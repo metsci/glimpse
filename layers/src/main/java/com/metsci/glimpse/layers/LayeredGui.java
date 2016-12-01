@@ -15,7 +15,7 @@ import javax.media.opengl.GLAnimatorControl;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
+import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.util.var.Var;
@@ -35,12 +35,12 @@ public class LayeredGui
 
     public LayeredGui( String frameTitleRoot )
     {
-        this( frameTitleRoot, defaultDockingTheme );
+        this( frameTitleRoot, defaultDockingTheme( ) );
     }
 
     public LayeredGui( String frameTitleRoot, DockingTheme theme )
     {
-        this.dockingGroup = new DockingGroup( theme, DISPOSE_ALL_FRAMES );
+        this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
         this.animator = new SwingEDTAnimator( 30 );

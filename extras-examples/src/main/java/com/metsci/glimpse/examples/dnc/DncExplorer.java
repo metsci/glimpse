@@ -33,10 +33,10 @@ import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
-import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.GlimpseDataPaths.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
@@ -84,7 +84,6 @@ import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -109,7 +108,6 @@ public class DncExplorer
         initializeLogging( "dnc-examples/logging.properties" );
         fixPlatformQuirks( );
         initTinyLaf( );
-        DockingTheme dockingTheme = tinyLafDockingTheme( );
         ToolTipManager.sharedInstance( ).setLightWeightPopupEnabled( false );
         JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
@@ -323,7 +321,7 @@ public class DncExplorer
             };
 
             String appName = "dnc-explorer";
-            DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+            DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
 
             GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );

@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
-import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
+import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
@@ -36,6 +36,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -53,13 +54,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.UIManager;
 
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
-
-import net.sf.tinylaf.Theme;
-import net.sf.tinylaf.TinyLookAndFeel;
 
 public class SimpleDockingExample
 {
@@ -67,9 +63,8 @@ public class SimpleDockingExample
     public static void main( String[] args ) throws Exception
     {
         fixPlatformQuirks( );
-        Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
-        UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        final DockingTheme dockingTheme = tinyLafDockingTheme( );
+        initTinyLaf( );
+        final DockingTheme dockingTheme = defaultDockingTheme( );
 
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
@@ -147,7 +142,7 @@ public class SimpleDockingExample
                 //
 
                 final String appName = "simple-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, dockingTheme );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
 
                 GroupArrangement groupArr = loadDockingArrangement( appName, SimpleDockingExample.class.getClassLoader( ).getResource( "docking/simple-arrangement-default.xml" ) );

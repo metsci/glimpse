@@ -72,8 +72,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-
 @SuppressWarnings("serial")
 public class TileImpl extends Tile
 {

@@ -20,7 +20,6 @@ import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
 
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.TileImpl.TabComponentFactory;
 
 @SuppressWarnings( "serial" )

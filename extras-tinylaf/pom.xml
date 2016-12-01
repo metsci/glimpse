@@ -7,14 +7,14 @@
         <version>CURRENT-SNAPSHOT</version>
     </parent>
 
-    <artifactId>glimpse-docking</artifactId>
+    <artifactId>glimpse-extras-tinylaf</artifactId>
 
     <dependencies>
 
         <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-extras-tinylaf</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>net.sf.tinylaf</groupId>
+            <artifactId>tinylaf</artifactId>
+            <version>1.4.0</version>
         </dependency>
 
     </dependencies>

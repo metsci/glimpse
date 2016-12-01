@@ -35,132 +35,81 @@ import static java.awt.Color.white;
 import java.awt.Color;
 import java.util.logging.Logger;
 
-import javax.swing.ImageIcon;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
+
+import net.sf.tinylaf.Theme;
+import net.sf.tinylaf.TinyLookAndFeel;
 
 public class DockingThemes
 {
-
     protected static final Logger logger = Logger.getLogger( DockingThemes.class.getName( ) );
 
-    public static class DockingTheme
+    public static DockingTheme defaultDockingTheme( )
     {
-
-        public final int dividerSize;
-
-        public final int landingIndicatorThickness;
-        public final Color landingIndicatorColor;
-
-        /**
-         * Even lineThickness values do NOT work well
-         */
-        public final int lineThickness;
-        public final int cornerRadius;
-        public final int cardPadding;
-        public final int labelPadding;
-
-        public final Color lineColor;
-        public final Color highlightColor;
-        public final Color selectedTextColor;
-        public final Color unselectedTextColor;
-
-        public final ImageIcon maximizeIcon;
-        public final ImageIcon unmaximizeIcon;
-        public final ImageIcon optionsIcon;
-
-        public final ImageIcon closeViewIcon;
-        public final ImageIcon closeViewHoveredIcon;
-        public final ImageIcon closeViewPressedIcon;
-
-        public DockingTheme( int dividerSize,
-
-                int landingIndicatorThickness, Color landingIndicatorColor,
-
-                int lineThickness, // Even lineThickness values do NOT work well
-                int cornerRadius, int cardPadding, int labelPadding,
-
-                Color lineColor, Color highlightColor, Color selectedTextColor, Color unselectedTextColor,
-
-                ImageIcon maximizeIcon, ImageIcon unmaximizeIcon, ImageIcon optionsIcon,
-
-                ImageIcon closeViewIcon, ImageIcon closeViewHoveredIcon, ImageIcon closeViewPressedIcon )
+        LookAndFeel laf = UIManager.getLookAndFeel( );
+        if ( laf instanceof TinyLookAndFeel )
         {
-            this.dividerSize = dividerSize;
-
-            this.landingIndicatorThickness = landingIndicatorThickness;
-            this.landingIndicatorColor = landingIndicatorColor;
-
-            this.lineThickness = lineThickness;
-            this.cornerRadius = cornerRadius;
-            this.cardPadding = cardPadding;
-            this.labelPadding = labelPadding;
-
-            this.lineColor = lineColor;
-            this.highlightColor = highlightColor;
-            this.selectedTextColor = selectedTextColor;
-            this.unselectedTextColor = unselectedTextColor;
-
-            this.maximizeIcon = maximizeIcon;
-            this.unmaximizeIcon = unmaximizeIcon;
-            this.optionsIcon = optionsIcon;
-
-            this.closeViewIcon = closeViewIcon;
-            this.closeViewHoveredIcon = closeViewHoveredIcon;
-            this.closeViewPressedIcon = closeViewPressedIcon;
+            return tinyLafDockingTheme( );
         }
-
+        else
+        {
+            return basicDockingTheme;
+        }
     }
 
-    public static final DockingTheme defaultDockingTheme = new DockingTheme( 5,
+    public static final DockingTheme basicDockingTheme = new DockingTheme( 5,
 
-            2, black,
+                                                                           2,
+                                                                           black,
 
-            1, // Even lineThickness values do NOT work well
-            5, 2, 4,
+                                                                           1, // Even lineThickness values do NOT work well
+                                                                           5,
+                                                                           2,
+                                                                           4,
 
-            lightGray, white, darkGray, darkGray,
+                                                                           lightGray,
+                                                                           white,
+                                                                           darkGray,
+                                                                           darkGray,
 
-            requireIcon( "icons/maximize.gif" ), requireIcon( "icons/unmaximize.gif" ), requireIcon( "icons/options.gif" ),
+                                                                           requireIcon( "icons/maximize.gif" ),
+                                                                           requireIcon( "icons/unmaximize.gif" ),
+                                                                           requireIcon( "icons/options.gif" ),
 
-            requireIcon( "icons/chromium/close.png" ), requireIcon( "icons/chromium/close_h.png" ), requireIcon( "icons/chromium/close_p.png" ) );
+                                                                           requireIcon( "icons/chromium/close.png" ),
+                                                                           requireIcon( "icons/chromium/close_h.png" ),
+                                                                           requireIcon( "icons/chromium/close_p.png" ) );
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {
-        return new DockingTheme( defaultDockingTheme.dividerSize,
+        return new DockingTheme( basicDockingTheme.dividerSize,
 
-                defaultDockingTheme.landingIndicatorThickness, defaultDockingTheme.landingIndicatorColor,
+                                 basicDockingTheme.landingIndicatorThickness,
+                                 basicDockingTheme.landingIndicatorColor,
 
-                defaultDockingTheme.lineThickness, defaultDockingTheme.cornerRadius, defaultDockingTheme.cardPadding, defaultDockingTheme.labelPadding,
+                                 basicDockingTheme.lineThickness,
+                                 basicDockingTheme.cornerRadius,
+                                 basicDockingTheme.cardPadding,
+                                 basicDockingTheme.labelPadding,
 
-                lineColor, defaultDockingTheme.highlightColor, textColor, textColor,
+                                 lineColor,
+                                 basicDockingTheme.highlightColor,
+                                 textColor,
+                                 textColor,
 
-                defaultDockingTheme.maximizeIcon, defaultDockingTheme.unmaximizeIcon, defaultDockingTheme.optionsIcon,
+                                 basicDockingTheme.maximizeIcon,
+                                 basicDockingTheme.unmaximizeIcon,
+                                 basicDockingTheme.optionsIcon,
 
-                defaultDockingTheme.closeViewIcon, defaultDockingTheme.closeViewHoveredIcon, defaultDockingTheme.closeViewPressedIcon );
+                                 basicDockingTheme.closeViewIcon,
+                                 basicDockingTheme.closeViewHoveredIcon,
+                                 basicDockingTheme.closeViewPressedIcon );
     }
 
     public static DockingTheme tinyLafDockingTheme( )
     {
-        try
-        {
-            return tinyLafDockingTheme0( );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace( System.err );
-            logger.warning( "TinyLaF is not accessible; default docking theme will be used" );
-            return defaultDockingTheme;
-        }
-    }
-
-    public static DockingTheme tinyLafDockingTheme0( ) throws Exception
-    {
-        return newDockingTheme( tinyLafColor( "tabPaneBorderColor" ), tinyLafColor( "tabFontColor" ) );
-    }
-
-    public static Color tinyLafColor( String fieldName ) throws Exception
-    {
-        Object sbRef = Class.forName( "net.sf.tinylaf.Theme" ).getField( fieldName ).get( null );
-        return ( Color ) Class.forName( "net.sf.tinylaf.util.SBReference" ).getMethod( "getColor" ).invoke( sbRef );
+        return newDockingTheme( Theme.tabPaneBorderColor.getColor( ), Theme.tabFontColor.getColor( ) );
     }
 
 }

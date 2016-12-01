@@ -30,6 +30,7 @@ import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.containsView;
 import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
+import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
@@ -55,7 +56,6 @@ import java.util.logging.Logger;
 import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
@@ -75,7 +75,12 @@ public class DockingGroup
 
     protected final Set<DockingGroupListener> listeners;
 
-    public DockingGroup( DockingTheme theme, DockingFrameCloseOperation frameCloseOperation )
+    public DockingGroup( DockingFrameCloseOperation frameCloseOperation )
+    {
+        this( frameCloseOperation, defaultDockingTheme( ) );
+    }
+
+    public DockingGroup( DockingFrameCloseOperation frameCloseOperation, DockingTheme theme )
     {
         this.theme = theme;
         this.frameCloseOperation = frameCloseOperation;

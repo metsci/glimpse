@@ -72,6 +72,7 @@
         <module>extras-swt</module>
         <module>extras-examples</module>
         <module>extras-worldwind</module>
+        <module>extras-tinylaf</module>
 
     </modules>
 
