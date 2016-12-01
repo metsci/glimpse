@@ -13,7 +13,7 @@ import com.metsci.glimpse.layers.LayeredScenario;
 import com.metsci.glimpse.layers.LayeredTimeline;
 import com.metsci.glimpse.layers.TimelineLayer;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
@@ -24,7 +24,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 
     protected ExampleGeoPainter geoPainter;
 
-    protected EventPlotInfo timelineRow;
+    protected TimePlotInfo timelineRow;
     protected TaggedAxisListener1D timeAxisListener;
 
 
@@ -70,9 +70,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void installToTimeline( LayeredTimeline timeline )
     {
-        this.timelineRow = timeline.plot.createEventPlot( );
-        this.timelineRow.setGrow( false );
-        this.timelineRow.setLabelText( "Example" );
+        this.timelineRow = timeline.addPlotRow( "Example" );
 
         this.timeAxisListener = new TaggedAxisListener1D( )
         {
