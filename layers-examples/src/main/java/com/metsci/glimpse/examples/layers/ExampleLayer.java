@@ -26,6 +26,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 
     protected TimePlotInfo timelineRow;
     protected TaggedAxisListener1D timeAxisListener;
+    protected ExampleTimelinePainter timelinePainter;
 
 
     public ExampleLayer( )
@@ -37,12 +38,14 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 
         this.timelineRow = null;
         this.timeAxisListener = null;
+        this.timelinePainter = null;
     }
 
     // WIP: Take lat/lon instead of x,y
     public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
     {
         this.geoPainter.addPoint( time_PMILLIS, x_SU, y_SU, z_SU );
+        this.timelinePainter.addPoint( time_PMILLIS, x_SU, y_SU, z_SU );
     }
 
     @Override
@@ -70,7 +73,10 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void installToTimeline( LayeredTimeline timeline )
     {
+        this.timelinePainter = new ExampleTimelinePainter( this.timelineEpoch );
+
         this.timelineRow = timeline.addPlotRow( "Example" );
+        this.timelineRow.addPainter( this.timelinePainter );
 
         this.timeAxisListener = new TaggedAxisListener1D( )
         {
@@ -81,6 +87,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
                 long tMax_PMILLIS = timeline.plot.getTimeSelectionMax( ).toPosixMillis( );
                 long tCursor_PMILLIS = timeline.plot.getTimeSelection( ).toPosixMillis( );
                 geoPainter.setTimeSelection( tMin_PMILLIS, tMax_PMILLIS, tCursor_PMILLIS );
+                timelinePainter.setTimeSelection( tMin_PMILLIS, tMax_PMILLIS, tCursor_PMILLIS );
             }
         };
         timeline.plot.getTimeAxis( ).addAxisListener( this.timeAxisListener );
@@ -91,6 +98,10 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     {
         timeline.plot.getTimeAxis( ).removeAxisListener( this.timeAxisListener );
         this.timeAxisListener = null;
+
+        this.timelineRow.removePainter( this.timelinePainter );
+        this.timelinePainter.dispose( context );
+        this.timelinePainter = null;
 
         timeline.plot.removePlot( this.timelineRow.getId( ) );
         this.timelineRow = null;

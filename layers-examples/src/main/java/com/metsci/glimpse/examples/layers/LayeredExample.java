@@ -3,6 +3,8 @@ package com.metsci.glimpse.examples.layers;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static java.lang.Math.PI;
+import static java.lang.Math.sin;
 
 import java.util.Random;
 
@@ -50,7 +52,7 @@ public class LayeredExample
                 long t_PMILLIS = t0_PMILLIS + i*1000;
                 float x_SU = -10 + 0.02f*i + 4*r.nextFloat( );
                 float y_SU = -10 + 20*r.nextFloat( );
-                float z_SU = -10 + 20*r.nextFloat( );
+                float z_SU = ( float ) ( 10*sin( 0.001*i * 5*PI ) + 8*r.nextFloat( ) );
                 exampleLayer.addPoint( t_PMILLIS, x_SU, y_SU, z_SU );
             }
 
