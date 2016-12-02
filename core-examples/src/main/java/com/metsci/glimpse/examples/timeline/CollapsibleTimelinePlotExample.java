@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
@@ -95,19 +94,17 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 
         plot.setShowLabels( true );
 
-        /*
         for ( TimePlotInfo row : plot.getAllTimePlots( ) )
         {
             // create a collapsible/expandable group for each row
             GroupInfo group = plot.createGroup( String.format( "%s-group", row.getId( ) ), row );
-        
+
             // set labels
             row.getLabelPainter( ).setText( "Label Here" );
             group.setLabelText( "Group Name" );
-        
+
             setPlotLookAndFeel( row );
         }
-        */
 
         // create a 1D timeline to display event durations
         final EventPlotInfo events1 = plot.createEventPlot( "event-1" );
@@ -304,8 +301,6 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
                 }
             }
         } );
-
-        plot.setTimeAxisMouseListener( new AxisMouseListener1D( ) );
 
         return plot;
     }
