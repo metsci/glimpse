@@ -44,6 +44,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     // WIP: Take lat/lon instead of x,y
     public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
     {
+        // WIP: This only works if the painters already exist, which isn't true until the layer has been installed
         this.geoPainter.addPoint( time_PMILLIS, x_SU, y_SU, z_SU );
         this.timelinePainter.addPoint( time_PMILLIS, x_SU, y_SU, z_SU );
     }

@@ -2,6 +2,10 @@ package com.metsci.glimpse.layers;
 
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
+import static com.metsci.glimpse.util.PredicateUtils.require;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import javax.swing.JToolBar;
 
@@ -15,7 +19,9 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.util.var.Var;
+import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.units.Azimuth;
+import com.metsci.glimpse.util.vector.Vector2d;
 
 public class LayeredGeo
 {
@@ -31,7 +37,7 @@ public class LayeredGeo
     public final BorderPainter borderPainter;
 
 
-    public LayeredGeo( Var<LayeredScenario> scenario )
+    public LayeredGeo( )
     {
         this.plot = new MultiAxisPlot2D( );
         Axis1D xAxis = plot.getCenterAxisX( );
@@ -58,6 +64,24 @@ public class LayeredGeo
         this.toolbar = newToolbar( true );
 
         this.view = new View( "geoView", this.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), this.toolbar );
+    }
+
+    public void init( LayeredScenario scenario )
+    {
+        GeoProjection proj = require( scenario.geoProj, notNull );
+        LayeredGeoBounds bounds = require( scenario.geoInitBounds, notNull );
+
+        Vector2d west = proj.project( bounds.center.displacedBy( 0.5*bounds.ewExtent_SU, Azimuth.fromNavDeg( -90 ) ) );
+        Vector2d east = proj.project( bounds.center.displacedBy( 0.5*bounds.ewExtent_SU, Azimuth.fromNavDeg( +90 ) ) );
+        Vector2d north = proj.project( bounds.center.displacedBy( 0.5*bounds.nsExtent_SU, Azimuth.fromNavDeg( 0 ) ) );
+        Vector2d south = proj.project( bounds.center.displacedBy( 0.5*bounds.nsExtent_SU, Azimuth.fromNavDeg( 180 ) ) );
+
+        double xMin = min( min( west.getX( ), east.getX( ) ), min( north.getX( ), south.getX( ) ) );
+        double xMax = max( max( west.getX( ), east.getX( ) ), max( north.getX( ), south.getX( ) ) );
+        double yMin = min( min( west.getY( ), east.getY( ) ), min( north.getY( ), south.getY( ) ) );
+        double yMax = max( max( west.getY( ), east.getY( ) ), max( north.getY( ), south.getY( ) ) );
+
+        this.plot.getCenterAxis( ).set( xMin, xMax, yMin, yMax );
     }
 
 }

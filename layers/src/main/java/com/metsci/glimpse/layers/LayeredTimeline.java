@@ -3,6 +3,8 @@ package com.metsci.glimpse.layers;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
+import static com.metsci.glimpse.util.PredicateUtils.require;
 
 import javax.swing.JToolBar;
 
@@ -12,11 +14,12 @@ import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
+import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.util.var.Var;
+import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class LayeredTimeline
 {
@@ -31,10 +34,8 @@ public class LayeredTimeline
      */
     public final CollapsibleTimePlot2D plot;
 
-    public final Var<LayeredScenario> scenario;
 
-
-    public LayeredTimeline( Var<LayeredScenario> scenario )
+    public LayeredTimeline( )
     {
         this.plot = new CollapsibleTimePlot2D( );
         this.plot.setShowLabels( true );
@@ -45,12 +46,15 @@ public class LayeredTimeline
         this.toolbar = newToolbar( true );
 
         this.view = new View( "timelineView", this.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), this.toolbar );
+    }
 
-        this.scenario = scenario;
-        this.scenario.addListener( true, ( ) ->
-        {
-            plot.setEpoch( this.scenario.v( ).timelineEpoch );
-        } );
+    public void init( LayeredScenario scenario )
+    {
+        Epoch epoch = require( scenario.timelineEpoch, notNull );
+        LayeredTimelineBounds bounds = require( scenario.timelineInitBounds, notNull );
+
+        plot.setEpoch( epoch );
+        plot.setTimeAxisBounds( TimeStamp.fromPosixMillis( bounds.min_PMILLIS ), TimeStamp.fromPosixMillis( bounds.max_MILLIS ) );
     }
 
     public EventPlotInfo addEventRow( String labelText )

@@ -6,7 +6,6 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameT
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static com.metsci.glimpse.util.PredicateUtils.notNull;
 
 import java.net.URL;
 
@@ -18,7 +17,6 @@ import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
-import com.metsci.glimpse.util.var.Var;
 
 public class LayeredGui
 {
@@ -27,7 +25,7 @@ public class LayeredGui
     protected final GLAnimatorControl animator;
     protected DockingGroupListener dockingArrSaver;
 
-    protected final Var<LayeredScenario> scenario;
+    protected LayeredScenario scenario;
 
     protected LayeredGeo geo;
     protected LayeredTimeline timeline;
@@ -56,8 +54,7 @@ public class LayeredGui
 
         this.dockingArrSaver = null;
 
-        LayeredScenario emptyScenario = ( new LayeredScenario.Builder( ) ).build( );
-        this.scenario = new Var<>( emptyScenario, notNull );
+        this.scenario = ( new LayeredScenario.Builder( ) ).build( );
 
         this.geo = null;
         this.timeline = null;
@@ -93,40 +90,28 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
-    protected LayeredGeo getGeo( )
-    {
-        if ( this.geo == null )
-        {
-            this.geo = new LayeredGeo( this.scenario );
-            this.animator.add( this.geo.canvas.getGLDrawable( ) );
-            this.dockingGroup.addView( this.geo.view );
-        }
-        return this.geo;
-    }
-
-    protected LayeredTimeline getTimeline( )
-    {
-        if ( this.timeline == null )
-        {
-            this.timeline = new LayeredTimeline( this.scenario );
-            this.animator.add( this.timeline.canvas.getGLDrawable( ) );
-            this.dockingGroup.addView( this.timeline.view );
-        }
-        return this.timeline;
-    }
-
-    public void setScenario( LayeredScenario newScenario )
+    public void init( LayeredScenario newScenario )
     {
         // WIP: Remove layers
 
-        this.scenario.set( newScenario );
+        this.scenario = newScenario;
+
+        if ( this.geo != null )
+        {
+            this.geo.init( this.scenario );
+        }
+
+        if ( this.timeline != null )
+        {
+            this.timeline.init( this.scenario );
+        }
 
         // WIP: Add layers back in
     }
 
     public void addLayer( Layer layer )
     {
-        layer.init( this.scenario.v( ) );
+        layer.init( this.scenario );
 
         if ( layer instanceof GeoLayer )
         {
@@ -146,6 +131,30 @@ public class LayeredGui
     public void removeLayer( Layer layer )
     {
         // WIP: Need active GL context
+    }
+
+    protected LayeredGeo getGeo( )
+    {
+        if ( this.geo == null )
+        {
+            this.geo = new LayeredGeo( );
+            this.geo.init( this.scenario );
+            this.animator.add( this.geo.canvas.getGLDrawable( ) );
+            this.dockingGroup.addView( this.geo.view );
+        }
+        return this.geo;
+    }
+
+    protected LayeredTimeline getTimeline( )
+    {
+        if ( this.timeline == null )
+        {
+            this.timeline = new LayeredTimeline( );
+            this.timeline.init( this.scenario );
+            this.animator.add( this.timeline.canvas.getGLDrawable( ) );
+            this.dockingGroup.addView( this.timeline.view );
+        }
+        return this.timeline;
     }
 
 }
