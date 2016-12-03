@@ -6,6 +6,9 @@ import static com.metsci.glimpse.util.PredicateUtils.require;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -142,6 +145,31 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.geoPainter = new ExampleGeoPainter( );
         geo.dataPainter.addPainter( this.geoPainter );
 
+        geo.plot.getCenterAxis( ).addAxisListener( new AxisListener2D( )
+        {
+            @Override
+            public void axisUpdated( Axis2D axis )
+            {
+                Axis1D xAxis = axis.getAxisX( );
+                float xMin = ( float ) ( xAxis.getSelectionCenter( ) - 0.5*xAxis.getSelectionSize( ) );
+                float xMax = ( float ) ( xAxis.getSelectionCenter( ) + 0.5*xAxis.getSelectionSize( ) );
+
+                Axis1D yAxis = axis.getAxisY( );
+                float yMin = ( float ) ( yAxis.getSelectionCenter( ) - 0.5*yAxis.getSelectionSize( ) );
+                float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5*yAxis.getSelectionSize( ) );
+
+                if ( geoPainter != null )
+                {
+                    geoPainter.setXyWindow( xMin, xMax, yMin, yMax );
+                }
+
+                if ( timelinePainter != null )
+                {
+                    timelinePainter.setXyWindow( xMin, xMax, yMin, yMax );
+                }
+            }
+        } );
+
         // Add points we already have
         for ( ProjectedPoint p : this.projectedPoints )
         {
@@ -172,8 +200,16 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
             {
                 float tMin = ( float ) timelineEpoch.fromTimeStamp( timeline.plot.getTimeSelectionMin( ) );
                 float tMax = ( float ) timelineEpoch.fromTimeStamp( timeline.plot.getTimeSelectionMax( ) );
-                geoPainter.setTimeSelection( tMin, tMax );
-                timelinePainter.setTimeSelection( tMin, tMax );
+
+                if ( geoPainter != null )
+                {
+                    geoPainter.setTWindow( tMin, tMax );
+                }
+
+                if ( timelinePainter != null )
+                {
+                    timelinePainter.setTWindow( tMin, tMax );
+                }
             }
         };
         timeline.plot.getTimeAxis( ).addAxisListener( this.timeAxisListener );

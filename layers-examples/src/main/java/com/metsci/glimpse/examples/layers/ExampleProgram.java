@@ -26,16 +26,21 @@ public class ExampleProgram
     {
         public final int program;
 
+        public final int TIMELINE_MODE;
+
         public final int AXIS_RECT;
         public final int VIEWPORT_SIZE_PX;
-
-        public final int POINT_SIZE_PX;
         public final int FEATHER_THICKNESS_PX;
-        public final int RGBA_INSIDE_TIME_WINDOW;
-        public final int RGBA_OUTSIDE_TIME_WINDOW;
 
-        public final int TIME_WINDOW_MIN;
-        public final int TIME_WINDOW_MAX;
+        public final int RGBA_INSIDE_T_WINDOW;
+        public final int RGBA_OUTSIDE_T_WINDOW;
+        public final int T_WINDOW_MIN;
+        public final int T_WINDOW_MAX;
+
+        public final int POINT_SIZE_INSIDE_XY_WINDOW_PX;
+        public final int POINT_SIZE_OUTSIDE_XY_WINDOW_PX;
+        public final int XY_WINDOW_MIN;
+        public final int XY_WINDOW_MAX;
 
         public final int inTxyz;
 
@@ -43,16 +48,21 @@ public class ExampleProgram
         {
             this.program = createProgram( gl, exampleVertShader_GLSL, exampleGeomShader_GLSL, exampleFragShader_GLSL );
 
+            this.TIMELINE_MODE = gl.glGetUniformLocation( program, "TIMELINE_MODE" );
+
             this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
             this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
-
-            this.POINT_SIZE_PX = gl.glGetUniformLocation( program, "POINT_SIZE_PX" );
             this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( program, "FEATHER_THICKNESS_PX" );
-            this.RGBA_INSIDE_TIME_WINDOW = gl.glGetUniformLocation( program, "RGBA_INSIDE_TIME_WINDOW" );
-            this.RGBA_OUTSIDE_TIME_WINDOW = gl.glGetUniformLocation( program, "RGBA_OUTSIDE_TIME_WINDOW" );
 
-            this.TIME_WINDOW_MIN = gl.glGetUniformLocation( program, "TIME_WINDOW_MIN" );
-            this.TIME_WINDOW_MAX = gl.glGetUniformLocation( program, "TIME_WINDOW_MAX" );
+            this.RGBA_INSIDE_T_WINDOW = gl.glGetUniformLocation( program, "RGBA_INSIDE_T_WINDOW" );
+            this.RGBA_OUTSIDE_T_WINDOW = gl.glGetUniformLocation( program, "RGBA_OUTSIDE_T_WINDOW" );
+            this.T_WINDOW_MIN = gl.glGetUniformLocation( program, "T_WINDOW_MIN" );
+            this.T_WINDOW_MAX = gl.glGetUniformLocation( program, "T_WINDOW_MAX" );
+
+            this.POINT_SIZE_INSIDE_XY_WINDOW_PX = gl.glGetUniformLocation( program, "POINT_SIZE_INSIDE_XY_WINDOW_PX" );
+            this.POINT_SIZE_OUTSIDE_XY_WINDOW_PX = gl.glGetUniformLocation( program, "POINT_SIZE_OUTSIDE_XY_WINDOW_PX" );
+            this.XY_WINDOW_MIN = gl.glGetUniformLocation( program, "XY_WINDOW_MIN" );
+            this.XY_WINDOW_MAX = gl.glGetUniformLocation( program, "XY_WINDOW_MAX" );
 
             this.inTxyz = gl.glGetAttribLocation( program, "inTxyz" );
         }
@@ -116,18 +126,34 @@ public class ExampleProgram
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
     }
 
-    public void setStyle( GL2ES2 gl, ExampleStyle style )
+    public void setGeoMode( GL2ES2 gl )
     {
-        gl.glUniform1f( this.handles.POINT_SIZE_PX, style.pointSize_PX );
-        gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
-        gl.glUniform4fv( this.handles.RGBA_INSIDE_TIME_WINDOW, 1, style.rgbaInsideTimeWindow, 0 );
-        gl.glUniform4fv( this.handles.RGBA_OUTSIDE_TIME_WINDOW, 1, style.rgbaOutsideTimeWindow, 0 );
+        gl.glUniform1i( this.handles.TIMELINE_MODE, 0 );
     }
 
-    public void setTimeWindow( GL2ES2 gl, float tMin, float tMax )
+    public void setTimelineMode( GL2ES2 gl )
     {
-        gl.glUniform1f( this.handles.TIME_WINDOW_MIN, tMin );
-        gl.glUniform1f( this.handles.TIME_WINDOW_MAX, tMax );
+        gl.glUniform1i( this.handles.TIMELINE_MODE, 1 );
+    }
+
+    public void setStyle( GL2ES2 gl, ExampleStyle style, long renderTime_PMILLIS )
+    {
+        gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
+
+        gl.glUniform4fv( this.handles.RGBA_INSIDE_T_WINDOW, 1, style.rgbaInsideTWindow, 0 );
+        gl.glUniform4fv( this.handles.RGBA_OUTSIDE_T_WINDOW, 1, style.rgbaOutsideTWindow, 0 );
+
+        gl.glUniform1f( this.handles.POINT_SIZE_INSIDE_XY_WINDOW_PX, style.pointSizeInsideXyWindow_PX( renderTime_PMILLIS ) );
+        gl.glUniform1f( this.handles.POINT_SIZE_OUTSIDE_XY_WINDOW_PX, style.pointSizeOutsideXyWindow_PX );
+    }
+
+    public void setWindow( GL2ES2 gl, float tMin, float tMax, float xMin, float xMax, float yMin, float yMax )
+    {
+        gl.glUniform1f( this.handles.T_WINDOW_MIN, tMin );
+        gl.glUniform1f( this.handles.T_WINDOW_MAX, tMax );
+
+        gl.glUniform2f( this.handles.XY_WINDOW_MIN, xMin, yMin );
+        gl.glUniform2f( this.handles.XY_WINDOW_MAX, xMax, yMax );
     }
 
     public void draw( GL2ES3 gl, GLEditableBuffer txyzBuffer )

@@ -2,6 +2,7 @@ package com.metsci.glimpse.examples.layers;
 
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static java.lang.System.currentTimeMillis;
 import static javax.media.opengl.GL.GL_STATIC_DRAW;
 
 import javax.media.opengl.GL2ES2;
@@ -19,8 +20,12 @@ public class ExampleTimelinePainter extends GlimpsePainterBase
     protected final ExampleProgram prog;
     protected final ExampleStyle style;
 
-    protected float tSelectionMin;
-    protected float tSelectionMax;
+    protected float tWindowMin;
+    protected float tWindowMax;
+    protected float xWindowMin;
+    protected float xWindowMax;
+    protected float yWindowMin;
+    protected float yWindowMax;
 
     protected final GLEditableBuffer txyzBuffer;
 
@@ -30,27 +35,34 @@ public class ExampleTimelinePainter extends GlimpsePainterBase
         this.prog = new ExampleProgram( );
         this.style = new ExampleStyle( );
 
-        this.tSelectionMin = 0;
-        this.tSelectionMax = 0;
+        this.tWindowMin = 0;
+        this.tWindowMax = 0;
+        this.xWindowMin = 0;
+        this.xWindowMax = 0;
+        this.yWindowMin = 0;
+        this.yWindowMax = 0;
 
         this.txyzBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 0 );
     }
 
     public void addPoint( float t, float x, float y, float z )
     {
-        // WIP: Shader will eventually need to know xy, to pulsate the geo selection
-        this.txyzBuffer.grow4f( t, t, z, z );
+        this.txyzBuffer.grow4f( t, x, y, z );
     }
 
-    public void setGeoSelection( float xMin, float xMax, float yMin, float yMax )
+    public void setTWindow( float tMin, float tMax )
     {
-        // WIP
+        this.tWindowMin = tMin;
+        this.tWindowMax = tMax;
     }
 
-    public void setTimeSelection( float tMin, float tMax )
+    public void setXyWindow( float xMin, float xMax, float yMin, float yMax )
     {
-        this.tSelectionMin = tMin;
-        this.tSelectionMax = tMax;
+        this.xWindowMin = xMin;
+        this.xWindowMax = xMax;
+
+        this.yWindowMin = yMin;
+        this.yWindowMax = yMax;
     }
 
     @Override
@@ -67,9 +79,9 @@ public class ExampleTimelinePainter extends GlimpsePainterBase
             this.prog.setViewport( gl, bounds );
             this.prog.setAxisOrtho( gl, axis );
 
-            this.prog.setStyle( gl, this.style );
-
-            this.prog.setTimeWindow( gl, this.tSelectionMin, this.tSelectionMax );
+            this.prog.setTimelineMode( gl );
+            this.prog.setStyle( gl, this.style, currentTimeMillis( ) );
+            this.prog.setWindow( gl, this.tWindowMin, this.tWindowMax, this.xWindowMin, this.xWindowMax, this.yWindowMin, this.yWindowMax );
 
             this.prog.draw( gl, this.txyzBuffer );
         }

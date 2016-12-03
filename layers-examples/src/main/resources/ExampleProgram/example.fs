@@ -27,18 +27,18 @@
 
 #version 150
 
-uniform float POINT_SIZE_PX;
 uniform float FEATHER_THICKNESS_PX;
 
 in vec2 gXy_PX;
 in vec4 gColor;
+in float gPointSize_PX;
 
 out vec4 outRgba;
 
 void main( )
 {
     float r = length( gXy_PX );
-    float featherAlpha = clamp( ( 0.5*POINT_SIZE_PX + 0.5*FEATHER_THICKNESS_PX - r ) / FEATHER_THICKNESS_PX, 0.0, 1.0 );
+    float featherAlpha = clamp( ( 0.5*gPointSize_PX + 0.5*FEATHER_THICKNESS_PX - r ) / FEATHER_THICKNESS_PX, 0.0, 1.0 );
     outRgba.rgb = gColor.rgb;
     outRgba.a = gColor.a * featherAlpha;
 }

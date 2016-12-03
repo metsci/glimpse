@@ -50,23 +50,50 @@ vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
     return ( xy_FRAC * viewportSize_PX );
 }
 
+bool isBetween( float v, float vMin, float vMax )
+{
+    return ( vMin <= v && v <= vMax );
+}
+
+bool isBetween( vec2 v, vec2 vMin, vec2 vMax )
+{
+    return ( isBetween( v.x, vMin.x, vMax.x ) && isBetween( v.y, vMin.y, vMax.y ) );
+}
+
+
+// If TIMELINE_MODE > 0, (t,z) is used as vertex position
+// Otherwise, (x,y) is used as vertex position
+uniform int TIMELINE_MODE;
+
 // AXIS_RECT is (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
-uniform vec4 RGBA_INSIDE_TIME_WINDOW;
-uniform vec4 RGBA_OUTSIDE_TIME_WINDOW;
-uniform float TIME_WINDOW_MIN;
-uniform float TIME_WINDOW_MAX;
+
+uniform vec4 RGBA_INSIDE_T_WINDOW;
+uniform vec4 RGBA_OUTSIDE_T_WINDOW;
+uniform float T_WINDOW_MIN;
+uniform float T_WINDOW_MAX;
+
+uniform float POINT_SIZE_OUTSIDE_XY_WINDOW_PX;
+uniform float POINT_SIZE_INSIDE_XY_WINDOW_PX;
+uniform vec2 XY_WINDOW_MIN;
+uniform vec2 XY_WINDOW_MAX;
+
 
 in vec4 inTxyz;
 
+
 out vec4 vColor;
+out float vPointSize_PX;
+
 
 void main( )
 {
     float t = inTxyz.x;
-    vColor = ( TIME_WINDOW_MIN <= t && t <= TIME_WINDOW_MAX ? RGBA_INSIDE_TIME_WINDOW : RGBA_OUTSIDE_TIME_WINDOW );
+    vec2 xy = inTxyz.yz;
+    vColor = ( isBetween( t, T_WINDOW_MIN, T_WINDOW_MAX ) ? RGBA_INSIDE_T_WINDOW : RGBA_OUTSIDE_T_WINDOW );
+    vPointSize_PX = ( isBetween( xy, XY_WINDOW_MIN, XY_WINDOW_MAX ) ? POINT_SIZE_INSIDE_XY_WINDOW_PX : POINT_SIZE_OUTSIDE_XY_WINDOW_PX );
 
-    vec2 xy_AXIS = inTxyz.yz;
+    vec2 xy_AXIS = ( TIMELINE_MODE > 0 ? inTxyz.xw : inTxyz.yz );
     gl_Position.xy = axisXyToPx( xy_AXIS, AXIS_RECT, VIEWPORT_SIZE_PX );
 }

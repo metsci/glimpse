@@ -32,15 +32,16 @@ layout( triangle_strip, max_vertices = 4 ) out;
 
 
 uniform vec2 VIEWPORT_SIZE_PX;
-uniform float POINT_SIZE_PX;
 uniform float FEATHER_THICKNESS_PX;
 
 
 in vec4[] vColor;
+in float[] vPointSize_PX;
 
 
 out vec2 gXy_PX;
 out vec4 gColor;
+out float gPointSize_PX;
 
 
 void main( )
@@ -48,7 +49,8 @@ void main( )
     vec2 center_PX = gl_in[ 0 ].gl_Position.xy;
     vec2 center_NDC = -1.0 + center_PX / ( 0.5 * VIEWPORT_SIZE_PX );
 
-    float offset_PX = 0.5*POINT_SIZE_PX + 0.5*FEATHER_THICKNESS_PX;
+    float pointSize_PX = vPointSize_PX[ 0 ];
+    float offset_PX = 0.5*pointSize_PX + 0.5*FEATHER_THICKNESS_PX;
     vec2 offset_NDC = offset_PX / ( 0.5 * VIEWPORT_SIZE_PX );
 
     float top_NDC = center_NDC.y + offset_NDC.y;
@@ -60,21 +62,25 @@ void main( )
 
     gl_Position = vec4( left_NDC, bottom_NDC, 0.0, 1.0 );
     gXy_PX = vec2( -offset_PX, -offset_PX );
+    gPointSize_PX = pointSize_PX;
     gColor = color;
     EmitVertex( );
 
     gl_Position = vec4( left_NDC, top_NDC, 0.0, 1.0 );
     gXy_PX = vec2( -offset_PX, +offset_PX );
+    gPointSize_PX = pointSize_PX;
     gColor = color;
     EmitVertex( );
 
     gl_Position = vec4( right_NDC, bottom_NDC, 0.0, 1.0 );
     gXy_PX = vec2( +offset_PX, -offset_PX );
+    gPointSize_PX = pointSize_PX;
     gColor = color;
     EmitVertex( );
 
     gl_Position = vec4( right_NDC, top_NDC, 0.0, 1.0 );
     gXy_PX = vec2( +offset_PX, +offset_PX );
+    gPointSize_PX = pointSize_PX;
     gColor = color;
     EmitVertex( );
 

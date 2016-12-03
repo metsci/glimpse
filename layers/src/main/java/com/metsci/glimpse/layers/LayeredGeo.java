@@ -40,23 +40,23 @@ public class LayeredGeo
     public LayeredGeo( )
     {
         this.plot = new MultiAxisPlot2D( );
-        Axis1D xAxis = plot.getCenterAxisX( );
-        Axis1D yAxis = plot.getCenterAxisY( );
-        AxisInfo xAxisInfo = plot.createAxisBottom( "xBottom", xAxis, new AxisMouseListener1D( ) );
-        AxisInfo yAxisInfo = plot.createAxisLeft( "yLeft", yAxis, new AxisMouseListener1D( ) );
+        this.plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
+        Axis1D xAxis = this.plot.getCenterAxisX( );
+        Axis1D yAxis = this.plot.getCenterAxisY( );
+        AxisInfo xAxisInfo = this.plot.createAxisBottom( "xBottom", xAxis, new AxisMouseListener1D( ) );
+        AxisInfo yAxisInfo = this.plot.createAxisLeft( "yLeft", yAxis, new AxisMouseListener1D( ) );
 
         this.gridPainter = new GridPainter( xAxisInfo.getTickHandler( ), yAxisInfo.getTickHandler( ) );
-        plot.addPainter( gridPainter );
+        this.plot.addPainter( this.gridPainter );
 
         this.dataPainter = new DelegatePainter( );
-        plot.addPainter( dataPainter );
+        this.plot.addPainter( this.dataPainter );
 
         this.crosshairPainter = new CrosshairPainter( );
-        crosshairPainter.showSelectionBox( false );
-        plot.addPainter( crosshairPainter );
+        this.plot.addPainter( this.crosshairPainter );
 
         this.borderPainter = new BorderPainter( );
-        plot.addPainter( borderPainter );
+        this.plot.addPainter( this.borderPainter );
 
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
