@@ -139,7 +139,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void installToGeo( LayeredGeo geo )
     {
-        this.geoPainter = new ExampleGeoPainter( this.geoProj, this.timelineEpoch );
+        this.geoPainter = new ExampleGeoPainter( );
         geo.dataPainter.addPainter( this.geoPainter );
 
         // Add points we already have
@@ -160,7 +160,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void installToTimeline( LayeredTimeline timeline )
     {
-        this.timelinePainter = new ExampleTimelinePainter( this.timelineEpoch );
+        this.timelinePainter = new ExampleTimelinePainter( );
 
         this.timelineRow = timeline.addPlotRow( "Example" );
         this.timelineRow.addPainter( this.timelinePainter );
