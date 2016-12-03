@@ -50,7 +50,6 @@ public class LayeredGui
                 animator.stop( );
             }
         } );
-        this.animator.start( );
 
         this.dockingArrSaver = null;
 
@@ -139,7 +138,10 @@ public class LayeredGui
         {
             this.geo = new LayeredGeo( );
             this.geo.init( this.scenario );
+
             this.animator.add( this.geo.canvas.getGLDrawable( ) );
+            this.animator.start( );
+
             this.dockingGroup.addView( this.geo.view );
         }
         return this.geo;
@@ -151,7 +153,10 @@ public class LayeredGui
         {
             this.timeline = new LayeredTimeline( );
             this.timeline.init( this.scenario );
+
             this.animator.add( this.timeline.canvas.getGLDrawable( ) );
+            this.animator.start( );
+
             this.dockingGroup.addView( this.timeline.view );
         }
         return this.timeline;

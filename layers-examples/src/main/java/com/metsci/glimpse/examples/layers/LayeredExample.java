@@ -110,8 +110,6 @@ public class LayeredExample
             gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
 
-            // WIP: Stop the animator if init() fails, so the Swing thread can terminate
-
         } );
     }
 
