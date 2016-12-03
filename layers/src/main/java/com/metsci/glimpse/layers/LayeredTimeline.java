@@ -1,7 +1,6 @@
 package com.metsci.glimpse.layers;
 
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
@@ -10,7 +9,6 @@ import javax.swing.JToolBar;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
-import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
@@ -26,7 +24,6 @@ public class LayeredTimeline
 
     public final NewtSwingEDTGlimpseCanvas canvas;
     public final JToolBar toolbar;
-    public final View view;
 
     /**
      * NOTE: Do not call {@code LayeredTimeline.plot.setEpoch()} directly -- it
@@ -44,8 +41,6 @@ public class LayeredTimeline
         this.canvas.addLayout( this.plot );
 
         this.toolbar = newToolbar( true );
-
-        this.view = new View( "timelineView", this.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), this.toolbar );
     }
 
     public void init( LayeredScenario scenario )

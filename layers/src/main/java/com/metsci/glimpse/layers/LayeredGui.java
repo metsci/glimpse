@@ -5,6 +5,7 @@ import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 
 import java.net.URL;
@@ -15,6 +16,7 @@ import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
+import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
@@ -142,7 +144,8 @@ public class LayeredGui
             this.animator.add( this.geo.canvas.getGLDrawable( ) );
             this.animator.start( );
 
-            this.dockingGroup.addView( this.geo.view );
+            View geoView = new View( "geoView", this.geo.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), this.geo.toolbar );
+            this.dockingGroup.addView( geoView );
         }
         return this.geo;
     }
@@ -157,7 +160,8 @@ public class LayeredGui
             this.animator.add( this.timeline.canvas.getGLDrawable( ) );
             this.animator.start( );
 
-            this.dockingGroup.addView( this.timeline.view );
+            View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), this.timeline.toolbar );
+            this.dockingGroup.addView( timelineView );
         }
         return this.timeline;
     }

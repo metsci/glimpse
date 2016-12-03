@@ -1,7 +1,6 @@
 package com.metsci.glimpse.layers;
 
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
 import static java.lang.Math.max;
@@ -11,7 +10,6 @@ import javax.swing.JToolBar;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
-import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
@@ -28,7 +26,6 @@ public class LayeredGeo
 
     public final NewtSwingEDTGlimpseCanvas canvas;
     public final JToolBar toolbar;
-    public final View view;
 
     public final MultiAxisPlot2D plot;
     public final GridPainter gridPainter;
@@ -62,8 +59,6 @@ public class LayeredGeo
         this.canvas.addLayout( this.plot );
 
         this.toolbar = newToolbar( true );
-
-        this.view = new View( "geoView", this.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), this.toolbar );
     }
 
     public void init( LayeredScenario scenario )
