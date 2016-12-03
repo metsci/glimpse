@@ -198,7 +198,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     {
         // Use the same timelineRowId for all instances of ExampleLayer, so they all share a single plot
         String timelineRowId = "ExampleLayer.timelineRow";
-        this.timelineRow = timeline.getPlotRow( timelineRowId, "Example" );
+        this.timelineRow = timeline.acquirePlotRow( timelineRowId, "Example" );
 
         this.timelinePainter = new ExampleTimelinePainter( this.style );
         this.timelineRow.addPainter( this.timelinePainter );
@@ -208,8 +208,8 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
             @Override
             public void tagsUpdated( TaggedAxis1D axis )
             {
-                float tMin = ( float ) timelineEpoch.fromTimeStamp( timeline.plot.getTimeSelectionMin( ) );
-                float tMax = ( float ) timelineEpoch.fromTimeStamp( timeline.plot.getTimeSelectionMax( ) );
+                float tMin = ( float ) timelineEpoch.fromPosixMillis( timeline.selectionMin_PMILLIS( ) );
+                float tMax = ( float ) timelineEpoch.fromPosixMillis( timeline.selectionMax_PMILLIS( ) );
 
                 if ( geoPainter != null )
                 {
@@ -222,7 +222,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
                 }
             }
         };
-        timeline.plot.getTimeAxis( ).addAxisListener( this.timeAxisListener );
+        timeline.timeAxis( ).addAxisListener( this.timeAxisListener );
 
         // Add points we already have
         for ( ProjectedPoint p : this.projectedPoints )
@@ -234,14 +234,14 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void uninstallFromTimeline( LayeredTimeline timeline, GlimpseContext context )
     {
-        timeline.plot.getTimeAxis( ).removeAxisListener( this.timeAxisListener );
+        timeline.timeAxis( ).removeAxisListener( this.timeAxisListener );
         this.timeAxisListener = null;
 
         this.timelineRow.removePainter( this.timelinePainter );
         this.timelinePainter.dispose( context );
         this.timelinePainter = null;
 
-        timeline.plot.removePlot( this.timelineRow.getId( ) );
+        timeline.releaseRow( this.timelineRow.getId( ) );
         this.timelineRow = null;
     }
 

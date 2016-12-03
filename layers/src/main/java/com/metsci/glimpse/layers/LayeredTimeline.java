@@ -5,8 +5,12 @@ import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPositi
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.swing.JToolBar;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.painter.decoration.GridPainter;
@@ -25,17 +29,17 @@ public class LayeredTimeline
     public final NewtSwingEDTGlimpseCanvas canvas;
     public final JToolBar toolbar;
 
-    /**
-     * NOTE: Do not call {@code LayeredTimeline.plot.setEpoch()} directly -- use
-     * {@link LayeredGui#init(LayeredScenario)} to change the timeline epoch.
-     */
-    public final CollapsibleTimePlot2D plot;
+    protected final CollapsibleTimePlot2D plot;
+
+    protected final Map<Object,Integer> rowRefCounts;
 
 
     public LayeredTimeline( )
     {
         this.plot = new CollapsibleTimePlot2D( );
         this.plot.setShowLabels( true );
+
+        this.rowRefCounts = new HashMap<>( );
 
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
@@ -52,57 +56,108 @@ public class LayeredTimeline
         plot.setTimeAxisBounds( TimeStamp.fromPosixMillis( bounds.min_PMILLIS ), TimeStamp.fromPosixMillis( bounds.max_MILLIS ) );
     }
 
-    public EventPlotInfo addEventRow( String labelText )
+    public Axis1D timeAxis( )
     {
-        EventPlotInfo row = this.plot.createEventPlot( );
+        return this.plot.getTimeAxis( );
+    }
 
-        row.setGrow( false );
+    public long selectionMin_PMILLIS( )
+    {
+        Epoch epoch = this.plot.getEpoch( );
+        return epoch.toPosixMillis( this.plot.getTimeSelectionMinTag( ).getValue( ) );
+    }
 
-        GridPainter gridPainter = row.getGridPainter( );
-        gridPainter.setShowVerticalLines( true );
-        gridPainter.setShowHorizontalLines( false );
-        gridPainter.setVisible( true );
-        row.getLayout( ).setZOrder( gridPainter, -1 );
+    public long selectionMax_PMILLIS( )
+    {
+        Epoch epoch = this.plot.getEpoch( );
+        return epoch.toPosixMillis( this.plot.getTimeSelectionMaxTag( ).getValue( ) );
+    }
 
-        SimpleTextPainter labelPainter = row.getLabelPainter( );
-        labelPainter.setHorizontalLabels( true );
-        labelPainter.setFont( FontUtils.getDefaultBold( 12 ), true );
+    public long selectionCursor_PMILLIS( )
+    {
+        Epoch epoch = this.plot.getEpoch( );
+        return epoch.toPosixMillis( this.plot.getTimeSelectionTag( ).getValue( ) );
+    }
 
-        row.setFont( FontUtils.getDefaultPlain( 12 ), true );
-        row.setLabelText( labelText );
+    public EventPlotInfo acquireEventRow( Object rowId, String labelText )
+    {
+        EventPlotInfo row = this.plot.getEventPlot( rowId );
+        if ( row == null )
+        {
+            row = this.plot.createEventPlot( rowId );
+
+            row.setGrow( false );
+
+            GridPainter gridPainter = row.getGridPainter( );
+            gridPainter.setShowVerticalLines( true );
+            gridPainter.setShowHorizontalLines( false );
+            gridPainter.setVisible( true );
+            row.getLayout( ).setZOrder( gridPainter, -1 );
+
+            SimpleTextPainter labelPainter = row.getLabelPainter( );
+            labelPainter.setHorizontalLabels( true );
+            labelPainter.setFont( FontUtils.getDefaultBold( 12 ), true );
+
+            row.setFont( FontUtils.getDefaultPlain( 12 ), true );
+            row.setLabelText( labelText );
+        }
+
+        this.rowRefCounts.compute( rowId, ( k, v ) -> incRefCount( v ) );
 
         return row;
     }
 
-    public TimePlotInfo getPlotRow( Object rowId, String dataAxisText )
+    public TimePlotInfo acquirePlotRow( Object rowId, String dataAxisText )
     {
-        return this.getPlotRow( rowId, dataAxisText, AxisUnitConverters.identity );
+        return this.acquirePlotRow( rowId, dataAxisText, AxisUnitConverters.identity );
     }
 
-    public TimePlotInfo getPlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits )
+    public TimePlotInfo acquirePlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits )
     {
         TimePlotInfo row = this.plot.getTimePlot( rowId );
         if ( row == null )
         {
             row = this.plot.createTimePlot( rowId );
+
+            GridPainter gridPainter = row.getGridPainter( );
+            gridPainter.setShowVerticalLines( true );
+            gridPainter.setShowHorizontalLines( false );
+            gridPainter.setVisible( true );
+            row.getLayout( ).setZOrder( gridPainter, -1 );
+
+            SimpleTextPainter labelPainter = row.getLabelPainter( );
+            labelPainter.setText( dataAxisText );
+            labelPainter.setHorizontalLabels( false );
+            labelPainter.setHorizontalPadding( 9 );
+            labelPainter.setHorizontalPosition( Right );
+            labelPainter.setFont( FontUtils.getDefaultPlain( 12 ), true );
+
+            row.getAxisPainter( ).getLabelHandlerY( ).setAxisUnitConverter( dataAxisUnits );
         }
 
-        GridPainter gridPainter = row.getGridPainter( );
-        gridPainter.setShowVerticalLines( true );
-        gridPainter.setShowHorizontalLines( false );
-        gridPainter.setVisible( true );
-        row.getLayout( ).setZOrder( gridPainter, -1 );
-
-        SimpleTextPainter labelPainter = row.getLabelPainter( );
-        labelPainter.setText( dataAxisText );
-        labelPainter.setHorizontalLabels( false );
-        labelPainter.setHorizontalPadding( 9 );
-        labelPainter.setHorizontalPosition( Right );
-        labelPainter.setFont( FontUtils.getDefaultPlain( 12 ), true );
-
-        row.getAxisPainter( ).getLabelHandlerY( ).setAxisUnitConverter( dataAxisUnits );
+        this.rowRefCounts.compute( rowId, ( k, v ) -> incRefCount( v ) );
 
         return row;
+    }
+
+    public void releaseRow( Object rowId )
+    {
+        Integer refCount = this.rowRefCounts.compute( rowId, ( k, v ) -> decRefCount( v ) );
+
+        if ( refCount == null )
+        {
+            this.plot.removePlot( rowId );
+        }
+    }
+
+    public static Integer incRefCount( Integer refCount )
+    {
+        return ( refCount == null ? 1 : refCount + 1 );
+    }
+
+    public static Integer decRefCount( Integer refCount )
+    {
+        return ( refCount >= 2 ? refCount - 1 : null );
     }
 
 }
