@@ -131,7 +131,27 @@ public class LayeredGui
 
     public void removeLayer( Layer layer )
     {
-        // WIP: Need active GL context
+        if ( layer instanceof TimelineLayer )
+        {
+            TimelineLayer timelineLayer = ( TimelineLayer ) layer;
+            this.timeline.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+            {
+                GlimpseContext context = this.timeline.canvas.getGlimpseContext( );
+                timelineLayer.uninstallFromTimeline( this.timeline, context );
+                return false;
+            } );
+        }
+
+        if ( layer instanceof GeoLayer )
+        {
+            GeoLayer geoLayer = ( GeoLayer ) layer;
+            this.geo.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+            {
+                GlimpseContext context = this.geo.canvas.getGlimpseContext( );
+                geoLayer.uninstallFromGeo( this.geo, context );
+                return false;
+            } );
+        }
     }
 
     protected LayeredGeo getGeo( )
