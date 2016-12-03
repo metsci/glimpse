@@ -71,7 +71,6 @@ public class SwingEDTAnimator implements GLAnimatorControl
         // create a default exception handler which simply logs exceptions
         this.handler = new UncaughtExceptionHandler( )
         {
-
             @Override
             public void uncaughtException( GLAnimatorControl animator, GLAutoDrawable drawable, Throwable cause )
             {
