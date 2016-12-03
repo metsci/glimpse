@@ -3,8 +3,7 @@ package com.metsci.glimpse.examples.layers;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
-import static java.lang.Math.PI;
-import static java.lang.Math.sin;
+import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.util.Random;
 
@@ -17,7 +16,10 @@ import com.metsci.glimpse.layers.LayeredTimelineBounds;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
+import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.units.Length;
+import com.metsci.glimpse.util.units.Speed;
+import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 public class LayeredExample
@@ -52,32 +54,62 @@ public class LayeredExample
             // WIP: Specify timezone
 
 
+            // Create some layers
+            //
+
+            ExampleLayer exampleLayerA = new ExampleLayer( );
+            ExampleLayer exampleLayerB = new ExampleLayer( );
+
+            long time_PMILLIS = scenario.timelineEpoch.getPosixMillis( );
+
+            LatLonGeo latlonA = LatLonGeo.fromDeg( 30.0, -75.0 );
+            double speedA_SU = Speed.fromKnots( 5.0 );
+            double courseA_NAVDEG = 45.0;
+
+            double zA_SU = 0;
+
+            Random r = new Random( 0 );
+            for ( int i = 0; i < 3600; i++ )
+            {
+                long timeStep_MILLIS = 1000;
+
+                time_PMILLIS += timeStep_MILLIS;
+
+                if ( r.nextDouble( ) < 0.1 )
+                {
+                    speedA_SU = Speed.fromKnots( 4.0 + 2.0*r.nextDouble( ) );
+                    courseA_NAVDEG = normalizeAngle360( courseA_NAVDEG - 30.0 + 60.0*r.nextDouble( ) );
+                }
+
+                if ( r.nextDouble( ) < 0.003 )
+                {
+                    zA_SU = 100.0 * r.nextDouble( );
+                }
+
+                double distanceA_SU = speedA_SU * Time.fromMilliseconds( timeStep_MILLIS );
+                double courseA_SU = Azimuth.fromNavDeg( courseA_NAVDEG );
+                latlonA = latlonA.displacedBy( distanceA_SU, courseA_SU );
+
+                double errorDistance_SU = Length.fromNauticalMiles( 0.03*r.nextDouble( ) );
+                double errorDirection_SU = Azimuth.fromNavDeg( 360.0 * r.nextDouble( ) );
+                LatLonGeo latlonB = latlonA.displacedBy( errorDistance_SU, errorDirection_SU );
+                double zB_SU = zA_SU - 5.0 + 10.0*r.nextDouble( );
+
+                exampleLayerA.addPoint( time_PMILLIS, latlonA, zA_SU );
+                exampleLayerB.addPoint( time_PMILLIS, latlonB, zB_SU );
+            }
+
+
             // Create the gui
             //
 
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
             gui.init( scenario.build( ) );
+            //gui.addLayer( exampleLayerA );
+            gui.addLayer( exampleLayerB );
 
-            // WIP: Need to stop the animator if init() fails, so the Swing thread can terminate
-
-
-            // Add a layer
-            //
-
-            ExampleLayer exampleLayer = new ExampleLayer( );
-            gui.addLayer( exampleLayer );
-
-            long t0_PMILLIS = scenario.timelineEpoch.getPosixMillis( );
-            Random r = new Random( 0 );
-            for ( int i = 0; i < 3600; i++ )
-            {
-                long t_PMILLIS = t0_PMILLIS + i*1000;
-                float x_SU = ( float ) Length.fromNauticalMiles( -11 + 0.005f*i + 4*r.nextFloat( ) );
-                float y_SU = ( float ) Length.fromNauticalMiles( -10 + 20*r.nextFloat( ) );
-                float z_SU = ( float ) ( 10*sin( 0.001*i * 5*PI ) + 8*r.nextFloat( ) );
-                exampleLayer.addPoint( t_PMILLIS, x_SU, y_SU, z_SU );
-            }
+            // WIP: Stop the animator if init() fails, so the Swing thread can terminate
 
         } );
     }

@@ -12,49 +12,44 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 public class ExampleGeoPainter extends GlimpsePainterBase
 {
 
-    protected final GeoProjection geoProj;
-    protected final Epoch timelineEpoch;
-
     protected final ExampleProgram prog;
     protected final ExampleStyle style;
-    protected float timeWindowMin;
-    protected float timeWindowMax;
+
+    protected float tSelectionMin;
+    protected float tSelectionMax;
+
     protected final GLEditableBuffer txyzBuffer;
 
 
-    public ExampleGeoPainter( GeoProjection geoProj, Epoch timelineEpoch )
+    public ExampleGeoPainter( )
     {
-        this.geoProj = geoProj;
-        this.timelineEpoch = timelineEpoch;
-
         this.prog = new ExampleProgram( );
         this.style = new ExampleStyle( );
-        this.timeWindowMin = 0;
-        this.timeWindowMax = 0;
+
+        this.tSelectionMin = 0;
+        this.tSelectionMax = 0;
+
         this.txyzBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 0 );
     }
 
-    public void addPoint( long time_PMILLIS, float x_SU, float y_SU, float z_SU )
+    public void addPoint( float t, float x, float y, float z )
     {
-        float t = ( float ) this.timelineEpoch.fromPosixMillis( time_PMILLIS );
-        this.txyzBuffer.grow4f( t, x_SU, y_SU, z_SU );
+        this.txyzBuffer.grow4f( t, x, y, z );
     }
 
-    public void setGeoSelection( float xMin_SU, float xMax_SU, float yMin_SU, float yMax_SU )
+    public void setGeoSelection( float xMin, float xMax, float yMin, float yMax )
     {
         // WIP
     }
 
-    public void setTimeSelection( long tMin_PMILLIS, long tMax_PMILLIS, long tCursor_PMILLIS )
+    public void setTimeSelection( float tMin, float tMax )
     {
-        this.timeWindowMin = ( float ) this.timelineEpoch.fromPosixMillis( tMin_PMILLIS );
-        this.timeWindowMax = ( float ) this.timelineEpoch.fromPosixMillis( tMax_PMILLIS );
+        this.tSelectionMin = tMin;
+        this.tSelectionMax = tMax;
     }
 
     @Override
@@ -73,7 +68,7 @@ public class ExampleGeoPainter extends GlimpsePainterBase
 
             this.prog.setStyle( gl, this.style );
 
-            this.prog.setTimeWindow( gl, this.timeWindowMin, this.timeWindowMax );
+            this.prog.setTimeWindow( gl, this.tSelectionMin, this.tSelectionMax );
 
             this.prog.draw( gl, this.txyzBuffer );
         }
