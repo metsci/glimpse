@@ -26,8 +26,8 @@ public class LayeredTimeline
     public final JToolBar toolbar;
 
     /**
-     * NOTE: Do not call {@code LayeredTimeline.plot.setEpoch()} directly -- it
-     * will not notify listeners. Use {@code LayeredTimeline.epoch.set()} instead.
+     * NOTE: Do not call {@code LayeredTimeline.plot.setEpoch()} directly -- use
+     * {@link LayeredGui#init(LayeredScenario)} to change the timeline epoch.
      */
     public final CollapsibleTimePlot2D plot;
 
