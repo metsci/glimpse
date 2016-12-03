@@ -14,6 +14,7 @@ import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredScenario;
 import com.metsci.glimpse.layers.LayeredTimelineBounds;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.units.Azimuth;
@@ -57,8 +58,8 @@ public class LayeredExample
             // Create some layers
             //
 
-            ExampleLayer exampleLayerA = new ExampleLayer( );
-            ExampleLayer exampleLayerB = new ExampleLayer( );
+            ExampleLayer exampleLayerA = new ExampleLayer( GlimpseColor.getRed( ) );
+            ExampleLayer exampleLayerB = new ExampleLayer( GlimpseColor.getBlack( ) );
 
             long time_PMILLIS = scenario.timelineEpoch.getPosixMillis( );
 
@@ -106,7 +107,7 @@ public class LayeredExample
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
             gui.init( scenario.build( ) );
-            //gui.addLayer( exampleLayerA );
+            gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
 
             // WIP: Stop the animator if init() fails, so the Swing thread can terminate

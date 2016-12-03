@@ -30,10 +30,10 @@ public class ExampleTimelinePainter extends GlimpsePainterBase
     protected final GLEditableBuffer txyzBuffer;
 
 
-    public ExampleTimelinePainter( )
+    public ExampleTimelinePainter( ExampleStyle style )
     {
         this.prog = new ExampleProgram( );
-        this.style = new ExampleStyle( );
+        this.style = new ExampleStyle( style );
 
         this.tWindowMin = 0;
         this.tWindowMax = 0;

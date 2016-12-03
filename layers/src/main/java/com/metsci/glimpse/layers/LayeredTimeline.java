@@ -79,14 +79,18 @@ public class LayeredTimeline
         return row;
     }
 
-    public TimePlotInfo addPlotRow( String dataAxisText )
+    public TimePlotInfo getPlotRow( Object rowId, String dataAxisText )
     {
-        return this.addPlotRow( dataAxisText, AxisUnitConverters.identity );
+        return this.getPlotRow( rowId, dataAxisText, AxisUnitConverters.identity );
     }
 
-    public TimePlotInfo addPlotRow( String dataAxisText, AxisUnitConverter dataAxisUnits )
+    public TimePlotInfo getPlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits )
     {
-        TimePlotInfo row = this.plot.createTimePlot( );
+        TimePlotInfo row = this.plot.getTimePlot( rowId );
+        if ( row == null )
+        {
+            row = this.plot.createTimePlot( rowId );
+        }
 
         GridPainter gridPainter = row.getGridPainter( );
         gridPainter.setShowVerticalLines( true );

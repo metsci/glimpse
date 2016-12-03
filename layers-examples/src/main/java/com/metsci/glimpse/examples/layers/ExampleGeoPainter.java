@@ -30,10 +30,10 @@ public class ExampleGeoPainter extends GlimpsePainterBase
     protected final GLEditableBuffer txyzBuffer;
 
 
-    public ExampleGeoPainter( )
+    public ExampleGeoPainter( ExampleStyle style )
     {
         this.prog = new ExampleProgram( );
-        this.style = new ExampleStyle( );
+        this.style = new ExampleStyle( style );
 
         this.tWindowMin = 0;
         this.tWindowMax = 0;

@@ -4,6 +4,7 @@ import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -20,6 +21,7 @@ import com.metsci.glimpse.layers.LayeredTimeline;
 import com.metsci.glimpse.layers.TimelineLayer;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -71,6 +73,8 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     }
 
 
+    protected final ExampleStyle style;
+
     protected final List<CanonicalPoint> canonicalPoints;
 
     protected GeoProjection geoProj;
@@ -84,8 +88,12 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     protected ExampleTimelinePainter timelinePainter;
 
 
-    public ExampleLayer( )
+    public ExampleLayer( float[] rgba )
     {
+        this.style = new ExampleStyle( );
+        this.style.rgbaInsideTWindow = Arrays.copyOf( rgba, 4 );
+        this.style.rgbaOutsideTWindow = GeneralUtils.floats( 0.4f + 0.6f*rgba[0], 0.4f + 0.6f*rgba[1], 0.4f + 0.6f*rgba[2], 0.4f*rgba[3] );
+
         this.canonicalPoints = new ArrayList<>( );
 
         this.geoProj = null;
@@ -142,7 +150,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void installToGeo( LayeredGeo geo )
     {
-        this.geoPainter = new ExampleGeoPainter( );
+        this.geoPainter = new ExampleGeoPainter( this.style );
         geo.dataPainter.addPainter( this.geoPainter );
 
         geo.plot.getCenterAxis( ).addAxisListener( new AxisListener2D( )
@@ -188,9 +196,11 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void installToTimeline( LayeredTimeline timeline )
     {
-        this.timelinePainter = new ExampleTimelinePainter( );
+        // Use the same timelineRowId for all instances of ExampleLayer, so they all share a single plot
+        String timelineRowId = "ExampleLayer.timelineRow";
+        this.timelineRow = timeline.getPlotRow( timelineRowId, "Example" );
 
-        this.timelineRow = timeline.addPlotRow( "Example" );
+        this.timelinePainter = new ExampleTimelinePainter( this.style );
         this.timelineRow.addPainter( this.timelinePainter );
 
         this.timeAxisListener = new TaggedAxisListener1D( )
