@@ -1,14 +1,15 @@
 package com.metsci.glimpse.layers;
 
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableCollection;
 
+import java.awt.Component;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.JToolBar;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
@@ -27,7 +28,7 @@ public class LayeredTimeline
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
-    public final JToolBar toolbar;
+    public final Collection<Component> toolbarComponents;
 
     protected final CollapsibleTimePlot2D plot;
 
@@ -44,7 +45,7 @@ public class LayeredTimeline
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
 
-        this.toolbar = newToolbar( true );
+        this.toolbarComponents = unmodifiableCollection( asList( ) );
     }
 
     public void init( LayeredScenario scenario )

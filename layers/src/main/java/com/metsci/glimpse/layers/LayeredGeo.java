@@ -1,12 +1,14 @@
 package com.metsci.glimpse.layers;
 
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableCollection;
 
-import javax.swing.JToolBar;
+import java.awt.Component;
+import java.util.Collection;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
@@ -25,7 +27,7 @@ public class LayeredGeo
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
-    public final JToolBar toolbar;
+    public final Collection<Component> toolbarComponents;
 
     public final MultiAxisPlot2D plot;
     public final GridPainter gridPainter;
@@ -58,7 +60,7 @@ public class LayeredGeo
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
 
-        this.toolbar = newToolbar( true );
+        this.toolbarComponents = unmodifiableCollection( asList( ) );
     }
 
     public void init( LayeredScenario scenario )

@@ -5,9 +5,11 @@ import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 
+import java.awt.Component;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.media.opengl.GLAnimatorControl;
+import javax.swing.JToolBar;
 
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.docking.DockingGroup;
@@ -190,7 +193,13 @@ public class LayeredGui
             this.animator.add( this.geo.canvas.getGLDrawable( ) );
             this.animator.start( );
 
-            View geoView = new View( "geoView", this.geo.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), this.geo.toolbar );
+            JToolBar geoToolbar = newToolbar( true );
+            for ( Component c : this.geo.toolbarComponents )
+            {
+                geoToolbar.add( c );
+            }
+
+            View geoView = new View( "geoView", this.geo.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), geoToolbar );
             this.dockingGroup.addView( geoView );
         }
         return this.geo;
@@ -206,7 +215,13 @@ public class LayeredGui
             this.animator.add( this.timeline.canvas.getGLDrawable( ) );
             this.animator.start( );
 
-            View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), this.timeline.toolbar );
+            JToolBar timelineToolbar = newToolbar( true );
+            for ( Component c : this.timeline.toolbarComponents )
+            {
+                timelineToolbar.add( c );
+            }
+
+            View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), timelineToolbar );
             this.dockingGroup.addView( timelineView );
         }
         return this.timeline;
