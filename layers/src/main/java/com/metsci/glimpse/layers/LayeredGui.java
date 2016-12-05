@@ -9,9 +9,14 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.media.opengl.GLAnimatorControl;
 
+import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
@@ -31,6 +36,8 @@ public class LayeredGui
 
     protected LayeredGeo geo;
     protected LayeredTimeline timeline;
+
+    protected final Set<Layer> layers;
 
 
     public LayeredGui( String frameTitleRoot )
@@ -59,6 +66,8 @@ public class LayeredGui
 
         this.geo = null;
         this.timeline = null;
+
+        this.layers = new LinkedHashSet<>( );
 
         // WIP: Add layer-tree view
     }
@@ -93,10 +102,19 @@ public class LayeredGui
 
     public void init( LayeredScenario newScenario )
     {
-        // WIP: Remove layers
+        // Remember the layers
+        List<Layer> layers = new ArrayList<>( this.layers );
 
+        // Remove all layers
+        for ( Layer layer : layers )
+        {
+            this.removeLayer( layer );
+        }
+
+        // Change scenario
         this.scenario = newScenario;
 
+        // Initialize views
         if ( this.geo != null )
         {
             this.geo.init( this.scenario );
@@ -107,50 +125,58 @@ public class LayeredGui
             this.timeline.init( this.scenario );
         }
 
-        // WIP: Add layers back in
+        // Add layers back in
+        for ( Layer layer : layers )
+        {
+            this.addLayer( layer );
+        }
     }
 
     public void addLayer( Layer layer )
     {
-        layer.init( this.scenario );
-
-        if ( layer instanceof GeoLayer )
+        if ( this.layers.add( layer ) )
         {
-            GeoLayer geoLayer = ( GeoLayer ) layer;
-            geoLayer.installToGeo( this.getGeo( ) );
-        }
+            layer.init( this.scenario );
 
-        if ( layer instanceof TimelineLayer )
-        {
-            TimelineLayer timelineLayer = ( TimelineLayer ) layer;
-            timelineLayer.installToTimeline( this.getTimeline( ) );
-        }
+            if ( layer instanceof GeoLayer )
+            {
+                GeoLayer geoLayer = ( GeoLayer ) layer;
+                geoLayer.installToGeo( this.getGeo( ) );
+            }
 
-        // WIP: Add to layer-tree model
+            if ( layer instanceof TimelineLayer )
+            {
+                TimelineLayer timelineLayer = ( TimelineLayer ) layer;
+                timelineLayer.installToTimeline( this.getTimeline( ) );
+            }
+        }
     }
 
     public void removeLayer( Layer layer )
     {
-        if ( layer instanceof TimelineLayer )
+        if ( this.layers.remove( layer ) )
         {
-            TimelineLayer timelineLayer = ( TimelineLayer ) layer;
-            this.timeline.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+            if ( layer instanceof GeoLayer )
             {
-                GlimpseContext context = this.timeline.canvas.getGlimpseContext( );
-                timelineLayer.uninstallFromTimeline( this.timeline, context );
-                return false;
-            } );
-        }
+                GeoLayer geoLayer = ( GeoLayer ) layer;
+                this.geo.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+                {
+                    GlimpseContext context = this.geo.canvas.getGlimpseContext( );
+                    geoLayer.uninstallFromGeo( this.geo, context );
+                    return false;
+                } );
+            }
 
-        if ( layer instanceof GeoLayer )
-        {
-            GeoLayer geoLayer = ( GeoLayer ) layer;
-            this.geo.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+            if ( layer instanceof TimelineLayer )
             {
-                GlimpseContext context = this.geo.canvas.getGlimpseContext( );
-                geoLayer.uninstallFromGeo( this.geo, context );
-                return false;
-            } );
+                TimelineLayer timelineLayer = ( TimelineLayer ) layer;
+                this.timeline.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+                {
+                    GlimpseContext context = this.timeline.canvas.getGlimpseContext( );
+                    timelineLayer.uninstallFromTimeline( this.timeline, context );
+                    return false;
+                } );
+            }
         }
     }
 

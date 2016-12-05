@@ -82,10 +82,11 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     protected final List<ProjectedPoint> projectedPoints;
 
     protected ExampleGeoPainter geoPainter;
+    protected AxisListener2D geoAxisListener;
 
     protected TimePlotInfo timelineRow;
-    protected TaggedAxisListener1D timeAxisListener;
     protected ExampleTimelinePainter timelinePainter;
+    protected TaggedAxisListener1D timeAxisListener;
 
 
     public ExampleLayer( float[] rgba )
@@ -101,10 +102,11 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.projectedPoints = new ArrayList<>( );
 
         this.geoPainter = null;
+        this.geoAxisListener = null;
 
         this.timelineRow = null;
-        this.timeAxisListener = null;
         this.timelinePainter = null;
+        this.timeAxisListener = null;
     }
 
     public void addPoint( long time_PMILLIS, LatLonGeo latlon, double z_SU )
@@ -153,7 +155,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.geoPainter = new ExampleGeoPainter( this.style );
         geo.dataPainter.addPainter( this.geoPainter );
 
-        geo.plot.getCenterAxis( ).addAxisListener( new AxisListener2D( )
+        this.geoAxisListener = new AxisListener2D( )
         {
             @Override
             public void axisUpdated( Axis2D axis )
@@ -176,7 +178,8 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
                     timelinePainter.setXyWindow( xMin, xMax, yMin, yMax );
                 }
             }
-        } );
+        };
+        geo.plot.getCenterAxis( ).addAxisListener( this.geoAxisListener );
 
         // Add points we already have
         for ( ProjectedPoint p : this.projectedPoints )
@@ -188,6 +191,9 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     @Override
     public void uninstallFromGeo( LayeredGeo geo, GlimpseContext context )
     {
+        geo.plot.getCenterAxis( ).removeAxisListener( this.geoAxisListener );
+        this.geoAxisListener = null;
+
         geo.dataPainter.removePainter( this.geoPainter );
         this.geoPainter.dispose( context );
         this.geoPainter = null;
