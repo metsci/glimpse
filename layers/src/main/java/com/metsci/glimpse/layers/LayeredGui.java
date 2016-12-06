@@ -8,13 +8,15 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static java.util.Collections.unmodifiableCollection;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 import java.awt.Component;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +45,8 @@ public class LayeredGui
     protected LayeredGeo geo;
     protected LayeredTimeline timeline;
 
-    protected final Set<Layer> layers;
+    protected final List<Layer> layers;
+    protected final Set<Layer> installedLayers;
 
     protected final LayersPanel layersPanel;
 
@@ -75,10 +78,45 @@ public class LayeredGui
         this.geo = null;
         this.timeline = null;
 
-        this.layers = new LinkedHashSet<>( );
+        this.layers = new ArrayList<>( );
+        this.installedLayers = new HashSet<>( );
 
-        this.layersPanel = new LayersPanel( );
-        this.layersPanel.setLayers( this.layers );
+        // XXX: Getting too verbose for an inline anonymous class
+        Collection<Layer> layersUnmod = unmodifiableCollection( this.layers );
+        this.layersPanel = new LayersPanel( new LayersPanel.Model( )
+        {
+            @Override
+            public Collection<Layer> getLayers( )
+            {
+                return layersUnmod;
+            }
+
+            @Override
+            public void showLayer( Layer layer, boolean show )
+            {
+                if ( show )
+                {
+                    // XXX: May cause flickering
+
+                    List<Layer> layersAfter = layers.subList( layers.indexOf( layer ) + 1, layers.size( ) );
+                    for ( Layer layerAfter : layersAfter )
+                    {
+                        uninstallLayer( layerAfter );
+                    }
+
+                    installLayer( layer );
+
+                    for ( Layer layerAfter : layersAfter )
+                    {
+                        installLayer( layerAfter );
+                    }
+                }
+                else
+                {
+                    uninstallLayer( layer );
+                }
+            }
+        } );
         JScrollPane layersScroller = new JScrollPane( this.layersPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
         View layersView = new View( "layersView", layersScroller, "Layers", false, null, null, null );
         this.dockingGroup.addView( layersView );
@@ -114,16 +152,16 @@ public class LayeredGui
 
     public void init( LayeredScenario newScenario )
     {
-        // Remember the layers
-        List<Layer> layers = new ArrayList<>( this.layers );
+        // Remember which layers to re-install
+        Set<Layer> installedLayers = new HashSet<>( this.installedLayers );
 
-        // Remove all layers
-        for ( Layer layer : layers )
+        // Uninstall all layers
+        for ( Layer layer : installedLayers )
         {
-            this.doRemoveLayer( layer, false );
+            this.uninstallLayer( layer );
         }
 
-        // Change scenario
+        // Change scenario (while no layers are installed)
         this.scenario = newScenario;
 
         // Initialize views
@@ -137,21 +175,37 @@ public class LayeredGui
             this.timeline.init( this.scenario );
         }
 
-        // Add layers back in
-        for ( Layer layer : layers )
+        // Re-install appropriate layers
+        for ( Layer layer : this.layers )
         {
-            this.doAddLayer( layer, false );
+            if ( installedLayers.contains( layer ) )
+            {
+                this.installLayer( layer );
+            }
         }
     }
 
     public void addLayer( Layer layer )
     {
-        this.doAddLayer( layer, true );
+        if ( this.layers.add( layer ) )
+        {
+            this.installLayer( layer );
+            this.layersPanel.refresh( );
+        }
     }
 
-    protected void doAddLayer( Layer layer, boolean updateLayersPanel )
+    public void removeLayer( Layer layer )
     {
-        if ( this.layers.add( layer ) )
+        if ( this.layers.remove( layer ) )
+        {
+            this.uninstallLayer( layer );
+            this.layersPanel.refresh( );
+        }
+    }
+
+    protected void installLayer( Layer layer )
+    {
+        if ( this.installedLayers.add( layer ) )
         {
             layer.init( this.scenario );
 
@@ -166,22 +220,12 @@ public class LayeredGui
                 TimelineLayer timelineLayer = ( TimelineLayer ) layer;
                 timelineLayer.installToTimeline( this.getTimeline( ) );
             }
-
-            if ( updateLayersPanel )
-            {
-                this.layersPanel.setLayers( this.layers );
-            }
         }
     }
 
-    public void removeLayer( Layer layer )
+    protected void uninstallLayer( Layer layer )
     {
-        this.doRemoveLayer( layer, true );
-    }
-
-    protected void doRemoveLayer( Layer layer, boolean updateLayersPanel )
-    {
-        if ( this.layers.remove( layer ) )
+        if ( this.installedLayers.remove( layer ) )
         {
             if ( layer instanceof GeoLayer )
             {
@@ -203,11 +247,6 @@ public class LayeredGui
                     timelineLayer.uninstallFromTimeline( this.timeline, context );
                     return false;
                 } );
-            }
-
-            if ( updateLayersPanel )
-            {
-                this.layersPanel.setLayers( this.layers );
             }
         }
     }
