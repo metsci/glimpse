@@ -73,6 +73,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     }
 
 
+    protected final String title;
     protected final ExampleStyle style;
 
     protected final List<CanonicalPoint> canonicalPoints;
@@ -89,8 +90,10 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     protected TaggedAxisListener1D timeAxisListener;
 
 
-    public ExampleLayer( float[] rgba )
+    public ExampleLayer( String title, float[] rgba )
     {
+        this.title = title;
+
         this.style = new ExampleStyle( );
         this.style.rgbaInsideTWindow = Arrays.copyOf( rgba, 4 );
         this.style.rgbaOutsideTWindow = GeneralUtils.floats( 0.4f + 0.6f*rgba[0], 0.4f + 0.6f*rgba[1], 0.4f + 0.6f*rgba[2], 0.4f*rgba[3] );
@@ -107,6 +110,11 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.timelineRow = null;
         this.timelinePainter = null;
         this.timeAxisListener = null;
+    }
+
+    public String title( )
+    {
+        return this.title;
     }
 
     public void addPoint( long time_PMILLIS, LatLonGeo latlon, double z_SU )

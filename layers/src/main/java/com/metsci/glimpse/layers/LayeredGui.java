@@ -8,6 +8,8 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 import java.awt.Component;
 import java.net.URL;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.media.opengl.GLAnimatorControl;
+import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
 import com.metsci.glimpse.context.GlimpseContext;
@@ -41,6 +44,8 @@ public class LayeredGui
     protected LayeredTimeline timeline;
 
     protected final Set<Layer> layers;
+
+    protected final LayersPanel layersPanel;
 
 
     public LayeredGui( String frameTitleRoot )
@@ -72,7 +77,11 @@ public class LayeredGui
 
         this.layers = new LinkedHashSet<>( );
 
-        // WIP: Add layer-tree view
+        this.layersPanel = new LayersPanel( );
+        this.layersPanel.setLayers( this.layers );
+        JScrollPane layersScroller = new JScrollPane( this.layersPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
+        View layersView = new View( "layersView", layersScroller, "Layers", false, null, null, null );
+        this.dockingGroup.addView( layersView );
     }
 
     public void arrange( String appName, String defaultArrResource )
@@ -111,7 +120,7 @@ public class LayeredGui
         // Remove all layers
         for ( Layer layer : layers )
         {
-            this.removeLayer( layer );
+            this.doRemoveLayer( layer, false );
         }
 
         // Change scenario
@@ -131,11 +140,16 @@ public class LayeredGui
         // Add layers back in
         for ( Layer layer : layers )
         {
-            this.addLayer( layer );
+            this.doAddLayer( layer, false );
         }
     }
 
     public void addLayer( Layer layer )
+    {
+        this.doAddLayer( layer, true );
+    }
+
+    protected void doAddLayer( Layer layer, boolean updateLayersPanel )
     {
         if ( this.layers.add( layer ) )
         {
@@ -152,10 +166,20 @@ public class LayeredGui
                 TimelineLayer timelineLayer = ( TimelineLayer ) layer;
                 timelineLayer.installToTimeline( this.getTimeline( ) );
             }
+
+            if ( updateLayersPanel )
+            {
+                this.layersPanel.setLayers( this.layers );
+            }
         }
     }
 
     public void removeLayer( Layer layer )
+    {
+        this.doRemoveLayer( layer, true );
+    }
+
+    protected void doRemoveLayer( Layer layer, boolean updateLayersPanel )
     {
         if ( this.layers.remove( layer ) )
         {
@@ -179,6 +203,11 @@ public class LayeredGui
                     timelineLayer.uninstallFromTimeline( this.timeline, context );
                     return false;
                 } );
+            }
+
+            if ( updateLayersPanel )
+            {
+                this.layersPanel.setLayers( this.layers );
             }
         }
     }

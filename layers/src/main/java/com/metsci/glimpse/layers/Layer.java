@@ -10,6 +10,8 @@ public interface Layer
     //Layer parent( );
     //List<Layer> children( );
 
+    String title( );
+
     void init( LayeredScenario scenario );
 
 }

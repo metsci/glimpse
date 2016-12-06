@@ -58,8 +58,8 @@ public class LayeredExample
             // Create some layers
             //
 
-            ExampleLayer exampleLayerA = new ExampleLayer( GlimpseColor.getRed( ) );
-            ExampleLayer exampleLayerB = new ExampleLayer( GlimpseColor.getBlack( ) );
+            ExampleLayer exampleLayerA = new ExampleLayer( "Truth", GlimpseColor.getRed( ) );
+            ExampleLayer exampleLayerB = new ExampleLayer( "Observed", GlimpseColor.getBlack( ) );
 
             long time_PMILLIS = scenario.timelineEpoch.getPosixMillis( );
 

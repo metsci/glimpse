@@ -7,21 +7,32 @@
             <width>1500</width>
             <height>900</height>
             <docker xsi:type="Split">
-                <arrangeVertically>true</arrangeVertically>
-                <splitFrac>0.7</splitFrac>
+                <arrangeVertically>false</arrangeVertically>
+                <splitFrac>0.2</splitFrac>
                 <childA xsi:type="Tile">
                     <views>
-                        <view>geoView</view>
+                        <view>layersView</view>
                     </views>
-                    <selectedView>geoView</selectedView>
+                    <selectedView>layersView</selectedView>
                     <isMaximized>false</isMaximized>
                 </childA>
-                <childB xsi:type="Tile">
-                    <views>
-                        <view>timelineView</view>
-                    </views>
-                    <selectedView>timelineView</selectedView>
-                    <isMaximized>false</isMaximized>
+                <childB xsi:type="Split">
+                    <arrangeVertically>true</arrangeVertically>
+                    <splitFrac>0.7</splitFrac>
+                    <childA xsi:type="Tile">
+                        <views>
+                            <view>geoView</view>
+                        </views>
+                        <selectedView>geoView</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childA>
+                    <childB xsi:type="Tile">
+                        <views>
+                            <view>timelineView</view>
+                        </views>
+                        <selectedView>timelineView</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childB>
                 </childB>
             </docker>
         </frame>
