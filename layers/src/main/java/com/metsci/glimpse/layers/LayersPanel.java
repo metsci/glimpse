@@ -21,7 +21,8 @@ public class LayersPanel extends JPanel
     public static interface Model
     {
         Collection<Layer> getLayers( );
-        void showLayer( Layer layer, boolean show );
+        boolean isLayerVisible( Layer layer );
+        void setLayerVisible( Layer layer, boolean visible );
     }
 
 
@@ -63,10 +64,10 @@ public class LayersPanel extends JPanel
     protected JComponent createLayerCard( Layer layer )
     {
         JCheckBox check = new JCheckBox( );
-//        check.setSelected( true ); // WIP: Hack
+        check.setSelected( this.model.isLayerVisible( layer ) );
         check.addItemListener( ( ev ) ->
         {
-            this.model.showLayer( layer, check.isSelected( ) );
+            this.model.setLayerVisible( layer, check.isSelected( ) );
         } );
 
         JLabel label = new JLabel( layer.title( ) );

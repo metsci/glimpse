@@ -11,9 +11,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
@@ -57,9 +57,14 @@ public class LayeredTimeline
         plot.setTimeAxisBounds( TimeStamp.fromPosixMillis( bounds.min_PMILLIS ), TimeStamp.fromPosixMillis( bounds.max_MILLIS ) );
     }
 
-    public Axis1D timeAxis( )
+    public TaggedAxis1D timeAxis( )
     {
         return this.plot.getTimeAxis( );
+    }
+
+    public TimeAxisSelection selection( )
+    {
+        return new TimeAxisSelection( this.selectionMin_PMILLIS( ), this.selectionMax_PMILLIS( ), this.selectionCursor_PMILLIS( ) );
     }
 
     public long selectionMin_PMILLIS( )

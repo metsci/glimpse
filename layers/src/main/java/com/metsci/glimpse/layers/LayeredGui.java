@@ -92,23 +92,31 @@ public class LayeredGui
             }
 
             @Override
-            public void showLayer( Layer layer, boolean show )
+            public boolean isLayerVisible( Layer layer )
             {
-                if ( show )
+                return installedLayers.contains( layer );
+            }
+
+            @Override
+            public void setLayerVisible( Layer layer, boolean visible )
+            {
+                if ( visible )
                 {
                     // XXX: May cause flickering
 
-                    List<Layer> layersAfter = layers.subList( layers.indexOf( layer ) + 1, layers.size( ) );
-                    for ( Layer layerAfter : layersAfter )
+                    List<Layer> layersToReinstall = new ArrayList<>( layers.subList( layers.indexOf( layer ) + 1, layers.size( ) ) );
+                    layersToReinstall.retainAll( installedLayers );
+
+                    for ( Layer layerToReinstall : layersToReinstall )
                     {
-                        uninstallLayer( layerAfter );
+                        uninstallLayer( layerToReinstall );
                     }
 
                     installLayer( layer );
 
-                    for ( Layer layerAfter : layersAfter )
+                    for ( Layer layerToReinstall : layersToReinstall )
                     {
-                        installLayer( layerAfter );
+                        installLayer( layerToReinstall );
                     }
                 }
                 else

@@ -1,5 +1,8 @@
 package com.metsci.glimpse.examples.layers;
 
+import static com.metsci.glimpse.layers.AxisSelection2D.axisSelection2D;
+import static com.metsci.glimpse.layers.AxisUtils.addAxisListener2D;
+import static com.metsci.glimpse.layers.AxisUtils.addTaggedAxisListener1D;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.PredicateUtils.require;
 
@@ -7,17 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.layers.AxisSelection2D;
 import com.metsci.glimpse.layers.GeoLayer;
 import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.LayeredGeo;
 import com.metsci.glimpse.layers.LayeredScenario;
 import com.metsci.glimpse.layers.LayeredTimeline;
+import com.metsci.glimpse.layers.TimeAxisSelection;
 import com.metsci.glimpse.layers.TimelineLayer;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
@@ -84,10 +86,12 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 
     protected ExampleGeoPainter geoPainter;
     protected AxisListener2D geoAxisListener;
+    protected AxisSelection2D geoAxisSelection;
 
     protected TimePlotInfo timelineRow;
     protected ExampleTimelinePainter timelinePainter;
     protected TaggedAxisListener1D timeAxisListener;
+    protected TimeAxisSelection timeAxisSelection;
 
 
     public ExampleLayer( String title, float[] rgba )
@@ -106,12 +110,15 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
 
         this.geoPainter = null;
         this.geoAxisListener = null;
+        this.geoAxisSelection = null;
 
         this.timelineRow = null;
         this.timelinePainter = null;
         this.timeAxisListener = null;
+        this.timeAxisSelection = null;
     }
 
+    @Override
     public String title( )
     {
         return this.title;
@@ -163,36 +170,42 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.geoPainter = new ExampleGeoPainter( this.style );
         geo.dataPainter.addPainter( this.geoPainter );
 
-        this.geoAxisListener = new AxisListener2D( )
+        // Initialize the new painter's T window
+        this.setTimeAxisSelection( this.timeAxisSelection );
+
+        // Initialize both painters' XY windows, and update them when geo selection changes
+        this.geoAxisListener = addAxisListener2D( geo.plot.getCenterAxis( ), true, ( axis ) ->
         {
-            @Override
-            public void axisUpdated( Axis2D axis )
-            {
-                Axis1D xAxis = axis.getAxisX( );
-                float xMin = ( float ) ( xAxis.getSelectionCenter( ) - 0.5*xAxis.getSelectionSize( ) );
-                float xMax = ( float ) ( xAxis.getSelectionCenter( ) + 0.5*xAxis.getSelectionSize( ) );
-
-                Axis1D yAxis = axis.getAxisY( );
-                float yMin = ( float ) ( yAxis.getSelectionCenter( ) - 0.5*yAxis.getSelectionSize( ) );
-                float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5*yAxis.getSelectionSize( ) );
-
-                if ( geoPainter != null )
-                {
-                    geoPainter.setXyWindow( xMin, xMax, yMin, yMax );
-                }
-
-                if ( timelinePainter != null )
-                {
-                    timelinePainter.setXyWindow( xMin, xMax, yMin, yMax );
-                }
-            }
-        };
-        geo.plot.getCenterAxis( ).addAxisListener( this.geoAxisListener );
+            this.setGeoAxisSelection( axisSelection2D( axis ) );
+        } );
 
         // Add points we already have
         for ( ProjectedPoint p : this.projectedPoints )
         {
             this.geoPainter.addPoint( p.t, p.x, p.y, p.z );
+        }
+    }
+
+    protected void setGeoAxisSelection( AxisSelection2D geoAxisSelection )
+    {
+        if ( geoAxisSelection != null )
+        {
+            this.geoAxisSelection = geoAxisSelection;
+
+            float xMin = ( float ) this.geoAxisSelection.xSelection.min;
+            float xMax = ( float ) this.geoAxisSelection.xSelection.max;
+            float yMin = ( float ) this.geoAxisSelection.ySelection.min;
+            float yMax = ( float ) this.geoAxisSelection.ySelection.max;
+
+            if ( this.geoPainter != null )
+            {
+                this.geoPainter.setXyWindow( xMin, xMax, yMin, yMax );
+            }
+
+            if ( this.timelinePainter != null )
+            {
+                this.timelinePainter.setXyWindow( xMin, xMax, yMin, yMax );
+            }
         }
     }
 
@@ -217,31 +230,40 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.timelinePainter = new ExampleTimelinePainter( this.style );
         this.timelineRow.addPainter( this.timelinePainter );
 
-        this.timeAxisListener = new TaggedAxisListener1D( )
+        // Initialize the new painter's XY window
+        this.setGeoAxisSelection( this.geoAxisSelection );
+
+        // Initialize both painters' T windows, and update them when time selection changes
+        this.timeAxisListener = addTaggedAxisListener1D( timeline.timeAxis( ), true, ( axis ) ->
         {
-            @Override
-            public void tagsUpdated( TaggedAxis1D axis )
-            {
-                float tMin = ( float ) timelineEpoch.fromPosixMillis( timeline.selectionMin_PMILLIS( ) );
-                float tMax = ( float ) timelineEpoch.fromPosixMillis( timeline.selectionMax_PMILLIS( ) );
-
-                if ( geoPainter != null )
-                {
-                    geoPainter.setTWindow( tMin, tMax );
-                }
-
-                if ( timelinePainter != null )
-                {
-                    timelinePainter.setTWindow( tMin, tMax );
-                }
-            }
-        };
-        timeline.timeAxis( ).addAxisListener( this.timeAxisListener );
+            this.setTimeAxisSelection( timeline.selection( ) );
+        } );
 
         // Add points we already have
         for ( ProjectedPoint p : this.projectedPoints )
         {
             this.timelinePainter.addPoint( p.t, p.x, p.y, p.z );
+        }
+    }
+
+    protected void setTimeAxisSelection( TimeAxisSelection timeAxisSelection )
+    {
+        if ( timeAxisSelection != null )
+        {
+            this.timeAxisSelection = timeAxisSelection;
+
+            float tMin = ( float ) this.timelineEpoch.fromPosixMillis( timeAxisSelection.min_PMILLIS );
+            float tMax = ( float ) this.timelineEpoch.fromPosixMillis( timeAxisSelection.max_PMILLIS );
+
+            if ( this.geoPainter != null )
+            {
+                this.geoPainter.setTWindow( tMin, tMax );
+            }
+
+            if ( this.timelinePainter != null )
+            {
+                this.timelinePainter.setTWindow( tMin, tMax );
+            }
         }
     }
 
