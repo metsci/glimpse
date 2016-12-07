@@ -7,6 +7,6 @@ public interface TimelineLayer extends Layer
 
     void installToTimeline( LayeredTimeline timeline );
 
-    void uninstallFromTimeline( LayeredTimeline timeline, GlimpseContext context );
+    void uninstallFromTimeline( LayeredTimeline timeline, GlimpseContext context, boolean reinstalling );
 
 }

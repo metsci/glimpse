@@ -148,9 +148,14 @@ public class LayeredTimeline
 
     public void releaseRow( Object rowId )
     {
+        this.releaseRow( rowId, false );
+    }
+
+    public void releaseRow( Object rowId, boolean keepRow )
+    {
         Integer refCount = this.rowRefCounts.compute( rowId, ( k, v ) -> decRefCount( v ) );
 
-        if ( refCount == null )
+        if ( refCount == null && !keepRow )
         {
             this.plot.removePlot( rowId );
         }

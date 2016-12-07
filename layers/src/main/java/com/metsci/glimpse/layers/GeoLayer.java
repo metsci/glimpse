@@ -7,6 +7,6 @@ public interface GeoLayer extends Layer
 
     void installToGeo( LayeredGeo geo );
 
-    void uninstallFromGeo( LayeredGeo geo, GlimpseContext context );
+    void uninstallFromGeo( LayeredGeo geo, GlimpseContext context, boolean reinstalling );
 
 }

@@ -109,7 +109,7 @@ public class LayeredGui
 
                     for ( Layer layerToReinstall : layersToReinstall )
                     {
-                        uninstallLayer( layerToReinstall );
+                        uninstallLayer( layerToReinstall, true );
                     }
 
                     installLayer( layer );
@@ -121,7 +121,7 @@ public class LayeredGui
                 }
                 else
                 {
-                    uninstallLayer( layer );
+                    uninstallLayer( layer, false );
                 }
             }
         } );
@@ -166,7 +166,7 @@ public class LayeredGui
         // Uninstall all layers
         for ( Layer layer : installedLayers )
         {
-            this.uninstallLayer( layer );
+            this.uninstallLayer( layer, true );
         }
 
         // Change scenario (while no layers are installed)
@@ -206,7 +206,7 @@ public class LayeredGui
     {
         if ( this.layers.remove( layer ) )
         {
-            this.uninstallLayer( layer );
+            this.uninstallLayer( layer, false );
             this.layersPanel.refresh( );
         }
     }
@@ -231,7 +231,7 @@ public class LayeredGui
         }
     }
 
-    protected void uninstallLayer( Layer layer )
+    protected void uninstallLayer( Layer layer, boolean reinstalling )
     {
         if ( this.installedLayers.remove( layer ) )
         {
@@ -241,7 +241,7 @@ public class LayeredGui
                 this.geo.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
                 {
                     GlimpseContext context = this.geo.canvas.getGlimpseContext( );
-                    geoLayer.uninstallFromGeo( this.geo, context );
+                    geoLayer.uninstallFromGeo( this.geo, context, reinstalling );
                     return false;
                 } );
             }
@@ -252,7 +252,7 @@ public class LayeredGui
                 this.timeline.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
                 {
                     GlimpseContext context = this.timeline.canvas.getGlimpseContext( );
-                    timelineLayer.uninstallFromTimeline( this.timeline, context );
+                    timelineLayer.uninstallFromTimeline( this.timeline, context, reinstalling );
                     return false;
                 } );
             }

@@ -210,7 +210,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     }
 
     @Override
-    public void uninstallFromGeo( LayeredGeo geo, GlimpseContext context )
+    public void uninstallFromGeo( LayeredGeo geo, GlimpseContext context, boolean reinstalling )
     {
         geo.plot.getCenterAxis( ).removeAxisListener( this.geoAxisListener );
         this.geoAxisListener = null;
@@ -268,7 +268,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
     }
 
     @Override
-    public void uninstallFromTimeline( LayeredTimeline timeline, GlimpseContext context )
+    public void uninstallFromTimeline( LayeredTimeline timeline, GlimpseContext context, boolean reinstalling )
     {
         timeline.timeAxis( ).removeAxisListener( this.timeAxisListener );
         this.timeAxisListener = null;
@@ -277,7 +277,7 @@ public class ExampleLayer implements Layer, GeoLayer, TimelineLayer
         this.timelinePainter.dispose( context );
         this.timelinePainter = null;
 
-        timeline.releaseRow( this.timelineRow.getId( ) );
+        timeline.releaseRow( this.timelineRow.getId( ), reinstalling );
         this.timelineRow = null;
     }
 
