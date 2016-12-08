@@ -61,8 +61,7 @@ public class Epoch
 
     public Epoch( TimeStamp epoch )
     {
-        this.epoch = epoch;
-        this.epoch_PMILLIS = epoch.toPosixMillis( );
+        this( epoch.toPosixMillis( ) );
     }
 
     public Epoch( long epoch_PMILLIS )
@@ -131,5 +130,25 @@ public class Epoch
     public double fromPosixMillis( long time_PMILLIS )
     {
         return millisecondsToSeconds( time_PMILLIS - this.epoch_PMILLIS );
+    }
+
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 12347;
+        int result = 1;
+        result = prime * result + Long.hashCode( this.epoch_PMILLIS );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        Epoch other = ( Epoch ) o;
+        return ( other.epoch_PMILLIS == this.epoch_PMILLIS );
     }
 }
