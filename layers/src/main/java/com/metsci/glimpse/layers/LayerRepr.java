@@ -3,8 +3,10 @@ package com.metsci.glimpse.layers;
 public interface LayerRepr
 {
 
-    void setVisible( boolean visible );
+    boolean isVisible( );
 
-    void dispose( boolean reinstalling );
+    void setVisible( boolean isReprVisible );
+
+    void dispose( boolean isReinstall );
 
 }

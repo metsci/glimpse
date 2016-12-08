@@ -8,6 +8,9 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javax.swing.SwingUtilities;
@@ -129,25 +132,37 @@ public class LayeredExample
             setDefaultGeoConfigurator( gui, geoConfigurator );
             setDefaultTimelineConfigurator( gui, timelineConfigurator );
 
-            gui.addView( new LayeredGeo( ) );
-            gui.addView( new LayeredTimeline( ) );
+            LayeredGeo geo = new LayeredGeo( );
+            gui.addView( geo );
+
+            LayeredTimeline timeline = new LayeredTimeline( );
+            gui.addView( timeline );
 
             gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
 
 
 
-//            scenario.geoProj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.5 ) );
-//            LayeredScenario newScenario = scenario.build( );
-//
-//            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( );
-//            exec.schedule( ( ) ->
-//            {
-//                SwingUtilities.invokeLater( ( ) ->
-//                {
-//                    gui.init( newScenario );
-//                } );
-//            }, 5, TimeUnit.SECONDS );
+            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( );
+            exec.schedule( ( ) ->
+            {
+                SwingUtilities.invokeLater( ( ) ->
+                {
+
+                    // WIP
+                    modifyGeoConfig( geo, ( geoConfig ) ->
+                    {
+
+
+                        return newGeoConfig;
+                    } );
+
+                    //LayeredGeoConfig.setGeoConfig( geo, geoConfig );
+                    //geo.init( );
+
+
+                } );
+            }, 5, TimeUnit.SECONDS );
 
 
 

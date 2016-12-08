@@ -18,33 +18,19 @@ import net.miginfocom.swing.MigLayout;
 public class LayersPanel extends JPanel
 {
 
-    public static interface Model
-    {
-        Collection<Layer> getLayers( );
-        boolean isLayerVisible( Layer layer );
-        void setLayerVisible( Layer layer, boolean visible );
-    }
-
-
-    protected final Model model;
     protected final Map<Layer,JComponent> layerCards;
 
 
-    public LayersPanel( Model model )
+    public LayersPanel( )
     {
-        this.model = model;
         this.layerCards = new HashMap<>( );
 
         this.setLayout( new MigLayout( "fillx" ) );
         this.setBackground( UIManager.getColor( "List.background" ) );
-
-        this.refresh( );
     }
 
-    public void refresh( )
+    public void refresh( Collection<Layer> layers )
     {
-        Collection<Layer> layers = this.model.getLayers( );
-
         // Remove all cards from UI
         this.removeAll( );
 
@@ -53,24 +39,24 @@ public class LayersPanel extends JPanel
 
         for ( Layer layer : layers )
         {
-            // Create card if needed, and add to map
-            JComponent card = this.layerCards.computeIfAbsent( layer, this::createLayerCard );
+            // Add a new card to the map, if necessary
+            JComponent card = this.layerCards.computeIfAbsent( layer, LayersPanel::createLayerCard );
 
             // Add card to UI
             this.add( card, "growx, wrap" );
         }
     }
 
-    protected JComponent createLayerCard( Layer layer )
+    protected static JComponent createLayerCard( Layer layer )
     {
         JCheckBox check = new JCheckBox( );
-        check.setSelected( this.model.isLayerVisible( layer ) );
+        check.setSelected( layer.isVisible( ) );
         check.addItemListener( ( ev ) ->
         {
-            this.model.setLayerVisible( layer, check.isSelected( ) );
+            layer.setVisible( check.isSelected( ) );
         } );
 
-        JLabel label = new JLabel( layer.title( ) );
+        JLabel label = new JLabel( layer.getTitle( ) );
 
         JPanel card = new JPanel( new MigLayout( "fillx" ) );
         card.setBorder( createLineBorder( card.getBackground( ).darker( ), 1 ) );

@@ -8,8 +8,8 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static com.metsci.glimpse.layers.geo.LayeredGeoConfig.setGeoConfig;
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableList;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
@@ -17,6 +17,7 @@ import java.awt.Component;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -37,7 +38,6 @@ import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
-import com.metsci.glimpse.layers.geo.LayeredGeoConfig;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LayeredGui
@@ -51,6 +51,7 @@ public class LayeredGui
     protected final Map<String,Supplier<? extends LayeredViewConfig>> viewConfigurators;
 
     protected final List<Layer> layers;
+    protected final List<Layer> layersUnmod;
 
     protected final LayersPanel layersPanel;
 
@@ -81,51 +82,9 @@ public class LayeredGui
         this.viewConfigurators = new LinkedHashMap<>( );
 
         this.layers = new ArrayList<>( );
+        this.layersUnmod = unmodifiableList( this.layers );
 
-        // XXX: Getting too verbose for an inline anonymous class
-        Collection<Layer> layersUnmod = unmodifiableCollection( this.layers );
-        this.layersPanel = new LayersPanel( new LayersPanel.Model( )
-        {
-            @Override
-            public Collection<Layer> getLayers( )
-            {
-                return layersUnmod;
-            }
-
-            @Override
-            public boolean isLayerVisible( Layer layer )
-            {
-                return installedLayers.contains( layer );
-            }
-
-            @Override
-            public void setLayerVisible( Layer layer, boolean visible )
-            {
-                if ( visible )
-                {
-                    // XXX: May cause flickering
-
-                    List<Layer> layersToReinstall = new ArrayList<>( layers.subList( layers.indexOf( layer ) + 1, layers.size( ) ) );
-                    layersToReinstall.retainAll( installedLayers );
-
-                    for ( Layer layerToReinstall : layersToReinstall )
-                    {
-                        uninstallLayer( layerToReinstall, true );
-                    }
-
-                    installLayer( layer );
-
-                    for ( Layer layerToReinstall : layersToReinstall )
-                    {
-                        installLayer( layerToReinstall );
-                    }
-                }
-                else
-                {
-                    uninstallLayer( layer, false );
-                }
-            }
-        } );
+        this.layersPanel = new LayersPanel( );
         JScrollPane layersScroller = new JScrollPane( this.layersPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
         View layersView = new View( "layersView", layersScroller, "Layers", false, null, null, null );
         this.dockingGroup.addView( layersView );
@@ -174,123 +133,67 @@ public class LayeredGui
 
     public void addView( LayeredView view )
     {
-        for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.entrySet( ) )
+        if ( this.views.add( view ) )
         {
-            String configKey = en.getKey( );
-            Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
-            LayeredViewConfig config = configurator.get( );
-            view.setConfig( configKey, config );
-        }
-
-        view.init( );
-
-        this.animator.add( this.view.canvas.getGLDrawable( ) );
-        this.animator.start( );
-
-        JToolBar geoToolbar = newToolbar( true );
-        for ( Component c : view.toolbarComponents )
-        {
-            geoToolbar.add( c );
-        }
-
-        View dockingView = new View( "geoView", this.view.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), geoToolbar );
-        View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), timelineToolbar );
-        this.dockingGroup.addView( dockingView );
-
-        // WIP: Add existing layers to new view
-    }
-
-
-
-
-
-
-
-
-    public void init( LayeredScenario newScenario )
-    {
-        // Remember which layers to re-install
-        Set<Layer> installedLayers = new HashSet<>( this.installedLayers );
-
-        // Uninstall all layers
-        for ( Layer layer : installedLayers )
-        {
-            this.uninstallLayer( layer, true );
-        }
-
-        // Change scenario (while no layers are installed)
-        this.scenario = newScenario;
-
-        // Initialize views
-        if ( this.geo != null )
-        {
-            this.geo.init( this.scenario );
-        }
-
-        if ( this.timeline != null )
-        {
-            this.timeline.init( this.scenario );
-        }
-
-        // Re-install appropriate layers
-        for ( Layer layer : this.layers )
-        {
-            if ( installedLayers.contains( layer ) )
+            for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.entrySet( ) )
             {
-                this.installLayer( layer );
+                String configKey = en.getKey( );
+                Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
+                LayeredViewConfig config = configurator.get( );
+                view.setConfig( configKey, config );
             }
+
+            view.init( );
+
+            this.animator.add( view.canvas.getGLDrawable( ) );
+            this.animator.start( );
+
+            JToolBar geoToolbar = newToolbar( true );
+            for ( Component c : view.toolbarComponents )
+            {
+                geoToolbar.add( c );
+            }
+
+            View dockingView = new View( "geoView", this.view.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), geoToolbar );
+            View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), timelineToolbar );
+            this.dockingGroup.addView( dockingView );
+
+            for ( Layer layer : this.layers )
+            {
+                layer.installTo( view );
+            }
+
+            this.layersPanel.refresh( this.layersUnmod );
         }
     }
 
     public void addLayer( Layer layer )
     {
-        if ( this.layers.add( layer ) )
+        if ( !this.layers.contains( layer ) )
         {
-            this.installLayer( layer );
-            this.layersPanel.refresh( );
+            this.layers.add( layer );
+
+            for ( LayeredView view : this.views )
+            {
+                layer.installTo( view );
+            }
+
+            this.layersPanel.refresh( this.layersUnmod );
         }
     }
 
     public void removeLayer( Layer layer )
     {
-        if ( this.layers.remove( layer ) )
+        if ( this.layers.contains( layer ) )
         {
-            this.uninstallLayer( layer, false );
-            this.layersPanel.refresh( );
-        }
-    }
+            this.layers.remove( layer );
 
-    protected void installLayer( Layer layer )
-    {
-        if ( this.installedLayers.add( layer ) )
-        {
             for ( LayeredView view : this.views )
             {
-                LayerRepr repr = layer.installTo( view );
-                // WIP: Store repr somewhere
-            }
-        }
-    }
-
-    protected void uninstallLayer( Layer layer, boolean reinstalling )
-    {
-        if ( this.installedLayers.remove( layer ) )
-        {
-            for ( LayerRepr repr : asdf )
-            {
-                repr.dispose( context, reinstalling );
+                layer.uninstallFrom( view, false );
             }
 
-            if ( layer instanceof TimelineLayer )
-            {
-                TimelineLayer timelineLayer = ( TimelineLayer ) layer;
-                this.timeline.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
-                {
-                    GlimpseContext context = this.timeline.canvas.getGlimpseContext( );
-                    timelineLayer.uninstallFromTimeline( this.timeline, context, reinstalling );
-                    return false;
-                } );
-            }
+            this.layersPanel.refresh( this.layersUnmod );
         }
     }
 

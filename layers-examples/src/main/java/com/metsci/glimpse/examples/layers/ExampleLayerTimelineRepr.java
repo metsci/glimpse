@@ -21,6 +21,8 @@ import com.metsci.glimpse.util.vector.Vector2d;
 public class ExampleLayerTimelineRepr implements LayerRepr
 {
 
+    protected final ExampleLayer layer;
+
     protected final LayeredTimeline view;
     protected final LayeredGeoConfig geoConfig;
     protected final LayeredTimelineConfig timelineConfig;
@@ -31,9 +33,13 @@ public class ExampleLayerTimelineRepr implements LayerRepr
     protected final AxisListener2D geoAxisListener;
     protected final TaggedAxisListener1D timeAxisListener;
 
+    protected boolean visible;
 
-    public ExampleLayerTimelineRepr( LayeredTimeline view, ExampleStyle style )
+
+    public ExampleLayerTimelineRepr( ExampleLayer layer, LayeredTimeline view, ExampleStyle style )
     {
+        this.layer = layer;
+
         this.view = view;
         this.geoConfig = requireGeoConfig( this.view );
         this.timelineConfig = requireTimelineConfig( this.view );
@@ -67,6 +73,9 @@ public class ExampleLayerTimelineRepr implements LayerRepr
 
             this.painter.setTWindow( tMin, tMax );
         } );
+
+        this.visible = true;
+        this.refreshVisibility( );
     }
 
     public void addPoint( ExamplePoint point )
@@ -85,9 +94,24 @@ public class ExampleLayerTimelineRepr implements LayerRepr
     }
 
     @Override
+    public boolean isVisible( )
+    {
+        return this.visible;
+    }
+
+    @Override
     public void setVisible( boolean visible )
     {
-        this.painter.setVisible( visible );
+        if ( visible != this.visible )
+        {
+            this.visible = visible;
+            this.refreshVisibility( );
+        }
+    }
+
+    public void refreshVisibility( )
+    {
+        this.painter.setVisible( this.layer.isVisible( ) && this.isVisible( ) );
     }
 
     @Override

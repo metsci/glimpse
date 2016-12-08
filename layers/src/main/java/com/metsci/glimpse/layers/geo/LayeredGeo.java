@@ -61,8 +61,12 @@ public class LayeredGeo extends LayeredView
     @Override
     public void init( )
     {
+        // WIP: Uninstall layers
+
         LayeredGeoConfig geoConfig = requireGeoConfig( this );
         this.plot.getCenterAxis( ).setParent( geoConfig.axis );
+
+        // WIP: Reinstall appropriate layers
     }
 
 }

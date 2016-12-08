@@ -48,9 +48,13 @@ public class LayeredTimeline extends LayeredView
     @Override
     public void init( )
     {
+        // WIP: Uninstall layers
+
         LayeredTimelineConfig timelineConfig = requireTimelineConfig( this );
         this.plot.setEpoch( timelineConfig.epoch );
         this.plot.getTimeAxis( ).setParent( timelineConfig.axis );
+
+        // WIP: Reinstall appropriate layers
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )
