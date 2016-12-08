@@ -10,11 +10,13 @@ import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javax.swing.SwingUtilities;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.LayeredGeo;
 import com.metsci.glimpse.layers.geo.LayeredGeoConfig;
@@ -143,22 +145,25 @@ public class LayeredExample
 
 
 
-            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( );
+            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
+            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
             exec.schedule( ( ) ->
             {
                 SwingUtilities.invokeLater( ( ) ->
                 {
 
-                    // WIP
-                    modifyGeoConfig( geo, ( geoConfig ) ->
-                    {
+                    gui.addView( new LayeredGeo( ) );
 
 
-                        return newGeoConfig;
-                    } );
-
-                    //LayeredGeoConfig.setGeoConfig( geo, geoConfig );
-                    //geo.init( );
+//                    GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
+//
+//                    LayeredGeoConfig config = new LayeredGeoConfig( proj );
+//
+//                    config.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+//                    // WIP: Initialize selection box
+//                    // WIP: Specify axis units for display
+//
+//                    setGeoConfig( geo, config );
 
 
                 } );

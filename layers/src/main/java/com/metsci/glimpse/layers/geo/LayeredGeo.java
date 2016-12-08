@@ -1,11 +1,15 @@
 package com.metsci.glimpse.layers.geo;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.LayeredGeoConfig.requireGeoConfig;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.Component;
 import java.util.Collection;
+
+import javax.media.opengl.GLAutoDrawable;
+import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
@@ -59,14 +63,40 @@ public class LayeredGeo extends LayeredView
     }
 
     @Override
+    public String getTitle( )
+    {
+        return "Geo";
+    }
+
+    @Override
+    public Icon getIcon( )
+    {
+        return requireIcon( "LayeredGeo/fugue-icons/map.png" );
+    }
+
+    @Override
+    public Component getComponent( )
+    {
+        return this.canvas;
+    }
+
+    @Override
+    public GLAutoDrawable getGLDrawable( )
+    {
+        return this.canvas.getGLDrawable( );
+    }
+
+    @Override
+    public Collection<Component> getToolbarComponents( )
+    {
+        return this.toolbarComponents;
+    }
+
+    @Override
     public void init( )
     {
-        // WIP: Uninstall layers
-
         LayeredGeoConfig geoConfig = requireGeoConfig( this );
         this.plot.getCenterAxis( ).setParent( geoConfig.axis );
-
-        // WIP: Reinstall appropriate layers
     }
 
 }

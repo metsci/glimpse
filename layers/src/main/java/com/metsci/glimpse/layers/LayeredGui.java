@@ -6,9 +6,7 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameT
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -16,9 +14,7 @@ import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import java.awt.Component;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,10 +24,10 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.media.opengl.GLAnimatorControl;
+import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
-import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
@@ -43,16 +39,14 @@ import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 public class LayeredGui
 {
 
+    protected final Map<String,Supplier<? extends LayeredViewConfig>> viewConfigurators;
+    protected final Set<LayeredView> views;
+    protected final List<Layer> layers;
+
     protected final DockingGroup dockingGroup;
     protected final GLAnimatorControl animator;
     protected DockingGroupListener dockingArrSaver;
-
-    protected final Set<LayeredView> views;
-    protected final Map<String,Supplier<? extends LayeredViewConfig>> viewConfigurators;
-
-    protected final List<Layer> layers;
-    protected final List<Layer> layersUnmod;
-
+    protected final Map<String,Integer> dockingViewIdCounters;
     protected final LayersPanel layersPanel;
 
 
@@ -63,6 +57,10 @@ public class LayeredGui
 
     public LayeredGui( String frameTitleRoot, DockingTheme theme )
     {
+        this.viewConfigurators = new LinkedHashMap<>( );
+        this.views = new LinkedHashSet<>( );
+        this.layers = new ArrayList<>( );
+
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
@@ -78,11 +76,7 @@ public class LayeredGui
 
         this.dockingArrSaver = null;
 
-        this.views = new LinkedHashSet<>( );
-        this.viewConfigurators = new LinkedHashMap<>( );
-
-        this.layers = new ArrayList<>( );
-        this.layersUnmod = unmodifiableList( this.layers );
+        this.dockingViewIdCounters = new HashMap<>( );
 
         this.layersPanel = new LayersPanel( );
         JScrollPane layersScroller = new JScrollPane( this.layersPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
@@ -135,35 +129,45 @@ public class LayeredGui
     {
         if ( this.views.add( view ) )
         {
+            Map<String,LayeredViewConfig> configs = new LinkedHashMap<>( );
             for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.entrySet( ) )
             {
                 String configKey = en.getKey( );
                 Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
-                LayeredViewConfig config = configurator.get( );
-                view.setConfig( configKey, config );
+                configs.put( configKey, configurator.get( ) );
             }
-
-            view.init( );
-
-            this.animator.add( view.canvas.getGLDrawable( ) );
-            this.animator.start( );
-
-            JToolBar geoToolbar = newToolbar( true );
-            for ( Component c : view.toolbarComponents )
-            {
-                geoToolbar.add( c );
-            }
-
-            View dockingView = new View( "geoView", this.view.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), geoToolbar );
-            View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), timelineToolbar );
-            this.dockingGroup.addView( dockingView );
+            view.setConfigs( configs );
 
             for ( Layer layer : this.layers )
             {
-                layer.installTo( view );
+                view.addLayer( layer );
             }
 
-            this.layersPanel.refresh( this.layersUnmod );
+            this.layersPanel.refresh( unmodifiableList( this.layers ) );
+
+            GLAutoDrawable glDrawable = view.getGLDrawable( );
+            if ( glDrawable != null )
+            {
+                this.animator.add( glDrawable );
+                this.animator.start( );
+            }
+
+            JToolBar toolbar = newToolbar( true );
+            for ( Component c : view.getToolbarComponents( ) )
+            {
+                toolbar.add( c );
+            }
+
+            // WIP: Add support in docking for wildcard viewIds
+            String dockingViewIdRoot = view.getClass( ).getName( );
+            int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
+            this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
+            String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
+
+            View dockingView = new View( dockingViewId, view.getComponent( ), view.getTitle( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
+            this.dockingGroup.addView( dockingView );
+
+            // WIP: Add view-closing listener
         }
     }
 
@@ -175,10 +179,10 @@ public class LayeredGui
 
             for ( LayeredView view : this.views )
             {
-                layer.installTo( view );
+                view.addLayer( layer );
             }
 
-            this.layersPanel.refresh( this.layersUnmod );
+            this.layersPanel.refresh( unmodifiableList( this.layers ) );
         }
     }
 
@@ -190,10 +194,10 @@ public class LayeredGui
 
             for ( LayeredView view : this.views )
             {
-                layer.uninstallFrom( view, false );
+                view.removeLayer( layer );
             }
 
-            this.layersPanel.refresh( this.layersUnmod );
+            this.layersPanel.refresh( unmodifiableList( this.layers ) );
         }
     }
 

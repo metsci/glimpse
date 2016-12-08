@@ -86,49 +86,48 @@ public class ExampleLayer implements Layer
     @Override
     public void installTo( LayeredView view )
     {
-        if ( view instanceof LayeredGeo )
+        if ( !this.allReprs.containsKey( view ) )
         {
-            LayeredGeo geo = ( LayeredGeo ) view;
-            LayerRepr repr = this.geoReprs.computeIfAbsent( geo, ( k ) ->
+            if ( view instanceof LayeredGeo )
             {
-                ExampleLayerGeoRepr geoRepr = new ExampleLayerGeoRepr( this, geo, this.style );
+                LayeredGeo geo = ( LayeredGeo ) view;
+
+                ExampleLayerGeoRepr repr = new ExampleLayerGeoRepr( this, geo, this.style );
                 for ( ExamplePoint point : this.points )
                 {
-                    geoRepr.addPoint( point );
+                    repr.addPoint( point );
                 }
-                return geoRepr;
-            } );
 
-            this.allReprs.put( view, repr );
-        }
+                this.allReprs.put( geo, repr );
+                this.geoReprs.put( geo, repr );
+            }
 
-        if ( view instanceof LayeredTimeline )
-        {
-            LayeredTimeline timeline = ( LayeredTimeline ) view;
-            LayerRepr repr = this.timelineReprs.computeIfAbsent( timeline, ( k ) ->
+            if ( view instanceof LayeredTimeline )
             {
-                ExampleLayerTimelineRepr timelineRepr = new ExampleLayerTimelineRepr( this, timeline, this.style );
+                LayeredTimeline timeline = ( LayeredTimeline ) view;
+
+                ExampleLayerTimelineRepr repr = new ExampleLayerTimelineRepr( this, timeline, this.style );
                 for ( ExamplePoint point : this.points )
                 {
-                    timelineRepr.addPoint( point );
+                    repr.addPoint( point );
                 }
-                return timelineRepr;
-            } );
 
-            this.allReprs.put( view, repr );
+                this.allReprs.put( timeline, repr );
+                this.timelineReprs.put( timeline, repr );
+            }
         }
     }
 
     @Override
     public void uninstallFrom( LayeredView view, boolean isReinstall )
     {
-        LayerRepr repr = this.allReprs.remove( view );
-        if ( repr != null )
+        if ( this.allReprs.containsKey( view ) )
         {
-            repr.dispose( isReinstall );
-
             this.geoReprs.remove( view );
             this.timelineReprs.remove( view );
+            LayerRepr repr = this.allReprs.remove( view );
+
+            repr.dispose( isReinstall );
         }
     }
 

@@ -1,5 +1,6 @@
 package com.metsci.glimpse.layers.timeline;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.timeline.LayeredTimelineConfig.requireTimelineConfig;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static java.util.Arrays.asList;
@@ -9,6 +10,9 @@ import java.awt.Component;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.media.opengl.GLAutoDrawable;
+import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
@@ -46,15 +50,41 @@ public class LayeredTimeline extends LayeredView
     }
 
     @Override
+    public String getTitle( )
+    {
+        return "Timeline";
+    }
+
+    @Override
+    public Icon getIcon( )
+    {
+        return requireIcon( "LayeredTimeline/open-icons/time.png" );
+    }
+
+    @Override
+    public Component getComponent( )
+    {
+        return this.canvas;
+    }
+
+    @Override
+    public GLAutoDrawable getGLDrawable( )
+    {
+        return this.canvas.getGLDrawable( );
+    }
+
+    @Override
+    public Collection<Component> getToolbarComponents( )
+    {
+        return this.toolbarComponents;
+    }
+
+    @Override
     public void init( )
     {
-        // WIP: Uninstall layers
-
         LayeredTimelineConfig timelineConfig = requireTimelineConfig( this );
         this.plot.setEpoch( timelineConfig.epoch );
         this.plot.getTimeAxis( ).setParent( timelineConfig.axis );
-
-        // WIP: Reinstall appropriate layers
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )

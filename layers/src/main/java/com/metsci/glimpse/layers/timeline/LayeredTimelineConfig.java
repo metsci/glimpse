@@ -71,7 +71,7 @@ public class LayeredTimelineConfig implements LayeredViewConfig
         double cursor_SEC_SINCE_EPOCH = max_SEC_SINCE_EPOCH;
 
         this.selectionMinTag.setValue( min_SEC_SINCE_EPOCH );
-        this.selectionMinTag.setValue( max_SEC_SINCE_EPOCH );
+        this.selectionMaxTag.setValue( max_SEC_SINCE_EPOCH );
         this.selectionCursorTag.setValue( cursor_SEC_SINCE_EPOCH );
         this.axis.validateTags( );
     }
