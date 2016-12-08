@@ -34,6 +34,8 @@ public class ExampleLayer implements Layer
     {
         this.title = title;
 
+        this.visible = true;
+
         this.style = new ExampleStyle( );
         this.style.rgbaInsideTWindow = Arrays.copyOf( rgba, 4 );
         this.style.rgbaOutsideTWindow = GeneralUtils.floats( 0.4f + 0.6f*rgba[0], 0.4f + 0.6f*rgba[1], 0.4f + 0.6f*rgba[2], 0.4f*rgba[3] );
