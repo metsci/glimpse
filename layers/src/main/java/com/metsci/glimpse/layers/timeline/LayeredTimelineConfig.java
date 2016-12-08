@@ -3,11 +3,13 @@ package com.metsci.glimpse.layers.timeline;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.CURRENT_TIME;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MAX_TIME;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MIN_TIME;
+import static com.metsci.glimpse.util.PredicateUtils.require;
 import static java.util.Arrays.asList;
 
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 
+import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -89,6 +91,33 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     public long selectionCursor_PMILLIS( )
     {
         return this.epoch.toPosixMillis( this.selectionCursorTag.getValue( ) );
+    }
+
+    @Override
+    public boolean allowsParent( LayeredViewConfig parent )
+    {
+        if ( parent == null )
+        {
+            return true;
+        }
+        else if ( parent instanceof LayeredTimelineConfig )
+        {
+            LayeredTimelineConfig timelineParent = ( LayeredTimelineConfig ) parent;
+            return Objects.equal( timelineParent.epoch, this.epoch );
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    @Override
+    public void setParent( LayeredViewConfig parent )
+    {
+        require( parent, this::allowsParent );
+
+        LayeredTimelineConfig timelineParent = ( LayeredTimelineConfig ) parent;
+        this.axis.setParent( timelineParent.axis );
     }
 
 }

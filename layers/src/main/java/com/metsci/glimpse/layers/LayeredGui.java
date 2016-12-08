@@ -138,6 +138,8 @@ public class LayeredGui
             }
             view.setConfigs( configs );
 
+            // WIP: Link configs where possible
+
             for ( Layer layer : this.layers )
             {
                 view.addLayer( layer );

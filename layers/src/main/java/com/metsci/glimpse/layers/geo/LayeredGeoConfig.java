@@ -2,10 +2,12 @@ package com.metsci.glimpse.layers.geo;
 
 import static com.google.common.primitives.Doubles.max;
 import static com.google.common.primitives.Doubles.min;
+import static com.metsci.glimpse.util.PredicateUtils.require;
 
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 
+import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
@@ -73,6 +75,33 @@ public class LayeredGeoConfig implements LayeredViewConfig
                        unitsToSu.applyAsDouble( xMax_UNITS ),
                        unitsToSu.applyAsDouble( yMin_UNITS ),
                        unitsToSu.applyAsDouble( yMax_UNITS ) );
+    }
+
+    @Override
+    public boolean allowsParent( LayeredViewConfig parent )
+    {
+        if ( parent == null )
+        {
+            return true;
+        }
+        else if ( parent instanceof LayeredGeoConfig )
+        {
+            LayeredGeoConfig geoParent = ( LayeredGeoConfig ) parent;
+            return Objects.equal( geoParent.proj, this.proj );
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    @Override
+    public void setParent( LayeredViewConfig parent )
+    {
+        require( parent, this::allowsParent );
+
+        LayeredGeoConfig geoParent = ( LayeredGeoConfig ) parent;
+        this.axis.setParent( geoParent.axis );
     }
 
 }
