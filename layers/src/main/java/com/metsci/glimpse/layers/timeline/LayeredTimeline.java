@@ -1,8 +1,7 @@
-package com.metsci.glimpse.layers;
+package com.metsci.glimpse.layers.timeline;
 
+import static com.metsci.glimpse.layers.timeline.LayeredTimelineConfig.requireTimelineConfig;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
-import static com.metsci.glimpse.util.PredicateUtils.notNull;
-import static com.metsci.glimpse.util.PredicateUtils.require;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 
@@ -13,18 +12,16 @@ import java.util.Map;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.layers.LayeredView;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.util.units.time.TimeStamp;
 
-public class LayeredTimeline
+public class LayeredTimeline extends LayeredView
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
@@ -48,41 +45,12 @@ public class LayeredTimeline
         this.toolbarComponents = unmodifiableCollection( asList( ) );
     }
 
-    public void init( LayeredScenario scenario )
+    @Override
+    public void init( )
     {
-        Epoch epoch = require( scenario.timelineEpoch, notNull );
-        LayeredTimelineBounds bounds = require( scenario.timelineInitBounds, notNull );
-
-        plot.setEpoch( epoch );
-        plot.setTimeAxisBounds( TimeStamp.fromPosixMillis( bounds.min_PMILLIS ), TimeStamp.fromPosixMillis( bounds.max_MILLIS ) );
-    }
-
-    public TaggedAxis1D timeAxis( )
-    {
-        return this.plot.getTimeAxis( );
-    }
-
-    public TimeAxisSelection selection( )
-    {
-        return new TimeAxisSelection( this.selectionMin_PMILLIS( ), this.selectionMax_PMILLIS( ), this.selectionCursor_PMILLIS( ) );
-    }
-
-    public long selectionMin_PMILLIS( )
-    {
-        Epoch epoch = this.plot.getEpoch( );
-        return epoch.toPosixMillis( this.plot.getTimeSelectionMinTag( ).getValue( ) );
-    }
-
-    public long selectionMax_PMILLIS( )
-    {
-        Epoch epoch = this.plot.getEpoch( );
-        return epoch.toPosixMillis( this.plot.getTimeSelectionMaxTag( ).getValue( ) );
-    }
-
-    public long selectionCursor_PMILLIS( )
-    {
-        Epoch epoch = this.plot.getEpoch( );
-        return epoch.toPosixMillis( this.plot.getTimeSelectionTag( ).getValue( ) );
+        LayeredTimelineConfig timelineConfig = requireTimelineConfig( this );
+        this.plot.setEpoch( timelineConfig.epoch );
+        this.plot.getTimeAxis( ).setParent( timelineConfig.axis );
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )

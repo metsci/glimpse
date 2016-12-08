@@ -8,6 +8,7 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.geo.LayeredGeoConfig.setGeoConfig;
 import static java.util.Collections.unmodifiableCollection;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -17,8 +18,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.JScrollPane;
@@ -31,6 +37,7 @@ import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.layers.geo.LayeredGeoConfig;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LayeredGui
@@ -40,13 +47,10 @@ public class LayeredGui
     protected final GLAnimatorControl animator;
     protected DockingGroupListener dockingArrSaver;
 
-    protected LayeredScenario scenario;
-
-    protected LayeredGeo geo;
-    protected LayeredTimeline timeline;
+    protected final Set<LayeredView> views;
+    protected final Map<String,Supplier<? extends LayeredViewConfig>> viewConfigurators;
 
     protected final List<Layer> layers;
-    protected final Set<Layer> installedLayers;
 
     protected final LayersPanel layersPanel;
 
@@ -73,13 +77,10 @@ public class LayeredGui
 
         this.dockingArrSaver = null;
 
-        this.scenario = ( new LayeredScenario.Builder( ) ).build( );
-
-        this.geo = null;
-        this.timeline = null;
+        this.views = new LinkedHashSet<>( );
+        this.viewConfigurators = new LinkedHashMap<>( );
 
         this.layers = new ArrayList<>( );
-        this.installedLayers = new HashSet<>( );
 
         // XXX: Getting too verbose for an inline anonymous class
         Collection<Layer> layersUnmod = unmodifiableCollection( this.layers );
@@ -158,6 +159,54 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
+    public <T extends LayeredViewConfig> void setDefaultViewConfigurator( String configKey, Class<T> configClass, Supplier<? extends T> configurator )
+    {
+        // The configClass arg isn't currently used, but it might be used in the future
+        // to check supplied config instances at runtime.
+        //
+        // More importantly, it forces the caller to think about config class, which is
+        // important. And as a side benefit, it makes it more cumbersome to call this
+        // method directly, which encourages callers to use convenience functions with
+        // more natural typing, such as LayeredGeoConfig.setDefaultGeoConfigFn().
+        //
+        this.viewConfigurators.put( configKey, configurator );
+    }
+
+    public void addView( LayeredView view )
+    {
+        for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.entrySet( ) )
+        {
+            String configKey = en.getKey( );
+            Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
+            LayeredViewConfig config = configurator.get( );
+            view.setConfig( configKey, config );
+        }
+
+        view.init( );
+
+        this.animator.add( this.view.canvas.getGLDrawable( ) );
+        this.animator.start( );
+
+        JToolBar geoToolbar = newToolbar( true );
+        for ( Component c : view.toolbarComponents )
+        {
+            geoToolbar.add( c );
+        }
+
+        View dockingView = new View( "geoView", this.view.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), geoToolbar );
+        View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), timelineToolbar );
+        this.dockingGroup.addView( dockingView );
+
+        // WIP: Add existing layers to new view
+    }
+
+
+
+
+
+
+
+
     public void init( LayeredScenario newScenario )
     {
         // Remember which layers to re-install
@@ -215,18 +264,10 @@ public class LayeredGui
     {
         if ( this.installedLayers.add( layer ) )
         {
-            layer.init( this.scenario );
-
-            if ( layer instanceof GeoLayer )
+            for ( LayeredView view : this.views )
             {
-                GeoLayer geoLayer = ( GeoLayer ) layer;
-                geoLayer.installToGeo( this.getGeo( ) );
-            }
-
-            if ( layer instanceof TimelineLayer )
-            {
-                TimelineLayer timelineLayer = ( TimelineLayer ) layer;
-                timelineLayer.installToTimeline( this.getTimeline( ) );
+                LayerRepr repr = layer.installTo( view );
+                // WIP: Store repr somewhere
             }
         }
     }
@@ -235,15 +276,9 @@ public class LayeredGui
     {
         if ( this.installedLayers.remove( layer ) )
         {
-            if ( layer instanceof GeoLayer )
+            for ( LayerRepr repr : asdf )
             {
-                GeoLayer geoLayer = ( GeoLayer ) layer;
-                this.geo.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
-                {
-                    GlimpseContext context = this.geo.canvas.getGlimpseContext( );
-                    geoLayer.uninstallFromGeo( this.geo, context, reinstalling );
-                    return false;
-                } );
+                repr.dispose( context, reinstalling );
             }
 
             if ( layer instanceof TimelineLayer )
@@ -257,50 +292,6 @@ public class LayeredGui
                 } );
             }
         }
-    }
-
-    protected LayeredGeo getGeo( )
-    {
-        if ( this.geo == null )
-        {
-            this.geo = new LayeredGeo( );
-            this.geo.init( this.scenario );
-
-            this.animator.add( this.geo.canvas.getGLDrawable( ) );
-            this.animator.start( );
-
-            JToolBar geoToolbar = newToolbar( true );
-            for ( Component c : this.geo.toolbarComponents )
-            {
-                geoToolbar.add( c );
-            }
-
-            View geoView = new View( "geoView", this.geo.canvas, "Geo", false, null, requireIcon( "LayeredGeo/fugue-icons/map.png" ), geoToolbar );
-            this.dockingGroup.addView( geoView );
-        }
-        return this.geo;
-    }
-
-    protected LayeredTimeline getTimeline( )
-    {
-        if ( this.timeline == null )
-        {
-            this.timeline = new LayeredTimeline( );
-            this.timeline.init( this.scenario );
-
-            this.animator.add( this.timeline.canvas.getGLDrawable( ) );
-            this.animator.start( );
-
-            JToolBar timelineToolbar = newToolbar( true );
-            for ( Component c : this.timeline.toolbarComponents )
-            {
-                timelineToolbar.add( c );
-            }
-
-            View timelineView = new View( "timelineView", this.timeline.canvas, "Timeline", false, null, requireIcon( "LayeredTimeline/open-icons/time.png" ), timelineToolbar );
-            this.dockingGroup.addView( timelineView );
-        }
-        return this.timeline;
     }
 
 }

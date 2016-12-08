@@ -1,21 +1,26 @@
 package com.metsci.glimpse.examples.layers;
 
+import static com.metsci.glimpse.layers.geo.LayeredGeoConfig.setDefaultGeoConfigurator;
+import static com.metsci.glimpse.layers.timeline.LayeredTimelineConfig.setDefaultTimelineConfigurator;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.util.Random;
+import java.util.function.Supplier;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.layers.LayeredGeoBounds;
 import com.metsci.glimpse.layers.LayeredGui;
-import com.metsci.glimpse.layers.LayeredScenario;
-import com.metsci.glimpse.layers.LayeredTimelineBounds;
+import com.metsci.glimpse.layers.geo.LayeredGeo;
+import com.metsci.glimpse.layers.geo.LayeredGeoConfig;
+import com.metsci.glimpse.layers.timeline.LayeredTimeline;
+import com.metsci.glimpse.layers.timeline.LayeredTimelineConfig;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
+import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.units.Length;
@@ -39,20 +44,34 @@ public class LayeredExample
             initTinyLaf( );
 
 
-            // Set up our scenario
+            // Set up view-config defaults
             //
 
-            LayeredScenario.Builder scenario = new LayeredScenario.Builder( );
+            Supplier<LayeredGeoConfig> geoConfigurator = ( ) ->
+            {
+                GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
 
-            scenario.geoProj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
-            scenario.geoInitBounds = new LayeredGeoBounds( LatLonGeo.fromDeg( 30.0, -75.0 ), Length.fromNauticalMiles( 25.0 ), Length.fromNauticalMiles( 25.0 ) );
+                LayeredGeoConfig config = new LayeredGeoConfig( proj );
 
-            // WIP: Specify axis display units
+                config.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+                // WIP: Initialize selection box
+                // WIP: Specify axis units for display
 
-            scenario.timelineEpoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
-            scenario.timelineInitBounds = new LayeredTimelineBounds( TimeStamp.fromString( "2015-12-31T23:55:00Z" ), TimeStamp.fromString( "2016-01-01T01:05:00Z" ) );
+                return config;
+            };
 
-            // WIP: Specify timezone
+            Supplier<LayeredTimelineConfig> timelineConfigurator = ( ) ->
+            {
+                Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
+
+                LayeredTimelineConfig config = new LayeredTimelineConfig( epoch );
+
+                config.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
+                config.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
+                // WIP: Specify timezone for display
+
+                return config;
+            };
 
 
             // Create some layers
@@ -61,7 +80,7 @@ public class LayeredExample
             ExampleLayer exampleLayerA = new ExampleLayer( "Truth", GlimpseColor.getRed( ) );
             ExampleLayer exampleLayerB = new ExampleLayer( "Observed", GlimpseColor.getBlack( ) );
 
-            long time_PMILLIS = scenario.timelineEpoch.getPosixMillis( );
+            long time_PMILLIS = TimeStamp.fromString( "2016-01-01T00:00:00Z" ).toPosixMillis( );
 
             LatLonGeo latlonA = LatLonGeo.fromDeg( 30.0, -75.0 );
             double speedA_SU = Speed.fromKnots( 5.0 );
@@ -96,8 +115,8 @@ public class LayeredExample
                 LatLonGeo latlonB = latlonA.displacedBy( errorDistance_SU, errorDirection_SU );
                 double zB_SU = zA_SU - 5.0 + 10.0*r.nextDouble( );
 
-                exampleLayerA.addPoint( time_PMILLIS, latlonA, zA_SU );
-                exampleLayerB.addPoint( time_PMILLIS, latlonB, zB_SU );
+                exampleLayerA.addPoint( new ExamplePoint( time_PMILLIS, latlonA, zA_SU ) );
+                exampleLayerB.addPoint( new ExamplePoint( time_PMILLIS, latlonB, zB_SU ) );
             }
 
 
@@ -106,9 +125,32 @@ public class LayeredExample
 
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
-            gui.init( scenario.build( ) );
+
+            setDefaultGeoConfigurator( gui, geoConfigurator );
+            setDefaultTimelineConfigurator( gui, timelineConfigurator );
+
+            gui.addView( new LayeredGeo( ) );
+            gui.addView( new LayeredTimeline( ) );
+
             gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
+
+
+
+//            scenario.geoProj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.5 ) );
+//            LayeredScenario newScenario = scenario.build( );
+//
+//            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( );
+//            exec.schedule( ( ) ->
+//            {
+//                SwingUtilities.invokeLater( ( ) ->
+//                {
+//                    gui.init( newScenario );
+//                } );
+//            }, 5, TimeUnit.SECONDS );
+
+
+
 
         } );
     }
