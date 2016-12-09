@@ -87,6 +87,13 @@ public class LayeredTimeline extends LayeredView
         this.plot.getTimeAxis( ).setParent( timelineConfig.axis );
     }
 
+    @Override
+    protected void dispose( )
+    {
+        super.dispose( );
+        this.canvas.dispose( );
+    }
+
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )
     {
         EventPlotInfo row = this.plot.getEventPlot( rowId );

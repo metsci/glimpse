@@ -101,7 +101,7 @@ public class LayeredGeoConfig implements LayeredViewConfig
         require( parent, this::allowsParent );
 
         LayeredGeoConfig geoParent = ( LayeredGeoConfig ) parent;
-        this.axis.setParent( geoParent.axis );
+        this.axis.setParent( geoParent == null ? null : geoParent.axis );
     }
 
 }

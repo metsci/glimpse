@@ -99,4 +99,11 @@ public class LayeredGeo extends LayeredView
         this.plot.getCenterAxis( ).setParent( geoConfig.axis );
     }
 
+    @Override
+    protected void dispose( )
+    {
+        super.dispose( );
+        this.canvas.dispose( );
+    }
+
 }

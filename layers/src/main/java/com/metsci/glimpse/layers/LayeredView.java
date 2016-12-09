@@ -90,6 +90,11 @@ public abstract class LayeredView
 
     protected abstract void init( );
 
+    /**
+     * This method is protected to discourage access from client code, while still allowing
+     * access from {@link LayeredGui}. Client code should use {@link LayeredGui#addLayer(Layer)}
+     * instead.
+     */
     protected void addLayer( Layer layer )
     {
         if ( !this.layers.contains( layer ) )
@@ -99,6 +104,11 @@ public abstract class LayeredView
         }
     }
 
+    /**
+     * This method is protected to discourage access from client code, while still allowing
+     * access from {@link LayeredGui}. Client code should use {@link LayeredGui#removeLayer(Layer)}
+     * instead.
+     */
     protected void removeLayer( Layer layer )
     {
         if ( !this.layers.contains( layer ) )
@@ -106,6 +116,25 @@ public abstract class LayeredView
             this.layers.remove( layer );
             layer.uninstallFrom( this, false );
         }
+    }
+
+    /**
+     * This method is protected to discourage access from client code, while still allowing
+     * access from {@link LayeredGui}.
+     */
+    protected void dispose( )
+    {
+        for ( Layer layer : this.layers )
+        {
+            layer.uninstallFrom( this, false );
+        }
+        this.layers.clear( );
+
+        for ( LayeredViewConfig config : this.configs.values( ) )
+        {
+            config.setParent( null );
+        }
+        this.configs.clear( );
     }
 
 }

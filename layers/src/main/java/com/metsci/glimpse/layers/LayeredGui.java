@@ -16,11 +16,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -28,6 +26,8 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
@@ -40,7 +40,7 @@ public class LayeredGui
 {
 
     protected final Map<String,Supplier<? extends LayeredViewConfig>> viewConfigurators;
-    protected final Set<LayeredView> views;
+    protected final BiMap<LayeredView,View> views;
     protected final List<Layer> layers;
 
     protected final DockingGroup dockingGroup;
@@ -58,7 +58,7 @@ public class LayeredGui
     public LayeredGui( String frameTitleRoot, DockingTheme theme )
     {
         this.viewConfigurators = new LinkedHashMap<>( );
-        this.views = new LinkedHashSet<>( );
+        this.views = HashBiMap.create( );
         this.layers = new ArrayList<>( );
 
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
@@ -68,7 +68,17 @@ public class LayeredGui
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup group )
+            public void closingView( DockingGroup dockingGroup, View dockingView )
+            {
+                LayeredView view = views.inverse( ).get( dockingView );
+                if ( view != null )
+                {
+                    doRemoveView( view );
+                }
+            }
+
+            @Override
+            public void disposingAllFrames( DockingGroup dockingGroup )
             {
                 animator.stop( );
             }
@@ -104,7 +114,7 @@ public class LayeredGui
         this.dockingArrSaver = new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup group )
+            public void disposingAllFrames( DockingGroup dockingGroup )
             {
                 saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
             }
@@ -127,7 +137,7 @@ public class LayeredGui
 
     public void addView( LayeredView view )
     {
-        if ( this.views.add( view ) )
+        if ( !this.views.containsKey( view ) )
         {
             Map<String,LayeredViewConfig> configs = new LinkedHashMap<>( );
             for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.entrySet( ) )
@@ -169,7 +179,35 @@ public class LayeredGui
             View dockingView = new View( dockingViewId, view.getComponent( ), view.getTitle( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
             this.dockingGroup.addView( dockingView );
 
-            // WIP: Add view-closing listener
+            this.views.put( view, dockingView );
+        }
+    }
+
+    public void removeView( LayeredView view )
+    {
+        // This will trigger DockingGorupListener.closingView(), which will result in
+        // a call to this.doRemoveView().
+        //
+        View dockingView = this.views.get( view );
+        if ( dockingView != null )
+        {
+            this.dockingGroup.closeView( dockingView );
+        }
+    }
+
+    protected void doRemoveView( LayeredView view )
+    {
+        if ( this.views.containsKey( view ) )
+        {
+            GLAutoDrawable glDrawable = view.getGLDrawable( );
+            if ( glDrawable != null )
+            {
+                this.animator.remove( glDrawable );
+            }
+
+            view.dispose( );
+
+            this.views.remove( view );
         }
     }
 
@@ -179,7 +217,7 @@ public class LayeredGui
         {
             this.layers.add( layer );
 
-            for ( LayeredView view : this.views )
+            for ( LayeredView view : this.views.keySet( ) )
             {
                 view.addLayer( layer );
             }
@@ -194,7 +232,7 @@ public class LayeredGui
         {
             this.layers.remove( layer );
 
-            for ( LayeredView view : this.views )
+            for ( LayeredView view : this.views.keySet( ) )
             {
                 view.removeLayer( layer );
             }

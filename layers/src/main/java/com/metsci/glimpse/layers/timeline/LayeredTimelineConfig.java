@@ -117,7 +117,7 @@ public class LayeredTimelineConfig implements LayeredViewConfig
         require( parent, this::allowsParent );
 
         LayeredTimelineConfig timelineParent = ( LayeredTimelineConfig ) parent;
-        this.axis.setParent( timelineParent.axis );
+        this.axis.setParent( timelineParent == null ? null : timelineParent.axis );
     }
 
 }
