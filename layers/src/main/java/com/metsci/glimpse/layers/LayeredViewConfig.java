@@ -11,4 +11,6 @@ public interface LayeredViewConfig
      */
     void setParent( LayeredViewConfig parent );
 
+    LayeredViewConfig getParent( );
+
 }

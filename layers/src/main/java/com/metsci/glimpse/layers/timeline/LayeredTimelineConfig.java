@@ -46,6 +46,8 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     protected final Tag selectionMaxTag;
     protected final Tag selectionCursorTag;
 
+    protected LayeredTimelineConfig parent;
+
 
     public LayeredTimelineConfig( Epoch epoch )
     {
@@ -57,6 +59,8 @@ public class LayeredTimelineConfig implements LayeredViewConfig
         this.selectionMaxTag = this.axis.addTag( MAX_TIME, 10 );
         this.selectionCursorTag = this.axis.addTag( CURRENT_TIME, 10 );
         this.axis.addConstraint( new OrderedConstraint( "order", asList( MIN_TIME, CURRENT_TIME, MAX_TIME ) ) );
+
+        this.parent = null;
     }
 
     public void setRelativeBounds( DoubleUnaryOperator unitsToSeconds, double min_UNITS_SINCE_EPOCH, double max_UNITS_SINCE_EPOCH )
@@ -94,16 +98,16 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     }
 
     @Override
-    public boolean allowsParent( LayeredViewConfig parent )
+    public boolean allowsParent( LayeredViewConfig newParent )
     {
-        if ( parent == null )
+        if ( newParent == null )
         {
             return true;
         }
-        else if ( parent instanceof LayeredTimelineConfig )
+        else if ( newParent instanceof LayeredTimelineConfig )
         {
-            LayeredTimelineConfig timelineParent = ( LayeredTimelineConfig ) parent;
-            return Objects.equal( timelineParent.epoch, this.epoch );
+            LayeredTimelineConfig parent = ( LayeredTimelineConfig ) newParent;
+            return Objects.equal( parent.epoch, this.epoch );
         }
         else
         {
@@ -112,12 +116,18 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     }
 
     @Override
-    public void setParent( LayeredViewConfig parent )
+    public void setParent( LayeredViewConfig newParent )
     {
-        require( parent, this::allowsParent );
+        require( newParent, this::allowsParent );
 
-        LayeredTimelineConfig timelineParent = ( LayeredTimelineConfig ) parent;
-        this.axis.setParent( timelineParent == null ? null : timelineParent.axis );
+        this.parent = ( LayeredTimelineConfig ) newParent;
+        this.axis.setParent( this.parent == null ? null : this.parent.axis );
+    }
+
+    @Override
+    public LayeredTimelineConfig getParent( )
+    {
+        return this.parent;
     }
 
 }

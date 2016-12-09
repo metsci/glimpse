@@ -40,11 +40,13 @@ public class LayeredGeoConfig implements LayeredViewConfig
 
     public final GeoProjection proj;
     public final Axis2D axis;
+    protected LayeredGeoConfig parent;
 
     public LayeredGeoConfig( GeoProjection proj )
     {
         this.proj = proj;
         this.axis = new Axis2D( );
+        this.parent = null;
     }
 
     public void setBounds( LatLonGeo center, DoubleUnaryOperator unitsToSu, double ewExtent_UNITS, double nsExtent_UNITS )
@@ -78,16 +80,16 @@ public class LayeredGeoConfig implements LayeredViewConfig
     }
 
     @Override
-    public boolean allowsParent( LayeredViewConfig parent )
+    public boolean allowsParent( LayeredViewConfig newParent )
     {
-        if ( parent == null )
+        if ( newParent == null )
         {
             return true;
         }
-        else if ( parent instanceof LayeredGeoConfig )
+        else if ( newParent instanceof LayeredGeoConfig )
         {
-            LayeredGeoConfig geoParent = ( LayeredGeoConfig ) parent;
-            return Objects.equal( geoParent.proj, this.proj );
+            LayeredGeoConfig parent = ( LayeredGeoConfig ) newParent;
+            return Objects.equal( parent.proj, this.proj );
         }
         else
         {
@@ -96,12 +98,18 @@ public class LayeredGeoConfig implements LayeredViewConfig
     }
 
     @Override
-    public void setParent( LayeredViewConfig parent )
+    public void setParent( LayeredViewConfig newParent )
     {
-        require( parent, this::allowsParent );
+        require( newParent, this::allowsParent );
 
-        LayeredGeoConfig geoParent = ( LayeredGeoConfig ) parent;
-        this.axis.setParent( geoParent == null ? null : geoParent.axis );
+        this.parent = ( LayeredGeoConfig ) newParent;
+        this.axis.setParent( this.parent == null ? null : this.parent.axis );
+    }
+
+    @Override
+    public LayeredGeoConfig getParent( )
+    {
+        return this.parent;
     }
 
 }

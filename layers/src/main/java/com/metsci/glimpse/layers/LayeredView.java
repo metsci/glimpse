@@ -6,6 +6,7 @@ import static java.util.Collections.singletonMap;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,14 +75,45 @@ public abstract class LayeredView
 
     public void setConfigs( Map<? extends String,? extends LayeredViewConfig> newConfigs )
     {
+        // Uninstall layers
         for ( Layer layer : this.layers )
         {
             layer.uninstallFrom( this, true );
         }
 
+        // Update configs, preserving parentage where possible
+        Map<String,LayeredViewConfig> oldConfigParents = new HashMap<>( );
+        for ( String configKey : newConfigs.keySet( ) )
+        {
+            if ( this.configs.containsKey( configKey ) )
+            {
+                LayeredViewConfig oldConfig = this.configs.get( configKey );
+                LayeredViewConfig oldParent = oldConfig.getParent( );
+                oldConfigParents.put( configKey, oldParent );
+                oldConfig.setParent( null );
+            }
+        }
+
         this.configs.putAll( newConfigs );
+
+        for ( String configKey : newConfigs.keySet( ) )
+        {
+            LayeredViewConfig newConfig = this.configs.get( configKey );
+            LayeredViewConfig oldParent = oldConfigParents.get( configKey );
+            if ( newConfig.allowsParent( oldParent ) )
+            {
+                newConfig.setParent( oldParent );
+            }
+            else
+            {
+                newConfig.setParent( null );
+            }
+        }
+
+        // Re-init the view
         this.init( );
 
+        // Re-install layers
         for ( Layer layer : this.layers )
         {
             layer.installTo( this );
