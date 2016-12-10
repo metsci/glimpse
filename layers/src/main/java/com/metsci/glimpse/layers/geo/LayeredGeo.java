@@ -37,6 +37,8 @@ public class LayeredGeo extends LayeredView
 
     public LayeredGeo( )
     {
+        this.title.set( "Geo" );
+
         this.plot = new MultiAxisPlot2D( );
         this.plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
         Axis1D xAxis = this.plot.getCenterAxisX( );
@@ -60,12 +62,6 @@ public class LayeredGeo extends LayeredView
         this.canvas.addLayout( this.plot );
 
         this.toolbarComponents = unmodifiableCollection( asList( ) );
-    }
-
-    @Override
-    public String getTitle( )
-    {
-        return "Geo";
     }
 
     @Override

@@ -15,6 +15,7 @@ import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addElementRemovedListener;
+import static java.lang.String.format;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
@@ -59,7 +60,7 @@ public class LayeredGui
     protected DockingGroupListener dockingArrSaver;
     protected final Map<String,Integer> dockingViewIdCounters;
     protected final BiMap<LayeredView,View> dockingViews;
-    protected final LayersPanel layersPanel;
+    protected final LayerCardsPanel layerCardsPanel;
 
 
     public LayeredGui( String frameTitleRoot )
@@ -112,20 +113,20 @@ public class LayeredGui
             }
         } );
 
-        this.layersPanel = new LayersPanel( );
-        JScrollPane layersScroller = new JScrollPane( this.layersPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        View layersView = new View( "layersView", layersScroller, "Layers", false, null, null, null );
+        this.layerCardsPanel = new LayerCardsPanel( this.layers );
+        JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
+        View layersView = new View( "layersView", layerCardsScroller, "Layers", false, null, null, null );
         this.dockingGroup.addView( layersView );
 
 
         // Controller
         //
 
-        addElementAddedListener( this.views, true, this::handleViewAdded );
         addElementRemovedListener( this.views, true, this::handleViewRemoved );
+        addElementAddedListener( this.views, true, this::handleViewAdded );
 
-        addElementAddedListener( this.layers, true, this::handleLayerAdded );
         addElementRemovedListener( this.layers, true, this::handleLayerRemoved );
+        addElementAddedListener( this.layers, true, this::handleLayerAdded );
     }
 
     public void arrange( String appName, String defaultArrResource )
@@ -227,7 +228,14 @@ public class LayeredGui
         this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
         String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
 
-        View dockingView = new View( dockingViewId, view.getComponent( ), view.getTitle( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
+        // XXX: Do this without depending on docking info
+        if ( dockingViewIdNumber != 0 )
+        {
+            view.title.update( ( v ) -> format( "%s (%d)", v, dockingViewIdNumber + 1 ) );
+        }
+
+        // XXX: Add support in docking for changing view titles
+        View dockingView = new View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
         this.dockingGroup.addView( dockingView );
 
         this.dockingViews.put( view, dockingView );

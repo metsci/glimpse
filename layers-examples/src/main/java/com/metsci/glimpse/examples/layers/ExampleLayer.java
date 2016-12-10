@@ -1,40 +1,37 @@
 package com.metsci.glimpse.examples.layers;
 
-import static java.util.Collections.unmodifiableMap;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapMinus;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.LayerRepr;
 import com.metsci.glimpse.layers.LayeredView;
 import com.metsci.glimpse.layers.geo.LayeredGeo;
 import com.metsci.glimpse.layers.timeline.LayeredTimeline;
 import com.metsci.glimpse.util.GeneralUtils;
+import com.metsci.glimpse.util.var.ReadableVar;
+import com.metsci.glimpse.util.var.Var;
 
-public class ExampleLayer implements Layer
+public class ExampleLayer extends Layer
 {
 
-    protected String title;
-    protected boolean visible;
     protected ExampleStyle style;
 
     protected final List<ExamplePoint> points;
 
-    protected final Map<LayeredView,LayerRepr> allReprs;
-    protected final Map<LayeredView,LayerRepr> allReprsUnmod;
-    protected final Map<LayeredGeo,ExampleLayerGeoRepr> geoReprs;
-    protected final Map<LayeredTimeline,ExampleLayerTimelineRepr> timelineReprs;
+    protected final Var<ImmutableMap<LayeredView,ExampleLayerRepr>> reprs;
 
 
     public ExampleLayer( String title, float[] rgba )
     {
-        this.title = title;
-
-        this.visible = true;
+        this.title.set( title );
 
         this.style = new ExampleStyle( );
         this.style.rgbaInsideTWindow = Arrays.copyOf( rgba, 4 );
@@ -42,80 +39,40 @@ public class ExampleLayer implements Layer
 
         this.points = new ArrayList<>( );
 
-        this.allReprs = new LinkedHashMap<>( );
-        this.allReprsUnmod = unmodifiableMap( this.allReprs );
-        this.geoReprs = new LinkedHashMap<>( );
-        this.timelineReprs = new LinkedHashMap<>( );
+        this.reprs = new Var<>( ImmutableMap.of( ), notNull );
     }
 
     @Override
-    public String getTitle( )
+    public ReadableVar<? extends Map<? extends LayeredView,? extends LayerRepr>> reprs( )
     {
-        return this.title;
-    }
-
-    @Override
-    public boolean isVisible( )
-    {
-        return this.visible;
-    }
-
-    @Override
-    public void setVisible( boolean visible )
-    {
-        if ( visible != this.visible )
-        {
-            this.visible = visible;
-
-            for ( ExampleLayerGeoRepr repr : this.geoReprs.values( ) )
-            {
-                repr.refreshVisibility( );
-            }
-
-            for ( ExampleLayerTimelineRepr repr : this.timelineReprs.values( ) )
-            {
-                repr.refreshVisibility( );
-            }
-        }
-    }
-
-    @Override
-    public Map<? extends LayeredView,? extends LayerRepr> reprs( )
-    {
-        return this.allReprsUnmod;
+        return this.reprs;
     }
 
     @Override
     public void installTo( LayeredView view )
     {
-        if ( !this.allReprs.containsKey( view ) )
+        if ( !this.reprs.v( ).containsKey( view ) )
         {
             if ( view instanceof LayeredGeo )
             {
                 LayeredGeo geo = ( LayeredGeo ) view;
-
-                ExampleLayerGeoRepr repr = new ExampleLayerGeoRepr( this, geo, this.style );
+                ExampleLayerRepr repr = new ExampleLayerGeoRepr( this, geo, this.style );
+                this.reprs.update( ( v ) -> mapWith( v, view, repr ) );
                 for ( ExamplePoint point : this.points )
                 {
                     repr.addPoint( point );
                 }
-
-                this.allReprs.put( geo, repr );
-                this.geoReprs.put( geo, repr );
             }
 
             if ( view instanceof LayeredTimeline )
             {
                 LayeredTimeline timeline = ( LayeredTimeline ) view;
-
-                ExampleLayerTimelineRepr repr = new ExampleLayerTimelineRepr( this, timeline, this.style );
+                ExampleLayerRepr repr = new ExampleLayerTimelineRepr( this, timeline, this.style );
+                this.reprs.update( ( v ) -> mapWith( v, view, repr ) );
                 for ( ExamplePoint point : this.points )
                 {
                     repr.addPoint( point );
                 }
-
-                this.allReprs.put( timeline, repr );
-                this.timelineReprs.put( timeline, repr );
             }
         }
     }
@@ -123,13 +80,12 @@ public class ExampleLayer implements Layer
     @Override
     public void uninstallFrom( LayeredView view, boolean isReinstall )
     {
-        if ( this.allReprs.containsKey( view ) )
+        if ( this.reprs.v( ).containsKey( view ) )
         {
-            this.geoReprs.remove( view );
-            this.timelineReprs.remove( view );
-            LayerRepr repr = this.allReprs.remove( view );
-
+            LayerRepr repr = this.reprs.v( ).get( view );
             repr.dispose( isReinstall );
+
+            this.reprs.update( ( v ) -> mapMinus( v, view ) );
         }
     }
 
@@ -137,12 +93,7 @@ public class ExampleLayer implements Layer
     {
         this.points.add( point );
 
-        for ( ExampleLayerGeoRepr repr : this.geoReprs.values( ) )
-        {
-            repr.addPoint( point );
-        }
-
-        for ( ExampleLayerTimelineRepr repr : this.timelineReprs.values( ) )
+        for ( ExampleLayerRepr repr : this.reprs.v( ).values( ) )
         {
             repr.addPoint( point );
         }

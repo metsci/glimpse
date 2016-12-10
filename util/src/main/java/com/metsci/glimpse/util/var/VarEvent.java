@@ -6,6 +6,11 @@ package com.metsci.glimpse.util.var;
  * avoid bugs in "nested modification" situations, in which one modification
  * triggers a listener that makes a second modification. In such a case, some
  * listeners can get notified of the modifications out of order.
+ * <p>
+ * The best way to pass value information to listeners is for each listener to
+ * query current value of the Var, and to keep track of the value the Var had
+ * the last time the listener was fired. Some helper functions can be found in
+ * {@link VarUtils}.
  */
 public class VarEvent
 {

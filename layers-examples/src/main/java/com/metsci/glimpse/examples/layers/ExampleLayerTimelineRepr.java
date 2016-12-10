@@ -9,7 +9,6 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.layers.LayerRepr;
 import com.metsci.glimpse.layers.geo.LayeredGeoConfig;
 import com.metsci.glimpse.layers.timeline.LayeredTimeline;
 import com.metsci.glimpse.layers.timeline.LayeredTimelineConfig;
@@ -18,7 +17,7 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class ExampleLayerTimelineRepr implements LayerRepr
+public class ExampleLayerTimelineRepr extends ExampleLayerRepr
 {
 
     protected final ExampleLayer layer;
@@ -32,8 +31,6 @@ public class ExampleLayerTimelineRepr implements LayerRepr
 
     protected final AxisListener2D geoAxisListener;
     protected final TaggedAxisListener1D timeAxisListener;
-
-    protected boolean visible;
 
 
     public ExampleLayerTimelineRepr( ExampleLayer layer, LayeredTimeline view, ExampleStyle style )
@@ -74,10 +71,17 @@ public class ExampleLayerTimelineRepr implements LayerRepr
             this.painter.setTWindow( tMin, tMax );
         } );
 
-        this.visible = true;
-        this.refreshVisibility( );
+        this.isVisible.addListener( true, this::refreshVisibility );
+        this.layer.isVisible.addListener( true, this::refreshVisibility );
     }
 
+    protected void refreshVisibility( )
+    {
+        boolean visible = ( this.layer.isVisible.v( ) && this.isVisible.v( ) );
+        this.painter.setVisible( visible );
+    }
+
+    @Override
     public void addPoint( ExamplePoint point )
     {
         Epoch epoch = this.timelineConfig.epoch;
@@ -91,27 +95,6 @@ public class ExampleLayerTimelineRepr implements LayerRepr
         float z = ( float ) point.z_SU;
 
         this.painter.addPoint( t, x, y, z );
-    }
-
-    @Override
-    public boolean isVisible( )
-    {
-        return this.visible;
-    }
-
-    @Override
-    public void setVisible( boolean visible )
-    {
-        if ( visible != this.visible )
-        {
-            this.visible = visible;
-            this.refreshVisibility( );
-        }
-    }
-
-    public void refreshVisibility( )
-    {
-        this.painter.setVisible( this.layer.isVisible( ) && this.isVisible( ) );
     }
 
     @Override

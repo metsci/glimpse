@@ -1,20 +1,29 @@
 package com.metsci.glimpse.layers;
 
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
+
 import java.util.Map;
 
-public interface Layer
+import com.metsci.glimpse.util.var.ReadableVar;
+import com.metsci.glimpse.util.var.Var;
+
+public abstract class Layer
 {
 
-    String getTitle( );
+    public final Var<String> title;
+    public final Var<Boolean> isVisible;
 
-    boolean isVisible( );
 
-    void setVisible( boolean visible );
+    public Layer( )
+    {
+        this.title = new Var<>( "Untitled Layer", notNull );
+        this.isVisible = new Var<>( true, notNull );
+    }
 
-    Map<? extends LayeredView,? extends LayerRepr> reprs( );
+    public abstract ReadableVar<? extends Map<? extends LayeredView,? extends LayerRepr>> reprs( );
 
-    void installTo( LayeredView view );
+    public abstract void installTo( LayeredView view );
 
-    void uninstallFrom( LayeredView view, boolean isReinstall );
+    public abstract void uninstallFrom( LayeredView view, boolean isReinstall );
 
 }

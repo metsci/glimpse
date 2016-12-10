@@ -38,6 +38,8 @@ public class LayeredTimeline extends LayeredView
 
     public LayeredTimeline( )
     {
+        this.title.set( "Timeline" );
+
         this.plot = new CollapsibleTimePlot2D( );
         this.plot.setShowLabels( true );
 
@@ -47,12 +49,6 @@ public class LayeredTimeline extends LayeredView
         this.canvas.addLayout( this.plot );
 
         this.toolbarComponents = unmodifiableCollection( asList( ) );
-    }
-
-    @Override
-    public String getTitle( )
-    {
-        return "Timeline";
     }
 
     @Override

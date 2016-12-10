@@ -1,5 +1,6 @@
 package com.metsci.glimpse.layers;
 
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 
@@ -14,20 +15,26 @@ import java.util.Map;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 
+import com.metsci.glimpse.util.var.Var;
+
 public abstract class LayeredView
 {
 
+    public final Var<String> title;
+
+    // WIP: Make this a Var
     protected final Map<String,LayeredViewConfig> configs;
+
+    // WIP: Use the Var<List<Layer>> from LayeredGui instead
     protected final List<Layer> layers;
 
 
     public LayeredView( )
     {
+        this.title = new Var<>( "Untitled View", notNull );
         this.configs = new LinkedHashMap<>( );
         this.layers = new ArrayList<>( );
     }
-
-    public abstract String getTitle( );
 
     public abstract Component getComponent( );
 

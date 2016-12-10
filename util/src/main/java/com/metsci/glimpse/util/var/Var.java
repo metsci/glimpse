@@ -6,7 +6,7 @@ import static com.metsci.glimpse.util.PredicateUtils.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class Var<V> extends Notifier<VarEvent>
+public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 {
 
     public final Predicate<? super V> validateFn;
@@ -23,11 +23,20 @@ public class Var<V> extends Notifier<VarEvent>
     public Var( V value, Predicate<? super V> validateFn )
     {
         this.validateFn = validateFn;
-
-        this.value = require( value, validateFn );
+        this.value = this.requireValid( value );
         this.ongoing = false;
     }
 
+    protected V requireValid( V value )
+    {
+        if ( !this.validateFn.test( value ) )
+        {
+            throw new InvalidValueException( this, value );
+        }
+        return value;
+    }
+
+    @Override
     public V v( )
     {
         return this.value;
@@ -43,7 +52,7 @@ public class Var<V> extends Notifier<VarEvent>
         // Update if value has changed, or if changes were previously ongoing but no longer are
         if ( ( !ongoing && this.ongoing ) || !equal( value, this.value ) )
         {
-            this.value = require( value, this.validateFn );
+            this.value = this.requireValid( value );
             this.ongoing = ongoing;
             this.fire( new VarEvent( ongoing ) );
         }
