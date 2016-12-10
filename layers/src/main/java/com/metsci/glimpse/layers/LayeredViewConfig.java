@@ -13,4 +13,6 @@ public interface LayeredViewConfig
 
     LayeredViewConfig getParent( );
 
+    LayeredViewConfig createClone( );
+
 }

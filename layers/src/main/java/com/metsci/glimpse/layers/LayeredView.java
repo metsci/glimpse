@@ -129,6 +129,8 @@ public abstract class LayeredView
 
     protected abstract void init( );
 
+    public abstract LayeredView createClone( );
+
     /**
      * This method is protected to discourage access from client code, while still allowing
      * access from {@link LayeredGui}. Client code should use {@link LayeredGui#addLayer(Layer)}

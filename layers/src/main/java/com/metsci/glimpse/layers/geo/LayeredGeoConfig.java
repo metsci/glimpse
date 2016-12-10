@@ -112,4 +112,10 @@ public class LayeredGeoConfig implements LayeredViewConfig
         return this.parent;
     }
 
+    @Override
+    public LayeredGeoConfig createClone( )
+    {
+        return new LayeredGeoConfig( this.proj );
+    }
+
 }

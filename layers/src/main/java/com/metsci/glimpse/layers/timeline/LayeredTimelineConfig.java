@@ -130,4 +130,10 @@ public class LayeredTimelineConfig implements LayeredViewConfig
         return this.parent;
     }
 
+    @Override
+    public LayeredTimelineConfig createClone( )
+    {
+        return new LayeredTimelineConfig( this.epoch );
+    }
+
 }

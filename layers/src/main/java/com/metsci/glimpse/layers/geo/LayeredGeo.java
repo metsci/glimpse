@@ -96,6 +96,12 @@ public class LayeredGeo extends LayeredView
     }
 
     @Override
+    public LayeredGeo createClone( )
+    {
+        return new LayeredGeo( );
+    }
+
+    @Override
     protected void dispose( )
     {
         super.dispose( );

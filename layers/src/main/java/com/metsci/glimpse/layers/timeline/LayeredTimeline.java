@@ -84,6 +84,12 @@ public class LayeredTimeline extends LayeredView
     }
 
     @Override
+    public LayeredTimeline createClone( )
+    {
+        return new LayeredTimeline( );
+    }
+
+    @Override
     protected void dispose( )
     {
         super.dispose( );

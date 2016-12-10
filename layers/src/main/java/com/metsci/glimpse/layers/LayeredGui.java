@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
+import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
@@ -115,7 +116,7 @@ public class LayeredGui
 
         this.layerCardsPanel = new LayerCardsPanel( this.layers );
         JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        View layersView = new View( "layersView", layerCardsScroller, "Layers", false, null, null, null );
+        View layersView = new View( "layersView", layerCardsScroller, "Layers", false, null, this.layerCardsPanel.getIcon( ), null );
         this.dockingGroup.addView( layersView );
 
 
@@ -198,7 +199,10 @@ public class LayeredGui
         {
             String configKey = en.getKey( );
             Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
-            configs.put( configKey, configurator.get( ) );
+            if ( !view.configs.containsKey( configKey ) )
+            {
+                configs.put( configKey, configurator.get( ) );
+            }
         }
         view.setConfigs( configs );
 
@@ -216,7 +220,47 @@ public class LayeredGui
             this.animator.start( );
         }
 
+        JButton cloneViewButton = new JButton( "Clone" );
+        cloneViewButton.setToolTipText( "Clone This View" );
+        cloneViewButton.addActionListener( ( ev ) ->
+        {
+            LayeredView clone = view.createClone( );
+
+            Map<String,LayeredViewConfig> cloneConfigs = new LinkedHashMap<>( );
+            for ( Entry<String,LayeredViewConfig> en : view.configs.entrySet( ) )
+            {
+                String configKey = en.getKey( );
+                LayeredViewConfig config = en.getValue( );
+                cloneConfigs.put( configKey, config.createClone( ) );
+            }
+            clone.setConfigs( cloneConfigs );
+
+            // WIP: Link clone with original
+//            for ( Entry<String,LayeredViewConfig> en : view.configs.entrySet( ) )
+//            {
+//                String configKey = en.getKey( );
+//                LayeredViewConfig config = en.getValue( );
+//
+//                if ( config.getParent( ) == null )
+//                {
+//                    LayeredViewConfig parent = config.createClone( );
+//
+//                    // WIP: Register parent with LayeredGui, as a "linkage"
+//
+//                    config.setParent( parent );
+//                }
+//
+//                // WIP: Ugly
+//                LayeredViewConfig cloneConfig = cloneConfigs.get( configKey );
+//
+//                cloneConfig.setParent( config.getParent( ) );
+//            }
+
+            this.addView( clone );
+        } );
+
         JToolBar toolbar = newToolbar( true );
+        toolbar.add( cloneViewButton );
         for ( Component c : view.getToolbarComponents( ) )
         {
             toolbar.add( c );
