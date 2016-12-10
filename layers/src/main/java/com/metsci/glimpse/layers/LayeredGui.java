@@ -7,16 +7,21 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static java.util.Collections.unmodifiableList;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.setMinus;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
+import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
+import static com.metsci.glimpse.util.var.VarUtils.addElementRemovedListener;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 import java.awt.Component;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
@@ -28,6 +33,9 @@ import javax.swing.JToolBar;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
@@ -35,18 +43,22 @@ import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.util.var.Var;
 
 public class LayeredGui
 {
 
-    protected final Map<String,Supplier<? extends LayeredViewConfig>> viewConfigurators;
-    protected final BiMap<LayeredView,View> views;
-    protected final List<Layer> layers;
+    // Model
+    public final Var<ImmutableMap<String,Supplier<? extends LayeredViewConfig>>> viewConfigurators;
+    public final Var<ImmutableSet<LayeredView>> views;
+    public final Var<ImmutableList<Layer>> layers;
 
+    // View
     protected final DockingGroup dockingGroup;
     protected final GLAnimatorControl animator;
     protected DockingGroupListener dockingArrSaver;
     protected final Map<String,Integer> dockingViewIdCounters;
+    protected final BiMap<LayeredView,View> dockingViews;
     protected final LayersPanel layersPanel;
 
 
@@ -57,9 +69,16 @@ public class LayeredGui
 
     public LayeredGui( String frameTitleRoot, DockingTheme theme )
     {
-        this.viewConfigurators = new LinkedHashMap<>( );
-        this.views = HashBiMap.create( );
-        this.layers = new ArrayList<>( );
+        // Model
+        //
+
+        this.viewConfigurators = new Var<>( ImmutableMap.of( ), notNull );
+        this.views = new Var<>( ImmutableSet.of( ), notNull );
+        this.layers = new Var<>( ImmutableList.of( ), notNull );
+
+
+        // View
+        //
 
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
@@ -67,16 +86,6 @@ public class LayeredGui
         this.animator = new SwingEDTAnimator( 30 );
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
-            @Override
-            public void closingView( DockingGroup dockingGroup, View dockingView )
-            {
-                LayeredView view = views.inverse( ).get( dockingView );
-                if ( view != null )
-                {
-                    doRemoveView( view );
-                }
-            }
-
             @Override
             public void disposingAllFrames( DockingGroup dockingGroup )
             {
@@ -88,10 +97,35 @@ public class LayeredGui
 
         this.dockingViewIdCounters = new HashMap<>( );
 
+        this.dockingViews = HashBiMap.create( );
+        this.dockingGroup.addListener( new DockingGroupAdapter( )
+        {
+            @Override
+            public void closingView( DockingGroup dockingGroup, View dockingView )
+            {
+                // If dockingViews still has this entry, then the layeredView hasn't been removed yet
+                LayeredView view = dockingViews.inverse( ).remove( dockingView );
+                if ( view != null )
+                {
+                    views.update( ( v ) -> setMinus( v, view ) );
+                }
+            }
+        } );
+
         this.layersPanel = new LayersPanel( );
         JScrollPane layersScroller = new JScrollPane( this.layersPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
         View layersView = new View( "layersView", layersScroller, "Layers", false, null, null, null );
         this.dockingGroup.addView( layersView );
+
+
+        // Controller
+        //
+
+        addElementAddedListener( this.views, true, this::handleViewAdded );
+        addElementRemovedListener( this.views, true, this::handleViewRemoved );
+
+        addElementAddedListener( this.layers, true, this::handleLayerAdded );
+        addElementRemovedListener( this.layers, true, this::handleLayerRemoved );
     }
 
     public void arrange( String appName, String defaultArrResource )
@@ -130,114 +164,106 @@ public class LayeredGui
         // More importantly, it forces the caller to think about config class, which is
         // important. And as a side benefit, it makes it more cumbersome to call this
         // method directly, which encourages callers to use convenience functions with
-        // more natural typing, such as LayeredGeoConfig.setDefaultGeoConfigFn().
+        // more natural typing, such as LayeredGeoConfig.setDefaultGeoConfigurator().
         //
-        this.viewConfigurators.put( configKey, configurator );
+
+        this.viewConfigurators.update( ( v ) -> mapWith( v, configKey, configurator ) );
     }
 
     public void addView( LayeredView view )
     {
-        if ( !this.views.containsKey( view ) )
-        {
-            Map<String,LayeredViewConfig> configs = new LinkedHashMap<>( );
-            for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.entrySet( ) )
-            {
-                String configKey = en.getKey( );
-                Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
-                configs.put( configKey, configurator.get( ) );
-            }
-            view.setConfigs( configs );
-
-            // WIP: Link configs where possible
-
-            for ( Layer layer : this.layers )
-            {
-                view.addLayer( layer );
-            }
-
-            this.layersPanel.refresh( unmodifiableList( this.layers ) );
-
-            GLAutoDrawable glDrawable = view.getGLDrawable( );
-            if ( glDrawable != null )
-            {
-                this.animator.add( glDrawable );
-                this.animator.start( );
-            }
-
-            JToolBar toolbar = newToolbar( true );
-            for ( Component c : view.getToolbarComponents( ) )
-            {
-                toolbar.add( c );
-            }
-
-            // WIP: Add support in docking for wildcard viewIds
-            String dockingViewIdRoot = view.getClass( ).getName( );
-            int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
-            this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
-            String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
-
-            View dockingView = new View( dockingViewId, view.getComponent( ), view.getTitle( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
-            this.dockingGroup.addView( dockingView );
-
-            this.views.put( view, dockingView );
-        }
+        this.views.update( ( v ) -> setPlus( v, view ) );
     }
 
     public void removeView( LayeredView view )
     {
-        // This will trigger DockingGorupListener.closingView(), which will result in
-        // a call to this.doRemoveView().
-        //
-        View dockingView = this.views.get( view );
+        this.views.update( ( v ) -> setMinus( v, view ) );
+    }
+
+    public void addLayer( Layer layer )
+    {
+        this.layers.update( ( v ) -> listPlus( v, layer ) );
+    }
+
+    public void removeLayer( Layer layer )
+    {
+        this.layers.update( ( v ) -> listMinus( v, layer ) );
+    }
+
+    protected void handleViewAdded( LayeredView view )
+    {
+        Map<String,LayeredViewConfig> configs = new LinkedHashMap<>( );
+        for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.v( ).entrySet( ) )
+        {
+            String configKey = en.getKey( );
+            Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
+            configs.put( configKey, configurator.get( ) );
+        }
+        view.setConfigs( configs );
+
+        // WIP: Link configs where possible
+
+        for ( Layer layer : this.layers.v( ) )
+        {
+            view.addLayer( layer );
+        }
+
+        GLAutoDrawable glDrawable = view.getGLDrawable( );
+        if ( glDrawable != null )
+        {
+            this.animator.add( glDrawable );
+            this.animator.start( );
+        }
+
+        JToolBar toolbar = newToolbar( true );
+        for ( Component c : view.getToolbarComponents( ) )
+        {
+            toolbar.add( c );
+        }
+
+        // WIP: Add support in docking for wildcard viewIds
+        String dockingViewIdRoot = view.getClass( ).getName( );
+        int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
+        this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
+        String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
+
+        View dockingView = new View( dockingViewId, view.getComponent( ), view.getTitle( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
+        this.dockingGroup.addView( dockingView );
+
+        this.dockingViews.put( view, dockingView );
+    }
+
+    protected void handleViewRemoved( LayeredView view )
+    {
+        GLAutoDrawable glDrawable = view.getGLDrawable( );
+        if ( glDrawable != null )
+        {
+            this.animator.remove( glDrawable );
+        }
+
+        view.dispose( );
+
+        // If dockingViews still has this entry, then the dockingView hasn't been closed yet
+        View dockingView = this.dockingViews.remove( view );
         if ( dockingView != null )
         {
             this.dockingGroup.closeView( dockingView );
         }
     }
 
-    protected void doRemoveView( LayeredView view )
+    protected void handleLayerAdded( Layer layer )
     {
-        if ( this.views.containsKey( view ) )
+        for ( LayeredView view : this.views.v( ) )
         {
-            GLAutoDrawable glDrawable = view.getGLDrawable( );
-            if ( glDrawable != null )
-            {
-                this.animator.remove( glDrawable );
-            }
-
-            view.dispose( );
-
-            this.views.remove( view );
+            view.addLayer( layer );
         }
     }
 
-    public void addLayer( Layer layer )
+    protected void handleLayerRemoved( Layer layer )
     {
-        if ( !this.layers.contains( layer ) )
+        for ( LayeredView view : this.views.v( ) )
         {
-            this.layers.add( layer );
-
-            for ( LayeredView view : this.views.keySet( ) )
-            {
-                view.addLayer( layer );
-            }
-
-            this.layersPanel.refresh( unmodifiableList( this.layers ) );
-        }
-    }
-
-    public void removeLayer( Layer layer )
-    {
-        if ( this.layers.contains( layer ) )
-        {
-            this.layers.remove( layer );
-
-            for ( LayeredView view : this.views.keySet( ) )
-            {
-                view.removeLayer( layer );
-            }
-
-            this.layersPanel.refresh( unmodifiableList( this.layers ) );
+            view.removeLayer( layer );
         }
     }
 
