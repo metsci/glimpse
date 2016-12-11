@@ -270,7 +270,7 @@ public class LayeredGui
             toolbar.add( c );
         }
 
-        // WIP: Add support in docking for wildcard viewIds
+        // XXX: Add support in docking for wildcard viewIds
         String dockingViewIdRoot = view.getClass( ).getName( );
         int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
         this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );

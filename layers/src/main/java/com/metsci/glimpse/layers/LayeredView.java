@@ -22,10 +22,9 @@ public abstract class LayeredView
 
     public final Var<String> title;
 
-    // WIP: Make this a Var
+    // WIP: This may need to be a Var to support a "Linkages" panel
     protected final Map<String,LayeredExtension> extensions;
 
-    // WIP: Use the Var<List<Layer>> from LayeredGui instead
     protected final List<Layer> layers;
 
 
