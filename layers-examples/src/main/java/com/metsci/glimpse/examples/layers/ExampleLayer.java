@@ -13,8 +13,8 @@ import com.google.common.collect.ImmutableMap;
 import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.LayerRepr;
 import com.metsci.glimpse.layers.LayeredView;
-import com.metsci.glimpse.layers.geo.LayeredGeo;
-import com.metsci.glimpse.layers.timeline.LayeredTimeline;
+import com.metsci.glimpse.layers.geo.GeoView;
+import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
@@ -53,9 +53,9 @@ public class ExampleLayer extends Layer
     {
         if ( !this.reprs.v( ).containsKey( view ) )
         {
-            if ( view instanceof LayeredGeo )
+            if ( view instanceof GeoView )
             {
-                LayeredGeo geo = ( LayeredGeo ) view;
+                GeoView geo = ( GeoView ) view;
                 ExampleLayerRepr repr = new ExampleLayerGeoRepr( this, geo, this.style );
                 this.reprs.update( ( v ) -> mapWith( v, view, repr ) );
                 for ( ExamplePoint point : this.points )
@@ -64,9 +64,9 @@ public class ExampleLayer extends Layer
                 }
             }
 
-            if ( view instanceof LayeredTimeline )
+            if ( view instanceof TimelineView )
             {
-                LayeredTimeline timeline = ( LayeredTimeline ) view;
+                TimelineView timeline = ( TimelineView ) view;
                 ExampleLayerRepr repr = new ExampleLayerTimelineRepr( this, timeline, this.style );
                 this.reprs.update( ( v ) -> mapWith( v, view, repr ) );
                 for ( ExamplePoint point : this.points )

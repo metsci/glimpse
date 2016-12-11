@@ -1,7 +1,7 @@
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.layers.geo.LayeredGeoConfig.setDefaultGeoConfigurator;
-import static com.metsci.glimpse.layers.timeline.LayeredTimelineConfig.setDefaultTimelineConfigurator;
+import static com.metsci.glimpse.layers.geo.GeoExtension.setDefaultGeoExtender;
+import static com.metsci.glimpse.layers.time.TimeExtension.setDefaultTimeExtender;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
@@ -18,10 +18,10 @@ import javax.swing.SwingUtilities;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.layers.LayeredGui;
-import com.metsci.glimpse.layers.geo.LayeredGeo;
-import com.metsci.glimpse.layers.geo.LayeredGeoConfig;
-import com.metsci.glimpse.layers.timeline.LayeredTimeline;
-import com.metsci.glimpse.layers.timeline.LayeredTimelineConfig;
+import com.metsci.glimpse.layers.geo.GeoExtension;
+import com.metsci.glimpse.layers.geo.GeoView;
+import com.metsci.glimpse.layers.time.TimeExtension;
+import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -49,33 +49,33 @@ public class LayeredExample
             initTinyLaf( );
 
 
-            // Set up view-config defaults
+            // Set up defaults for extensions (e.g. time and geo)
             //
 
-            Supplier<LayeredGeoConfig> geoConfigurator = ( ) ->
+            Supplier<GeoExtension> geoExtender = ( ) ->
             {
                 GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
 
-                LayeredGeoConfig config = new LayeredGeoConfig( proj );
+                GeoExtension extension = new GeoExtension( proj );
 
-                config.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+                extension.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
                 // WIP: Initialize selection box
                 // WIP: Specify axis units for display
 
-                return config;
+                return extension;
             };
 
-            Supplier<LayeredTimelineConfig> timelineConfigurator = ( ) ->
+            Supplier<TimeExtension> timeExtender = ( ) ->
             {
                 Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
 
-                LayeredTimelineConfig config = new LayeredTimelineConfig( epoch );
+                TimeExtension extension = new TimeExtension( epoch );
 
-                config.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
-                config.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
+                extension.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
+                extension.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
                 // WIP: Specify timezone for display
 
-                return config;
+                return extension;
             };
 
 
@@ -131,13 +131,13 @@ public class LayeredExample
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
 
-            setDefaultGeoConfigurator( gui, geoConfigurator );
-            setDefaultTimelineConfigurator( gui, timelineConfigurator );
+            setDefaultGeoExtender( gui, geoExtender );
+            setDefaultTimeExtender( gui, timeExtender );
 
-            LayeredGeo geo = new LayeredGeo( );
+            GeoView geo = new GeoView( );
             gui.addView( geo );
 
-            LayeredTimeline timeline = new LayeredTimeline( );
+            TimelineView timeline = new TimelineView( );
             gui.addView( timeline );
 
             gui.addLayer( exampleLayerA );
@@ -152,18 +152,18 @@ public class LayeredExample
                 SwingUtilities.invokeLater( ( ) ->
                 {
 
-                    gui.addView( new LayeredGeo( ) );
+                    gui.addView( new GeoView( ) );
 
 
 //                    GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
 //
-//                    LayeredGeoConfig config = new LayeredGeoConfig( proj );
+//                    GeoExtension extension = new GeoExtension( proj );
 //
-//                    config.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+//                    extension.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
 //                    // WIP: Initialize selection box
 //                    // WIP: Specify axis units for display
 //
-//                    setGeoConfig( geo, config );
+//                    setGeoExtension( geo, extension );
 
 
                 } );

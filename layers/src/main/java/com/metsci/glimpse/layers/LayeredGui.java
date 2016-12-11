@@ -51,7 +51,7 @@ public class LayeredGui
 {
 
     // Model
-    public final Var<ImmutableMap<String,Supplier<? extends LayeredViewConfig>>> viewConfigurators;
+    public final Var<ImmutableMap<String,Supplier<? extends LayeredExtension>>> extenders;
     public final Var<ImmutableSet<LayeredView>> views;
     public final Var<ImmutableList<Layer>> layers;
 
@@ -74,7 +74,7 @@ public class LayeredGui
         // Model
         //
 
-        this.viewConfigurators = new Var<>( ImmutableMap.of( ), notNull );
+        this.extenders = new Var<>( ImmutableMap.of( ), notNull );
         this.views = new Var<>( ImmutableSet.of( ), notNull );
         this.layers = new Var<>( ImmutableList.of( ), notNull );
 
@@ -158,18 +158,18 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
-    public <T extends LayeredViewConfig> void setDefaultViewConfigurator( String configKey, Class<T> configClass, Supplier<? extends T> configurator )
+    public <T extends LayeredExtension> void setDefaultExtender( String extensionKey, Class<T> extensionClass, Supplier<? extends T> extender )
     {
-        // The configClass arg isn't currently used, but it might be used in the future
-        // to check supplied config instances at runtime.
+        // The extensionClass arg isn't currently used, but it might be used in the future
+        // to check extension instances supplied at runtime.
         //
-        // More importantly, it forces the caller to think about config class, which is
-        // important. And as a side benefit, it makes it more cumbersome to call this
-        // method directly, which encourages callers to use convenience functions with
-        // more natural typing, such as LayeredGeoConfig.setDefaultGeoConfigurator().
+        // More importantly, it forces the caller to think about extension class, which is
+        // important. And as a side benefit, it makes it more cumbersome to call this method
+        // directly, which encourages callers to use convenience functions with more natural
+        // typing, such as GeoExtension.setDefaultGeoExtender().
         //
 
-        this.viewConfigurators.update( ( v ) -> mapWith( v, configKey, configurator ) );
+        this.extenders.update( ( v ) -> mapWith( v, extensionKey, extender ) );
     }
 
     public void addView( LayeredView view )
@@ -194,19 +194,21 @@ public class LayeredGui
 
     protected void handleViewAdded( LayeredView view )
     {
-        Map<String,LayeredViewConfig> configs = new LinkedHashMap<>( );
-        for ( Entry<String,Supplier<? extends LayeredViewConfig>> en : this.viewConfigurators.v( ).entrySet( ) )
+        Map<String,LayeredExtension> extensions = new LinkedHashMap<>( );
+        for ( Entry<String,Supplier<? extends LayeredExtension>> en : this.extenders.v( ).entrySet( ) )
         {
-            String configKey = en.getKey( );
-            Supplier<? extends LayeredViewConfig> configurator = en.getValue( );
-            if ( !view.configs.containsKey( configKey ) )
+            String extensionKey = en.getKey( );
+            Supplier<? extends LayeredExtension> extender = en.getValue( );
+
+            // WIP: Ugly -- accessing protected field
+            if ( !view.extensions.containsKey( extensionKey ) )
             {
-                configs.put( configKey, configurator.get( ) );
+                extensions.put( extensionKey, extender.get( ) );
             }
         }
-        view.setConfigs( configs );
+        view.setExtensions( extensions );
 
-        // WIP: Link configs where possible
+        // WIP: Link extensions where possible
 
         for ( Layer layer : this.layers.v( ) )
         {
@@ -226,34 +228,36 @@ public class LayeredGui
         {
             LayeredView clone = view.createClone( );
 
-            Map<String,LayeredViewConfig> cloneConfigs = new LinkedHashMap<>( );
-            for ( Entry<String,LayeredViewConfig> en : view.configs.entrySet( ) )
+            Map<String,LayeredExtension> cloneExtensions = new LinkedHashMap<>( );
+
+            // WIP: Ugly -- accessing protected field
+            for ( Entry<String,LayeredExtension> en : view.extensions.entrySet( ) )
             {
-                String configKey = en.getKey( );
-                LayeredViewConfig config = en.getValue( );
-                cloneConfigs.put( configKey, config.createClone( ) );
+                String extensionKey = en.getKey( );
+                LayeredExtension extension = en.getValue( );
+                cloneExtensions.put( extensionKey, extension.createClone( ) );
             }
-            clone.setConfigs( cloneConfigs );
+            clone.setExtensions( cloneExtensions );
 
             // WIP: Link clone with original
-//            for ( Entry<String,LayeredViewConfig> en : view.configs.entrySet( ) )
+//            for ( Entry<String,LayeredExtension> en : view.extensions.entrySet( ) )
 //            {
-//                String configKey = en.getKey( );
-//                LayeredViewConfig config = en.getValue( );
+//                String extensionKey = en.getKey( );
+//                LayeredExtension extension = en.getValue( );
 //
-//                if ( config.getParent( ) == null )
+//                if ( extension.getParent( ) == null )
 //                {
-//                    LayeredViewConfig parent = config.createClone( );
+//                    LayeredExtension parent = extension.createClone( );
 //
 //                    // WIP: Register parent with LayeredGui, as a "linkage"
 //
-//                    config.setParent( parent );
+//                    extension.setParent( parent );
 //                }
 //
 //                // WIP: Ugly
-//                LayeredViewConfig cloneConfig = cloneConfigs.get( configKey );
+//                LayeredExtension cloneExtension = cloneExtensions.get( extensionKey );
 //
-//                cloneConfig.setParent( config.getParent( ) );
+//                cloneExtension.setParent( extension.getParent( ) );
 //            }
 
             this.addView( clone );

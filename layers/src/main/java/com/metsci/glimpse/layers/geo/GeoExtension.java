@@ -11,38 +11,38 @@ import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
-import com.metsci.glimpse.layers.LayeredViewConfig;
+import com.metsci.glimpse.layers.LayeredExtension;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class LayeredGeoConfig implements LayeredViewConfig
+public class GeoExtension implements LayeredExtension
 {
 
-    public static final String geoConfigKey = LayeredGeoConfig.class.getName( );
+    public static final String geoExtensionKey = GeoExtension.class.getName( );
 
-    public static void setDefaultGeoConfigurator( LayeredGui gui, Supplier<? extends LayeredGeoConfig> geoConfigurator )
+    public static void setDefaultGeoExtender( LayeredGui gui, Supplier<? extends GeoExtension> geoExtender )
     {
-        gui.setDefaultViewConfigurator( geoConfigKey, LayeredGeoConfig.class, geoConfigurator );
+        gui.setDefaultExtender( geoExtensionKey, GeoExtension.class, geoExtender );
     }
 
-    public static void setGeoConfig( LayeredView view, LayeredGeoConfig geoConfig )
+    public static void setGeoExtension( LayeredView view, GeoExtension geoExtension )
     {
-        view.setConfig( geoConfigKey, geoConfig );
+        view.setExtension( geoExtensionKey, geoExtension );
     }
 
-    public static LayeredGeoConfig requireGeoConfig( LayeredView view )
+    public static GeoExtension requireGeoExtension( LayeredView view )
     {
-        return view.requireConfig( geoConfigKey, LayeredGeoConfig.class );
+        return view.requireExtension( geoExtensionKey, GeoExtension.class );
     }
 
 
     public final GeoProjection proj;
     public final Axis2D axis;
-    protected LayeredGeoConfig parent;
+    protected GeoExtension parent;
 
-    public LayeredGeoConfig( GeoProjection proj )
+    public GeoExtension( GeoProjection proj )
     {
         this.proj = proj;
         this.axis = new Axis2D( );
@@ -80,15 +80,15 @@ public class LayeredGeoConfig implements LayeredViewConfig
     }
 
     @Override
-    public boolean allowsParent( LayeredViewConfig newParent )
+    public boolean allowsParent( LayeredExtension newParent )
     {
         if ( newParent == null )
         {
             return true;
         }
-        else if ( newParent instanceof LayeredGeoConfig )
+        else if ( newParent instanceof GeoExtension )
         {
-            LayeredGeoConfig parent = ( LayeredGeoConfig ) newParent;
+            GeoExtension parent = ( GeoExtension ) newParent;
             return Objects.equal( parent.proj, this.proj );
         }
         else
@@ -98,24 +98,24 @@ public class LayeredGeoConfig implements LayeredViewConfig
     }
 
     @Override
-    public void setParent( LayeredViewConfig newParent )
+    public void setParent( LayeredExtension newParent )
     {
         require( newParent, this::allowsParent );
 
-        this.parent = ( LayeredGeoConfig ) newParent;
+        this.parent = ( GeoExtension ) newParent;
         this.axis.setParent( this.parent == null ? null : this.parent.axis );
     }
 
     @Override
-    public LayeredGeoConfig getParent( )
+    public GeoExtension getParent( )
     {
         return this.parent;
     }
 
     @Override
-    public LayeredGeoConfig createClone( )
+    public GeoExtension createClone( )
     {
-        return new LayeredGeoConfig( this.proj );
+        return new GeoExtension( this.proj );
     }
 
 }

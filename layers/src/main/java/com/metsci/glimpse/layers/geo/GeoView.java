@@ -1,7 +1,7 @@
 package com.metsci.glimpse.layers.geo;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.layers.geo.LayeredGeoConfig.requireGeoConfig;
+import static com.metsci.glimpse.layers.geo.GeoExtension.requireGeoExtension;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 
@@ -22,7 +22,7 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
-public class LayeredGeo extends LayeredView
+public class GeoView extends LayeredView
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
@@ -35,7 +35,7 @@ public class LayeredGeo extends LayeredView
     public final BorderPainter borderPainter;
 
 
-    public LayeredGeo( )
+    public GeoView( )
     {
         this.title.set( "Geo" );
 
@@ -91,14 +91,14 @@ public class LayeredGeo extends LayeredView
     @Override
     public void init( )
     {
-        LayeredGeoConfig geoConfig = requireGeoConfig( this );
-        this.plot.getCenterAxis( ).setParent( geoConfig.axis );
+        GeoExtension geoExtension = requireGeoExtension( this );
+        this.plot.getCenterAxis( ).setParent( geoExtension.axis );
     }
 
     @Override
-    public LayeredGeo createClone( )
+    public GeoView createClone( )
     {
-        return new LayeredGeo( );
+        return new GeoView( );
     }
 
     @Override

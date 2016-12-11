@@ -23,7 +23,7 @@ public abstract class LayeredView
     public final Var<String> title;
 
     // WIP: Make this a Var
-    protected final Map<String,LayeredViewConfig> configs;
+    protected final Map<String,LayeredExtension> extensions;
 
     // WIP: Use the Var<List<Layer>> from LayeredGui instead
     protected final List<Layer> layers;
@@ -32,7 +32,7 @@ public abstract class LayeredView
     public LayeredView( )
     {
         this.title = new Var<>( "Untitled View", notNull );
-        this.configs = new LinkedHashMap<>( );
+        this.extensions = new LinkedHashMap<>( );
         this.layers = new ArrayList<>( );
     }
 
@@ -58,29 +58,29 @@ public abstract class LayeredView
         return null;
     }
 
-    public <T extends LayeredViewConfig> T requireConfig( String configKey, Class<T> configClass )
+    public <T extends LayeredExtension> T requireExtension( String extensionKey, Class<T> extensionClass )
     {
-        LayeredViewConfig config = this.configs.get( configKey );
+        LayeredExtension extension = this.extensions.get( extensionKey );
 
-        if ( config == null )
+        if ( extension == null )
         {
-            throw new RuntimeException( "Required view-config is missing: key = " + configKey + ", required-class = " + configClass.getName( ) );
+            throw new RuntimeException( "Required extension is missing: key = " + extensionKey + ", required-class = " + extensionClass.getName( ) );
         }
 
-        if ( !configClass.isInstance( config ) )
+        if ( !extensionClass.isInstance( extension ) )
         {
-            throw new RuntimeException( "Required view-config has wrong type: key = " + configKey + ", required-class = " + configClass.getName( ) + ", actual-class = " + config.getClass( ).getName( ) );
+            throw new RuntimeException( "Extension type mismatch: key = " + extensionKey + ", required-class = " + extensionClass.getName( ) + ", actual-class = " + extension.getClass( ).getName( ) );
         }
 
-        return configClass.cast( config );
+        return extensionClass.cast( extension );
     }
 
-    public void setConfig( String configKey, LayeredViewConfig newConfig )
+    public void setExtension( String extensionKey, LayeredExtension newExtension )
     {
-        this.setConfigs( singletonMap( configKey, newConfig ) );
+        this.setExtensions( singletonMap( extensionKey, newExtension ) );
     }
 
-    public void setConfigs( Map<? extends String,? extends LayeredViewConfig> newConfigs )
+    public void setExtensions( Map<? extends String,? extends LayeredExtension> newExtensions )
     {
         // Uninstall layers
         for ( Layer layer : this.layers )
@@ -88,32 +88,32 @@ public abstract class LayeredView
             layer.uninstallFrom( this, true );
         }
 
-        // Update configs, preserving parentage where possible
-        Map<String,LayeredViewConfig> oldConfigParents = new HashMap<>( );
-        for ( String configKey : newConfigs.keySet( ) )
+        // Update extensions, preserving parentage where possible
+        Map<String,LayeredExtension> oldExtensionParents = new HashMap<>( );
+        for ( String extensionKey : newExtensions.keySet( ) )
         {
-            if ( this.configs.containsKey( configKey ) )
+            if ( this.extensions.containsKey( extensionKey ) )
             {
-                LayeredViewConfig oldConfig = this.configs.get( configKey );
-                LayeredViewConfig oldParent = oldConfig.getParent( );
-                oldConfigParents.put( configKey, oldParent );
-                oldConfig.setParent( null );
+                LayeredExtension oldExtension = this.extensions.get( extensionKey );
+                LayeredExtension oldParent = oldExtension.getParent( );
+                oldExtensionParents.put( extensionKey, oldParent );
+                oldExtension.setParent( null );
             }
         }
 
-        this.configs.putAll( newConfigs );
+        this.extensions.putAll( newExtensions );
 
-        for ( String configKey : newConfigs.keySet( ) )
+        for ( String extensionKey : newExtensions.keySet( ) )
         {
-            LayeredViewConfig newConfig = this.configs.get( configKey );
-            LayeredViewConfig oldParent = oldConfigParents.get( configKey );
-            if ( newConfig.allowsParent( oldParent ) )
+            LayeredExtension newExtension = this.extensions.get( extensionKey );
+            LayeredExtension oldParent = oldExtensionParents.get( extensionKey );
+            if ( newExtension.allowsParent( oldParent ) )
             {
-                newConfig.setParent( oldParent );
+                newExtension.setParent( oldParent );
             }
             else
             {
-                newConfig.setParent( null );
+                newExtension.setParent( null );
             }
         }
 
@@ -171,11 +171,11 @@ public abstract class LayeredView
         }
         this.layers.clear( );
 
-        for ( LayeredViewConfig config : this.configs.values( ) )
+        for ( LayeredExtension extension : this.extensions.values( ) )
         {
-            config.setParent( null );
+            extension.setParent( null );
         }
-        this.configs.clear( );
+        this.extensions.clear( );
     }
 
 }

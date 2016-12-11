@@ -1,4 +1,4 @@
-package com.metsci.glimpse.layers.timeline;
+package com.metsci.glimpse.layers.time;
 
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.CURRENT_TIME;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MAX_TIME;
@@ -15,27 +15,27 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
-import com.metsci.glimpse.layers.LayeredViewConfig;
+import com.metsci.glimpse.layers.LayeredExtension;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 
-public class LayeredTimelineConfig implements LayeredViewConfig
+public class TimeExtension implements LayeredExtension
 {
 
-    public static final String timelineConfigKey = LayeredTimelineConfig.class.getName( );
+    public static final String timeExtensionKey = TimeExtension.class.getName( );
 
-    public static void setDefaultTimelineConfigurator( LayeredGui gui, Supplier<? extends LayeredTimelineConfig> timelineConfigurator )
+    public static void setDefaultTimeExtender( LayeredGui gui, Supplier<? extends TimeExtension> timeExtender )
     {
-        gui.setDefaultViewConfigurator( timelineConfigKey, LayeredTimelineConfig.class, timelineConfigurator );
+        gui.setDefaultExtender( timeExtensionKey, TimeExtension.class, timeExtender );
     }
 
-    public static void setTimelineConfig( LayeredView view, LayeredTimelineConfig timelineConfig )
+    public static void setTimeExtension( LayeredView view, TimeExtension timeExtension )
     {
-        view.setConfig( timelineConfigKey, timelineConfig );
+        view.setExtension( timeExtensionKey, timeExtension );
     }
 
-    public static LayeredTimelineConfig requireTimelineConfig( LayeredView view )
+    public static TimeExtension requireTimeExtension( LayeredView view )
     {
-        return view.requireConfig( timelineConfigKey, LayeredTimelineConfig.class );
+        return view.requireExtension( timeExtensionKey, TimeExtension.class );
     }
 
 
@@ -46,10 +46,10 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     protected final Tag selectionMaxTag;
     protected final Tag selectionCursorTag;
 
-    protected LayeredTimelineConfig parent;
+    protected TimeExtension parent;
 
 
-    public LayeredTimelineConfig( Epoch epoch )
+    public TimeExtension( Epoch epoch )
     {
         this.epoch = epoch;
 
@@ -98,15 +98,15 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     }
 
     @Override
-    public boolean allowsParent( LayeredViewConfig newParent )
+    public boolean allowsParent( LayeredExtension newParent )
     {
         if ( newParent == null )
         {
             return true;
         }
-        else if ( newParent instanceof LayeredTimelineConfig )
+        else if ( newParent instanceof TimeExtension )
         {
-            LayeredTimelineConfig parent = ( LayeredTimelineConfig ) newParent;
+            TimeExtension parent = ( TimeExtension ) newParent;
             return Objects.equal( parent.epoch, this.epoch );
         }
         else
@@ -116,24 +116,24 @@ public class LayeredTimelineConfig implements LayeredViewConfig
     }
 
     @Override
-    public void setParent( LayeredViewConfig newParent )
+    public void setParent( LayeredExtension newParent )
     {
         require( newParent, this::allowsParent );
 
-        this.parent = ( LayeredTimelineConfig ) newParent;
+        this.parent = ( TimeExtension ) newParent;
         this.axis.setParent( this.parent == null ? null : this.parent.axis );
     }
 
     @Override
-    public LayeredTimelineConfig getParent( )
+    public TimeExtension getParent( )
     {
         return this.parent;
     }
 
     @Override
-    public LayeredTimelineConfig createClone( )
+    public TimeExtension createClone( )
     {
-        return new LayeredTimelineConfig( this.epoch );
+        return new TimeExtension( this.epoch );
     }
 
 }

@@ -1,7 +1,7 @@
-package com.metsci.glimpse.layers.timeline;
+package com.metsci.glimpse.layers.time;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.layers.timeline.LayeredTimelineConfig.requireTimelineConfig;
+import static com.metsci.glimpse.layers.time.TimeExtension.requireTimeExtension;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
@@ -25,7 +25,7 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
-public class LayeredTimeline extends LayeredView
+public class TimelineView extends LayeredView
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
@@ -36,7 +36,7 @@ public class LayeredTimeline extends LayeredView
     protected final Map<Object,Integer> rowRefCounts;
 
 
-    public LayeredTimeline( )
+    public TimelineView( )
     {
         this.title.set( "Timeline" );
 
@@ -78,15 +78,15 @@ public class LayeredTimeline extends LayeredView
     @Override
     public void init( )
     {
-        LayeredTimelineConfig timelineConfig = requireTimelineConfig( this );
-        this.plot.setEpoch( timelineConfig.epoch );
-        this.plot.getTimeAxis( ).setParent( timelineConfig.axis );
+        TimeExtension timeExtension = requireTimeExtension( this );
+        this.plot.setEpoch( timeExtension.epoch );
+        this.plot.getTimeAxis( ).setParent( timeExtension.axis );
     }
 
     @Override
-    public LayeredTimeline createClone( )
+    public TimelineView createClone( )
     {
-        return new LayeredTimeline( );
+        return new TimelineView( );
     }
 
     @Override
