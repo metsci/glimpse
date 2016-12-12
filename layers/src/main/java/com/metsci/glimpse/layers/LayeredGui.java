@@ -42,7 +42,6 @@ import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
-import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.util.var.Var;
@@ -52,7 +51,7 @@ public class LayeredGui
 
     // Model
     public final Var<ImmutableMap<String,Supplier<? extends Trait>>> extenders;
-    public final Var<ImmutableSet<LayeredView>> views;
+    public final Var<ImmutableSet<View>> views;
     public final Var<ImmutableList<Layer>> layers;
 
     // View
@@ -60,7 +59,7 @@ public class LayeredGui
     protected final GLAnimatorControl animator;
     protected DockingGroupListener dockingArrSaver;
     protected final Map<String,Integer> dockingViewIdCounters;
-    protected final BiMap<LayeredView,View> dockingViews;
+    protected final BiMap<View,com.metsci.glimpse.docking.View> dockingViews;
     protected final LayerCardsPanel layerCardsPanel;
 
 
@@ -103,10 +102,10 @@ public class LayeredGui
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void closingView( DockingGroup dockingGroup, View dockingView )
+            public void closingView( DockingGroup dockingGroup, com.metsci.glimpse.docking.View dockingView )
             {
                 // If dockingViews still has this entry, then the layeredView hasn't been removed yet
-                LayeredView view = dockingViews.inverse( ).remove( dockingView );
+                View view = dockingViews.inverse( ).remove( dockingView );
                 if ( view != null )
                 {
                     views.update( ( v ) -> setMinus( v, view ) );
@@ -116,7 +115,7 @@ public class LayeredGui
 
         this.layerCardsPanel = new LayerCardsPanel( this.layers );
         JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        View layersView = new View( "layersView", layerCardsScroller, "Layers", false, null, this.layerCardsPanel.getIcon( ), null );
+        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( "layersView", layerCardsScroller, "Layers", false, null, this.layerCardsPanel.getIcon( ), null );
         this.dockingGroup.addView( layersView );
 
 
@@ -172,12 +171,12 @@ public class LayeredGui
         this.extenders.update( ( v ) -> mapWith( v, traitKey, extender ) );
     }
 
-    public void addView( LayeredView view )
+    public void addView( View view )
     {
         this.views.update( ( v ) -> setPlus( v, view ) );
     }
 
-    public void removeView( LayeredView view )
+    public void removeView( View view )
     {
         this.views.update( ( v ) -> setMinus( v, view ) );
     }
@@ -192,7 +191,7 @@ public class LayeredGui
         this.layers.update( ( v ) -> listMinus( v, layer ) );
     }
 
-    protected void handleViewAdded( LayeredView view )
+    protected void handleViewAdded( View view )
     {
         Map<String,Trait> traits = new LinkedHashMap<>( );
         for ( Entry<String,Supplier<? extends Trait>> en : this.extenders.v( ).entrySet( ) )
@@ -224,7 +223,7 @@ public class LayeredGui
         cloneViewButton.setToolTipText( "Clone This View" );
         cloneViewButton.addActionListener( ( ev ) ->
         {
-            LayeredView clone = view.createClone( );
+            View clone = view.createClone( );
 
             Map<String,Trait> cloneTraits = new LinkedHashMap<>( );
 
@@ -279,13 +278,13 @@ public class LayeredGui
         }
 
         // XXX: Add support in docking for changing view titles
-        View dockingView = new View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
         this.dockingGroup.addView( dockingView );
 
         this.dockingViews.put( view, dockingView );
     }
 
-    protected void handleViewRemoved( LayeredView view )
+    protected void handleViewRemoved( View view )
     {
         GLAutoDrawable glDrawable = view.getGLDrawable( );
         if ( glDrawable != null )
@@ -296,7 +295,7 @@ public class LayeredGui
         view.dispose( );
 
         // If dockingViews still has this entry, then the dockingView hasn't been closed yet
-        View dockingView = this.dockingViews.remove( view );
+        com.metsci.glimpse.docking.View dockingView = this.dockingViews.remove( view );
         if ( dockingView != null )
         {
             this.dockingGroup.closeView( dockingView );
@@ -305,7 +304,7 @@ public class LayeredGui
 
     protected void handleLayerAdded( Layer layer )
     {
-        for ( LayeredView view : this.views.v( ) )
+        for ( View view : this.views.v( ) )
         {
             view.addLayer( layer );
         }
@@ -313,7 +312,7 @@ public class LayeredGui
 
     protected void handleLayerRemoved( Layer layer )
     {
-        for ( LayeredView view : this.views.v( ) )
+        for ( View view : this.views.v( ) )
         {
             view.removeLayer( layer );
         }

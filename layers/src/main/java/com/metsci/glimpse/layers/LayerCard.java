@@ -57,7 +57,7 @@ public class LayerCard extends JPanel
         // Facets
         //
 
-        ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets = this.layer.facets( );
+        ReadableVar<? extends Map<? extends View,? extends Facet>> facets = this.layer.facets( );
 
         this.facetRemovedListener = addEntryRemovedListener( facets, true, ( view, facet ) ->
         {
@@ -87,7 +87,7 @@ public class LayerCard extends JPanel
 
     public void dispose( )
     {
-        ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets = this.layer.facets( );
+        ReadableVar<? extends Map<? extends View,? extends Facet>> facets = this.layer.facets( );
         facets.removeListener( this.facetRemovedListener );
         facets.removeListener( this.facetAddedListener );
 

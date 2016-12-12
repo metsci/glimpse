@@ -13,7 +13,7 @@ import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
-import com.metsci.glimpse.layers.LayeredView;
+import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
@@ -22,7 +22,7 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
-public class GeoView extends LayeredView
+public class GeoView extends View
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;

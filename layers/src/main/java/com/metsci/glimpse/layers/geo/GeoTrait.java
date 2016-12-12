@@ -10,7 +10,7 @@ import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.LayeredGui;
-import com.metsci.glimpse.layers.LayeredView;
+import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
@@ -27,12 +27,12 @@ public class GeoTrait implements Trait
         gui.setDefaultExtender( geoTraitKey, GeoTrait.class, geoExtender );
     }
 
-    public static void setGeoTrait( LayeredView view, GeoTrait geoTrait )
+    public static void setGeoTrait( View view, GeoTrait geoTrait )
     {
         view.setTrait( geoTraitKey, geoTrait );
     }
 
-    public static GeoTrait requireGeoTrait( LayeredView view )
+    public static GeoTrait requireGeoTrait( View view )
     {
         return view.requireTrait( geoTraitKey, GeoTrait.class );
     }

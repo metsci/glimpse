@@ -20,10 +20,10 @@ public abstract class Layer
         this.isVisible = new Var<>( true, notNull );
     }
 
-    public abstract ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets( );
+    public abstract ReadableVar<? extends Map<? extends View,? extends Facet>> facets( );
 
-    public abstract void installTo( LayeredView view );
+    public abstract void installTo( View view );
 
-    public abstract void uninstallFrom( LayeredView view, boolean isReinstall );
+    public abstract void uninstallFrom( View view, boolean isReinstall );
 
 }

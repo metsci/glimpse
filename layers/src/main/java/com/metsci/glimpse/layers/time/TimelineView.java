@@ -16,7 +16,7 @@ import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
-import com.metsci.glimpse.layers.LayeredView;
+import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
@@ -25,7 +25,7 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
-public class TimelineView extends LayeredView
+public class TimelineView extends View
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;

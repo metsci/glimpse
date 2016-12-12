@@ -14,7 +14,7 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.LayeredGui;
-import com.metsci.glimpse.layers.LayeredView;
+import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.var.Var;
 
@@ -28,12 +28,12 @@ public class TimeTrait implements Trait
         gui.setDefaultExtender( timeTraitKey, TimeTrait.class, timeExtender );
     }
 
-    public static void setTimeTrait( LayeredView view, TimeTrait timeTrait )
+    public static void setTimeTrait( View view, TimeTrait timeTrait )
     {
         view.setTrait( timeTraitKey, timeTrait );
     }
 
-    public static TimeTrait requireTimeTrait( LayeredView view )
+    public static TimeTrait requireTimeTrait( View view )
     {
         return view.requireTrait( timeTraitKey, TimeTrait.class );
     }

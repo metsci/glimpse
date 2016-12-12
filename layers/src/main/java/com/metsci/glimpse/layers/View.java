@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
 
-public abstract class LayeredView
+public abstract class View
 {
 
     public final Var<String> title;
@@ -29,7 +29,7 @@ public abstract class LayeredView
     protected final List<Layer> layers;
 
 
-    public LayeredView( )
+    public View( )
     {
         this.title = new Var<>( "Untitled View", notNull );
         this._traits = new Var<>( ImmutableMap.of( ), notNull );
@@ -131,7 +131,7 @@ public abstract class LayeredView
 
     protected abstract void init( );
 
-    public abstract LayeredView createClone( );
+    public abstract View createClone( );
 
     /**
      * This method is protected to discourage access from client code, while still allowing

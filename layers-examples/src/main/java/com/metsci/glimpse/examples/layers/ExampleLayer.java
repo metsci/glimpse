@@ -12,7 +12,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.Facet;
-import com.metsci.glimpse.layers.LayeredView;
+import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.util.GeneralUtils;
@@ -26,7 +26,7 @@ public class ExampleLayer extends Layer
 
     protected final List<ExamplePoint> points;
 
-    protected final Var<ImmutableMap<LayeredView,ExampleFacet>> facets;
+    protected final Var<ImmutableMap<View,ExampleFacet>> facets;
 
 
     public ExampleLayer( String title, float[] rgba )
@@ -43,13 +43,13 @@ public class ExampleLayer extends Layer
     }
 
     @Override
-    public ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets( )
+    public ReadableVar<? extends Map<? extends View,? extends Facet>> facets( )
     {
         return this.facets;
     }
 
     @Override
-    public void installTo( LayeredView view )
+    public void installTo( View view )
     {
         if ( !this.facets.v( ).containsKey( view ) )
         {
@@ -78,7 +78,7 @@ public class ExampleLayer extends Layer
     }
 
     @Override
-    public void uninstallFrom( LayeredView view, boolean isReinstall )
+    public void uninstallFrom( View view, boolean isReinstall )
     {
         if ( this.facets.v( ).containsKey( view ) )
         {
