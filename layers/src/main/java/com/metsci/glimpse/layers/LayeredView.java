@@ -94,9 +94,9 @@ public abstract class LayeredView
             if ( this.extensions.containsKey( extensionKey ) )
             {
                 LayeredExtension oldExtension = this.extensions.get( extensionKey );
-                LayeredExtension oldParent = oldExtension.getParent( );
+                LayeredExtension oldParent = oldExtension.parent( ).v( );
                 oldExtensionParents.put( extensionKey, oldParent );
-                oldExtension.setParent( null );
+                oldExtension.parent( ).set( null );
             }
         }
 
@@ -106,13 +106,13 @@ public abstract class LayeredView
         {
             LayeredExtension newExtension = this.extensions.get( extensionKey );
             LayeredExtension oldParent = oldExtensionParents.get( extensionKey );
-            if ( newExtension.allowsParent( oldParent ) )
+            if ( newExtension.parent( ).validateFn.test( oldParent ) )
             {
-                newExtension.setParent( oldParent );
+                newExtension.parent( ).set( oldParent );
             }
             else
             {
-                newExtension.setParent( null );
+                newExtension.parent( ).set( null );
             }
         }
 
@@ -172,7 +172,7 @@ public abstract class LayeredView
 
         for ( LayeredExtension extension : this.extensions.values( ) )
         {
-            extension.setParent( null );
+            extension.parent( ).set( null );
         }
         this.extensions.clear( );
     }

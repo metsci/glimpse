@@ -2,19 +2,19 @@ package com.metsci.glimpse.layers.geo;
 
 import static com.google.common.primitives.Doubles.max;
 import static com.google.common.primitives.Doubles.min;
-import static com.metsci.glimpse.util.PredicateUtils.require;
 
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Supplier;
 
 import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.layers.LayeredExtension;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
-import com.metsci.glimpse.layers.LayeredExtension;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
+import com.metsci.glimpse.util.var.Var;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 public class GeoExtension implements LayeredExtension
@@ -40,13 +40,49 @@ public class GeoExtension implements LayeredExtension
 
     public final GeoProjection proj;
     public final Axis2D axis;
-    protected GeoExtension parent;
+
+    protected final Var<LayeredExtension> parent;
+
 
     public GeoExtension( GeoProjection proj )
     {
         this.proj = proj;
         this.axis = new Axis2D( );
-        this.parent = null;
+
+        this.parent = new Var<>( null, ( candidate ) ->
+        {
+            if ( candidate == null )
+            {
+                return true;
+            }
+            else if ( candidate instanceof GeoExtension )
+            {
+                GeoExtension geoCandidate = ( GeoExtension ) candidate;
+                return Objects.equal( geoCandidate.proj, this.proj );
+            }
+            else
+            {
+                return false;
+            }
+        } );
+
+        this.parent.addListener( true, ( ) ->
+        {
+            GeoExtension newParent = ( GeoExtension ) this.parent.v( );
+            this.axis.setParent( newParent == null ? null : newParent.axis );
+        } );
+    }
+
+    @Override
+    public Var<LayeredExtension> parent( )
+    {
+        return this.parent;
+    }
+
+    @Override
+    public GeoExtension createClone( )
+    {
+        return new GeoExtension( this.proj );
     }
 
     public void setBounds( LatLonGeo center, DoubleUnaryOperator unitsToSu, double ewExtent_UNITS, double nsExtent_UNITS )
@@ -77,45 +113,6 @@ public class GeoExtension implements LayeredExtension
                        unitsToSu.applyAsDouble( xMax_UNITS ),
                        unitsToSu.applyAsDouble( yMin_UNITS ),
                        unitsToSu.applyAsDouble( yMax_UNITS ) );
-    }
-
-    @Override
-    public boolean allowsParent( LayeredExtension newParent )
-    {
-        if ( newParent == null )
-        {
-            return true;
-        }
-        else if ( newParent instanceof GeoExtension )
-        {
-            GeoExtension parent = ( GeoExtension ) newParent;
-            return Objects.equal( parent.proj, this.proj );
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    @Override
-    public void setParent( LayeredExtension newParent )
-    {
-        require( newParent, this::allowsParent );
-
-        this.parent = ( GeoExtension ) newParent;
-        this.axis.setParent( this.parent == null ? null : this.parent.axis );
-    }
-
-    @Override
-    public GeoExtension getParent( )
-    {
-        return this.parent;
-    }
-
-    @Override
-    public GeoExtension createClone( )
-    {
-        return new GeoExtension( this.proj );
     }
 
 }

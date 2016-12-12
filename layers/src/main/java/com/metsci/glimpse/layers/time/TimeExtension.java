@@ -3,7 +3,6 @@ package com.metsci.glimpse.layers.time;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.CURRENT_TIME;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MAX_TIME;
 import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MIN_TIME;
-import static com.metsci.glimpse.util.PredicateUtils.require;
 import static java.util.Arrays.asList;
 
 import java.util.function.DoubleUnaryOperator;
@@ -13,10 +12,11 @@ import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.layers.LayeredExtension;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
-import com.metsci.glimpse.layers.LayeredExtension;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.util.var.Var;
 
 public class TimeExtension implements LayeredExtension
 {
@@ -46,7 +46,7 @@ public class TimeExtension implements LayeredExtension
     protected final Tag selectionMaxTag;
     protected final Tag selectionCursorTag;
 
-    protected TimeExtension parent;
+    protected final Var<LayeredExtension> parent;
 
 
     public TimeExtension( Epoch epoch )
@@ -60,7 +60,40 @@ public class TimeExtension implements LayeredExtension
         this.selectionCursorTag = this.axis.addTag( CURRENT_TIME, 10 );
         this.axis.addConstraint( new OrderedConstraint( "order", asList( MIN_TIME, CURRENT_TIME, MAX_TIME ) ) );
 
-        this.parent = null;
+        this.parent = new Var<>( null, ( candidate ) ->
+        {
+            if ( candidate == null )
+            {
+                return true;
+            }
+            else if ( candidate instanceof TimeExtension )
+            {
+                TimeExtension parent = ( TimeExtension ) candidate;
+                return Objects.equal( parent.epoch, this.epoch );
+            }
+            else
+            {
+                return false;
+            }
+        } );
+
+        this.parent.addListener( true, ( ) ->
+        {
+            TimeExtension newParent = ( TimeExtension ) this.parent.v( );
+            this.axis.setParent( newParent == null ? null : newParent.axis );
+        } );
+    }
+
+    @Override
+    public Var<LayeredExtension> parent( )
+    {
+        return this.parent;
+    }
+
+    @Override
+    public TimeExtension createClone( )
+    {
+        return new TimeExtension( this.epoch );
     }
 
     public void setRelativeBounds( DoubleUnaryOperator unitsToSeconds, double min_UNITS_SINCE_EPOCH, double max_UNITS_SINCE_EPOCH )
@@ -95,45 +128,6 @@ public class TimeExtension implements LayeredExtension
     public long selectionCursor_PMILLIS( )
     {
         return this.epoch.toPosixMillis( this.selectionCursorTag.getValue( ) );
-    }
-
-    @Override
-    public boolean allowsParent( LayeredExtension newParent )
-    {
-        if ( newParent == null )
-        {
-            return true;
-        }
-        else if ( newParent instanceof TimeExtension )
-        {
-            TimeExtension parent = ( TimeExtension ) newParent;
-            return Objects.equal( parent.epoch, this.epoch );
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    @Override
-    public void setParent( LayeredExtension newParent )
-    {
-        require( newParent, this::allowsParent );
-
-        this.parent = ( TimeExtension ) newParent;
-        this.axis.setParent( this.parent == null ? null : this.parent.axis );
-    }
-
-    @Override
-    public TimeExtension getParent( )
-    {
-        return this.parent;
-    }
-
-    @Override
-    public TimeExtension createClone( )
-    {
-        return new TimeExtension( this.epoch );
     }
 
 }
