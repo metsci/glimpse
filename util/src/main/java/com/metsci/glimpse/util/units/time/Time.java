@@ -832,7 +832,7 @@ public class Time
     /**
      * Converts from java.time.Instant to double posix seconds (system-units).
      */
-    public static double fromInstant( Instant instant )
+    public static double instantToPosixSeconds( Instant instant )
     {
         long second = instant.getEpochSecond( );
         long nano = instant.getNano( );
@@ -843,12 +843,28 @@ public class Time
     /**
      * Converts to java.time.Instant from double posix seconds (system-units).
      */
-    public static Instant toInstant( double posixSeconds )
+    public static Instant posixSecondsToInstant( double posixSeconds )
     {
         long epochSecond = ( long ) posixSeconds;
         long nanoAdjustment = ( long ) ( ( posixSeconds - epochSecond ) * 1e9 );
 
         return Instant.ofEpochSecond( epochSecond, nanoAdjustment );
+    }
+    
+    /**
+     * Converts from java.time.Instant to long posix milliseconds.
+     */
+    public static long instantToPosixMillis( Instant instant )
+    {
+        return instant.toEpochMilli( );
+    }
+    
+    /**
+     * Converts to java.time.Instant from long posix milliseconds.
+     */
+    public static Instant posixMillisToInstant( long posixMillis )
+    {
+        return Instant.ofEpochMilli( posixMillis );
     }
 
     private static double[] multiply( double[] array, double factor )
