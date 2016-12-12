@@ -1,7 +1,7 @@
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.layers.geo.GeoExtension.setDefaultGeoExtender;
-import static com.metsci.glimpse.layers.time.TimeExtension.setDefaultTimeExtender;
+import static com.metsci.glimpse.layers.geo.GeoTrait.setDefaultGeoExtender;
+import static com.metsci.glimpse.layers.time.TimeTrait.setDefaultTimeExtender;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
@@ -18,9 +18,9 @@ import javax.swing.SwingUtilities;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.layers.LayeredGui;
-import com.metsci.glimpse.layers.geo.GeoExtension;
+import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
-import com.metsci.glimpse.layers.time.TimeExtension;
+import com.metsci.glimpse.layers.time.TimeTrait;
 import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -49,33 +49,33 @@ public class LayeredExample
             initTinyLaf( );
 
 
-            // Set up defaults for extensions (e.g. time and geo)
+            // Set up defaults for traits (e.g. time and geo)
             //
 
-            Supplier<GeoExtension> geoExtender = ( ) ->
+            Supplier<GeoTrait> geoExtender = ( ) ->
             {
                 GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
 
-                GeoExtension extension = new GeoExtension( proj );
+                GeoTrait trait = new GeoTrait( proj );
 
-                extension.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+                trait.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
                 // WIP: Initialize selection box
                 // WIP: Specify axis units for display
 
-                return extension;
+                return trait;
             };
 
-            Supplier<TimeExtension> timeExtender = ( ) ->
+            Supplier<TimeTrait> timeExtender = ( ) ->
             {
                 Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
 
-                TimeExtension extension = new TimeExtension( epoch );
+                TimeTrait trait = new TimeTrait( epoch );
 
-                extension.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
-                extension.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
+                trait.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
+                trait.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
                 // WIP: Specify timezone for display
 
-                return extension;
+                return trait;
             };
 
 
@@ -157,13 +157,13 @@ public class LayeredExample
 
 //                    GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
 //
-//                    GeoExtension extension = new GeoExtension( proj );
+//                    GeoTrait trait = new GeoTrait( proj );
 //
-//                    extension.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+//                    trait.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
 //                    // WIP: Initialize selection box
 //                    // WIP: Specify axis units for display
 //
-//                    setGeoExtension( geo, extension );
+//                    setGeoTrait( geo, trait );
 
 
                 } );

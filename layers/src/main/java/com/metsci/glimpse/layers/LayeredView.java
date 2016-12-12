@@ -23,17 +23,17 @@ public abstract class LayeredView
 {
 
     public final Var<String> title;
-    public final ReadableVar<ImmutableMap<String,LayeredExtension>> extensions;
+    public final ReadableVar<ImmutableMap<String,Trait>> traits;
 
-    protected final Var<ImmutableMap<String,LayeredExtension>> _extensions;
+    protected final Var<ImmutableMap<String,Trait>> _traits;
     protected final List<Layer> layers;
 
 
     public LayeredView( )
     {
         this.title = new Var<>( "Untitled View", notNull );
-        this._extensions = new Var<>( ImmutableMap.of( ), notNull );
-        this.extensions = this._extensions;
+        this._traits = new Var<>( ImmutableMap.of( ), notNull );
+        this.traits = this._traits;
         this.layers = new ArrayList<>( );
     }
 
@@ -59,29 +59,29 @@ public abstract class LayeredView
         return null;
     }
 
-    public <T extends LayeredExtension> T requireExtension( String extensionKey, Class<T> extensionClass )
+    public <T extends Trait> T requireTrait( String traitKey, Class<T> traitClass )
     {
-        LayeredExtension extension = this.extensions.v( ).get( extensionKey );
+        Trait trait = this.traits.v( ).get( traitKey );
 
-        if ( extension == null )
+        if ( trait == null )
         {
-            throw new RuntimeException( "Required extension is missing: key = " + extensionKey + ", required-class = " + extensionClass.getName( ) );
+            throw new RuntimeException( "Required trait is missing: key = " + traitKey + ", required-class = " + traitClass.getName( ) );
         }
 
-        if ( !extensionClass.isInstance( extension ) )
+        if ( !traitClass.isInstance( trait ) )
         {
-            throw new RuntimeException( "Extension type mismatch: key = " + extensionKey + ", required-class = " + extensionClass.getName( ) + ", actual-class = " + extension.getClass( ).getName( ) );
+            throw new RuntimeException( "Trait type mismatch: key = " + traitKey + ", required-class = " + traitClass.getName( ) + ", actual-class = " + trait.getClass( ).getName( ) );
         }
 
-        return extensionClass.cast( extension );
+        return traitClass.cast( trait );
     }
 
-    public void setExtension( String extensionKey, LayeredExtension newExtension )
+    public void setTrait( String traitKey, Trait newTrait )
     {
-        this.setExtensions( singletonMap( extensionKey, newExtension ) );
+        this.setTraits( singletonMap( traitKey, newTrait ) );
     }
 
-    public void setExtensions( Map<? extends String,? extends LayeredExtension> newExtensions )
+    public void setTraits( Map<? extends String,? extends Trait> newTraits )
     {
         // Uninstall layers
         for ( Layer layer : this.layers )
@@ -89,32 +89,32 @@ public abstract class LayeredView
             layer.uninstallFrom( this, true );
         }
 
-        // Update extensions map
-        Map<String,LayeredExtension> oldExtensions = this._extensions.v( );
-        this._extensions.update( ( v ) -> mapWith( v, newExtensions ) );
+        // Update traits map
+        Map<String,Trait> oldTraits = this._traits.v( );
+        this._traits.update( ( v ) -> mapWith( v, newTraits ) );
 
         // Migrate parentage where possible
-        for ( Entry<? extends String,? extends LayeredExtension> en : newExtensions.entrySet( ) )
+        for ( Entry<? extends String,? extends Trait> en : newTraits.entrySet( ) )
         {
-            String extensionKey = en.getKey( );
+            String traitKey = en.getKey( );
 
-            // Unlink newExtension, to be sure we have a clean slate
-            LayeredExtension newExtension = en.getValue( );
-            newExtension.parent( ).set( null );
+            // Unlink newTrait, to be sure we have a clean slate
+            Trait newTrait = en.getValue( );
+            newTrait.parent( ).set( null );
 
-            // Migrate oldExtension's parentage to newExtension, if possible
-            LayeredExtension oldExtension = oldExtensions.get( extensionKey );
-            if ( oldExtension != null )
+            // Migrate oldTrait's parentage to newTrait, if possible
+            Trait oldTrait = oldTraits.get( traitKey );
+            if ( oldTrait != null )
             {
-                LayeredExtension oldParent = oldExtension.parent( ).v( );
+                Trait oldParent = oldTrait.parent( ).v( );
 
-                // Unlink oldExtension from oldParent
-                oldExtension.parent( ).set( null );
+                // Unlink oldTrait from oldParent
+                oldTrait.parent( ).set( null );
 
-                // Link newExtension to oldParent, if possible
-                if ( newExtension.parent( ).validateFn.test( oldParent ) )
+                // Link newTrait to oldParent, if possible
+                if ( newTrait.parent( ).validateFn.test( oldParent ) )
                 {
-                    newExtension.parent( ).set( oldParent );
+                    newTrait.parent( ).set( oldParent );
                 }
             }
         }
@@ -173,11 +173,11 @@ public abstract class LayeredView
         }
         this.layers.clear( );
 
-        for ( LayeredExtension extension : this._extensions.v( ).values( ) )
+        for ( Trait trait : this._traits.v( ).values( ) )
         {
-            extension.parent( ).set( null );
+            trait.parent( ).set( null );
         }
-        this._extensions.set( ImmutableMap.of( ) );
+        this._traits.set( ImmutableMap.of( ) );
     }
 
 }

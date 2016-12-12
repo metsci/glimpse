@@ -1,7 +1,7 @@
 package com.metsci.glimpse.layers.geo;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.layers.geo.GeoExtension.requireGeoExtension;
+import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 
@@ -91,8 +91,8 @@ public class GeoView extends LayeredView
     @Override
     public void init( )
     {
-        GeoExtension geoExtension = requireGeoExtension( this );
-        this.plot.getCenterAxis( ).setParent( geoExtension.axis );
+        GeoTrait geoTrait = requireGeoTrait( this );
+        this.plot.getCenterAxis( ).setParent( geoTrait.axis );
     }
 
     @Override

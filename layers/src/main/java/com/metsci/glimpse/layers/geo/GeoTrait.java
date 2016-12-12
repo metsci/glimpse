@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.layers.LayeredExtension;
+import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -17,34 +17,34 @@ import com.metsci.glimpse.util.units.Azimuth;
 import com.metsci.glimpse.util.var.Var;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class GeoExtension implements LayeredExtension
+public class GeoTrait implements Trait
 {
 
-    public static final String geoExtensionKey = GeoExtension.class.getName( );
+    public static final String geoTraitKey = GeoTrait.class.getName( );
 
-    public static void setDefaultGeoExtender( LayeredGui gui, Supplier<? extends GeoExtension> geoExtender )
+    public static void setDefaultGeoExtender( LayeredGui gui, Supplier<? extends GeoTrait> geoExtender )
     {
-        gui.setDefaultExtender( geoExtensionKey, GeoExtension.class, geoExtender );
+        gui.setDefaultExtender( geoTraitKey, GeoTrait.class, geoExtender );
     }
 
-    public static void setGeoExtension( LayeredView view, GeoExtension geoExtension )
+    public static void setGeoTrait( LayeredView view, GeoTrait geoTrait )
     {
-        view.setExtension( geoExtensionKey, geoExtension );
+        view.setTrait( geoTraitKey, geoTrait );
     }
 
-    public static GeoExtension requireGeoExtension( LayeredView view )
+    public static GeoTrait requireGeoTrait( LayeredView view )
     {
-        return view.requireExtension( geoExtensionKey, GeoExtension.class );
+        return view.requireTrait( geoTraitKey, GeoTrait.class );
     }
 
 
     public final GeoProjection proj;
     public final Axis2D axis;
 
-    protected final Var<LayeredExtension> parent;
+    protected final Var<Trait> parent;
 
 
-    public GeoExtension( GeoProjection proj )
+    public GeoTrait( GeoProjection proj )
     {
         this.proj = proj;
         this.axis = new Axis2D( );
@@ -55,9 +55,9 @@ public class GeoExtension implements LayeredExtension
             {
                 return true;
             }
-            else if ( candidate instanceof GeoExtension )
+            else if ( candidate instanceof GeoTrait )
             {
-                GeoExtension geoCandidate = ( GeoExtension ) candidate;
+                GeoTrait geoCandidate = ( GeoTrait ) candidate;
                 return Objects.equal( geoCandidate.proj, this.proj );
             }
             else
@@ -68,21 +68,21 @@ public class GeoExtension implements LayeredExtension
 
         this.parent.addListener( true, ( ) ->
         {
-            GeoExtension newParent = ( GeoExtension ) this.parent.v( );
+            GeoTrait newParent = ( GeoTrait ) this.parent.v( );
             this.axis.setParent( newParent == null ? null : newParent.axis );
         } );
     }
 
     @Override
-    public Var<LayeredExtension> parent( )
+    public Var<Trait> parent( )
     {
         return this.parent;
     }
 
     @Override
-    public GeoExtension createClone( )
+    public GeoTrait createClone( )
     {
-        return new GeoExtension( this.proj );
+        return new GeoTrait( this.proj );
     }
 
     public void setBounds( LatLonGeo center, DoubleUnaryOperator unitsToSu, double ewExtent_UNITS, double nsExtent_UNITS )

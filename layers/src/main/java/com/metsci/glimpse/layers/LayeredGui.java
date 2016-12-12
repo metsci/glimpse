@@ -51,7 +51,7 @@ public class LayeredGui
 {
 
     // Model
-    public final Var<ImmutableMap<String,Supplier<? extends LayeredExtension>>> extenders;
+    public final Var<ImmutableMap<String,Supplier<? extends Trait>>> extenders;
     public final Var<ImmutableSet<LayeredView>> views;
     public final Var<ImmutableList<Layer>> layers;
 
@@ -158,18 +158,18 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
-    public <T extends LayeredExtension> void setDefaultExtender( String extensionKey, Class<T> extensionClass, Supplier<? extends T> extender )
+    public <T extends Trait> void setDefaultExtender( String traitKey, Class<T> traitClass, Supplier<? extends T> extender )
     {
-        // The extensionClass arg isn't currently used, but it might be used in the future
-        // to check extension instances supplied at runtime.
+        // The traitClass arg isn't currently used, but it might be used in the future
+        // to check trait instances supplied at runtime.
         //
-        // More importantly, it forces the caller to think about extension class, which is
+        // More importantly, it forces the caller to think about trait class, which is
         // important. And as a side benefit, it makes it more cumbersome to call this method
         // directly, which encourages callers to use convenience functions with more natural
-        // typing, such as GeoExtension.setDefaultGeoExtender().
+        // typing, such as GeoTrait.setDefaultGeoExtender().
         //
 
-        this.extenders.update( ( v ) -> mapWith( v, extensionKey, extender ) );
+        this.extenders.update( ( v ) -> mapWith( v, traitKey, extender ) );
     }
 
     public void addView( LayeredView view )
@@ -194,19 +194,19 @@ public class LayeredGui
 
     protected void handleViewAdded( LayeredView view )
     {
-        Map<String,LayeredExtension> extensions = new LinkedHashMap<>( );
-        for ( Entry<String,Supplier<? extends LayeredExtension>> en : this.extenders.v( ).entrySet( ) )
+        Map<String,Trait> traits = new LinkedHashMap<>( );
+        for ( Entry<String,Supplier<? extends Trait>> en : this.extenders.v( ).entrySet( ) )
         {
-            String extensionKey = en.getKey( );
-            Supplier<? extends LayeredExtension> extender = en.getValue( );
-            if ( !view.extensions.v( ).containsKey( extensionKey ) )
+            String traitKey = en.getKey( );
+            Supplier<? extends Trait> extender = en.getValue( );
+            if ( !view.traits.v( ).containsKey( traitKey ) )
             {
-                extensions.put( extensionKey, extender.get( ) );
+                traits.put( traitKey, extender.get( ) );
             }
         }
-        view.setExtensions( extensions );
+        view.setTraits( traits );
 
-        // WIP: Link extensions where possible
+        // WIP: Link traits where possible
 
         for ( Layer layer : this.layers.v( ) )
         {
@@ -226,34 +226,34 @@ public class LayeredGui
         {
             LayeredView clone = view.createClone( );
 
-            Map<String,LayeredExtension> cloneExtensions = new LinkedHashMap<>( );
+            Map<String,Trait> cloneTraits = new LinkedHashMap<>( );
 
-            for ( Entry<String,LayeredExtension> en : view.extensions.v( ).entrySet( ) )
+            for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
             {
-                String extensionKey = en.getKey( );
-                LayeredExtension extension = en.getValue( );
-                cloneExtensions.put( extensionKey, extension.createClone( ) );
+                String traitKey = en.getKey( );
+                Trait trait = en.getValue( );
+                cloneTraits.put( traitKey, trait.createClone( ) );
             }
-            clone.setExtensions( cloneExtensions );
+            clone.setTraits( cloneTraits );
 
             // WIP: Link clone with original
-//            for ( Entry<String,LayeredExtension> en : view.extensions.v( ).entrySet( ) )
+//            for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
 //            {
-//                String extensionKey = en.getKey( );
-//                LayeredExtension extension = en.getValue( );
+//                String traitKey = en.getKey( );
+//                Trait trait = en.getValue( );
 //
-//                if ( extension.getParent( ) == null )
+//                if ( trait.getParent( ) == null )
 //                {
-//                    LayeredExtension parent = extension.createClone( );
+//                    Trait parent = trait.createClone( );
 //
 //                    // WIP: Register parent with LayeredGui, as a "linkage"
 //
-//                    extension.setParent( parent );
+//                    trait.setParent( parent );
 //                }
 //
-//                LayeredExtension cloneExtension = cloneExtensions.get( extensionKey );
+//                Trait cloneTrait = cloneTraits.get( traitKey );
 //
-//                cloneExtension.setParent( extension.getParent( ) );
+//                cloneTrait.setParent( trait.getParent( ) );
 //            }
 
             this.addView( clone );

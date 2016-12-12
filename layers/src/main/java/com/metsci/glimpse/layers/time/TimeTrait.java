@@ -12,30 +12,30 @@ import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.layers.LayeredExtension;
+import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.LayeredView;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.var.Var;
 
-public class TimeExtension implements LayeredExtension
+public class TimeTrait implements Trait
 {
 
-    public static final String timeExtensionKey = TimeExtension.class.getName( );
+    public static final String timeTraitKey = TimeTrait.class.getName( );
 
-    public static void setDefaultTimeExtender( LayeredGui gui, Supplier<? extends TimeExtension> timeExtender )
+    public static void setDefaultTimeExtender( LayeredGui gui, Supplier<? extends TimeTrait> timeExtender )
     {
-        gui.setDefaultExtender( timeExtensionKey, TimeExtension.class, timeExtender );
+        gui.setDefaultExtender( timeTraitKey, TimeTrait.class, timeExtender );
     }
 
-    public static void setTimeExtension( LayeredView view, TimeExtension timeExtension )
+    public static void setTimeTrait( LayeredView view, TimeTrait timeTrait )
     {
-        view.setExtension( timeExtensionKey, timeExtension );
+        view.setTrait( timeTraitKey, timeTrait );
     }
 
-    public static TimeExtension requireTimeExtension( LayeredView view )
+    public static TimeTrait requireTimeTrait( LayeredView view )
     {
-        return view.requireExtension( timeExtensionKey, TimeExtension.class );
+        return view.requireTrait( timeTraitKey, TimeTrait.class );
     }
 
 
@@ -46,10 +46,10 @@ public class TimeExtension implements LayeredExtension
     protected final Tag selectionMaxTag;
     protected final Tag selectionCursorTag;
 
-    protected final Var<LayeredExtension> parent;
+    protected final Var<Trait> parent;
 
 
-    public TimeExtension( Epoch epoch )
+    public TimeTrait( Epoch epoch )
     {
         this.epoch = epoch;
 
@@ -66,9 +66,9 @@ public class TimeExtension implements LayeredExtension
             {
                 return true;
             }
-            else if ( candidate instanceof TimeExtension )
+            else if ( candidate instanceof TimeTrait )
             {
-                TimeExtension parent = ( TimeExtension ) candidate;
+                TimeTrait parent = ( TimeTrait ) candidate;
                 return Objects.equal( parent.epoch, this.epoch );
             }
             else
@@ -79,21 +79,21 @@ public class TimeExtension implements LayeredExtension
 
         this.parent.addListener( true, ( ) ->
         {
-            TimeExtension newParent = ( TimeExtension ) this.parent.v( );
+            TimeTrait newParent = ( TimeTrait ) this.parent.v( );
             this.axis.setParent( newParent == null ? null : newParent.axis );
         } );
     }
 
     @Override
-    public Var<LayeredExtension> parent( )
+    public Var<Trait> parent( )
     {
         return this.parent;
     }
 
     @Override
-    public TimeExtension createClone( )
+    public TimeTrait createClone( )
     {
-        return new TimeExtension( this.epoch );
+        return new TimeTrait( this.epoch );
     }
 
     public void setRelativeBounds( DoubleUnaryOperator unitsToSeconds, double min_UNITS_SINCE_EPOCH, double max_UNITS_SINCE_EPOCH )

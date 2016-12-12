@@ -1,7 +1,7 @@
 package com.metsci.glimpse.layers.time;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.layers.time.TimeExtension.requireTimeExtension;
+import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
@@ -78,9 +78,9 @@ public class TimelineView extends LayeredView
     @Override
     public void init( )
     {
-        TimeExtension timeExtension = requireTimeExtension( this );
-        this.plot.setEpoch( timeExtension.epoch );
-        this.plot.getTimeAxis( ).setParent( timeExtension.axis );
+        TimeTrait timeTrait = requireTimeTrait( this );
+        this.plot.setEpoch( timeTrait.epoch );
+        this.plot.getTimeAxis( ).setParent( timeTrait.axis );
     }
 
     @Override
