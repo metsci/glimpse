@@ -11,7 +11,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.metsci.glimpse.layers.Layer;
-import com.metsci.glimpse.layers.LayerRepr;
+import com.metsci.glimpse.layers.Facet;
 import com.metsci.glimpse.layers.LayeredView;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimelineView;
@@ -26,7 +26,7 @@ public class ExampleLayer extends Layer
 
     protected final List<ExamplePoint> points;
 
-    protected final Var<ImmutableMap<LayeredView,ExampleLayerRepr>> reprs;
+    protected final Var<ImmutableMap<LayeredView,ExampleFacet>> facets;
 
 
     public ExampleLayer( String title, float[] rgba )
@@ -39,39 +39,39 @@ public class ExampleLayer extends Layer
 
         this.points = new ArrayList<>( );
 
-        this.reprs = new Var<>( ImmutableMap.of( ), notNull );
+        this.facets = new Var<>( ImmutableMap.of( ), notNull );
     }
 
     @Override
-    public ReadableVar<? extends Map<? extends LayeredView,? extends LayerRepr>> reprs( )
+    public ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets( )
     {
-        return this.reprs;
+        return this.facets;
     }
 
     @Override
     public void installTo( LayeredView view )
     {
-        if ( !this.reprs.v( ).containsKey( view ) )
+        if ( !this.facets.v( ).containsKey( view ) )
         {
             if ( view instanceof GeoView )
             {
                 GeoView geo = ( GeoView ) view;
-                ExampleLayerRepr repr = new ExampleLayerGeoRepr( this, geo, this.style );
-                this.reprs.update( ( v ) -> mapWith( v, view, repr ) );
+                ExampleFacet facet = new ExampleGeoFacet( this, geo, this.style );
+                this.facets.update( ( v ) -> mapWith( v, view, facet ) );
                 for ( ExamplePoint point : this.points )
                 {
-                    repr.addPoint( point );
+                    facet.addPoint( point );
                 }
             }
 
             if ( view instanceof TimelineView )
             {
                 TimelineView timeline = ( TimelineView ) view;
-                ExampleLayerRepr repr = new ExampleLayerTimelineRepr( this, timeline, this.style );
-                this.reprs.update( ( v ) -> mapWith( v, view, repr ) );
+                ExampleFacet facet = new ExampleTimelineFacet( this, timeline, this.style );
+                this.facets.update( ( v ) -> mapWith( v, view, facet ) );
                 for ( ExamplePoint point : this.points )
                 {
-                    repr.addPoint( point );
+                    facet.addPoint( point );
                 }
             }
         }
@@ -80,12 +80,12 @@ public class ExampleLayer extends Layer
     @Override
     public void uninstallFrom( LayeredView view, boolean isReinstall )
     {
-        if ( this.reprs.v( ).containsKey( view ) )
+        if ( this.facets.v( ).containsKey( view ) )
         {
-            LayerRepr repr = this.reprs.v( ).get( view );
-            repr.dispose( isReinstall );
+            Facet facet = this.facets.v( ).get( view );
+            facet.dispose( isReinstall );
 
-            this.reprs.update( ( v ) -> mapMinus( v, view ) );
+            this.facets.update( ( v ) -> mapMinus( v, view ) );
         }
     }
 
@@ -93,9 +93,9 @@ public class ExampleLayer extends Layer
     {
         this.points.add( point );
 
-        for ( ExampleLayerRepr repr : this.reprs.v( ).values( ) )
+        for ( ExampleFacet facet : this.facets.v( ).values( ) )
         {
-            repr.addPoint( point );
+            facet.addPoint( point );
         }
     }
 

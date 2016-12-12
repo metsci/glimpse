@@ -25,10 +25,10 @@ public class LayerCard extends JPanel
 
     // XXX: The "unbinder" and "remover" ideas are similar -- would be nice to unify them
     protected final Map<Object,ListenerBinding> bindings;
-    protected final Map<LayerRepr,Runnable> reprRemovers;
+    protected final Map<Facet,Runnable> facetRemovers;
 
-    protected final Runnable reprRemovedListener;
-    protected final Runnable reprAddedListener;
+    protected final Runnable facetRemovedListener;
+    protected final Runnable facetAddedListener;
 
 
     public LayerCard( Layer layer )
@@ -36,7 +36,7 @@ public class LayerCard extends JPanel
         this.layer = layer;
 
         this.bindings = new HashMap<>( );
-        this.reprRemovers = new HashMap<>( );
+        this.facetRemovers = new HashMap<>( );
 
         this.setBorder( createLineBorder( this.getBackground( ).darker( ), 1 ) );
         this.setLayout( new MigLayout( "fillx", "[][][push,grow]" ) );
@@ -54,32 +54,32 @@ public class LayerCard extends JPanel
         this.add( layerTitleLabel, "spanx 2, wrap" );
 
 
-        // Reprs
+        // Facets
         //
 
-        ReadableVar<? extends Map<? extends LayeredView,? extends LayerRepr>> reprs = this.layer.reprs( );
+        ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets = this.layer.facets( );
 
-        this.reprRemovedListener = addEntryRemovedListener( reprs, true, ( view, repr ) ->
+        this.facetRemovedListener = addEntryRemovedListener( facets, true, ( view, facet ) ->
         {
-            this.reprRemovers.remove( repr ).run( );
-            this.bindings.remove( repr.isVisible ).unbind( );
+            this.facetRemovers.remove( facet ).run( );
+            this.bindings.remove( facet.isVisible ).unbind( );
             this.bindings.remove( view.title ).unbind( );
         } );
 
         // WIP: Respect layer ordering
-        this.reprAddedListener = addEntryAddedListener( reprs, true, ( view, repr ) ->
+        this.facetAddedListener = addEntryAddedListener( facets, true, ( view, facet ) ->
         {
-            JCheckBox reprVisibleCheck = new JCheckBox( );
-            this.bindings.put( repr.isVisible, bindToggleButton( reprVisibleCheck, repr.isVisible ) );
-            this.add( reprVisibleCheck, "gapleft 12, spanx 2" );
+            JCheckBox facetVisibleCheck = new JCheckBox( );
+            this.bindings.put( facet.isVisible, bindToggleButton( facetVisibleCheck, facet.isVisible ) );
+            this.add( facetVisibleCheck, "gapleft 12, spanx 2" );
 
             JLabel viewTitleLabel = new JLabel( );
             this.bindings.put( view.title, bindLabel( viewTitleLabel, view.title ) );
             this.add( viewTitleLabel, "wrap" );
 
-            this.reprRemovers.put( repr, ( ) ->
+            this.facetRemovers.put( facet, ( ) ->
             {
-                this.remove( reprVisibleCheck );
+                this.remove( facetVisibleCheck );
                 this.remove( viewTitleLabel );
             } );
         } );
@@ -87,9 +87,9 @@ public class LayerCard extends JPanel
 
     public void dispose( )
     {
-        ReadableVar<? extends Map<? extends LayeredView,? extends LayerRepr>> reprs = this.layer.reprs( );
-        reprs.removeListener( this.reprRemovedListener );
-        reprs.removeListener( this.reprAddedListener );
+        ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets = this.layer.facets( );
+        facets.removeListener( this.facetRemovedListener );
+        facets.removeListener( this.facetAddedListener );
 
         for ( ListenerBinding binding : this.bindings.values( ) )
         {

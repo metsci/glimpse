@@ -20,7 +20,7 @@ public abstract class Layer
         this.isVisible = new Var<>( true, notNull );
     }
 
-    public abstract ReadableVar<? extends Map<? extends LayeredView,? extends LayerRepr>> reprs( );
+    public abstract ReadableVar<? extends Map<? extends LayeredView,? extends Facet>> facets( );
 
     public abstract void installTo( LayeredView view );
 

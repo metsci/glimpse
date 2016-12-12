@@ -4,13 +4,13 @@ import static com.metsci.glimpse.util.PredicateUtils.notNull;
 
 import com.metsci.glimpse.util.var.Var;
 
-public abstract class LayerRepr
+public abstract class Facet
 {
 
     public final Var<Boolean> isVisible;
 
 
-    public LayerRepr( )
+    public Facet( )
     {
         this.isVisible = new Var<>( true, notNull );
     }

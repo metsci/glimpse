@@ -12,28 +12,30 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layers.geo.GeoExtension;
-import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimeExtension;
+import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class ExampleLayerGeoRepr extends ExampleLayerRepr
+public class ExampleTimelineFacet extends ExampleFacet
 {
 
     protected final ExampleLayer layer;
 
-    protected final GeoView view;
+    protected final TimelineView view;
     protected final GeoExtension geoExtension;
     protected final TimeExtension timeExtension;
 
-    protected final ExampleGeoPainter painter;
+    protected final TimePlotInfo row;
+    protected final ExampleTimelinePainter painter;
 
     protected final AxisListener2D geoAxisListener;
     protected final TaggedAxisListener1D timeAxisListener;
 
 
-    public ExampleLayerGeoRepr( ExampleLayer layer, GeoView view, ExampleStyle style )
+    public ExampleTimelineFacet( ExampleLayer layer, TimelineView view, ExampleStyle style )
     {
         this.layer = layer;
 
@@ -41,8 +43,12 @@ public class ExampleLayerGeoRepr extends ExampleLayerRepr
         this.geoExtension = requireGeoExtension( this.view );
         this.timeExtension = requireTimeExtension( this.view );
 
-        this.painter = new ExampleGeoPainter( style );
-        this.view.dataPainter.addPainter( this.painter );
+        // By using a fixed rowId, we share the row with other layers that use the same rowId
+        String rowId = "z_SU";
+        this.row = view.acquirePlotRow( rowId, "Example" );
+
+        this.painter = new ExampleTimelinePainter( style );
+        this.row.addPainter( this.painter );
 
         Axis2D geoAxis = this.geoExtension.axis;
         this.geoAxisListener = addAxisListener2D( geoAxis, true, ( axis ) ->
@@ -107,7 +113,8 @@ public class ExampleLayerGeoRepr extends ExampleLayerRepr
         Axis2D geoAxis = this.geoExtension.axis;
         geoAxis.removeAxisListener( this.geoAxisListener );
 
-        this.view.dataPainter.removePainter( this.painter );
+        this.row.removePainter( this.painter );
+        this.view.releaseRow( this.row.getId( ), reinstalling );
         this.view.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
         {
             GlimpseContext context = this.view.canvas.getGlimpseContext( );
