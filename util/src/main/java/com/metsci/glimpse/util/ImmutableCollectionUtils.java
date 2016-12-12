@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -43,6 +44,40 @@ public class ImmutableCollectionUtils
             }
             return ImmutableMap.copyOf( newMap );
         }
+    }
+
+    public static <K,V> ImmutableMap<K,V> mapWith( ImmutableMap<K,V> map, Map<? extends K,? extends V> newEntries )
+    {
+        // Leave newMap as null until we have to actually change a value
+        Map<K,V> newMap = null;
+
+        for ( Entry<? extends K,? extends V> en : newEntries.entrySet( ) )
+        {
+            K key = en.getKey( );
+            V newValue = en.getValue( );
+            V oldValue = map.get( key );
+
+            if ( !equal( newValue, oldValue ) )
+            {
+                // Have to change a value, so make sure we have a mutable copy of the map
+                if ( newMap == null )
+                {
+                    newMap = new LinkedHashMap<>( map );
+                }
+
+                if ( newValue == null )
+                {
+                    newMap.remove( key );
+                }
+                else
+                {
+                    newMap.put( key, newValue );
+                }
+            }
+        }
+
+        // If newMap is still null, then we never actually changed any values
+        return ( newMap == null ? map : ImmutableMap.copyOf( newMap ) );
     }
 
     public static <K,V> ImmutableMap<K,V> mapWith( ImmutableMap<K,V> map, K key, Function<? super V,? extends V> transformFn )

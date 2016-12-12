@@ -1,5 +1,6 @@
 package com.metsci.glimpse.layers;
 
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
@@ -7,31 +8,32 @@ import static java.util.Collections.singletonMap;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 
+import com.google.common.collect.ImmutableMap;
+import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
 
 public abstract class LayeredView
 {
 
     public final Var<String> title;
+    public final ReadableVar<ImmutableMap<String,LayeredExtension>> extensions;
 
-    // WIP: This may need to be a Var to support a "Linkages" panel
-    protected final Map<String,LayeredExtension> extensions;
-
+    protected final Var<ImmutableMap<String,LayeredExtension>> _extensions;
     protected final List<Layer> layers;
 
 
     public LayeredView( )
     {
         this.title = new Var<>( "Untitled View", notNull );
-        this.extensions = new LinkedHashMap<>( );
+        this._extensions = new Var<>( ImmutableMap.of( ), notNull );
+        this.extensions = this._extensions;
         this.layers = new ArrayList<>( );
     }
 
@@ -59,7 +61,7 @@ public abstract class LayeredView
 
     public <T extends LayeredExtension> T requireExtension( String extensionKey, Class<T> extensionClass )
     {
-        LayeredExtension extension = this.extensions.get( extensionKey );
+        LayeredExtension extension = this.extensions.v( ).get( extensionKey );
 
         if ( extension == null )
         {
@@ -87,32 +89,33 @@ public abstract class LayeredView
             layer.uninstallFrom( this, true );
         }
 
-        // Update extensions, preserving parentage where possible
-        Map<String,LayeredExtension> oldExtensionParents = new HashMap<>( );
-        for ( String extensionKey : newExtensions.keySet( ) )
+        // Update extensions map
+        Map<String,LayeredExtension> oldExtensions = this._extensions.v( );
+        this._extensions.update( ( v ) -> mapWith( v, newExtensions ) );
+
+        // Migrate parentage where possible
+        for ( Entry<? extends String,? extends LayeredExtension> en : newExtensions.entrySet( ) )
         {
-            if ( this.extensions.containsKey( extensionKey ) )
+            String extensionKey = en.getKey( );
+
+            // Unlink newExtension, to be sure we have a clean slate
+            LayeredExtension newExtension = en.getValue( );
+            newExtension.parent( ).set( null );
+
+            // Migrate oldExtension's parentage to newExtension, if possible
+            LayeredExtension oldExtension = oldExtensions.get( extensionKey );
+            if ( oldExtension != null )
             {
-                LayeredExtension oldExtension = this.extensions.get( extensionKey );
                 LayeredExtension oldParent = oldExtension.parent( ).v( );
-                oldExtensionParents.put( extensionKey, oldParent );
+
+                // Unlink oldExtension from oldParent
                 oldExtension.parent( ).set( null );
-            }
-        }
 
-        this.extensions.putAll( newExtensions );
-
-        for ( String extensionKey : newExtensions.keySet( ) )
-        {
-            LayeredExtension newExtension = this.extensions.get( extensionKey );
-            LayeredExtension oldParent = oldExtensionParents.get( extensionKey );
-            if ( newExtension.parent( ).validateFn.test( oldParent ) )
-            {
-                newExtension.parent( ).set( oldParent );
-            }
-            else
-            {
-                newExtension.parent( ).set( null );
+                // Link newExtension to oldParent, if possible
+                if ( newExtension.parent( ).validateFn.test( oldParent ) )
+                {
+                    newExtension.parent( ).set( oldParent );
+                }
             }
         }
 
@@ -170,11 +173,11 @@ public abstract class LayeredView
         }
         this.layers.clear( );
 
-        for ( LayeredExtension extension : this.extensions.values( ) )
+        for ( LayeredExtension extension : this._extensions.v( ).values( ) )
         {
             extension.parent( ).set( null );
         }
-        this.extensions.clear( );
+        this._extensions.set( ImmutableMap.of( ) );
     }
 
 }

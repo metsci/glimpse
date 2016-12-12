@@ -199,9 +199,7 @@ public class LayeredGui
         {
             String extensionKey = en.getKey( );
             Supplier<? extends LayeredExtension> extender = en.getValue( );
-
-            // WIP: Ugly -- accessing protected field
-            if ( !view.extensions.containsKey( extensionKey ) )
+            if ( !view.extensions.v( ).containsKey( extensionKey ) )
             {
                 extensions.put( extensionKey, extender.get( ) );
             }
@@ -230,8 +228,7 @@ public class LayeredGui
 
             Map<String,LayeredExtension> cloneExtensions = new LinkedHashMap<>( );
 
-            // WIP: Ugly -- accessing protected field
-            for ( Entry<String,LayeredExtension> en : view.extensions.entrySet( ) )
+            for ( Entry<String,LayeredExtension> en : view.extensions.v( ).entrySet( ) )
             {
                 String extensionKey = en.getKey( );
                 LayeredExtension extension = en.getValue( );
@@ -240,7 +237,7 @@ public class LayeredGui
             clone.setExtensions( cloneExtensions );
 
             // WIP: Link clone with original
-//            for ( Entry<String,LayeredExtension> en : view.extensions.entrySet( ) )
+//            for ( Entry<String,LayeredExtension> en : view.extensions.v( ).entrySet( ) )
 //            {
 //                String extensionKey = en.getKey( );
 //                LayeredExtension extension = en.getValue( );
@@ -254,7 +251,6 @@ public class LayeredGui
 //                    extension.setParent( parent );
 //                }
 //
-//                // WIP: Ugly
 //                LayeredExtension cloneExtension = cloneExtensions.get( extensionKey );
 //
 //                cloneExtension.setParent( extension.getParent( ) );
