@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.units.time;
 
+import java.time.Instant;
+
 /**
  * @author hogye
  */
@@ -825,6 +827,28 @@ public class Time
     public static double[] fromMicroseconds( double... durations_MICROSECONDS )
     {
         return multiply( durations_MICROSECONDS, microsecondsToSu );
+    }
+
+    /**
+     * Converts from java.time.Instant to double posix seconds (system-units).
+     */
+    public static double fromInstant( Instant instant )
+    {
+        long second = instant.getEpochSecond( );
+        long nano = instant.getNano( );
+
+        return second + nano * 1e-9;
+    }
+
+    /**
+     * Converts to java.time.Instant from double posix seconds (system-units).
+     */
+    public static Instant toInstant( double posixSeconds )
+    {
+        long epochSecond = ( long ) posixSeconds;
+        long nanoAdjustment = ( long ) ( ( posixSeconds - epochSecond ) * 1e9 );
+
+        return Instant.ofEpochSecond( epochSecond, nanoAdjustment );
     }
 
     private static double[] multiply( double[] array, double factor )
