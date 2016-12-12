@@ -1,4 +1,4 @@
-package com.metsci.glimpse.layers;
+package com.metsci.glimpse.layers.misc;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
@@ -13,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.util.var.Var;
 
 import net.miginfocom.swing.MigLayout;

@@ -1,4 +1,4 @@
-package com.metsci.glimpse.layers;
+package com.metsci.glimpse.layers.misc;
 
 import java.awt.Color;
 import java.awt.event.ItemListener;

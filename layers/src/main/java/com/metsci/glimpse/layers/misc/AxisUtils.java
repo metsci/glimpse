@@ -1,4 +1,4 @@
-package com.metsci.glimpse.layers;
+package com.metsci.glimpse.layers.misc;
 
 import static com.metsci.glimpse.axis.tagged.TaggedAxisListener1D.newTaggedAxisListener1D;
 

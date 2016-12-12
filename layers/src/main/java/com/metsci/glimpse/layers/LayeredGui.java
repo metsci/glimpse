@@ -43,6 +43,7 @@ import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.layers.misc.LayerCardsPanel;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.util.var.Var;
 

@@ -1,7 +1,7 @@
-package com.metsci.glimpse.layers;
+package com.metsci.glimpse.layers.misc;
 
-import static com.metsci.glimpse.layers.UiUtils.bindLabel;
-import static com.metsci.glimpse.layers.UiUtils.bindToggleButton;
+import static com.metsci.glimpse.layers.misc.UiUtils.bindLabel;
+import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.var.VarUtils.addEntryAddedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addEntryRemovedListener;
 import static javax.swing.BorderFactory.createLineBorder;
@@ -13,7 +13,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.layers.UiUtils.ListenerBinding;
+import com.metsci.glimpse.layers.Facet;
+import com.metsci.glimpse.layers.Layer;
+import com.metsci.glimpse.layers.View;
+import com.metsci.glimpse.layers.misc.UiUtils.ListenerBinding;
 import com.metsci.glimpse.util.var.ReadableVar;
 
 import net.miginfocom.swing.MigLayout;

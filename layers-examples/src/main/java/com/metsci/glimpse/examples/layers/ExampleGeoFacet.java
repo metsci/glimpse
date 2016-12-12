@@ -1,8 +1,8 @@
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.layers.AxisUtils.addAxisListener2D;
-import static com.metsci.glimpse.layers.AxisUtils.addTaggedAxisListener1D;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
+import static com.metsci.glimpse.layers.misc.AxisUtils.addAxisListener2D;
+import static com.metsci.glimpse.layers.misc.AxisUtils.addTaggedAxisListener1D;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 
 import com.metsci.glimpse.axis.Axis1D;
