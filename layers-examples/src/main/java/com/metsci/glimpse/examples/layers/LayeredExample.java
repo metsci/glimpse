@@ -8,14 +8,9 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
@@ -53,7 +48,7 @@ public class LayeredExample
 
             GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
             GeoTrait geoLinkage = new GeoTrait( true, proj );
-            geoLinkage.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+            geoLinkage.setProjectedBounds( Length::fromNauticalMiles, -2, +2, -2, +2 );
             // WIP: Initialize selection box
             // WIP: Specify axis units for display
 
