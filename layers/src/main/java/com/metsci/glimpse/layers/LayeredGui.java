@@ -5,8 +5,10 @@ import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
@@ -29,7 +31,11 @@ import java.util.Map.Entry;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 import com.google.common.collect.BiMap;
@@ -267,11 +273,6 @@ public class LayeredGui
             }
         }
 
-        for ( Layer layer : this.layers.v( ) )
-        {
-            view.addLayer( layer );
-        }
-
         GLAutoDrawable glDrawable = view.getGLDrawable( );
         if ( glDrawable != null )
         {
@@ -279,19 +280,48 @@ public class LayeredGui
             this.animator.start( );
         }
 
-        JButton cloneViewButton = new JButton( "Clone" );
-        cloneViewButton.setToolTipText( "Clone This View" );
-        cloneViewButton.addActionListener( ( ev ) ->
+        for ( Layer layer : this.layers.v( ) )
+        {
+            view.addLayer( layer );
+        }
+
+        // WIP: Get icon in a cleaner way
+        JToggleButton facetsButton = new JToggleButton( this.layerCardsPanel.getIcon( ) );
+        facetsButton.setToolTipText( "Toggle Layers" );
+        JPopupMenu facetsPopup = newButtonPopup( facetsButton );
+
+        // WIP: Remove listener on view closing
+        this.layers.addListener( true, ( ) ->
+        {
+            facetsPopup.removeAll( );
+            for ( Layer layer : this.layers.v( ) )
+            {
+                Facet facet = layer.facets( ).v( ).get( view );
+
+                // XXX: Handle title changes
+                JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+
+                // WIP: Unbind when appropriate
+                bindToggleButton( facetToggle, facet.isVisible );
+
+                facetsPopup.add( facetToggle );
+            }
+        } );
+
+        JButton cloneButton = new JButton( "Clone" );
+        cloneButton.setToolTipText( "Clone This View" );
+        cloneButton.addActionListener( ( ev ) ->
         {
             this.cloneView( view );
         } );
 
         JToolBar toolbar = newToolbar( true );
-        toolbar.add( cloneViewButton );
         for ( Component c : view.getToolbarComponents( ) )
         {
             toolbar.add( c );
         }
+        toolbar.add( cloneButton );
+        toolbar.add( facetsButton );
 
         // XXX: Add support in docking for wildcard viewIds
         String dockingViewIdRoot = view.getClass( ).getName( );
