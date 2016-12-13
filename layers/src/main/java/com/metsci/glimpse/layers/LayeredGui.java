@@ -7,6 +7,7 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
@@ -30,6 +31,7 @@ import java.util.Map.Entry;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
@@ -54,6 +56,8 @@ import com.metsci.glimpse.util.var.Var;
 
 public class LayeredGui
 {
+    public static final Icon layersIcon = requireIcon( "fugue-icons/category.png" );
+
 
     // Model
     public final Var<ImmutableMap<String,ImmutableList<Trait>>> linkages;
@@ -121,7 +125,7 @@ public class LayeredGui
 
         this.layerCardsPanel = new LayerCardsPanel( this.layers );
         JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( "layersView", layerCardsScroller, "Layers", false, null, this.layerCardsPanel.getIcon( ), null );
+        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( "layersView", layerCardsScroller, "Layers", false, null, layersIcon, null );
         this.dockingGroup.addView( layersView );
 
 
@@ -285,9 +289,8 @@ public class LayeredGui
             view.addLayer( layer );
         }
 
-        // WIP: Get icon in a cleaner way
-        JToggleButton facetsButton = new JToggleButton( this.layerCardsPanel.getIcon( ) );
-        facetsButton.setToolTipText( "Toggle Layers" );
+        JToggleButton facetsButton = new JToggleButton( layersIcon );
+        facetsButton.setToolTipText( "Show Layers" );
         JPopupMenu facetsPopup = newButtonPopup( facetsButton );
 
         // WIP: Remove listener on view closing

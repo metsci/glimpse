@@ -67,7 +67,7 @@ public class GeoView extends View
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "LayeredGeo/fugue-icons/map.png" );
+        return requireIcon( "fugue-icons/map.png" );
     }
 
     @Override

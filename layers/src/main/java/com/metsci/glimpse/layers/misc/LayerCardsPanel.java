@@ -1,6 +1,5 @@
 package com.metsci.glimpse.layers.misc;
 
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addElementRemovedListener;
 
@@ -8,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -48,11 +46,6 @@ public class LayerCardsPanel extends JPanel
             JComponent card = this.cards.remove( layer );
             this.remove( card );
         } );
-    }
-
-    public ImageIcon getIcon( )
-    {
-        return requireIcon( "LayerCardsPanel/fugue-icons/category.png" );
     }
 
     public void dispose( )

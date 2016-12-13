@@ -54,7 +54,7 @@ public class TimelineView extends View
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "LayeredTimeline/open-icons/time.png" );
+        return requireIcon( "open-icons/time.png" );
     }
 
     @Override
