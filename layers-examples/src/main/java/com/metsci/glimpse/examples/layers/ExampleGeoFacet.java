@@ -31,6 +31,7 @@ public class ExampleGeoFacet extends ExampleFacet
 
     protected final AxisListener2D geoAxisListener;
     protected final TaggedAxisListener1D timeAxisListener;
+    protected final Runnable visibilityListener;
 
 
     public ExampleGeoFacet( ExampleLayer layer, GeoView view, ExampleStyle style )
@@ -69,14 +70,12 @@ public class ExampleGeoFacet extends ExampleFacet
             this.painter.setTWindow( tMin, tMax );
         } );
 
-        this.isVisible.addListener( true, this::refreshVisibility );
-        this.layer.isVisible.addListener( true, this::refreshVisibility );
-    }
-
-    protected void refreshVisibility( )
-    {
-        boolean visible = ( this.layer.isVisible.v( ) && this.isVisible.v( ) );
-        this.painter.setVisible( visible );
+        this.visibilityListener = ( ) ->
+        {
+            this.painter.setVisible( this.layer.isVisible.v( ) && this.isVisible.v( ) );
+        };
+        this.isVisible.addListener( false, this.visibilityListener );
+        this.layer.isVisible.addListener( true, this.visibilityListener );
     }
 
     @Override
@@ -98,8 +97,8 @@ public class ExampleGeoFacet extends ExampleFacet
     @Override
     public void dispose( boolean reinstalling )
     {
-        this.layer.isVisible.removeListener( this::refreshVisibility );
-        this.isVisible.removeListener( this::refreshVisibility );
+        this.layer.isVisible.removeListener( this.visibilityListener );
+        this.isVisible.removeListener( this.visibilityListener );
 
         TaggedAxis1D timeAxis = this.timeTrait.axis;
         timeAxis.removeAxisListener( this.timeAxisListener );
