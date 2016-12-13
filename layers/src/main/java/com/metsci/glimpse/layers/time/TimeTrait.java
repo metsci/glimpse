@@ -125,4 +125,18 @@ public class TimeTrait extends Trait
         return this.epoch.toPosixMillis( this.selectionCursorTag.getValue( ) );
     }
 
+    public double selectionMin_SU( )
+    {
+        return this.selectionMinTag.getValue( );
+    }
+
+    public double selectionMax_SU( )
+    {
+        return this.selectionMaxTag.getValue( );
+    }
+
+    public double selectionCursor_SU( )
+    {
+        return this.selectionCursorTag.getValue( );
+    }
 }
