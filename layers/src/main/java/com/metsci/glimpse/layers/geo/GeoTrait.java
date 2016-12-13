@@ -4,12 +4,11 @@ import static com.google.common.primitives.Doubles.max;
 import static com.google.common.primitives.Doubles.min;
 
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.Supplier;
 
 import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.LayeredGui;
+import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -22,9 +21,9 @@ public class GeoTrait implements Trait
 
     public static final String geoTraitKey = GeoTrait.class.getName( );
 
-    public static void setDefaultGeoExtender( LayeredGui gui, Supplier<? extends GeoTrait> geoExtender )
+    public static void addGeoLinkage( LayeredGui gui, GeoTrait master )
     {
-        gui.setDefaultExtender( geoTraitKey, GeoTrait.class, geoExtender );
+        gui.addLinkage( geoTraitKey, master );
     }
 
     public static void setGeoTrait( View view, GeoTrait geoTrait )

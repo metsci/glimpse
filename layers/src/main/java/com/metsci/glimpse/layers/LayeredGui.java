@@ -23,9 +23,9 @@ import java.awt.Component;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Supplier;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
@@ -51,7 +51,7 @@ public class LayeredGui
 {
 
     // Model
-    public final Var<ImmutableMap<String,Supplier<? extends Trait>>> extenders;
+    public final Var<ImmutableMap<String,ImmutableList<Linkage>>> linkages;
     public final Var<ImmutableSet<View>> views;
     public final Var<ImmutableList<Layer>> layers;
 
@@ -74,7 +74,7 @@ public class LayeredGui
         // Model
         //
 
-        this.extenders = new Var<>( ImmutableMap.of( ), notNull );
+        this.linkages = new Var<>( ImmutableMap.of( ), notNull );
         this.views = new Var<>( ImmutableSet.of( ), notNull );
         this.layers = new Var<>( ImmutableList.of( ), notNull );
 
@@ -158,18 +158,27 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
-    public <T extends Trait> void setDefaultExtender( String traitKey, Class<T> traitClass, Supplier<? extends T> extender )
+    public void addLinkage( String traitKey, Trait master )
     {
-        // The traitClass arg isn't currently used, but it might be used in the future
-        // to check trait instances supplied at runtime.
-        //
-        // More importantly, it forces the caller to think about trait class, which is
-        // important. And as a side benefit, it makes it more cumbersome to call this method
-        // directly, which encourages callers to use convenience functions with more natural
-        // typing, such as GeoTrait.setDefaultGeoExtender().
-        //
+        Linkage linkage = new Linkage( master, false );
+        this.addLinkage( traitKey, linkage );
+    }
 
-        this.extenders.update( ( v ) -> mapWith( v, traitKey, extender ) );
+    protected void addLinkage( String traitKey, Linkage linkage )
+    {
+        ImmutableList<Linkage> oldLinkages = this.linkages.v( ).get( traitKey );
+        ImmutableList<Linkage> newLinkages;
+        if ( oldLinkages == null )
+        {
+            newLinkages = ImmutableList.of( linkage );
+        }
+        else
+        {
+            // WIP: Insertion index
+            newLinkages = listPlus( oldLinkages, linkage );
+        }
+
+        this.linkages.update( ( v ) -> mapWith( v, traitKey, newLinkages ) );
     }
 
     public void addView( View view )
@@ -194,19 +203,44 @@ public class LayeredGui
 
     protected void handleViewAdded( View view )
     {
-        Map<String,Trait> traits = new LinkedHashMap<>( );
-        for ( Entry<String,Supplier<? extends Trait>> en : this.extenders.v( ).entrySet( ) )
+        Map<String,Trait> oldTraits = view.traits.v( );
+        Map<String,Trait> newTraits = new LinkedHashMap<>( );
+        for ( Entry<String,ImmutableList<Linkage>> en : this.linkages.v( ).entrySet( ) )
         {
             String traitKey = en.getKey( );
-            Supplier<? extends Trait> extender = en.getValue( );
-            if ( !view.traits.v( ).containsKey( traitKey ) )
-            {
-                traits.put( traitKey, extender.get( ) );
-            }
-        }
-        view.setTraits( traits );
+            List<Linkage> linkages = en.getValue( );
+            Trait trait = oldTraits.get( traitKey );
 
-        // WIP: Link traits where possible
+            // If the view doesn't have this trait yet, create one compatible with the default linkage
+            if ( trait == null )
+            {
+                trait = linkages.get( 0 ).create( );
+            }
+
+            // If the trait doesn't have a parent, look for a compatible linkage
+            if ( trait.parent( ).v( ) == null )
+            {
+                for ( Linkage linkage : linkages )
+                {
+                    if ( linkage.canAdd( trait ) )
+                    {
+                        linkage.add( trait );
+                        break;
+                    }
+                }
+            }
+
+            // If the trait still doesn't have a parent, create an implicit linkage
+            if ( trait.parent( ).v( ) == null )
+            {
+                Linkage linkage = new Linkage( trait.createClone( ), true );
+                this.addLinkage( traitKey, linkage );
+                linkage.add( trait );
+            }
+
+            newTraits.put( traitKey, trait );
+        }
+        view.setTraits( newTraits );
 
         for ( Layer layer : this.layers.v( ) )
         {
@@ -287,6 +321,8 @@ public class LayeredGui
 
     protected void handleViewRemoved( View view )
     {
+        // WIP: Remove abandoned implicit linkages
+
         GLAutoDrawable glDrawable = view.getGLDrawable( );
         if ( glDrawable != null )
         {

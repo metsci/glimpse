@@ -6,14 +6,13 @@ import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MIN_TIME;
 import static java.util.Arrays.asList;
 
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.Supplier;
 
 import com.google.common.base.Objects;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.LayeredGui;
+import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.util.var.Var;
@@ -23,9 +22,9 @@ public class TimeTrait implements Trait
 
     public static final String timeTraitKey = TimeTrait.class.getName( );
 
-    public static void setDefaultTimeExtender( LayeredGui gui, Supplier<? extends TimeTrait> timeExtender )
+    public static void addTimeLinkage( LayeredGui gui, TimeTrait master )
     {
-        gui.setDefaultExtender( timeTraitKey, TimeTrait.class, timeExtender );
+        gui.addLinkage( timeTraitKey, master );
     }
 
     public static void setTimeTrait( View view, TimeTrait timeTrait )

@@ -1,22 +1,16 @@
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.layers.geo.GeoTrait.setDefaultGeoExtender;
-import static com.metsci.glimpse.layers.time.TimeTrait.setDefaultTimeExtender;
+import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
+import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import javax.swing.SwingUtilities;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
@@ -49,34 +43,20 @@ public class LayeredExample
             initTinyLaf( );
 
 
-            // Set up defaults for traits (e.g. time and geo)
+            // Set up default traits
             //
 
-            Supplier<GeoTrait> geoExtender = ( ) ->
-            {
-                GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
+            GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
+            GeoTrait geoTrait = new GeoTrait( proj );
+            geoTrait.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+            // WIP: Initialize selection box
+            // WIP: Specify axis units for display
 
-                GeoTrait trait = new GeoTrait( proj );
-
-                trait.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
-                // WIP: Initialize selection box
-                // WIP: Specify axis units for display
-
-                return trait;
-            };
-
-            Supplier<TimeTrait> timeExtender = ( ) ->
-            {
-                Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
-
-                TimeTrait trait = new TimeTrait( epoch );
-
-                trait.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
-                trait.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
-                // WIP: Specify timezone for display
-
-                return trait;
-            };
+            Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
+            TimeTrait timeTrait = new TimeTrait( epoch );
+            timeTrait.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
+            timeTrait.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
+            // WIP: Specify timezone for display
 
 
             // Create some layers
@@ -131,43 +111,40 @@ public class LayeredExample
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
 
-            setDefaultGeoExtender( gui, geoExtender );
-            setDefaultTimeExtender( gui, timeExtender );
+            addGeoLinkage( gui, geoTrait );
+            addTimeLinkage( gui, timeTrait );
 
-            GeoView geo = new GeoView( );
-            gui.addView( geo );
-
-            TimelineView timeline = new TimelineView( );
-            gui.addView( timeline );
+            gui.addView( new GeoView( ) );
+            gui.addView( new TimelineView( ) );
 
             gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
 
 
 
-            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
-            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
-            exec.schedule( ( ) ->
-            {
-                SwingUtilities.invokeLater( ( ) ->
-                {
-
-                    gui.addView( new GeoView( ) );
-
-
-//                    GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
+//            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
+//            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
+//            exec.schedule( ( ) ->
+//            {
+//                SwingUtilities.invokeLater( ( ) ->
+//                {
 //
-//                    GeoTrait trait = new GeoTrait( proj );
+//                    gui.addView( new GeoView( ) );
 //
-//                    trait.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
-//                    // WIP: Initialize selection box
-//                    // WIP: Specify axis units for display
 //
-//                    setGeoTrait( geo, trait );
-
-
-                } );
-            }, 5, TimeUnit.SECONDS );
+////                    GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
+////
+////                    GeoTrait trait = new GeoTrait( proj );
+////
+////                    trait.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+////                    // WIP: Initialize selection box
+////                    // WIP: Specify axis units for display
+////
+////                    setGeoTrait( geo, trait );
+//
+//
+//                } );
+//            }, 5, TimeUnit.SECONDS );
 
 
 
