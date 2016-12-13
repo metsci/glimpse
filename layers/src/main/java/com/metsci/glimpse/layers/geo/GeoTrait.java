@@ -71,7 +71,13 @@ public class GeoTrait extends Trait
     @Override
     public GeoTrait copy( boolean isLinkage )
     {
-        return new GeoTrait( isLinkage, this.proj );
+        GeoTrait copy = new GeoTrait( isLinkage, this.proj );
+
+        // Simplest way to copy axis settings
+        copy.axis.setParent( this.axis );
+        copy.axis.setParent( null );
+
+        return copy;
     }
 
     public void setBounds( LatLonGeo center, DoubleUnaryOperator unitsToSu, double ewExtent_UNITS, double nsExtent_UNITS )

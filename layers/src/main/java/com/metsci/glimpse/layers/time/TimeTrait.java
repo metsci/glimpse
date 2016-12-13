@@ -82,7 +82,13 @@ public class TimeTrait extends Trait
     @Override
     public TimeTrait copy( boolean isLinkage )
     {
-        return new TimeTrait( isLinkage, this.epoch );
+        TimeTrait copy = new TimeTrait( isLinkage, this.epoch );
+
+        // Simplest way to copy axis settings
+        copy.axis.setParent( this.axis );
+        copy.axis.setParent( null );
+
+        return copy;
     }
 
     public void setRelativeBounds( DoubleUnaryOperator unitsToSeconds, double min_UNITS_SINCE_EPOCH, double max_UNITS_SINCE_EPOCH )
