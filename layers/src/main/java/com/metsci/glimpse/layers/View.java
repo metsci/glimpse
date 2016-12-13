@@ -101,17 +101,17 @@ public abstract class View
             Trait oldTrait = oldTraits.get( traitKey );
 
             // Link newTrait to oldParent (if they are compatible), unless newTrait already has a parent
-            if ( oldTrait != null && newTrait.parent( ).v( ) == null )
+            if ( oldTrait != null && newTrait.parent.v( ) == null )
             {
-                Trait oldParent = oldTrait.parent( ).v( );
+                Trait oldParent = oldTrait.parent.v( );
 
                 // Unlink oldTrait from oldParent
-                oldTrait.parent( ).set( null );
+                oldTrait.parent.set( null );
 
                 // Link newTrait to oldParent, if possible
-                if ( newTrait.parent( ).validateFn.test( oldParent ) )
+                if ( newTrait.parent.validateFn.test( oldParent ) )
                 {
-                    newTrait.parent( ).set( oldParent );
+                    newTrait.parent.set( oldParent );
                 }
             }
         }
@@ -128,7 +128,7 @@ public abstract class View
 
     protected abstract void init( );
 
-    public abstract View createClone( );
+    public abstract View copy( );
 
     /**
      * This method is protected to discourage access from client code, while still allowing
@@ -172,7 +172,7 @@ public abstract class View
 
         for ( Trait trait : this._traits.v( ).values( ) )
         {
-            trait.parent( ).set( null );
+            trait.parent.set( null );
         }
         this._traits.set( ImmutableMap.of( ) );
     }

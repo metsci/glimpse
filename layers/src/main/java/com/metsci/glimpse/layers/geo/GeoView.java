@@ -96,7 +96,7 @@ public class GeoView extends View
     }
 
     @Override
-    public GeoView createClone( )
+    public GeoView copy( )
     {
         return new GeoView( );
     }

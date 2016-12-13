@@ -84,7 +84,7 @@ public class TimelineView extends View
     }
 
     @Override
-    public TimelineView createClone( )
+    public TimelineView copy( )
     {
         return new TimelineView( );
     }

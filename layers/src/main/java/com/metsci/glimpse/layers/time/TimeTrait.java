@@ -15,9 +15,8 @@ import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.util.var.Var;
 
-public class TimeTrait implements Trait
+public class TimeTrait extends Trait
 {
 
     public static final String timeTraitKey = TimeTrait.class.getName( );
@@ -45,11 +44,11 @@ public class TimeTrait implements Trait
     protected final Tag selectionMaxTag;
     protected final Tag selectionCursorTag;
 
-    protected final Var<Trait> parent;
 
-
-    public TimeTrait( Epoch epoch )
+    public TimeTrait( boolean isLinkage, Epoch epoch )
     {
+        super( isLinkage );
+
         this.epoch = epoch;
 
         // XXX: Duplicated from StackedTimePlot2D.addTimeTags()
@@ -59,23 +58,6 @@ public class TimeTrait implements Trait
         this.selectionCursorTag = this.axis.addTag( CURRENT_TIME, 10 );
         this.axis.addConstraint( new OrderedConstraint( "order", asList( MIN_TIME, CURRENT_TIME, MAX_TIME ) ) );
 
-        this.parent = new Var<>( null, ( candidate ) ->
-        {
-            if ( candidate == null )
-            {
-                return true;
-            }
-            else if ( candidate instanceof TimeTrait )
-            {
-                TimeTrait parent = ( TimeTrait ) candidate;
-                return Objects.equal( parent.epoch, this.epoch );
-            }
-            else
-            {
-                return false;
-            }
-        } );
-
         this.parent.addListener( true, ( ) ->
         {
             TimeTrait newParent = ( TimeTrait ) this.parent.v( );
@@ -84,15 +66,23 @@ public class TimeTrait implements Trait
     }
 
     @Override
-    public Var<Trait> parent( )
+    protected boolean isValidParent( Trait linkage )
     {
-        return this.parent;
+        if ( linkage instanceof TimeTrait )
+        {
+            TimeTrait timeLinkage = ( TimeTrait ) linkage;
+            return Objects.equal( timeLinkage.epoch, this.epoch );
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override
-    public TimeTrait createClone( )
+    public TimeTrait copy( boolean isLinkage )
     {
-        return new TimeTrait( this.epoch );
+        return new TimeTrait( isLinkage, this.epoch );
     }
 
     public void setRelativeBounds( DoubleUnaryOperator unitsToSeconds, double min_UNITS_SINCE_EPOCH, double max_UNITS_SINCE_EPOCH )

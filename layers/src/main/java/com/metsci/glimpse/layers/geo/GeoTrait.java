@@ -13,10 +13,9 @@ import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Azimuth;
-import com.metsci.glimpse.util.var.Var;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class GeoTrait implements Trait
+public class GeoTrait extends Trait
 {
 
     public static final String geoTraitKey = GeoTrait.class.getName( );
@@ -40,30 +39,13 @@ public class GeoTrait implements Trait
     public final GeoProjection proj;
     public final Axis2D axis;
 
-    protected final Var<Trait> parent;
 
-
-    public GeoTrait( GeoProjection proj )
+    public GeoTrait( boolean isLinkage, GeoProjection proj )
     {
+        super( isLinkage );
+
         this.proj = proj;
         this.axis = new Axis2D( );
-
-        this.parent = new Var<>( null, ( candidate ) ->
-        {
-            if ( candidate == null )
-            {
-                return true;
-            }
-            else if ( candidate instanceof GeoTrait )
-            {
-                GeoTrait geoCandidate = ( GeoTrait ) candidate;
-                return Objects.equal( geoCandidate.proj, this.proj );
-            }
-            else
-            {
-                return false;
-            }
-        } );
 
         this.parent.addListener( true, ( ) ->
         {
@@ -73,15 +55,23 @@ public class GeoTrait implements Trait
     }
 
     @Override
-    public Var<Trait> parent( )
+    protected boolean isValidParent( Trait linkage )
     {
-        return this.parent;
+        if ( linkage instanceof GeoTrait )
+        {
+            GeoTrait geoLinkage = ( GeoTrait ) linkage;
+            return Objects.equal( geoLinkage.proj, this.proj );
+        }
+        else
+        {
+            return false;
+        }
     }
 
     @Override
-    public GeoTrait createClone( )
+    public GeoTrait copy( boolean isLinkage )
     {
-        return new GeoTrait( this.proj );
+        return new GeoTrait( isLinkage, this.proj );
     }
 
     public void setBounds( LatLonGeo center, DoubleUnaryOperator unitsToSu, double ewExtent_UNITS, double nsExtent_UNITS )

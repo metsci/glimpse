@@ -23,7 +23,6 @@ import java.awt.Component;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,7 +50,7 @@ public class LayeredGui
 {
 
     // Model
-    public final Var<ImmutableMap<String,ImmutableList<Linkage>>> linkages;
+    public final Var<ImmutableMap<String,ImmutableList<Trait>>> linkages;
     public final Var<ImmutableSet<View>> views;
     public final Var<ImmutableList<Layer>> layers;
 
@@ -158,32 +157,57 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
-    public void addLinkage( String traitKey, Trait master )
+    public Trait addLinkage( String traitKey, Trait template )
     {
-        Linkage linkage = new Linkage( master, false );
-        this.addLinkage( traitKey, linkage );
-    }
+        Trait linkage = template.copy( true );
 
-    protected void addLinkage( String traitKey, Linkage linkage )
-    {
-        ImmutableList<Linkage> oldLinkages = this.linkages.v( ).get( traitKey );
-        ImmutableList<Linkage> newLinkages;
+        ImmutableList<Trait> oldLinkages = this.linkages.v( ).get( traitKey );
+        ImmutableList<Trait> newLinkages;
         if ( oldLinkages == null )
         {
             newLinkages = ImmutableList.of( linkage );
         }
         else
         {
-            // WIP: Insertion index
+            // WIP: What should insertion index be?
             newLinkages = listPlus( oldLinkages, linkage );
         }
 
         this.linkages.update( ( v ) -> mapWith( v, traitKey, newLinkages ) );
+
+        return linkage;
     }
 
     public void addView( View view )
     {
         this.views.update( ( v ) -> setPlus( v, view ) );
+    }
+
+    public void cloneView( View view )
+    {
+        Map<String,Trait> newTraits = new LinkedHashMap<>( );
+        for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
+        {
+            String traitKey = en.getKey( );
+
+            Trait oldTrait = en.getValue( );
+            if ( oldTrait.parent.v( ) == null )
+            {
+                // XXX: Mark linkage as implicit
+                Trait linkage = this.addLinkage( traitKey, oldTrait );
+                oldTrait.parent.set( linkage );
+            }
+
+            Trait newTrait = oldTrait.copy( false );
+            newTrait.parent.set( oldTrait.parent.v( ) );
+
+            newTraits.put( traitKey, newTrait );
+        }
+
+        View newView = view.copy( );
+        newView.setTraits( newTraits );
+
+        this.addView( newView );
     }
 
     public void removeView( View view )
@@ -203,44 +227,45 @@ public class LayeredGui
 
     protected void handleViewAdded( View view )
     {
-        Map<String,Trait> oldTraits = view.traits.v( );
-        Map<String,Trait> newTraits = new LinkedHashMap<>( );
-        for ( Entry<String,ImmutableList<Linkage>> en : this.linkages.v( ).entrySet( ) )
+        // Fill in traits the view doesn't already have
+        Map<String,Trait> newTraits = new LinkedHashMap<>( view.traits.v( ) );
+        for ( String traitKey : this.linkages.v( ).keySet( ) )
+        {
+            newTraits.computeIfAbsent( traitKey, ( k ) ->
+            {
+                // The default linkage is the one at index 0
+                return this.linkages.v( ).get( traitKey ).get( 0 ).copy( false );
+            } );
+        }
+        view.setTraits( newTraits );
+
+        // Link traits that aren't already linked
+        for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
         {
             String traitKey = en.getKey( );
-            List<Linkage> linkages = en.getValue( );
-            Trait trait = oldTraits.get( traitKey );
-
-            // If the view doesn't have this trait yet, create one compatible with the default linkage
-            if ( trait == null )
-            {
-                trait = linkages.get( 0 ).create( );
-            }
+            Trait trait = en.getValue( );
 
             // If the trait doesn't have a parent, look for a compatible linkage
-            if ( trait.parent( ).v( ) == null )
+            if ( trait.parent.v( ) == null )
             {
-                for ( Linkage linkage : linkages )
+                for ( Trait linkage : this.linkages.v( ).get( traitKey ) )
                 {
-                    if ( linkage.canAdd( trait ) )
+                    if ( trait.parent.validateFn.test( linkage ) )
                     {
-                        linkage.add( trait );
+                        trait.parent.set( linkage );
                         break;
                     }
                 }
             }
 
             // If the trait still doesn't have a parent, create an implicit linkage
-            if ( trait.parent( ).v( ) == null )
+            if ( trait.parent.v( ) == null )
             {
-                Linkage linkage = new Linkage( trait.createClone( ), true );
-                this.addLinkage( traitKey, linkage );
-                linkage.add( trait );
+                // XXX: Mark the linkage as implicit
+                Trait linkage = this.addLinkage( traitKey, trait );
+                trait.parent.set( linkage );
             }
-
-            newTraits.put( traitKey, trait );
         }
-        view.setTraits( newTraits );
 
         for ( Layer layer : this.layers.v( ) )
         {
@@ -258,39 +283,7 @@ public class LayeredGui
         cloneViewButton.setToolTipText( "Clone This View" );
         cloneViewButton.addActionListener( ( ev ) ->
         {
-            View clone = view.createClone( );
-
-            Map<String,Trait> cloneTraits = new LinkedHashMap<>( );
-
-            for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
-            {
-                String traitKey = en.getKey( );
-                Trait trait = en.getValue( );
-                cloneTraits.put( traitKey, trait.createClone( ) );
-            }
-            clone.setTraits( cloneTraits );
-
-            // WIP: Link clone with original
-//            for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
-//            {
-//                String traitKey = en.getKey( );
-//                Trait trait = en.getValue( );
-//
-//                if ( trait.getParent( ) == null )
-//                {
-//                    Trait parent = trait.createClone( );
-//
-//                    // WIP: Register parent with LayeredGui, as a "linkage"
-//
-//                    trait.setParent( parent );
-//                }
-//
-//                Trait cloneTrait = cloneTraits.get( traitKey );
-//
-//                cloneTrait.setParent( trait.getParent( ) );
-//            }
-
-            this.addView( clone );
+            this.cloneView( view );
         } );
 
         JToolBar toolbar = newToolbar( true );
