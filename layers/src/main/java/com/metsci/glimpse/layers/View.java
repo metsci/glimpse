@@ -93,18 +93,15 @@ public abstract class View
         Map<String,Trait> oldTraits = this._traits.v( );
         this._traits.update( ( v ) -> mapWith( v, newTraits ) );
 
-        // Migrate parentage where possible
+        // Migrate parentage where appropriate
         for ( Entry<? extends String,? extends Trait> en : newTraits.entrySet( ) )
         {
             String traitKey = en.getKey( );
-
-            // Unlink newTrait, to be sure we have a clean slate
             Trait newTrait = en.getValue( );
-            newTrait.parent( ).set( null );
-
-            // Migrate oldTrait's parentage to newTrait, if possible
             Trait oldTrait = oldTraits.get( traitKey );
-            if ( oldTrait != null )
+
+            // Link newTrait to oldParent (if they are compatible), unless newTrait already has a parent
+            if ( oldTrait != null && newTrait.parent( ).v( ) == null )
             {
                 Trait oldParent = oldTrait.parent( ).v( );
 
