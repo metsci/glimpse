@@ -300,14 +300,16 @@ public class LayeredGui
             for ( Layer layer : this.layers.v( ) )
             {
                 Facet facet = layer.facets( ).v( ).get( view );
+                if ( facet != null )
+                {
+                    // XXX: Handle title changes
+                    JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
 
-                // XXX: Handle title changes
-                JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+                    // WIP: Unbind when appropriate
+                    bindToggleButton( facetToggle, facet.isVisible );
 
-                // WIP: Unbind when appropriate
-                bindToggleButton( facetToggle, facet.isVisible );
-
-                facetsPopup.add( facetToggle );
+                    facetsPopup.add( facetToggle );
+                }
             }
         } );
 
