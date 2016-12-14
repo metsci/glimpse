@@ -66,12 +66,12 @@ public abstract class View
 
         if ( trait == null )
         {
-            throw new RuntimeException( "Required trait is missing: key = " + traitKey + ", required-class = " + traitClass.getName( ) );
+            throw new TraitMissingException( traitKey, traitClass );
         }
 
         if ( !traitClass.isInstance( trait ) )
         {
-            throw new RuntimeException( "Trait type mismatch: key = " + traitKey + ", required-class = " + traitClass.getName( ) + ", actual-class = " + trait.getClass( ).getName( ) );
+            throw new TraitClassMismatchException( traitKey, traitClass, trait );
         }
 
         return traitClass.cast( trait );
