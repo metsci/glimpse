@@ -101,7 +101,7 @@ public class ExampleGeoFacet extends ExampleFacet
         this.disposables.dispose( );
 
         this.view.dataPainter.removePainter( this.painter );
-        this.view.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+        this.view.canvas.getGLDrawable( ).invoke( false, ( glDrawable ) ->
         {
             GlimpseContext context = this.view.canvas.getGlimpseContext( );
             this.painter.dispose( context );
