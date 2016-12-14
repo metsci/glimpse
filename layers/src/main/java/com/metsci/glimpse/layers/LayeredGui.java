@@ -332,13 +332,6 @@ public class LayeredGui
             }
         }
 
-        GLAutoDrawable glDrawable = view.getGLDrawable( );
-        if ( glDrawable != null )
-        {
-            this.animator.add( glDrawable );
-            this.animator.start( );
-        }
-
         for ( Layer layer : this.layers.v( ) )
         {
             view.addLayer( layer );
@@ -396,7 +389,7 @@ public class LayeredGui
         // When the user closes a dockingView, we will need to know the corresponding view
         this.dockingViews.put( view, dockingView );
 
-        // Clean up after ourselves when the view closes
+        // Clean up some locals when the view closes
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
@@ -409,6 +402,13 @@ public class LayeredGui
                 }
             }
         } );
+
+        GLAutoDrawable glDrawable = view.getGLDrawable( );
+        if ( glDrawable != null )
+        {
+            this.animator.add( glDrawable );
+            this.animator.start( );
+        }
     }
 
     protected void handleViewRemoved( View view )
