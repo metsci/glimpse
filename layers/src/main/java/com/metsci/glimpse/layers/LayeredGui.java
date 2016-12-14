@@ -53,6 +53,61 @@ import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.Var;
 
+/**
+ * A {@link LayeredGui} represents a number of {@link View}s and a number of {@link Layer}s.
+ * Each layer is given an opportunity to display a representation of itself on each view.
+ * Layers and views can be added and removed dynamically.
+ * <p>
+ * A layer typically has a different representation in each view -- for example, a TracksLayer
+ * might show a spatial representation in a geo view, and a temporal representation in a
+ * timeline view. The representation of a particular layer on a particular view is called a
+ * {@link Facet}.
+ * <p>
+ * There can be more than one view of a given type -- for example, two different geo views.
+ * A layer may display itself differently on each of these views. For example, if there are
+ * two geo views with different projections, the TracksLayer might have separate facets for
+ * the two views: one facet showing the track points projected one way, the other facet showing
+ * the same track points projected a different way.
+ * <p>
+ * A view can be configured by modifying its {@link Trait}s, which inform the view's facets
+ * about what they should be displaying. For example, a geo trait might contain a projection,
+ * and a time trait might contain a selected time. The facets for each view can base their
+ * rendering on these traits -- so facets on geo-view #1 can use projection #1 and selected
+ * time #1, while facets on geo-view #2 use projection #2 and selected time #2.
+ * <p>
+ * It is important to note that every view has every trait. A geo view has <em>both</em> a geo
+ * trait <em>and</em> a time trait. A timeline view also has both a geo trait and a time trait.
+ * <p>
+ * It is possible to define a custom trait, and add it to the LayeredGui. Every view will then
+ * have its own instance of the custom trait, so that a facet on any view can consult that trait.
+ * For example, if a scatter plot has been added, there may be a scatter trait that contains
+ * the bounds of the selection window in the XY space of the scatter plot. A layer can then
+ * have a facet on a geo view which highlights the geo locations of the points that are selected
+ * in the scatter plot.
+ * <p>
+ * Trait instances can be linked to each other. For example, two timeline views can have their
+ * time traits linked together, so that adjusting the selection window in one timeline affects
+ * the selection window in the other timeline as well. For another example, a geo view can have
+ * its time trait linked to the time trait of a timeline view, so that a facet on the geo can
+ * highlight points inside the time window that is selected on the timeline.
+ * <p>
+ * To be linked, two trait instances must be compatible with each other. Compatibility is checked
+ * using the {@link Var#validateFn} of the {@link Trait#parent} var.
+ * <p>
+ * For flexibility, traits that are owned by views are not linked directly to each other, but
+ * are instead linked to a common "linkage." A linkage is simply a trait object that is used
+ * as a shared parent for some number of child traits.
+ * <p>
+ * When a new view is added, if it is missing a trait for which there is an existing linkage,
+ * the new view's trait is populated by making a copy of the linkage. This can be used to set
+ * default values for a trait: first add a linkage with the desired settings, and then any views
+ * subsequently added, which don't already have that trait defined, will inherit the default
+ * values from the linkage.
+ * <p>
+ * When a new view is added, an attempt is made to link each of its traits to an existing linkage.
+ * If no compatible linkage is found, the trait is left unlinked -- however, it may end up linked
+ * automatically later on, if another view with a compatible trait is added.
+ */
 public class LayeredGui
 {
     public static final Icon layersIcon = requireIcon( "fugue-icons/category.png" );
