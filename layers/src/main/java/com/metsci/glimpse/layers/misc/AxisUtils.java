@@ -10,6 +10,7 @@ import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
+import com.metsci.glimpse.util.var.Disposable;
 
 public class AxisUtils
 {
@@ -18,13 +19,12 @@ public class AxisUtils
      * Adds the listener to the axis, and also:
      * <ul>
      * <li>Invokes the listener immediately, if {@code runImmediately} is true
-     * <li>Returns the listener
+     * <li>Returns a {@link Disposable} for removing the listener
      * </ul>
      * This can improve conciseness in controller code, where we often want to: define
-     * a lambda, add it as a listener, run it immediately, and store a reference to the
-     * lambda (so that the listener can be removed later).
+     * a lambda, add it as a listener, run it immediately, and remove the listener later.
      */
-    public static AxisListener1D addAxisListener1D( Axis1D axis, boolean runImmediately, AxisListener1D listener )
+    public static Disposable addAxisListener1D( Axis1D axis, boolean runImmediately, AxisListener1D listener )
     {
         if ( runImmediately )
         {
@@ -33,20 +33,22 @@ public class AxisUtils
 
         axis.addAxisListener( listener );
 
-        return listener;
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener );
+        };
     }
 
     /**
      * Adds the listener to the axis, and also:
      * <ul>
      * <li>Invokes the listener immediately, if {@code runImmediately} is true
-     * <li>Returns the listener
+     * <li>Returns a {@link Disposable} for removing the listener
      * </ul>
      * This can improve conciseness in controller code, where we often want to: define
-     * a lambda, add it as a listener, run it immediately, and store a reference to the
-     * lambda (so that the listener can be removed later).
+     * a lambda, add it as a listener, run it immediately, and remove the listener later.
      */
-    public static TaggedAxisListener1D addTaggedAxisListener1D( TaggedAxis1D axis, boolean runImmediately, Consumer<TaggedAxis1D> tagsUpdatedFn )
+    public static Disposable addTaggedAxisListener1D( TaggedAxis1D axis, boolean runImmediately, Consumer<TaggedAxis1D> tagsUpdatedFn )
     {
         return addTaggedAxisListener1D( axis, runImmediately, newTaggedAxisListener1D( tagsUpdatedFn ) );
     }
@@ -55,13 +57,12 @@ public class AxisUtils
      * Adds the listener to the axis, and also:
      * <ul>
      * <li>Invokes the listener immediately, if {@code runImmediately} is true
-     * <li>Returns the listener
+     * <li>Returns a {@link Disposable} for removing the listener
      * </ul>
      * This can improve conciseness in controller code, where we often want to: define
-     * a lambda, add it as a listener, run it immediately, and store a reference to the
-     * lambda (so that the listener can be removed later).
+     * a lambda, add it as a listener, run it immediately, and remove the listener later.
      */
-    public static TaggedAxisListener1D addTaggedAxisListener1D( TaggedAxis1D axis, boolean runImmediately, TaggedAxisListener1D listener )
+    public static Disposable addTaggedAxisListener1D( TaggedAxis1D axis, boolean runImmediately, TaggedAxisListener1D listener )
     {
         if ( runImmediately )
         {
@@ -70,20 +71,22 @@ public class AxisUtils
 
         axis.addAxisListener( listener );
 
-        return listener;
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener );
+        };
     }
 
     /**
      * Adds the listener to the axis, and also:
      * <ul>
      * <li>Invokes the listener immediately, if {@code runImmediately} is true
-     * <li>Returns the listener
+     * <li>Returns a {@link Disposable} for removing the listener
      * </ul>
      * This can improve conciseness in controller code, where we often want to: define
-     * a lambda, add it as a listener, run it immediately, and store a reference to the
-     * lambda (so that the listener can be removed later).
+     * a lambda, add it as a listener, run it immediately, and remove the listener later.
      */
-    public static AxisListener2D addAxisListener2D( Axis2D axis, boolean runImmediately, AxisListener2D listener )
+    public static Disposable addAxisListener2D( Axis2D axis, boolean runImmediately, AxisListener2D listener )
     {
         if ( runImmediately )
         {
@@ -92,7 +95,10 @@ public class AxisUtils
 
         axis.addAxisListener( listener );
 
-        return listener;
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener );
+        };
     }
 
 }

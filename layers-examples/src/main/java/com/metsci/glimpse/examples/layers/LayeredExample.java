@@ -8,9 +8,14 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
@@ -122,17 +127,17 @@ public class LayeredExample
 
 
 
-//            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
-//            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
-//            exec.schedule( ( ) ->
-//            {
-//                SwingUtilities.invokeLater( ( ) ->
-//                {
-//
-//                    GeoView geo2 = new GeoView( );
-//                    gui.addView( geo2 );
-//
-//
+            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
+            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
+            exec.schedule( ( ) ->
+            {
+                SwingUtilities.invokeLater( ( ) ->
+                {
+
+                    GeoView geo2 = new GeoView( );
+                    gui.addView( geo2 );
+
+
 //                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
 //
 //                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
@@ -142,10 +147,10 @@ public class LayeredExample
 //                    // WIP: Specify axis units for display
 //
 //                    GeoTrait.setGeoTrait( geo2, geoTrait2 );
-//
-//
-//                } );
-//            }, 5, TimeUnit.SECONDS );
+
+
+                } );
+            }, 5, TimeUnit.SECONDS );
 
 
 

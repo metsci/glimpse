@@ -7,9 +7,7 @@ import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.time.TimeTrait;
@@ -17,6 +15,10 @@ import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.var.DisposableGroup;
+import com.metsci.glimpse.util.var.Listenable;
+import com.metsci.glimpse.util.var.ListenableGroup;
+import com.metsci.glimpse.util.var.VarEvent;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 public class ExampleTimelineFacet extends ExampleFacet
@@ -31,9 +33,7 @@ public class ExampleTimelineFacet extends ExampleFacet
     protected final TimePlotInfo row;
     protected final ExampleTimelinePainter painter;
 
-    protected final AxisListener2D geoAxisListener;
-    protected final TaggedAxisListener1D timeAxisListener;
-    protected final Runnable visibilityListener;
+    protected final DisposableGroup disposables;
 
 
     public ExampleTimelineFacet( ExampleLayer layer, TimelineView view, ExampleStyle style )
@@ -51,8 +51,10 @@ public class ExampleTimelineFacet extends ExampleFacet
         this.painter = new ExampleTimelinePainter( style );
         this.row.addPainter( this.painter );
 
+        this.disposables = new DisposableGroup( );
+
         Axis2D geoAxis = this.geoTrait.axis;
-        this.geoAxisListener = addAxisListener2D( geoAxis, true, ( axis ) ->
+        this.disposables.add( addAxisListener2D( geoAxis, true, ( axis ) ->
         {
             Axis1D xAxis = geoAxis.getAxisX( );
             Axis1D yAxis = geoAxis.getAxisY( );
@@ -63,10 +65,10 @@ public class ExampleTimelineFacet extends ExampleFacet
             float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5*yAxis.getSelectionSize( ) );
 
             this.painter.setXyWindow( xMin, xMax, yMin, yMax );
-        } );
+        } ) );
 
         TaggedAxis1D timeAxis = this.timeTrait.axis;
-        this.timeAxisListener = addTaggedAxisListener1D( timeAxis, true, ( axis ) ->
+        this.disposables.add( addTaggedAxisListener1D( timeAxis, true, ( axis ) ->
         {
             Epoch epoch = this.timeTrait.epoch;
 
@@ -74,14 +76,13 @@ public class ExampleTimelineFacet extends ExampleFacet
             float tMax = ( float ) epoch.fromPosixMillis( this.timeTrait.selectionMax_PMILLIS( ) );
 
             this.painter.setTWindow( tMin, tMax );
-        } );
+        } ) );
 
-        this.visibilityListener = ( ) ->
+        Listenable<VarEvent> visibilityGroup = new ListenableGroup<>( this.isVisible, this.layer.isVisible );
+        this.disposables.add( visibilityGroup.addListener( true, ( ) ->
         {
             this.painter.setVisible( this.layer.isVisible.v( ) && this.isVisible.v( ) );
-        };
-        this.isVisible.addListener( false, this.visibilityListener );
-        this.layer.isVisible.addListener( true, this.visibilityListener );
+        } ) );
     }
 
     @Override
@@ -103,14 +104,7 @@ public class ExampleTimelineFacet extends ExampleFacet
     @Override
     public void dispose( boolean reinstalling )
     {
-        this.layer.isVisible.removeListener( this.visibilityListener );
-        this.isVisible.removeListener( this.visibilityListener );
-
-        TaggedAxis1D timeAxis = this.timeTrait.axis;
-        timeAxis.removeAxisListener( this.timeAxisListener );
-
-        Axis2D geoAxis = this.geoTrait.axis;
-        geoAxis.removeAxisListener( this.geoAxisListener );
+        this.disposables.dispose( );
 
         this.row.removePainter( this.painter );
         this.view.releaseRow( this.row.getId( ), reinstalling );

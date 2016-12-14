@@ -52,6 +52,8 @@ import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.Var;
 
 public class LayeredGui
@@ -293,10 +295,13 @@ public class LayeredGui
         facetsButton.setToolTipText( "Show Layers" );
         JPopupMenu facetsPopup = newButtonPopup( facetsButton );
 
-        // WIP: Remove listener on view closing
-        this.layers.addListener( true, ( ) ->
+        DisposableGroup facetToggleBindings = new DisposableGroup( );
+        Disposable layersListener = this.layers.addListener( true, ( ) ->
         {
+            facetToggleBindings.dispose( );
+            facetToggleBindings.clear( );
             facetsPopup.removeAll( );
+
             for ( Layer layer : this.layers.v( ) )
             {
                 Facet facet = layer.facets( ).v( ).get( view );
@@ -304,10 +309,7 @@ public class LayeredGui
                 {
                     // XXX: Handle title changes
                     JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
-
-                    // WIP: Unbind when appropriate
-                    bindToggleButton( facetToggle, facet.isVisible );
-
+                    facetToggleBindings.add( bindToggleButton( facetToggle, facet.isVisible ) );
                     facetsPopup.add( facetToggle );
                 }
             }
@@ -345,12 +347,24 @@ public class LayeredGui
         this.dockingGroup.addView( dockingView );
 
         this.dockingViews.put( view, dockingView );
+
+
+        this.dockingGroup.addListener( new DockingGroupAdapter( )
+        {
+            @Override
+            public void closingView( DockingGroup group, com.metsci.glimpse.docking.View closingDockingView )
+            {
+                if ( closingDockingView == dockingView )
+                {
+                    layersListener.dispose( );
+                    facetToggleBindings.dispose( );
+                }
+            }
+        } );
     }
 
     protected void handleViewRemoved( View view )
     {
-        // WIP: Remove abandoned implicit linkages
-
         GLAutoDrawable glDrawable = view.getGLDrawable( );
         if ( glDrawable != null )
         {
@@ -358,6 +372,8 @@ public class LayeredGui
         }
 
         view.dispose( );
+
+        // WIP: Remove implicit linkages that don't have any children
 
         // If dockingViews still has this entry, then the dockingView hasn't been closed yet
         com.metsci.glimpse.docking.View dockingView = this.dockingViews.remove( view );

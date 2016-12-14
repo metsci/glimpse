@@ -1,11 +1,16 @@
 package com.metsci.glimpse.layers.misc;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.ItemSelectable;
 import java.awt.event.ItemListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 
+import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.InvalidValueException;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
@@ -16,33 +21,25 @@ public class UiUtils
     public static final Color invalidValueBg = new Color( 255, 175, 175 );
 
 
-    public static interface ListenerBinding
+    public static Disposable bindLabel( JLabel c, ReadableVar<String> var )
     {
-        void unbind( );
-    }
-
-    public static ListenerBinding bindLabel( JLabel c, ReadableVar<String> var )
-    {
-        Runnable varListener = var.addListener( true, ( ) ->
+        return var.addListener( true, ( ) ->
         {
             c.setText( var.v( ) );
         } );
-
-        return ( ) ->
-        {
-            var.removeListener( varListener );
-        };
     }
 
-    public static ListenerBinding bindToggleButton( AbstractButton c, Var<Boolean> var )
+    public static Disposable bindToggleButton( AbstractButton c, Var<Boolean> var )
     {
-        Runnable varListener = var.addListener( true, ( ) ->
+        DisposableGroup listeners = new DisposableGroup( );
+
+        listeners.add( var.addListener( true, ( ) ->
         {
             c.setSelected( var.v( ) );
-        } );
+        } ) );
 
         Color origBackground = c.getBackground( );
-        ItemListener uiListener = ( ev ) ->
+        listeners.add( addItemListener( c, ( ev ) ->
         {
             try
             {
@@ -53,13 +50,28 @@ public class UiUtils
             {
                 c.setBackground( invalidValueBg );
             }
-        };
-        c.addItemListener( uiListener );
+        } ) );
+
+        return listeners;
+    }
+
+    public static Disposable addComponent( Container container, Component child, Object constraints )
+    {
+        container.add( child, constraints );
 
         return ( ) ->
         {
-            var.removeListener( varListener );
-            c.removeItemListener( uiListener );
+            container.remove( child );
+        };
+    }
+
+    public static Disposable addItemListener( ItemSelectable itemSelectable, ItemListener itemListener )
+    {
+        itemSelectable.addItemListener( itemListener );
+
+        return ( ) ->
+        {
+            itemSelectable.removeItemListener( itemListener );
         };
     }
 
