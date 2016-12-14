@@ -2,11 +2,8 @@ package com.metsci.glimpse.layers.geo;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.Component;
-import java.util.Collection;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
@@ -26,7 +23,6 @@ public class GeoView extends View
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
-    public final Collection<Component> toolbarComponents;
 
     public final MultiAxisPlot2D plot;
     public final GridPainter gridPainter;
@@ -60,8 +56,6 @@ public class GeoView extends View
 
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
-
-        this.toolbarComponents = unmodifiableCollection( asList( ) );
     }
 
     @Override
@@ -80,12 +74,6 @@ public class GeoView extends View
     public GLAutoDrawable getGLDrawable( )
     {
         return this.canvas.getGLDrawable( );
-    }
-
-    @Override
-    public Collection<Component> getToolbarComponents( )
-    {
-        return this.toolbarComponents;
     }
 
     @Override

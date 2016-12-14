@@ -6,7 +6,6 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameT
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
@@ -22,7 +21,6 @@ import static java.lang.String.format;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
-import java.awt.Component;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,7 +36,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -322,13 +319,8 @@ public class LayeredGui
             this.cloneView( view );
         } );
 
-        JToolBar toolbar = newToolbar( true );
-        for ( Component c : view.getToolbarComponents( ) )
-        {
-            toolbar.add( c );
-        }
-        toolbar.add( cloneButton );
-        toolbar.add( facetsButton );
+        view.toolbar.add( cloneButton );
+        view.toolbar.add( facetsButton );
 
         // XXX: Add support in docking for wildcard viewIds
         String dockingViewIdRoot = view.getClass( ).getName( );
@@ -343,7 +335,7 @@ public class LayeredGui
         }
 
         // XXX: Add support in docking for changing view titles
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), toolbar );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), view.toolbar );
         this.dockingGroup.addView( dockingView );
 
         this.dockingViews.put( view, dockingView );

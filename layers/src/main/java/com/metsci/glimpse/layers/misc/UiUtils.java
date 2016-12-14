@@ -55,9 +55,24 @@ public class UiUtils
         return listeners;
     }
 
+    public static Disposable addComponent( Container container, Component child )
+    {
+        return addComponent( container, child, null );
+    }
+
+    public static Disposable addComponent( Container container, Component child, int index )
+    {
+        return addComponent( container, child, null, index );
+    }
+
     public static Disposable addComponent( Container container, Component child, Object constraints )
     {
-        container.add( child, constraints );
+        return addComponent( container, child, constraints, -1 );
+    }
+
+    public static Disposable addComponent( Container container, Component child, Object constraints, int index )
+    {
+        container.add( child, constraints, index );
 
         return ( ) ->
         {

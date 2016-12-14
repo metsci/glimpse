@@ -1,19 +1,19 @@
 package com.metsci.glimpse.layers;
 
+import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
+import javax.swing.JToolBar;
 
 import com.google.common.collect.ImmutableMap;
 import com.metsci.glimpse.util.var.ReadableVar;
@@ -22,8 +22,9 @@ import com.metsci.glimpse.util.var.Var;
 public abstract class View
 {
 
-    public final Var<String> title;
     public final ReadableVar<ImmutableMap<String,Trait>> traits;
+    public final Var<String> title;
+    public final JToolBar toolbar;
 
     protected final Var<ImmutableMap<String,Trait>> _traits;
     protected final List<Layer> layers;
@@ -31,10 +32,12 @@ public abstract class View
 
     public View( )
     {
-        this.title = new Var<>( "Untitled View", notNull );
         this._traits = new Var<>( ImmutableMap.of( ), notNull );
-        this.traits = this._traits;
         this.layers = new ArrayList<>( );
+
+        this.traits = this._traits;
+        this.title = new Var<>( "Untitled View", notNull );
+        this.toolbar = newToolbar( true );
     }
 
     public abstract Component getComponent( );
@@ -47,11 +50,6 @@ public abstract class View
     public Icon getIcon( )
     {
         return null;
-    }
-
-    public Collection<Component> getToolbarComponents( )
-    {
-        return emptyList( );
     }
 
     public GLAutoDrawable getGLDrawable( )

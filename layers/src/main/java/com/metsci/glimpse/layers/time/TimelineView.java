@@ -3,11 +3,8 @@ package com.metsci.glimpse.layers.time;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.Component;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +26,6 @@ public class TimelineView extends View
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
-    public final Collection<Component> toolbarComponents;
 
     protected final CollapsibleTimePlot2D plot;
 
@@ -47,8 +43,6 @@ public class TimelineView extends View
 
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
-
-        this.toolbarComponents = unmodifiableCollection( asList( ) );
     }
 
     @Override
@@ -67,12 +61,6 @@ public class TimelineView extends View
     public GLAutoDrawable getGLDrawable( )
     {
         return this.canvas.getGLDrawable( );
-    }
-
-    @Override
-    public Collection<Component> getToolbarComponents( )
-    {
-        return this.toolbarComponents;
     }
 
     @Override
