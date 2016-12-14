@@ -13,6 +13,7 @@ import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -37,6 +38,7 @@ public class TimelineView extends View
         this.title.set( "Timeline" );
 
         this.plot = new CollapsibleTimePlot2D( );
+        this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
         this.plot.setShowLabels( true );
 
         this.rowRefCounts = new HashMap<>( );
