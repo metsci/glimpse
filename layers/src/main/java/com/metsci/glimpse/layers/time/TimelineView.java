@@ -7,6 +7,7 @@ import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPositi
 import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
@@ -121,6 +122,11 @@ public class TimelineView extends View
 
     public TimePlotInfo acquirePlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits )
     {
+        return this.acquirePlotRow( rowId, dataAxisText, AxisUnitConverters.identity, null );
+    }
+
+    public TimePlotInfo acquirePlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits, Consumer<TimePlotInfo> initFn )
+    {
         TimePlotInfo row = this.plot.getTimePlot( rowId );
         if ( row == null )
         {
@@ -140,6 +146,11 @@ public class TimelineView extends View
             labelPainter.setFont( FontUtils.getDefaultPlain( 12 ), true );
 
             row.getAxisPainter( ).getLabelHandlerY( ).setAxisUnitConverter( dataAxisUnits );
+
+            if ( initFn != null )
+            {
+                initFn.accept( row );
+            }
         }
 
         this.rowRefCounts.compute( rowId, ( k, v ) -> incRefCount( v ) );

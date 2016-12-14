@@ -73,7 +73,7 @@ public class GeoTrait extends Trait
     {
         GeoTrait copy = new GeoTrait( isLinkage, this.proj );
 
-        // Simplest way to copy axis settings
+        // Copy axis settings
         copy.axis.setParent( this.axis );
         copy.axis.setParent( null );
 

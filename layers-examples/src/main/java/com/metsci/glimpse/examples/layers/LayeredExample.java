@@ -1,5 +1,6 @@
 package com.metsci.glimpse.examples.layers;
 
+import static com.metsci.glimpse.examples.layers.ExampleTrait.addExampleLinkage;
 import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
 import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
@@ -47,16 +48,19 @@ public class LayeredExample
             //
 
             GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
-            GeoTrait geoLinkage = new GeoTrait( true, proj );
-            geoLinkage.setProjectedBounds( Length::fromNauticalMiles, -2, +2, -2, +2 );
+            GeoTrait geoTemplate = new GeoTrait( false, proj );
+            geoTemplate.setProjectedBounds( Length::fromNauticalMiles, -2, +2, -2, +2 );
             // WIP: Initialize selection box
             // WIP: Specify axis units for display
 
             Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
-            TimeTrait timeLinkage = new TimeTrait( true, epoch );
-            timeLinkage.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
-            timeLinkage.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
+            TimeTrait timeTemplate = new TimeTrait( false, epoch );
+            timeTemplate.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
+            timeTemplate.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
             // WIP: Specify timezone for display
+
+            ExampleTrait exampleTemplate = new ExampleTrait( true );
+            exampleTemplate.setZBounds( Length::fromFeet, -5, +105 );
 
 
             // Create some layers
@@ -88,7 +92,7 @@ public class LayeredExample
 
                 if ( r.nextDouble( ) < 0.003 )
                 {
-                    zA_SU = 100.0 * r.nextDouble( );
+                    zA_SU = Length.fromFeet( 100.0 * r.nextDouble( ) );
                 }
 
                 double distanceA_SU = speedA_SU * Time.fromMilliseconds( timeStep_MILLIS );
@@ -98,7 +102,7 @@ public class LayeredExample
                 double errorDistance_SU = Length.fromNauticalMiles( 0.03*r.nextDouble( ) );
                 double errorDirection_SU = Azimuth.fromNavDeg( 360.0 * r.nextDouble( ) );
                 LatLonGeo latlonB = latlonA.displacedBy( errorDistance_SU, errorDirection_SU );
-                double zB_SU = zA_SU - 5.0 + 10.0*r.nextDouble( );
+                double zB_SU = zA_SU + Length.fromFeet( -5.0 + 10.0*r.nextDouble( ) );
 
                 exampleLayerA.addPoint( new ExamplePoint( time_PMILLIS, latlonA, zA_SU ) );
                 exampleLayerB.addPoint( new ExamplePoint( time_PMILLIS, latlonB, zB_SU ) );
@@ -111,8 +115,9 @@ public class LayeredExample
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
 
-            addGeoLinkage( gui, geoLinkage );
-            addTimeLinkage( gui, timeLinkage );
+            addGeoLinkage( gui, geoTemplate );
+            addTimeLinkage( gui, timeTemplate );
+            addExampleLinkage( gui, exampleTemplate );
 
             gui.addView( new GeoView( ) );
             gui.addView( new TimelineView( ) );
@@ -129,20 +134,13 @@ public class LayeredExample
 //                SwingUtilities.invokeLater( ( ) ->
 //                {
 //
+//                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
+//                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
+//                    geoTrait2.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+//
 //                    GeoView geo2 = new GeoView( );
 //                    gui.addView( geo2 );
-//
-//
-//                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
-//
-//                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
-//
-//                    geoTrait2.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
-//                    // WIP: Initialize selection box
-//                    // WIP: Specify axis units for display
-//
 //                    GeoTrait.setGeoTrait( geo2, geoTrait2 );
-//
 //
 //                } );
 //            }, 5, TimeUnit.SECONDS );

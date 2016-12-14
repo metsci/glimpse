@@ -84,7 +84,7 @@ public class TimeTrait extends Trait
     {
         TimeTrait copy = new TimeTrait( isLinkage, this.epoch );
 
-        // Simplest way to copy axis settings
+        // Copy axis settings
         copy.axis.setParent( this.axis );
         copy.axis.setParent( null );
 

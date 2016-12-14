@@ -1,5 +1,7 @@
 package com.metsci.glimpse.examples.layers;
 
+import static com.metsci.glimpse.axis.painter.label.AxisUnitConverters.suShownAsFeet;
+import static com.metsci.glimpse.examples.layers.ExampleTrait.requireExampleTrait;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.layers.misc.AxisUtils.addAxisListener2D;
 import static com.metsci.glimpse.layers.misc.AxisUtils.addTaggedAxisListener1D;
@@ -23,12 +25,16 @@ import com.metsci.glimpse.util.vector.Vector2d;
 
 public class ExampleTimelineFacet extends ExampleFacet
 {
+    // Multiple facets can share a timeline row by using the same rowId
+    public static final String exampleTimelineFacetRowId = "z_suShownAsFeet";
+
 
     protected final ExampleLayer layer;
 
     protected final TimelineView view;
     protected final GeoTrait geoTrait;
     protected final TimeTrait timeTrait;
+    protected final ExampleTrait exampleTrait;
 
     protected final TimePlotInfo row;
     protected final ExampleTimelinePainter painter;
@@ -43,10 +49,13 @@ public class ExampleTimelineFacet extends ExampleFacet
         this.view = view;
         this.geoTrait = requireGeoTrait( this.view );
         this.timeTrait = requireTimeTrait( this.view );
+        this.exampleTrait = requireExampleTrait( this.view );
 
-        // By using a fixed rowId, we share the row with other layers that use the same rowId
-        String rowId = "z_SU";
-        this.row = view.acquirePlotRow( rowId, "Example" );
+        this.row = view.acquirePlotRow( exampleTimelineFacetRowId, "Example (FT)", suShownAsFeet, ( newRow ) ->
+        {
+            Axis1D zAxis = newRow.getOrthogonalAxis( );
+            zAxis.setParent( this.exampleTrait.zAxis );
+        } );
 
         this.painter = new ExampleTimelinePainter( style );
         this.row.addPainter( this.painter );
