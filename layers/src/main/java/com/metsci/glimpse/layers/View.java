@@ -1,21 +1,22 @@
 package com.metsci.glimpse.layers;
 
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static java.util.Collections.singletonMap;
 
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
 
@@ -23,19 +24,21 @@ public abstract class View
 {
 
     public final ReadableVar<ImmutableMap<String,Trait>> traits;
+    public final ReadableVar<ImmutableMap<Layer,Facet>> facets;
     public final Var<String> title;
     public final JToolBar toolbar;
 
     protected final Var<ImmutableMap<String,Trait>> _traits;
-    protected final List<Layer> layers;
+    protected final Var<ImmutableMap<Layer,Facet>> _facets;
 
 
     public View( )
     {
         this._traits = new Var<>( ImmutableMap.of( ), notNull );
-        this.layers = new ArrayList<>( );
+        this._facets = new Var<>( ImmutableMap.of( ), notNull );
 
         this.traits = this._traits;
+        this.facets = this._facets;
         this.title = new Var<>( "Untitled View", notNull );
         this.toolbar = newToolbar( true );
     }
@@ -81,10 +84,12 @@ public abstract class View
 
     public void setTraits( Map<? extends String,? extends Trait> newTraits )
     {
+        Set<Layer> layers = ImmutableSet.copyOf( this._facets.v( ).keySet( ) );
+
         // Uninstall layers
-        for ( Layer layer : this.layers )
+        for ( Layer layer : layers )
         {
-            layer.uninstallFrom( this, true );
+            this.removeLayer( layer );
         }
 
         // Update traits map
@@ -118,9 +123,9 @@ public abstract class View
         this.init( );
 
         // Re-install layers
-        for ( Layer layer : this.layers )
+        for ( Layer layer : layers )
         {
-            layer.installTo( this );
+            this.addLayer( layer );
         }
     }
 
@@ -135,10 +140,15 @@ public abstract class View
      */
     protected void addLayer( Layer layer )
     {
-        if ( !this.layers.contains( layer ) )
+        if ( !this._facets.v( ).containsKey( layer ) )
         {
-            this.layers.add( layer );
             layer.installTo( this );
+
+            Facet facet = layer.facets( ).v( ).get( this );
+            if ( facet != null )
+            {
+                this._facets.update( ( v ) -> mapWith( v, layer, facet ) );
+            }
         }
     }
 
@@ -149,9 +159,9 @@ public abstract class View
      */
     protected void removeLayer( Layer layer )
     {
-        if ( !this.layers.contains( layer ) )
+        if ( this._facets.v( ).containsKey( layer ) )
         {
-            this.layers.remove( layer );
+            this._facets.update( ( v ) -> mapMinus( v, layer ) );
             layer.uninstallFrom( this, false );
         }
     }
@@ -162,11 +172,10 @@ public abstract class View
      */
     protected void dispose( )
     {
-        for ( Layer layer : this.layers )
+        for ( Layer layer : this._facets.v( ).keySet( ) )
         {
-            layer.uninstallFrom( this, false );
+            this.removeLayer( layer );
         }
-        this.layers.clear( );
 
         for ( Trait trait : this._traits.v( ).values( ) )
         {

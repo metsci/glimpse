@@ -292,23 +292,22 @@ public class LayeredGui
         facetsButton.setToolTipText( "Show Layers" );
         JPopupMenu facetsPopup = newButtonPopup( facetsButton );
 
-        DisposableGroup facetToggleBindings = new DisposableGroup( );
-        Disposable layersListener = this.layers.addListener( true, ( ) ->
+        DisposableGroup facetBindings = new DisposableGroup( );
+        Disposable facetsListener = view.facets.addListener( true, ( ) ->
         {
-            facetToggleBindings.dispose( );
-            facetToggleBindings.clear( );
+            facetBindings.dispose( );
+            facetBindings.clear( );
             facetsPopup.removeAll( );
 
-            for ( Layer layer : this.layers.v( ) )
+            for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
             {
-                Facet facet = layer.facets( ).v( ).get( view );
-                if ( facet != null )
-                {
-                    // XXX: Handle title changes
-                    JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
-                    facetToggleBindings.add( bindToggleButton( facetToggle, facet.isVisible ) );
-                    facetsPopup.add( facetToggle );
-                }
+                Layer layer = en.getKey( );
+                Facet facet = en.getValue( );
+
+                // XXX: Handle title changes
+                JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+                facetBindings.add( bindToggleButton( facetToggle, facet.isVisible ) );
+                facetsPopup.add( facetToggle );
             }
         } );
 
@@ -338,9 +337,10 @@ public class LayeredGui
         com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), view.toolbar );
         this.dockingGroup.addView( dockingView );
 
+        // When the user closes a dockingView, we will need to know the corresponding view
         this.dockingViews.put( view, dockingView );
 
-
+        // Clean up after ourselves when the view closes
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
@@ -348,8 +348,8 @@ public class LayeredGui
             {
                 if ( closingDockingView == dockingView )
                 {
-                    layersListener.dispose( );
-                    facetToggleBindings.dispose( );
+                    facetsListener.dispose( );
+                    facetBindings.dispose( );
                 }
             }
         } );
