@@ -56,6 +56,7 @@ import com.metsci.glimpse.util.var.Var;
 public class LayeredGui
 {
     public static final Icon layersIcon = requireIcon( "fugue-icons/category.png" );
+    public static final String layerCardsViewId = "com.metsci.glimpse.layers.geo.LayeredGui.layerCardsView";
 
 
     // Model
@@ -124,7 +125,7 @@ public class LayeredGui
 
         this.layerCardsPanel = new LayerCardsPanel( this.layers );
         JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( "layersView", layerCardsScroller, "Layers", false, null, layersIcon, null );
+        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", false, null, layersIcon, null );
         this.dockingGroup.addView( layersView );
 
 
