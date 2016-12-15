@@ -1,5 +1,8 @@
 package com.metsci.glimpse.layers;
 
+/**
+ * Thrown when a {@link Trait} is required, but is not found in the specified {@link View}.
+ */
 public class TraitMissingException extends RuntimeException
 {
 
