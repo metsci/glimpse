@@ -413,13 +413,13 @@ public class LayeredGui
 
     protected void handleViewRemoved( View view )
     {
+        view.dispose( );
+
         GLAutoDrawable glDrawable = view.getGLDrawable( );
         if ( glDrawable != null )
         {
             this.animator.remove( glDrawable );
         }
-
-        view.dispose( );
 
         // WIP: Remove implicit linkages that don't have any children
 
