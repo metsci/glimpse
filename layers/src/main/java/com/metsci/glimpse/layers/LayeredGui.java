@@ -55,13 +55,12 @@ import com.metsci.glimpse.util.var.Var;
 
 /**
  * A {@link LayeredGui} represents a number of {@link View}s and a number of {@link Layer}s.
- * Each layer is given an opportunity to display a representation of itself on each view.
- * Layers and views can be added and removed dynamically.
+ * Each layer is given an opportunity to add a representation of itself to each view. Layers
+ * and views can be added and removed dynamically.
  * <p>
  * A layer typically has a different representation in each view -- for example, a TracksLayer
- * might show a spatial representation in a geo view, and a temporal representation in a
- * timeline view. The representation of a particular layer on a particular view is called a
- * {@link Facet}.
+ * can show a spatial representation in a geo view, and a temporal representation in a timeline
+ * view. The representation of a particular layer on a particular view is called a {@link Facet}.
  * <p>
  * There can be more than one view of a given type -- for example, two different geo views.
  * A layer may display itself differently on each of these views. For example, if there are

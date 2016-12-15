@@ -17,6 +17,7 @@ import javax.swing.JToolBar;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
 
@@ -129,8 +130,34 @@ public abstract class View
         }
     }
 
+    /**
+     * Called after one or more traits have been added or replaced. This gives the view a
+     * chance to initialize its UI components based on trait values -- for example, setting
+     * the timeline epoch.
+     * <p>
+     * To query a trait, implementations of this method should use {@link View#requireTrait(String, Class)},
+     * or a variation thereof. Rather than calling {@link View#requireTrait(String, Class)}
+     * directly, it is usually better to call a convenience function that has the appropriate
+     * trait key and class built in, such as {@link GeoTrait#requireGeoTrait(View)}.
+     * <p>
+     * The view is guaranteed to have no layers installed when this method is called. If traits
+     * are changed after layers have already been installed, the following steps will be taken
+     * automatically:
+     * <ol>
+     * <li>Uninstall its layers
+     * <li>Set the trait (or traits) being changed
+     * <li>Call this method
+     * <li>Re-install the original layers
+     * </ol>
+     */
     protected abstract void init( );
 
+    /**
+     * Make a new instance that, once traits and layers are added, will be identical to this
+     * view.
+     * <p>
+     * <em>Does not copy traits or layers</em> -- that is the responsibility of the caller.
+     */
     public abstract View copy( );
 
     /**
