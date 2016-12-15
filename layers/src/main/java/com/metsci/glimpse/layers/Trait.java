@@ -5,17 +5,16 @@ import com.metsci.glimpse.layers.time.TimeTrait;
 import com.metsci.glimpse.util.var.Var;
 
 /**
- * A {@link Trait} is a fragment of state attached to a {@link View}. For example, a view
- * typically displays a bunch of different data from the same moment in time -- so to attach
- * a selected time to a view, a {@link TimeTrait} can be used. All the {@link Facet}s on
- * the view can query the time trait, and then do their rendering based on the selected time.
- * Since the facets are all on the same view, they all see the same time trait, and they all
+ * A {@link Trait} is a fragment of state that can be attached to a {@link View}. For example,
+ * consider the case where a view displays a bunch of different data from the same moment in time.
+ * A trait that contains a selected time can be attached to the view. Then all the {@link Facet}s
+ * on the view can query the selected time from the trait, and do their rendering based on it.
+ * Since the facets are all on the same view, they all query the same time trait, and they all
  * render data from the same time.
  * <p>
- * The layers module includes classes for some commonly used traits, such as {@link GeoTrait}
- * and {@link TimeTrait}. However, there is no magic to the included traits; custom traits
- * can be defined as well, the same way the included ones are defined. If you want to define
- * your own custom trait, the included traits make good examples to follow.
+ * The name "trait" is intended in the general English-language sense, rather than the technical
+ * sense used in some programming languages. In those terms, this class is more like a mixin,
+ * because it includes state (rather than just method implementations).
  * <p>
  * Trait instances can be linked to each other. For example, two timeline views can have their
  * time traits linked together, so that adjusting the selection window in one timeline affects
@@ -26,12 +25,14 @@ import com.metsci.glimpse.util.var.Var;
  * To be linked, two trait instances must be compatible with each other. Compatibility is checked
  * using the {@link Var#validateFn} of the {@link Trait#parent} var.
  * <p>
- * For flexibility, traits that are owned by views are not linked directly to each other, but
- * are instead linked to a common "linkage." A linkage is simply a trait object that is used
- * as a shared parent for some number of child traits. A regular (non-linkage) trait may have
- * a parent, but the parent of a linkage is always null.
+ * The layers module includes classes for some commonly used traits, such as {@link GeoTrait}
+ * and {@link TimeTrait}. However, there is no magic to the included traits; custom traits
+ * can be defined as well, the same way the included ones are defined. If you want to define
+ * your own custom trait, the included traits make good examples to follow.
  * <p>
- * See {@link LayeredGui} for more detail on how it uses traits and linkages.
+ * A "linkage" is a trait object that is used as a shared parent for some number of child traits.
+ * A regular (non-linkage) trait may have a parent, but the parent of a linkage is always null.
+ * See {@link LayeredGui} for more detail on how it uses linkages and regular traits.
  */
 public abstract class Trait
 {
@@ -49,7 +50,12 @@ public abstract class Trait
      */
     public final Var<Trait> parent;
 
-
+    /**
+     * The {@code isLinkage} arg specifies whether the created instance will be a linkage or a
+     * regular trait. A linkage is a trait object used as a shared parent for some number of
+     * child traits. A regular trait may have a parent, but the parent of a linkage is always
+     * null.
+     */
     protected Trait( boolean isLinkage )
     {
         this.isLinkage = isLinkage;
