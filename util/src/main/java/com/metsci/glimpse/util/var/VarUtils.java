@@ -37,9 +37,9 @@ public class VarUtils
         } );
     }
 
-    public static <T> Disposable addElementRemovedListener( ReadableVar<? extends Collection<T>> var, boolean runImmediately, Consumer<? super T> listener )
+    public static <T> Disposable addElementRemovedListener( ReadableVar<? extends Collection<T>> var, Consumer<? super T> listener )
     {
-        return var.addListener( runImmediately, new Runnable( )
+        return var.addListener( false, new Runnable( )
         {
             private Set<T> valuesOld = emptySet( );
 
@@ -83,9 +83,9 @@ public class VarUtils
         } );
     }
 
-    public static <K,V> Disposable addEntryRemovedListener( ReadableVar<? extends Map<K,V>> var, boolean runImmediately, BiConsumer<? super K,? super V> listener )
+    public static <K,V> Disposable addEntryRemovedListener( ReadableVar<? extends Map<K,V>> var, BiConsumer<? super K,? super V> listener )
     {
-        return var.addListener( runImmediately, new Runnable( )
+        return var.addListener( false, new Runnable( )
         {
             private Set<Entry<K,V>> entriesOld = emptySet( );
 

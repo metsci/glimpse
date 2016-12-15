@@ -8,6 +8,7 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.misc.UiUtils.addToAnimator;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -17,15 +18,21 @@ import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addElementRemovedListener;
+import static com.metsci.glimpse.util.var.VarUtils.addEntryRemovedListener;
 import static java.lang.String.format;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
@@ -115,10 +122,12 @@ public class LayeredGui
 
     // Model
     public final Var<ImmutableMap<String,ImmutableList<Trait>>> linkages;
+    public final Var<ImmutableMap<String,ImmutableMap<Trait,String>>> linkageNames;
     public final Var<ImmutableSet<View>> views;
     public final Var<ImmutableList<Layer>> layers;
 
     // View
+    protected final Map<View,Disposable> viewDisposables;
     protected final DockingGroup dockingGroup;
     protected final GLAnimatorControl animator;
     protected DockingGroupListener dockingArrSaver;
@@ -138,12 +147,15 @@ public class LayeredGui
         //
 
         this.linkages = new Var<>( ImmutableMap.of( ), notNull );
+        this.linkageNames = new Var<>( ImmutableMap.of( ), notNull );
         this.views = new Var<>( ImmutableSet.of( ), notNull );
         this.layers = new Var<>( ImmutableList.of( ), notNull );
 
 
         // View
         //
+
+        this.viewDisposables = new HashMap<>( );
 
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
@@ -186,11 +198,13 @@ public class LayeredGui
         // Controller
         //
 
-        addElementRemovedListener( this.views, true, this::handleViewRemoved );
+        addElementRemovedListener( this.views, this::handleViewRemoved );
         addElementAddedListener( this.views, true, this::handleViewAdded );
 
-        addElementRemovedListener( this.layers, true, this::handleLayerRemoved );
+        addElementRemovedListener( this.layers, this::handleLayerRemoved );
         addElementAddedListener( this.layers, true, this::handleLayerAdded );
+
+        addEntryRemovedListener( this.linkageNames, ( k, v ) -> this.pruneLinkages( ) );
     }
 
     public void arrange( String appName, String defaultArrResource )
@@ -221,9 +235,14 @@ public class LayeredGui
         this.dockingGroup.addListener( this.dockingArrSaver );
     }
 
-    public Trait addLinkage( String traitKey, Trait template )
+    public Trait addLinkage( String traitKey, String name, Trait template )
     {
         Trait linkage = template.copy( true );
+
+        if ( name != null )
+        {
+            this.putLinkageName( traitKey, name, linkage );
+        }
 
         ImmutableList<Trait> oldLinkages = this.linkages.v( ).get( traitKey );
         ImmutableList<Trait> newLinkages;
@@ -242,6 +261,22 @@ public class LayeredGui
         return linkage;
     }
 
+    protected void putLinkageName( String traitKey, String name, Trait linkage )
+    {
+        ImmutableMap<Trait,String> oldNames = this.linkageNames.v( ).get( traitKey );
+        ImmutableMap<Trait,String> newNames;
+        if ( oldNames == null )
+        {
+            newNames = ImmutableMap.of( linkage, name );
+        }
+        else
+        {
+            newNames = mapWith( oldNames, linkage, name );
+        }
+
+        this.linkageNames.update( ( v ) -> mapWith( v, traitKey, newNames ) );
+    }
+
     public void addView( View view )
     {
         this.views.update( ( v ) -> setPlus( v, view ) );
@@ -257,8 +292,8 @@ public class LayeredGui
             Trait oldTrait = en.getValue( );
             if ( oldTrait.parent.v( ) == null )
             {
-                // XXX: Mark linkage as implicit
-                Trait linkage = this.addLinkage( traitKey, oldTrait );
+                // Unnamed linkage -- will get removed if all its children get removed
+                Trait linkage = this.addLinkage( traitKey, null, oldTrait );
                 oldTrait.parent.set( linkage );
             }
 
@@ -291,6 +326,9 @@ public class LayeredGui
 
     protected void handleViewAdded( View view )
     {
+        // Keep track of disposables that need to run when this view gets removed
+        DisposableGroup disposables = new DisposableGroup( );
+
         // Fill in traits the view doesn't already have
         Map<String,Trait> newTraits = new LinkedHashMap<>( view.traits.v( ) );
         for ( String traitKey : this.linkages.v( ).keySet( ) )
@@ -304,32 +342,35 @@ public class LayeredGui
         view.setTraits( newTraits );
 
         // Link traits that aren't already linked
-        for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
+        disposables.add( view.traits.addListener( true, ( ) ->
         {
-            String traitKey = en.getKey( );
-            Trait trait = en.getValue( );
-
-            // If the trait doesn't have a parent, look for a compatible linkage
-            if ( trait.parent.v( ) == null )
+            for ( Entry<String,Trait> en : view.traits.v( ).entrySet( ) )
             {
-                for ( Trait linkage : this.linkages.v( ).get( traitKey ) )
+                String traitKey = en.getKey( );
+                Trait trait = en.getValue( );
+
+                // If the trait doesn't have a parent, look for a compatible linkage
+                if ( trait.parent.v( ) == null )
                 {
-                    if ( trait.parent.validateFn.test( linkage ) )
+                    for ( Trait linkage : this.linkages.v( ).get( traitKey ) )
                     {
-                        trait.parent.set( linkage );
-                        break;
+                        if ( trait.parent.validateFn.test( linkage ) )
+                        {
+                            trait.parent.set( linkage );
+                            break;
+                        }
                     }
                 }
-            }
 
-            // If the trait still doesn't have a parent, create an implicit linkage
-            if ( trait.parent.v( ) == null )
-            {
-                // XXX: Mark the linkage as implicit
-                Trait linkage = this.addLinkage( traitKey, trait );
-                trait.parent.set( linkage );
+                // If the trait still doesn't have a parent, create an unnamed linkage
+                if ( trait.parent.v( ) == null )
+                {
+                    // Unnamed linkage -- will get removed if all its children get removed
+                    Trait linkage = this.addLinkage( traitKey, null, trait );
+                    trait.parent.set( linkage );
+                }
             }
-        }
+        } ) );
 
         for ( Layer layer : this.layers.v( ) )
         {
@@ -340,11 +381,11 @@ public class LayeredGui
         facetsButton.setToolTipText( "Show Layers" );
         JPopupMenu facetsPopup = newButtonPopup( facetsButton );
 
-        DisposableGroup facetBindings = new DisposableGroup( );
-        Disposable facetsListener = view.facets.addListener( true, ( ) ->
+        DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
+        disposables.add( view.facets.addListener( true, ( ) ->
         {
-            facetBindings.dispose( );
-            facetBindings.clear( );
+            facetDisposables.dispose( );
+            facetDisposables.clear( );
             facetsPopup.removeAll( );
 
             for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
@@ -354,10 +395,10 @@ public class LayeredGui
 
                 // XXX: Handle title changes
                 JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
-                facetBindings.add( bindToggleButton( facetToggle, facet.isVisible ) );
+                facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
                 facetsPopup.add( facetToggle );
             }
-        } );
+        } ) );
 
         JButton cloneButton = new JButton( "Clone" );
         cloneButton.setToolTipText( "Clone This View" );
@@ -388,39 +429,21 @@ public class LayeredGui
         // When the user closes a dockingView, we will need to know the corresponding view
         this.dockingViews.put( view, dockingView );
 
-        // Clean up some locals when the view closes
-        this.dockingGroup.addListener( new DockingGroupAdapter( )
-        {
-            @Override
-            public void closingView( DockingGroup group, com.metsci.glimpse.docking.View closingDockingView )
-            {
-                if ( closingDockingView == dockingView )
-                {
-                    facetsListener.dispose( );
-                    facetBindings.dispose( );
-                }
-            }
-        } );
+        disposables.add( view::dispose );
 
         GLAutoDrawable glDrawable = view.getGLDrawable( );
         if ( glDrawable != null )
         {
-            this.animator.add( glDrawable );
             this.animator.start( );
+            disposables.add( addToAnimator( glDrawable, this.animator ) );
         }
+
+        this.viewDisposables.put( view, disposables );
     }
 
     protected void handleViewRemoved( View view )
     {
-        view.dispose( );
-
-        GLAutoDrawable glDrawable = view.getGLDrawable( );
-        if ( glDrawable != null )
-        {
-            this.animator.remove( glDrawable );
-        }
-
-        // WIP: Remove implicit linkages that don't have any children
+        this.viewDisposables.remove( view ).dispose( );
 
         // If dockingViews still has this entry, then the dockingView hasn't been closed yet
         com.metsci.glimpse.docking.View dockingView = this.dockingViews.remove( view );
@@ -428,6 +451,60 @@ public class LayeredGui
         {
             this.dockingGroup.closeView( dockingView );
         }
+
+        this.pruneLinkages( );
+    }
+
+    protected void pruneLinkages( )
+    {
+        ImmutableMap<String,ImmutableList<Trait>> prunedLinkages = pruneLinkages( this.linkages.v( ), this.linkageNames.v( ), this.views.v( ) );
+        this.linkages.set( prunedLinkages );
+    }
+
+    protected static ImmutableMap<String,ImmutableList<Trait>> pruneLinkages( Map<String,? extends Collection<Trait>> linkages, Map<String,? extends Map<Trait,String>> linkageNames, Collection<View> views )
+    {
+        Map<String,ImmutableList<Trait>> result = new LinkedHashMap<>( );
+        for ( String traitKey : linkages.keySet( ) )
+        {
+            List<Trait> linkagesToKeep = pruneLinkages( traitKey, linkages.get( traitKey ), linkageNames.get( traitKey ), views );
+            result.put( traitKey, ImmutableList.copyOf( linkagesToKeep ) );
+        }
+        return ImmutableMap.copyOf( result );
+    }
+
+    protected static List<Trait> pruneLinkages( String traitKey, Collection<Trait> linkages, Map<Trait,String> linkageNames, Collection<View> views )
+    {
+        Set<Trait> linkagesInUse = findLinkagesInUse( views, traitKey );
+
+        List<Trait> linkagesToKeep = new ArrayList<>( );
+        for ( Trait linkage : linkages )
+        {
+            // Never auto-remove a named linkage
+            boolean isNamed = ( linkageNames != null && linkageNames.containsKey( linkage ) );
+            if ( isNamed || linkagesInUse.contains( linkage ) )
+            {
+                linkagesToKeep.add( linkage );
+            }
+        }
+        return linkagesToKeep;
+    }
+
+    protected static Set<Trait> findLinkagesInUse( Collection<View> views, String traitKey )
+    {
+        Set<Trait> linkages = new LinkedHashSet<>( );
+        for ( View view : views )
+        {
+            Trait trait = view.traits.v( ).get( traitKey );
+            if ( trait != null )
+            {
+                Trait linkage = trait.parent.v( );
+                if ( linkage != null )
+                {
+                    linkages.add( linkage );
+                }
+            }
+        }
+        return linkages;
     }
 
     protected void handleLayerAdded( Layer layer )

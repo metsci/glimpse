@@ -12,9 +12,9 @@ public class ExampleTrait extends Trait
 
     public static final String exampleTraitKey = ExampleTrait.class.getName( );
 
-    public static void addExampleLinkage( LayeredGui gui, ExampleTrait master )
+    public static void addExampleLinkage( LayeredGui gui, String name, ExampleTrait master )
     {
-        gui.addLinkage( exampleTraitKey, master );
+        gui.addLinkage( exampleTraitKey, name, master );
     }
 
     public static void setExampleTrait( View view, ExampleTrait exampleTrait )

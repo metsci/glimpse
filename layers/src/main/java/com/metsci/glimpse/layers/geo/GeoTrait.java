@@ -20,9 +20,9 @@ public class GeoTrait extends Trait
 
     public static final String geoTraitKey = GeoTrait.class.getName( );
 
-    public static void addGeoLinkage( LayeredGui gui, GeoTrait master )
+    public static void addGeoLinkage( LayeredGui gui, String name, GeoTrait master )
     {
-        gui.addLinkage( geoTraitKey, master );
+        gui.addLinkage( geoTraitKey, name, master );
     }
 
     public static void setGeoTrait( View view, GeoTrait geoTrait )

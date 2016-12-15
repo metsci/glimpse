@@ -6,6 +6,8 @@ import java.awt.Container;
 import java.awt.ItemSelectable;
 import java.awt.event.ItemListener;
 
+import javax.media.opengl.GLAnimatorControl;
+import javax.media.opengl.GLAutoDrawable;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 
@@ -87,6 +89,16 @@ public class UiUtils
         return ( ) ->
         {
             itemSelectable.removeItemListener( itemListener );
+        };
+    }
+
+    public static Disposable addToAnimator( GLAutoDrawable glDrawable, GLAnimatorControl animator )
+    {
+        animator.add( glDrawable );
+
+        return ( ) ->
+        {
+            animator.remove( glDrawable );
         };
     }
 

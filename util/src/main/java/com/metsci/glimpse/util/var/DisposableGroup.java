@@ -14,9 +14,10 @@ public class DisposableGroup implements Disposable
         this.members = new ArrayList<>( );
     }
 
-    public void add( Disposable member )
+    public <T extends Disposable> T add( T member )
     {
         this.members.add( member );
+        return member;
     }
 
     public void remove( Disposable member )

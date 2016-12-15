@@ -115,9 +115,9 @@ public class LayeredExample
             LayeredGui gui = new LayeredGui( "Layered Example" );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
 
-            addGeoLinkage( gui, geoTemplate );
-            addTimeLinkage( gui, timeTemplate );
-            addExampleLinkage( gui, exampleTemplate );
+            addGeoLinkage( gui, "Geo Defaults", geoTemplate );
+            addTimeLinkage( gui, "Time Defaults", timeTemplate );
+            addExampleLinkage( gui, "Example Defaults", exampleTemplate );
 
             gui.addView( new GeoView( ) );
             gui.addView( new TimelineView( ) );

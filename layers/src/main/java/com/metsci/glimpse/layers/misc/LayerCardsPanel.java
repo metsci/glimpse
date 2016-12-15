@@ -42,7 +42,7 @@ public class LayerCardsPanel extends JPanel
             this.add( card, "growx, wrap" );
         } ) );
 
-        this.disposables.add( addElementRemovedListener( this.layers, true, ( layer ) ->
+        this.disposables.add( addElementRemovedListener( this.layers, ( layer ) ->
         {
             JComponent card = this.cards.remove( layer );
             this.remove( card );

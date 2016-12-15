@@ -21,9 +21,9 @@ public class TimeTrait extends Trait
 
     public static final String timeTraitKey = TimeTrait.class.getName( );
 
-    public static void addTimeLinkage( LayeredGui gui, TimeTrait master )
+    public static void addTimeLinkage( LayeredGui gui, String name, TimeTrait master )
     {
-        gui.addLinkage( timeTraitKey, master );
+        gui.addLinkage( timeTraitKey, name, master );
     }
 
     public static void setTimeTrait( View view, TimeTrait timeTrait )
