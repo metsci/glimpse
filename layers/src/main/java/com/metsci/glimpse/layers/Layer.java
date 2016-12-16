@@ -33,6 +33,13 @@ public abstract class Layer
 
     public abstract void installTo( View view );
 
+    /**
+     * The {@code isReinstall} arg indicates whether the layer is going to install a new facet
+     * to replace this one, more or less immediately after removing this one. Some implementations
+     * of this method may use this flag to decide whether to leave certain UI elements in place
+     * for the replacement facet to reuse. This can reduce avoid effects due to UI elements being
+     * removed and then immediately re-added.
+     */
     public abstract void uninstallFrom( View view, boolean isReinstall );
 
 }
