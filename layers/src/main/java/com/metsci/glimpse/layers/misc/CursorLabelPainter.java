@@ -22,7 +22,6 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.function.Function;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES3;
@@ -38,15 +37,13 @@ import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
-public class CursorLabelPainter extends GlimpsePainterBase
+public abstract class CursorLabelPainter extends GlimpsePainterBase
 {
 
     protected int xOffset_PX;
     protected int yOffset_PX;
     protected boolean offsetBySelectionSize;
     protected boolean clampToScreenEdges;
-
-    protected final Function<Axis2D,String> contentFn;
 
     protected boolean dirty;
     protected String content;
@@ -57,14 +54,12 @@ public class CursorLabelPainter extends GlimpsePainterBase
     protected final CursorLabelProgram prog;
 
 
-    public CursorLabelPainter( Function<Axis2D,String> contentFn )
+    public CursorLabelPainter( )
     {
         this.xOffset_PX = 6;
         this.yOffset_PX = 6;
         this.offsetBySelectionSize = true;
         this.clampToScreenEdges = true;
-
-        this.contentFn = contentFn;
 
         this.dirty = true;
         this.content = null;
@@ -90,6 +85,8 @@ public class CursorLabelPainter extends GlimpsePainterBase
 
         this.label.setBorder( createEmptyBorder( 2, 5, 3, 5 ) );
     }
+
+    protected abstract String getCursorText( Axis2D axis );
 
     @Override
     public void doDispose( GlimpseContext context )
@@ -132,7 +129,7 @@ public class CursorLabelPainter extends GlimpsePainterBase
         // Update texture
         //
 
-        String newContent = this.contentFn.apply( axis );
+        String newContent = this.getCursorText( axis );
         if ( this.dirty || !equal( newContent, this.content ) )
         {
             this.label.setText( newContent );
