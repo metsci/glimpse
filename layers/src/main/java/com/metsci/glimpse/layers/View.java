@@ -90,7 +90,7 @@ public abstract class View
         // Uninstall layers
         for ( Layer layer : layers )
         {
-            this.removeLayer( layer );
+            this.removeLayer( layer, true );
         }
 
         // Update traits map
@@ -184,12 +184,12 @@ public abstract class View
      * access from {@link LayeredGui}. Client code should use {@link LayeredGui#removeLayer(Layer)}
      * instead.
      */
-    protected void removeLayer( Layer layer )
+    protected void removeLayer( Layer layer, boolean isReinstall )
     {
         if ( this._facets.v( ).containsKey( layer ) )
         {
             this._facets.update( ( v ) -> mapMinus( v, layer ) );
-            layer.uninstallFrom( this, false );
+            layer.uninstallFrom( this, isReinstall );
         }
     }
 
@@ -201,7 +201,7 @@ public abstract class View
     {
         for ( Layer layer : this._facets.v( ).keySet( ) )
         {
-            this.removeLayer( layer );
+            this.removeLayer( layer, false );
         }
 
         for ( Trait trait : this._traits.v( ).values( ) )

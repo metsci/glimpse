@@ -519,7 +519,7 @@ public class LayeredGui
     {
         for ( View view : this.views.v( ) )
         {
-            view.removeLayer( layer );
+            view.removeLayer( layer, false );
         }
     }
 
