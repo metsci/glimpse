@@ -5,6 +5,7 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_TEXTURE0;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
 import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
 
@@ -74,7 +75,6 @@ public class CursorLabelProgram
 
         gl.glBindVertexArray( defaultVertexAttributeArray( gl ) );
         gl.glUseProgram( this.handles.program );
-        gl.glEnable( GL_TEXTURE_2D );
         gl.glEnableVertexAttribArray( this.handles.inSt );
         gl.glEnableVertexAttribArray( this.handles.inXy );
     }
@@ -98,10 +98,11 @@ public class CursorLabelProgram
     {
         if ( texture.getTarget( ) != GL_TEXTURE_2D )
         {
-            throw new RuntimeException( "Unsupported texture target: required = GL_TEXTURE_2D, found = " + texture.getTarget( ) );
+            throw new RuntimeException( "Texture has wrong target: required = GL_TEXTURE_2D, found = " + texture.getTarget( ) );
         }
+        gl.glActiveTexture( GL_TEXTURE0 );
         texture.bind( gl );
-        gl.glUniform1i( this.handles.IMAGE, GL_TEXTURE_2D );
+        gl.glUniform1i( this.handles.IMAGE, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, stBuffer.deviceBuffer( gl ) );
         gl.glVertexAttribPointer( this.handles.inSt, 2, GL_FLOAT, false, 0, 0 );
@@ -116,7 +117,6 @@ public class CursorLabelProgram
     {
         gl.glDisableVertexAttribArray( this.handles.inSt );
         gl.glDisableVertexAttribArray( this.handles.inXy );
-        gl.glDisable( GL_TEXTURE_2D );
         gl.glUseProgram( 0 );
         gl.glBindVertexArray( 0 );
     }
