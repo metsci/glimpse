@@ -235,7 +235,7 @@ public class DockingUtils
     {
         try
         {
-            return new ImageIcon( ImageIO.read( DockingUtils.class.getClassLoader( ).getResource( resourcePath ) ) );
+            return new ImageIcon( ImageIO.read( Thread.currentThread( ).getContextClassLoader( ).getResource( resourcePath ) ) );
         }
         catch ( IOException e )
         {

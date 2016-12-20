@@ -5,12 +5,8 @@ import java.util.function.Consumer;
 public interface Listenable<T>
 {
 
-    Runnable addListener( boolean runImmediately, Runnable runnable );
+    Disposable addListener( boolean runImmediately, Runnable runnable );
 
-    void removeListener( Runnable runnable );
-
-    Consumer<T> addListener( boolean runImmediately, Consumer<T> consumer );
-
-    void removeListener( Consumer<T> consumer );
+    Disposable addListener( boolean runImmediately, Consumer<T> consumer );
 
 }

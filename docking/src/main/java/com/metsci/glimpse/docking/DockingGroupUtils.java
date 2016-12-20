@@ -8,6 +8,7 @@ import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
+import static com.metsci.glimpse.docking.SplitPane.computeChildSizes;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
@@ -415,7 +416,15 @@ public class DockingGroupUtils
             return new InNewFrame( planFrame, planTile );
         }
 
-        // Use fallback location
+        // First fallback is in the largest tile
+        DockerArrangementTile existingLargest = findLargestArrTile( existingArr );
+        if ( existingLargest != null )
+        {
+            int viewNum = existingLargest.viewIds.size( );
+            return new InExistingTile( null, null, existingLargest, viewNum );
+        }
+
+        // Final fallback is in a new frame
         return new InNewFallbackFrame( );
     }
 
@@ -748,6 +757,150 @@ public class DockingGroupUtils
         else
         {
             throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
+        }
+    }
+
+    public static DockerArrangementTile findLargestArrTile( GroupArrangement groupArr )
+    {
+        ArrTileWithSize best = null;
+
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            ArrTileWithSize frameBest = findMaximizedArrTile( frameArr );
+
+            if ( frameBest == null )
+            {
+                frameBest = findLargestArrTile( frameArr );
+            }
+
+            if ( best == null || ( frameBest != null && frameBest.width*frameBest.height > best.width*best.height ) )
+            {
+                best = frameBest;
+            }
+        }
+
+        return ( best == null ? null : best.tile );
+    }
+
+    protected static class ArrTileWithSize
+    {
+        public final DockerArrangementTile tile;
+        public final int width;
+        public final int height;
+
+        public ArrTileWithSize( DockerArrangementTile tile, int width, int height )
+        {
+            this.tile = tile;
+            this.width = width;
+            this.height = height;
+        }
+    }
+
+    protected static ArrTileWithSize findMaximizedArrTile( FrameArrangement frameArr )
+    {
+        DockerArrangementTile maximizedTile = findMaximizedArrTile( frameArr.dockerArr );
+        return ( maximizedTile == null ? null : new ArrTileWithSize( maximizedTile, frameArr.width, frameArr.height ) );
+    }
+
+    protected static DockerArrangementTile findMaximizedArrTile( DockerArrangementNode root )
+    {
+        if ( root instanceof DockerArrangementTile )
+        {
+            DockerArrangementTile tile = ( DockerArrangementTile ) root;
+            return ( tile.isMaximized ? tile : null );
+        }
+        else if ( root instanceof DockerArrangementSplit )
+        {
+            DockerArrangementSplit split = ( DockerArrangementSplit ) root;
+
+            DockerArrangementTile resultA = findMaximizedArrTile( split.childA );
+            if ( resultA != null )
+            {
+                return resultA;
+            }
+
+            DockerArrangementTile resultB = findMaximizedArrTile( split.childB );
+            if ( resultB != null )
+            {
+                return resultB;
+            }
+
+            return null;
+        }
+        else if ( root == null )
+        {
+            return null;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + root.getClass( ).getName( ) );
+        }
+    }
+
+    protected static ArrTileWithSize findLargestArrTile( FrameArrangement frameArr )
+    {
+        return findLargestArrTile( frameArr.dockerArr, frameArr.width, frameArr.height );
+    }
+
+    protected static ArrTileWithSize findLargestArrTile( DockerArrangementNode root, int rootWidth, int rootHeight )
+    {
+        if ( root instanceof DockerArrangementTile )
+        {
+            DockerArrangementTile tile = ( DockerArrangementTile ) root;
+            return new ArrTileWithSize( tile, rootWidth, rootHeight );
+        }
+        else if ( root instanceof DockerArrangementSplit )
+        {
+            DockerArrangementSplit split = ( DockerArrangementSplit ) root;
+
+            int widthA;
+            int widthB;
+            int heightA;
+            int heightB;
+            if ( split.arrangeVertically )
+            {
+                int[] heightsAB = computeChildSizes( rootHeight, 0, 0, split.splitFrac );
+                widthA = rootWidth;
+                widthB = rootWidth;
+                heightA = heightsAB[ 0 ];
+                heightB = heightsAB[ 1 ];
+            }
+            else
+            {
+                int[] widthsAB = computeChildSizes( rootWidth, 0, 0, split.splitFrac );
+                widthA = widthsAB[ 0 ];
+                widthB = widthsAB[ 1 ];
+                heightA = rootHeight;
+                heightB = rootHeight;
+            }
+
+            ArrTileWithSize resultA = findLargestArrTile( split.childA, widthA, heightA );
+            ArrTileWithSize resultB = findLargestArrTile( split.childB, widthB, heightB );
+
+            if ( resultA == null && resultB == null )
+            {
+                return null;
+            }
+            else if ( resultA == null )
+            {
+                return resultB;
+            }
+            else if ( resultB == null )
+            {
+                return resultA;
+            }
+            else
+            {
+                return ( resultA.width*resultA.height >= resultB.width*resultB.height ? resultA : resultB );
+            }
+        }
+        else if ( root == null )
+        {
+            return null;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + root.getClass( ).getName( ) );
         }
     }
 

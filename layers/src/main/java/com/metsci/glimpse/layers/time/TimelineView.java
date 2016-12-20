@@ -1,88 +1,90 @@
-package com.metsci.glimpse.layers;
+package com.metsci.glimpse.layers.time;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
-import static com.metsci.glimpse.util.PredicateUtils.notNull;
-import static com.metsci.glimpse.util.PredicateUtils.require;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.Component;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+
+import javax.media.opengl.GLAutoDrawable;
+import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.util.units.time.TimeStamp;
 
-public class LayeredTimeline
+public class TimelineView extends View
 {
 
     public final NewtSwingEDTGlimpseCanvas canvas;
-    public final Collection<Component> toolbarComponents;
 
     protected final CollapsibleTimePlot2D plot;
 
     protected final Map<Object,Integer> rowRefCounts;
 
 
-    public LayeredTimeline( )
+    public TimelineView( )
     {
+        this.title.set( "Timeline" );
+
         this.plot = new CollapsibleTimePlot2D( );
+        this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
         this.plot.setShowLabels( true );
 
         this.rowRefCounts = new HashMap<>( );
 
         this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
-
-        this.toolbarComponents = unmodifiableCollection( asList( ) );
     }
 
-    public void init( LayeredScenario scenario )
+    @Override
+    public Icon getIcon( )
     {
-        Epoch epoch = require( scenario.timelineEpoch, notNull );
-        LayeredTimelineBounds bounds = require( scenario.timelineInitBounds, notNull );
-
-        plot.setEpoch( epoch );
-        plot.setTimeAxisBounds( TimeStamp.fromPosixMillis( bounds.min_PMILLIS ), TimeStamp.fromPosixMillis( bounds.max_MILLIS ) );
+        return requireIcon( "open-icons/time.png" );
     }
 
-    public TaggedAxis1D timeAxis( )
+    @Override
+    public Component getComponent( )
     {
-        return this.plot.getTimeAxis( );
+        return this.canvas;
     }
 
-    public TimeAxisSelection selection( )
+    @Override
+    public GLAutoDrawable getGLDrawable( )
     {
-        return new TimeAxisSelection( this.selectionMin_PMILLIS( ), this.selectionMax_PMILLIS( ), this.selectionCursor_PMILLIS( ) );
+        return this.canvas.getGLDrawable( );
     }
 
-    public long selectionMin_PMILLIS( )
+    @Override
+    public void init( )
     {
-        Epoch epoch = this.plot.getEpoch( );
-        return epoch.toPosixMillis( this.plot.getTimeSelectionMinTag( ).getValue( ) );
+        TimeTrait timeTrait = requireTimeTrait( this );
+        this.plot.setEpoch( timeTrait.epoch );
+        this.plot.getTimeAxis( ).setParent( timeTrait.axis );
     }
 
-    public long selectionMax_PMILLIS( )
+    @Override
+    public TimelineView copy( )
     {
-        Epoch epoch = this.plot.getEpoch( );
-        return epoch.toPosixMillis( this.plot.getTimeSelectionMaxTag( ).getValue( ) );
+        return new TimelineView( );
     }
 
-    public long selectionCursor_PMILLIS( )
+    @Override
+    protected void dispose( )
     {
-        Epoch epoch = this.plot.getEpoch( );
-        return epoch.toPosixMillis( this.plot.getTimeSelectionTag( ).getValue( ) );
+        super.dispose( );
+        this.canvas.dispose( );
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )
@@ -120,6 +122,11 @@ public class LayeredTimeline
 
     public TimePlotInfo acquirePlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits )
     {
+        return this.acquirePlotRow( rowId, dataAxisText, AxisUnitConverters.identity, null );
+    }
+
+    public TimePlotInfo acquirePlotRow( Object rowId, String dataAxisText, AxisUnitConverter dataAxisUnits, Consumer<TimePlotInfo> initFn )
+    {
         TimePlotInfo row = this.plot.getTimePlot( rowId );
         if ( row == null )
         {
@@ -139,6 +146,11 @@ public class LayeredTimeline
             labelPainter.setFont( FontUtils.getDefaultPlain( 12 ), true );
 
             row.getAxisPainter( ).getLabelHandlerY( ).setAxisUnitConverter( dataAxisUnits );
+
+            if ( initFn != null )
+            {
+                initFn.accept( row );
+            }
         }
 
         this.rowRefCounts.compute( rowId, ( k, v ) -> incRefCount( v ) );
@@ -148,9 +160,14 @@ public class LayeredTimeline
 
     public void releaseRow( Object rowId )
     {
+        this.releaseRow( rowId, false );
+    }
+
+    public void releaseRow( Object rowId, boolean keepRow )
+    {
         Integer refCount = this.rowRefCounts.compute( rowId, ( k, v ) -> decRefCount( v ) );
 
-        if ( refCount == null )
+        if ( refCount == null && !keepRow )
         {
             this.plot.removePlot( rowId );
         }
