@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class VarUtils
 {
 
-    public static <T> Disposable addElementAddedListener( ReadableVar<? extends Collection<T>> var, boolean runImmediately, Consumer<? super T> listener )
+    public static <T> Disposable addElementAddedListener( ReadableVar<? extends Collection<? extends T>> var, boolean runImmediately, Consumer<? super T> listener )
     {
         return var.addListener( runImmediately, new Runnable( )
         {
@@ -37,7 +37,7 @@ public class VarUtils
         } );
     }
 
-    public static <T> Disposable addElementRemovedListener( ReadableVar<? extends Collection<T>> var, Consumer<? super T> listener )
+    public static <T> Disposable addElementRemovedListener( ReadableVar<? extends Collection<? extends T>> var, Consumer<? super T> listener )
     {
         return var.addListener( false, new Runnable( )
         {
@@ -60,20 +60,20 @@ public class VarUtils
         } );
     }
 
-    public static <K,V> Disposable addEntryAddedListener( ReadableVar<? extends Map<K,V>> var, boolean runImmediately, BiConsumer<? super K,? super V> listener )
+    public static <K, V> Disposable addEntryAddedListener( ReadableVar<? extends Map<K, V>> var, boolean runImmediately, BiConsumer<? super K, ? super V> listener )
     {
         return var.addListener( runImmediately, new Runnable( )
         {
-            private Set<Entry<K,V>> entriesOld = emptySet( );
+            private Set<Entry<K, V>> entriesOld = emptySet( );
 
             @Override
             public void run( )
             {
-                Set<Entry<K,V>> entriesNew = new HashSet<>( var.v( ).entrySet( ) );
+                Set<Entry<K, V>> entriesNew = new HashSet<>( var.v( ).entrySet( ) );
 
                 // difference() returns an unmodifiable view, which is what we want
-                Set<Entry<K,V>> entriesAdded = difference( entriesNew, entriesOld );
-                for ( Entry<K,V> entry : entriesAdded )
+                Set<Entry<K, V>> entriesAdded = difference( entriesNew, entriesOld );
+                for ( Entry<K, V> entry : entriesAdded )
                 {
                     listener.accept( entry.getKey( ), entry.getValue( ) );
                 }
@@ -83,20 +83,20 @@ public class VarUtils
         } );
     }
 
-    public static <K,V> Disposable addEntryRemovedListener( ReadableVar<? extends Map<K,V>> var, BiConsumer<? super K,? super V> listener )
+    public static <K, V> Disposable addEntryRemovedListener( ReadableVar<? extends Map<K, V>> var, BiConsumer<? super K, ? super V> listener )
     {
         return var.addListener( false, new Runnable( )
         {
-            private Set<Entry<K,V>> entriesOld = emptySet( );
+            private Set<Entry<K, V>> entriesOld = emptySet( );
 
             @Override
             public void run( )
             {
-                Set<Entry<K,V>> entriesNew = new HashSet<>( var.v( ).entrySet( ) );
+                Set<Entry<K, V>> entriesNew = new HashSet<>( var.v( ).entrySet( ) );
 
                 // difference() returns an unmodifiable view, which is what we want
-                Set<Entry<K,V>> entriesRemoved = difference( entriesOld, entriesNew );
-                for ( Entry<K,V> entry : entriesRemoved )
+                Set<Entry<K, V>> entriesRemoved = difference( entriesOld, entriesNew );
+                for ( Entry<K, V> entry : entriesRemoved )
                 {
                     listener.accept( entry.getKey( ), entry.getValue( ) );
                 }
