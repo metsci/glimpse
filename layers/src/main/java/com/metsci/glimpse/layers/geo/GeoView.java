@@ -50,7 +50,7 @@ public class GeoView extends GlimpseCanvasView
     }
 
     @Override
-    protected void onContextReady( GlimpseContext context )
+    protected void doContextReady( GlimpseContext context )
     {
         this.plot = new MultiAxisPlot2D( );
         this.plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
@@ -79,14 +79,14 @@ public class GeoView extends GlimpseCanvasView
     }
 
     @Override
-    public void init( )
+    public void doInit( )
     {
         GeoTrait geoTrait = requireGeoTrait( this );
         this.plot.getCenterAxis( ).setParent( geoTrait.axis );
     }
 
     @Override
-    protected void onContextDying( GlimpseContext context )
+    protected void doContextDying( GlimpseContext context )
     {
         this.canvas.removeLayout( this.plot );
 

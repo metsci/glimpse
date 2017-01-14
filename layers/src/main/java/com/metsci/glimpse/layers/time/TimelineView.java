@@ -45,7 +45,7 @@ public class TimelineView extends GlimpseCanvasView
     }
 
     @Override
-    protected void onContextReady( GlimpseContext context )
+    protected void doContextReady( GlimpseContext context )
     {
         this.plot = new CollapsibleTimePlot2D( );
         this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
@@ -57,7 +57,7 @@ public class TimelineView extends GlimpseCanvasView
     }
 
     @Override
-    public void init( )
+    public void doInit( )
     {
         TimeTrait timeTrait = requireTimeTrait( this );
         this.plot.setEpoch( timeTrait.epoch );
@@ -65,7 +65,7 @@ public class TimelineView extends GlimpseCanvasView
     }
 
     @Override
-    protected void onContextDying( GlimpseContext context )
+    protected void doContextDying( GlimpseContext context )
     {
         this.canvas.removeLayout( this.plot );
 

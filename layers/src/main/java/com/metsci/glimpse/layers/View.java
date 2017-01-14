@@ -130,6 +130,11 @@ public abstract class View
         }
     }
 
+    protected void init( )
+    {
+        this.doInit( );
+    }
+
     /**
      * Called after one or more traits have been added or replaced. This gives the view a
      * chance to initialize its UI components based on trait values -- for example, setting
@@ -150,7 +155,7 @@ public abstract class View
      * <li>Re-install the original layers
      * </ol>
      */
-    protected abstract void init( );
+    protected abstract void doInit( );
 
     /**
      * Make a new instance that, once traits and layers are added, will be identical to this
