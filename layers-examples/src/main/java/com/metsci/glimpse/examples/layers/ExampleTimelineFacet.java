@@ -117,7 +117,7 @@ public class ExampleTimelineFacet extends ExampleFacet
 
         this.row.removePainter( this.painter );
         this.view.releaseRow( this.row.getId( ), reinstalling );
-        this.view.canvas.getGLDrawable( ).invoke( false, ( glDrawable ) ->
+        this.view.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
         {
             GlimpseContext context = this.view.canvas.getGlimpseContext( );
             this.painter.dispose( context );

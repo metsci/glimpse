@@ -4,48 +4,38 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 
-import java.awt.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.layers.View;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.layers.GlimpseCanvasView;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
-public class TimelineView extends View
+public class TimelineView extends GlimpseCanvasView
 {
 
-    public final NewtSwingEDTGlimpseCanvas canvas;
+    protected CollapsibleTimePlot2D plot;
 
-    protected final CollapsibleTimePlot2D plot;
-
-    protected final Map<Object,Integer> rowRefCounts;
+    protected Map<Object,Integer> rowRefCounts;
 
 
     public TimelineView( )
     {
         this.title.set( "Timeline" );
 
-        this.plot = new CollapsibleTimePlot2D( );
-        this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
-        this.plot.setShowLabels( true );
-
-        this.rowRefCounts = new HashMap<>( );
-
-        this.canvas = new NewtSwingEDTGlimpseCanvas( );
-        this.canvas.addLayout( this.plot );
+        this.plot = null;
+        this.rowRefCounts = null;
     }
 
     @Override
@@ -55,15 +45,15 @@ public class TimelineView extends View
     }
 
     @Override
-    public Component getComponent( )
+    protected void onContextReady( GlimpseContext context )
     {
-        return this.canvas;
-    }
+        this.plot = new CollapsibleTimePlot2D( );
+        this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
+        this.plot.setShowLabels( true );
 
-    @Override
-    public GLAutoDrawable getGLDrawable( )
-    {
-        return this.canvas.getGLDrawable( );
+        this.rowRefCounts = new HashMap<>( );
+
+        this.canvas.addLayout( this.plot );
     }
 
     @Override
@@ -75,16 +65,20 @@ public class TimelineView extends View
     }
 
     @Override
-    public TimelineView copy( )
+    protected void onContextDying( GlimpseContext context )
     {
-        return new TimelineView( );
+        this.canvas.removeLayout( this.plot );
+
+        this.plot.dispose( context );
+
+        this.plot = null;
+        this.rowRefCounts = null;
     }
 
     @Override
-    protected void dispose( )
+    public TimelineView copy( )
     {
-        super.dispose( );
-        this.canvas.dispose( );
+        return new TimelineView( );
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )
