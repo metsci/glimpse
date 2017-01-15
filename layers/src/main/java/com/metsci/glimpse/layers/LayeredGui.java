@@ -178,6 +178,12 @@ public class LayeredGui
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
+            public void disposingAllFrames( DockingGroup dockingGroup )
+            {
+                views.set( ImmutableSet.of( ) );
+            }
+
+            @Override
             public void closingView( DockingGroup dockingGroup, com.metsci.glimpse.docking.View dockingView )
             {
                 // If dockingViews still has this entry, then the layeredView hasn't been removed yet

@@ -42,6 +42,8 @@ import javax.swing.SwingUtilities;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Window;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
@@ -104,6 +106,31 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
         {
             display.setEDTUtil( new AWTEDTUtil( currentThread( ).getThreadGroup( ), "AWTDisplay-" + display.getFQName( ), display::dispatchMessages ) );
         }
+
+        // If the NEWT window is still attached to the AWT component hierarchy when
+        // its parent gets destroyed, there is a weird sequence that results in a new
+        // EDTUtil thread being launched:
+        //
+        //   1. Old AWTEDTUtil thread gets stopped
+        //   2. AWT component hierarchy changes
+        //   3. A hierarchy listener gets triggered, and requests the EDTUtil
+        //   4. Since the old AWTEDTUtil is gone, a new one is started
+        //
+        // This new AWTEDTUtil thread never gets stopped. And because it periodically
+        // invokes its dispatch routine on the AWT EDT, it keeps the JVM from exiting
+        // even after all windows have been disposed.
+        //
+        // To avoid the problem, detach the NEWT window from the AWT heirarchy early
+        // in the destroy sequence.
+        //
+        window.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowDestroyNotify( WindowEvent ev )
+            {
+                glCanvas.setNEWTChild( null );
+            }
+        } );
 
         return GLWindow.create( window );
     }
