@@ -113,7 +113,7 @@ public abstract class View
                 oldTrait.parent.set( null );
 
                 // Link newTrait to oldParent, if possible
-                if ( newTrait.parent.validateFn.test( oldParent ) )
+                if ( newTrait.parent.isValid( oldParent ) )
                 {
                     newTrait.parent.set( oldParent );
                 }

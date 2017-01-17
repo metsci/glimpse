@@ -360,7 +360,7 @@ public class LayeredGui
                 {
                     for ( Trait linkage : this.linkages.v( ).get( traitKey ) )
                     {
-                        if ( trait.parent.validateFn.test( linkage ) )
+                        if ( trait.parent.isValid( linkage ) )
                         {
                             trait.parent.set( linkage );
                             break;
