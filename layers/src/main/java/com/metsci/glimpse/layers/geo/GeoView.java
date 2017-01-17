@@ -23,12 +23,12 @@ import com.metsci.glimpse.util.var.Disposable;
 public class GeoView extends GlimpseCanvasView
 {
 
-    protected MultiAxisPlot2D plot;
-    protected GridPainter gridPainter;
-    protected DelegatePainter dataPainter;
-    protected CrosshairPainter crosshairPainter;
-    protected CompositeCursorLabelPainter cursorTextPainter;
-    protected BorderPainter borderPainter;
+    public MultiAxisPlot2D plot;
+    public GridPainter gridPainter;
+    public DelegatePainter dataPainter;
+    public CrosshairPainter crosshairPainter;
+    public CompositeCursorLabelPainter cursorTextPainter;
+    public BorderPainter borderPainter;
 
 
     public GeoView( )
