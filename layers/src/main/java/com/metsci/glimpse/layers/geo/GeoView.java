@@ -2,41 +2,56 @@ package com.metsci.glimpse.layers.geo;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
+import static com.metsci.glimpse.layers.misc.UiUtils.addPainter;
 
-import java.awt.Component;
-
-import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
-import com.metsci.glimpse.layers.View;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.layers.GlimpseCanvasView;
 import com.metsci.glimpse.layers.misc.CompositeCursorLabelPainter;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.util.var.Disposable;
 
-public class GeoView extends View
+public class GeoView extends GlimpseCanvasView
 {
 
-    public final NewtSwingEDTGlimpseCanvas canvas;
-
-    public final MultiAxisPlot2D plot;
-    public final GridPainter gridPainter;
-    public final DelegatePainter dataPainter;
-    public final CrosshairPainter crosshairPainter;
-    public final CompositeCursorLabelPainter cursorTextPainter;
-    public final BorderPainter borderPainter;
+    protected MultiAxisPlot2D plot;
+    protected GridPainter gridPainter;
+    protected DelegatePainter dataPainter;
+    protected CrosshairPainter crosshairPainter;
+    protected CompositeCursorLabelPainter cursorTextPainter;
+    protected BorderPainter borderPainter;
 
 
     public GeoView( )
     {
         this.title.set( "Geo" );
 
+        this.plot = null;
+        this.gridPainter = null;
+        this.dataPainter = null;
+        this.crosshairPainter = null;
+        this.cursorTextPainter = null;
+        this.borderPainter = null;
+    }
+
+    @Override
+    public Icon getIcon( )
+    {
+        return requireIcon( "fugue-icons/map.png" );
+    }
+
+    @Override
+    protected void doContextReady( GlimpseContext context )
+    {
         this.plot = new MultiAxisPlot2D( );
         this.plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
         Axis1D xAxis = this.plot.getCenterAxisX( );
@@ -60,33 +75,29 @@ public class GeoView extends View
         this.borderPainter = new BorderPainter( );
         this.plot.addPainter( this.borderPainter );
 
-        this.canvas = new NewtSwingEDTGlimpseCanvas( );
         this.canvas.addLayout( this.plot );
     }
 
     @Override
-    public Icon getIcon( )
-    {
-        return requireIcon( "fugue-icons/map.png" );
-    }
-
-    @Override
-    public Component getComponent( )
-    {
-        return this.canvas;
-    }
-
-    @Override
-    public GLAutoDrawable getGLDrawable( )
-    {
-        return this.canvas.getGLDrawable( );
-    }
-
-    @Override
-    public void init( )
+    public void doInit( )
     {
         GeoTrait geoTrait = requireGeoTrait( this );
         this.plot.getCenterAxis( ).setParent( geoTrait.axis );
+    }
+
+    @Override
+    protected void doContextDying( GlimpseContext context )
+    {
+        this.canvas.removeLayout( this.plot );
+
+        this.plot.dispose( context );
+
+        this.plot = null;
+        this.gridPainter = null;
+        this.dataPainter = null;
+        this.crosshairPainter = null;
+        this.cursorTextPainter = null;
+        this.borderPainter = null;
     }
 
     @Override
@@ -95,11 +106,9 @@ public class GeoView extends View
         return new GeoView( );
     }
 
-    @Override
-    protected void dispose( )
+    public Disposable addDataPainter( GlimpsePainter painter )
     {
-        super.dispose( );
-        this.canvas.dispose( );
+        return addPainter( this.dataPainter, painter );
     }
 
 }

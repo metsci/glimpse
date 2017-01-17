@@ -16,6 +16,9 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 
+import com.metsci.glimpse.layout.GlimpseLayout;
+import com.metsci.glimpse.painter.base.GlimpsePainter;
+import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.InvalidValueException;
@@ -195,6 +198,26 @@ public class UiUtils
                 layoutTree( child );
             }
         }
+    }
+
+    public static Disposable addPainter( GlimpseLayout layout, GlimpsePainter painter )
+    {
+        layout.addPainter( painter );
+
+        return ( ) ->
+        {
+            layout.removePainter( painter );
+        };
+    }
+
+    public static Disposable addPainter( DelegatePainter delegatePainter, GlimpsePainter painter )
+    {
+        delegatePainter.addPainter( painter );
+
+        return ( ) ->
+        {
+            delegatePainter.removePainter( painter );
+        };
     }
 
 }

@@ -36,6 +36,8 @@ public class ExampleGeoFacet extends ExampleFacet
 
     public ExampleGeoFacet( ExampleLayer layer, GeoView view, ExampleStyle style )
     {
+        this.disposables = new DisposableGroup( );
+
         this.layer = layer;
 
         this.view = view;
@@ -43,9 +45,7 @@ public class ExampleGeoFacet extends ExampleFacet
         this.timeTrait = requireTimeTrait( this.view );
 
         this.painter = new ExampleGeoPainter( style );
-        this.view.dataPainter.addPainter( this.painter );
-
-        this.disposables = new DisposableGroup( );
+        this.disposables.add( this.view.addDataPainter( this.painter ) );
 
         Axis2D geoAxis = this.geoTrait.axis;
         this.disposables.add( addAxisListener2D( geoAxis, true, ( axis ) ->
@@ -100,8 +100,7 @@ public class ExampleGeoFacet extends ExampleFacet
     {
         this.disposables.dispose( );
 
-        this.view.dataPainter.removePainter( this.painter );
-        this.view.canvas.getGLDrawable( ).invoke( false, ( glDrawable ) ->
+        this.view.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
         {
             GlimpseContext context = this.view.canvas.getGlimpseContext( );
             this.painter.dispose( context );

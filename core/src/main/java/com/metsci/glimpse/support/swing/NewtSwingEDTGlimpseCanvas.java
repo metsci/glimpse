@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.lang.Thread.*;
 
 import java.util.logging.Logger;
 
@@ -38,12 +39,18 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLRunnable;
 import javax.swing.SwingUtilities;
 
+import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
+import com.jogamp.newt.Window;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
+
+import jogamp.newt.driver.awt.AWTEDTUtil;
 
 /**
  * <p>A subclass of NewtSwingGlimpseCanvas which performs rendering on the Swing EDT,
@@ -92,16 +99,40 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     @Override
     protected GLWindow createGLWindow( GLCapabilities glCapabilities )
     {
-        return new GLWindow( NewtFactory.createWindow( glCapabilities ) )
+        Window window = NewtFactory.createWindow( glCapabilities );
+
+        Display display = window.getScreen( ).getDisplay( );
+        if ( !( display.getEDTUtil( ) instanceof AWTEDTUtil ) )
         {
-            public void display( )
+            display.setEDTUtil( new AWTEDTUtil( currentThread( ).getThreadGroup( ), "AWTDisplay-" + display.getFQName( ), display::dispatchMessages ) );
+        }
+
+        // If the NEWT window is still attached to the AWT component hierarchy when
+        // its parent gets destroyed, there is a weird sequence that results in a new
+        // EDTUtil thread being launched:
+        //
+        //   1. Old AWTEDTUtil thread gets stopped
+        //   2. AWT component hierarchy changes
+        //   3. A hierarchy listener gets triggered, and requests the EDTUtil
+        //   4. Since the old AWTEDTUtil is gone, a new one is started
+        //
+        // This new AWTEDTUtil thread never gets stopped. And because it periodically
+        // invokes its dispatch routine on the AWT EDT, it keeps the JVM from exiting
+        // even after all windows have been disposed.
+        //
+        // To avoid the problem, detach the NEWT window from the AWT heirarchy early
+        // in the destroy sequence.
+        //
+        window.addWindowListener( new WindowAdapter( )
+        {
+            @Override
+            public void windowDestroyNotify( WindowEvent ev )
             {
-                if ( SwingUtilities.isEventDispatchThread( ) )
-                {
-                    super.display( );
-                }
+                glCanvas.setNEWTChild( null );
             }
-        };
+        } );
+
+        return GLWindow.create( window );
     }
 
     @Override
@@ -115,11 +146,12 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     {
         return new GLEventListener( )
         {
-            // NOT run on Swing EDT
-            // (does not need to be as it only sets up OpenGL state, doesn't touch Glimpse classes)
+            // runs on the Swing EDT, as long as AWTEDTUtil is used
             @Override
             public void init( final GLAutoDrawable drawable )
             {
+                requireSwingThread( );
+
                 try
                 {
                     GL gl = drawable.getGL( );
@@ -134,13 +166,11 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 }
             }
 
-            // run on Swing EDT automatically when using SwingAnimator
+            // runs on the Swing EDT, as long as SwingEDTAnimator is used
             @Override
             public void display( final GLAutoDrawable drawable )
             {
-                // Before animator is attached, display() may get called from off the EDT.
-                // Simply ignore these calls.
-                if ( !SwingUtilities.isEventDispatchThread( ) ) return;
+                requireSwingThread( );
 
                 // Ignore initial reshapes while canvas is not showing/
                 // The canvas can report incorrect/transient sizes during this time.
@@ -152,33 +182,28 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 }
             }
 
-            // Called by NEWT off the Swing EDT, is run on the EDT with SwingUtilities.invokeLater().
-            // This strategy would fail if reshape required using the GLAutoDrawable, since the context
-            // is no longer active when SwingUtilities.invokeLater() is run.
+            // runs on the Swing EDT, as long as AWTEDTUtil is used
             @Override
             public void reshape( GLAutoDrawable drawable, int x, int y, int width, int height )
             {
-                SwingUtilities.invokeLater( new Runnable( )
-                {
-                    @Override
-                    public void run( )
-                    {
-                        // ignore initial reshapes while canvas is not showing
-                        // (the canvas can report incorrect/transient sizes during this time)
-                        if ( !glCanvas.isShowing( ) ) return;
+                requireSwingThread( );
 
-                        layoutTo( );
-                    }
-                } );
+                // ignore initial reshapes while canvas is not showing
+                // (the canvas can report incorrect/transient sizes during this time)
+                if ( !glCanvas.isShowing( ) ) return;
+
+                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
+                {
+                    layout.layoutTo( getGlimpseContext( ) );
+                }
             }
 
-            // NOT run on Swing EDT
-            // However, GlimsepCanvas.disposeAttached( ) and GlimsepCanvas.disposePainter( ) are called
-            // from the Swing EDT when using SwingAnimator and those methods are where Glimpse resources
-            // are disposed of.
+            // runs on the Swing EDT, as long as AWTEDTUtil is used
             @Override
             public void dispose( final GLAutoDrawable drawable )
             {
+                requireSwingThread( );
+
                 for ( GLRunnable runnable : disposeListeners )
                 {
                     runnable.run( drawable );
@@ -187,49 +212,11 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
         };
     }
 
-    @Override
-    public void disposeAttached( )
+    protected static void requireSwingThread( )
     {
-        this.getGLDrawable( ).invoke( false, new GLRunnable( )
+        if ( !SwingUtilities.isEventDispatchThread( ) )
         {
-            @Override
-            public boolean run( GLAutoDrawable drawable )
-            {
-                for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-                {
-                    layout.dispose( getGlimpseContext( ) );
-                }
-
-                // after layouts are disposed they should not be painted
-                // so remove them from the canvas
-                removeAllLayouts( );
-
-                return true;
-            }
-        } );
-    }
-
-    @Override
-    public void disposePainter( final GlimpsePainter painter )
-    {
-        this.getGLDrawable( ).invoke( false, new GLRunnable( )
-        {
-            @Override
-            public boolean run( GLAutoDrawable drawable )
-            {
-                painter.dispose( getGlimpseContext( ) );
-                return true;
-            }
-        } );
-    }
-
-    public void layoutTo( )
-    {
-        assert ( SwingUtilities.isEventDispatchThread( ) );
-
-        for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
-        {
-            layout.layoutTo( getGlimpseContext( ) );
+            throw new RuntimeException( "This operation is only allowed on the Swing/AWT event-dispatch thread" );
         }
     }
 }
