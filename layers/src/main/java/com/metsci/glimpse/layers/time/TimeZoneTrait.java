@@ -33,6 +33,17 @@ public class TimeZoneTrait extends Trait
     public final Var<ZoneId> timeZone;
 
 
+    public TimeZoneTrait( boolean isLinkage, String zoneId )
+    {
+        this( isLinkage, ZoneId.of( zoneId ) );
+    }
+
+    public TimeZoneTrait( boolean isLinkage, ZoneId zoneId )
+    {
+        this( isLinkage );
+        this.timeZone.set( zoneId );
+    }
+
     public TimeZoneTrait( boolean isLinkage )
     {
         super( isLinkage );
