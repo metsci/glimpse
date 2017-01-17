@@ -139,4 +139,5 @@ public class TimeTrait extends Trait
     {
         return this.selectionCursorTag.getValue( );
     }
+
 }

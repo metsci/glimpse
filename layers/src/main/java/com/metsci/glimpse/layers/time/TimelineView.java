@@ -2,10 +2,14 @@ package com.metsci.glimpse.layers.time;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
+import static com.metsci.glimpse.layers.time.TimeZoneTrait.requireTimeZoneTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
 
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import javax.swing.Icon;
@@ -21,11 +25,13 @@ import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.util.var.Var;
 
 public class TimelineView extends GlimpseCanvasView
 {
 
     protected CollapsibleTimePlot2D plot;
+    protected Var<ZoneId> timeZone;
 
     protected Map<Object,Integer> rowRefCounts;
 
@@ -35,6 +41,7 @@ public class TimelineView extends GlimpseCanvasView
         this.title.set( "Timeline" );
 
         this.plot = null;
+        this.timeZone = null;
         this.rowRefCounts = null;
     }
 
@@ -51,6 +58,14 @@ public class TimelineView extends GlimpseCanvasView
         this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
         this.plot.setShowLabels( true );
 
+        this.timeZone = new Var<>( ZoneId.of( "UTC" ), notNull );
+        this.timeZone.addListener( true, ( ) ->
+        {
+            TimeZone tz = TimeZone.getTimeZone( this.timeZone.v( ) );
+            this.plot.getTimeAxisLabelHandler( ).setTimeZone( tz );
+            this.plot.getDefaultTimeline( ).setTimeZone( tz );
+        } );
+
         this.rowRefCounts = new HashMap<>( );
 
         this.canvas.addLayout( this.plot );
@@ -62,6 +77,9 @@ public class TimelineView extends GlimpseCanvasView
         TimeTrait timeTrait = requireTimeTrait( this );
         this.plot.setEpoch( timeTrait.epoch );
         this.plot.getTimeAxis( ).setParent( timeTrait.axis );
+
+        TimeZoneTrait timeZoneTrait = requireTimeZoneTrait( this );
+        this.timeZone.setParent( timeZoneTrait.timeZone );
     }
 
     @Override
@@ -69,9 +87,11 @@ public class TimelineView extends GlimpseCanvasView
     {
         this.canvas.removeLayout( this.plot );
 
+        this.timeZone.setParent( null );
         this.plot.dispose( context );
 
         this.plot = null;
+        this.timeZone = null;
         this.rowRefCounts = null;
     }
 
