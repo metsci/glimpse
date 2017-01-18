@@ -51,7 +51,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
-import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
@@ -130,7 +129,7 @@ public class LayeredGui
     protected final Map<View,Disposable> viewDisposables;
     protected final DockingGroup dockingGroup;
     protected final GLAnimatorControl animator;
-    protected DockingGroupListener dockingArrSaver;
+    protected String dockingAppName;
     protected final Map<String,Integer> dockingViewIdCounters;
     protected final BiMap<View,com.metsci.glimpse.docking.View> dockingViews;
     protected final LayerCardsPanel layerCardsPanel;
@@ -170,7 +169,17 @@ public class LayeredGui
             }
         } );
 
-        this.dockingArrSaver = null;
+        this.dockingGroup.addListener( new DockingGroupAdapter( )
+        {
+            @Override
+            public void disposingAllFrames( DockingGroup dockingGroup )
+            {
+                if ( dockingAppName != null )
+                {
+                    saveDockingArrangement( dockingAppName, dockingGroup.captureArrangement( ) );
+                }
+            }
+        } );
 
         this.dockingViewIdCounters = new HashMap<>( );
 
@@ -221,24 +230,9 @@ public class LayeredGui
 
     public void arrange( String appName, URL defaultArrUrl )
     {
-        if ( this.dockingArrSaver != null )
-        {
-            this.dockingGroup.removeListener( this.dockingArrSaver );
-            this.dockingArrSaver = null;
-        }
-
         GroupArrangement groupArr = loadDockingArrangement( appName, defaultArrUrl );
         this.dockingGroup.setArrangement( groupArr );
-
-        this.dockingArrSaver = new DockingGroupAdapter( )
-        {
-            @Override
-            public void disposingAllFrames( DockingGroup dockingGroup )
-            {
-                saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
-            }
-        };
-        this.dockingGroup.addListener( this.dockingArrSaver );
+        this.dockingAppName = appName;
     }
 
     public Trait addLinkage( String traitKey, String name, Trait template )
