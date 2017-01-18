@@ -53,7 +53,7 @@ public class LayeredExample
             GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
             GeoTrait geoTemplate = new GeoTrait( false, proj );
             geoTemplate.setProjectedBounds( Length::fromNauticalMiles, -2, +2, -2, +2 );
-            // WIP: Initialize selection box
+            geoTemplate.setSelectionSize( Length::fromNauticalMiles, 0.4 );
             // WIP: Specify axis units for display
 
             Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
