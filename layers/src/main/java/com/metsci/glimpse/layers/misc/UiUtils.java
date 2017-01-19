@@ -10,13 +10,17 @@ import java.awt.Graphics2D;
 import java.awt.ItemSelectable;
 import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.gl.GLEventAdapter;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
@@ -101,14 +105,63 @@ public class UiUtils
         };
     }
 
-    public static Disposable addToAnimator( GLAutoDrawable glDrawable, GLAnimatorControl animator )
+    public static Disposable addToAnimator( GLAutoDrawable glDrawable, GLAnimatorControl glAnimator )
     {
-        animator.add( glDrawable );
+        glAnimator.add( glDrawable );
 
         return ( ) ->
         {
-            animator.remove( glDrawable );
+            glAnimator.remove( glDrawable );
         };
+    }
+
+    public static Disposable addGLEventListener( GlimpseCanvas canvas, GLEventListener glListener )
+    {
+        return addGLEventListener( canvas.getGLDrawable( ), glListener );
+    }
+
+    public static Disposable addGLEventListener( GLAutoDrawable glDrawable, GLEventListener glListener )
+    {
+        glDrawable.addGLEventListener( glListener );
+
+        return ( ) ->
+        {
+            glDrawable.removeGLEventListener( glListener );
+        };
+    }
+
+    public static Disposable onGLInit( GlimpseCanvas canvas, Consumer<GLAutoDrawable> initFn )
+    {
+        return onGLInit( canvas.getGLDrawable( ), initFn );
+    }
+
+    public static Disposable onGLInit( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> initFn )
+    {
+        return addGLEventListener( glDrawable, new GLEventAdapter( )
+        {
+            @Override
+            public void init( GLAutoDrawable glDrawable )
+            {
+                initFn.accept( glDrawable );
+            }
+        } );
+    }
+
+    public static Disposable onGLDispose( GlimpseCanvas canvas, Consumer<GLAutoDrawable> disposeFn )
+    {
+        return onGLDispose( canvas.getGLDrawable( ), disposeFn );
+    }
+
+    public static Disposable onGLDispose( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> disposeFn )
+    {
+        return addGLEventListener( glDrawable, new GLEventAdapter( )
+        {
+            @Override
+            public void dispose( GLAutoDrawable glDrawable )
+            {
+                disposeFn.accept( glDrawable );
+            }
+        } );
     }
 
     /**
