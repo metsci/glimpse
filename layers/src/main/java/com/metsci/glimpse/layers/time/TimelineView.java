@@ -5,6 +5,7 @@ import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.requireTimeZoneTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
+import static javax.media.opengl.GLProfile.GL3;
 
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
+import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
@@ -38,6 +40,8 @@ public class TimelineView extends GlimpseCanvasView
 
     public TimelineView( )
     {
+        super( GLProfile.get( GL3 ) );
+
         this.title.set( "Timeline" );
 
         this.plot = null;

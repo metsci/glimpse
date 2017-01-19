@@ -8,7 +8,6 @@ import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimeTrait;
@@ -100,11 +99,10 @@ public class ExampleGeoFacet extends ExampleFacet
     {
         this.disposables.dispose( );
 
-        this.view.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+        this.view.glimpseInvoke( ( context ) ->
         {
-            GlimpseContext context = this.view.canvas.getGlimpseContext( );
             this.painter.dispose( context );
-            return false;
+            return true;
         } );
     }
 

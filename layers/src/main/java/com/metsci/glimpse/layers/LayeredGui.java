@@ -8,7 +8,6 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static com.metsci.glimpse.layers.misc.UiUtils.addToAnimator;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -35,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -160,14 +158,10 @@ public class LayeredGui
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
         this.animator = new SwingEDTAnimator( 30 );
-        this.dockingGroup.addListener( new DockingGroupAdapter( )
-        {
-            @Override
-            public void disposingAllFrames( DockingGroup dockingGroup )
-            {
-                animator.stop( );
-            }
-        } );
+
+        this.dockingViewIdCounters = new HashMap<>( );
+
+        this.dockingViews = HashBiMap.create( );
 
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
@@ -178,18 +172,10 @@ public class LayeredGui
                 {
                     saveDockingArrangement( dockingAppName, dockingGroup.captureArrangement( ) );
                 }
-            }
-        } );
 
-        this.dockingViewIdCounters = new HashMap<>( );
-
-        this.dockingViews = HashBiMap.create( );
-        this.dockingGroup.addListener( new DockingGroupAdapter( )
-        {
-            @Override
-            public void disposingAllFrames( DockingGroup dockingGroup )
-            {
                 views.set( ImmutableSet.of( ) );
+
+                animator.stop( );
             }
 
             @Override
@@ -377,6 +363,8 @@ public class LayeredGui
             view.addLayer( layer );
         }
 
+        view.setGLAnimator( this.animator );
+
         JToggleButton facetsButton = new JToggleButton( layersIcon );
         facetsButton.setToolTipText( "Show Layers" );
         JPopupMenu facetsPopup = newButtonPopup( facetsButton );
@@ -430,13 +418,6 @@ public class LayeredGui
         this.dockingViews.put( view, dockingView );
 
         disposables.add( view::dispose );
-
-        GLAutoDrawable glDrawable = view.getGLDrawable( );
-        if ( glDrawable != null )
-        {
-            this.animator.start( );
-            disposables.add( addToAnimator( glDrawable, this.animator ) );
-        }
 
         this.viewDisposables.put( view, disposables );
     }

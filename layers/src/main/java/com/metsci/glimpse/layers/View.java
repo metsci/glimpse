@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 
@@ -44,6 +44,11 @@ public abstract class View
         this.toolbar = newToolbar( true );
     }
 
+    public void setGLAnimator( GLAnimatorControl glAnimator )
+    {
+        // Do nothing by default
+    }
+
     public abstract Component getComponent( );
 
     public String getTooltip( )
@@ -52,11 +57,6 @@ public abstract class View
     }
 
     public Icon getIcon( )
-    {
-        return null;
-    }
-
-    public GLAutoDrawable getGLDrawable( )
     {
         return null;
     }

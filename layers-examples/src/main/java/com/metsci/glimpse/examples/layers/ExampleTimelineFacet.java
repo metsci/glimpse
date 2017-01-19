@@ -10,7 +10,6 @@ import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.time.TimeTrait;
 import com.metsci.glimpse.layers.time.TimelineView;
@@ -114,14 +113,13 @@ public class ExampleTimelineFacet extends ExampleFacet
     public void dispose( boolean reinstalling )
     {
         this.disposables.dispose( );
-
         this.row.removePainter( this.painter );
         this.view.releaseRow( this.row.getId( ), reinstalling );
-        this.view.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+
+        this.view.glimpseInvoke( ( context ) ->
         {
-            GlimpseContext context = this.view.canvas.getGlimpseContext( );
             this.painter.dispose( context );
-            return false;
+            return true;
         } );
     }
 

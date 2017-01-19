@@ -3,7 +3,9 @@ package com.metsci.glimpse.layers.geo;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.layers.misc.UiUtils.addPainter;
+import static javax.media.opengl.GLProfile.GL3;
 
+import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -33,6 +35,8 @@ public class GeoView extends GlimpseCanvasView
 
     public GeoView( )
     {
+        super( GLProfile.get( GL3 ) );
+
         this.title.set( "Geo" );
 
         this.plot = null;

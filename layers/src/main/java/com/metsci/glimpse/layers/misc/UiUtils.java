@@ -15,6 +15,7 @@ import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -218,6 +219,14 @@ public class UiUtils
         {
             delegatePainter.removePainter( painter );
         };
+    }
+
+    public static void requireSwingThread( )
+    {
+        if ( !SwingUtilities.isEventDispatchThread( ) )
+        {
+            throw new RuntimeException( "This operation is only allowed on the Swing/AWT event-dispatch thread" );
+        }
     }
 
 }
