@@ -110,6 +110,21 @@ public class TimeTrait extends Trait
         this.axis.validateTags( );
     }
 
+    public double selectionMin_PSEC( )
+    {
+        return this.epoch.toTimeStamp( this.selectionMinTag.getValue( ) ).toPosixSeconds( );
+    }
+
+    public double selectionMax_PSEC( )
+    {
+        return this.epoch.toTimeStamp( this.selectionMaxTag.getValue( ) ).toPosixSeconds( );
+    }
+
+    public double selectionCursor_PSEC( )
+    {
+        return this.epoch.toTimeStamp( this.selectionCursorTag.getValue( ) ).toPosixSeconds( );
+    }
+
     public long selectionMin_PMILLIS( )
     {
         return this.epoch.toPosixMillis( this.selectionMinTag.getValue( ) );
