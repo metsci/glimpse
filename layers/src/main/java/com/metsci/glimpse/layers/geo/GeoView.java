@@ -63,21 +63,26 @@ public class GeoView extends GlimpseCanvasView
         AxisInfo xAxisInfo = this.plot.createAxisBottom( "xBottom", xAxis, new AxisMouseListener1D( ) );
         AxisInfo yAxisInfo = this.plot.createAxisLeft( "yLeft", yAxis, new AxisMouseListener1D( ) );
 
+        //TODO Adding zOrder arguments to the painters fixes issue where
+        //     cursor labels were appearing behind painters in dataPainter
+        //     DelegatePainter. However, I'm unsure why the zOrder arguments
+        //     are necessary as GlimpseLayouts default to the order painters
+        //     were added. --Geoff
         this.gridPainter = new GridPainter( xAxisInfo.getTickHandler( ), yAxisInfo.getTickHandler( ) );
-        this.plot.addPainter( this.gridPainter );
+        this.plot.addPainter( this.gridPainter, -10 );
 
         this.dataPainter = new DelegatePainter( );
-        this.plot.addPainter( this.dataPainter );
+        this.plot.addPainter( this.dataPainter, 0 );
 
         this.crosshairPainter = new CrosshairPainter( );
-        this.plot.addPainter( this.crosshairPainter );
+        this.plot.addPainter( this.crosshairPainter, 10 );
 
         this.cursorTextPainter = new CompositeCursorLabelPainter( );
         this.cursorTextPainter.setXYLabels( xAxisInfo, yAxisInfo );
-        this.plot.addPainter( this.cursorTextPainter );
+        this.plot.addPainter( this.cursorTextPainter, 10 );
 
         this.borderPainter = new BorderPainter( );
-        this.plot.addPainter( this.borderPainter );
+        this.plot.addPainter( this.borderPainter, 20 );
 
         this.canvas.addLayout( this.plot );
     }
