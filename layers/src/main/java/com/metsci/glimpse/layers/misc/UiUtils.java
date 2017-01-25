@@ -1,5 +1,6 @@
 package com.metsci.glimpse.layers.misc;
 
+import static com.metsci.glimpse.support.DisposableUtils.addItemListener;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 import java.awt.Color;
@@ -7,23 +8,12 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.ItemSelectable;
-import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
-import java.util.function.Consumer;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.canvas.GlimpseCanvas;
-import com.metsci.glimpse.gl.GLEventAdapter;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.InvalidValueException;
@@ -68,100 +58,6 @@ public class UiUtils
         } ) );
 
         return listeners;
-    }
-
-    public static Disposable addComponent( Container container, Component child )
-    {
-        return addComponent( container, child, null );
-    }
-
-    public static Disposable addComponent( Container container, Component child, int index )
-    {
-        return addComponent( container, child, null, index );
-    }
-
-    public static Disposable addComponent( Container container, Component child, Object constraints )
-    {
-        return addComponent( container, child, constraints, -1 );
-    }
-
-    public static Disposable addComponent( Container container, Component child, Object constraints, int index )
-    {
-        container.add( child, constraints, index );
-
-        return ( ) ->
-        {
-            container.remove( child );
-        };
-    }
-
-    public static Disposable addItemListener( ItemSelectable itemSelectable, ItemListener itemListener )
-    {
-        itemSelectable.addItemListener( itemListener );
-
-        return ( ) ->
-        {
-            itemSelectable.removeItemListener( itemListener );
-        };
-    }
-
-    public static Disposable addToAnimator( GLAutoDrawable glDrawable, GLAnimatorControl glAnimator )
-    {
-        glAnimator.add( glDrawable );
-
-        return ( ) ->
-        {
-            glAnimator.remove( glDrawable );
-        };
-    }
-
-    public static Disposable addGLEventListener( GlimpseCanvas canvas, GLEventListener glListener )
-    {
-        return addGLEventListener( canvas.getGLDrawable( ), glListener );
-    }
-
-    public static Disposable addGLEventListener( GLAutoDrawable glDrawable, GLEventListener glListener )
-    {
-        glDrawable.addGLEventListener( glListener );
-
-        return ( ) ->
-        {
-            glDrawable.removeGLEventListener( glListener );
-        };
-    }
-
-    public static Disposable onGLInit( GlimpseCanvas canvas, Consumer<GLAutoDrawable> initFn )
-    {
-        return onGLInit( canvas.getGLDrawable( ), initFn );
-    }
-
-    public static Disposable onGLInit( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> initFn )
-    {
-        return addGLEventListener( glDrawable, new GLEventAdapter( )
-        {
-            @Override
-            public void init( GLAutoDrawable glDrawable )
-            {
-                initFn.accept( glDrawable );
-            }
-        } );
-    }
-
-    public static Disposable onGLDispose( GlimpseCanvas canvas, Consumer<GLAutoDrawable> disposeFn )
-    {
-        return onGLDispose( canvas.getGLDrawable( ), disposeFn );
-    }
-
-    public static Disposable onGLDispose( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> disposeFn )
-    {
-        return addGLEventListener( glDrawable, new GLEventAdapter( )
-        {
-            @Override
-            public void dispose( GLAutoDrawable glDrawable )
-            {
-                disposeFn.accept( glDrawable );
-            }
-        } );
     }
 
     /**
@@ -252,26 +148,6 @@ public class UiUtils
                 layoutTree( child );
             }
         }
-    }
-
-    public static Disposable addPainter( GlimpseLayout layout, GlimpsePainter painter )
-    {
-        layout.addPainter( painter );
-
-        return ( ) ->
-        {
-            layout.removePainter( painter );
-        };
-    }
-
-    public static Disposable addPainter( DelegatePainter delegatePainter, GlimpsePainter painter )
-    {
-        delegatePainter.addPainter( painter );
-
-        return ( ) ->
-        {
-            delegatePainter.removePainter( painter );
-        };
     }
 
     public static void requireSwingThread( )

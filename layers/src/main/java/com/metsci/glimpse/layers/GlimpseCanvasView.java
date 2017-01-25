@@ -1,8 +1,8 @@
 package com.metsci.glimpse.layers;
 
-import static com.metsci.glimpse.layers.misc.UiUtils.onGLDispose;
-import static com.metsci.glimpse.layers.misc.UiUtils.onGLInit;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
+import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
+import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

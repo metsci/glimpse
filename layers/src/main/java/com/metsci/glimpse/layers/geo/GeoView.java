@@ -2,7 +2,7 @@ package com.metsci.glimpse.layers.geo;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
-import static com.metsci.glimpse.layers.misc.UiUtils.addPainter;
+import static com.metsci.glimpse.support.DisposableUtils.addGlimpsePainter;
 import static javax.media.opengl.GLProfile.GL3;
 
 import javax.media.opengl.GLProfile;
@@ -117,7 +117,7 @@ public class GeoView extends GlimpseCanvasView
 
     public Disposable addDataPainter( GlimpsePainter painter )
     {
-        return addPainter( this.dataPainter, painter );
+        return addGlimpsePainter( this.dataPainter, painter );
     }
 
 }
