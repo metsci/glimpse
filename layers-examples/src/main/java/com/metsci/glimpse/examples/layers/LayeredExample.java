@@ -3,11 +3,13 @@ package com.metsci.glimpse.examples.layers;
 import static com.metsci.glimpse.examples.layers.ExampleTrait.addExampleLinkage;
 import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
 import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
+import static com.metsci.glimpse.layers.time.TimeZoneTrait.addTimeZoneLinkage;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
+import java.time.ZoneId;
 import java.util.Random;
 
 import javax.swing.SwingUtilities;
@@ -16,6 +18,7 @@ import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimeTrait;
+import com.metsci.glimpse.layers.time.TimeZoneTrait;
 import com.metsci.glimpse.layers.time.TimelineView;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -50,14 +53,16 @@ public class LayeredExample
             GeoProjection proj = new TangentPlane( LatLonGeo.fromDeg( 30.0, -75.0 ) );
             GeoTrait geoTemplate = new GeoTrait( false, proj );
             geoTemplate.setProjectedBounds( Length::fromNauticalMiles, -2, +2, -2, +2 );
-            // WIP: Initialize selection box
+            geoTemplate.setSelectionSize( Length::fromNauticalMiles, 0.4 );
             // WIP: Specify axis units for display
 
             Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
             TimeTrait timeTemplate = new TimeTrait( false, epoch );
             timeTemplate.setRelativeBounds( Time::minutesToSeconds, -5, +65 );
             timeTemplate.setRelativeSelection( Time::minutesToSeconds, 0, +10 );
-            // WIP: Specify timezone for display
+
+            TimeZoneTrait timeZoneTemplate = new TimeZoneTrait( false );
+            timeZoneTemplate.timeZone.set( ZoneId.of( "Z" ) );
 
             ExampleTrait exampleTemplate = new ExampleTrait( true );
             exampleTemplate.setZBounds( Length::fromFeet, -5, +105 );
@@ -117,6 +122,7 @@ public class LayeredExample
 
             addGeoLinkage( gui, "Geo Defaults", geoTemplate );
             addTimeLinkage( gui, "Time Defaults", timeTemplate );
+            addTimeZoneLinkage( gui, "Time Zone Defaults", timeZoneTemplate );
             addExampleLinkage( gui, "Example Defaults", exampleTemplate );
 
             gui.addView( new GeoView( ) );

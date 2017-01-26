@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 
@@ -44,6 +44,11 @@ public abstract class View
         this.toolbar = newToolbar( true );
     }
 
+    public void setGLAnimator( GLAnimatorControl glAnimator )
+    {
+        // Do nothing by default
+    }
+
     public abstract Component getComponent( );
 
     public String getTooltip( )
@@ -52,11 +57,6 @@ public abstract class View
     }
 
     public Icon getIcon( )
-    {
-        return null;
-    }
-
-    public GLAutoDrawable getGLDrawable( )
     {
         return null;
     }
@@ -113,7 +113,7 @@ public abstract class View
                 oldTrait.parent.set( null );
 
                 // Link newTrait to oldParent, if possible
-                if ( newTrait.parent.validateFn.test( oldParent ) )
+                if ( newTrait.parent.isValid( oldParent ) )
                 {
                     newTrait.parent.set( oldParent );
                 }
@@ -128,6 +128,11 @@ public abstract class View
         {
             this.addLayer( layer );
         }
+    }
+
+    protected void init( )
+    {
+        this.doInit( );
     }
 
     /**
@@ -150,7 +155,7 @@ public abstract class View
      * <li>Re-install the original layers
      * </ol>
      */
-    protected abstract void init( );
+    protected abstract void doInit( );
 
     /**
      * Make a new instance that, once traits and layers are added, will be identical to this

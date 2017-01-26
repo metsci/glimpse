@@ -1,5 +1,6 @@
 package com.metsci.glimpse.layers.misc;
 
+import static com.metsci.glimpse.support.DisposableUtils.addItemListener;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 import java.awt.Color;
@@ -7,14 +8,11 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.ItemSelectable;
-import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLAutoDrawable;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
@@ -60,51 +58,6 @@ public class UiUtils
         } ) );
 
         return listeners;
-    }
-
-    public static Disposable addComponent( Container container, Component child )
-    {
-        return addComponent( container, child, null );
-    }
-
-    public static Disposable addComponent( Container container, Component child, int index )
-    {
-        return addComponent( container, child, null, index );
-    }
-
-    public static Disposable addComponent( Container container, Component child, Object constraints )
-    {
-        return addComponent( container, child, constraints, -1 );
-    }
-
-    public static Disposable addComponent( Container container, Component child, Object constraints, int index )
-    {
-        container.add( child, constraints, index );
-
-        return ( ) ->
-        {
-            container.remove( child );
-        };
-    }
-
-    public static Disposable addItemListener( ItemSelectable itemSelectable, ItemListener itemListener )
-    {
-        itemSelectable.addItemListener( itemListener );
-
-        return ( ) ->
-        {
-            itemSelectable.removeItemListener( itemListener );
-        };
-    }
-
-    public static Disposable addToAnimator( GLAutoDrawable glDrawable, GLAnimatorControl animator )
-    {
-        animator.add( glDrawable );
-
-        return ( ) ->
-        {
-            animator.remove( glDrawable );
-        };
     }
 
     /**
@@ -194,6 +147,14 @@ public class UiUtils
             {
                 layoutTree( child );
             }
+        }
+    }
+
+    public static void requireSwingThread( )
+    {
+        if ( !SwingUtilities.isEventDispatchThread( ) )
+        {
+            throw new RuntimeException( "This operation is only allowed on the Swing/AWT event-dispatch thread" );
         }
     }
 

@@ -2,50 +2,51 @@ package com.metsci.glimpse.layers.time;
 
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
+import static com.metsci.glimpse.layers.time.TimeZoneTrait.requireTimeZoneTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
+import static com.metsci.glimpse.util.PredicateUtils.notNull;
+import static javax.media.opengl.GLProfile.GL3;
 
-import java.awt.Component;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 
-import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.layers.View;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.layers.GlimpseCanvasView;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.util.var.Var;
 
-public class TimelineView extends View
+public class TimelineView extends GlimpseCanvasView
 {
 
-    public final NewtSwingEDTGlimpseCanvas canvas;
+    protected CollapsibleTimePlot2D plot;
+    protected Var<ZoneId> timeZone;
 
-    protected final CollapsibleTimePlot2D plot;
-
-    protected final Map<Object,Integer> rowRefCounts;
+    protected Map<Object,Integer> rowRefCounts;
 
 
     public TimelineView( )
     {
+        super( GLProfile.get( GL3 ) );
+
         this.title.set( "Timeline" );
 
-        this.plot = new CollapsibleTimePlot2D( );
-        this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
-        this.plot.setShowLabels( true );
-
-        this.rowRefCounts = new HashMap<>( );
-
-        this.canvas = new NewtSwingEDTGlimpseCanvas( );
-        this.canvas.addLayout( this.plot );
+        this.plot = null;
+        this.timeZone = null;
+        this.rowRefCounts = null;
     }
 
     @Override
@@ -55,36 +56,53 @@ public class TimelineView extends View
     }
 
     @Override
-    public Component getComponent( )
+    protected void doContextReady( GlimpseContext context )
     {
-        return this.canvas;
+        this.plot = new CollapsibleTimePlot2D( );
+        this.plot.setTimeAxisMouseListener( new TaggedAxisMouseListener1D( ) );
+        this.plot.setShowLabels( true );
+
+        this.timeZone = new Var<>( ZoneId.of( "UTC" ), notNull );
+        this.timeZone.addListener( true, ( ) ->
+        {
+            TimeZone tz = TimeZone.getTimeZone( this.timeZone.v( ) );
+            this.plot.getTimeAxisLabelHandler( ).setTimeZone( tz );
+            this.plot.getDefaultTimeline( ).setTimeZone( tz );
+        } );
+
+        this.rowRefCounts = new HashMap<>( );
+
+        this.canvas.addLayout( this.plot );
     }
 
     @Override
-    public GLAutoDrawable getGLDrawable( )
-    {
-        return this.canvas.getGLDrawable( );
-    }
-
-    @Override
-    public void init( )
+    public void doInit( )
     {
         TimeTrait timeTrait = requireTimeTrait( this );
         this.plot.setEpoch( timeTrait.epoch );
         this.plot.getTimeAxis( ).setParent( timeTrait.axis );
+
+        TimeZoneTrait timeZoneTrait = requireTimeZoneTrait( this );
+        this.timeZone.setParent( timeZoneTrait.timeZone );
+    }
+
+    @Override
+    protected void doContextDying( GlimpseContext context )
+    {
+        this.canvas.removeLayout( this.plot );
+
+        this.timeZone.setParent( null );
+        this.plot.dispose( context );
+
+        this.plot = null;
+        this.timeZone = null;
+        this.rowRefCounts = null;
     }
 
     @Override
     public TimelineView copy( )
     {
         return new TimelineView( );
-    }
-
-    @Override
-    protected void dispose( )
-    {
-        super.dispose( );
-        this.canvas.dispose( );
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )

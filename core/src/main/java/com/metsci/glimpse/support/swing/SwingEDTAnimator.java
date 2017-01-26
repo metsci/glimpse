@@ -31,6 +31,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -42,7 +43,6 @@ import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.SwingUtilities;
 
-import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.util.concurrent.ConcurrencyUtils;
 
@@ -66,7 +66,7 @@ public class SwingEDTAnimator implements GLAnimatorControl
     {
         this.fps = fps;
 
-        this.targets = Lists.newCopyOnWriteArrayList( );
+        this.targets = new CopyOnWriteArrayList<>( );
 
         // create a default exception handler which simply logs exceptions
         this.handler = new UncaughtExceptionHandler( )

@@ -110,4 +110,15 @@ public class GeoTrait extends Trait
                        unitsToSu.applyAsDouble( yMax_UNITS ) );
     }
 
+    public void setSelectionSize( DoubleUnaryOperator unitsToSu, double size_UNITS )
+    {
+        this.setSelectionSize( unitsToSu, size_UNITS, size_UNITS );
+    }
+
+    public void setSelectionSize( DoubleUnaryOperator unitsToSu, double xSize_UNITS, double ySize_UNITS )
+    {
+        this.axis.getAxisX( ).setSelectionSize( unitsToSu.applyAsDouble( xSize_UNITS ) );
+        this.axis.getAxisY( ).setSelectionSize( unitsToSu.applyAsDouble( ySize_UNITS ) );
+    }
+
 }

@@ -100,6 +100,11 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         init( glProfile, context );
     }
 
+    public NewtSwingGlimpseCanvas( GLProfile glProfile )
+    {
+        init( glProfile, null );
+    }
+
     public NewtSwingGlimpseCanvas( String profile )
     {
         init( GLProfile.get( profile ), null );

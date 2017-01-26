@@ -8,7 +8,6 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static com.metsci.glimpse.layers.misc.UiUtils.addToAnimator;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -35,7 +34,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLAutoDrawable;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -51,7 +49,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
-import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
@@ -130,7 +127,7 @@ public class LayeredGui
     protected final Map<View,Disposable> viewDisposables;
     protected final DockingGroup dockingGroup;
     protected final GLAnimatorControl animator;
-    protected DockingGroupListener dockingArrSaver;
+    protected String dockingAppName;
     protected final Map<String,Integer> dockingViewIdCounters;
     protected final BiMap<View,com.metsci.glimpse.docking.View> dockingViews;
     protected final LayerCardsPanel layerCardsPanel;
@@ -161,22 +158,26 @@ public class LayeredGui
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
         this.animator = new SwingEDTAnimator( 30 );
+
+        this.dockingViewIdCounters = new HashMap<>( );
+
+        this.dockingViews = HashBiMap.create( );
+
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
             public void disposingAllFrames( DockingGroup dockingGroup )
             {
+                if ( dockingAppName != null )
+                {
+                    saveDockingArrangement( dockingAppName, dockingGroup.captureArrangement( ) );
+                }
+
+                views.set( ImmutableSet.of( ) );
+
                 animator.stop( );
             }
-        } );
 
-        this.dockingArrSaver = null;
-
-        this.dockingViewIdCounters = new HashMap<>( );
-
-        this.dockingViews = HashBiMap.create( );
-        this.dockingGroup.addListener( new DockingGroupAdapter( )
-        {
             @Override
             public void closingView( DockingGroup dockingGroup, com.metsci.glimpse.docking.View dockingView )
             {
@@ -215,24 +216,9 @@ public class LayeredGui
 
     public void arrange( String appName, URL defaultArrUrl )
     {
-        if ( this.dockingArrSaver != null )
-        {
-            this.dockingGroup.removeListener( this.dockingArrSaver );
-            this.dockingArrSaver = null;
-        }
-
         GroupArrangement groupArr = loadDockingArrangement( appName, defaultArrUrl );
         this.dockingGroup.setArrangement( groupArr );
-
-        this.dockingArrSaver = new DockingGroupAdapter( )
-        {
-            @Override
-            public void disposingAllFrames( DockingGroup dockingGroup )
-            {
-                saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
-            }
-        };
-        this.dockingGroup.addListener( this.dockingArrSaver );
+        this.dockingAppName = appName;
     }
 
     public Trait addLinkage( String traitKey, String name, Trait template )
@@ -354,7 +340,7 @@ public class LayeredGui
                 {
                     for ( Trait linkage : this.linkages.v( ).get( traitKey ) )
                     {
-                        if ( trait.parent.validateFn.test( linkage ) )
+                        if ( trait.parent.isValid( linkage ) )
                         {
                             trait.parent.set( linkage );
                             break;
@@ -376,6 +362,8 @@ public class LayeredGui
         {
             view.addLayer( layer );
         }
+
+        view.setGLAnimator( this.animator );
 
         JToggleButton facetsButton = new JToggleButton( layersIcon );
         facetsButton.setToolTipText( "Show Layers" );
@@ -430,13 +418,6 @@ public class LayeredGui
         this.dockingViews.put( view, dockingView );
 
         disposables.add( view::dispose );
-
-        GLAutoDrawable glDrawable = view.getGLDrawable( );
-        if ( glDrawable != null )
-        {
-            this.animator.start( );
-            disposables.add( addToAnimator( glDrawable, this.animator ) );
-        }
 
         this.viewDisposables.put( view, disposables );
     }
