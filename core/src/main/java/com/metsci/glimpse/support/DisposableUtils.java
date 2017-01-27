@@ -137,7 +137,12 @@ public class DisposableUtils
         } );
     }
 
-    public static Disposable addToGLAnimator( GLAutoDrawable glDrawable, GLAnimatorControl glAnimator )
+    public static Disposable addToGLAnimator( GLAnimatorControl glAnimator, GlimpseCanvas canvas )
+    {
+        return addToGLAnimator( glAnimator, canvas.getGLDrawable( ) );
+    }
+
+    public static Disposable addToGLAnimator( GLAnimatorControl glAnimator, GLAutoDrawable glDrawable )
     {
         glAnimator.add( glDrawable );
 
