@@ -135,6 +135,13 @@ public class ImmutableCollectionUtils
         return ImmutableList.copyOf( newList );
     }
 
+    public static <V> ImmutableList<V> listPlus( ImmutableList<V> list, int index, V value )
+    {
+        List<V> newList = new ArrayList<>( list );
+        newList.add( index, value );
+        return ImmutableList.copyOf( newList );
+    }
+
     public static <V> ImmutableList<V> listPlus( ImmutableList<V> list, Collection<? extends V> values )
     {
         List<V> newList = new ArrayList<>( list );
