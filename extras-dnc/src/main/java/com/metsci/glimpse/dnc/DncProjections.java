@@ -28,6 +28,10 @@ package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.dnc.DncTangentPlanes.azimuthToTangentPlane_MATHRAD;
 import static com.metsci.glimpse.dnc.DncTangentPlanes.posToTangentPlane;
+import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 
 import com.metsci.glimpse.dnc.DncTangentPlanes.DncTangentPlane;
@@ -84,8 +88,15 @@ public class DncProjections
 
         public double projectAzimuth_MATHRAD( double x, double y, double azimuth_MATHRAD )
         {
-            // XXX
-            return azimuth_MATHRAD;
+            double cos_LOCAL = cos( azimuth_MATHRAD );
+            double sin_LOCAL = sin( azimuth_MATHRAD );
+
+            double lat_DEG = y;
+            double cosLat = cos( degreesToRadians( lat_DEG ) );
+            double cos_PROJ = cos_LOCAL / cosLat;
+            double sin_PROJ = sin_LOCAL;
+
+            return atan2( sin_PROJ, cos_PROJ );
         }
     };
 

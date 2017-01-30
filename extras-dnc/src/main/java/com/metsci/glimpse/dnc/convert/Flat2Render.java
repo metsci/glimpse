@@ -98,7 +98,7 @@ import static com.metsci.glimpse.util.GeneralUtils.compareInts;
 import static com.metsci.glimpse.util.GeneralUtils.compareLongs;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
+import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static java.lang.Float.NEGATIVE_INFINITY;
 import static java.lang.Float.POSITIVE_INFINITY;
 import static java.lang.Math.max;
@@ -166,6 +166,7 @@ import com.metsci.glimpse.support.polygon.VertexAccumulator;
 import com.metsci.glimpse.util.primitives.CharsArray;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
+import com.metsci.glimpse.util.units.Azimuth;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -1372,7 +1373,7 @@ public class Flat2Render
                     {
                         if ( group.geosymAssignment.hasPointSymbol( ) )
                         {
-                            float rotation_CCWRAD = featureRotation_CCWRAD( group.geosymAssignment, attrs, proj, x, y );
+                            float rotation_CCWRAD = iconRotation_CCWRAD( group.geosymAssignment, attrs, proj, x, y );
                             group.iconCoords.append( x );
                             group.iconCoords.append( y );
                             group.iconCoords.append( featureNum );
@@ -1540,7 +1541,7 @@ public class Flat2Render
                     {
                         if ( group.geosymAssignment.hasPointSymbol( ) )
                         {
-                            float rotation_CCWRAD = featureRotation_CCWRAD( group.geosymAssignment, attrs, proj, x, y );
+                            float rotation_CCWRAD = iconRotation_CCWRAD( group.geosymAssignment, attrs, proj, x, y );
                             group.iconCoords.append( x );
                             group.iconCoords.append( y );
                             group.iconCoords.append( featureNum );
@@ -1614,7 +1615,7 @@ public class Flat2Render
                 {
                     if ( group.geosymAssignment.hasPointSymbol( ) )
                     {
-                        float rotation_CCWRAD = featureRotation_CCWRAD( group.geosymAssignment, attrs, proj, x, y );
+                        float rotation_CCWRAD = iconRotation_CCWRAD( group.geosymAssignment, attrs, proj, x, y );
                         group.iconCoords.append( x );
                         group.iconCoords.append( y );
                         group.iconCoords.append( featureNum );
@@ -1695,14 +1696,19 @@ public class Flat2Render
         return false;
     }
 
-    public static float featureRotation_CCWRAD( DncGeosymAssignment geosymAssignment, Function<String,Object> featureAttrs, DncProjection proj, float x, float y )
+    public static float iconRotation_CCWRAD( DncGeosymAssignment geosymAssignment, Function<String,Object> featureAttrs, DncProjection proj, float x, float y )
     {
         Object orientationValue = featureAttrs.apply( geosymAssignment.orientationAttr );
         if ( orientationValue instanceof Number )
         {
-            double unprojRotation_CWDEG = ( ( Number ) orientationValue ).doubleValue( );
-            double unprojRotation_CCWRAD = degreesToRadians( -unprojRotation_CWDEG );
-            return ( float ) proj.projectAzimuth_MATHRAD( x, y, unprojRotation_CCWRAD );
+            // The icon for an oriented feature is stored pointing north ... to rotate it for display,
+            // we compute its projected orientation, then convert it to a rotation -- but with unusual
+            // units: radians counter-clockwise from north
+            double localOrientation_NAVDEG = ( ( Number ) orientationValue ).doubleValue( );
+            double localOrientation_MATHRAD = Azimuth.toMathRad( Azimuth.fromNavDeg( localOrientation_NAVDEG ) );
+            double projectedOrientation_MATHRAD = proj.projectAzimuth_MATHRAD( x, y, localOrientation_MATHRAD );
+            double iconRotation_CCWRAD = ( projectedOrientation_MATHRAD - HALF_PI );
+            return ( float ) iconRotation_CCWRAD;
         }
         else
         {
