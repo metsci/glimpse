@@ -102,7 +102,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
         this.selectionBorderColor = color;
     }
 
-    public void setCurrenTimeMarkerColor( float[] color )
+    public void setCurrentTimeMarkerColor( float[] color )
     {
         this.currentTimeMarkerColor = color;
     }
