@@ -148,8 +148,8 @@ public class WrappedPainter extends GlimpsePainterBase
             // XXX: not sure why this doesn't get called automatically somewhere else
             axis.validate( );
 
-            List<WrappedTextureBounds> boundsX = Lists.newArrayList( iterator( axisX, bounds.getWidth( ) ) );
-            List<WrappedTextureBounds> boundsY = Lists.newArrayList( iterator( axisY, bounds.getHeight( ) ) );
+            List<WrappedTextureBounds> boundsX = Lists.newArrayList( wrappedBoundsIterator( axisX, bounds.getWidth( ) ) );
+            List<WrappedTextureBounds> boundsY = Lists.newArrayList( wrappedBoundsIterator( axisY, bounds.getHeight( ) ) );
 
             // always require a redraw for the first image
             boolean forceRedraw = true;
@@ -206,6 +206,8 @@ public class WrappedPainter extends GlimpsePainterBase
     {
         GL3 gl = context.getGL( ).getGL3( );
 
+        gl.glActiveTexture( GL.GL_TEXTURE0 );
+
         // position the drawn data in non-wrapped coordinates
         // (since we've split up the image such that we don't have to worry about seams)
         this.vertCoordBuffer.clear( );
@@ -255,7 +257,7 @@ public class WrappedPainter extends GlimpsePainterBase
     //    drawing offscreen at the correct resolution would require an offscreen buffer twice the size of the on-screen.
     //
     // see comment above: true indicates "case a", false indicates "case b", value ignored if wrap is false
-    protected Iterator<WrappedTextureBounds> iterator( Axis1D axis, int boundsSize )
+    public static Iterator<WrappedTextureBounds> wrappedBoundsIterator( Axis1D axis, int boundsSize )
     {
         boolean wrap = axis instanceof WrappedAxis1D;
 
@@ -295,7 +297,7 @@ public class WrappedPainter extends GlimpsePainterBase
         }
     }
 
-    private class WrappedTextureBounds
+    public static class WrappedTextureBounds
     {
         private double startValue;
         private double endValue;
@@ -350,7 +352,7 @@ public class WrappedPainter extends GlimpsePainterBase
     }
 
     // If we are not wrapping, then simply draw the image as we normally would, using the axis bounds
-    private class NoWrapIterator implements Iterator<WrappedTextureBounds>
+    private static class NoWrapIterator implements Iterator<WrappedTextureBounds>
     {
         private Axis1D axis;
         private int boundsSize;
@@ -391,7 +393,7 @@ public class WrappedPainter extends GlimpsePainterBase
     }
 
     // In the zoomed in case, we draw one half of the image then the other half.
-    private class ZoomedInIterator implements Iterator<WrappedTextureBounds>
+    private static class ZoomedInIterator implements Iterator<WrappedTextureBounds>
     {
         private WrappedAxis1D axis;
         private int boundsSize;
@@ -476,7 +478,7 @@ public class WrappedPainter extends GlimpsePainterBase
     // In the zoomed out case, we draw the whole image once, then draw it onto the screen multiple times to tile the space.
     // We could use this approach in the ZoomedIn case as well, but we would need to allocate a very large offscreen buffer
     // to draw at the appropriate resolution and some (perhaps most if very zoomed in) of what we draw wouldn't get seen anyway.
-    private class ZoomedOutIterator implements Iterator<WrappedTextureBounds>
+    private static class ZoomedOutIterator implements Iterator<WrappedTextureBounds>
     {
         private WrappedAxis1D axis;
         private int boundsSize;
