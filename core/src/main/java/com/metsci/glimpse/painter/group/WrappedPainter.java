@@ -63,6 +63,9 @@ public class WrappedPainter extends GlimpsePainterBase
 {
     private static final Logger logger = Logger.getLogger( WrappedPainter.class.getName( ) );
 
+    // XXX: This should probably be something more flexible, maybe along the lines of GLCapabilities
+    private final boolean attachStencilBuffer;
+
     private List<GlimpsePainter> painters;
 
     private FBObject fbo;
@@ -78,6 +81,13 @@ public class WrappedPainter extends GlimpsePainterBase
 
     public WrappedPainter( )
     {
+        this( false );
+    }
+
+    public WrappedPainter( boolean attachStencilBuffer )
+    {
+        this.attachStencilBuffer = attachStencilBuffer;
+
         this.painters = new CopyOnWriteArrayList<GlimpsePainter>( );
 
         this.dummyAxis = new Axis2D( );
@@ -129,6 +139,10 @@ public class WrappedPainter extends GlimpsePainterBase
             {
                 this.fbo = new FBObject( );
                 this.fbo.init( gl, 0, 0, 0 );
+                if ( this.attachStencilBuffer )
+                {
+                    this.fbo.attachRenderbuffer( gl, FBObject.Attachment.Type.STENCIL, FBObject.DEFAULT_BITS );
+                }
                 this.fboTextureAttachment = this.fbo.attachTexture2D( gl, this.fboTextureUnit, true );
                 this.fbo.unbind( gl );
 
