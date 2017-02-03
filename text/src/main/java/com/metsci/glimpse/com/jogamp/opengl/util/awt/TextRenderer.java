@@ -893,7 +893,6 @@ public final class TextRenderer
         {
 
             Check.notNull( type, "Event type cannot be null" );
-            Check.notNull( data, "Data cannot be null" );
 
             switch ( type )
             {
@@ -904,6 +903,7 @@ public final class TextRenderer
                     glyphProducer.clearGlyphs( );
                     break;
                 case CLEAN:
+                    Check.notNull( data, "Data cannot be null" );
                     glyphProducer.removeGlyph( ( Glyph ) data );
                     break;
             }
