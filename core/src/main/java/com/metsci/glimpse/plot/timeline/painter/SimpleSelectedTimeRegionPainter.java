@@ -57,6 +57,7 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
     protected float[] selectionBorderColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 );
     protected float[] currentTimeMarkerColor = GlimpseColor.fromColorRgba( 0, 51, 255, 255 );
 
+    protected boolean showSelectedTimeRegion = true;
     protected boolean showCurrenTimeMarker = true;
     protected float currentTimeMarkerWidth = 3.0f;
 
@@ -110,6 +111,11 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
     public void setShowCurrentTimeMarker( boolean show )
     {
         this.showCurrenTimeMarker = show;
+    }
+    
+    public void setShowSelectedTimeRegion( boolean show )
+    {
+        this.showSelectedTimeRegion = show;
     }
 
     public void setCurrentTimeMarkerWidth( float width )
@@ -172,78 +178,92 @@ public class SimpleSelectedTimeRegionPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
 
-        fillProg.begin( gl );
-        try
+        if ( showSelectedTimeRegion )
         {
-            fillPath.clear( );
-
-            if ( orientation == Orientation.VERTICAL )
+            fillProg.begin( gl );
+            try
             {
-                fillProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
-                fillPath.growQuad2f( min, 0, max, height - 1 );
-            }
-            else
-            {
-                fillProg.setOrtho( gl, 0, width, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ) );
-                fillPath.growQuad2f( 0, min, width, max );
-            }
-
-            fillProg.draw( gl, fillPath, selectionFillColor );
-        }
-        finally
-        {
-            fillProg.end( gl );
-        }
-
-        lineProg.begin( gl );
-        try
-        {
-            lineProg.setViewport( gl, bounds );
-
-            linePath.clear( );
-
-            if ( orientation == Orientation.VERTICAL )
-            {
-                lineProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
-
-                linePath.addRectangle( min, 0, max, height - 1 );
-            }
-            else
-            {
-                lineProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
-
-                linePath.addRectangle( 0, min, width, max );
-            }
-
-            lineStyle.rgba = selectionBorderColor;
-            lineStyle.thickness_PX = 1.0f;
-
-            lineProg.draw( gl, lineStyle, linePath );
-
-            if ( this.showCurrenTimeMarker )
-            {
-                lineStyle.rgba = currentTimeMarkerColor;
-                lineStyle.thickness_PX = currentTimeMarkerWidth;
-
-                linePath.clear( );
-
+                fillPath.clear( );
+    
                 if ( orientation == Orientation.VERTICAL )
                 {
-                    linePath.moveTo( current, 0 );
-                    linePath.lineTo( current, height );
+                    fillProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
+                    fillPath.growQuad2f( min, 0, max, height - 1 );
                 }
                 else
                 {
-                    linePath.moveTo( 0, current );
-                    linePath.lineTo( width, current );
+                    fillProg.setOrtho( gl, 0, width, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ) );
+                    fillPath.growQuad2f( 0, min, width, max );
                 }
-
-                lineProg.draw( gl, lineStyle, linePath );
+    
+                fillProg.draw( gl, fillPath, selectionFillColor );
+            }
+            finally
+            {
+                fillProg.end( gl );
             }
         }
-        finally
+
+        if ( showSelectedTimeRegion || showCurrenTimeMarker )
         {
-            lineProg.end( gl );
+            lineProg.begin( gl );
+            try
+            {
+                lineProg.setViewport( gl, bounds );
+    
+                if ( orientation == Orientation.VERTICAL )
+                {
+                    lineProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
+                }
+                else
+                {
+                    lineProg.setOrtho( gl, ( float ) taggedAxis.getMin( ), ( float ) taggedAxis.getMax( ), 0, height );
+                }
+                
+                if ( showSelectedTimeRegion )
+                {
+                    linePath.clear( );
+        
+                    if ( orientation == Orientation.VERTICAL )
+                    {
+                        linePath.addRectangle( min, 0, max, height - 1 );
+                    }
+                    else
+                    {
+                        linePath.addRectangle( 0, min, width, max );
+                    }
+        
+                    lineStyle.rgba = selectionBorderColor;
+                    lineStyle.thickness_PX = 1.0f;
+        
+                    lineProg.draw( gl, lineStyle, linePath );
+                }
+    
+                if ( showCurrenTimeMarker )
+                {
+                    lineStyle.rgba = currentTimeMarkerColor;
+                    lineStyle.thickness_PX = currentTimeMarkerWidth;
+    
+                    linePath.clear( );
+    
+                    if ( orientation == Orientation.VERTICAL )
+                    {
+                        linePath.moveTo( current, 0 );
+                        linePath.lineTo( current, height );
+                    }
+                    else
+                    {
+                        linePath.moveTo( 0, current );
+                        linePath.lineTo( width, current );
+                    }
+    
+                    lineProg.draw( gl, lineStyle, linePath );
+                }
+            }
+            finally
+            {
+                lineProg.end( gl );
+            }
         }
     }
 }
