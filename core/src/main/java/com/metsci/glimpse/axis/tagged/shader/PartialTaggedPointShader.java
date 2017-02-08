@@ -31,7 +31,7 @@ import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import java.io.IOException;
 import java.util.List;
 
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;

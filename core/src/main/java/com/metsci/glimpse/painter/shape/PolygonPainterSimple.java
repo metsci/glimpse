@@ -35,8 +35,8 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

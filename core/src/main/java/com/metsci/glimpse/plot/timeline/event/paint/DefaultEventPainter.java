@@ -33,7 +33,7 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;

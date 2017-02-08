@@ -29,8 +29,8 @@ package com.metsci.glimpse.painter.plot;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;

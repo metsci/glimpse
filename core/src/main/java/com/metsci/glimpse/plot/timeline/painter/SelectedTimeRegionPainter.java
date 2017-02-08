@@ -29,8 +29,8 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;

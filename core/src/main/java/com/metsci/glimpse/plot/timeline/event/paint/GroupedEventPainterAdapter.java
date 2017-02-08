@@ -28,7 +28,7 @@ package com.metsci.glimpse.plot.timeline.event.paint;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseBounds;

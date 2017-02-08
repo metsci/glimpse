@@ -29,8 +29,8 @@ package com.metsci.glimpse.painter.decoration;
 import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.FRAME_BACKGROUND_COLOR;
 import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.PLOT_BACKGROUND_COLOR;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainter;

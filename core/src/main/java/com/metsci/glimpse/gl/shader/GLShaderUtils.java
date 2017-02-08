@@ -31,7 +31,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 public class GLShaderUtils
 {

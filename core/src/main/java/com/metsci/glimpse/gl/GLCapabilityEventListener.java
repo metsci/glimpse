@@ -35,9 +35,9 @@ import static java.util.logging.Level.INFO;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
 
 public class GLCapabilityEventListener implements GLEventListener
 {

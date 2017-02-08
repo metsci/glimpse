@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.support.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * A texture class which stores 8 bit integer values (uncapped). Must be used

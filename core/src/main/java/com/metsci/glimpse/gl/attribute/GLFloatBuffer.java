@@ -28,7 +28,7 @@ package com.metsci.glimpse.gl.attribute;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
 

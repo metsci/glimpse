@@ -65,15 +65,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLException;
-import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.glu.GLU;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.glu.GLU;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -97,15 +97,15 @@ import jogamp.opengl.Debug;
 
     Using the {@link AttributedTextRenderer TextRenderer} is simple. Add a
     "<code>TextRenderer renderer;</code>" field to your {@link
-    javax.media.opengl.GLEventListener GLEventListener}. In your {@link
-    javax.media.opengl.GLEventListener#init init} method, add:
+    com.jogamp.opengl.GLEventListener GLEventListener}. In your {@link
+    com.jogamp.opengl.GLEventListener#init init} method, add:
 
     <PRE>
     renderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
     </PRE>
 
-    <P> In the {@link javax.media.opengl.GLEventListener#display display} method of your
-    {@link javax.media.opengl.GLEventListener GLEventListener}, add:
+    <P> In the {@link com.jogamp.opengl.GLEventListener#display display} method of your
+    {@link com.jogamp.opengl.GLEventListener GLEventListener}, add:
     <PRE>
     renderer.beginRendering(drawable.getWidth(), drawable.getHeight());
     // optionally set the color
@@ -400,7 +400,7 @@ public class AttributedTextRenderer
     
         @param width the width of the current on-screen OpenGL drawable
         @param height the height of the current on-screen OpenGL drawable
-        @throws javax.media.opengl.GLException If an OpenGL context is not current when this method is called
+        @throws com.jogamp.opengl.GLException If an OpenGL context is not current when this method is called
     */
     public void beginRendering( int width, int height ) throws GLException
     {

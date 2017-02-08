@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 import com.metsci.glimpse.support.color.RGBA;
 

@@ -28,7 +28,7 @@ package com.metsci.glimpse.axis.painter;
 
 import java.awt.Font;
 
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLContext;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
