@@ -30,6 +30,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -296,6 +297,23 @@ public class ColorGradients
     public static final ColorGradient autumn = fromCSV( "colormap/matplotlib/autumn.csv" );
     public static final ColorGradient accent = fromCSV( "colormap/matplotlib/accent.csv" );
 
+    public static ColorGradient twoColorFade( float[] color1, float[] color2 )
+    {
+        List<float[]> list = new ArrayList<>( );
+        list.add( color1 );
+        list.add( color2 );
+        return nColorFade( list );
+    }
+
+    public static ColorGradient threeColorFade( float[] color1, float[] color2, float[] color3 )
+    {
+        List<float[]> list = new ArrayList<>( );
+        list.add( color1 );
+        list.add( color2 );
+        list.add( color3 );
+        return nColorFade( list );
+    }
+
     public static ColorGradient nColorFade( final List<float[]> colors )
     {
         return new ColorGradient( )
@@ -472,7 +490,7 @@ public class ColorGradients
     {
         FloatsArray f = new FloatsArray( );
         String line = null;
-        try ( BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ) )
+        try (BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ))
         {
             while ( ( line = reader.readLine( ) ) != null )
             {
