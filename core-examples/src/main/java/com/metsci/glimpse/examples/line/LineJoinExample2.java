@@ -56,12 +56,12 @@ import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.support.shader.line.LineStrip;
 import com.metsci.glimpse.support.shader.line.LineStyle;
-import com.metsci.glimpse.support.shader.line.StreamingLinePath;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-public class StreamingLinePathExample
+public class LineJoinExample2
 {
 
     public static void main( String[] args )
@@ -124,7 +124,7 @@ public class StreamingLinePathExample
 
     public static class CustomLinesPainter extends GlimpsePainterBase
     {
-        protected final StreamingLinePath path;
+        protected final LineStrip strip;
         protected final LineStyle style;
         protected final LineProgram prog;
 
@@ -136,7 +136,7 @@ public class StreamingLinePathExample
         public CustomLinesPainter( Tag leftAngleTag_CWDEG, Tag rightAngleTag_CWDEG, Tag thicknessTag_PX, Tag featherTag_PX )
         {
             // Create a path, which will be populated in doPaintTo()
-            this.path = new StreamingLinePath( );
+            this.strip = new LineStrip( );
 
             // Set line appearance
             this.style = new LineStyle( );
@@ -159,41 +159,35 @@ public class StreamingLinePathExample
             Axis2D axis = requireAxis2D( context );
             GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
-            // Populate the path based on axis tags
-            this.path.map( gl, 6, style.stippleEnable, ppvAspectRatio( axis ) );
-            try
-            {
-                double xB = -1;
-                double yB = -1;
-                double xC = +1;
-                double yC = +1;
+            // Compute coords based on axis tags
+            double xB = -1;
+            double yB = -1;
+            double xC = +1;
+            double yC = +1;
 
-                double dxBC = xC - xB;
-                double dyBC = yC - yB;
-                double dxCB = -dxBC;
-                double dyCB = -dyBC;
+            double dxBC = xC - xB;
+            double dyBC = yC - yB;
+            double dxCB = -dxBC;
+            double dyCB = -dyBC;
 
-                double angleB_CCWRAD = toRadians( -this.angleTagB_CWDEG.getValue( ) );
-                double cosAngleB = cos( angleB_CCWRAD );
-                double sinAngleB = sin( angleB_CCWRAD );
-                double xA = xB + dxCB*cosAngleB - dyCB*sinAngleB;
-                double yA = yB + dxCB*sinAngleB + dyCB*cosAngleB;
+            double angleB_CCWRAD = toRadians( -this.angleTagB_CWDEG.getValue( ) );
+            double cosAngleB = cos( angleB_CCWRAD );
+            double sinAngleB = sin( angleB_CCWRAD );
+            double xA = xB + dxCB*cosAngleB - dyCB*sinAngleB;
+            double yA = yB + dxCB*sinAngleB + dyCB*cosAngleB;
 
-                double angleC_CCWRAD = -toRadians( -this.angleTagC_CWDEG.getValue( ) );
-                double cosAngleC = cos( angleC_CCWRAD );
-                double sinAngleC = sin( angleC_CCWRAD );
-                double xD = xC + dxBC*cosAngleC - dyBC*sinAngleC;
-                double yD = yC + dxBC*sinAngleC + dyBC*cosAngleC;
+            double angleC_CCWRAD = -toRadians( -this.angleTagC_CWDEG.getValue( ) );
+            double cosAngleC = cos( angleC_CCWRAD );
+            double sinAngleC = sin( angleC_CCWRAD );
+            double xD = xC + dxBC*cosAngleC - dyBC*sinAngleC;
+            double yD = yC + dxBC*sinAngleC + dyBC*cosAngleC;
 
-                this.path.moveTo( ( float ) xA, ( float ) yA );
-                this.path.lineTo( ( float ) xB, ( float ) yB );
-                this.path.lineTo( ( float ) xC, ( float ) yC );
-                this.path.lineTo( ( float ) xD, ( float ) yD );
-            }
-            finally
-            {
-                this.path.seal( gl );
-            }
+            // Populate the strip
+            this.strip.clear( );
+            this.strip.grow1( ( float ) xA, ( float ) yA );
+            this.strip.grow1( ( float ) xB, ( float ) yB );
+            this.strip.grow1( ( float ) xC, ( float ) yC );
+            this.strip.grow1( ( float ) xD, ( float ) yD );
 
             // Update the style based on axis tags
             this.style.thickness_PX = ( float ) this.thicknessTag_PX.getValue( );
@@ -206,7 +200,7 @@ public class StreamingLinePathExample
             {
                 this.prog.setViewport( gl, bounds );
                 this.prog.setAxisOrtho( gl, axis );
-                this.prog.draw( gl, style, path );
+                this.prog.draw( gl, this.style, this.strip, ppvAspectRatio( axis ) );
             }
             finally
             {
@@ -219,7 +213,7 @@ public class StreamingLinePathExample
         protected void doDispose( GlimpseContext context )
         {
             GL2ES2 gl = context.getGL( ).getGL2ES2( );
-            this.path.dispose( gl );
+            this.strip.dispose( gl );
             this.prog.dispose( gl );
         }
     }

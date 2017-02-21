@@ -114,6 +114,20 @@ public class ImmutableCollectionUtils
         }
     }
 
+    @SafeVarargs
+    public static <V> ImmutableSet<V> setPlus( ImmutableSet<V> set, V... values )
+    {
+        Set<V> newSet = new LinkedHashSet<>( set );
+
+        boolean changed = false;
+        for ( V value : values )
+        {
+            changed |= newSet.add( value );
+        }
+
+        return ( changed ? ImmutableSet.copyOf( newSet ) : set );
+    }
+
     public static <V> ImmutableSet<V> setMinus( ImmutableSet<V> set, V value )
     {
         if ( !set.contains( value ) )
@@ -128,10 +142,31 @@ public class ImmutableCollectionUtils
         }
     }
 
+    @SafeVarargs
+    public static <V> ImmutableSet<V> setMinus( ImmutableSet<V> set, V... values )
+    {
+        Set<V> newSet = new LinkedHashSet<>( set );
+
+        boolean changed = false;
+        for ( V value : values )
+        {
+            changed |= newSet.remove( value );
+        }
+
+        return ( changed ? ImmutableSet.copyOf( newSet ) : set );
+    }
+
     public static <V> ImmutableList<V> listPlus( ImmutableList<V> list, V value )
     {
         List<V> newList = new ArrayList<>( list );
         newList.add( value );
+        return ImmutableList.copyOf( newList );
+    }
+
+    public static <V> ImmutableList<V> listPlus( ImmutableList<V> list, int index, V value )
+    {
+        List<V> newList = new ArrayList<>( list );
+        newList.add( index, value );
         return ImmutableList.copyOf( newList );
     }
 

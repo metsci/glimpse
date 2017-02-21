@@ -317,17 +317,21 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-
+        
+        double xBaseline = textBounds.getX( );
+        // distance from the top of the text to the baseline
+        double yBaselineToTop = -textBounds.getY( );
+                
         switch ( hPos )
         {
             case Left:
-                xText = horizontalPadding;
+                xText = ( int ) ( horizontalPadding + xBaseline );
                 break;
             case Center:
-                xText = ( int ) ( width / 2d - textBounds.getWidth( ) * 0.5 );
+                xText = ( int ) ( width * 0.5 - textBounds.getWidth( ) * 0.5 + xBaseline );
                 break;
             case Right:
-                xText = ( int ) ( width - textBounds.getWidth( ) - horizontalPadding );
+                xText = ( int ) ( width - textBounds.getWidth( ) - horizontalPadding + xBaseline );
                 break;
         }
 
@@ -337,7 +341,7 @@ public class SimpleTextPainter extends GlimpsePainterBase
                 yText = verticalPadding;
                 break;
             case Center:
-                yText = ( int ) ( height / 2d - textBounds.getHeight( ) * 0.5 );
+                yText = ( int ) ( height * 0.5 - yBaselineToTop * 0.5 );
                 break;
             case Top:
                 yText = ( int ) ( height - textBounds.getHeight( ) - verticalPadding );

@@ -26,14 +26,19 @@
  */
 package com.metsci.glimpse.dnc;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.metsci.glimpse.dnc.DncProjections.canProjectBrowse;
+import static com.metsci.glimpse.painter.group.WrappedPainter.wrappedBoundsIterator;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.util.Collection;
+import java.util.List;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.dnc.DncProjections.DncProjection;
+import com.metsci.glimpse.painter.group.WrappedPainter.WrappedTextureBounds;
 
 public class DncPainterSettingsImpl implements DncPainterSettings
 {
@@ -113,11 +118,28 @@ public class DncPainterSettingsImpl implements DncPainterSettings
 
     public static boolean isLibraryPositionVisible( DncLibrary library, Axis2D axis )
     {
-        double xMin = axis.getMinX( );
-        double yMin = axis.getMinY( );
-        double xMax = axis.getMaxX( );
-        double yMax = axis.getMaxY( );
-        return ( xMin <= library.xMax && library.xMin <= xMax && yMin <= library.yMax && library.yMin <= yMax );
+        Axis1D xAxis = axis.getAxisX( );
+        Axis1D yAxis = axis.getAxisY( );
+
+        // This works fine even for non-wrapped axes -- the bounds lists just have a single entry
+        List<WrappedTextureBounds> xWrappedBounds = newArrayList( wrappedBoundsIterator( xAxis, xAxis.getSizePixels( ) ) );
+        List<WrappedTextureBounds> yWrappedBounds = newArrayList( wrappedBoundsIterator( yAxis, yAxis.getSizePixels( ) ) );
+
+        for ( WrappedTextureBounds xBounds : xWrappedBounds )
+        {
+            for ( WrappedTextureBounds yBounds : yWrappedBounds )
+            {
+                double xMin = xBounds.getStartValueWrapped( );
+                double xMax = xBounds.getEndValueWrapped( );
+                double yMin = yBounds.getStartValueWrapped( );
+                double yMax = yBounds.getEndValueWrapped( );
+                if ( xMin <= library.xMax && library.xMin <= xMax && yMin <= library.yMax && library.yMin <= yMax )
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean isLibraryOfType( DncLibrary library, char type )

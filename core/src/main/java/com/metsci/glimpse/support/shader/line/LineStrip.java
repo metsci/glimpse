@@ -61,57 +61,102 @@ public class LineStrip
         return ( actualSize == 0 ? 0 : actualSize - 2 );
     }
 
+
     protected final GLEditableBuffer xyBuffer;
     protected final GLEditableBuffer flagsBuffer;
     protected final GLEditableBuffer mileageBuffer;
 
-    protected int logicalSize;
-
     protected double mileagePpvAspectRatio;
+
+    protected boolean hCloseLoop;
+    protected boolean dCloseLoop;
+
+
+    public LineStrip( )
+    {
+        this( 0 );
+    }
 
     public LineStrip( int logicalCapacity )
     {
         int actualCapacity = logicalToActualSize( logicalCapacity );
         this.xyBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 2 * actualCapacity * SIZEOF_FLOAT );
-        this.flagsBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 1 * actualCapacity * SIZEOF_BYTE );
-        this.mileageBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 1 * actualCapacity * SIZEOF_FLOAT );
-
-        this.logicalSize = 0;
+        this.flagsBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
+        this.mileageBuffer = new GLEditableBuffer( GL_DYNAMIC_DRAW, 0 );
 
         this.mileagePpvAspectRatio = Double.NaN;
+
+        this.hCloseLoop = false;
+        this.dCloseLoop = false;
+    }
+
+    public void setLoop( boolean isLoop )
+    {
+        this.hCloseLoop = isLoop;
     }
 
     public int logicalSize( )
     {
-        return this.logicalSize;
+        return actualToLogicalSize( this.actualSize( ) );
     }
 
     public int actualSize( )
     {
-        return logicalToActualSize( this.logicalSize );
+        return ( this.xyBuffer.sizeFloats( ) / 2 );
     }
 
-    public void grow( int logicalAdditional )
+    public void clear( )
     {
-        int actualAdditional = logicalToActualIndex( logicalAdditional );
-        this.xyBuffer.ensureRemainingFloats( 2 * actualAdditional );
-        this.flagsBuffer.ensureRemainingBytes( 1 * actualAdditional );
-        this.mileageBuffer.ensureRemainingFloats( 1 * actualAdditional );
+        this.xyBuffer.clear( );
+    }
+
+    public void truncate( int logicalSize )
+    {
+        this.xyBuffer.truncateFloats( 2 * logicalToActualSize( logicalSize ) );
+    }
+
+    public void grow1( float x, float y )
+    {
+        this.grow( 1 ).put( x ).put( y );
+    }
+
+    public void grow2( float xA, float yA, float xB, float yB )
+    {
+        this.grow( 2 ).put( xA ).put( yA ).put( xB ).put( yB );
+    }
+
+    public void growNv( float[] array )
+    {
+        this.growNv( array, 0, array.length / 2 );
+    }
+
+    public void growNv( float[] array, int offset, int logicalCount )
+    {
+        this.grow( logicalCount ).put( array, offset, 2 * logicalCount );
+    }
+
+    public FloatBuffer grow( int logicalCount )
+    {
+        int newActualSize = logicalToActualSize( this.logicalSize( ) + logicalCount );
+        this.xyBuffer.ensureCapacityFloats( 2 * newActualSize );
+        return this.edit( logicalCount );
     }
 
     public FloatBuffer edit( int logicalCount )
     {
-        int logicalFirst = this.logicalSize;
+        int logicalFirst = this.logicalSize( );
         return this.edit( logicalFirst, logicalCount );
     }
 
     public FloatBuffer edit( int logicalFirst, int logicalCount )
     {
-        this.logicalSize = max( this.logicalSize, logicalFirst + logicalCount );
-
         int actualFirst = logicalToActualIndex( logicalFirst );
-        int actualCount = logicalCount;
-        return this.xyBuffer.editFloats( 2 * actualFirst, 2 * actualCount );
+
+        // Include an extra vertex beyond the end, to leave room for a trailing vertex
+        FloatBuffer xyEdit = this.xyBuffer.editFloats( 2 * actualFirst, 2 * ( logicalCount + 1 ) );
+        xyEdit.limit( 2 * logicalCount );
+
+        return xyEdit;
     }
 
     public LineBufferHandles deviceBuffers( GL2ES3 gl, boolean needMileage, double ppvAspectRatio )
@@ -121,27 +166,44 @@ public class LineStrip
 
     public LineBufferHandles deviceBuffers( GL2ES3 gl, boolean needMileage, double ppvAspectRatio, double ppvAspectRatioChangeThreshold )
     {
+        this.flagsBuffer.ensureCapacityBytes( 1 * this.actualSize( ) );
+        this.mileageBuffer.ensureCapacityFloats( 1 * this.actualSize( ) );
+
         FloatBuffer xyRead = this.xyBuffer.hostFloats( );
         IntRangeSet xyDirtyByteSet = this.xyBuffer.dirtyByteRanges( );
 
-        // Update leader xy
         int actualFirstVisible = logicalToActualIndex( 0 );
-        boolean putLeader = xyDirtyByteSet.contains( 2 * actualFirstVisible * SIZEOF_FLOAT );
+        int actualSecondVisible = logicalToActualIndex( 1 );
+        int actualNextToLastVisible = logicalToActualIndex( this.logicalSize( ) - 2 );
+        int actualLastVisible = logicalToActualIndex( this.logicalSize( ) - 1 );
+
+        // If loop status has changed, trigger update of phantom vertices
+        boolean closeLoop = ( this.hCloseLoop && this.logicalSize( ) >= 2 );
+        if ( this.dCloseLoop != closeLoop )
+        {
+            this.xyBuffer.editFloats( 2 * actualFirstVisible, 4 );
+            this.xyBuffer.editFloats( 2 * actualNextToLastVisible, 4 );
+            this.dCloseLoop = closeLoop;
+        }
+
+        // Update leader xy
+        int actualLeaderOrig = ( closeLoop ? actualNextToLastVisible : actualFirstVisible );
+        boolean putLeader = xyDirtyByteSet.contains( 2 * actualLeaderOrig * SIZEOF_FLOAT );
         if ( putLeader )
         {
-            float xLeader = xyRead.get( 2 * actualFirstVisible + 0 );
-            float yLeader = xyRead.get( 2 * actualFirstVisible + 1 );
+            float xLeader = xyRead.get( 2 * actualLeaderOrig + 0 );
+            float yLeader = xyRead.get( 2 * actualLeaderOrig + 1 );
             FloatBuffer xyEdit = this.xyBuffer.editFloats( 2 * ( actualFirstVisible - 1 ), 2 );
             xyEdit.put( xLeader ).put( yLeader );
         }
 
         // Update trailer xy
-        int actualLastVisible = logicalToActualIndex( this.logicalSize - 1 );
-        boolean putTrailer = xyDirtyByteSet.contains( 2 * actualLastVisible * SIZEOF_FLOAT );
+        int actualTrailerOrig = ( closeLoop ? actualSecondVisible : actualLastVisible );
+        boolean putTrailer = xyDirtyByteSet.contains( 2 * actualTrailerOrig * SIZEOF_FLOAT );
         if ( putTrailer )
         {
-            float xTrailer = xyRead.get( 2 * actualLastVisible + 0 );
-            float yTrailer = xyRead.get( 2 * actualLastVisible + 1 );
+            float xTrailer = xyRead.get( 2 * actualTrailerOrig + 0 );
+            float yTrailer = xyRead.get( 2 * actualTrailerOrig + 1 );
             FloatBuffer xyEdit = this.xyBuffer.editFloats( 2 * ( actualLastVisible + 1 ), 2 );
             xyEdit.put( xTrailer ).put( yTrailer );
         }
@@ -169,12 +231,12 @@ public class LineStrip
                 else if ( actualIndex == actualFirstVisible )
                 {
                     // First visible vertex
-                    flagsEdit.put( ( byte ) 0 );
+                    flagsEdit.put( ( byte ) ( this.dCloseLoop ? FLAGS_JOIN : 0 ) );
                 }
                 else if ( actualIndex == actualLastVisible )
                 {
                     // Last visible vertex
-                    flagsEdit.put( ( byte ) FLAGS_CONNECT );
+                    flagsEdit.put( ( byte ) ( this.dCloseLoop ? ( FLAGS_CONNECT | FLAGS_JOIN ) : FLAGS_CONNECT ) );
                 }
                 else if ( actualIndex > actualLastVisible )
                 {
@@ -189,36 +251,46 @@ public class LineStrip
             }
         }
 
-        boolean keepPpvAspectRatio = ( mileagePpvAspectRatio / ppvAspectRatioChangeThreshold <= ppvAspectRatio && ppvAspectRatio <= mileagePpvAspectRatio * ppvAspectRatioChangeThreshold );
-
         // Update mileage
-        if ( needMileage && ( !xyDirtyByteRanges.isEmpty( ) || !keepPpvAspectRatio ) )
+        if ( needMileage )
         {
-            int editFirst, dirtyFirst;
+            // If any relevant values are NaN, all inequalities will return false, so keepPpvAspectRatio will be false
+            boolean keepPpvAspectRatio = ( mileagePpvAspectRatio / ppvAspectRatioChangeThreshold <= ppvAspectRatio && ppvAspectRatio <= mileagePpvAspectRatio * ppvAspectRatioChangeThreshold );
+
+            int dirtyFirst;
             if ( keepPpvAspectRatio )
             {
-                // Include the previous mileage so that updateMileage() can read it,
-                // but position after it so that updateMileage() doesn't write it
                 dirtyFirst = xyDirtyByteRanges.first( ) / ( 2 * SIZEOF_FLOAT );
-                editFirst = max( 0, dirtyFirst - 1 );
             }
             else
             {
-                dirtyFirst = 0;
-                editFirst = 0;
                 this.mileagePpvAspectRatio = ppvAspectRatio;
+                dirtyFirst = 0;
             }
 
+            // Include the previous mileage so that updateMileage() can read it,
+            // but position after it so that updateMileage() doesn't write it
+            int editFirst = max( 0, dirtyFirst - 1 );
             int editCount = this.actualSize( ) - editFirst;
-
             FloatBuffer mileageEdit = this.mileageBuffer.editFloats( editFirst, editCount );
             mileageEdit.position( dirtyFirst - editFirst );
 
             FloatBuffer xySlice = sliced( this.xyBuffer.hostFloats( ), 2 * editFirst, 2 * editCount );
             ByteBuffer flagsSlice = sliced( this.flagsBuffer.hostBytes( ), 1 * editFirst, 1 * editCount );
 
-            updateMileageBuffer( xySlice, flagsSlice, mileageEdit, false, ppvAspectRatio );
+            // Some mileage values may already have been computed based on this.mileagePpvAspectRatio, so always
+            // compute the rest of them based on this.mileagePpvAspectRatio -- not on ppvAspectRatio
+            updateMileageBuffer( xySlice, flagsSlice, mileageEdit, false, this.mileagePpvAspectRatio );
         }
+        else
+        {
+            // The xy-dirty ranges are about to get cleared, but we don't want to assume
+            // that all mileages are up to date -- so just mark all mileages as out of date
+            this.mileagePpvAspectRatio = Double.NaN;
+        }
+
+        // Remember device-buffers' loop status
+        this.dCloseLoop = this.hCloseLoop;
 
         return new LineBufferHandles( this.xyBuffer.deviceBuffer( gl ), this.flagsBuffer.deviceBuffer( gl ), ( needMileage ? this.mileageBuffer.deviceBuffer( gl ) : 0 ) );
     }

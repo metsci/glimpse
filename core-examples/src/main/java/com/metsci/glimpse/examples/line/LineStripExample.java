@@ -121,8 +121,7 @@ public class LineStripExample
                 // Append a vertex
                 float x = strip.logicalSize( );
                 float y = x + 10*( random.nextFloat( ) - 0.5f );
-                strip.grow( 1 );
-                strip.edit( 1 ).put( x ).put( y );
+                strip.grow1( x, y );
 
                 // Move an existing vertex
                 int iPerturb = strip.logicalSize( ) / 4;
