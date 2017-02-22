@@ -208,6 +208,11 @@ public class LayeredGui
 
         addEntryRemovedListener( this.linkageNames, ( k, v ) -> this.pruneLinkages( ) );
     }
+    
+    public DockingGroup getDockingGroup( )
+    {
+        return this.dockingGroup;
+    }
 
     public void arrange( String appName, String defaultArrResource )
     {
