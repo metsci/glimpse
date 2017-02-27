@@ -463,4 +463,54 @@ public class GeneralUtils
     {
         sb.append( String.format( format, args ) );
     }
+
+    /**
+     * Is the given integer within epsilon (1e-10) of an integer.
+     */
+    public static boolean approximateInteger( double d1 )
+    {
+        return approximateInteger( d1, 1e-10 );
+    }
+
+    /**
+     * Is the given integer within epsilon of an integer.
+     */
+    public static boolean approximateInteger( double d1, double epsilon )
+    {
+        // d1 % 1 returns the fractional part of d1, which should be near 0 or 1 if d1 is an integer
+        double frac = Math.abs( d1 % 1 );
+        return approximateEqual( frac, 0, epsilon ) || approximateEqual( frac, 1, epsilon );
+    }
+
+    /**
+     * Returns true if two doubles are within a given epsilon (1e-10) of each other.
+     */
+    public static boolean approximateEqual( double d1, double d2 )
+    {
+        return approximateEqual( d1, d2, 1e-10 );
+    }
+
+    /**
+     * Returns true if two doubles are within a given epsilon of each other.
+     */
+    public static boolean approximateEqual( double d1, double d2, double epsilon )
+    {
+        return Math.abs( d1 - d2 ) < epsilon;
+    }
+
+    /**
+     * Returns true if two doubles are further than a given epsilon (1e-10) of each other.
+     */
+    public static boolean approximateNotEqual( double d1, double d2 )
+    {
+        return approximateNotEqual( d1, d2, 1e-10 );
+    }
+
+    /**
+     * Returns true if two doubles are further than a given epsilon of each other.
+     */
+    public static boolean approximateNotEqual( double d1, double d2, double epsilon )
+    {
+        return Math.abs( d1 - d2 ) > epsilon;
+    }
 }
