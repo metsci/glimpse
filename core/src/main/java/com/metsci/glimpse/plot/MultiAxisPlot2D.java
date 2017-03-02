@@ -740,6 +740,16 @@ public class MultiAxisPlot2D extends GlimpseLayout
         return info;
     }
 
+    public BackgroundPainter getBackgroundPainter( )
+    {
+        return this.backgroundPainter;
+    }
+
+    public BackgroundPainter getPlotBackgroundPainter( )
+    {
+        return this.plotBackgroundPainter;
+    }
+
     protected void attachAxisMouseListener( Mouseable mouseable, AxisMouseListener listener )
     {
         mouseable.addGlimpseMouseListener( listener );
