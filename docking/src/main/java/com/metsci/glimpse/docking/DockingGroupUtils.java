@@ -1,7 +1,7 @@
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.intersection;
 import static com.metsci.glimpse.docking.MiscUtils.union;
 import static com.metsci.glimpse.docking.Side.BOTTOM;

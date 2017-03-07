@@ -1,6 +1,6 @@
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 
 import java.awt.Component;
 import java.util.function.Function;

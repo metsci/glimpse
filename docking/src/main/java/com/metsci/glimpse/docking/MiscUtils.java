@@ -80,12 +80,6 @@ public class MiscUtils
         return new IntAndIndex( vBest, iBest );
     }
 
-    @SuppressWarnings( "unchecked" )
-    public static <T> T getAncestorOfClass( Class<? extends T> clazz, Component c )
-    {
-        return ( T ) SwingUtilities.getAncestorOfClass( clazz, c );
-    }
-
     public static Point convertPointFromScreen( Point pOnScreen, Component c )
     {
         Point pInC = new Point( pOnScreen );
