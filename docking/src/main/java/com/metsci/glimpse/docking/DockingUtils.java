@@ -31,6 +31,7 @@ import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
@@ -259,17 +260,19 @@ public class DockingUtils
 
     public static final Collection<Class<?>> dockingXmlClasses = unmodifiableCollection( asList( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ) );
 
-    public static void restoreArrangementAndSaveOnShutdown( DockingGroup dockingGroup, File targetFile, URL fallbackInput )
+    public static GroupArrangement restoreArrangementAndSaveOnShutdown( DockingGroup dockingGroup, File targetFile, URL fallbackInput )
     {
         try
         {
             InputStream is;
             if ( targetFile.isFile( ) && targetFile.canRead( ) )
             {
+                LOGGER.log( INFO, "Reading docking arrangement from " + targetFile);
                 is = new FileInputStream( targetFile );
             }
             else
             {
+                LOGGER.log( INFO, "Reading docking arrangement from " + fallbackInput);
                 is = fallbackInput.openStream( );
             }
 
@@ -282,6 +285,7 @@ public class DockingUtils
                 @Override
                 public void disposingAllFrames( DockingGroup group )
                 {
+                    LOGGER.log( INFO, "Writing docking arrangement to " + targetFile);
                     try (OutputStream os = new BufferedOutputStream( new FileOutputStream( targetFile ) ))
                     {
                         saveDockingArrangement( os, groupArr );
@@ -292,10 +296,13 @@ public class DockingUtils
                     }
                 }
             } );
+
+            return groupArr;
         }
         catch ( IOException | JAXBException ex )
         {
             LOGGER.log( WARNING, "Error reading arrangement from " + targetFile + " or " + fallbackInput, ex );
+            return null;
         }
     }
 

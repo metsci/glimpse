@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.util;
 
+import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,13 +36,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.logging.Logger;
 
 public class AppConfigUtils
 {
+    private static final Logger LOGGER = Logger.getLogger(AppConfigUtils.class.getName());
+
     public static File getAppConfigPath( String appName, String filename )
     {
         File dataDir = GlimpseDataPaths.glimpseUserDataDir;
         File appDir = new File( dataDir, appName );
+        logFine(LOGGER, "Making dirs for %s", appDir);
         appDir.mkdirs( );
 
         if ( !appDir.isDirectory( ) )
@@ -61,6 +68,7 @@ public class AppConfigUtils
     public static InputStream openAppConfigInput( String appName, String filename ) throws IOException
     {
         File file = getAppConfigPath( appName, filename );
+        logInfo(LOGGER, "Opening application config input file %s", file);
         return new FileInputStream( file );
     }
 
@@ -69,10 +77,12 @@ public class AppConfigUtils
         File file = getAppConfigPath( appName, filename );
         if ( file.isFile( ) && file.canRead( ) )
         {
+            logInfo(LOGGER, "Opening application config input file %s", file);
             return new FileInputStream( file );
         }
         else
         {
+            logInfo(LOGGER, "Opening application config input fallback url %s", fallbackUrl);
             return fallbackUrl.openStream( );
         }
     }
@@ -80,6 +90,7 @@ public class AppConfigUtils
     public static OutputStream openAppConfigOutput( String appName, String filename ) throws IOException
     {
         File file = getAppConfigPath( appName, filename );
+        logInfo(LOGGER, "Opening application config output file %s", file);
         return new FileOutputStream( file );
     }
 }
