@@ -8,6 +8,7 @@ import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -50,8 +51,10 @@ public abstract class GlimpseCanvasView extends View
     protected NewtSwingEDTGlimpseCanvas canvas;
 
 
-    public GlimpseCanvasView( GLProfile glProfile )
+    public GlimpseCanvasView( GLProfile glProfile, Collection<? extends ViewOption> options )
     {
+        super( options );
+
         this.layers = new ArrayList<>( );
         this.animator = null;
 

@@ -8,6 +8,8 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.StandardViewOption.NOT_CLONEABLE;
+import static com.metsci.glimpse.layers.StandardViewOption.NOT_CLOSEABLE;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -208,7 +210,7 @@ public class LayeredGui
 
         addEntryRemovedListener( this.linkageNames, ( k, v ) -> this.pruneLinkages( ) );
     }
-    
+
     public DockingGroup getDockingGroup( )
     {
         return this.dockingGroup;
@@ -394,14 +396,17 @@ public class LayeredGui
             }
         } ) );
 
-        JButton cloneButton = new JButton( cloneIcon );
-        cloneButton.setToolTipText( "Clone This View" );
-        cloneButton.addActionListener( ( ev ) ->
+        if ( !view.viewOptions.contains( NOT_CLONEABLE ) )
         {
-            this.cloneView( view );
-        } );
+            JButton cloneButton = new JButton( cloneIcon );
+            cloneButton.setToolTipText( "Clone This View" );
+            cloneButton.addActionListener( ( ev ) ->
+            {
+                this.cloneView( view );
+            } );
+            view.toolbar.add( cloneButton );
+        }
 
-        view.toolbar.add( cloneButton );
         view.toolbar.add( facetsButton );
 
         // XXX: Add support in docking for wildcard viewIds
@@ -417,7 +422,8 @@ public class LayeredGui
         }
 
         // XXX: Add support in docking for changing view titles
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        boolean closeable = ( !view.viewOptions.contains( NOT_CLOSEABLE ) );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
         this.dockingGroup.addView( dockingView );
 
         // When the user closes a dockingView, we will need to know the corresponding view

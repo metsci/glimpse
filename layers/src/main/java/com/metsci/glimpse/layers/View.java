@@ -7,6 +7,7 @@ import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static java.util.Collections.singletonMap;
 
 import java.awt.Component;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -28,12 +29,13 @@ public abstract class View
     public final ReadableVar<ImmutableMap<Layer,Facet>> facets;
     public final Var<String> title;
     public final JToolBar toolbar;
+    public final ImmutableSet<ViewOption> viewOptions;
 
     protected final Var<ImmutableMap<String,Trait>> _traits;
     protected final Var<ImmutableMap<Layer,Facet>> _facets;
 
 
-    public View( )
+    public View( Collection<? extends ViewOption> viewOptions )
     {
         this._traits = new Var<>( ImmutableMap.of( ), notNull );
         this._facets = new Var<>( ImmutableMap.of( ), notNull );
@@ -42,6 +44,7 @@ public abstract class View
         this.facets = this._facets;
         this.title = new Var<>( "Untitled View", notNull );
         this.toolbar = newToolbar( true );
+        this.viewOptions = ImmutableSet.copyOf( viewOptions );
     }
 
     public void setGLAnimator( GLAnimatorControl glAnimator )
