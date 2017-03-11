@@ -3,7 +3,6 @@ package com.metsci.glimpse.layers.geo;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.support.DisposableUtils.addGlimpsePainter;
-import static java.util.Arrays.asList;
 import static javax.media.opengl.GLProfile.GL3;
 
 import java.util.Collection;
@@ -11,6 +10,7 @@ import java.util.Collection;
 import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -39,7 +39,7 @@ public class GeoView extends GlimpseCanvasView
 
     public GeoView( ViewOption... viewOptions )
     {
-        this( asList( viewOptions ) );
+        this( ImmutableSet.copyOf( viewOptions ) );
     }
 
     public GeoView( Collection<? extends ViewOption> viewOptions )
