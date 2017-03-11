@@ -26,23 +26,31 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.AppConfigUtils.loadAppConfig;
-import static com.metsci.glimpse.docking.AppConfigUtils.saveAppConfig;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.logging.Level.WARNING;
+import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -53,6 +61,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
@@ -62,6 +75,7 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingUtils
 {
+    private static final Logger LOGGER = Logger.getLogger( DockingUtils.class.getName( ) );
 
     public static void requireSwingThread( )
     {
@@ -245,14 +259,76 @@ public class DockingUtils
 
     public static final Collection<Class<?>> dockingXmlClasses = unmodifiableCollection( asList( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ) );
 
-    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
+    public static void restoreArrangementAndSaveOnShutdown( DockingGroup dockingGroup, File targetFile, URL fallbackInput )
     {
-        saveAppConfig( appName, "arrangement.xml", groupArr, dockingXmlClasses );
+        try
+        {
+            InputStream is;
+            if ( targetFile.isFile( ) && targetFile.canRead( ) )
+            {
+                is = new FileInputStream( targetFile );
+            }
+            else
+            {
+                is = fallbackInput.openStream( );
+            }
+
+            is = new BufferedInputStream( is );
+            GroupArrangement groupArr = loadDockingArrangement( is );
+            is.close( );
+            dockingGroup.setArrangement( groupArr );
+            dockingGroup.addListener( new DockingGroupAdapter( )
+            {
+                @Override
+                public void disposingAllFrames( DockingGroup group )
+                {
+                    try (OutputStream os = new BufferedOutputStream( new FileOutputStream( targetFile ) ))
+                    {
+                        saveDockingArrangement( os, groupArr );
+                    }
+                    catch ( IOException | JAXBException ex )
+                    {
+                        LOGGER.log( WARNING, "Error writing arrangement to " + targetFile, ex );
+                    }
+                }
+            } );
+        }
+        catch ( IOException | JAXBException ex )
+        {
+            LOGGER.log( WARNING, "Error reading arrangement from " + targetFile + " or " + fallbackInput, ex );
+        }
     }
 
-    public static GroupArrangement loadDockingArrangement( String appName, URL fallbackUrl )
+    public static void saveDockingArrangement( OutputStream os, GroupArrangement groupArr ) throws JAXBException
     {
-        return loadAppConfig( appName, "arrangement.xml", fallbackUrl, GroupArrangement.class, dockingXmlClasses );
+        Class<?>[] classes = dockingXmlClasses.toArray( new Class[0] );
+        Marshaller marshaller = JAXBContext.newInstance( classes ).createMarshaller( );
+        marshaller.setProperty( JAXB_FORMATTED_OUTPUT, true );
+        marshaller.marshal( groupArr, os );
+    }
+
+    public static GroupArrangement loadDockingArrangement( InputStream is ) throws JAXBException
+    {
+        Class<?>[] classes = dockingXmlClasses.toArray( new Class[0] );
+        Unmarshaller unmarshaller = JAXBContext.newInstance( classes ).createUnmarshaller( );
+        Object unmarshalled = unmarshaller.unmarshal( is );
+        return castUnmarshalled( unmarshalled, GroupArrangement.class );
+    }
+
+    private static <T> T castUnmarshalled( Object unmarshalled, Class<T> clazz )
+    {
+        if ( clazz.isInstance( unmarshalled ) )
+        {
+            return clazz.cast( unmarshalled );
+        }
+        else if ( unmarshalled instanceof JAXBElement )
+        {
+            return castUnmarshalled( ( ( JAXBElement<?> ) unmarshalled ).getValue( ), clazz );
+        }
+        else
+        {
+            throw new ClassCastException( "Unmarshalled object is neither a " + clazz.getName( ) + " nor a " + JAXBElement.class.getName( ) + ": classname = " + unmarshalled.getClass( ).getName( ) );
+        }
     }
 
     public static <C extends Component> C findLargestComponent( Collection<C> components )

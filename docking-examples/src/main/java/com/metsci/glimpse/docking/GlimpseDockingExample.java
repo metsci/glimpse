@@ -29,20 +29,21 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.restoreArrangementAndSaveOnShutdown;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
+import static com.metsci.glimpse.util.AppConfigUtils.getAppConfigPath;
+
+import java.net.URL;
 
 import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
@@ -97,13 +98,13 @@ public class GlimpseDockingExample
                 final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
 
-                GroupArrangement groupArr = loadDockingArrangement( appName, GlimpseDockingExample.class.getClassLoader( ).getResource( "docking/glimpse-arrangement-default.xml" ) );
-                dockingGroup.setArrangement( groupArr );
+                URL fallbackUrl = GlimpseDockingExample.class.getClassLoader( ).getResource( "docking/glimpse-arrangement-default.xml" );
+                restoreArrangementAndSaveOnShutdown( dockingGroup, getAppConfigPath( appName, "arrangement.xml" ), fallbackUrl );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
+                    @Override
                     public void disposingAllFrames( DockingGroup group )
                     {
-                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                         glAnimator.stop( );
                     }
                 } );

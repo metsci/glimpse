@@ -37,12 +37,14 @@ import static com.metsci.glimpse.docking.DockingThemes.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
+import static com.metsci.glimpse.util.AppConfigUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.GlimpseDataPaths.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static java.awt.Font.*;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -86,7 +88,6 @@ import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
 import com.metsci.glimpse.docking.View;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -276,6 +277,7 @@ public class DncExplorer
         startThread( "DncQuery", true, new ThrowingRunnable( )
         {
             DncQuery oldQuery = null;
+            @Override
             public void runThrows( ) throws Exception
             {
                 while ( true )
@@ -326,13 +328,12 @@ public class DncExplorer
             DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
 
-            GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
-            dockingGroup.setArrangement( groupArr );
-            dockingGroup.addListener( new DockingGroupAdapter( )
-            {
+            URL fallbackUrl = DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" );
+            restoreArrangementAndSaveOnShutdown(dockingGroup, getAppConfigPath(appName, "arrangement.xml"), fallbackUrl);
+            dockingGroup.addListener(new DockingGroupAdapter() {
+                @Override
                 public void disposingAllFrames( DockingGroup group )
                 {
-                    saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                     attrsTableModel.dispose( );
                     animator.stop( );
                 }

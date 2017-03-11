@@ -29,13 +29,13 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.restoreArrangementAndSaveOnShutdown;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.util.AppConfigUtils.getAppConfigPath;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -46,6 +46,7 @@ import static java.awt.Color.white;
 import static java.awt.Color.yellow;
 
 import java.awt.Color;
+import java.net.URL;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -56,7 +57,6 @@ import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
 import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
@@ -74,6 +74,7 @@ public class SimpleDockingExample
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
+            @Override
             public void run( )
             {
 
@@ -150,15 +151,8 @@ public class SimpleDockingExample
                 final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
 
-                GroupArrangement groupArr = loadDockingArrangement( appName, SimpleDockingExample.class.getClassLoader( ).getResource( "docking/simple-arrangement-default.xml" ) );
-                dockingGroup.setArrangement( groupArr );
-                dockingGroup.addListener( new DockingGroupAdapter( )
-                {
-                    public void disposingAllFrames( DockingGroup group )
-                    {
-                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
-                    }
-                } );
+                URL fallbackUrl = SimpleDockingExample.class.getClassLoader( ).getResource( "docking/simple-arrangement-default.xml" );
+                restoreArrangementAndSaveOnShutdown( dockingGroup, getAppConfigPath( appName, "arrangement.xml" ), fallbackUrl );
 
                 dockingGroup.addViews( views );
 
