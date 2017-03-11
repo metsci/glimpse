@@ -8,6 +8,7 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.FpsOption.findFps;
 import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
@@ -166,7 +167,8 @@ public class LayeredGui
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
-        this.animator = new SwingEDTAnimator( 30 );
+        double fps = findFps( guiOptions, 60 );
+        this.animator = new SwingEDTAnimator( fps );
 
         this.dockingViewIdCounters = new HashMap<>( );
 
