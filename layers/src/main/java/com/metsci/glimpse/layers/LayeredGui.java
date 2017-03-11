@@ -8,8 +8,9 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static com.metsci.glimpse.layers.StandardViewOption.NOT_CLONEABLE;
-import static com.metsci.glimpse.layers.StandardViewOption.NOT_CLOSEABLE;
+import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
+import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
+import static com.metsci.glimpse.layers.StandardViewOption.HIDE_FACETS_MENU;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -373,30 +374,7 @@ public class LayeredGui
 
         view.setGLAnimator( this.animator );
 
-        JToggleButton facetsButton = new JToggleButton( layersIcon );
-        facetsButton.setToolTipText( "Show Layers" );
-        JPopupMenu facetsPopup = newButtonPopup( facetsButton );
-
-        DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
-        disposables.add( view.facets.addListener( true, ( ) ->
-        {
-            facetDisposables.dispose( );
-            facetDisposables.clear( );
-            facetsPopup.removeAll( );
-
-            for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
-            {
-                Layer layer = en.getKey( );
-                Facet facet = en.getValue( );
-
-                // XXX: Handle title changes
-                JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
-                facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
-                facetsPopup.add( facetToggle );
-            }
-        } ) );
-
-        if ( !view.viewOptions.contains( NOT_CLONEABLE ) )
+        if ( !view.viewOptions.contains( HIDE_CLONE_BUTTON ) )
         {
             JButton cloneButton = new JButton( cloneIcon );
             cloneButton.setToolTipText( "Clone This View" );
@@ -404,10 +382,37 @@ public class LayeredGui
             {
                 this.cloneView( view );
             } );
+
             view.toolbar.add( cloneButton );
         }
 
-        view.toolbar.add( facetsButton );
+        if ( !view.viewOptions.contains( HIDE_FACETS_MENU ) )
+        {
+            JToggleButton facetsButton = new JToggleButton( layersIcon );
+            facetsButton.setToolTipText( "Show Layers" );
+            JPopupMenu facetsPopup = newButtonPopup( facetsButton );
+
+            DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
+            disposables.add( view.facets.addListener( true, ( ) ->
+            {
+                facetDisposables.dispose( );
+                facetDisposables.clear( );
+                facetsPopup.removeAll( );
+
+                for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
+                {
+                    Layer layer = en.getKey( );
+                    Facet facet = en.getValue( );
+
+                    // XXX: Handle title changes
+                    JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+                    facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
+                    facetsPopup.add( facetToggle );
+                }
+            } ) );
+
+            view.toolbar.add( facetsButton );
+        }
 
         // XXX: Add support in docking for wildcard viewIds
         String dockingViewIdRoot = view.getClass( ).getName( );
@@ -422,7 +427,7 @@ public class LayeredGui
         }
 
         // XXX: Add support in docking for changing view titles
-        boolean closeable = ( !view.viewOptions.contains( NOT_CLOSEABLE ) );
+        boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
         com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
         this.dockingGroup.addView( dockingView );
 
