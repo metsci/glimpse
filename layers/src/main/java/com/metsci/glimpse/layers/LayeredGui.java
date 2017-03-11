@@ -8,6 +8,7 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_FACETS_MENU;
@@ -134,15 +135,19 @@ public class LayeredGui
     protected String dockingAppName;
     protected final Map<String,Integer> dockingViewIdCounters;
     protected final BiMap<View,com.metsci.glimpse.docking.View> dockingViews;
-    protected final LayerCardsPanel layerCardsPanel;
 
 
-    public LayeredGui( String frameTitleRoot )
+    public LayeredGui( String frameTitleRoot, GuiOption... guiOptions )
     {
-        this( frameTitleRoot, defaultDockingTheme( ) );
+        this( frameTitleRoot, defaultDockingTheme( ), guiOptions );
     }
 
-    public LayeredGui( String frameTitleRoot, DockingTheme theme )
+    public LayeredGui( String frameTitleRoot, DockingTheme theme, GuiOption... guiOptions )
+    {
+        this( frameTitleRoot, theme, ImmutableSet.copyOf( guiOptions ) );
+    }
+
+    public LayeredGui( String frameTitleRoot, DockingTheme theme, Collection<? extends GuiOption> guiOptions )
     {
         // Model
         //
@@ -194,10 +199,13 @@ public class LayeredGui
             }
         } );
 
-        this.layerCardsPanel = new LayerCardsPanel( this.layers );
-        JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", false, null, layersIcon, null );
-        this.dockingGroup.addView( layersView );
+        if ( !guiOptions.contains( HIDE_LAYERS_PANEL ) )
+        {
+            LayerCardsPanel layerCardsPanel = new LayerCardsPanel( this.layers );
+            JScrollPane layerCardsScroller = new JScrollPane( layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
+            com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", false, null, layersIcon, null );
+            this.dockingGroup.addView( layersView );
+        }
 
 
         // Controller
