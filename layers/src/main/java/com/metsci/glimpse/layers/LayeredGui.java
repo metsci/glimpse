@@ -227,6 +227,16 @@ public class LayeredGui
         return this.dockingGroup;
     }
 
+    public void stopAnimator( )
+    {
+        animator.stop( );
+    }
+    
+    public void startAnimator( )
+    {
+        animator.start( );
+    }
+    
     public void arrange( String appName, String defaultArrResource )
     {
         URL defaultArrUrl = getResource( defaultArrResource );
@@ -530,5 +540,4 @@ public class LayeredGui
             view.removeLayer( layer, false );
         }
     }
-
 }
