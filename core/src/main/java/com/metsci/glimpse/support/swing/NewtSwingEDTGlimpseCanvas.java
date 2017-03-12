@@ -195,6 +195,8 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
 
     public BufferedImage toBufferedImage( )
     {
+        requireSwingThread( );
+        
         GLContext glContext = this.getGLDrawable( ).getContext( );
         glContext.makeCurrent( );
         try
