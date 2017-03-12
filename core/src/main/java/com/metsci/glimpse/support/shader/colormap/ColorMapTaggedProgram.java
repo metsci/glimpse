@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.support.shader.colormap;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -92,7 +93,7 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
         this.addUniformData( new GLUniformData( "tcoordtex", textureTexUnit ) );
 
         this.alphaArg = this.addUniformData( new GLUniformData( "alpha", 1.0f ) );
-        this.sizeArg = this.addUniformData( new GLUniformData( "size", getSizeArgValue( ) ) );
+        this.sizeArg = this.addUniformData( new GLUniformData( "size", this.getSizeArgValue( ) ) );
         this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
         this.discardAbove = this.addUniformData( new GLUniformData( "discardAbove", 0 ) );
         this.discardBelow = this.addUniformData( new GLUniformData( "discardBelow", 0 ) );
@@ -105,12 +106,12 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     @Override
     public void axisUpdated( Axis1D axis )
     {
-        this.sizeArg.setData( getSizeArgValue( ) );
+        this.sizeArg.setData( this.getSizeArgValue( ) );
     }
 
     protected int getSizeArgValue( )
     {
-        List<Tag> tags = taggedAxis.getSortedTags( );
+        List<Tag> tags = this.taggedAxis.getSortedTags( );
         int size = tags.size( );
 
         int count = 0;
@@ -131,17 +132,17 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
 
     public void setDiscardNaN( boolean discard )
     {
-        discardNaN.setData( discard ? 1 : 0 );
+        this.discardNaN.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardAbove( boolean discard )
     {
-        discardAbove.setData( discard ? 1 : 0 );
+        this.discardAbove.setData( discard ? 1 : 0 );
     }
 
     public void setDiscardBelow( boolean discard )
     {
-        discardBelow.setData( discard ? 1 : 0 );
+        this.discardBelow.setData( discard ? 1 : 0 );
     }
 
     /// DrawableTextureProgram methods
@@ -156,9 +157,9 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     @Override
     public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
-        setOrtho( context, xMin, xMax, yMin, yMax );
+        this.setOrtho( context, xMin, xMax, yMin, yMax );
 
-        begin( context );
+        this.begin( context );
     }
 
     public void begin( GlimpseContext context )
@@ -167,15 +168,13 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     }
 
     @Override
-    public void useProgram( GL gl, boolean on )
+    public void doUseProgram( GL gl, boolean on )
     {
-        super.useProgram( gl, on );
-
         GL3 gl3 = gl.getGL3( );
 
         if ( this.handles == null )
         {
-            this.handles = new ProgramHandles( gl3, getShaderProgram( ).program( ) );
+            this.handles = new ProgramHandles( gl3, this.getShaderProgram( ).program( ) );
         }
 
         if ( on )
@@ -192,12 +191,12 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
 
     public void setAxisOrtho( GlimpseContext context, Axis2D axis )
     {
-        setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+        this.setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
     public void setPixelOrtho( GlimpseContext context, GlimpseBounds bounds )
     {
-        setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
+        this.setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
     public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
@@ -209,7 +208,7 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
     public void draw( GlimpseContext context, int mode, GLEditableBuffer xyVbo, GLEditableBuffer sVbo, int first, int count )
     {
         GL gl = context.getGL( );
-        draw( context, mode, xyVbo.deviceBuffer( gl ), sVbo.deviceBuffer( gl ), first, count );
+        this.draw( context, mode, xyVbo.deviceBuffer( gl ), sVbo.deviceBuffer( gl ), first, count );
     }
 
     @Override
