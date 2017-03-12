@@ -1,7 +1,7 @@
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.lang.Math.ceil;

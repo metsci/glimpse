@@ -212,6 +212,11 @@ public class DockingUtils
         return toolbar;
     }
 
+    public static <T> T getAncestorOfClass( Class<? extends T> clazz, Component c )
+    {
+        return clazz.cast( SwingUtilities.getAncestorOfClass( clazz, c ) );
+    }
+
     public static int getFrameExtendedState( FrameArrangement frameArr )
     {
         return getFrameExtendedState( frameArr.isMaximizedHoriz, frameArr.isMaximizedVert );

@@ -1,6 +1,7 @@
 package com.metsci.glimpse.examples.layers;
 
 import static com.metsci.glimpse.examples.layers.ExampleTrait.addExampleLinkage;
+import static com.metsci.glimpse.layers.FpsOption.FPS;
 import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
 import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.addTimeZoneLinkage;
@@ -117,7 +118,7 @@ public class LayeredExample
             // Create the gui
             //
 
-            LayeredGui gui = new LayeredGui( "Layered Example" );
+            LayeredGui gui = new LayeredGui( "Layered Example", FPS( 30 ) );
             gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
 
             addGeoLinkage( gui, "Geo Defaults", geoTemplate );

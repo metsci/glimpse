@@ -8,6 +8,11 @@ import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.layers.FpsOption.findFps;
+import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
+import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
+import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
+import static com.metsci.glimpse.layers.StandardViewOption.HIDE_FACETS_MENU;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -131,15 +136,19 @@ public class LayeredGui
     protected String dockingAppName;
     protected final Map<String,Integer> dockingViewIdCounters;
     protected final BiMap<View,com.metsci.glimpse.docking.View> dockingViews;
-    protected final LayerCardsPanel layerCardsPanel;
 
 
-    public LayeredGui( String frameTitleRoot )
+    public LayeredGui( String frameTitleRoot, GuiOption... guiOptions )
     {
-        this( frameTitleRoot, defaultDockingTheme( ) );
+        this( frameTitleRoot, defaultDockingTheme( ), guiOptions );
     }
 
-    public LayeredGui( String frameTitleRoot, DockingTheme theme )
+    public LayeredGui( String frameTitleRoot, DockingTheme theme, GuiOption... guiOptions )
+    {
+        this( frameTitleRoot, theme, ImmutableSet.copyOf( guiOptions ) );
+    }
+
+    public LayeredGui( String frameTitleRoot, DockingTheme theme, Collection<? extends GuiOption> guiOptions )
     {
         // Model
         //
@@ -158,7 +167,8 @@ public class LayeredGui
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
-        this.animator = new SwingEDTAnimator( 30 );
+        double fps = findFps( guiOptions, 60 );
+        this.animator = new SwingEDTAnimator( fps );
 
         this.dockingViewIdCounters = new HashMap<>( );
 
@@ -191,10 +201,13 @@ public class LayeredGui
             }
         } );
 
-        this.layerCardsPanel = new LayerCardsPanel( this.layers );
-        JScrollPane layerCardsScroller = new JScrollPane( this.layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-        com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", false, null, layersIcon, null );
-        this.dockingGroup.addView( layersView );
+        if ( !guiOptions.contains( HIDE_LAYERS_PANEL ) )
+        {
+            LayerCardsPanel layerCardsPanel = new LayerCardsPanel( this.layers );
+            JScrollPane layerCardsScroller = new JScrollPane( layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
+            com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", false, null, layersIcon, null );
+            this.dockingGroup.addView( layersView );
+        }
 
 
         // Controller
@@ -208,7 +221,7 @@ public class LayeredGui
 
         addEntryRemovedListener( this.linkageNames, ( k, v ) -> this.pruneLinkages( ) );
     }
-    
+
     public DockingGroup getDockingGroup( )
     {
         return this.dockingGroup;
@@ -371,38 +384,45 @@ public class LayeredGui
 
         view.setGLAnimator( this.animator );
 
-        JToggleButton facetsButton = new JToggleButton( layersIcon );
-        facetsButton.setToolTipText( "Show Layers" );
-        JPopupMenu facetsPopup = newButtonPopup( facetsButton );
-
-        DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
-        disposables.add( view.facets.addListener( true, ( ) ->
+        if ( !view.viewOptions.contains( HIDE_CLONE_BUTTON ) )
         {
-            facetDisposables.dispose( );
-            facetDisposables.clear( );
-            facetsPopup.removeAll( );
-
-            for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
+            JButton cloneButton = new JButton( cloneIcon );
+            cloneButton.setToolTipText( "Clone This View" );
+            cloneButton.addActionListener( ( ev ) ->
             {
-                Layer layer = en.getKey( );
-                Facet facet = en.getValue( );
+                this.cloneView( view );
+            } );
 
-                // XXX: Handle title changes
-                JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
-                facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
-                facetsPopup.add( facetToggle );
-            }
-        } ) );
+            view.toolbar.add( cloneButton );
+        }
 
-        JButton cloneButton = new JButton( cloneIcon );
-        cloneButton.setToolTipText( "Clone This View" );
-        cloneButton.addActionListener( ( ev ) ->
+        if ( !view.viewOptions.contains( HIDE_FACETS_MENU ) )
         {
-            this.cloneView( view );
-        } );
+            JToggleButton facetsButton = new JToggleButton( layersIcon );
+            facetsButton.setToolTipText( "Show Layers" );
+            JPopupMenu facetsPopup = newButtonPopup( facetsButton );
 
-        view.toolbar.add( cloneButton );
-        view.toolbar.add( facetsButton );
+            DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
+            disposables.add( view.facets.addListener( true, ( ) ->
+            {
+                facetDisposables.dispose( );
+                facetDisposables.clear( );
+                facetsPopup.removeAll( );
+
+                for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
+                {
+                    Layer layer = en.getKey( );
+                    Facet facet = en.getValue( );
+
+                    // XXX: Handle title changes
+                    JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+                    facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
+                    facetsPopup.add( facetToggle );
+                }
+            } ) );
+
+            view.toolbar.add( facetsButton );
+        }
 
         // XXX: Add support in docking for wildcard viewIds
         String dockingViewIdRoot = view.getClass( ).getName( );
@@ -417,7 +437,8 @@ public class LayeredGui
         }
 
         // XXX: Add support in docking for changing view titles
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), true, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
         this.dockingGroup.addView( dockingView );
 
         // When the user closes a dockingView, we will need to know the corresponding view

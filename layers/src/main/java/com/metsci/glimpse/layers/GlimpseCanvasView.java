@@ -1,5 +1,6 @@
 package com.metsci.glimpse.layers;
 
+import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
 import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
 import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
@@ -7,6 +8,7 @@ import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -25,6 +27,20 @@ public abstract class GlimpseCanvasView extends View
     }
 
 
+    /**
+     * Specifies the approach to use when moving a GL canvas from one parent component to another.
+     * This is exercised during changes to the docking arrangement (both programmatic and interactive).
+     * Recognized values are:
+     * <ul>
+     * <li>FAST: rely on NEWT reparenting -- smooth when it works, but breaks badly on some platforms
+     * <li>ROBUST: avoid NEWT reparenting -- reliable across platforms, but can be slow and clunky
+     * <li>AUTO: choose the best method, potentially based on the details of the current platform
+     * </ul>
+     * Defaults to AUTO if no value is specified, or if an unrecognized value is specified.
+     */
+    public static final String glReparentingMethod = System.getProperty( "layers.glReparentingMethod" );
+
+
     protected final List<Layer> layers;
     protected GLAnimatorControl animator;
 
@@ -35,8 +51,10 @@ public abstract class GlimpseCanvasView extends View
     protected NewtSwingEDTGlimpseCanvas canvas;
 
 
-    public GlimpseCanvasView( GLProfile glProfile )
+    public GlimpseCanvasView( GLProfile glProfile, Collection<? extends ViewOption> options )
     {
+        super( options );
+
         this.layers = new ArrayList<>( );
         this.animator = null;
 
@@ -45,30 +63,41 @@ public abstract class GlimpseCanvasView extends View
 
         this.canvas = null;
 
-        // NEWT's reparenting seems to have problematic race conditions -- so remove all GL stuff
-        // before the view gets reparented, and re-create the GL stuff after reparenting is done
-        this.canvasParent = new JPanel( new BorderLayout( ) )
+        // XXX: Consider platform details when method is AUTO
+        if ( equal( glReparentingMethod, "FAST" ) )
         {
-            @Override
-            public void addNotify( )
+            // NEWT's reparenting works fine on some platforms, and is smoother than the method below
+            this.canvasParent = new JPanel( new BorderLayout( ) );
+            this.setUpCanvas( glProfile );
+        }
+        else
+        {
+            // NEWT's reparenting seems to have problematic race conditions -- so remove all GL stuff
+            // before the view gets reparented, and re-create the GL stuff after reparenting is done
+            this.canvasParent = new JPanel( new BorderLayout( ) )
             {
-                super.addNotify( );
-                setUpCanvas( glProfile );
-            }
+                @Override
+                public void addNotify( )
+                {
+                    super.addNotify( );
+                    setUpCanvas( glProfile );
+                }
 
-            @Override
-            public void removeNotify( )
-            {
-                tearDownCanvas( );
-                super.removeNotify( );
-            }
-        };
+                @Override
+                public void removeNotify( )
+                {
+                    tearDownCanvas( );
+                    super.removeNotify( );
+                }
+            };
+        }
     }
 
     protected void setUpCanvas( GLProfile glProfile )
     {
         if ( this.canvas == null )
         {
+            // XXX: FAST reparenting might require a shared context on some platforms
             this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
 
             // Once canvas is ready, do view-specific setup and install facets
@@ -112,8 +141,11 @@ public abstract class GlimpseCanvasView extends View
 
             this.canvasParent.add( this.canvas );
 
-            this.animator.start( );
-            this.animator.add( this.canvas.getGLDrawable( ) );
+            if ( this.animator != null )
+            {
+                this.animator.start( );
+                this.animator.add( this.canvas.getGLDrawable( ) );
+            }
         }
     }
 
@@ -144,6 +176,12 @@ public abstract class GlimpseCanvasView extends View
     public void setGLAnimator( GLAnimatorControl animator )
     {
         this.animator = animator;
+
+        if ( this.canvas != null )
+        {
+            this.animator.start( );
+            this.animator.add( this.canvas.getGLDrawable( ) );
+        }
     }
 
     @Override

@@ -5,13 +5,17 @@ import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.support.DisposableUtils.addGlimpsePainter;
 import static javax.media.opengl.GLProfile.GL3;
 
+import java.util.Collection;
+
 import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layers.GlimpseCanvasView;
+import com.metsci.glimpse.layers.ViewOption;
 import com.metsci.glimpse.layers.misc.CompositeCursorLabelPainter;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
@@ -33,9 +37,14 @@ public class GeoView extends GlimpseCanvasView
     public BorderPainter borderPainter;
 
 
-    public GeoView( )
+    public GeoView( ViewOption... viewOptions )
     {
-        super( GLProfile.get( GL3 ) );
+        this( ImmutableSet.copyOf( viewOptions ) );
+    }
+
+    public GeoView( Collection<? extends ViewOption> viewOptions )
+    {
+        super( GLProfile.get( GL3 ), viewOptions );
 
         this.title.set( "Geo" );
 
@@ -112,7 +121,7 @@ public class GeoView extends GlimpseCanvasView
     @Override
     public GeoView copy( )
     {
-        return new GeoView( );
+        return new GeoView( this.viewOptions );
     }
 
     public Disposable addDataPainter( GlimpsePainter painter )

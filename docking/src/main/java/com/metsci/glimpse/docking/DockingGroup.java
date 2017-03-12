@@ -34,7 +34,7 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;

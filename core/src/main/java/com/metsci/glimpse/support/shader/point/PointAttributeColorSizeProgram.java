@@ -116,8 +116,8 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
             @Override
             public void axisUpdated( Axis1D handler )
             {
-                colorMin.setData( ( float ) handler.getMin( ) );
-                colorMax.setData( ( float ) handler.getMax( ) );
+                PointAttributeColorSizeProgram.this.colorMin.setData( ( float ) handler.getMin( ) );
+                PointAttributeColorSizeProgram.this.colorMax.setData( ( float ) handler.getMax( ) );
             }
         } );
 
@@ -126,17 +126,15 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
             @Override
             public void axisUpdated( Axis1D handler )
             {
-                sizeMin.setData( ( float ) handler.getMin( ) );
-                sizeMax.setData( ( float ) handler.getMax( ) );
+                PointAttributeColorSizeProgram.this.sizeMin.setData( ( float ) handler.getMin( ) );
+                PointAttributeColorSizeProgram.this.sizeMax.setData( ( float ) handler.getMax( ) );
             }
         } );
     }
 
     @Override
-    public void useProgram( GL gl, boolean on )
+    public void doUseProgram( GL gl, boolean on )
     {
-        super.useProgram( gl, on );
-
         if ( on )
         {
             gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
@@ -164,7 +162,7 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
 
     public void setProjectionMatrix( Axis2D axis )
     {
-        setProjectionMatrix( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+        this.setProjectionMatrix( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
     public void setVertexData( Buffer b )

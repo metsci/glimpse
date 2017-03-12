@@ -8,6 +8,7 @@ import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static javax.media.opengl.GLProfile.GL3;
 
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
@@ -16,11 +17,13 @@ import java.util.function.Consumer;
 import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.layers.GlimpseCanvasView;
+import com.metsci.glimpse.layers.ViewOption;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
@@ -38,9 +41,14 @@ public class TimelineView extends GlimpseCanvasView
     protected Map<Object,Integer> rowRefCounts;
 
 
-    public TimelineView( )
+    public TimelineView( ViewOption... viewOptions )
     {
-        super( GLProfile.get( GL3 ) );
+        this( ImmutableSet.copyOf( viewOptions ) );
+    }
+
+    public TimelineView( Collection<? extends ViewOption> viewOptions )
+    {
+        super( GLProfile.get( GL3 ), viewOptions );
 
         this.title.set( "Timeline" );
 
@@ -102,7 +110,7 @@ public class TimelineView extends GlimpseCanvasView
     @Override
     public TimelineView copy( )
     {
-        return new TimelineView( );
+        return new TimelineView( this.viewOptions );
     }
 
     public EventPlotInfo acquireEventRow( Object rowId, String labelText )
