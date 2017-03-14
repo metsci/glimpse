@@ -28,6 +28,7 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.util.var.VarUtils.addOldNewListener;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.BorderLayout.CENTER;
@@ -53,8 +54,6 @@ import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -62,9 +61,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -72,7 +71,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-@SuppressWarnings("serial")
+import com.metsci.glimpse.util.var.DisposableGroup;
+
+@SuppressWarnings( "serial" )
 public class TileImpl extends Tile
 {
 
@@ -102,11 +103,11 @@ public class TileImpl extends Tile
 
             setOpaque( false );
             setBorder( null );
-            setToolTipText( view.tooltip );
 
             this.view = view;
             this.selected = false;
-            this.label = new JLabel( view.title, view.icon, LEFT );
+            this.label = new JLabel( );
+            label.setHorizontalAlignment( LEFT );
             label.setForeground( unselectedTextColor );
 
             // Add extra space on top and right, because text is right up against the edge
@@ -119,6 +120,16 @@ public class TileImpl extends Tile
             {
                 add( cornerComponent, EAST );
             }
+        }
+
+        public void setText( String text )
+        {
+            label.setText( text );
+        }
+
+        public void setIcon( Icon icon )
+        {
+            label.setIcon( icon );
         }
 
         public void setSelected( boolean selected )
@@ -242,7 +253,7 @@ public class TileImpl extends Tile
 
     protected final List<MouseAdapter> dockingMouseAdapters;
 
-    protected final Map<String, ViewEntry> viewMap;
+    protected final Map<String,ViewEntry> viewMap;
     protected final List<View> views;
     protected View selectedView;
 
@@ -498,38 +509,99 @@ public class TileImpl extends Tile
     @Override
     public void addView( final View view, int viewNum )
     {
+        DisposableGroup disposables = new DisposableGroup( );
+
         JPanel card = new JPanel( new BorderLayout( ) );
-        card.add( view.component, BorderLayout.CENTER );
-        cardPanel.add( card, view.viewId );
+        {
+            disposables.add( addOldNewListener( view.component, true, ( componentOld, componentNew ) ->
+            {
+                if ( componentOld != null )
+                {
+                    card.remove( componentOld );
+                }
+
+                if ( componentNew != null )
+                {
+                    card.add( componentNew, CENTER );
+                }
+            } ) );
+
+            cardPanel.add( card, view.viewId );
+        }
 
         CustomTab tab = new CustomTab( view );
-        tab.addMouseListener( new MouseAdapter( )
         {
-            @Override
-            public void mousePressed( MouseEvent ev )
+            tab.addMouseListener( new MouseAdapter( )
             {
-                selectViewById( view.viewId );
+                @Override
+                public void mousePressed( MouseEvent ev )
+                {
+                    selectViewById( view.viewId );
+                }
+            } );
+
+            for ( MouseAdapter mouseAdapter : dockingMouseAdapters )
+            {
+                addMouseAdapter( tab, mouseAdapter );
             }
-        } );
-        for ( MouseAdapter mouseAdapter : dockingMouseAdapters )
-        {
-            addMouseAdapter( tab, mouseAdapter );
+
+            disposables.add( view.title.addListener( true, ( ) ->
+            {
+                tab.setText( view.title.v( ) );
+            } ) );
+
+            disposables.add( view.icon.addListener( true, ( ) ->
+            {
+                tab.setIcon( view.icon.v( ) );
+            } ) );
+
+            disposables.add( view.tooltip.addListener( true, ( ) ->
+            {
+                tab.setToolTipText( view.tooltip.v( ) );
+            } ) );
+
+            tabBar.add( tab, viewNum );
         }
-        tabBar.add( tab, viewNum );
 
-        JMenuItem overflowMenuItem = new JMenuItem( view.title, view.icon );
-        overflowMenuItem.setToolTipText( view.tooltip );
-        overflowMenuItem.addActionListener( new ActionListener( )
+        JMenuItem overflowMenuItem = new JMenuItem( );
         {
-            @Override
-            public void actionPerformed( ActionEvent ev )
+            disposables.add( view.title.addListener( true, ( ) ->
+            {
+                overflowMenuItem.setText( view.title.v( ) );
+            } ) );
+
+            disposables.add( view.icon.addListener( true, ( ) ->
+            {
+                overflowMenuItem.setIcon( view.icon.v( ) );
+            } ) );
+
+            disposables.add( view.tooltip.addListener( true, ( ) ->
+            {
+                overflowMenuItem.setToolTipText( view.tooltip.v( ) );
+            } ) );
+
+            overflowMenuItem.addActionListener( ( ev ) ->
             {
                 selectViewById( view.viewId );
-            }
-        } );
-        overflowPopup.add( overflowMenuItem );
+            } );
 
-        viewMap.put( view.viewId, new ViewEntry( view, card, tab, overflowMenuItem ) );
+            overflowPopup.add( overflowMenuItem );
+        }
+
+        Runnable validateAndRepaint = ( ) ->
+        {
+            // Validating tile may change the contents of overflowPopup
+            validate( );
+            repaint( );
+            overflowPopup.pack( );
+            overflowPopup.repaint( );
+        };
+        disposables.add( view.component.addListener( true, validateAndRepaint ) );
+        disposables.add( view.tooltip.addListener( true, validateAndRepaint ) );
+        disposables.add( view.title.addListener( true, validateAndRepaint ) );
+        disposables.add( view.icon.addListener( true, validateAndRepaint ) );
+
+        viewMap.put( view.viewId, new ViewEntry( view, card, tab, overflowMenuItem, disposables ) );
         views.add( viewNum, view );
 
         for ( TileListener listener : listeners )
@@ -544,46 +616,6 @@ public class TileImpl extends Tile
     }
 
     @Override
-    public void updateView( View view )
-    {
-        int index = views.indexOf( view );
-        ViewEntry entry = viewMap.get( view.viewId );
-
-        if ( entry == null || index < 0 )
-        {
-            throw new IllegalArgumentException( String.format( "View %s does not exist. addView( ) must be called prior to updateView( ).", view.viewId ) );
-        }
-
-        // only replace the component if it has changed (avoids flicker under some circumstances)
-        if ( view.component != entry.view.component )
-        {
-            entry.card.remove( entry.view.component );
-            entry.card.add( view.component, BorderLayout.CENTER );
-        }
-
-        entry.tab.label.setText( view.title );
-        entry.tab.label.setIcon( view.icon );
-        entry.tab.setToolTipText( view.tooltip );
-        entry.overflowMenuItem.setText( view.title );
-        entry.overflowMenuItem.setIcon( view.icon );
-        entry.overflowMenuItem.setToolTipText( view.tooltip );
-
-        views.set( index, view );
-        viewMap.put( view.viewId, new ViewEntry( view, entry.card, entry.tab, entry.overflowMenuItem ) );
-
-        // if the view being updated is the selectedView:
-        // 1) set selectedView to point to the new view
-        // 2) update the toolbar, which may have changed
-        if ( Objects.equals( selectedView, view ) )
-        {
-            selectedView = view;
-
-            topBar.doLayout( );
-            topBar.repaint( );
-        }
-    }
-
-    @Override
     public void removeView( View view )
     {
         boolean removingSelectedView = ( view == selectedView );
@@ -594,6 +626,7 @@ public class TileImpl extends Tile
         }
 
         ViewEntry viewEntry = viewMap.remove( view.viewId );
+        viewEntry.disposables.dispose( );
         overflowPopup.remove( viewEntry.overflowMenuItem );
         tabBar.remove( viewEntry.tab );
         cardPanel.remove( viewEntry.card );
@@ -755,13 +788,15 @@ public class TileImpl extends Tile
         public final JPanel card;
         public final CustomTab tab;
         public final JMenuItem overflowMenuItem;
+        public final DisposableGroup disposables;
 
-        public ViewEntry( View view, JPanel card, CustomTab tab, JMenuItem overflowMenuItem )
+        public ViewEntry( View view, JPanel card, CustomTab tab, JMenuItem overflowMenuItem, DisposableGroup disposables )
         {
             this.view = view;
             this.card = card;
             this.tab = tab;
             this.overflowMenuItem = overflowMenuItem;
+            this.disposables = disposables;
         }
     }
 }

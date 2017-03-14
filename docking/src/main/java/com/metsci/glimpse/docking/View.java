@@ -31,15 +31,17 @@ import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 
+import com.metsci.glimpse.util.var.Var;
+
 public class View
 {
 
     public final String viewId;
-    public final Component component;
-    public final String title;
+    public final Var<Component> component;
+    public final Var<String> title;
     public final boolean closeable;
-    public final String tooltip;
-    public final Icon icon;
+    public final Var<String> tooltip;
+    public final Var<Icon> icon;
     public final JToolBar toolbar;
 
     public View( String viewId, Component component, String title )
@@ -65,35 +67,12 @@ public class View
     public View( String viewId, Component component, String title, boolean closeable, String tooltip, Icon icon, JToolBar toolbar )
     {
         this.viewId = viewId;
-        this.component = component;
-        this.title = title;
+        this.component = new Var<>( component );
+        this.title = new Var<>( title );
         this.closeable = closeable;
-        this.tooltip = tooltip;
-        this.icon = icon;
+        this.tooltip = new Var<>( tooltip );
+        this.icon = new Var<>( icon );
         this.toolbar = toolbar;
     }
 
-    @Override
-    public int hashCode( )
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ( ( viewId == null ) ? 0 : viewId.hashCode( ) );
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj ) return true;
-        if ( obj == null ) return false;
-        if ( getClass( ) != obj.getClass( ) ) return false;
-        View other = ( View ) obj;
-        if ( viewId == null )
-        {
-            if ( other.viewId != null ) return false;
-        }
-        else if ( !viewId.equals( other.viewId ) ) return false;
-        return true;
-    }
 }
