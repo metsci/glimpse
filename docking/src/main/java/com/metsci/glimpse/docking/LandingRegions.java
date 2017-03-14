@@ -142,14 +142,10 @@ public class LandingRegions
             {
                 switch ( closest.index )
                 {
-                    case 0:
-                        return new EdgeOfDockingPane( docker, LEFT );
-                    case 1:
-                        return new EdgeOfDockingPane( docker, RIGHT );
-                    case 2:
-                        return new EdgeOfDockingPane( docker, TOP );
-                    case 3:
-                        return new EdgeOfDockingPane( docker, BOTTOM );
+                    case 0: return new EdgeOfDockingPane( docker, LEFT );
+                    case 1: return new EdgeOfDockingPane( docker, RIGHT );
+                    case 2: return new EdgeOfDockingPane( docker, TOP );
+                    case 3: return new EdgeOfDockingPane( docker, BOTTOM );
                 }
             }
         }
@@ -168,14 +164,10 @@ public class LandingRegions
             {
                 switch ( closest.index )
                 {
-                    case 0:
-                        return new BesideExistingTile( docker, toLeaf, LEFT );
-                    case 1:
-                        return new BesideExistingTile( docker, toLeaf, RIGHT );
-                    case 2:
-                        return new BesideExistingTile( docker, toLeaf, TOP );
-                    case 3:
-                        return new BesideExistingTile( docker, toLeaf, BOTTOM );
+                    case 0: return new BesideExistingTile( docker, toLeaf, LEFT );
+                    case 1: return new BesideExistingTile( docker, toLeaf, RIGHT );
+                    case 2: return new BesideExistingTile( docker, toLeaf, TOP );
+                    case 3: return new BesideExistingTile( docker, toLeaf, BOTTOM );
                 }
             }
         }
@@ -248,17 +240,11 @@ public class LandingRegions
 
             switch ( edgeOfPane )
             {
-                case LEFT:
-                    return new Rectangle( x, y, 64, h );
-                case RIGHT:
-                    return new Rectangle( x + w - 1 - 64, y, 64, h );
-                case TOP:
-                    return new Rectangle( x, y, w, 64 );
-                case BOTTOM:
-                    return new Rectangle( x, y + h - 1 - 64, w, 64 );
-
-                default:
-                    return null;
+                case LEFT:   return new Rectangle( x, y, 64, h );
+                case RIGHT:  return new Rectangle( x + w - 1 - 64, y, 64, h );
+                case TOP:    return new Rectangle( x, y, w, 64 );
+                case BOTTOM: return new Rectangle( x, y + h - 1 - 64, w, 64 );
+                default: return null;
             }
         }
 
@@ -297,17 +283,11 @@ public class LandingRegions
 
             switch ( sideOfNeighbor )
             {
-                case LEFT:
-                    return new Rectangle( x, y, w / 2, h );
-                case RIGHT:
-                    return new Rectangle( x + w - w / 2, y, w / 2, h );
-                case TOP:
-                    return new Rectangle( x, y, w, h / 2 );
-                case BOTTOM:
-                    return new Rectangle( x, y + h - h / 2, w, h / 2 );
-
-                default:
-                    return null;
+                case LEFT:   return new Rectangle( x, y, w / 2, h );
+                case RIGHT:  return new Rectangle( x + w - w / 2, y, w / 2, h );
+                case TOP:    return new Rectangle( x, y, w, h / 2 );
+                case BOTTOM: return new Rectangle( x, y + h - h / 2, w, h / 2 );
+                default: return null;
             }
         }
 
