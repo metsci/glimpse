@@ -267,12 +267,12 @@ public class DockingUtils
             InputStream is;
             if ( targetFile.isFile( ) && targetFile.canRead( ) )
             {
-                LOGGER.log( INFO, "Reading docking arrangement from " + targetFile);
+                LOGGER.log( INFO, "Reading docking arrangement from " + targetFile );
                 is = new FileInputStream( targetFile );
             }
             else
             {
-                LOGGER.log( INFO, "Reading docking arrangement from " + fallbackInput);
+                LOGGER.log( INFO, "Reading docking arrangement from " + fallbackInput );
                 is = fallbackInput.openStream( );
             }
 
@@ -285,10 +285,11 @@ public class DockingUtils
                 @Override
                 public void disposingAllFrames( DockingGroup group )
                 {
-                    LOGGER.log( INFO, "Writing docking arrangement to " + targetFile);
+                    LOGGER.log( INFO, "Writing docking arrangement to " + targetFile );
+                    GroupArrangement capturedArr = group.captureArrangement( );
                     try (OutputStream os = new BufferedOutputStream( new FileOutputStream( targetFile ) ))
                     {
-                        saveDockingArrangement( os, groupArr );
+                        saveDockingArrangement( os, capturedArr );
                     }
                     catch ( IOException | JAXBException ex )
                     {
