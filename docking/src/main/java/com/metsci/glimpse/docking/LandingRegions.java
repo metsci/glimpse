@@ -74,10 +74,21 @@ public class LandingRegions
         int xInset = ( dockerOrigin.x - frameOrigin.x ) + dockerInsets.left;
         int yInset = ( dockerOrigin.y - frameOrigin.y ) + dockerInsets.top;
 
-        Rectangle firstTabBounds = fromTile.viewTabBounds( 0 );
         Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
-        int xTileOffset = firstTabBounds.x + 7 * draggedTabBounds.width / 16;
-        int yTileOffset = firstTabBounds.y + 5 * draggedTabBounds.height / 8;
+
+        Rectangle leftmostTabBounds = draggedTabBounds;
+        for ( int i = 0; i < fromTile.numViews( ); i++ )
+        {
+            if ( fromTile.hasViewTab( i ) )
+            {
+                leftmostTabBounds = fromTile.viewTabBounds( i );
+                break;
+            }
+        }
+
+        // XXX: Could do better by accounting for the mouse-press point
+        int xTileOffset = leftmostTabBounds.x + 7 * draggedTabBounds.width / 16;
+        int yTileOffset = leftmostTabBounds.y + 5 * draggedTabBounds.height / 8;
 
         return new InNewWindow( dockingGroup, pOnScreen.x - xTileOffset, pOnScreen.y - yTileOffset, fromTile.getWidth( ), fromTile.getHeight( ), xInset, yInset );
     }

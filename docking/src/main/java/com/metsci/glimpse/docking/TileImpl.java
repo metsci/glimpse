@@ -734,6 +734,13 @@ public class TileImpl extends Tile
         return new Rectangle( x, y, tab.getWidth( ), tab.getHeight( ) );
     }
 
+    @Override
+    public boolean hasViewTab( int viewNum )
+    {
+        CustomTab tab = viewEntry( viewNum ).tab;
+        return tab.isVisible( );
+    }
+
     protected int leftmostViewNum( )
     {
         for ( int i = 0; i < views.size( ); i++ )

@@ -59,6 +59,8 @@ public abstract class Tile extends JComponent
 
     public abstract Rectangle viewTabBounds( int viewNum );
 
+    public abstract boolean hasViewTab( int viewNum );
+
     public abstract void addDockingMouseAdapter( MouseAdapter mouseAdapter );
 
 }
