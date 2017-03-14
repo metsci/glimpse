@@ -23,7 +23,6 @@ import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addElementRemovedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addEntryRemovedListener;
-import static java.lang.String.format;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
@@ -424,7 +423,7 @@ public class LayeredGui
                     Layer layer = en.getKey( );
                     Facet facet = en.getValue( );
 
-                    // XXX: Handle title changes
+                    // XXX: Handle layer title changes
                     JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
                     facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
                     facetsPopup.add( facetToggle );
@@ -440,15 +439,12 @@ public class LayeredGui
         this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
         String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
 
-        // XXX: Do this without depending on docking info
-        if ( dockingViewIdNumber != 0 )
-        {
-            view.title.update( ( v ) -> format( "%s (%d)", v, dockingViewIdNumber + 1 ) );
-        }
-
-        // XXX: Add support in docking for changing view titles
         boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), view.title.v( ), closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), "", closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        disposables.add( view.title.addListener( true, ( ) ->
+        {
+            dockingView.title.set( view.title.v( ) );
+        } ) );
         this.dockingGroup.addView( dockingView );
 
         // When the user closes a dockingView, we will need to know the corresponding view
