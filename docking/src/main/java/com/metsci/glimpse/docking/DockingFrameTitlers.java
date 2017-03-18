@@ -44,7 +44,7 @@ public class DockingFrameTitlers
             View view = tile.selectedView( );
             if ( view != null )
             {
-                return view.title + " - " + titleRoot;
+                return view.title.v( ) + " - " + titleRoot;
             }
         }
         return titleRoot;

@@ -1,5 +1,6 @@
 package com.metsci.glimpse.util.var;
 
+import static com.google.common.base.Objects.*;
 import static com.google.common.collect.Sets.*;
 import static java.util.Collections.*;
 
@@ -13,6 +14,27 @@ import java.util.function.Consumer;
 
 public class VarUtils
 {
+
+    public static <V> Disposable addOldNewListener( ReadableVar<? extends V> var, boolean runImmediately, BiConsumer<? super V, ? super V> oldNewListener )
+    {
+        return var.addListener( runImmediately, new Runnable( )
+        {
+            private V valueOld = null;
+
+            @Override
+            public void run( )
+            {
+                V valueNew = var.v( );
+
+                if ( !equal( valueNew, valueOld ) )
+                {
+                    oldNewListener.accept( valueOld, valueNew );
+                }
+
+                this.valueOld = valueNew;
+            }
+        } );
+    }
 
     public static <T> Disposable addElementAddedListener( ReadableVar<? extends Collection<? extends T>> var, boolean runImmediately, Consumer<? super T> listener )
     {

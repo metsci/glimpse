@@ -29,6 +29,7 @@ package com.metsci.glimpse.support.swing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static java.lang.Thread.*;
 
+import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -44,6 +45,7 @@ import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Window;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -191,6 +193,24 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
         };
     }
 
+    public BufferedImage toBufferedImage( )
+    {
+        requireSwingThread( );
+        
+        GLContext glContext = this.getGLDrawable( ).getContext( );
+        glContext.makeCurrent( );
+        try
+        {
+            this.paint( );
+            AWTGLReadBufferUtil util = new AWTGLReadBufferUtil( this.glProfile, true );
+            return util.readPixelsToBufferedImage( glContext.getGL( ), true );
+        }
+        finally
+        {
+            glContext.release( );
+        }
+    }
+    
     protected static void requireSwingThread( )
     {
         if ( !SwingUtilities.isEventDispatchThread( ) )

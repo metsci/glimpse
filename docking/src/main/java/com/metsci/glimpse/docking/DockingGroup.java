@@ -32,7 +32,6 @@ import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
-import static com.metsci.glimpse.docking.DockingUtils.findTiles;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
@@ -449,23 +448,9 @@ public class DockingGroup
         placement.placeView( existing, view );
     }
 
-    public void updateView( View view )
-    {
-        for ( DockingFrame frame : frames )
-        {
-            for ( Tile tile : findTiles( frame.docker ) )
-            {
-                if ( tile.hasView( view ) )
-                {
-                    tile.updateView( view );
-                }
-            }
-        }
-    }
-
     public void closeView( View view )
     {
-        Tile tile = getAncestorOfClass( Tile.class, view.component );
+        Tile tile = getAncestorOfClass( Tile.class, view.component.v( ) );
         if ( tile == null )
         {
             throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );

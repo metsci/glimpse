@@ -7,6 +7,7 @@ import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +27,6 @@ public abstract class GlimpseCanvasView extends View
         boolean run( GlimpseContext context );
     }
 
-
     /**
      * Specifies the approach to use when moving a GL canvas from one parent component to another.
      * This is exercised during changes to the docking arrangement (both programmatic and interactive).
@@ -40,7 +40,6 @@ public abstract class GlimpseCanvasView extends View
      */
     public static final String glReparentingMethod = System.getProperty( "layers.glReparentingMethod" );
 
-
     protected final List<Layer> layers;
     protected GLAnimatorControl animator;
 
@@ -49,7 +48,6 @@ public abstract class GlimpseCanvasView extends View
 
     public final JPanel canvasParent;
     protected NewtSwingEDTGlimpseCanvas canvas;
-
 
     public GlimpseCanvasView( GLProfile glProfile, Collection<? extends ViewOption> options )
     {
@@ -101,8 +99,7 @@ public abstract class GlimpseCanvasView extends View
             this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
 
             // Once canvas is ready, do view-specific setup and install facets
-            onGLInit( this.canvas, ( drawable ) ->
-            {
+            onGLInit( this.canvas, ( drawable ) -> {
                 this.doContextReady( this.canvas.getGlimpseContext( ) );
 
                 this.isCanvasReady = true;
@@ -119,8 +116,7 @@ public abstract class GlimpseCanvasView extends View
             } );
 
             // Before canvas gets destroyed, uninstall facets and do view-specific tear-down
-            onGLDispose( this.canvas, ( drawable ) ->
-            {
+            onGLDispose( this.canvas, ( drawable ) -> {
                 for ( Layer layer : this.layers )
                 {
                     // The GLContext is being disposed, so something must be happening to the
@@ -179,6 +175,7 @@ public abstract class GlimpseCanvasView extends View
 
         if ( this.canvas != null )
         {
+            //XXX: Should the view be starting the animator? Why not the LayeredGui who owns it?
             this.animator.start( );
             this.animator.add( this.canvas.getGLDrawable( ) );
         }
@@ -222,8 +219,7 @@ public abstract class GlimpseCanvasView extends View
     {
         requireSwingThread( );
 
-        boolean succeeded = this.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
-        {
+        boolean succeeded = this.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) -> {
             return runnable.run( this.canvas.getGlimpseContext( ) );
         } );
 
@@ -231,6 +227,14 @@ public abstract class GlimpseCanvasView extends View
         {
             throw new RuntimeException( "glimpseInvoke() failed" );
         }
+    }
+
+    public BufferedImage toBufferedImage( )
+    {
+        requireSwingThread( );
+
+        // XXX: Should this be using glimpseInvoke()?  Or doing something completely different?        
+        return canvas.toBufferedImage( );
     }
 
     @Override

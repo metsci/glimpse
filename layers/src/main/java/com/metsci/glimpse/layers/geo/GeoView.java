@@ -36,7 +36,10 @@ public class GeoView extends GlimpseCanvasView
     public CompositeCursorLabelPainter cursorTextPainter;
     public BorderPainter borderPainter;
 
-
+    public AxisInfo xAxisInfo;
+    public AxisInfo yAxisInfo;
+    
+    
     public GeoView( ViewOption... viewOptions )
     {
         this( ImmutableSet.copyOf( viewOptions ) );
@@ -69,8 +72,8 @@ public class GeoView extends GlimpseCanvasView
         this.plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
         Axis1D xAxis = this.plot.getCenterAxisX( );
         Axis1D yAxis = this.plot.getCenterAxisY( );
-        AxisInfo xAxisInfo = this.plot.createAxisBottom( "xBottom", xAxis, new AxisMouseListener1D( ) );
-        AxisInfo yAxisInfo = this.plot.createAxisLeft( "yLeft", yAxis, new AxisMouseListener1D( ) );
+        this.xAxisInfo = this.plot.createAxisBottom( "xBottom", xAxis, new AxisMouseListener1D( ) );
+        this.yAxisInfo = this.plot.createAxisLeft( "yLeft", yAxis, new AxisMouseListener1D( ) );
 
         //TODO Adding zOrder arguments to the painters fixes issue where
         //     cursor labels were appearing behind painters in dataPainter
