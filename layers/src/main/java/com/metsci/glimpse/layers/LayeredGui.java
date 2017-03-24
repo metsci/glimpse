@@ -450,14 +450,21 @@ public class LayeredGui
             {
                 dockingView.title.set( view.title.v( ) );
             } ) );
-            this.dockingGroup.addView( dockingView );
-
-            // When the user closes a dockingView, we will need to know the corresponding view
-            this.dockingViews.put( view, dockingView );
-
-            disposables.add( view::dispose );
-
-            this.viewDisposables.put( view, disposables );   
+            
+            try
+            {
+                this.dockingGroup.addView( dockingView );
+            }
+            // ensure that the remaining view setup happens even if there are issues adding the view
+            finally
+            {
+                // When the user closes a dockingView, we will need to know the corresponding view
+                this.dockingViews.put( view, dockingView );
+    
+                disposables.add( view::dispose );
+    
+                this.viewDisposables.put( view, disposables );
+            }
         }
     }
 
