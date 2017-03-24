@@ -64,6 +64,9 @@ public class TinyLafUtils
 
             // TinyLaf disables the "new folder" button in some cases ... not sure why
             UIManager.put( "FileChooser.readOnly", FALSE );
+
+            // TinyLaf progress bars look extremely dated
+            UIManager.put( "ProgressBarUI", TinyProgressBarUI2.class.getName( ) );
         }
         catch ( UnsupportedLookAndFeelException e )
         {
