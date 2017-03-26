@@ -31,7 +31,18 @@ public abstract class Layer
 
     public abstract ReadableVar<? extends Map<? extends View,? extends Facet>> facets( );
 
-    public abstract void installTo( View view );
+    /**
+     * An implementation of this method may (but is not required to) add a representation of
+     * this Layer to the specified View. If such a representation is added to the View, a Facet
+     * will be added to the map that is returned by this Layer's {@link #facets()} method.
+     * <p>
+     * If a call to this method does not add a Facet the View, then the method call will not
+     * have changed the state of either the View or the Layer.
+     * <p>
+     * If a call to this method throws an exception, it will not add a Facet to the View, and
+     * will not change the state of either the View or the Layer.
+     */
+    public abstract void installTo( View view ) throws Exception;
 
     /**
      * The {@code isReinstall} arg indicates whether the layer is going to install a new facet

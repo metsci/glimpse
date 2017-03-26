@@ -386,86 +386,73 @@ public class LayeredGui
             }
         } ) );
 
-        try
+        for ( Layer layer : this.layers.v( ) )
         {
-            for ( Layer layer : this.layers.v( ) )
-            {
-                view.addLayer( layer );
-            }
+            view.addLayer( layer );
         }
-        // ensure that the remaining view setup happens even if there are issues adding layers
-        finally
+
+        view.setGLAnimator( this.animator );
+
+        if ( !view.viewOptions.contains( HIDE_CLONE_BUTTON ) )
         {
-            view.setGLAnimator( this.animator );
-
-            if ( !view.viewOptions.contains( HIDE_CLONE_BUTTON ) )
+            JButton cloneButton = new JButton( cloneIcon );
+            cloneButton.setToolTipText( "Clone This View" );
+            cloneButton.addActionListener( ( ev ) ->
             {
-                JButton cloneButton = new JButton( cloneIcon );
-                cloneButton.setToolTipText( "Clone This View" );
-                cloneButton.addActionListener( ( ev ) ->
+                this.cloneView( view );
+            } );
+
+            view.toolbar.add( cloneButton );
+        }
+
+        if ( !view.viewOptions.contains( HIDE_FACETS_MENU ) )
+        {
+            JToggleButton facetsButton = new JToggleButton( layersIcon );
+            facetsButton.setToolTipText( "Show Layers" );
+            JPopupMenu facetsPopup = newButtonPopup( facetsButton );
+
+            DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
+            disposables.add( view.facets.addListener( true, ( ) ->
+            {
+                facetDisposables.dispose( );
+                facetDisposables.clear( );
+                facetsPopup.removeAll( );
+
+                for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
                 {
-                    this.cloneView( view );
-                } );
+                    Layer layer = en.getKey( );
+                    Facet facet = en.getValue( );
 
-                view.toolbar.add( cloneButton );
-            }
-
-            if ( !view.viewOptions.contains( HIDE_FACETS_MENU ) )
-            {
-                JToggleButton facetsButton = new JToggleButton( layersIcon );
-                facetsButton.setToolTipText( "Show Layers" );
-                JPopupMenu facetsPopup = newButtonPopup( facetsButton );
-
-                DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
-                disposables.add( view.facets.addListener( true, ( ) ->
-                {
-                    facetDisposables.dispose( );
-                    facetDisposables.clear( );
-                    facetsPopup.removeAll( );
-
-                    for ( Entry<Layer,Facet> en : view.facets.v( ).entrySet( ) )
-                    {
-                        Layer layer = en.getKey( );
-                        Facet facet = en.getValue( );
-
-                        // XXX: Handle layer title changes
-                        JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
-                        facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
-                        facetsPopup.add( facetToggle );
-                    }
-                } ) );
-
-                view.toolbar.add( facetsButton );
-            }
-
-            // XXX: Add support in docking for wildcard viewIds
-            String dockingViewIdRoot = view.getClass( ).getName( );
-            int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
-            this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
-            String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
-
-            boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
-            com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), "", closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
-            disposables.add( view.title.addListener( true, ( ) ->
-            {
-                dockingView.title.set( view.title.v( ) );
+                    // XXX: Handle layer title changes
+                    JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+                    facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
+                    facetsPopup.add( facetToggle );
+                }
             } ) );
-            
-            try
-            {
-                this.dockingGroup.addView( dockingView );
-            }
-            // ensure that the remaining view setup happens even if there are issues adding the view
-            finally
-            {
-                // When the user closes a dockingView, we will need to know the corresponding view
-                this.dockingViews.put( view, dockingView );
-    
-                disposables.add( view::dispose );
-    
-                this.viewDisposables.put( view, disposables );
-            }
+
+            view.toolbar.add( facetsButton );
         }
+
+        // XXX: Add support in docking for wildcard viewIds
+        String dockingViewIdRoot = view.getClass( ).getName( );
+        int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
+        this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
+        String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
+
+        boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), "", closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        disposables.add( view.title.addListener( true, ( ) ->
+        {
+            dockingView.title.set( view.title.v( ) );
+        } ) );
+        this.dockingGroup.addView( dockingView );
+
+        // When the user closes a dockingView, we will need to know the corresponding view
+        this.dockingViews.put( view, dockingView );
+
+        disposables.add( view::dispose );
+
+        this.viewDisposables.put( view, disposables );
     }
 
     protected void handleViewRemoved( View view )
