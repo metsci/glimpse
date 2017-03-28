@@ -34,6 +34,14 @@ public class UiUtils
         } );
     }
 
+    public static Disposable bindButtonText( AbstractButton c, ReadableVar<String> var )
+    {
+        return var.addListener( true, ( ) ->
+        {
+            c.setText( var.v( ) );
+        } );
+    }
+
     public static Disposable bindToggleButton( AbstractButton c, Var<Boolean> var )
     {
         DisposableGroup listeners = new DisposableGroup( );
