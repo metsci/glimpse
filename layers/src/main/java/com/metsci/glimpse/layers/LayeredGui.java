@@ -167,6 +167,8 @@ public class LayeredGui
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
+        // Don't start the animator here, since we might not ever get any views that
+        // use it -- see the javadocs for {@link View#setGLAnimator(GLAnimatorControl)}
         double fps = findFps( guiOptions, 60 );
         this.animator = new SwingEDTAnimator( fps );
 

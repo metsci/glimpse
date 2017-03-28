@@ -22,6 +22,7 @@ import javax.swing.JToolBar;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.layers.geo.GeoTrait;
+import com.metsci.glimpse.layers.misc.UiUtils;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
 
@@ -52,6 +53,13 @@ public abstract class View
         this.viewOptions = ImmutableSet.copyOf( viewOptions );
     }
 
+    /**
+     * Called by LayeredGui to supply this View with a shared animator.
+     * <p>
+     * glAnimator may not have been started yet, since LayeredGui doesn't know whether any
+     * views need it. The simplest approach is for every view that uses the animator to call
+     * {@link UiUtils#ensureAnimating(GLAnimatorControl)}.
+     */
     public void setGLAnimator( GLAnimatorControl glAnimator )
     {
         // Do nothing by default

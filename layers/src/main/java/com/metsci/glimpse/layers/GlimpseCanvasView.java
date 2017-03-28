@@ -1,6 +1,7 @@
 package com.metsci.glimpse.layers;
 
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.layers.misc.UiUtils.ensureAnimating;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
 import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
 import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
@@ -139,7 +140,7 @@ public abstract class GlimpseCanvasView extends View
 
             if ( this.animator != null )
             {
-                this.animator.start( );
+                ensureAnimating( this.animator );
                 this.animator.add( this.canvas.getGLDrawable( ) );
             }
         }
@@ -175,8 +176,7 @@ public abstract class GlimpseCanvasView extends View
 
         if ( this.canvas != null )
         {
-            //XXX: Should the view be starting the animator? Why not the LayeredGui who owns it?
-            this.animator.start( );
+            ensureAnimating( this.animator );
             this.animator.add( this.canvas.getGLDrawable( ) );
         }
     }
