@@ -534,7 +534,7 @@ public class TileImpl extends Tile
         viewMap.put( view.viewId, new ViewEntry( view, card, tab, overflowMenuItem ) );
         views.add( viewNum, view );
 
-        for ( TileListener listener : listeners )
+        for ( TileListener listener : new ArrayList<>( listeners ) )
         {
             listener.addedView( view );
         }
@@ -601,7 +601,7 @@ public class TileImpl extends Tile
         cardPanel.remove( viewEntry.card );
         views.remove( view );
 
-        for ( TileListener listener : listeners )
+        for ( TileListener listener : new ArrayList<>( listeners ) )
         {
             listener.removedView( view );
         }
@@ -651,7 +651,7 @@ public class TileImpl extends Tile
         topBar.doLayout( );
         topBar.repaint( );
 
-        for ( TileListener listener : listeners )
+        for ( TileListener listener : new ArrayList<>( listeners ) )
         {
             listener.selectedView( view );
         }
