@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import javax.media.opengl.GLAnimatorControl;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
@@ -26,7 +27,23 @@ public class UiUtils
     public static final Color invalidValueBg = new Color( 255, 175, 175 );
 
 
+    public static void ensureAnimating( GLAnimatorControl animator )
+    {
+        // This might need to do something more involved one day, like check
+        // the return value. For now, the idea is just to have a method name
+        // that makes it clear that multiple calls are okay.
+        animator.start( );
+    }
+
     public static Disposable bindLabel( JLabel c, ReadableVar<String> var )
+    {
+        return var.addListener( true, ( ) ->
+        {
+            c.setText( var.v( ) );
+        } );
+    }
+
+    public static Disposable bindButtonText( AbstractButton c, ReadableVar<String> var )
     {
         return var.addListener( true, ( ) ->
         {

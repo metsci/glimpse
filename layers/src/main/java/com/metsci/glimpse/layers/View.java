@@ -4,6 +4,8 @@ import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.util.Collections.singletonMap;
 
 import java.awt.Component;
@@ -11,6 +13,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
@@ -19,11 +22,14 @@ import javax.swing.JToolBar;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.layers.geo.GeoTrait;
+import com.metsci.glimpse.layers.misc.UiUtils;
 import com.metsci.glimpse.util.var.ReadableVar;
 import com.metsci.glimpse.util.var.Var;
 
 public abstract class View
 {
+    private static final Logger logger = getLogger( View.class );
+
 
     public final ReadableVar<ImmutableMap<String,Trait>> traits;
     public final ReadableVar<ImmutableMap<Layer,Facet>> facets;
@@ -47,6 +53,13 @@ public abstract class View
         this.viewOptions = ImmutableSet.copyOf( viewOptions );
     }
 
+    /**
+     * Called by LayeredGui to supply this View with a shared animator.
+     * <p>
+     * glAnimator may not have been started yet, since LayeredGui doesn't know whether any
+     * views need it. The simplest approach is for every view that uses the animator to call
+     * {@link UiUtils#ensureAnimating(GLAnimatorControl)}.
+     */
     public void setGLAnimator( GLAnimatorControl glAnimator )
     {
         // Do nothing by default
@@ -172,12 +185,25 @@ public abstract class View
      * This method is protected to discourage access from client code, while still allowing
      * access from {@link LayeredGui}. Client code should use {@link LayeredGui#addLayer(Layer)}
      * instead.
+     * <p>
+     * If {@link Layer#installTo(View)} throws an exception, this method will catch and log
+     * the exception, and then carry on. Assuming the Layer satisfies the general contract of
+     * {@link Layer#installTo(View)}, subsequent behavior will be the same as if the Layer
+     * had simply chosen not to install a Facet to this View.
      */
     protected void addLayer( Layer layer )
     {
         if ( !this._facets.v( ).containsKey( layer ) )
         {
-            layer.installTo( this );
+            try
+            {
+                layer.installTo( this );
+            }
+            catch ( Exception e )
+            {
+                // XXX: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
+                logWarning( logger, "Failed to install a " + layer.getClass( ).getName( ) + " to a " + this.getClass( ).getName( ), e );
+            }
 
             Facet facet = layer.facets( ).v( ).get( this );
             if ( facet != null )

@@ -1,6 +1,7 @@
 package com.metsci.glimpse.layers;
 
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.layers.misc.UiUtils.ensureAnimating;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
 import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
 import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
@@ -99,7 +100,8 @@ public abstract class GlimpseCanvasView extends View
             this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
 
             // Once canvas is ready, do view-specific setup and install facets
-            onGLInit( this.canvas, ( drawable ) -> {
+            onGLInit( this.canvas, ( drawable ) ->
+            {
                 this.doContextReady( this.canvas.getGlimpseContext( ) );
 
                 this.isCanvasReady = true;
@@ -116,17 +118,16 @@ public abstract class GlimpseCanvasView extends View
             } );
 
             // Before canvas gets destroyed, uninstall facets and do view-specific tear-down
-            onGLDispose( this.canvas, ( drawable ) -> {
+            onGLDispose( this.canvas, ( drawable ) ->
+            {
                 for ( Layer layer : this.layers )
                 {
-                    // The GLContext is being disposed, so something must be happening to the
-                    // view as a whole: either the view is being closed (in which case the value
-                    // of isReinstall doesn't matter), or it is being re-parented (in which case
-                    // we want isReinstall to be true)
+                    // The GLContext is being disposed, so something must be happening to the view as a whole:
+                    // either the view is being closed (in which case the value of isReinstall doesn't matter),
+                    // or it is being re-parented (in which case we want isReinstall to be true)
                     boolean isReinstall = true;
 
-                    // Call super.removeLayer() to uninstall the facet, while leaving the layer
-                    // in this.layers
+                    // Call super.removeLayer() to uninstall the facet, while leaving the layer in this.layers
                     super.removeLayer( layer, isReinstall );
                 }
 
@@ -139,7 +140,7 @@ public abstract class GlimpseCanvasView extends View
 
             if ( this.animator != null )
             {
-                this.animator.start( );
+                ensureAnimating( this.animator );
                 this.animator.add( this.canvas.getGLDrawable( ) );
             }
         }
@@ -175,8 +176,7 @@ public abstract class GlimpseCanvasView extends View
 
         if ( this.canvas != null )
         {
-            //XXX: Should the view be starting the animator? Why not the LayeredGui who owns it?
-            this.animator.start( );
+            ensureAnimating( this.animator );
             this.animator.add( this.canvas.getGLDrawable( ) );
         }
     }
@@ -219,7 +219,8 @@ public abstract class GlimpseCanvasView extends View
     {
         requireSwingThread( );
 
-        boolean succeeded = this.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) -> {
+        boolean succeeded = this.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
+        {
             return runnable.run( this.canvas.getGlimpseContext( ) );
         } );
 

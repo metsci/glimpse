@@ -13,6 +13,7 @@ import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_FACETS_MENU;
+import static com.metsci.glimpse.layers.misc.UiUtils.bindButtonText;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
@@ -166,6 +167,8 @@ public class LayeredGui
         this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
+        // Don't start the animator here, since we might not ever get any views that
+        // use it -- see the javadocs for {@link View#setGLAnimator(GLAnimatorControl)}
         double fps = findFps( guiOptions, 60 );
         this.animator = new SwingEDTAnimator( fps );
 
@@ -230,12 +233,12 @@ public class LayeredGui
     {
         animator.stop( );
     }
-    
+
     public void startAnimator( )
     {
         animator.start( );
     }
-    
+
     public void arrange( String appName, String defaultArrResource )
     {
         URL defaultArrUrl = getResource( defaultArrResource );
@@ -423,10 +426,17 @@ public class LayeredGui
                     Layer layer = en.getKey( );
                     Facet facet = en.getValue( );
 
-                    // XXX: Handle layer title changes
-                    JMenuItem facetToggle = new JCheckBoxMenuItem( layer.title.v( ) );
+                    JMenuItem facetToggle = new JCheckBoxMenuItem( );
+                    facetDisposables.add( bindButtonText( facetToggle, layer.title ) );
                     facetDisposables.add( bindToggleButton( facetToggle, facet.isVisible ) );
                     facetsPopup.add( facetToggle );
+
+                    // Redo popup menu layout after a layer title change
+                    facetDisposables.add( layer.title.addListener( true, ( ) ->
+                    {
+                        facetsPopup.pack( );
+                        facetsPopup.repaint( );
+                    } ) );
                 }
             } ) );
 
