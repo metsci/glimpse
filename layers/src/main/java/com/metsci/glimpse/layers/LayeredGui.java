@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
@@ -59,6 +59,7 @@ import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupUtils.BesideExistingNeighbor;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
+import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
@@ -322,7 +323,7 @@ public class LayeredGui
 
     protected String genDockingViewId( View view, boolean claim )
     {
-        String stem = view.getClass( ).getName( );
+        String stem = dockingViewIdStem( view.getClass( ) );
         int number = this.dockingViewIdCounters.getOrDefault( stem, 0 );
 
         if ( claim )
@@ -333,21 +334,37 @@ public class LayeredGui
         return ( stem + ":" + number );
     }
 
+    public static String dockingViewIdStem( Class<? extends View> viewClass )
+    {
+        return viewClass.getName( );
+    }
+
+    public static Pattern dockingViewIdPattern( Class<? extends View> viewClass )
+    {
+        String stem = dockingViewIdStem( viewClass );
+        return Pattern.compile( "^" + Pattern.quote( stem ) + ":[0-9]+$" );
+    }
+
+    public static boolean dockingViewIdMatches( Class<? extends View> viewClass, String viewId )
+    {
+        return dockingViewIdPattern( viewClass ).matcher( viewId ).matches( );
+    }
+
     public void addView( View view )
     {
         this.addView( view, null );
     }
 
     /**
-     * If {@code placementFn} is non-null, it will be called to choose a docking destination
+     * If {@code placementRule} is non-null, it will be called to choose a docking destination
      * for {@code view}.
      */
-    public void addView( View view, Function<GroupArrangement,ViewPlacement> placementFn )
+    public void addView( View view, ViewPlacementRule placementRule )
     {
-        if ( placementFn != null )
+        if ( placementRule != null )
         {
             String viewId = this.predictDockingViewId( view );
-            this.dockingGroup.addViewPlacement( viewId, placementFn );
+            this.dockingGroup.addViewPlacement( viewId, placementRule );
         }
 
         this.views.update( ( v ) -> setPlus( v, view ) );
@@ -377,11 +394,11 @@ public class LayeredGui
         View newView = view.copy( );
         newView.setTraits( newTraits );
 
-        this.addView( newView, ( groupArr ) ->
+        this.addView( newView, ( planArr, existingViewIds ) ->
         {
             // Split the original tile, and put the clone in the right half of the split
             String viewId = this.dockingViews.get( view ).viewId;
-            DockerArrangementTile tile = findArrTileContaining( groupArr, viewId );
+            DockerArrangementTile tile = findArrTileContaining( planArr, viewId );
             return new BesideExistingNeighbor( null, null, tile, RIGHT, 0.5 );
         } );
     }
