@@ -490,7 +490,7 @@ public class DockingGroupUtils
         Map<DockerArrangementNode,Set<String>> map = new LinkedHashMap<>( );
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            Set<String> frameViewIds = putPlanSubtreeViewIds( frameArr.dockerArr, map );
+            Set<String> frameViewIds = putSubtreeViewIds( frameArr.dockerArr, map );
             viewIds.addAll( frameViewIds );
         }
 
@@ -502,12 +502,12 @@ public class DockingGroupUtils
         Map<DockerArrangementNode,Set<String>> result = new LinkedHashMap<>( );
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            putPlanSubtreeViewIds( frameArr.dockerArr, result );
+            putSubtreeViewIds( frameArr.dockerArr, result );
         }
         return result;
     }
 
-    protected static Set<String> putPlanSubtreeViewIds( DockerArrangementNode arrNode, Map<DockerArrangementNode,Set<String>> viewIds_INOUT )
+    protected static Set<String> putSubtreeViewIds( DockerArrangementNode arrNode, Map<DockerArrangementNode,Set<String>> viewIds_INOUT )
     {
         if ( arrNode instanceof DockerArrangementTile )
         {
@@ -519,8 +519,8 @@ public class DockingGroupUtils
         else if ( arrNode instanceof DockerArrangementSplit )
         {
             DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
-            Set<String> resultA = putPlanSubtreeViewIds( arrSplit.childA, viewIds_INOUT );
-            Set<String> resultB = putPlanSubtreeViewIds( arrSplit.childB, viewIds_INOUT );
+            Set<String> resultA = putSubtreeViewIds( arrSplit.childA, viewIds_INOUT );
+            Set<String> resultB = putSubtreeViewIds( arrSplit.childB, viewIds_INOUT );
             Set<String> result = unmodifiableSet( union( resultA, resultB ) );
             viewIds_INOUT.put( arrSplit, result );
             return result;
