@@ -3,11 +3,13 @@ package com.metsci.glimpse.layers;
 import static com.google.common.io.Resources.getResource;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
+import static com.metsci.glimpse.docking.DockingGroupUtils.findArrTileContaining;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.layers.FpsOption.findFps;
 import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
@@ -54,7 +57,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
+import com.metsci.glimpse.docking.DockingGroupUtils.BesideExistingNeighbor;
+import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingTheme;
+import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
@@ -294,8 +300,56 @@ public class LayeredGui
         this.linkageNames.update( ( v ) -> mapWith( v, traitKey, newNames ) );
     }
 
+    /**
+     * {@link LayeredGui} generates a docking viewId near the <em>end</em> of the process
+     * of adding a {@link View}. Sometimes, though, we want to know <em>before</em> we add
+     * a {@link View} what viewId it will have -- e.g. to pre-insert a {@link ViewPlacement}
+     * in the docking {@link GroupArrangement}.
+     * <p>
+     * This method returns the docking viewId that will be used when the given {@link View}
+     * gets added to this {@link LayeredGui} -- assuming no other {@link View}s get added in
+     * the meantime.
+     */
+    public String predictDockingViewId( View view )
+    {
+        return this.genDockingViewId( view, false );
+    }
+
+    protected String claimDockingViewId( View view )
+    {
+        return this.genDockingViewId( view, true );
+    }
+
+    protected String genDockingViewId( View view, boolean claim )
+    {
+        String stem = view.getClass( ).getName( );
+        int number = this.dockingViewIdCounters.getOrDefault( stem, 0 );
+
+        if ( claim )
+        {
+            this.dockingViewIdCounters.put( stem, number + 1 );
+        }
+
+        return ( stem + ":" + number );
+    }
+
     public void addView( View view )
     {
+        this.addView( view, null );
+    }
+
+    /**
+     * If {@code placementFn} is non-null, it will be called to choose a docking destination
+     * for {@code view}.
+     */
+    public void addView( View view, Function<GroupArrangement,ViewPlacement> placementFn )
+    {
+        if ( placementFn != null )
+        {
+            String viewId = this.predictDockingViewId( view );
+            this.dockingGroup.addViewPlacement( viewId, placementFn );
+        }
+
         this.views.update( ( v ) -> setPlus( v, view ) );
     }
 
@@ -323,7 +377,13 @@ public class LayeredGui
         View newView = view.copy( );
         newView.setTraits( newTraits );
 
-        this.addView( newView );
+        this.addView( newView, ( groupArr ) ->
+        {
+            // Split the original tile, and put the clone in the right half of the split
+            String viewId = this.dockingViews.get( view ).viewId;
+            DockerArrangementTile tile = findArrTileContaining( groupArr, viewId );
+            return new BesideExistingNeighbor( null, null, tile, RIGHT, 0.5 );
+        } );
     }
 
     public void removeView( View view )
@@ -443,14 +503,9 @@ public class LayeredGui
             view.toolbar.add( facetsButton );
         }
 
-        // XXX: Add support in docking for wildcard viewIds
-        String dockingViewIdRoot = view.getClass( ).getName( );
-        int dockingViewIdNumber = this.dockingViewIdCounters.getOrDefault( dockingViewIdRoot, 0 );
-        this.dockingViewIdCounters.put( dockingViewIdRoot, dockingViewIdNumber + 1 );
-        String dockingViewId = dockingViewIdRoot + ":" + dockingViewIdNumber;
-
+        String viewId = this.claimDockingViewId( view );
         boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( dockingViewId, view.getComponent( ), "", closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( viewId, view.getComponent( ), "", closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
         disposables.add( view.title.addListener( true, ( ) ->
         {
             dockingView.title.set( view.title.v( ) );
