@@ -1,10 +1,15 @@
 package com.metsci.glimpse.layers;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLRendererString;
+import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLVersionString;
 import static com.metsci.glimpse.layers.misc.UiUtils.ensureAnimating;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
 import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
 import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -12,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLProfile;
@@ -22,11 +28,7 @@ import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 public abstract class GlimpseCanvasView extends View
 {
-
-    public static interface GlimpseRunnable
-    {
-        boolean run( GlimpseContext context );
-    }
+    private static final Logger logger = getLogger( GlimpseCanvasView.class );
 
     /**
      * Specifies the approach to use when moving a GL canvas from one parent component to another.
@@ -41,6 +43,7 @@ public abstract class GlimpseCanvasView extends View
      */
     public static final String glReparentingMethod = System.getProperty( "layers.glReparentingMethod" );
 
+
     protected final List<Layer> layers;
     protected GLAnimatorControl animator;
 
@@ -49,6 +52,7 @@ public abstract class GlimpseCanvasView extends View
 
     public final JPanel canvasParent;
     protected NewtSwingEDTGlimpseCanvas canvas;
+
 
     public GlimpseCanvasView( GLProfile glProfile, Collection<? extends ViewOption> options )
     {
@@ -102,6 +106,8 @@ public abstract class GlimpseCanvasView extends View
             // Once canvas is ready, do view-specific setup and install facets
             onGLInit( this.canvas, ( drawable ) ->
             {
+                logInfo( logger, "GL canvas init: title = \"%s\", GL_VERSION = \"%s\", GL_RENDERER = \"%s\", reparenting = %s", this.title.v( ), getGLVersionString( drawable.getGL( ) ), getGLRendererString( drawable.getGL( ) ), firstNonNull( glReparentingMethod, "default" ) );
+
                 this.doContextReady( this.canvas.getGlimpseContext( ) );
 
                 this.isCanvasReady = true;
@@ -120,6 +126,8 @@ public abstract class GlimpseCanvasView extends View
             // Before canvas gets destroyed, uninstall facets and do view-specific tear-down
             onGLDispose( this.canvas, ( drawable ) ->
             {
+                logInfo( logger, "GL canvas dispose: title = \"%s\"", this.title.v( ) );
+
                 for ( Layer layer : this.layers )
                 {
                     // The GLContext is being disposed, so something must be happening to the view as a whole:
