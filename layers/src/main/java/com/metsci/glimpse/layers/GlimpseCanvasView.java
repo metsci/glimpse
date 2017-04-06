@@ -14,9 +14,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -44,7 +42,6 @@ public abstract class GlimpseCanvasView extends View
     public static final String glReparentingMethod = System.getProperty( "layers.glReparentingMethod" );
 
 
-    protected final List<Layer> layers;
     protected GLAnimatorControl animator;
 
     protected boolean areTraitsSet;
@@ -58,7 +55,6 @@ public abstract class GlimpseCanvasView extends View
     {
         super( options );
 
-        this.layers = new ArrayList<>( );
         this.animator = null;
 
         this.areTraitsSet = false;
@@ -109,17 +105,16 @@ public abstract class GlimpseCanvasView extends View
                 logInfo( logger, "GL canvas init: title = \"%s\", GL_VERSION = \"%s\", GL_RENDERER = \"%s\", reparenting = %s", this.title.v( ), getGLVersionString( drawable.getGL( ) ), getGLRendererString( drawable.getGL( ) ), firstNonNull( glReparentingMethod, "default" ) );
 
                 this.doContextReady( this.canvas.getGlimpseContext( ) );
-
                 this.isCanvasReady = true;
+
                 if ( this.areTraitsSet )
                 {
                     super.init( );
                 }
 
-                for ( Layer layer : this.layers )
+                for ( Layer layer : this._layers.v( ) )
                 {
-                    // Call super.addLayer() to install the facet, without re-adding the layer to this.layers
-                    super.addLayer( layer );
+                    this.installLayer( layer );
                 }
             } );
 
@@ -128,19 +123,17 @@ public abstract class GlimpseCanvasView extends View
             {
                 logInfo( logger, "GL canvas dispose: title = \"%s\"", this.title.v( ) );
 
-                for ( Layer layer : this.layers )
+                for ( Layer layer : this._layers.v( ) )
                 {
                     // The GLContext is being disposed, so something must be happening to the view as a whole:
                     // either the view is being closed (in which case the value of isReinstall doesn't matter),
                     // or it is being re-parented (in which case we want isReinstall to be true)
                     boolean isReinstall = true;
 
-                    // Call super.removeLayer() to uninstall the facet, while leaving the layer in this.layers
-                    super.removeLayer( layer, isReinstall );
+                    this.uninstallLayer( layer, isReinstall );
                 }
 
                 this.doContextDying( this.canvas.getGlimpseContext( ) );
-
                 this.isCanvasReady = false;
             } );
 
@@ -200,21 +193,12 @@ public abstract class GlimpseCanvasView extends View
     }
 
     @Override
-    protected void addLayer( Layer layer )
+    protected void installLayer( Layer layer )
     {
-        this.layers.add( layer );
-
         if ( this.isCanvasReady )
         {
-            super.addLayer( layer );
+            super.installLayer( layer );
         }
-    }
-
-    @Override
-    protected void removeLayer( Layer layer, boolean isReinstall )
-    {
-        this.layers.remove( layer );
-        super.removeLayer( layer, isReinstall );
     }
 
     @Override

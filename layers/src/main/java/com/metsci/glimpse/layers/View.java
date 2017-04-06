@@ -1,6 +1,8 @@
 package com.metsci.glimpse.layers;
 
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapMinus;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
@@ -12,13 +14,13 @@ import java.awt.Component;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.layers.geo.GeoTrait;
@@ -37,12 +39,14 @@ public abstract class View
     public final JToolBar toolbar;
     public final ImmutableSet<ViewOption> viewOptions;
 
+    protected final Var<ImmutableList<Layer>> _layers;
     protected final Var<ImmutableMap<String,Trait>> _traits;
     protected final Var<ImmutableMap<Layer,Facet>> _facets;
 
 
     public View( Collection<? extends ViewOption> viewOptions )
     {
+        this._layers = new Var<>( ImmutableList.of( ), notNull );
         this._traits = new Var<>( ImmutableMap.of( ), notNull );
         this._facets = new Var<>( ImmutableMap.of( ), notNull );
 
@@ -101,12 +105,10 @@ public abstract class View
 
     public void setTraits( Map<? extends String,? extends Trait> newTraits )
     {
-        Set<Layer> layers = ImmutableSet.copyOf( this._facets.v( ).keySet( ) );
-
         // Uninstall layers
-        for ( Layer layer : layers )
+        for ( Layer layer : this._layers.v( ) )
         {
-            this.removeLayer( layer, true );
+            this.uninstallLayer( layer, true );
         }
 
         // Update traits map
@@ -140,9 +142,9 @@ public abstract class View
         this.init( );
 
         // Re-install layers
-        for ( Layer layer : layers )
+        for ( Layer layer : this._layers.v( ) )
         {
-            this.addLayer( layer );
+            this.installLayer( layer );
         }
     }
 
@@ -193,23 +195,29 @@ public abstract class View
      */
     protected void addLayer( Layer layer )
     {
-        if ( !this._facets.v( ).containsKey( layer ) )
+        if ( !this._layers.v( ).contains( layer ) )
         {
-            try
-            {
-                layer.installTo( this );
-            }
-            catch ( Exception e )
-            {
-                // XXX: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
-                logWarning( logger, "Failed to install a " + layer.getClass( ).getName( ) + " to a " + this.getClass( ).getName( ), e );
-            }
+            this._layers.update( ( v ) -> listPlus( v, layer ) );
+            this.installLayer( layer );
+        }
+    }
 
-            Facet facet = layer.facets( ).v( ).get( this );
-            if ( facet != null )
-            {
-                this._facets.update( ( v ) -> mapWith( v, layer, facet ) );
-            }
+    protected void installLayer( Layer layer )
+    {
+        try
+        {
+            layer.installTo( this );
+        }
+        catch ( Exception e )
+        {
+            // XXX: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
+            logWarning( logger, "Failed to install a " + layer.getClass( ).getName( ) + " to a " + this.getClass( ).getName( ), e );
+        }
+
+        Facet facet = layer.facets( ).v( ).get( this );
+        if ( facet != null )
+        {
+            this._facets.update( ( v ) -> mapWith( v, layer, facet ) );
         }
     }
 
@@ -220,11 +228,17 @@ public abstract class View
      */
     protected void removeLayer( Layer layer, boolean isReinstall )
     {
-        if ( this._facets.v( ).containsKey( layer ) )
+        if ( this._layers.v( ).contains( layer ) )
         {
-            this._facets.update( ( v ) -> mapMinus( v, layer ) );
-            layer.uninstallFrom( this, isReinstall );
+            this._layers.update( ( v ) -> listMinus( v, layer ) );
+            this.uninstallLayer( layer, isReinstall );
         }
+    }
+
+    protected void uninstallLayer( Layer layer, boolean isReinstall )
+    {
+        this._facets.update( ( v ) -> mapMinus( v, layer ) );
+        layer.uninstallFrom( this, isReinstall );
     }
 
     /**
@@ -233,7 +247,7 @@ public abstract class View
      */
     protected void dispose( )
     {
-        for ( Layer layer : this._facets.v( ).keySet( ) )
+        for ( Layer layer : this._layers.v( ) )
         {
             this.removeLayer( layer, false );
         }
