@@ -173,7 +173,8 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock.lock( );
         try
         {
-            addPolygon( groupId, new IdPolygon( groupId, polygonId, buildPolygon( dataX, dataY ), z ) );
+            TessellatedPolygon tessellated = new TessellatedPolygon( buildPolygon( dataX, dataY ), this.tessellator );
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, tessellated, z ) );
         }
         finally
         {
@@ -186,8 +187,21 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock.lock( );
         try
         {
-            addPolygon( groupId, new IdPolygon( groupId, polygonId, geometry, z ) );
+            TessellatedPolygon tessellated = new TessellatedPolygon( geometry, this.tessellator );
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, tessellated, z ) );
+        }
+        finally
+        {
+            this.updateLock.unlock( );
+        }
+    }
 
+    public void addPolygon( Object groupId, Object polygonId, TessellatedPolygon tessellated, float z )
+    {
+        this.updateLock.lock( );
+        try
+        {
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, tessellated, z ) );
         }
         finally
         {
@@ -200,8 +214,8 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock.lock( );
         try
         {
-            addPolygon( groupId, new IdPolygon( groupId, polygonId, buildPolygon( shape ), z ) );
-
+            TessellatedPolygon tessellated = new TessellatedPolygon( buildPolygon( shape ), this.tessellator );
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, tessellated, z ) );
         }
         finally
         {
@@ -214,7 +228,8 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock.lock( );
         try
         {
-            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, buildPolygon( dataX, dataY ), z ) );
+            TessellatedPolygon tessellated = new TessellatedPolygon( buildPolygon( dataX, dataY ), this.tessellator );
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, tessellated, z ) );
         }
         finally
         {
@@ -227,7 +242,21 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock.lock( );
         try
         {
-            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, geometry, z ) );
+            TessellatedPolygon tessellated = new TessellatedPolygon( geometry, this.tessellator );
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, tessellated, z ) );
+        }
+        finally
+        {
+            this.updateLock.unlock( );
+        }
+    }
+
+    public void addPolygon( Object groupId, Object polygonId, long startTime, long endTime, TessellatedPolygon tessellated, float z )
+    {
+        this.updateLock.lock( );
+        try
+        {
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, tessellated, z ) );
         }
         finally
         {
@@ -240,7 +269,8 @@ public class PolygonPainter extends GlimpsePainterBase
         this.updateLock.lock( );
         try
         {
-            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, buildPolygon( shape ), z ) );
+            TessellatedPolygon tessellated = new TessellatedPolygon( buildPolygon( shape ), this.tessellator );
+            addPolygon( groupId, new IdPolygon( groupId, polygonId, startTime, endTime, tessellated, z ) );
         }
         finally
         {
@@ -1072,7 +1102,7 @@ public class PolygonPainter extends GlimpsePainterBase
         return loaded.glFillBufferInitialized && loaded.glLineBufferInitialized && loaded.glLineOffsetBuffer != null && loaded.glLineCountBuffer != null && loaded.glFillOffsetBuffer != null && loaded.glFillCountBuffer != null;
     }
 
-    protected static Polygon buildPolygon( float[] geometryX, float[] geometryY )
+    public static Polygon buildPolygon( float[] geometryX, float[] geometryY )
     {
         Polygon p = new Polygon( );
 
@@ -1093,7 +1123,7 @@ public class PolygonPainter extends GlimpsePainterBase
         return p;
     }
 
-    protected static Polygon buildPolygon( Shape shape )
+    public static Polygon buildPolygon( Shape shape )
     {
         Polygon p = new Polygon( );
         PathIterator iter = shape.getPathIterator( null );
@@ -1152,6 +1182,85 @@ public class PolygonPainter extends GlimpsePainterBase
     }
 
     /**
+     * In PolygonPainter, a Polygon is converted to a TessellatedPolygon, which is then converted to an IdPolygon.
+     * The first conversion can be done automatically by PolygonPainter -- however, such automatic conversion will
+     * be done on the render thread. Alternatively, client code can do the first conversion explicitly, on whatever
+     * thread is appropriate, and pass in the TessellatedPolygon.
+     */
+    public static class TessellatedPolygon
+    {
+        protected Polygon polygon;
+
+        protected float[] fillVertices;
+
+        protected int lineVertexCount;
+        protected int fillVertexCount;
+
+        protected int linePrimitiveCount;
+        protected int fillPrimitiveCount;
+
+        public TessellatedPolygon( Polygon polygon, PolygonTessellator tessellator )
+        {
+            this.polygon = polygon;
+            this.calculateLineCounts( );
+            this.calculateFillCounts( tessellator );
+        }
+
+        protected void calculateLineCounts( )
+        {
+            int vertexCount = 0;
+            int primitiveCount = 0;
+
+            if ( this.polygon != null )
+            {
+                Iterator<Loop> iter = this.polygon.getIterator( );
+                while ( iter.hasNext( ) )
+                {
+                    Loop loop = iter.next( );
+                    int size = loop.size( );
+                    // add 2 phantom vertices expected by LineProgram (see LinePathData)
+                    // and 1 vertex to close the loop
+                    vertexCount += size + 3;
+                    primitiveCount += 1;
+                }
+            }
+
+            this.lineVertexCount = vertexCount;
+            this.linePrimitiveCount = primitiveCount;
+        }
+
+        protected void calculateFillCounts( PolygonTessellator tessellator )
+        {
+            if ( this.polygon != null )
+            {
+                this.fillVertices = tessellate( this.polygon, tessellator );
+            }
+            else
+            {
+                this.fillVertices = new float[ 0 ];
+            }
+
+            this.fillVertexCount = this.fillVertices.length / 2;
+            this.fillPrimitiveCount = 1;
+        }
+
+        protected static float[] tessellate( Polygon polygon, PolygonTessellator tessellator )
+        {
+            try
+            {
+                SimpleVertexAccumulator accumulator = new SimpleVertexAccumulator( );
+                tessellator.tessellate( polygon, accumulator );
+                return accumulator.getVertices( );
+            }
+            catch ( TessellationException e )
+            {
+                logWarning( logger, "Problem tessellating polygon.", e );
+                return new float[ 0 ];
+            }
+        }
+    }
+
+    /**
      * An internal data structure containing geometry information about a single polygon.
      *
      * @author ulman
@@ -1164,10 +1273,9 @@ public class PolygonPainter extends GlimpsePainterBase
         long startTime;
         long endTime;
 
-        Polygon geometry;
-
-        float[] fillVertices;
         float depth;
+
+        TessellatedPolygon geometry;
 
         int lineVertexCount;
         int fillVertexCount;
@@ -1181,57 +1289,31 @@ public class PolygonPainter extends GlimpsePainterBase
         int[] fillOffsets;
         int[] fillSizes;
 
-        protected IdPolygon( Object groupId, Object polygonId, long startTime, long endTime, Polygon geometry, float depth )
+        protected IdPolygon( Object groupId, Object polygonId, TessellatedPolygon geometry, float depth )
+        {
+            this( groupId, polygonId, Long.MIN_VALUE, Long.MAX_VALUE, geometry, depth );
+        }
+
+        protected IdPolygon( Object groupId, Object polygonId, long startTime, long endTime, TessellatedPolygon geometry, float depth )
         {
             this.groupId = groupId;
             this.polygonId = polygonId;
             this.startTime = startTime;
             this.endTime = endTime;
-            this.geometry = geometry;
             this.depth = depth;
 
-            if ( this.geometry != null )
-            {
-                this.calculateLineCounts( );
-                this.calculateFillCounts( );
+            this.geometry = geometry;
 
-                this.lineOffsets = new int[linePrimitiveCount];
-                this.lineSizes = new int[linePrimitiveCount];
-                this.fillOffsets = new int[fillPrimitiveCount];
-                this.fillSizes = new int[fillPrimitiveCount];
-            }
-        }
+            this.lineVertexCount = geometry.lineVertexCount;
+            this.fillVertexCount = geometry.fillVertexCount;
 
-        protected IdPolygon( Object groupId, Object polygonId, Polygon geometry, float z )
-        {
-            this( groupId, polygonId, Long.MIN_VALUE, Long.MAX_VALUE, geometry, z );
-        }
+            this.linePrimitiveCount = geometry.linePrimitiveCount;
+            this.fillPrimitiveCount = geometry.fillPrimitiveCount;
 
-        protected void calculateLineCounts( )
-        {
-            int vertexCount = 0;
-            int primitiveCount = 0;
-
-            Iterator<Loop> iter = geometry.getIterator( );
-            while ( iter.hasNext( ) )
-            {
-                Loop loop = iter.next( );
-                int size = loop.size( );
-                // add 2 phantom vertices expected by LineProgram (see LinePathData)
-                // and 1 vertex to close the loop
-                vertexCount += size + 3;
-                primitiveCount += 1;
-            }
-
-            lineVertexCount = vertexCount;
-            linePrimitiveCount = primitiveCount;
-        }
-
-        protected void calculateFillCounts( )
-        {
-            fillVertices = tessellate( );
-            fillVertexCount = fillVertices.length / 2;
-            fillPrimitiveCount = 1;
+            this.lineOffsets = new int[ linePrimitiveCount ];
+            this.lineSizes = new int[ linePrimitiveCount ];
+            this.fillOffsets = new int[ fillPrimitiveCount ];
+            this.fillSizes = new int[ fillPrimitiveCount ];
         }
 
         /**
@@ -1249,7 +1331,7 @@ public class PolygonPainter extends GlimpsePainterBase
         {
             int totalSize = 0;
             int primitiveCount = 0;
-            Iterator<Loop> iter = geometry.getIterator( );
+            Iterator<Loop> iter = geometry.polygon.getIterator( );
             while ( iter.hasNext( ) )
             {
                 Loop loop = iter.next( );
@@ -1323,7 +1405,7 @@ public class PolygonPainter extends GlimpsePainterBase
         {
             for ( int i = 0; i < fillVertexCount * 2; i++ )
             {
-                vertexBuffer.put( fillVertices[i] );
+                vertexBuffer.put( geometry.fillVertices[i] );
 
                 if ( i % 2 != 0 ) vertexBuffer.put( zCoord );
             }
@@ -1339,21 +1421,6 @@ public class PolygonPainter extends GlimpsePainterBase
             // there is always only one fill primitive for a polygon
             offsetBuffer.put( fillOffsets[0] );
             sizeBuffer.put( fillSizes[0] );
-        }
-
-        protected float[] tessellate( )
-        {
-            try
-            {
-                SimpleVertexAccumulator accumulator = new SimpleVertexAccumulator( );
-                tessellator.tessellate( geometry, accumulator );
-                return accumulator.getVertices( );
-            }
-            catch ( TessellationException e )
-            {
-                logWarning( logger, "Problem tessellating polygon.", e );
-                return new float[0];
-            }
         }
 
         private PolygonPainter getOuterType( )
