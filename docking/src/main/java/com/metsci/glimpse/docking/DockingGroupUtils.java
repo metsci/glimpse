@@ -17,6 +17,7 @@ import static java.lang.Math.min;
 import static java.lang.Math.round;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
+import static java.util.Objects.requireNonNull;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -143,6 +144,11 @@ public class DockingGroupUtils
         }
     }
 
+    public static interface ViewPlacementRule
+    {
+        ViewPlacement getPlacement( GroupArrangement planArr, Set<String> existingViewIds );
+    }
+
     public static interface ViewPlacement
     {
         void placeView( GroupArrangement groupArr, String viewId );
@@ -266,9 +272,13 @@ public class DockingGroupUtils
         public final FrameArrangement planFrame;
         public final DockerArrangementTile planTile;
 
+        /**
+         * {@code planFrame} is used by both {@link #placeView(GroupRealization, View)} and
+         * {@link #placeView(GroupArrangement, String)} methods, so it must be non-null.
+         */
         public InNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
         {
-            this.planFrame = planFrame;
+            this.planFrame = requireNonNull( planFrame );
             this.planTile = planTile;
         }
 
@@ -368,10 +378,10 @@ public class DockingGroupUtils
 
     public static ViewPlacement chooseViewPlacement( GroupArrangement existingArr, GroupArrangement planArr, String viewId )
     {
-        Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildPlanSubtreeViewIdsMap( planArr );
-        Map<DockerArrangementNode,Set<String>> existingSubtreeViewIds = buildPlanSubtreeViewIdsMap( existingArr );
+        Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildSubtreeViewIdsMap( planArr );
+        Map<DockerArrangementNode,Set<String>> existingSubtreeViewIds = buildSubtreeViewIdsMap( existingArr );
 
-        FrameArrangement planFrame = findFrameArrContaining( planArr, viewId );
+        FrameArrangement planFrame = findFrameArrContaining( planArr, planSubtreeViewIds, viewId );
         if ( planFrame != null )
         {
             // Add to an existing tile that is similar to the planned tile
@@ -481,28 +491,70 @@ public class DockingGroupUtils
     public static Set<String> findViewIds( GroupArrangement groupArr )
     {
         Set<String> viewIds = new LinkedHashSet<>( );
-
-        Map<DockerArrangementNode,Set<String>> map = new LinkedHashMap<>( );
-        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        for ( DockerArrangementTile tile : findTiles( groupArr ) )
         {
-            Set<String> frameViewIds = putPlanSubtreeViewIds( frameArr.dockerArr, map );
-            viewIds.addAll( frameViewIds );
+            viewIds.addAll( tile.viewIds );
         }
-
         return viewIds;
     }
 
-    protected static Map<DockerArrangementNode,Set<String>> buildPlanSubtreeViewIdsMap( GroupArrangement groupArr )
+    public static Set<String> findViewIds( DockerArrangementNode arrNode )
+    {
+        Set<String> viewIds = new LinkedHashSet<>( );
+        for ( DockerArrangementTile tile : findTiles( arrNode ) )
+        {
+            viewIds.addAll( tile.viewIds );
+        }
+        return viewIds;
+    }
+
+    public static Set<DockerArrangementTile> findTiles( GroupArrangement groupArr )
+    {
+        Set<DockerArrangementTile> tiles = new LinkedHashSet<>( );
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            putSubtreeTiles( frameArr.dockerArr, tiles );
+        }
+        return tiles;
+    }
+
+    public static Set<DockerArrangementTile> findTiles( DockerArrangementNode arrNode )
+    {
+        Set<DockerArrangementTile> tiles = new LinkedHashSet<>( );
+        putSubtreeTiles( arrNode, tiles );
+        return tiles;
+    }
+
+    protected static void putSubtreeTiles( DockerArrangementNode arrNode, Set<DockerArrangementTile> result_OUT )
+    {
+        if ( arrNode instanceof DockerArrangementTile )
+        {
+            DockerArrangementTile arrTile = ( DockerArrangementTile ) arrNode;
+            result_OUT.add( arrTile );
+        }
+        else if ( arrNode instanceof DockerArrangementSplit )
+        {
+            DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
+            putSubtreeTiles( arrSplit.childA, result_OUT );
+            putSubtreeTiles( arrSplit.childB, result_OUT );
+        }
+        else if ( arrNode != null )
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
+        }
+    }
+
+    public static Map<DockerArrangementNode,Set<String>> buildSubtreeViewIdsMap( GroupArrangement groupArr )
     {
         Map<DockerArrangementNode,Set<String>> result = new LinkedHashMap<>( );
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            putPlanSubtreeViewIds( frameArr.dockerArr, result );
+            putSubtreeViewIds( frameArr.dockerArr, result );
         }
         return result;
     }
 
-    protected static Set<String> putPlanSubtreeViewIds( DockerArrangementNode arrNode, Map<DockerArrangementNode,Set<String>> viewIds_INOUT )
+    protected static Set<String> putSubtreeViewIds( DockerArrangementNode arrNode, Map<DockerArrangementNode,Set<String>> viewIds_INOUT )
     {
         if ( arrNode instanceof DockerArrangementTile )
         {
@@ -514,8 +566,8 @@ public class DockingGroupUtils
         else if ( arrNode instanceof DockerArrangementSplit )
         {
             DockerArrangementSplit arrSplit = ( DockerArrangementSplit ) arrNode;
-            Set<String> resultA = putPlanSubtreeViewIds( arrSplit.childA, viewIds_INOUT );
-            Set<String> resultB = putPlanSubtreeViewIds( arrSplit.childB, viewIds_INOUT );
+            Set<String> resultA = putSubtreeViewIds( arrSplit.childA, viewIds_INOUT );
+            Set<String> resultB = putSubtreeViewIds( arrSplit.childB, viewIds_INOUT );
             Set<String> result = unmodifiableSet( union( resultA, resultB ) );
             viewIds_INOUT.put( arrSplit, result );
             return result;
@@ -530,16 +582,11 @@ public class DockingGroupUtils
         }
     }
 
-    public static boolean containsView( GroupArrangement groupArr, String viewId )
-    {
-        return ( findFrameArrContaining( groupArr, viewId ) != null );
-    }
-
-    protected static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, String viewId )
+    protected static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
     {
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            if ( containsView( frameArr.dockerArr, viewId ) )
+            if ( containsView( frameArr.dockerArr, subtreeViewIds, viewId ) )
             {
                 return frameArr;
             }
@@ -548,26 +595,21 @@ public class DockingGroupUtils
         return null;
     }
 
-    protected static boolean containsView( DockerArrangementNode node, String viewId )
+    protected static boolean containsView( DockerArrangementNode node, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
     {
-        if ( node instanceof DockerArrangementTile )
-        {
-            DockerArrangementTile tile = ( DockerArrangementTile ) node;
-            return tile.viewIds.contains( viewId );
-        }
-        else if ( node instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit split = ( DockerArrangementSplit ) node;
-            return ( containsView( split.childA, viewId ) || containsView( split.childB, viewId ) );
-        }
-        else if ( node == null )
-        {
-            return false;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
-        }
+        Set<String> viewIds = subtreeViewIds.get( node );
+        return ( viewIds != null && viewIds.contains( viewId ) );
+    }
+
+    public static DockerArrangementTile findArrTileContaining( GroupArrangement groupArr, String viewId )
+    {
+        return findArrTileContaining( groupArr, buildSubtreeViewIdsMap( groupArr ), viewId );
+    }
+
+    protected static DockerArrangementTile findArrTileContaining( GroupArrangement groupArr, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
+    {
+        FrameArrangement frame = findFrameArrContaining( groupArr, subtreeViewIds, viewId );
+        return ( frame == null ? null : findArrTileContaining( frame.dockerArr, subtreeViewIds, viewId ) );
     }
 
     protected static DockerArrangementTile findArrTileContaining( DockerArrangementNode node, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
