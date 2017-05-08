@@ -53,6 +53,12 @@ public class GeneralUtils
 {
     public static final String LINE_SEPARATOR = System.getProperty( "line.separator", "\n" );
 
+    // An epsilon value for comparing when double values are approximately equal
+    // NOTE: In general the correct epsilon to use when defining a sense of floating point
+    //       equality is quite application specific. This epsilon is chosen to be appropriate
+    //       for comparing floating point values close to 0.
+    public static final double EPSILON = 1e-10;
+    
     /**
      * Prevent instantiation.
      */
@@ -469,7 +475,7 @@ public class GeneralUtils
      */
     public static boolean approximateInteger( double d1 )
     {
-        return approximateInteger( d1, 1e-10 );
+        return approximateInteger( d1, EPSILON );
     }
 
     /**
@@ -487,7 +493,7 @@ public class GeneralUtils
      */
     public static boolean approximateEqual( double d1, double d2 )
     {
-        return approximateEqual( d1, d2, 1e-10 );
+        return approximateEqual( d1, d2, EPSILON );
     }
 
     /**
@@ -503,7 +509,7 @@ public class GeneralUtils
      */
     public static boolean approximateNotEqual( double d1, double d2 )
     {
-        return approximateNotEqual( d1, d2, 1e-10 );
+        return approximateNotEqual( d1, d2, EPSILON );
     }
 
     /**
