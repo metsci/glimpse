@@ -58,7 +58,7 @@ public class GeneralUtils
     //       equality is quite application specific. This epsilon is chosen to be appropriate
     //       for comparing floating point values close to 0.
     public static final double EPSILON = 1e-10;
-    
+
     /**
      * Prevent instantiation.
      */
@@ -518,5 +518,290 @@ public class GeneralUtils
     public static boolean approximateNotEqual( double d1, double d2, double epsilon )
     {
         return Math.abs( d1 - d2 ) > epsilon;
+    }
+
+    /**
+     * Returns the first argument (value) unless it is ouside the range [min,max]. In that
+     * case, min is returned if value is less than min and max is returned if value is greater
+     * than max.
+     */
+    public static double clamp( double value, double min, double max )
+    {
+        if ( value < min )
+            return min;
+        else if ( value > max )
+            return max;
+        else
+            return value;
+    }
+
+    /**
+     * @see #clamp(double, double, double)
+     */
+    public static int clamp( int value, int min, int max )
+    {
+        if ( value < min )
+            return min;
+        else if ( value > max )
+            return max;
+        else
+            return value;
+    }
+
+    /**
+     * @see #clamp(double, double, double)
+     */
+    public static float clamp( float value, float min, float max )
+    {
+        if ( value < min )
+            return min;
+        else if ( value > max )
+            return max;
+        else
+            return value;
+    }
+
+    /**
+     * @see #clamp(double, double, double)
+     */
+    public static long clamp( long value, long min, long max )
+    {
+        if ( value < min )
+            return min;
+        else if ( value > max )
+            return max;
+        else
+            return value;
+    }
+
+    /**
+     * @see #clamp(double, double, double)
+     */
+    public static short clamp( short value, short min, short max )
+    {
+        if ( value < min )
+            return min;
+        else if ( value > max )
+            return max;
+        else
+            return value;
+    }
+
+    /**
+     * @see #clamp(double, double, double)
+     */
+    public static byte clamp( byte value, byte min, byte max )
+    {
+        if ( value < min )
+            return min;
+        else if ( value > max )
+            return max;
+        else
+            return value;
+    }
+
+    /**
+     * Returns the maximum value from among a set of inputs.
+     */
+    public static int max( int... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute max with no arguments" );
+
+        int max = Integer.MIN_VALUE;
+
+        for ( int value : values )
+        {
+            if ( value > max ) max = value;
+        }
+
+        return max;
+    }
+
+    /**
+     * Returns the maximum value from among three inputs. Should be preferred
+     * over {@link #max(int...)} for efficiency with only three arguments.
+     */
+    public static int max( int v1, int v2, int v3 )
+    {
+        return Math.max( Math.max( v1, v2 ), v3 );
+    }
+
+    /**
+     * @see #max(int...)
+     */
+    public static long max( long... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute max with no arguments" );
+
+        long max = Long.MIN_VALUE;
+
+        for ( long value : values )
+        {
+            if ( value > max ) max = value;
+        }
+
+        return max;
+    }
+
+    /**
+     * @see #max(int,int,int)
+     */
+    public static long max( long v1, long v2, long v3 )
+    {
+        return Math.max( Math.max( v1, v2 ), v3 );
+    }
+    
+    /**
+     * @see #max(int...)
+     */
+    public static double max( double... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute max with no arguments" );
+
+        double max = Double.NEGATIVE_INFINITY;
+
+        for ( double value : values )
+        {
+            if ( value > max ) max = value;
+        }
+
+        return max;
+    }
+
+    /**
+     * @see #max(int,int,int)
+     */
+    public static double max( double v1, double v2, double v3 )
+    {
+        return Math.max( Math.max( v1, v2 ), v3 );
+    }
+    
+    /**
+     * @see #max(int...)
+     */
+    public static float max( float... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute max with no arguments" );
+
+        float max = Float.NEGATIVE_INFINITY;
+
+        for ( float value : values )
+        {
+            if ( value > max ) max = value;
+        }
+
+        return max;
+    }
+
+    /**
+     * @see #max(int,int,int)
+     */
+    public static float max( float v1, float v2, float v3 )
+    {
+        return Math.max( Math.max( v1, v2 ), v3 );
+    }
+    
+    /**
+     * Returns the minimum value from among a set of inputs.
+     */
+    public static int min( int... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute min with no arguments" );
+
+        int min = Integer.MAX_VALUE;
+
+        for ( int value : values )
+        {
+            if ( value < min ) min = value;
+        }
+
+        return min;
+    }
+
+    /**
+     * Returns the minimum value from among three inputs. Should be preferred
+     * over {@link #min(int...)} for efficiency with only three arguments.
+     */
+    public static int min( int v1, int v2, int v3 )
+    {
+        return Math.min( Math.min( v1, v2 ), v3 );
+    }
+
+    /**
+     * @see #min(int...)
+     */
+    public static long min( long... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute min with no arguments" );
+
+        long min = Integer.MAX_VALUE;
+
+        for ( long value : values )
+        {
+            if ( value < min ) min = value;
+        }
+
+        return min;
+    }
+
+
+    /**
+     * @see #max(int,int,int)
+     */
+    public static long min( long v1, long v2, long v3 )
+    {
+        return Math.min( Math.min( v1, v2 ), v3 );
+    }
+    
+    /**
+     * @see #min(int...)
+     */
+    public static double min( double... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute min with no arguments" );
+
+        double min = Double.POSITIVE_INFINITY;
+
+        for ( double value : values )
+        {
+            if ( value < min ) min = value;
+        }
+
+        return min;
+    }
+
+
+    /**
+     * @see #max(int,int,int)
+     */
+    public static double min( double v1, double v2, double v3 )
+    {
+        return Math.min( Math.min( v1, v2 ), v3 );
+    }
+    
+    /**
+     * @see #min(int...)
+     */
+    public static float min( float... values )
+    {
+        if ( values.length == 0 ) throw new IllegalArgumentException( "Unable to compute min with no arguments" );
+
+        float min = Float.POSITIVE_INFINITY;
+
+        for ( float value : values )
+        {
+            if ( value < min ) min = value;
+        }
+
+        return min;
+    }
+
+
+    /**
+     * @see #max(int,int,int)
+     */
+    public static float min( float v1, float v2, float v3 )
+    {
+        return Math.min( Math.min( v1, v2 ), v3 );
     }
 }

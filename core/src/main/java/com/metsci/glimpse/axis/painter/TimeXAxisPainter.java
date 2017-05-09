@@ -42,6 +42,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -150,7 +151,7 @@ public class TimeXAxisPainter extends TimeAxisPainter
             int iMin = axis.valueToScreenPixel( fromTimeStamp( time.start ) );
             int iMax = ( int ) Math.floor( axis.valueToScreenPixel( fromTimeStamp( time.end ) ) - textWidth );
             int iApprox = ( int ) Math.round( axis.valueToScreenPixel( fromTimeStamp( time.textCenter ) ) - 0.5 * textWidth );
-            int i = Math.max( iMin, Math.min( iMax, iApprox ) );
+            int i = GeneralUtils.clamp( iApprox, iMin, iMax );
             if ( i < 0 || i + textWidth > width ) continue;
 
             int j = ( int ) Math.floor( jTimeText - textHeight - hoverLabelOffset );

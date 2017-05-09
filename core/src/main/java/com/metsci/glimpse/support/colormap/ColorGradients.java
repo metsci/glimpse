@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 
@@ -382,8 +383,8 @@ public class ColorGradients
                 gradient.toColor( fraction, rgba );
 
                 //convert rgb to hsl
-                float xMax = Math.max( Math.max( rgba[0], rgba[1] ), rgba[2] );
-                float xMin = Math.min( Math.min( rgba[0], rgba[1] ), rgba[2] );
+                float xMax = GeneralUtils.max( rgba[0], rgba[1], rgba[2] );
+                float xMin = GeneralUtils.min( rgba[0], rgba[1], rgba[2] );
                 float light = ( xMax + xMin ) / 2, sat = 0, hue = 0, temp2 = 0;
 
                 if ( xMin == xMax )
