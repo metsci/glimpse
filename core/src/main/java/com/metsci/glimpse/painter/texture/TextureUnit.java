@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.painter.texture;
 
+import java.util.Objects;
+
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.Texture;
 
@@ -63,7 +65,7 @@ public class TextureUnit<D extends Texture>
     @Override
     public int hashCode( )
     {
-        return 31 + ( ( texture == null ) ? 0 : texture.hashCode( ) );
+        return Objects.hashCode( texture );
     }
 
     @Override
@@ -73,7 +75,6 @@ public class TextureUnit<D extends Texture>
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
         TextureUnit<?> other = ( TextureUnit<?> ) obj;
-        if ( texture == null ) return other.texture == null;
-        return texture.equals( other.texture );
+        return Objects.equals( texture, other.texture );
     }
 }

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.animate;
 
+import java.util.Objects;
+
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D;
@@ -101,8 +103,8 @@ public class DragInfo
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( info == null ) ? 0 : info.hashCode( ) );
-        result = prime * result + ( top ? 1231 : 1237 );
+        result = prime * result + Objects.hashCode( info );
+        result = prime * result + Boolean.hashCode( top );
         return result;
     }
 
@@ -113,11 +115,7 @@ public class DragInfo
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
         DragInfo other = ( DragInfo ) obj;
-        if ( info == null )
-        {
-            if ( other.info != null ) return false;
-        }
-        else if ( !info.equals( other.info ) ) return false;
+        if ( !Objects.equals( info, other.info ) ) return false;
         if ( top != other.top ) return false;
         return true;
     }

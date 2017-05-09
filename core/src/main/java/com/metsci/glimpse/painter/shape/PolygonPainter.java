@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -1434,8 +1435,8 @@ public class PolygonPainter extends GlimpsePainterBase
             final int prime = 31;
             int result = 1;
             result = prime * result + getOuterType( ).hashCode( );
-            result = prime * result + ( ( groupId == null ) ? 0 : groupId.hashCode( ) );
-            result = prime * result + ( ( polygonId == null ) ? 0 : polygonId.hashCode( ) );
+            result = prime * result + Objects.hashCode( groupId );
+            result = prime * result + Objects.hashCode( polygonId );
             return result;
         }
 
@@ -1447,16 +1448,8 @@ public class PolygonPainter extends GlimpsePainterBase
             if ( getClass( ) != obj.getClass( ) ) return false;
             IdPolygon other = ( IdPolygon ) obj;
             if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
-            if ( groupId == null )
-            {
-                if ( other.groupId != null ) return false;
-            }
-            else if ( !groupId.equals( other.groupId ) ) return false;
-            if ( polygonId == null )
-            {
-                if ( other.polygonId != null ) return false;
-            }
-            else if ( !polygonId.equals( other.polygonId ) ) return false;
+            if ( !Objects.equals( groupId, other.groupId ) ) return false;
+            if ( !Objects.equals( polygonId, other.polygonId ) ) return false;
             return true;
         }
 
@@ -1994,7 +1987,7 @@ public class PolygonPainter extends GlimpsePainterBase
             final int prime = 31;
             int result = 1;
             result = prime * result + getOuterType( ).hashCode( );
-            result = prime * result + ( ( groupId == null ) ? 0 : groupId.hashCode( ) );
+            result = prime * result + Objects.hashCode( groupId );
             return result;
         }
 
@@ -2006,12 +1999,7 @@ public class PolygonPainter extends GlimpsePainterBase
             if ( getClass( ) != obj.getClass( ) ) return false;
             Group other = ( Group ) obj;
             if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
-            if ( groupId == null )
-            {
-                if ( other.groupId != null ) return false;
-            }
-            else if ( !groupId.equals( other.groupId ) ) return false;
-            return true;
+            return Objects.equals( groupId, other.groupId );
         }
 
         private PolygonPainter getOuterType( )
