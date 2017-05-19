@@ -190,11 +190,24 @@ public class FrameUtils
      */
     public static void centerFrame( Frame frame, double screenExtentFraction )
     {
+        centerFrame( frame, screenFracSize( screenExtentFraction ) );
+    }
+
+    public static Dimension screenFracSize( double screenFrac )
+    {
         Rectangle maxWindowBounds = GraphicsEnvironment.getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
-        float frac = ( float ) screenExtentFraction;
-        int width = round( frac * maxWindowBounds.width );
-        int height = round( frac * maxWindowBounds.height );
-        centerFrame( frame, width, height );
+        int width = ( int ) round( screenFrac * maxWindowBounds.width );
+        int height = ( int ) round( screenFrac * maxWindowBounds.height );
+        return new Dimension( width, height );
+    }
+
+    /**
+     * Size the frame, and center it on the screen (usually the screen of the primary monitor,
+     * but may vary based on the platform's window manager). Does not make the frame visible.
+     */
+    public static void centerFrame( Frame frame, Dimension size )
+    {
+        centerFrame( frame, size.width, size.height );
     }
 
     /**
