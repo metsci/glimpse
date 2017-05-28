@@ -68,6 +68,16 @@ public abstract class MouseWrapper<I>
         return result;
     }
 
+    public void dispose( )
+    {
+        this.dragHoveredSet.clear( );
+        this.hoveredSet.clear( );
+
+        this.dragHoveredSet = null;
+        this.hoveredSet = null;
+        this.canvas = null;
+    }
+
     protected GlimpseCanvas getCanvas( )
     {
         return this.canvas;

@@ -78,6 +78,7 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     protected GLCapabilities glCapabilities;
     protected GLJPanel glCanvas;
     protected GLAutoDrawable glDrawable;
+    protected GLEventListener glListener;
 
     protected LayoutManager layoutManager;
     protected MouseWrapperSwing mouseHelper;
@@ -167,7 +168,8 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
 
         this.isDestroyed = false;
 
-        this.glCanvas.addGLEventListener( createGLEventListener( ) );
+        this.glListener = createGLEventListener( );
+        this.glCanvas.addGLEventListener( this.glListener );
 
         this.disposeListeners = new CopyOnWriteArrayList<GLRunnable>( );
     }
@@ -437,8 +439,20 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     @Override
     public void dispose( )
     {
-        disposeAttached( );
-        destroy( );
+        // Stop the animator so that disposeAttached runs immediately in this thread
+        // instead of on the animator thread. If this is not the case, then destroy( )
+        // could run first and then the getGLDrawable( ).invoke( ) call will do nothing
+        // because the window is already destroyed
+        this.getGLDrawable( ).setAnimator( null );
+
+        this.removeMouseListener( this.mouseHelper );
+        this.removeMouseMotionListener( this.mouseHelper );
+        this.removeMouseWheelListener( this.mouseHelper );
+        this.glCanvas.removeGLEventListener( this.glListener );
+        this.mouseHelper.dispose( );
+
+        this.disposeAttached( );
+        this.destroy( );
     }
 
     @Override

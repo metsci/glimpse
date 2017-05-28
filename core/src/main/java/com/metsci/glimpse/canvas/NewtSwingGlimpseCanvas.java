@@ -81,6 +81,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     protected LayoutManager layoutManager;
     protected MouseWrapperNewt mouseHelper;
+    protected GLEventListener glListener;
 
     protected List<GLRunnable> disposeListeners;
 
@@ -127,7 +128,8 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
         this.glWindow = createGLWindow( glCapabilities );
         if ( context != null ) this.glWindow.setSharedContext( context );
-        this.glWindow.addGLEventListener( createGLEventListener( ) );
+        this.glListener = createGLEventListener( );
+        this.glWindow.addGLEventListener( this.glListener );
 
         this.mouseHelper = createMouseWrapper( );
         this.glWindow.addMouseListener( this.mouseHelper );
@@ -377,8 +379,18 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     @Override
     public void dispose( )
     {
-        disposeAttached( );
-        destroy( );
+        // Stop the animator so that disposeAttached runs immediately in this thread
+        // instead of on the animator thread. If this is not the case, then destroy( )
+        // could run first and then the getGLDrawable( ).invoke( ) call will do nothing
+        // because the window is already destroyed
+        this.getGLDrawable( ).setAnimator( null );
+
+        this.glWindow.removeMouseListener( this.mouseHelper );
+        this.glWindow.removeGLEventListener( this.glListener );
+        this.mouseHelper.dispose( );
+
+        this.disposeAttached( );
+        this.destroy( );
     }
 
     @Override
@@ -389,6 +401,8 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             @Override
             public boolean run( GLAutoDrawable drawable )
             {
+                System.out.println( "dispose" );
+
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.dispose( getGlimpseContext( ) );
