@@ -133,6 +133,28 @@ public class FrameUtils
     }
 
     /**
+     * WindowListeners are normally run in the order that Window.addWindowListener was called. This
+     * helper method inserts a WindowListener at the front of the list of listeners by removing all
+     * the existing listeners, inserting the new listener, and re-adding all the other listener in order.
+     */
+    public static void addWindowListenerFirst( Window window, WindowListener firstListener )
+    {
+        WindowListener[] listeners = window.getWindowListeners( );
+
+        for ( WindowListener listener : listeners )
+        {
+            window.removeWindowListener( listener );
+        }
+
+        window.addWindowListener( firstListener );
+
+        for ( WindowListener listener : listeners )
+        {
+            window.addWindowListener( listener );
+        }
+    }
+
+    /**
      * Size the frame, center it, and make it visible.
      *
      * The frame is sized to take up 85% of available horizontal and vertical space.
