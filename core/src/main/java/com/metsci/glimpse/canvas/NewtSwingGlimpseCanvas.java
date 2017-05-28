@@ -396,8 +396,6 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
             @Override
             public boolean run( GLAutoDrawable drawable )
             {
-                System.out.println( "dispose" );
-
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
                     layout.dispose( getGlimpseContext( ) );
