@@ -139,6 +139,7 @@ public class QuickUtils
         animator.start( );
 
         JFrame frame = new JFrame( );
+        frame.setTitle( progName );
         frame.getContentPane( ).add( canvas );
         frame.setSize( screenFracSize( screenFrac ) );
         frame.setLocationRelativeTo( null );
