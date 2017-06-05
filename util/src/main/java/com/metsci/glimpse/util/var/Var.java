@@ -2,6 +2,7 @@ package com.metsci.glimpse.util.var;
 
 import static com.google.common.base.Objects.*;
 import static com.metsci.glimpse.util.PredicateUtils.*;
+import static com.metsci.glimpse.util.var.InlineDispatcher.*;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -77,20 +78,30 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     public V update( Function<? super V,? extends V> updateFn )
     {
-        return this.update( false, updateFn );
+        return this.update( inlineDispatcher, false, updateFn );
     }
 
     public V update( boolean ongoing, Function<? super V,? extends V> updateFn )
     {
-        return this.set( ongoing, updateFn.apply( this.value ) );
+        return this.update( inlineDispatcher, ongoing, updateFn );
+    }
+
+    public V update( Dispatcher dispatcher, boolean ongoing, Function<? super V,? extends V> updateFn )
+    {
+        return this.set( dispatcher, ongoing, updateFn.apply( this.value ) );
     }
 
     public V set( V value )
     {
-        return this.set( false, value );
+        return this.set( inlineDispatcher, false, value );
     }
 
     public V set( boolean ongoing, V value )
+    {
+        return this.set( inlineDispatcher, ongoing, value );
+    }
+
+    public V set( Dispatcher dispatcher, boolean ongoing, V value )
     {
         // Update if value has changed, or if changes were previously ongoing but no longer are
         if ( ( !ongoing && this.ongoing ) || !equal( value, this.value ) )
@@ -98,7 +109,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
             Var<V> root = this.root( );
             root.requireValidForSubtree( value );
             root.setForSubtree( ongoing, value );
-            root.fireForSubtree( new VarEvent( ongoing ) );
+            dispatcher.fireForSubtree( root, new VarEvent( ongoing ) );
         }
         return this.value;
     }
