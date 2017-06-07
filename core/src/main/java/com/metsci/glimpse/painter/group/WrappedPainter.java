@@ -185,10 +185,15 @@ public class WrappedPainter extends GlimpsePainterBase
         {
             GL3 gl = context.getGL( ).getGL3( );
 
+            // copy axis settings, including locked status, mouse coords, etc.
+            this.dummyAxis.setParent( axis );
+            this.dummyAxis.setParent( null );
+
             // when we draw offscreen, do so in "wrapped coordinates" (if the wrapped axis is
             // bounded from 0 to 10, it should be because that is the domain that the painters
             // are set up to draw in)
             this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
+
             this.dummyAxis.validate( );
 
             if ( this.fbo.getWidth( ) < boundsX.getTextureSize( ) || this.fbo.getHeight( ) < boundsY.getTextureSize( ) )
