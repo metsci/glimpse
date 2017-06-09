@@ -31,6 +31,7 @@ import com.metsci.glimpse.wizard.WizardErrorType;
 import com.metsci.glimpse.wizard.WizardPage;
 import com.metsci.glimpse.wizard.WizardUI;
 import com.metsci.glimpse.wizard.error.ErrorPopupPanel;
+import com.metsci.glimpse.wizard.listener.PageModelListener;
 
 public class WizardUITree<D> implements WizardUI<D>
 {
@@ -52,6 +53,8 @@ public class WizardUITree<D> implements WizardUI<D>
     protected ErrorPopupPanel<D> errorPopup;
 
     protected Wizard<D> wizard;
+    
+    protected PageModelListener modelListener;
 
     public WizardUITree( )
     {
@@ -154,6 +157,24 @@ public class WizardUITree<D> implements WizardUI<D>
         this.templateContainer.add( new JSeparator( SwingConstants.HORIZONTAL ), BorderLayout.SOUTH );
 
         this.updatePageTree( );
+        
+        // update the UI when new pages are added
+        this.modelListener = new PageModelListener( )
+        {
+            @Override
+            public void onPagesRemoved( Collection<Object> removedPageIds )
+            {
+                SwingUtilities.invokeLater( WizardUITree.this::updatePageTree );
+            }
+            
+            @Override
+            public void onPagesAdded( Collection<Object> addedPageIds )
+            {
+                SwingUtilities.invokeLater( WizardUITree.this::updatePageTree );
+            }
+        };
+        
+        this.wizard.getPageModel( ).addListener( this.modelListener );
     }
 
     @Override
@@ -176,13 +197,16 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public void dispose( )
     {
-        // TODO Auto-generated method stub
+        this.wizard.getPageModel( ).addListener( this.modelListener );
     }
 
     protected void updatePageTree( )
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
+        try
+        {
+        
         this.model.removeAllElements( );
 
         for ( WizardPage<D> page : this.wizard.getPageModel( ).getPages( ) )
@@ -202,6 +226,12 @@ public class WizardUITree<D> implements WizardUI<D>
 
         this.getContainer( ).revalidate( );
         this.getContainer( ).repaint( );
+        
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace( );
+        }
     }
 
     protected void updateErrorButton( final WizardPage<D> page )

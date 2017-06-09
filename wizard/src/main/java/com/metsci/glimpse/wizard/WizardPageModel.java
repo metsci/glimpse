@@ -3,6 +3,8 @@ package com.metsci.glimpse.wizard;
 import java.util.Collection;
 import java.util.List;
 
+import com.metsci.glimpse.wizard.listener.PageModelListener;
+
 /**
  * Interface representing the data model for a {@link Wizard}.
  * This model tracks all the {@link WizardPage}s for the Wizard and controls
@@ -51,6 +53,10 @@ public interface WizardPageModel<D>
      */
     public Collection<WizardPage<D>> getPages( );
 
+    public void addListener( PageModelListener listener );
+    
+    public void removeListener( PageModelListener listener );
+    
     /**
      * Dispose this model and call {@link WizardPage#dispose()} on all pages in the model.
      */

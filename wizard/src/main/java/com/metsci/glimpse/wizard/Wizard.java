@@ -35,26 +35,23 @@ public class Wizard<D>
     protected List<Runnable> errorListeners;
     protected List<WizardValidator<D>> validators;
     
-    public Wizard( )
+    public Wizard( WizardPageModelTree<D> model, WizardUITree<D> ui )
     {
         this.errorListeners = new CopyOnWriteArrayList<>( );
         this.validators = new CopyOnWriteArrayList<>( );
         
-        this.setUI( new WizardUITree<>( ) );
-        this.setModel( new WizardPageModelTree<>( ) );
-
-    }
-    
-    public void setUI( WizardUI<D> ui )
-    {
-        this.ui = ui;
-        ui.setWizard( this );
-    }
-    
-    public void setModel( WizardPageModel<D> model )
-    {
+        this.pageHistory = new LinkedList<>( );
+        
         this.model = model;
-        model.setWizard( this );
+        this.ui = ui;
+        
+        this.ui.setWizard( this );
+        this.model.setWizard( this );
+    }
+    
+    public Wizard( )
+    {
+        this( new WizardPageModelTree<>( ), new WizardUITree<>( ) );
     }
     
     public WizardPage<D> visitPreviousPage( )

@@ -1,14 +1,18 @@
 package com.metsci.glimpse.wizard.tree;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardPage;
 import com.metsci.glimpse.wizard.WizardPageModel;
+import com.metsci.glimpse.wizard.listener.PageModelListener;
 
 public class WizardPageModelTree<D> implements WizardPageModel<D>
 {
@@ -18,21 +22,41 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     // a map for looking up pages by their unique id
     protected Map<Object, WizardTreeNode<D>> pageMap;
 
+    protected List<PageModelListener> listeners;
+
+    
     protected Wizard<D> wizard;
     
+    
+
     public WizardPageModelTree( )
     {
         this.pageTreeRoot = new WizardTreeNode<D>( null );
         this.pageMap = new HashMap<>( );
+        this.listeners = new CopyOnWriteArrayList<>( );
+
     }
     
+    @Override
+    public void addListener( PageModelListener listener )
+    {
+        this.listeners.add( listener );
+
+    }
+    
+    @Override
+    public void removeListener( PageModelListener listener )
+    {
+        this.listeners.remove( listener );
+    }
+    
+
     @Override
     public void setWizard( Wizard<D> wizard )
     {
         this.wizard = wizard;
     }
-    
-    
+
     /**
      * Add a page to the model.
      * <p>
@@ -59,7 +83,7 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
 
         this.pageMap.put( page.getId( ), childNode );
     }
-    
+
     public void addPage( WizardPage<D> page )
     {
         WizardTreeNode<D> childNode = new WizardTreeNode<>( page );
@@ -76,20 +100,27 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
         }
 
         this.pageMap.put( page.getId( ), childNode );
+        
+        this.firePagesAdded( Collections.singleton( page.getId( ) ) );
     }
-    
+
     public void removePage( WizardPage<D> page )
     {
         removePage( page.getId( ) );
     }
-    
+
     public void removePage( Object pageId )
     {
         WizardTreeNode<D> node = this.getNode( pageId );
 
-        node.removeFromParent( );
-
-        this.pageMap.remove( pageId );
+        if ( node != null )
+        {
+            node.removeFromParent( );
+    
+            this.pageMap.remove( pageId );
+            
+            this.firePagesRemoved( Collections.singleton( pageId ) );
+        }
     }
 
     public WizardTreeNode<D> getNode( WizardPage<D> page )
@@ -105,9 +136,10 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     @Override
     public WizardPage<D> getPage( Object id )
     {
-        return this.pageMap.get( id ).getPage( );
+        WizardTreeNode<D> node = this.pageMap.get( id );
+        return node == null ? null : node.getPage( );
     }
-    
+
     @Override
     public WizardPage<D> getNextPage( List<Object> visitHistory, D data )
     {
@@ -145,19 +177,18 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
 
         return list;
     }
-    
+
     public WizardTreeNode<D> getPageTree( )
     {
         return this.pageTreeRoot;
     }
 
-    
     protected WizardPage<D> getCurrentPage( List<Object> path )
     {
         WizardTreeNode<D> currentNode = this.getCurrentNode( path );
         return currentNode.getPage( );
     }
-    
+
     protected WizardTreeNode<D> getCurrentNode( List<Object> path )
     {
         if ( !path.isEmpty( ) )
@@ -170,7 +201,7 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
             return this.pageTreeRoot;
         }
     }
-    
+
     @SuppressWarnings( "unchecked" )
     protected WizardPage<D> getNextPage( Enumeration<?> enumeration )
     {
@@ -182,6 +213,22 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
         else
         {
             return null;
+        }
+    }
+    
+    protected void firePagesAdded( Collection<Object> pageIds )
+    {
+        for ( PageModelListener listener : this.listeners )
+        {
+            listener.onPagesAdded( pageIds );
+        }
+    }
+    
+    protected void firePagesRemoved( Collection<Object> pageIds )
+    {
+        for ( PageModelListener listener : this.listeners )
+        {
+            listener.onPagesRemoved( pageIds );
         }
     }
 }
