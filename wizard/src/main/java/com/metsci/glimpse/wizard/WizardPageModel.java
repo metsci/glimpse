@@ -1,6 +1,7 @@
 package com.metsci.glimpse.wizard;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.metsci.glimpse.wizard.listener.PageModelListener;
@@ -42,11 +43,11 @@ public interface WizardPageModel<D>
      * This decision can depend on the history of pages visited thus far, as well as
      * the current value of the Wizard data.
      * 
-     * @param path the history of page ids dor pages visited thus far
+     * @param visitHistory the sequence of pages visited thus far, ending in the current page
      * @param data the wizard data
      * @return the next page to visit
      */
-    public WizardPage<D> getNextPage( List<Object> visitHistory, D data );
+    public WizardPage<D> getNextPage( LinkedList<WizardPage<D>> visitHistory, D data );
 
     /**
      * Returns all the pages in the model.

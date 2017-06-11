@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -84,6 +85,7 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
         this.pageMap.put( page.getId( ), childNode );
     }
 
+    @Override
     public void addPage( WizardPage<D> page )
     {
         WizardTreeNode<D> childNode = new WizardTreeNode<>( page );
@@ -106,7 +108,7 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
 
     public void removePage( WizardPage<D> page )
     {
-        removePage( page.getId( ) );
+        this.removePage( page.getId( ) );
     }
 
     public void removePage( Object pageId )
@@ -141,7 +143,7 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     }
 
     @Override
-    public WizardPage<D> getNextPage( List<Object> visitHistory, D data )
+    public WizardPage<D> getNextPage( LinkedList<WizardPage<D>> visitHistory, D data )
     {
         WizardPage<D> currentPage = this.getCurrentPage( visitHistory );
 
@@ -183,10 +185,9 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
         return this.pageTreeRoot;
     }
 
-    protected WizardPage<D> getCurrentPage( List<Object> path )
+    protected WizardPage<D> getCurrentPage( LinkedList<WizardPage<D>> path )
     {
-        WizardTreeNode<D> currentNode = this.getCurrentNode( path );
-        return currentNode.getPage( );
+        return path.isEmpty( ) ? null : path.getLast( );
     }
 
     protected WizardTreeNode<D> getCurrentNode( List<Object> path )

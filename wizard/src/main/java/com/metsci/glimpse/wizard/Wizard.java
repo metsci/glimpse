@@ -1,7 +1,5 @@
 package com.metsci.glimpse.wizard;
 
-import static java.util.Collections.unmodifiableList;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,6 +10,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Multimap;
+import com.metsci.glimpse.wizard.listener.ErrorsUpdatedListener;
+import com.metsci.glimpse.wizard.listener.PageEnteredListener;
+import com.metsci.glimpse.wizard.listener.PageExitedListener;
+import com.metsci.glimpse.wizard.listener.WizardCancelledListener;
+import com.metsci.glimpse.wizard.listener.WizardFinishedListener;
 import com.metsci.glimpse.wizard.tree.WizardPageModelTree;
 import com.metsci.glimpse.wizard.tree.WizardUITree;
 
@@ -32,14 +35,20 @@ public class Wizard<D>
     protected WizardUI<D> ui;
     protected WizardPageModel<D> model;
     
-    protected List<Runnable> errorListeners;
-    protected List<WizardValidator<D>> validators;
-    
+    protected List<ErrorsUpdatedListener> errorListeners;
+    protected List<PageEnteredListener<D>> pageEnterListeners;
+    protected List<PageExitedListener<D>> pageExitListeners;
+    protected List<WizardCancelledListener> cancelledListeners;
+    protected List<WizardFinishedListener> finishedListeners;
+
     public Wizard( WizardPageModelTree<D> model, WizardUITree<D> ui )
     {
         this.errorListeners = new CopyOnWriteArrayList<>( );
-        this.validators = new CopyOnWriteArrayList<>( );
-        
+        this.pageEnterListeners = new CopyOnWriteArrayList<>( );
+        this.pageExitListeners = new CopyOnWriteArrayList<>( );
+        this.cancelledListeners = new CopyOnWriteArrayList<>( );
+        this.finishedListeners = new CopyOnWriteArrayList<>( );
+
         this.pageHistory = new LinkedList<>( );
         
         this.model = model;
@@ -52,6 +61,21 @@ public class Wizard<D>
     public Wizard( )
     {
         this( new WizardPageModelTree<>( ), new WizardUITree<>( ) );
+    }
+    
+    public void finish( )
+    {
+        this.fireFinished( );
+    }
+    
+    public void cancel( )
+    {
+        this.fireCancelled( );
+    }
+    
+    public D getData( )
+    {
+        return this.data;
     }
     
     public WizardPage<D> visitPreviousPage( )
@@ -67,7 +91,7 @@ public class Wizard<D>
     public WizardPage<D> visitNextPage( )
     {
         this.doLeavePage( this.getCurrentPage( ) );
-        WizardPage<D> nextPage = this.model.getNextPage( unmodifiableList( this.pageHistory ), this.data );
+        WizardPage<D> nextPage = this.model.getNextPage( this.getPageHistory( ), this.data );
         this.pageHistory.add( nextPage.getId( ) );
         this.doEnterPage( nextPage );
 
@@ -85,48 +109,26 @@ public class Wizard<D>
 
     protected void doLeavePage( WizardPage<D> currentPage )
     {
-        /*
         // save the settings for the current page
         if ( currentPage != null )
         {
-            this.savePageSettings( currentPage );
-
-            currentPage.onLeave( );
-            this.firePageLeave( currentPage );
+            this.updateData( currentPage );
+            this.firePageExited( currentPage );
         }
-        */
     }
 
     protected void doEnterPage( WizardPage<D> page )
     {
-        /*
         this.isVisited.add( page.getId( ) );
 
         // update the page fields with the settings
         page.setData( this.data );
 
-        // run save page settings to generate errors
-        // (this call should not actually modify the settings as none of the page
-        // controls have changed since the previous call)
-        this.savePageSettings( page );
+        // update errors for the page
+        this.setErrors( page );
 
         // update the display to reflect the new page
-        page.onEnter( );
-        this.firePageEnter( page );
-
-        // if there is no history, disable the ability to move backward
-        this.prevAction.setEnabled( this.pageHistory.size( ) > 1 );
-        // if there is a valid next page, enable the next action
-        this.nextAction.setEnabled( this.pageFactory.getNextPage( this.pageHistory, this.settings ) != null );
-
-        this.getContainer( ).revalidate( );
-        this.getContainer( ).repaint( );
-        */
-    }
-    
-    public void addValidator( WizardValidator<D> validator )
-    {
-        this.validators.add( validator );
+        this.firePageEntered( page );
     }
     
     /**
@@ -147,14 +149,54 @@ public class Wizard<D>
     /**
      * Add a listener which is notified when the wizard errors change.
      */
-    public void addErrorListener( Runnable listener )
+    public void addErrorsUpdatedListener( ErrorsUpdatedListener listener )
     {
         this.errorListeners.add( listener );
     }
     
-    public void removeErrorListener( Runnable listener )
+    public void removeErrorsUpdatedListener( ErrorsUpdatedListener listener )
     {
         this.errorListeners.remove( listener );
+    }
+    
+    public void addPageEnteredListener( PageEnteredListener<D> listener )
+    {
+        this.pageEnterListeners.add( listener );
+    }
+    
+    public void removePageEnteredListener( PageEnteredListener<D> listener )
+    {
+        this.pageEnterListeners.remove( listener );
+    }
+    
+    public void addPageExitedListener( PageExitedListener<D> listener )
+    {
+        this.pageExitListeners.add( listener );
+    }
+    
+    public void removePageExitedListener( PageExitedListener<D> listener )
+    {
+        this.pageExitListeners.remove( listener );
+    }
+    
+    public void addCancelledListener( WizardCancelledListener listener )
+    {
+        this.cancelledListeners.add( listener );
+    }
+    
+    public void removeCancelledListener( WizardCancelledListener listener )
+    {
+        this.cancelledListeners.remove( listener );
+    }
+    
+    public void addFinishedListener( WizardFinishedListener listener )
+    {
+        this.finishedListeners.add( listener );
+    }
+    
+    public void removeFinishedListener( WizardCancelledListener listener )
+    {
+        this.finishedListeners.remove( listener );
     }
     
     public WizardPageModel<D> getPageModel( )
@@ -170,14 +212,14 @@ public class Wizard<D>
     public Collection<WizardError> getErrors( )
     {
         // only return errors pertaining to visited pages
-        return errors.values( ).stream( )
+        return this.errors.values( ).stream( )
                 .filter( error -> error.getPageId( ) == null || this.isVisited.contains( error.getPageId( ) ) )
                 .collect( Collectors.toList( ) );
     }
 
     public Collection<WizardError> getErrors( WizardPage<D> page )
     {
-        return getErrors( page.getId( ) );
+        return this.getErrors( page.getId( ) );
     }
     
     public Collection<WizardError> getErrors( Object id )
@@ -228,16 +270,78 @@ public class Wizard<D>
         this.fireErrorsUpdated( );
     }
     
+    public LinkedList<WizardPage<D>> getPageHistory( )
+    {
+        return new LinkedList<>( this.pageHistory
+                .stream( )
+                .map( this.model::getPage )
+                .collect( Collectors.toList( ) ) );
+    }
+    
     protected void addError0( WizardError error )
     {
         this.errors.put( error.getPageId( ), error );
     }
     
+    protected void updateData( WizardPage<D> page )
+    {
+        if ( this.isVisited( page.getId( ) ) )
+        {
+            this.data = page.updateData( this.data );
+        }
+    }
+    
+    protected void setErrors( WizardPage<D> page )
+    {
+        if ( this.isVisited( page.getId( ) ) )
+        {
+            Collection<WizardError> pageErrors = page.getErrors( );
+            this.errors.replaceValues( page.getId( ), pageErrors );
+        }
+    }
+    
+    protected boolean isVisited( Object pageId )
+    {
+        return this.isVisited.contains( pageId );
+    }
+    
     protected void fireErrorsUpdated( )
     {
-        for ( Runnable listener : this.errorListeners )
+        for ( ErrorsUpdatedListener listener : this.errorListeners )
         {
-            listener.run( );
+            listener.onErrorsUpdated( );
+        }
+    }
+    
+    protected void firePageEntered( WizardPage<D> page )
+    {
+        for ( PageEnteredListener<D> listener : this.pageEnterListeners )
+        {
+            listener.onPageEntered( page );
+        }
+    }
+    
+    protected void firePageExited( WizardPage<D> page )
+    {
+        for ( PageExitedListener<D> listener : this.pageExitListeners )
+        {
+            listener.onPageExited( page );
+        }
+    }
+    
+    protected void fireFinished( )
+    {
+        for ( WizardFinishedListener listener : this.finishedListeners )
+        {
+            listener.finished( );
+        }
+    }
+    
+    protected void fireCancelled( )
+    {
+        for ( WizardCancelledListener listener : this.cancelledListeners )
+        {
+            listener.cancelled( );
         }
     }
 }
