@@ -2,6 +2,7 @@ package com.metsci.glimpse.wizard.page;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.UUID;
 
 import javax.swing.JSeparator;
 import javax.swing.JTextPane;
@@ -15,7 +16,12 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
 
     public DescriptionWizardPage( Object parentId, String title, String descriptionFile )
     {
-        super( parentId, title );
+        this( UUID.randomUUID( ), parentId, title, descriptionFile );
+    }
+    
+    public DescriptionWizardPage( Object id, Object parentId, String title, String descriptionFile )
+    {
+        super( id, parentId, title );
 
         this.descriptionFile = descriptionFile;
         this.container.setLayout( new MigLayout( ) );
@@ -24,7 +30,7 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         descriptionArea.setEditable( false );
         descriptionArea.setOpaque( false );
 
-        URL url = getClass( ).getClassLoader( ).getResource( descriptionFile );
+        URL url = this.getClass( ).getClassLoader( ).getResource( descriptionFile );
         try
         {
             descriptionArea.setPage( url );

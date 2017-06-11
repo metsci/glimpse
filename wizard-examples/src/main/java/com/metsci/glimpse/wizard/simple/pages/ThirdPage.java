@@ -9,11 +9,11 @@ import javax.swing.JLabel;
 import com.metsci.glimpse.wizard.WizardError;
 import com.metsci.glimpse.wizard.page.DescriptionWizardPage;
 
-public class FirstPage extends DescriptionWizardPage<Map<String, Object>>
+public class ThirdPage extends DescriptionWizardPage<Map<String, Object>>
 {
-    public FirstPage( )
+    public ThirdPage( )
     {
-        super( "first-page-id", null, "First Page", "descriptions/Example1.html" );
+        super( null, "Third Page", "descriptions/Example1.html" );
         
         this.container.add( new JLabel( "Label" ) );
     }

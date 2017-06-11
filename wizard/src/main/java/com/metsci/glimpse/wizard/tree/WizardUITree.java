@@ -123,34 +123,6 @@ public class WizardUITree<D> implements WizardUI<D>
     public void setWizard( Wizard<D> wizard )
     {
         this.wizard = wizard;
-
-        final JButton prevBtn = new JButton( this.prevAction );
-        final JButton nextBtn = new JButton( this.nextAction );
-        final JButton finishBtn = new JButton( this.finishAction );
-        final JButton cancelBtn = new JButton( this.cancelAction );
-
-        this.extraButtonPanel = new JPanel( );
-        this.extraButtonPanel.setLayout( new BoxLayout( this.extraButtonPanel, BoxLayout.LINE_AXIS ) );
-
-        this.buttonPanel = new JPanel( );
-        this.buttonPanel.setLayout( new BoxLayout( this.buttonPanel, BoxLayout.LINE_AXIS ) );
-        this.buttonPanel.add( this.extraButtonPanel );
-        this.buttonPanel.add( Box.createHorizontalGlue( ) );
-        this.buttonPanel.add( prevBtn );
-        this.buttonPanel.add( Box.createHorizontalStrut( 5 ) );
-        this.buttonPanel.add( nextBtn );
-        this.buttonPanel.add( Box.createHorizontalStrut( 10 ) );
-        this.buttonPanel.add( finishBtn );
-        this.buttonPanel.add( Box.createHorizontalStrut( 10 ) );
-        this.buttonPanel.add( cancelBtn );
-
-        this.buttonPanel.setBorder( BorderFactory.createEmptyBorder( 5, 15, 5, 15 ) );
-
-        this.outerPanel = new JPanel( );
-        this.outerPanel.setLayout( new BorderLayout( ) );
-
-        this.outerPanel.add( this.pageContainer, BorderLayout.CENTER );
-        this.outerPanel.add( this.buttonPanel, BorderLayout.SOUTH );
         
         this.errorButton = new JLabel( );
 
@@ -242,6 +214,34 @@ public class WizardUITree<D> implements WizardUI<D>
         this.templateContainer.add( splitPane, BorderLayout.CENTER );
         this.templateContainer.add( new JSeparator( SwingConstants.HORIZONTAL ), BorderLayout.SOUTH );
 
+        final JButton prevBtn = new JButton( this.prevAction );
+        final JButton nextBtn = new JButton( this.nextAction );
+        final JButton finishBtn = new JButton( this.finishAction );
+        final JButton cancelBtn = new JButton( this.cancelAction );
+
+        this.extraButtonPanel = new JPanel( );
+        this.extraButtonPanel.setLayout( new BoxLayout( this.extraButtonPanel, BoxLayout.LINE_AXIS ) );
+
+        this.buttonPanel = new JPanel( );
+        this.buttonPanel.setLayout( new BoxLayout( this.buttonPanel, BoxLayout.LINE_AXIS ) );
+        this.buttonPanel.add( this.extraButtonPanel );
+        this.buttonPanel.add( Box.createHorizontalGlue( ) );
+        this.buttonPanel.add( prevBtn );
+        this.buttonPanel.add( Box.createHorizontalStrut( 5 ) );
+        this.buttonPanel.add( nextBtn );
+        this.buttonPanel.add( Box.createHorizontalStrut( 10 ) );
+        this.buttonPanel.add( finishBtn );
+        this.buttonPanel.add( Box.createHorizontalStrut( 10 ) );
+        this.buttonPanel.add( cancelBtn );
+
+        this.buttonPanel.setBorder( BorderFactory.createEmptyBorder( 5, 15, 5, 15 ) );
+
+        this.outerPanel = new JPanel( );
+        this.outerPanel.setLayout( new BorderLayout( ) );
+
+        this.outerPanel.add( this.templateContainer, BorderLayout.CENTER );
+        this.outerPanel.add( this.buttonPanel, BorderLayout.SOUTH );
+        
         this.updatePageTree( );
         
         // update the UI when new pages are added
@@ -287,7 +287,7 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public Container getContainer( )
     {
-        return this.templateContainer;
+        return this.outerPanel;
     }
 
     @Override

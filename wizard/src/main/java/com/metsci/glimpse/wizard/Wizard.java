@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.metsci.glimpse.wizard.listener.ErrorsUpdatedListener;
 import com.metsci.glimpse.wizard.listener.PageEnteredListener;
@@ -43,6 +44,8 @@ public class Wizard<D>
 
     public Wizard( WizardPageModelTree<D> model, WizardUITree<D> ui )
     {
+        this.errors = HashMultimap.create( );
+        
         this.errorListeners = new CopyOnWriteArrayList<>( );
         this.pageEnterListeners = new CopyOnWriteArrayList<>( );
         this.pageExitListeners = new CopyOnWriteArrayList<>( );
@@ -126,6 +129,9 @@ public class Wizard<D>
 
         // update errors for the page
         this.setErrors( page );
+        
+        // have the UI show the page
+        this.ui.show( page );
 
         // update the display to reflect the new page
         this.firePageEntered( page );
