@@ -284,6 +284,12 @@ public class Wizard<D>
                 .collect( Collectors.toList( ) ) );
     }
     
+    public void dispose( )
+    {
+        this.model.dispose( );
+        this.ui.dispose( );
+    }
+    
     protected void addError0( WizardError error )
     {
         this.errors.put( error.getPageId( ), error );

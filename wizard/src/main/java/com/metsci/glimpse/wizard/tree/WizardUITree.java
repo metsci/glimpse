@@ -116,7 +116,7 @@ public class WizardUITree<D> implements WizardUI<D>
     
     public WizardUITree( )
     {
-
+        
     }
 
     @Override
@@ -250,13 +250,31 @@ public class WizardUITree<D> implements WizardUI<D>
             @Override
             public void onPagesRemoved( Collection<Object> removedPageIds )
             {
-                SwingUtilities.invokeLater( WizardUITree.this::updatePageTree );
+                SwingUtilities.invokeLater( ( ) ->
+                {
+                    for ( Object id : removedPageIds )
+                    {
+                        WizardPage<D> page = wizard.getPageModel( ).getPage( id );
+                        pageContainer.remove( page.getContainter( ) );
+                    }
+                    
+                    updatePageTree( );
+                } );
             }
             
             @Override
             public void onPagesAdded( Collection<Object> addedPageIds )
             {
-                SwingUtilities.invokeLater( WizardUITree.this::updatePageTree );
+                SwingUtilities.invokeLater( ( ) ->
+                {
+                    for ( Object id : addedPageIds )
+                    {
+                        WizardPage<D> page = wizard.getPageModel( ).getPage( id );
+                        pageContainer.add( page.getContainter( ), id.toString( ) );
+                    }
+                    
+                    updatePageTree( );
+                } );
             }
         };
         
@@ -270,14 +288,14 @@ public class WizardUITree<D> implements WizardUI<D>
                 LinkedList<WizardPage<D>> history = wizard.getPageHistory( );
                 
                 // if there is no history, disable the ability to move backward
-                WizardUITree.this.prevAction.setEnabled( history.size( ) > 1 );
+                prevAction.setEnabled( history.size( ) > 1 );
                 // if there is a valid next page, enable the next action
                 WizardPageModel<D> pageModel = wizard.getPageModel( );
                 D data = wizard.getData( );
-                WizardUITree.this.nextAction.setEnabled( pageModel.getNextPage( history, data ) != null );
+                nextAction.setEnabled( pageModel.getNextPage( history, data ) != null );
                 
-                WizardUITree.this.getContainer( ).revalidate( );
-                WizardUITree.this.getContainer( ).repaint( );
+                getContainer( ).revalidate( );
+                getContainer( ).repaint( );
             }
         };
         
@@ -294,7 +312,7 @@ public class WizardUITree<D> implements WizardUI<D>
     public void show( WizardPage<D> page )
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
-
+        
         this.cardLayout.show( this.pageContainer, page.getId( ).toString( ) );
         this.title.setText( this.getFullName( page ) );
         this.updateErrorButton( page );
