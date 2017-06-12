@@ -219,7 +219,7 @@ public abstract class MouseWrapper<I>
         return new LinkedList<GlimpseTargetStack>( dragHoveredSet );
     }
 
-    protected List<GlimpseTargetStack> getDragHovered( )
+    public List<GlimpseTargetStack> getDragHovered( )
     {
         return dragHoveredSet;
     }

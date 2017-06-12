@@ -42,6 +42,7 @@ import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
+import com.metsci.glimpse.event.key.GlimpseKeyListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
@@ -867,6 +868,12 @@ public class Plot2D extends GlimpseAxisLayout2D
     }
 
     @Override
+    public void addGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        this.axisLayoutXY.addGlimpseKeyListener( listener );
+    }
+
+    @Override
     public void removeGlimpseMouseAllListener( GlimpseMouseAllListener listener )
     {
         this.axisLayoutXY.removeGlimpseMouseAllListener( listener );
@@ -888,6 +895,12 @@ public class Plot2D extends GlimpseAxisLayout2D
     public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
         this.axisLayoutXY.removeGlimpseMouseWheelListener( listener );
+    }
+
+    @Override
+    public void removeGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        this.axisLayoutXY.removeGlimpseKeyListener( listener );
     }
 
     @Override
