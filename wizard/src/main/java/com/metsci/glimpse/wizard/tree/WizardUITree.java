@@ -45,7 +45,7 @@ import com.metsci.glimpse.wizard.listener.PageModelListener;
 
 public class WizardUITree<D> implements WizardUI<D>
 {
-    protected static final int NavigationListWidth = 200;
+    protected static final int NavigationListPreferredWidth = 200;
     protected static final int ErrorPopupHeight = 200;
     protected static final int ErrorPopupWidth = Integer.MAX_VALUE;
 
@@ -180,7 +180,7 @@ public class WizardUITree<D> implements WizardUI<D>
         } );
 
         this.sidebarScroll = new JScrollPane( this.sidebar );
-        this.sidebarScroll.setPreferredSize( new Dimension( NavigationListWidth, 0 ) );
+        this.sidebarScroll.setPreferredSize( new Dimension( NavigationListPreferredWidth, 0 ) );
         this.sidebarScroll.setBorder( createCompoundBorder( createEmptyBorder( 5, 5, 2, 5 ), createEtchedBorder( EtchedBorder.LOWERED ) ) );
 
         this.templateContainer = new JPanel( );
