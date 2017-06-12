@@ -135,10 +135,18 @@ public class Wizard<D>
         this.fireDataUpdated( data );
     }
 
-    public void setPageVisited( WizardPage<D> page )
+    public void visitAll( )
     {
-        this.isVisited.add( page.getId( ) );
+        this.getPageModel( ).getPages( ).stream( ).forEach(  p ->
+        {
+            this.isVisited.add( p.getId( ) );
+            Collection<WizardError> pageErrors = p.getErrors( );
+            this.pageErrors.replaceValues( p.getId( ), pageErrors );
+        } );
+        
+        this.fireErrorsUpdated( );
     }
+    
 
     public WizardPage<D> visitPreviousPage( )
     {

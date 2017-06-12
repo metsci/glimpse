@@ -59,7 +59,7 @@ public class WizardUITree<D> implements WizardUI<D>
     protected JPanel templateContainer;
     protected JPanel pageContainer;
     protected CardLayout cardLayout;
-    
+
     protected JPanel outerPanel;
     protected JPanel buttonPanel;
     protected JPanel extraButtonPanel;
@@ -67,7 +67,7 @@ public class WizardUITree<D> implements WizardUI<D>
     protected ErrorPopupPanel<D> errorPopup;
 
     protected Wizard<D> wizard;
-    
+
     protected PageModelListener<D> modelListener;
     protected PageEnteredListener<D> pageEnteredListener;
     protected ErrorsUpdatedListener errorsUpdatedListener;
@@ -115,17 +115,17 @@ public class WizardUITree<D> implements WizardUI<D>
             WizardUITree.this.wizard.cancel( );
         }
     };
-    
+
     public WizardUITree( )
     {
-        
+
     }
 
     @Override
     public void setWizard( Wizard<D> wizard )
     {
         this.wizard = wizard;
-        
+
         this.errorButton = new JLabel( );
 
         this.errorPopup = new ErrorPopupPanel<>( this.wizard, Collections.singleton( this.errorButton ) );
@@ -243,9 +243,9 @@ public class WizardUITree<D> implements WizardUI<D>
 
         this.outerPanel.add( this.templateContainer, BorderLayout.CENTER );
         this.outerPanel.add( this.buttonPanel, BorderLayout.SOUTH );
-        
+
         this.updatePageTree( );
-        
+
         // update the UI when new pages are added
         this.modelListener = new PageModelListener<D>( )
         {
@@ -258,11 +258,11 @@ public class WizardUITree<D> implements WizardUI<D>
                     {
                         pageContainer.remove( page.getContainter( ) );
                     }
-                    
+
                     updatePageTree( );
                 } );
             }
-            
+
             @Override
             public void onPagesAdded( Collection<WizardPage<D>> addedPages )
             {
@@ -272,47 +272,47 @@ public class WizardUITree<D> implements WizardUI<D>
                     {
                         pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
                     }
-                    
+
                     updatePageTree( );
                 } );
             }
         };
-        
+
         this.wizard.getPageModel( ).addListener( this.modelListener );
-        
+
         this.pageEnteredListener = new PageEnteredListener<D>( )
         {
             @Override
             public void onPageEntered( WizardPage<D> page )
             {
                 LinkedList<WizardPage<D>> history = wizard.getPageHistory( );
-                
+
                 // if there is no history, disable the ability to move backward
                 prevAction.setEnabled( history.size( ) > 1 );
                 // if there is a valid next page, enable the next action
                 WizardPageModel<D> pageModel = wizard.getPageModel( );
                 D data = wizard.getData( );
                 nextAction.setEnabled( pageModel.getNextPage( history, data ) != null );
-                
+
                 getContainer( ).revalidate( );
                 getContainer( ).repaint( );
             }
         };
-        
+
         this.wizard.addPageEnteredListener( this.pageEnteredListener );
-        
+
         this.errorsUpdatedListener = new ErrorsUpdatedListener( )
-        {   
+        {
             @Override
             public void onErrorsUpdated( )
             {
                 getContainer( ).revalidate( );
                 getContainer( ).repaint( );
-                
+
                 updateErrorButton( wizard.getCurrentPage( ) );
             }
         };
-        
+
         this.wizard.addErrorsUpdatedListener( this.errorsUpdatedListener );
     }
 
@@ -326,7 +326,7 @@ public class WizardUITree<D> implements WizardUI<D>
     public void show( WizardPage<D> page )
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
-        
+
         this.cardLayout.show( this.pageContainer, page.getId( ).toString( ) );
         this.title.setText( this.getFullName( page ) );
         this.updateErrorButton( page );
@@ -345,9 +345,6 @@ public class WizardUITree<D> implements WizardUI<D>
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
-        try
-        {
-        
         this.model.removeAllElements( );
 
         for ( WizardPage<D> page : this.wizard.getPageModel( ).getPages( ) )
@@ -358,7 +355,7 @@ public class WizardUITree<D> implements WizardUI<D>
         WizardPage<D> selectedPage = this.wizard.getCurrentPage( );
         if ( selectedPage != null )
         {
-            this.sidebar.setSelectedValue( new WizardTreeNode<>( selectedPage ), true );
+            this.sidebar.setSelectedValue( selectedPage, true );
         }
         else
         {
@@ -367,12 +364,6 @@ public class WizardUITree<D> implements WizardUI<D>
 
         this.getContainer( ).revalidate( );
         this.getContainer( ).repaint( );
-        
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace( );
-        }
     }
 
     protected void updateErrorButton( final WizardPage<D> page )
