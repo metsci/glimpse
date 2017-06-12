@@ -45,8 +45,14 @@ public interface WizardPage<D>
      * Update this page to display the provided data.
      * <p>
      * The provided data object should not be modified here.
+     * <p>
+     * The force parameter indicates when the provided data should override user entries in the page's
+     * data entry fields. In some cases, if the user has only entered partial information, that
+     * partial information should remain if the user leaves and re-enters the page. In many use
+     * cases this field can be ignored.
+     * 
      */
-    public void setData( D data );
+    public void setData( D data, boolean force );
 
     /**
      * Update the provided data to reflect the information entered by the user on this page.
@@ -62,4 +68,14 @@ public interface WizardPage<D>
      * @return a collection of problems with the data the user has entered
      */
     public Collection<WizardError> getErrors( );
+    
+    /**
+     * Callback method called by the Wizard when this page is visited.
+     */
+    public void onEnter( );
+    
+    /**
+     * Callback method called by the Wizard when this page stops being visited.
+     */
+    public void onExit( );
 }

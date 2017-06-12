@@ -68,6 +68,18 @@ public abstract class SimpleWizardPage<D> implements WizardPage<D>
     {
         // by default do nothing
     }
+    
+    @Override
+    public void onEnter( )
+    {
+        // by default do nothing
+    }
+    
+    @Override
+    public void onExit( )
+    {
+        // by default do nothing
+    }
 
     @Override
     public int hashCode( )

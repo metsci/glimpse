@@ -19,7 +19,7 @@ public class ChildFirstPage extends DescriptionWizardPage<Map<String, Object>>
     }
 
     @Override
-    public void setData( Map<String, Object> data )
+    public void setData( Map<String, Object> data, boolean force )
     {
         // do nothing
     }
