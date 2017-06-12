@@ -30,7 +30,7 @@ public interface WizardPageModel<D>
     public void addPage( WizardPage<D> page );
     
     public void removePage( WizardPage<D> page );
-    public void removePage( Object id );
+    public void removePageById( Object id );
     
     /**
      * Returns the page with the provided unique identifier.
@@ -38,7 +38,7 @@ public interface WizardPageModel<D>
      * @param id the unique identifier for a page
      * @return the page associated with the provided id
      */
-    public WizardPage<D> getPage( Object id );
+    public WizardPage<D> getPageById( Object id );
 
     /**
      * Returns the next page which should be visited.
@@ -57,9 +57,9 @@ public interface WizardPageModel<D>
      */
     public Collection<WizardPage<D>> getPages( );
 
-    public void addListener( PageModelListener listener );
+    public void addListener( PageModelListener<D> listener );
     
-    public void removeListener( PageModelListener listener );
+    public void removeListener( PageModelListener<D> listener );
     
     /**
      * Dispose this model and call {@link WizardPage#dispose()} on all pages in the model.

@@ -40,7 +40,7 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
 
         while ( page != null )
         {
-            page = model.getPage( page.getParentId( ) );
+            page = model.getPageById( page.getParentId( ) );
             level++;
         }
 

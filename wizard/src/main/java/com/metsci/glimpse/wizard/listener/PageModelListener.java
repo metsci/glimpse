@@ -2,9 +2,11 @@ package com.metsci.glimpse.wizard.listener;
 
 import java.util.Collection;
 
-public interface PageModelListener
+import com.metsci.glimpse.wizard.WizardPage;
+
+public interface PageModelListener<D>
 {
-    public void onPagesAdded( Collection<Object> addedPageIds );
-    public void onPagesRemoved( Collection<Object> removedPageIds );
+    public void onPagesAdded( Collection<WizardPage<D>> addedPages );
+    public void onPagesRemoved( Collection<WizardPage<D>> removedPages );
 
 }

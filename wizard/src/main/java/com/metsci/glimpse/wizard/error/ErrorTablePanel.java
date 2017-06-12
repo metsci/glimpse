@@ -95,7 +95,7 @@ public class ErrorTablePanel<K> extends JPanel
                         WizardError error = model.getError( table.convertRowIndexToModel( row ) );
 
                         Object pageId = error.getPageId( );
-                        WizardPage<K> page = controller.getPageModel( ).getPage( pageId );
+                        WizardPage<K> page = controller.getPageModel( ).getPageById( pageId );
 
                         if ( page != null )
                         {

@@ -94,7 +94,7 @@ public class ErrorTableModel extends AbstractTableModel
                 return error;
             case 1:
                 Object pageId = error.getPageId( );
-                WizardPage<?> page = controller.getPageModel( ).getPage( pageId );
+                WizardPage<?> page = controller.getPageModel( ).getPageById( pageId );
                 return page;
             default:
                 return super.getColumnName( columnIndex );

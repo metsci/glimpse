@@ -72,21 +72,21 @@ public class Wizard<D>
         this.ui.setWizard( this );
         this.model.setWizard( this );
 
-        this.model.addListener( new PageModelListener( )
+        this.model.addListener( new PageModelListener<D>( )
         {
             @Override
-            public void onPagesAdded( Collection<Object> addedPageIds )
+            public void onPagesAdded( Collection<WizardPage<D>> addedPages )
             {
             }
 
             @Override
-            public void onPagesRemoved( Collection<Object> removedPageIds )
+            public void onPagesRemoved( Collection<WizardPage<D>> removedPages )
             {
                 // clear errors for deleted pages
-                for ( Object id : removedPageIds )
+                for ( WizardPage<D> page : removedPages )
                 {
-                    pageErrors.get( id ).clear( );
-                    userErrors.get( id ).clear( );
+                    pageErrors.get( page.getId( ) ).clear( );
+                    userErrors.get( page.getId( ) ).clear( );
                 }
 
                 fireErrorsUpdated( );
@@ -144,7 +144,7 @@ public class Wizard<D>
     {
         this.doLeavePage( this.getCurrentPage( ) );
         this.pageHistory.removeLast( );
-        WizardPage<D> nextPage = this.model.getPage( this.pageHistory.getLast( ) );
+        WizardPage<D> nextPage = this.model.getPageById( this.pageHistory.getLast( ) );
         this.doEnterPage( nextPage );
 
         return nextPage;
@@ -171,6 +171,30 @@ public class Wizard<D>
     }
 
     /**
+     * Update the wizard data based on the state of the current page.
+     */
+    public void updateData( WizardPage<D> page )
+    {
+        this.data = page.updateData( this.data );
+        
+        this.fireDataUpdated( data );
+    }
+
+    /**
+     * Recalculates errors for the provided page.
+     */
+    public void setErrors( WizardPage<D> page )
+    {
+        if ( this.isVisited( page.getId( ) ) )
+        {
+            Collection<WizardError> pageErrors = page.getErrors( );
+            this.pageErrors.replaceValues( page.getId( ), pageErrors );
+
+            this.fireErrorsUpdated( );
+        }
+    }
+    
+    /**
      * @return the currently displayed page
      */
     public WizardPage<D> getCurrentPage( )
@@ -181,7 +205,7 @@ public class Wizard<D>
         }
         else
         {
-            return this.model.getPage( this.pageHistory.getLast( ) );
+            return this.model.getPageById( this.pageHistory.getLast( ) );
         }
     }
 
@@ -328,24 +352,8 @@ public class Wizard<D>
     {
         return new LinkedList<>( this.pageHistory
                 .stream( )
-                .map( this.model::getPage )
+                .map( this.model::getPageById )
                 .collect( Collectors.toList( ) ) );
-    }
-
-    public void updateData( WizardPage<D> page )
-    {
-        this.data = page.updateData( this.data );
-    }
-
-    public void setErrors( WizardPage<D> page )
-    {
-        if ( this.isVisited( page.getId( ) ) )
-        {
-            Collection<WizardError> pageErrors = page.getErrors( );
-            this.pageErrors.replaceValues( page.getId( ), pageErrors );
-
-            this.fireErrorsUpdated( );
-        }
     }
 
     public void dispose( )
@@ -376,6 +384,7 @@ public class Wizard<D>
             this.data = currentPage.updateData( this.data );
             this.fireDataUpdated( data );
             this.firePageExited( currentPage );
+            currentPage.onExit( );
         }
     }
 
@@ -385,13 +394,13 @@ public class Wizard<D>
 
         // update the page fields with the settings
         this.updatePage( page );
-
+        
         // have the UI show the page
         this.ui.show( page );
 
         // notify listeners
-        page.onEnter( );
         this.firePageEntered( page );
+        page.onEnter( );
     }
 
     protected void addError0( WizardError error )

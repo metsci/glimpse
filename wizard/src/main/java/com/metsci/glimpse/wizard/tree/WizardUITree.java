@@ -39,6 +39,7 @@ import com.metsci.glimpse.wizard.WizardPage;
 import com.metsci.glimpse.wizard.WizardPageModel;
 import com.metsci.glimpse.wizard.WizardUI;
 import com.metsci.glimpse.wizard.error.ErrorPopupPanel;
+import com.metsci.glimpse.wizard.listener.ErrorsUpdatedListener;
 import com.metsci.glimpse.wizard.listener.PageEnteredListener;
 import com.metsci.glimpse.wizard.listener.PageModelListener;
 
@@ -67,8 +68,9 @@ public class WizardUITree<D> implements WizardUI<D>
 
     protected Wizard<D> wizard;
     
-    protected PageModelListener modelListener;
+    protected PageModelListener<D> modelListener;
     protected PageEnteredListener<D> pageEnteredListener;
+    protected ErrorsUpdatedListener errorsUpdatedListener;
 
     private final AbstractAction prevAction = new AbstractAction( "Back" )
     {
@@ -245,16 +247,15 @@ public class WizardUITree<D> implements WizardUI<D>
         this.updatePageTree( );
         
         // update the UI when new pages are added
-        this.modelListener = new PageModelListener( )
+        this.modelListener = new PageModelListener<D>( )
         {
             @Override
-            public void onPagesRemoved( Collection<Object> removedPageIds )
+            public void onPagesRemoved( Collection<WizardPage<D>> removedPages )
             {
                 SwingUtilities.invokeLater( ( ) ->
                 {
-                    for ( Object id : removedPageIds )
+                    for ( WizardPage<D> page : removedPages )
                     {
-                        WizardPage<D> page = wizard.getPageModel( ).getPage( id );
                         pageContainer.remove( page.getContainter( ) );
                     }
                     
@@ -263,14 +264,13 @@ public class WizardUITree<D> implements WizardUI<D>
             }
             
             @Override
-            public void onPagesAdded( Collection<Object> addedPageIds )
+            public void onPagesAdded( Collection<WizardPage<D>> addedPages )
             {
                 SwingUtilities.invokeLater( ( ) ->
                 {
-                    for ( Object id : addedPageIds )
+                    for ( WizardPage<D> page : addedPages )
                     {
-                        WizardPage<D> page = wizard.getPageModel( ).getPage( id );
-                        pageContainer.add( page.getContainter( ), id.toString( ) );
+                        pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
                     }
                     
                     updatePageTree( );
@@ -300,6 +300,20 @@ public class WizardUITree<D> implements WizardUI<D>
         };
         
         this.wizard.addPageEnteredListener( this.pageEnteredListener );
+        
+        this.errorsUpdatedListener = new ErrorsUpdatedListener( )
+        {   
+            @Override
+            public void onErrorsUpdated( )
+            {
+                getContainer( ).revalidate( );
+                getContainer( ).repaint( );
+                
+                updateErrorButton( wizard.getCurrentPage( ) );
+            }
+        };
+        
+        this.wizard.addErrorsUpdatedListener( this.errorsUpdatedListener );
     }
 
     @Override
@@ -324,6 +338,7 @@ public class WizardUITree<D> implements WizardUI<D>
     {
         this.wizard.getPageModel( ).removeListener( this.modelListener );
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
+        this.wizard.removeErrorsUpdatedListener( this.errorsUpdatedListener );
     }
 
     protected void updatePageTree( )
@@ -391,7 +406,7 @@ public class WizardUITree<D> implements WizardUI<D>
         {
             b.append( page.getTitle( ) );
 
-            page = this.wizard.getPageModel( ).getPage( page.getParentId( ) );
+            page = this.wizard.getPageModel( ).getPageById( page.getParentId( ) );
 
             if ( page != null ) b.append( " | " );
         }
