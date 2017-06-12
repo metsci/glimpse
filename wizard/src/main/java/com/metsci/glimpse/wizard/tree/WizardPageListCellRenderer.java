@@ -25,16 +25,16 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
 {
     private static final long serialVersionUID = 1L;
 
-    protected Wizard<?> controller;
+    protected Wizard<?> wizard;
 
-    public WizardPageListCellRenderer( Wizard<?> controller )
+    public WizardPageListCellRenderer( Wizard<?> wizard )
     {
-        this.controller = controller;
+        this.wizard = wizard;
     }
 
     protected int getLevel( WizardPage<?> page )
     {
-        WizardPageModel<?> model = this.controller.getPageModel( );
+        WizardPageModel<?> model = this.wizard.getPageModel( );
 
         int level = 0;
 
@@ -47,6 +47,7 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
         return level;
     }
 
+    @Override
     public Component getListCellRendererComponent(
             JList<?> list,
             Object value,
@@ -72,7 +73,7 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
         background.setLayout( new MigLayout( "insets 0, gap 0" ) );
         background.add( label, "pushx, growx" );
 
-        Collection<WizardError> errors = page.getErrors( );
+        Collection<WizardError> errors = wizard.getErrors( page );
 
         if ( !errors.isEmpty( ) )
         {

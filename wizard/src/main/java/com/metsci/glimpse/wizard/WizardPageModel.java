@@ -23,11 +23,14 @@ public interface WizardPageModel<D>
     /**
      * Add a new page to the model.
      * <p>
-     * This may be used to pre-populate the WizardPageModel with all the 
+     * This may be used to pre-populate the WizardPageModel.
      * 
      * @param page
      */
     public void addPage( WizardPage<D> page );
+    
+    public void removePage( WizardPage<D> page );
+    public void removePage( Object id );
     
     /**
      * Returns the page with the provided unique identifier.

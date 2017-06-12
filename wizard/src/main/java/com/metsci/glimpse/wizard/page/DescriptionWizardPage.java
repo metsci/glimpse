@@ -30,7 +30,7 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         descriptionArea.setEditable( false );
         descriptionArea.setOpaque( false );
 
-        URL url = this.getClass( ).getClassLoader( ).getResource( descriptionFile );
+        URL url = getDescriptionResource( descriptionFile );
         try
         {
             descriptionArea.setPage( url );
@@ -42,5 +42,10 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
 
         this.container.add( descriptionArea, "split, span, pushx, growx, wrap" );
         this.container.add( new JSeparator( SwingConstants.HORIZONTAL ), "split, span, gap 0 0 10 10, pushx, growx, wrap" );
+    }
+    
+    protected URL getDescriptionResource( String descriptionFile )
+    {
+        return this.getClass( ).getClassLoader( ).getResource( descriptionFile );
     }
 }

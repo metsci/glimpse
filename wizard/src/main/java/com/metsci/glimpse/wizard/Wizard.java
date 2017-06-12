@@ -42,8 +42,10 @@ public class Wizard<D>
     protected List<WizardCancelledListener> cancelledListeners;
     protected List<WizardFinishedListener> finishedListeners;
 
-    public Wizard( WizardPageModelTree<D> model, WizardUITree<D> ui )
+    public Wizard( D data, WizardPageModelTree<D> model, WizardUITree<D> ui )
     {
+        this.data = data;
+        
         this.errors = HashMultimap.create( );
         
         this.errorListeners = new CopyOnWriteArrayList<>( );
@@ -63,7 +65,7 @@ public class Wizard<D>
     
     public Wizard( )
     {
-        this( new WizardPageModelTree<>( ), new WizardUITree<>( ) );
+        this( null, new WizardPageModelTree<>( ), new WizardUITree<>( ) );
     }
     
     public void finish( )
@@ -79,6 +81,16 @@ public class Wizard<D>
     public D getData( )
     {
         return this.data;
+    }
+    
+    public void setData( D data )
+    {
+        this.data = data;
+    }
+    
+    public void setPageVisited( WizardPage<D> page )
+    {
+        this.isVisited.add( page.getId( ) );
     }
     
     public WizardPage<D> visitPreviousPage( )
@@ -101,13 +113,28 @@ public class Wizard<D>
         return nextPage;
     }
 
-    public WizardPage<D> visitPage( WizardPage<D> page )
+    /**
+     * Make the provide page the current Wizard page.
+     */
+    public void visitPage( WizardPage<D> page )
     {
         this.doLeavePage( this.getCurrentPage( ) );
         this.pageHistory.add( page.getId( ) );
         this.doEnterPage( page );
-        
-        return page;
+    }
+    
+    /**
+     * Update Wizard data to reflect edits made to the provided page and recalculate errors associated with the page.
+     * 
+     * @param page the page to update
+     */
+    protected void updatePage( WizardPage<D> page )
+    {
+        // update the page fields with the settings
+        page.setData( this.data );
+
+        // update errors for the page
+        this.setErrors( page );
     }
 
     protected void doLeavePage( WizardPage<D> currentPage )
@@ -125,10 +152,7 @@ public class Wizard<D>
         this.isVisited.add( page.getId( ) );
 
         // update the page fields with the settings
-        page.setData( this.data );
-
-        // update errors for the page
-        this.setErrors( page );
+        this.updatePage( page );
         
         // have the UI show the page
         this.ui.show( page );
@@ -223,7 +247,7 @@ public class Wizard<D>
                 .collect( Collectors.toList( ) );
     }
 
-    public Collection<WizardError> getErrors( WizardPage<D> page )
+    public Collection<WizardError> getErrors( WizardPage<?> page )
     {
         return this.getErrors( page.getId( ) );
     }
@@ -284,6 +308,25 @@ public class Wizard<D>
                 .collect( Collectors.toList( ) ) );
     }
     
+    public void updateData( WizardPage<D> page )
+    {
+        if ( this.isVisited( page.getId( ) ) )
+        {
+            this.data = page.updateData( this.data );
+        }
+    }
+    
+    public void setErrors( WizardPage<D> page )
+    {
+        if ( this.isVisited( page.getId( ) ) )
+        {
+            Collection<WizardError> pageErrors = page.getErrors( );
+            this.errors.replaceValues( page.getId( ), pageErrors );
+            
+            this.fireErrorsUpdated( );
+        }
+    }
+    
     public void dispose( )
     {
         this.model.dispose( );
@@ -293,23 +336,6 @@ public class Wizard<D>
     protected void addError0( WizardError error )
     {
         this.errors.put( error.getPageId( ), error );
-    }
-    
-    protected void updateData( WizardPage<D> page )
-    {
-        if ( this.isVisited( page.getId( ) ) )
-        {
-            this.data = page.updateData( this.data );
-        }
-    }
-    
-    protected void setErrors( WizardPage<D> page )
-    {
-        if ( this.isVisited( page.getId( ) ) )
-        {
-            Collection<WizardError> pageErrors = page.getErrors( );
-            this.errors.replaceValues( page.getId( ), pageErrors );
-        }
     }
     
     protected boolean isVisited( Object pageId )
