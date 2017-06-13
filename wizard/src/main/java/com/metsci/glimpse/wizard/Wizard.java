@@ -131,6 +131,12 @@ public class Wizard<D>
     public void setData( D data )
     {
         this.data = data;
+        
+        // apply the new settings to each page
+        this.getPageModel( ).getPages( ).forEach( ( page ) ->
+        {
+            page.setData( data, true );
+        } );
 
         this.fireDataUpdated( data );
     }
@@ -321,7 +327,6 @@ public class Wizard<D>
 
     public void setErrors( Collection<WizardError> errors )
     {
-        this.pageErrors.clear( );
         this.userErrors.clear( );
 
         for ( WizardError error : errors )
