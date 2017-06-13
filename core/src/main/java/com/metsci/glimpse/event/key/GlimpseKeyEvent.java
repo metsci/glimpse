@@ -28,10 +28,13 @@ package com.metsci.glimpse.event.key;
 
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 
+import java.util.EnumSet;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 
@@ -45,23 +48,25 @@ public class GlimpseKeyEvent
 {
 
     protected GlimpseTargetStack stack;
-    protected int keyCode;
+    protected EnumSet<ModifierKey> modifiers;
+    protected GlimpseKey key;
     protected boolean handled;
 
-    public GlimpseKeyEvent( GlimpseTargetStack stack, int keyCode )
+    public GlimpseKeyEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, GlimpseKey key )
     {
-        this( stack, keyCode, false );
+        this( stack, modifiers, key, false );
     }
 
     public GlimpseKeyEvent( GlimpseKeyEvent ev )
     {
-        this( newTargetStack( ev.stack ), ev.keyCode, ev.handled );
+        this( newTargetStack( ev.stack ), EnumSet.copyOf( ev.modifiers ), ev.key, ev.handled );
     }
 
-    public GlimpseKeyEvent( GlimpseTargetStack stack, int keyCode, boolean handled )
+    public GlimpseKeyEvent( GlimpseTargetStack stack, EnumSet<ModifierKey> modifiers, GlimpseKey key, boolean handled )
     {
         this.stack = stack;
-        this.keyCode = keyCode;
+        this.modifiers = modifiers;
+        this.key = key;
         this.handled = false;
     }
 
@@ -75,9 +80,14 @@ public class GlimpseKeyEvent
         this.handled = handled;
     }
 
-    public int getKeyCode( )
+    public EnumSet<ModifierKey> getModifiers( )
     {
-        return this.keyCode;
+        return this.modifiers;
+    }
+
+    public GlimpseKey getKey( )
+    {
+        return this.key;
     }
 
     public GlimpseTargetStack getTargetStack( )
@@ -120,7 +130,7 @@ public class GlimpseKeyEvent
     @Override
     public String toString( )
     {
-        return String.format( "code: %d", this.keyCode );
+        return String.format( "code: %s modifier: %s", this.key, this.modifiers );
     }
 
 }

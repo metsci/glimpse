@@ -26,20 +26,39 @@
  */
 package com.metsci.glimpse.event.key.newt;
 
+import static com.jogamp.newt.event.KeyEvent.VK_DELETE;
+import static com.metsci.glimpse.event.key.GlimpseKey.KEY_DELETE;
+import static com.metsci.glimpse.event.key.GlimpseKey.KEY_UNRECOGNIZED;
+import static com.metsci.glimpse.event.mouse.newt.GlimpseMouseWrapper.getModifierKeys;
+
+import java.util.EnumSet;
+
 import com.jogamp.newt.event.KeyEvent;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.key.GlimpseKey;
 import com.metsci.glimpse.event.key.GlimpseKeyEvent;
+import com.metsci.glimpse.event.mouse.ModifierKey;
 
 public class GlimpseKeyWrapper
 {
 
-    public static GlimpseKeyEvent fromKeyEvent( KeyEvent ev, GlimpseTargetStack stack )
+    public static GlimpseKeyEvent fromNewtKeyEvent( KeyEvent ev, GlimpseTargetStack stack )
     {
-        // FIXME: Translate modifier keys
+        GlimpseKey key = fromNewtKeyCode( ev.getKeyCode( ) );
+        EnumSet<ModifierKey> modifiers = getModifierKeys( ev.getModifiers( ) );
+        return new GlimpseKeyEvent( stack, modifiers, key );
+    }
 
-        short keyCode = ev.getKeyCode( );
+    public static GlimpseKey fromNewtKeyCode( short newtKeyCode )
+    {
+        switch ( newtKeyCode )
+        {
+            // FIXME: Handle more keyCodes
 
-        return new GlimpseKeyEvent( stack, keyCode );
+            case VK_DELETE: return KEY_DELETE;
+
+            default: return KEY_UNRECOGNIZED;
+        }
     }
 
 }

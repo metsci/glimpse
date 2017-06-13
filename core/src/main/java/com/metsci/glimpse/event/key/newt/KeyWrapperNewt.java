@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.event.key.newt;
 
+import static com.metsci.glimpse.event.key.newt.GlimpseKeyWrapper.fromNewtKeyEvent;
+
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
@@ -49,7 +51,7 @@ public class KeyWrapperNewt extends KeyWrapperImpl<KeyEvent> implements KeyListe
     @Override
     protected GlimpseKeyEvent toGlimpseEvent( KeyEvent ev, GlimpseTargetStack stack )
     {
-        return GlimpseKeyWrapper.fromKeyEvent( ev, stack );
+        return fromNewtKeyEvent( ev, stack );
     }
 
     @Override
