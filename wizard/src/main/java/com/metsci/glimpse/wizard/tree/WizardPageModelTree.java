@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardPage;
 import com.metsci.glimpse.wizard.WizardPageModel;
@@ -39,7 +41,6 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     public void addListener( PageModelListener<D> listener )
     {
         this.listeners.add( listener );
-
     }
     
     @Override
@@ -66,6 +67,8 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
      */
     public void addPage( WizardPage<D> page, int insertIndex )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         WizardTreeNode<D> childNode = new WizardTreeNode<>( page );
         WizardPage<D> parent = this.getPageById( page.getParentId( ) );
 
@@ -85,6 +88,8 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     @Override
     public void addPage( WizardPage<D> page )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         WizardTreeNode<D> childNode = new WizardTreeNode<>( page );
         WizardPage<D> parent = this.getPageById( page.getParentId( ) );
 
@@ -105,11 +110,15 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
 
     public void removePage( WizardPage<D> page )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         this.removePageById( page.getId( ) );
     }
 
     public void removePageById( Object pageId )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         WizardTreeNode<D> node = this.getNode( pageId );
 
         if ( node != null )
@@ -124,17 +133,23 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
 
     public WizardTreeNode<D> getNode( WizardPage<D> page )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         return this.getNode( page.getId( ) );
     }
 
     public WizardTreeNode<D> getNode( Object id )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         return this.pageMap.get( id );
     }
 
     @Override
     public WizardPage<D> getPageById( Object id )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         WizardTreeNode<D> node = this.pageMap.get( id );
         return node == null ? null : node.getPage( );
     }
@@ -142,6 +157,8 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     @Override
     public WizardPage<D> getNextPage( LinkedList<WizardPage<D>> visitHistory, D data )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         WizardPage<D> currentPage = this.getCurrentPage( visitHistory );
 
         Enumeration<?> enumeration = this.pageTreeRoot.preorderEnumeration( );
@@ -163,6 +180,8 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
     @Override
     public List<WizardPage<D>> getPages( )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         List<WizardPage<D>> list = new ArrayList<>( );
 
         // fill the list model with nodes from the tree in a preorder traversal
@@ -176,12 +195,7 @@ public class WizardPageModelTree<D> implements WizardPageModel<D>
 
         return list;
     }
-
-    public WizardTreeNode<D> getPageTree( )
-    {
-        return this.pageTreeRoot;
-    }
-
+    
     protected WizardPage<D> getCurrentPage( LinkedList<WizardPage<D>> path )
     {
         return path.isEmpty( ) ? null : path.getLast( );

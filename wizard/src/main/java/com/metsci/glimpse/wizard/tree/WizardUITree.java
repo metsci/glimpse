@@ -319,6 +319,8 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public Container getContainer( )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         return this.outerPanel;
     }
 
@@ -336,6 +338,8 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public void dispose( )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         this.wizard.getPageModel( ).removeListener( this.modelListener );
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
         this.wizard.removeErrorsUpdatedListener( this.errorsUpdatedListener );
@@ -391,6 +395,8 @@ public class WizardUITree<D> implements WizardUI<D>
 
     protected String getFullName( WizardPage<D> page )
     {
+        assert( SwingUtilities.isEventDispatchThread( ) );
+
         StringBuilder b = new StringBuilder( );
 
         while ( page != null )
