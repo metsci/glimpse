@@ -209,7 +209,7 @@ Information regarding Parallel Colt is available at:
 
 https://sites.google.com/site/piotrwendykier/software/parallelcolt
 
-The originial Parallel Colt source is available at:
+The original Parallel Colt source is available at:
 
 http://sourceforge.net/projects/parallelcolt/files/parallelcolt/0.9.4/parallelcolt-0.9.4-src.zip/download
 
@@ -489,3 +489,22 @@ in Matplotlib (http://matplotlib.org/users/installing.html). Matplotlib uses a B
 license based on the PSF license:
 
 http://matplotlib.org/users/license.html
+
+-----------------------------------------------------------------------------
+
+Code in com.metsci.glimpse.wizard package is loosely inspired from
+https://github.com/cjwizard/cjwizard which is available under the following license:
+
+Copyright 2008  Eugene Creswick
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
