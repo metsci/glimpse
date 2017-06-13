@@ -37,6 +37,9 @@ public class Txn
         for ( SubtreeModification mod : this.subtreeMods )
         {
             mod.root.commitForSubtree( );
+        }
+        for ( SubtreeModification mod : this.subtreeMods )
+        {
             mod.root.fireForSubtree( mod.ev );
         }
         this.subtreeMods.clear( );

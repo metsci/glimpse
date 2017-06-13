@@ -25,14 +25,23 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     public static <T> T doTxn( Supplier<T> task )
     {
-        Txn txn = activeTxn.get( );
-        if ( txn == null )
+        if ( activeTxn.get( ) == null )
         {
-            txn = new Txn( );
-            activeTxn.set( txn );
+            Txn txn = new Txn( );
             try
             {
-                T result = task.get( );
+                T result;
+                activeTxn.set( txn );
+                try
+                {
+                    result = task.get( );
+                }
+                finally
+                {
+                    // Make sure we set activeTxn back to null before firing listeners
+                    activeTxn.set( null );
+                }
+
                 txn.commit( );
                 return result;
             }
@@ -40,10 +49,6 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
             {
                 txn.rollback( );
                 throw e;
-            }
-            finally
-            {
-                activeTxn.set( null );
             }
         }
         else
