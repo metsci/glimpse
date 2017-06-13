@@ -44,8 +44,7 @@ public abstract class KeyWrapperImpl<E> extends KeyWrapper<E>
     {
         if ( ev == null ) return false;
 
-        // FIXME: Probably want most recent mouse-pressed stacks, rather than drag-hovered stacks
-        Collection<GlimpseTargetStack> stacks = this.canvasMouseHelper.getDragHovered( );
+        Collection<GlimpseTargetStack> stacks = this.canvasMouseHelper.getFocused( );
         for ( GlimpseTargetStack stack : stacks )
         {
             Keyable keyTarget = getKeyTarget( stack );
@@ -70,8 +69,7 @@ public abstract class KeyWrapperImpl<E> extends KeyWrapper<E>
     {
         if ( ev == null ) return false;
 
-        // FIXME: Probably want most recent mouse-pressed stacks, rather than drag-hovered stacks
-        Collection<GlimpseTargetStack> stacks = this.canvasMouseHelper.getDragHovered( );
+        Collection<GlimpseTargetStack> stacks = this.canvasMouseHelper.getFocused( );
         for ( GlimpseTargetStack stack : stacks )
         {
             Keyable keyTarget = getKeyTarget( stack );
