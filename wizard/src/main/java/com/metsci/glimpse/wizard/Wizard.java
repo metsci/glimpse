@@ -140,6 +140,7 @@ public class Wizard<D>
         this.getPageModel( ).getPages( ).stream( ).forEach(  p ->
         {
             this.isVisited.add( p.getId( ) );
+            p.setData( this.data, false );
             Collection<WizardError> pageErrors = p.getErrors( );
             this.pageErrors.replaceValues( p.getId( ), pageErrors );
         } );
