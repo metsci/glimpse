@@ -123,9 +123,14 @@ public class GlimpseMouseWrapper
 
     public static EnumSet<ModifierKey> getModifierKeys( MouseEvent event )
     {
+        return getModifierKeys( event.getModifiers( ) );
+    }
+
+    public static EnumSet<ModifierKey> getModifierKeys( int newtModifierBits )
+    {
         EnumSet<ModifierKey> modifiers = EnumSet.noneOf( ModifierKey.class );
 
-        int mod = event.getModifiers( );
+        int mod = newtModifierBits;
 
         if ( ( mod & MouseEvent.ALT_MASK ) == MouseEvent.ALT_MASK ) modifiers.add( ModifierKey.Alt );
         if ( ( mod & MouseEvent.CTRL_MASK ) == MouseEvent.CTRL_MASK ) modifiers.add( ModifierKey.Ctrl );

@@ -2,20 +2,70 @@ package com.metsci.glimpse.util.var;
 
 import static com.google.common.base.Objects.*;
 import static com.metsci.glimpse.util.PredicateUtils.*;
-import static com.metsci.glimpse.util.var.InlineDispatcher.*;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 {
+
+    protected static final ThreadLocal<Txn> activeTxn = new ThreadLocal<>( );
+
+    public static void doTxn( Runnable task )
+    {
+        doTxn( ( ) ->
+        {
+            task.run( );
+            return null;
+        } );
+    }
+
+    public static <T> T doTxn( Supplier<T> task )
+    {
+        if ( activeTxn.get( ) == null )
+        {
+            Txn txn = new Txn( );
+            try
+            {
+                T result;
+                activeTxn.set( txn );
+                try
+                {
+                    result = task.get( );
+                }
+                finally
+                {
+                    // Make sure we set activeTxn back to null before firing listeners
+                    activeTxn.set( null );
+                }
+
+                txn.commit( );
+                return result;
+            }
+            catch ( Exception e )
+            {
+                txn.rollback( );
+                throw e;
+            }
+        }
+        else
+        {
+            // Already inside a txn
+            return task.get( );
+        }
+    }
+
 
     protected final Predicate<? super V> validateFn;
 
     protected Var<V> parent;
     protected final Set<Var<V>> children;
+
+    protected V rollbackValue;
+    protected boolean rollbackOngoing;
 
     protected V value;
     protected boolean ongoing;
@@ -32,6 +82,9 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
         this.parent = null;
         this.children = new CopyOnWriteArraySet<>( );
+
+        this.rollbackValue = null;
+        this.rollbackOngoing = false;
 
         this.value = this.requireValid( value );
         this.ongoing = false;
@@ -78,30 +131,20 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     public V update( Function<? super V,? extends V> updateFn )
     {
-        return this.update( inlineDispatcher, false, updateFn );
+        return this.update( false, updateFn );
     }
 
     public V update( boolean ongoing, Function<? super V,? extends V> updateFn )
     {
-        return this.update( inlineDispatcher, ongoing, updateFn );
-    }
-
-    public V update( Dispatcher dispatcher, boolean ongoing, Function<? super V,? extends V> updateFn )
-    {
-        return this.set( dispatcher, ongoing, updateFn.apply( this.value ) );
+        return this.set( ongoing, updateFn.apply( this.value ) );
     }
 
     public V set( V value )
     {
-        return this.set( inlineDispatcher, false, value );
+        return this.set( false, value );
     }
 
     public V set( boolean ongoing, V value )
-    {
-        return this.set( inlineDispatcher, ongoing, value );
-    }
-
-    public V set( Dispatcher dispatcher, boolean ongoing, V value )
     {
         // Update if value has changed, or if changes were previously ongoing but no longer are
         if ( ( !ongoing && this.ongoing ) || !equal( value, this.value ) )
@@ -109,7 +152,17 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
             Var<V> root = this.root( );
             root.requireValidForSubtree( value );
             root.setForSubtree( ongoing, value );
-            dispatcher.fireForSubtree( root, new VarEvent( ongoing ) );
+
+            Txn txn = activeTxn.get( );
+            if ( txn == null )
+            {
+                root.commitForSubtree( );
+                root.fireForSubtree( new VarEvent( ongoing ) );
+            }
+            else
+            {
+                txn.recordSubtreeMod( root, new VarEvent( ongoing ) );
+            }
         }
         return this.value;
     }
@@ -154,6 +207,9 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     protected void setForSubtree( boolean ongoing, V value )
     {
+        this.rollbackValue = this.value;
+        this.rollbackOngoing = this.ongoing;
+
         this.value = value;
         this.ongoing = ongoing;
 
@@ -163,6 +219,43 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         }
     }
 
+    /**
+     * This method is protected to discourage access from client code, while still allowing
+     * access from {@link Txn}.
+     */
+    protected void commitForSubtree( )
+    {
+        this.rollbackValue = null;
+        this.rollbackOngoing = false;
+
+        for ( Var<V> child : this.children )
+        {
+            child.commitForSubtree( );
+        }
+    }
+
+    /**
+     * This method is protected to discourage access from client code, while still allowing
+     * access from {@link Txn}.
+     */
+    protected void rollbackForSubtree( )
+    {
+        this.value = this.rollbackValue;
+        this.ongoing = this.rollbackOngoing;
+
+        this.rollbackValue = null;
+        this.rollbackOngoing = false;
+
+        for ( Var<V> child : this.children )
+        {
+            child.rollbackForSubtree( );
+        }
+    }
+
+    /**
+     * This method is protected to discourage access from client code, while still allowing
+     * access from {@link Txn}.
+     */
     protected void fireForSubtree( VarEvent ev )
     {
         this.fire( ev );

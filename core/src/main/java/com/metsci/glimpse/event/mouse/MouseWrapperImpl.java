@@ -85,6 +85,7 @@ public abstract class MouseWrapperImpl<I> extends MouseWrapper<I>
         List<GlimpseTargetStack> list = getContainingTargets( event );
 
         setAllHovered( list );
+        setFocused( list );
 
         // stacks with low indices are on top in the layout, and
         // have their mouse events generated first

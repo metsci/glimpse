@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.lang.Thread.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Thread.currentThread;
+import static java.util.Objects.requireNonNull;
 
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
@@ -47,6 +48,7 @@ import com.jogamp.newt.Window;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.event.key.newt.KeyWrapperNewt;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -120,6 +122,12 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     protected MouseWrapperNewt createMouseWrapper( )
     {
         return new MouseWrapperNewtSwingEDT( this );
+    }
+
+    @Override
+    protected KeyWrapperNewt createKeyWrapper( )
+    {
+        return new KeyWrapperNewtSwingEDT( this, requireNonNull( this.mouseHelper ) );
     }
 
     @Override
