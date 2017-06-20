@@ -115,6 +115,7 @@ public class Wizard<D>
         this.pageHistory.clear( );
         this.clearErrors( );
         this.setData( data );
+        this.visitNextPage( );
     }
     
     public void finish( )
