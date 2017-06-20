@@ -81,9 +81,14 @@ public class GLUtils
 
     public static int genBuffer( GL gl )
     {
-        int[] handle = new int[1];
-        gl.glGenBuffers( 1, handle, 0 );
-        return handle[0];
+        return genBuffers( gl, 1 )[0];
+    }
+
+    public static int[] genBuffers( GL gl, int count )
+    {
+        int[] handles = new int[count];
+        gl.glGenBuffers( count, handles, 0 );
+        return handles;
     }
 
     public static void deleteBuffers( GL gl, int... handles )
@@ -93,9 +98,19 @@ public class GLUtils
 
     public static int genTexture( GL gl )
     {
-        int[] handle = new int[1];
-        gl.glGenTextures( 1, handle, 0 );
-        return handle[0];
+        return genTextures( gl, 1 )[0];
+    }
+
+    public static int[] genTextures( GL gl, int count )
+    {
+        int[] handles = new int[count];
+        gl.glGenTextures( count, handles, 0 );
+        return handles;
+    }
+
+    public static void deleteTextures( GL gl, int... handles )
+    {
+        gl.glDeleteTextures( handles.length, handles, 0 );
     }
 
     public static int queryGLInteger( int param, GL gl )

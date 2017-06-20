@@ -31,6 +31,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -111,7 +112,7 @@ public class SlippyAxisMouseListener2D extends AxisMouseListener2D
             zoom++;
 
         }
-        zoom = Math.max( 0, Math.min( zoom, MAX_ZOOM ) );
+        zoom = GeneralUtils.clamp( zoom, 0, MAX_ZOOM );
 
         if ( !force && zoom == currentZoom )
         {

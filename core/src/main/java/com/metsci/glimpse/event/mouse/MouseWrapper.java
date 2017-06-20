@@ -49,12 +49,15 @@ public abstract class MouseWrapper<I>
     // this is necessary because mouseExited and mouseEntered events
     // are fired even while the mouse is dragging
     protected LinkedList<GlimpseTargetStack> hoveredSet;
+    // set of stacks that should receive keyboard events
+    protected LinkedList<GlimpseTargetStack> focusedSet;
 
     public MouseWrapper( GlimpseCanvas canvas )
     {
         this.canvas = canvas;
         this.dragHoveredSet = new LinkedList<GlimpseTargetStack>( );
         this.hoveredSet = new LinkedList<GlimpseTargetStack>( );
+        this.focusedSet = new LinkedList<GlimpseTargetStack>( );
     }
 
     public List<GlimpseTargetStack> getContainingTargets( I e )
@@ -66,6 +69,18 @@ public abstract class MouseWrapper<I>
         getContainingTargets( e, context, result );
 
         return result;
+    }
+
+    public void dispose( )
+    {
+        this.dragHoveredSet.clear( );
+        this.hoveredSet.clear( );
+        this.focusedSet.clear( );
+
+        this.dragHoveredSet = null;
+        this.hoveredSet = null;
+        this.focusedSet = null;
+        this.canvas = null;
     }
 
     protected GlimpseCanvas getCanvas( )
@@ -246,6 +261,35 @@ public abstract class MouseWrapper<I>
     protected List<GlimpseTargetStack> getHovered( )
     {
         return hoveredSet;
+    }
+
+    protected List<GlimpseTargetStack> clearFocused( )
+    {
+        List<GlimpseTargetStack> oldFocused = copyFocused( );
+        focusedSet.clear( );
+        return oldFocused;
+    }
+
+    protected void addFocused( GlimpseTargetStack stack )
+    {
+        focusedSet.add( TargetStackUtil.newTargetStack( stack ) );
+    }
+
+    protected void setFocused( List<GlimpseTargetStack> list )
+    {
+        clearFocused( );
+        for ( GlimpseTargetStack stack : list )
+            addFocused( stack );
+    }
+
+    protected List<GlimpseTargetStack> copyFocused( )
+    {
+        return new LinkedList<GlimpseTargetStack>( focusedSet );
+    }
+
+    public List<GlimpseTargetStack> getFocused( )
+    {
+        return focusedSet;
     }
 
     protected abstract boolean isButtonDown( I e );

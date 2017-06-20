@@ -44,6 +44,7 @@ import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.support.FrameUtils;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
@@ -117,8 +118,8 @@ public class Example
 
         // This listener is added before adding the SwingGlimpseCanvas to the frame because
         // NEWTGLCanvas adds its own WindowListener and this WindowListener should receive the WindowEvent first
-        // (although I'm now not sure how much this matters)
-        frame.addWindowListener( new WindowAdapter( )
+        // also see comment in NewtSwingGlimpseCanvas.dispose( )
+        FrameUtils.addWindowListenerFirst( frame, new WindowAdapter( )
         {
             @Override
             public void windowClosing( WindowEvent e )
@@ -143,7 +144,8 @@ public class Example
         // it should also be done after the frame has been made visible or
         // the GlimpseCanvas GLEventListener.reshape( ) may be called
         // with spurious sizes (possible NEWT bug)
-        SwingUtilities.invokeAndWait( ( ) -> {
+        SwingUtilities.invokeAndWait( ( ) ->
+        {
             frame.add( canvas );
             frame.validate( );
         } );
@@ -194,10 +196,10 @@ public class Example
         };
 
         final JFrame rightFrame = new JFrame( "Glimpse Example (Frame A)" );
-        rightFrame.addWindowListener( disposeListener );
+        FrameUtils.addWindowListenerFirst( rightFrame, disposeListener );
 
         final JFrame leftFrame = new JFrame( "Glimpse Example (Frame B)" );
-        leftFrame.addWindowListener( disposeListener );
+        FrameUtils.addWindowListenerFirst( leftFrame, disposeListener );
 
         rightFrame.setSize( 800, 800 );
         rightFrame.setLocation( 800, 0 );

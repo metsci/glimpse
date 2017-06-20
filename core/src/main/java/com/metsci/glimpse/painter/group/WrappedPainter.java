@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.painter.group;
 
+import static com.metsci.glimpse.util.GeneralUtils.ints;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
@@ -44,7 +45,6 @@ import com.metsci.glimpse.axis.WrappedAxis1D;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
@@ -53,6 +53,8 @@ import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
+import com.metsci.glimpse.support.wrapped.WrappedGlimpseContext;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 /**
  * @see WrappedAxis1D
@@ -61,7 +63,6 @@ import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
  */
 public class WrappedPainter extends GlimpsePainterBase
 {
-    private static final Logger logger = Logger.getLogger( WrappedPainter.class.getName( ) );
 
     // XXX: This should probably be something more flexible, maybe along the lines of GLCapabilities
     private final boolean attachStencilBuffer;
@@ -185,10 +186,15 @@ public class WrappedPainter extends GlimpsePainterBase
         {
             GL3 gl = context.getGL( ).getGL3( );
 
+            // copy axis settings, including locked status, mouse coords, etc.
+            this.dummyAxis.setParent( axis );
+            this.dummyAxis.setParent( null );
+
             // when we draw offscreen, do so in "wrapped coordinates" (if the wrapped axis is
             // bounded from 0 to 10, it should be because that is the domain that the painters
             // are set up to draw in)
             this.dummyAxis.set( boundsX.getStartValueWrapped( ), boundsX.getEndValueWrapped( ), boundsY.getStartValueWrapped( ), boundsY.getEndValueWrapped( ) );
+
             this.dummyAxis.validate( );
 
             if ( this.fbo.getWidth( ) < boundsX.getTextureSize( ) || this.fbo.getHeight( ) < boundsY.getTextureSize( ) )
@@ -196,7 +202,7 @@ public class WrappedPainter extends GlimpsePainterBase
                 this.fbo.reset( gl, boundsX.getTextureSize( ), boundsY.getTextureSize( ), 0 );
             }
 
-            GlimpseContext glimpseContext = new GlimpseContextImpl( context.getGLContext( ), new int[] { 1, 1 } );
+            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), ints( 1, 1 ), new Wrapper2D( axis ) );
             glimpseContext.getTargetStack( ).push( this.dummyLayout, new GlimpseBounds( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) ) );
 
             this.fbo.bind( gl );

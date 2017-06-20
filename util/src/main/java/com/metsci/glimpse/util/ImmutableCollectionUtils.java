@@ -205,4 +205,11 @@ public class ImmutableCollectionUtils
         }
     }
 
+    public static <V> ImmutableList<V> listMinus( ImmutableList<V> list, int index )
+    {
+        List<V> newList = new ArrayList<>( list );
+        newList.remove( index );
+        return ImmutableList.copyOf( newList );
+    }
+
 }
