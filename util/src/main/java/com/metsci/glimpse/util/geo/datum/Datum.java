@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.geo.datum;
 
+import java.io.Serializable;
+
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.LatLonRect;
 import com.metsci.glimpse.util.geo.util.DistanceAzimuth;
@@ -35,8 +37,10 @@ import com.metsci.glimpse.util.vector.Vector3d;
 /**
  * @author osborn
  */
-public abstract class Datum
+public abstract class Datum implements Serializable
 {
+    private static final long serialVersionUID = 1L;
+    
     public final static Datum wgs84 = new DatumWgs84( );
     public final static DatumSphere wgs84sphere = new DatumSphereWgs84( );
     public final static DatumSphere unitSphere = new DatumSphereUnit( );
