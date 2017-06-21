@@ -27,6 +27,15 @@ public class ApproxSphere
         this.approxAsin = new ApproxAsin( numSamples );
         this.approxAtan = new ApproxAtan( numSamples );
     }
+    
+    public LatLonGeo toLatLonGeo( double x, double y, double z, double radius )
+    {
+        final double lat = approxAtan.atan2( z, Math.sqrt( x * x + y * y ) );
+        final double lon = approxAtan.atan2( y, x );
+        final double h = Math.sqrt( x * x + y * y + z * z ) - radius;
+
+        return LatLonGeo.fromRad( lat, lon, h );
+    }
 
     public LatLonGeo greatCircleShift( DatumSphere sphere, LatLonGeo from, double distance, double azimuth_SU )
     {

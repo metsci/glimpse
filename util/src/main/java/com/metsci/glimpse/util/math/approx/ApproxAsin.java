@@ -1,5 +1,6 @@
 package com.metsci.glimpse.util.math.approx;
 
+import static java.lang.Math.PI;
 import static com.metsci.glimpse.util.math.MathConstants.*;
 
 /**
@@ -9,6 +10,7 @@ import static com.metsci.glimpse.util.math.MathConstants.*;
 public class ApproxAsin
 {
     public static final double ONE_OVER_TWO_PI = 1.0 / TWO_PI;
+    public static final double PI_OVER_2 = PI / 2.0;
 
 
     protected final int n;
@@ -34,6 +36,14 @@ public class ApproxAsin
             double x = -1.0 + ( i * this.xStep );
             this.y[ i ] = Math.asin( x );
         }
+    }
+    
+    // Helper method for taking advantage of the precalculated asin values to
+    // compute acos values. Requires an additional subtraction over creating
+    // an ApproxAcos class, but requires no additional storage.
+    public double acos( double x )
+    {
+        return PI_OVER_2 - asin( x );
     }
 
     public double asin( double x )
