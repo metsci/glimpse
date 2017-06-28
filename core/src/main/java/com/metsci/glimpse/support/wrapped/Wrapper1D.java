@@ -69,4 +69,20 @@ public interface Wrapper1D
      */
     double wrapDelta( double delta );
 
+    /**
+     * For an item occupying coordinates [minValue,maxValue], return a set of
+     * coordinate shifts at which the item should be rendered.
+     * <p>
+     * Common cases:
+     * <ol>
+     * <li>For an item that does not cross either wrapMin or wrapMax, returns { 0.0 }
+     * <li>For an item that crosses wrapMin, returns { 0.0, +wrapSpan }
+     * <li>For an item that crosses wrapMax, returns { 0.0, -wrapSpan }
+     * </ol>
+     * <p>
+     * An item may cross both wrapMin and wrapMax. It may also cross the wrap
+     * range more than once.
+     */
+    double[] getRenderShifts( double minValue, double maxValue );
+
 }

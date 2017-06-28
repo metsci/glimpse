@@ -1,7 +1,9 @@
 package com.metsci.glimpse.support.wrapped;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
+import static java.lang.Math.max;
 
 public class StandardWrapper1D implements Wrapper1D
 {
@@ -54,6 +56,22 @@ public class StandardWrapper1D implements Wrapper1D
         double deltaA = delta - ( wrapCount * wrapSpan );
         double deltaB = delta - ( ( wrapCount + 1.0 ) * wrapSpan );
         return ( abs( deltaA ) <= abs( deltaB ) ? deltaA : deltaB );
+    }
+
+    @Override
+    public double[] getRenderShifts( double minValue, double maxValue )
+    {
+        double first = this.wrapValue( minValue ) - minValue;
+        double step = this.wrapMax - this.wrapMin;
+        int count = ( int ) max( 0, ceil( ( ( maxValue + first ) - this.wrapMin ) / step ) );
+
+        double[] shifts = new double[ count ];
+        for ( int i = 0; i < count; i++ )
+        {
+            double offset = first - i*step;
+            shifts[ i ] = offset;
+        }
+        return shifts;
     }
 
     @Override

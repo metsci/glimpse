@@ -40,6 +40,12 @@ public class NoopWrapper1D implements Wrapper1D
     }
 
     @Override
+    public double[] getRenderShifts( double minValue, double maxValue )
+    {
+        return new double[] { 0.0 };
+    }
+
+    @Override
     public int hashCode( )
     {
         // Singleton, so just use Object identity
