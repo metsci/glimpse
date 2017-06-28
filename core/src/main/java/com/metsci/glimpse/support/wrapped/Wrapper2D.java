@@ -1,13 +1,10 @@
 package com.metsci.glimpse.support.wrapped;
 
 import static com.metsci.glimpse.support.wrapped.NoopWrapper1D.NOOP_WRAPPER_1D;
-import static com.metsci.glimpse.support.wrapped.RenderOffset2D.getRenderOffsets;
 import static com.metsci.glimpse.support.wrapped.Wrapper1D.getWrapper1D;
 
-import java.util.Collection;
 import java.util.Objects;
 
-import com.google.common.collect.ImmutableList;
 import com.metsci.glimpse.axis.Axis2D;
 
 public class Wrapper2D
@@ -17,7 +14,6 @@ public class Wrapper2D
 
     public final Wrapper1D x;
     public final Wrapper1D y;
-    public final Collection<? extends RenderOffset2D> renderOffsets;
 
 
     public Wrapper2D( Axis2D axis )
@@ -29,7 +25,6 @@ public class Wrapper2D
     {
         this.x = x;
         this.y = y;
-        this.renderOffsets = ImmutableList.copyOf( getRenderOffsets( this.x, this.y ) );
     }
 
     @Override
