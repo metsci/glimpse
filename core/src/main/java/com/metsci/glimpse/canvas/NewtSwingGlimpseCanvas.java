@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.util.Objects.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -50,6 +51,7 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.key.newt.KeyWrapperNewt;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -81,6 +83,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
 
     protected LayoutManager layoutManager;
     protected MouseWrapperNewt mouseHelper;
+    protected KeyWrapperNewt keyHelper;
     protected GLEventListener glListener;
 
     protected List<GLRunnable> disposeListeners;
@@ -88,6 +91,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwingGlimpseCanvas( String glProfile, GLContext context )
     {
         this( GLProfile.get( glProfile ), context );
@@ -96,9 +100,15 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwingGlimpseCanvas( GLProfile glProfile, GLContext context )
     {
         init( glProfile, context );
+    }
+
+    public NewtSwingGlimpseCanvas( GLProfile glProfile )
+    {
+        init( glProfile, null );
     }
 
     public NewtSwingGlimpseCanvas( String profile )
@@ -129,6 +139,9 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
         this.mouseHelper = createMouseWrapper( );
         this.glWindow.addMouseListener( this.mouseHelper );
 
+        this.keyHelper = createKeyWrapper( );
+        this.glWindow.addKeyListener( this.keyHelper );
+
         this.glCanvas = new NewtCanvasAWT( glWindow );
         this.setLayout( new BorderLayout( ) );
         this.add( this.glCanvas, BorderLayout.CENTER );
@@ -152,6 +165,14 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     protected MouseWrapperNewt createMouseWrapper( )
     {
         return new MouseWrapperNewt( this );
+    }
+
+    /**
+     * Must be called <em>after</em> this.mouseHelper has been set.
+     */
+    protected KeyWrapperNewt createKeyWrapper( )
+    {
+        return new KeyWrapperNewt( this, requireNonNull( this.mouseHelper ) );
     }
 
     protected GLEventListener createGLEventListener( )

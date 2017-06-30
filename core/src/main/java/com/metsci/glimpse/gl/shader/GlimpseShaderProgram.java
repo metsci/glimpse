@@ -71,7 +71,7 @@ public class GlimpseShaderProgram
 
     public void loadProgram( GL gl )
     {
-        load( gl.getGL3( ), this.codes );
+        this.load( gl.getGL3( ), this.codes );
     }
 
     public void useProgram( GL gl, boolean on )
@@ -81,19 +81,21 @@ public class GlimpseShaderProgram
             gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
         }
 
-        if ( !load( gl.getGL3( ), this.codes ) ) return;
+        if ( !this.load( gl.getGL3( ), this.codes ) ) return;
 
         this.state.useProgram( gl.getGL3( ), on );
 
         if ( on ) this.updateUniformData( gl );
 
-        for ( GLArrayDataClient array : arrays )
+        for ( GLArrayDataClient array : this.arrays )
         {
             if ( array.sealed( ) )
             {
                 array.enableBuffer( gl, on );
             }
         }
+        
+        this.doUseProgram( gl, on );
 
         if ( !on )
         {
@@ -101,29 +103,34 @@ public class GlimpseShaderProgram
         }
     }
 
+    protected void doUseProgram( GL gl, boolean on )
+    {
+        // do nothing by default
+    }
+    
     public ShaderCode addFragmentShader( String path )
     {
-        return addShader( GL3.GL_FRAGMENT_SHADER, path );
+        return this.addShader( GL3.GL_FRAGMENT_SHADER, path );
     }
 
     public ShaderCode addVertexShader( String path )
     {
-        return addShader( GL3.GL_VERTEX_SHADER, path );
+        return this.addShader( GL3.GL_VERTEX_SHADER, path );
     }
 
     public ShaderCode addGeometryShader( String path )
     {
-        return addShader( GL3.GL_GEOMETRY_SHADER, path );
+        return this.addShader( GL3.GL_GEOMETRY_SHADER, path );
     }
 
     public ShaderCode addShader( int type, String path )
     {
-        return this.addShader( ShaderCode.create( null, type, 1, getClass( ), new String[] { path }, true ) );
+        return this.addShader( ShaderCode.create( null, type, 1, this.getClass( ), new String[] { path }, true ) );
     }
 
     public ShaderCode addShader( ShaderCode code )
     {
-        codes.add( code );
+        this.codes.add( code );
         return code;
     }
 
@@ -152,7 +159,7 @@ public class GlimpseShaderProgram
     {
         GL3 gl3 = gl.getGL3( );
 
-        for ( GLUniformData uniform : uniforms )
+        for ( GLUniformData uniform : this.uniforms )
         {
             this.state.uniform( gl3, uniform );
         }
@@ -180,12 +187,12 @@ public class GlimpseShaderProgram
 
         this.state.attachShaderProgram( gl3, this.program, true );
 
-        for ( GLArrayData array : arrays )
+        for ( GLArrayData array : this.arrays )
         {
             this.state.ownAttribute( array, true );
         }
 
-        for ( GLUniformData uniform : uniforms )
+        for ( GLUniformData uniform : this.uniforms )
         {
             this.state.ownUniform( uniform );
         }

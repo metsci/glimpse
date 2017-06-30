@@ -23,17 +23,11 @@
             <artifactId>glimpse-docking</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sf.tinylaf</groupId>
-            <artifactId>tinylaf</artifactId>
-            <version>1.4.0</version>
         </dependency>
 
     </dependencies>

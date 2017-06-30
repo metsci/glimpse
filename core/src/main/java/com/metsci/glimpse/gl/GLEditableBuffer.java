@@ -122,6 +122,13 @@ public class GLEditableBuffer
         this.dirtyRanges.clear( );
     }
 
+    public void truncateBytes( int sizeBytes )
+    {
+        int oldSizeBytes = this.sizeBytes( );
+        this.hBuffer.position( sizeBytes );
+        this.dirtyRanges.remove( sizeBytes, oldSizeBytes - sizeBytes );
+    }
+
     public int deviceBuffer( GL gl )
     {
         if ( this.dBuffer == 0 )
@@ -182,6 +189,11 @@ public class GLEditableBuffer
     public FloatBuffer hostFloats( )
     {
         return this.hostBytes( ).asFloatBuffer( );
+    }
+
+    public void truncateFloats( int sizeFloats )
+    {
+        this.truncateBytes( sizeFloats * SIZEOF_FLOAT );
     }
 
     public void grow1f( float a )

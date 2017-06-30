@@ -102,7 +102,7 @@ public class IconShader extends GlimpseShaderProgram
 
     public void setProjectionMatrix( Axis2D axis )
     {
-        setProjectionMatrix( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+        this.setProjectionMatrix( ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
     public void setPickMode( boolean pickMode )
@@ -153,11 +153,5 @@ public class IconShader extends GlimpseShaderProgram
     public void setGlobalScale( float scale )
     {
         this.globalScale.setData( scale );
-    }
-
-    @Override
-    public void useProgram( GL gl, boolean on )
-    {
-        super.useProgram( gl, on );
     }
 }

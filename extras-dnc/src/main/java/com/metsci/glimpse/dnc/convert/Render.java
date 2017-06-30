@@ -48,7 +48,7 @@ import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 public class Render
 {
 
-    public static final String renderFormatVersion = "12";
+    public static final String renderFormatVersion = "13";
 
 
     public static final String renderCharsetFilename = "charset";

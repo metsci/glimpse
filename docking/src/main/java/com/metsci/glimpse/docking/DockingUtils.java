@@ -26,11 +26,10 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.util.AppConfigUtils.getAppConfigPath;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableCollection;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
@@ -39,7 +38,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,6 +66,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import com.google.common.collect.ImmutableList;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
@@ -227,6 +226,11 @@ public class DockingUtils
         return toolbar;
     }
 
+    public static <T> T getAncestorOfClass( Class<? extends T> clazz, Component c )
+    {
+        return clazz.cast( SwingUtilities.getAncestorOfClass( clazz, c ) );
+    }
+
     public static int getFrameExtendedState( FrameArrangement frameArr )
     {
         return getFrameExtendedState( frameArr.isMaximizedHoriz, frameArr.isMaximizedVert );
@@ -250,7 +254,7 @@ public class DockingUtils
     {
         try
         {
-            return new ImageIcon( ImageIO.read( DockingUtils.class.getClassLoader( ).getResource( resourcePath ) ) );
+            return new ImageIcon( ImageIO.read( Thread.currentThread( ).getContextClassLoader( ).getResource( resourcePath ) ) );
         }
         catch ( IOException e )
         {
@@ -258,53 +262,109 @@ public class DockingUtils
         }
     }
 
-    public static final Collection<Class<?>> dockingXmlClasses = unmodifiableCollection( asList( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class ) );
-
-    public static GroupArrangement restoreArrangementAndSaveOnShutdown( DockingGroup dockingGroup, File targetFile, URL fallbackInput )
+    public static URL resourceUrl( Class<?> clazz, String location )
     {
-        try
-        {
-            InputStream is;
-            if ( targetFile.isFile( ) && targetFile.canRead( ) )
-            {
-                LOGGER.log( INFO, "Reading docking arrangement from " + targetFile );
-                is = new FileInputStream( targetFile );
-            }
-            else
-            {
-                LOGGER.log( INFO, "Reading docking arrangement from " + fallbackInput );
-                is = fallbackInput.openStream( );
-            }
+        return clazz.getClassLoader( ).getResource( location );
+    }
 
-            is = new BufferedInputStream( is );
-            GroupArrangement groupArr = loadDockingArrangement( is );
-            is.close( );
-            dockingGroup.setArrangement( groupArr );
-            dockingGroup.addListener( new DockingGroupAdapter( )
-            {
-                @Override
-                public void disposingAllFrames( DockingGroup group )
-                {
-                    LOGGER.log( INFO, "Writing docking arrangement to " + targetFile );
-                    GroupArrangement capturedArr = group.captureArrangement( );
-                    try (OutputStream os = new BufferedOutputStream( new FileOutputStream( targetFile ) ))
-                    {
-                        saveDockingArrangement( os, capturedArr );
-                    }
-                    catch ( IOException | JAXBException ex )
-                    {
-                        LOGGER.log( WARNING, "Error writing arrangement to " + targetFile, ex );
-                    }
-                }
-            } );
+    public static void setArrangementAndSaveOnDispose( DockingGroup dockingGroup, String appName, URL fallbackInput )
+    {
+        setArrangementAndSaveOnDispose( dockingGroup, getDockingArrangementFile( appName ), fallbackInput );
+    }
 
-            return groupArr;
-        }
-        catch ( IOException | JAXBException ex )
+    public static void setArrangementAndSaveOnDispose( DockingGroup dockingGroup, File targetFile, URL fallbackInput )
+    {
+        GroupArrangement loadArr = loadDockingArrangement( targetFile, fallbackInput );
+        dockingGroup.setArrangement( loadArr );
+
+        dockingGroup.addListener( new DockingGroupAdapter( )
         {
-            LOGGER.log( WARNING, "Error reading arrangement from " + targetFile + " or " + fallbackInput, ex );
-            return null;
+            @Override
+            public void disposingAllFrames( DockingGroup group )
+            {
+                GroupArrangement saveArr = dockingGroup.captureArrangement( );
+                saveDockingArrangement( targetFile, saveArr );
+            }
+        } );
+    }
+
+    public static File getDockingArrangementFile( String appName )
+    {
+        return getAppConfigPath( appName, "arrangement.xml" );
+    }
+
+    public static GroupArrangement loadDockingArrangement( String appName, URL fallbackUrl )
+    {
+        File file = getDockingArrangementFile( appName );
+        return loadDockingArrangement( file, fallbackUrl );
+    }
+
+    public static void saveDockingArrangement( String appName, GroupArrangement groupArr )
+    {
+        File file = getDockingArrangementFile( appName );
+        saveDockingArrangement( file, groupArr );
+    }
+
+    public static GroupArrangement loadDockingArrangement( File file, URL fallbackUrl )
+    {
+        // First, try to load from file
+        //
+        // If file does not exist, skip this whole block without logging a warning. If file
+        // does exist, run this block -- even if it is a dir or is unreadable, in which case
+        // a warning will be logged.
+        //
+        if ( file.exists( ) )
+        {
+            LOGGER.log( INFO, "Reading docking arrangement from file: file = " + file );
+            try ( InputStream stream = new FileInputStream( file ) )
+            {
+                return loadDockingArrangement( stream );
+            }
+            catch ( Exception e )
+            {
+                LOGGER.log( WARNING, "Failed to load docking arrangement from file: file = " + file, e );
+            }
         }
+
+        // Next, try to load from fallbackUrl
+        if ( fallbackUrl != null )
+        {
+            LOGGER.log( INFO, "Reading fallback docking arrangement from resource: resource = " + fallbackUrl );
+            try ( InputStream stream = fallbackUrl.openStream( ) )
+            {
+                return loadDockingArrangement( stream );
+            }
+            catch ( Exception e )
+            {
+                LOGGER.log( WARNING, "Failed to load fallback docking arrangement from resource: resource = " + fallbackUrl.toString( ), e );
+            }
+        }
+
+        // Finally, give up and return null
+        return null;
+    }
+
+    public static void saveDockingArrangement( File file, GroupArrangement groupArr )
+    {
+        LOGGER.log( INFO, "Writing docking arrangement to file: file = " + file );
+        try ( OutputStream stream = new BufferedOutputStream( new FileOutputStream( file ) ) )
+        {
+            saveDockingArrangement( stream, groupArr );
+        }
+        catch ( Exception e )
+        {
+            LOGGER.log( WARNING, "Failed to write docking arrangement to file: file = " + file, e );
+        }
+    }
+
+    public static final Collection<Class<?>> dockingXmlClasses = ImmutableList.of( GroupArrangement.class, FrameArrangement.class, DockerArrangementNode.class, DockerArrangementSplit.class, DockerArrangementTile.class );
+
+    public static GroupArrangement loadDockingArrangement( InputStream is ) throws JAXBException
+    {
+        Class<?>[] classes = dockingXmlClasses.toArray( new Class[0] );
+        Unmarshaller unmarshaller = JAXBContext.newInstance( classes ).createUnmarshaller( );
+        Object unmarshalled = unmarshaller.unmarshal( is );
+        return castUnmarshalled( unmarshalled, GroupArrangement.class );
     }
 
     public static void saveDockingArrangement( OutputStream os, GroupArrangement groupArr ) throws JAXBException
@@ -313,14 +373,6 @@ public class DockingUtils
         Marshaller marshaller = JAXBContext.newInstance( classes ).createMarshaller( );
         marshaller.setProperty( JAXB_FORMATTED_OUTPUT, true );
         marshaller.marshal( groupArr, os );
-    }
-
-    public static GroupArrangement loadDockingArrangement( InputStream is ) throws JAXBException
-    {
-        Class<?>[] classes = dockingXmlClasses.toArray( new Class[0] );
-        Unmarshaller unmarshaller = JAXBContext.newInstance( classes ).createUnmarshaller( );
-        Object unmarshalled = unmarshaller.unmarshal( is );
-        return castUnmarshalled( unmarshalled, GroupArrangement.class );
     }
 
     private static <T> T castUnmarshalled( Object unmarshalled, Class<T> clazz )

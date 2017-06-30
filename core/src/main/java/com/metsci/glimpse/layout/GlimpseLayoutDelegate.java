@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.media.opengl.GL;
 
@@ -104,7 +105,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         @Override
         public int hashCode( )
         {
-            return 31 + ( ( painter == null ) ? 0 : painter.hashCode( ) );
+            return Objects.hashCode( painter );
         }
 
         @Override
@@ -114,10 +115,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
             if ( obj == null ) return false;
             if ( getClass( ) != obj.getClass( ) ) return false;
             Member other = ( Member ) obj;
-            if ( painter == null && other.painter != null )
-                return false;
-            else if ( !painter.equals( other.painter ) ) return false;
-            return true;
+            return Objects.equals( painter, other.painter );
         }
     }
 

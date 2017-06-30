@@ -61,7 +61,7 @@ public class LatLonRect
 
     public static final LatLonRect fromUnitVectorAndLength( double xUnit, double yUnit, double zUnit, double length )
     {
-        return new LatLonRect( xUnit, yUnit, xUnit, length );
+        return new LatLonRect( xUnit, yUnit, zUnit, length );
     }
 
     public static final LatLonRect fromEnu( Vector3d enuPoint, LatLonGeo refPoint, Datum datum )

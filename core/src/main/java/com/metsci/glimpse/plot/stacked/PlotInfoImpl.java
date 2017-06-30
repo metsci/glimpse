@@ -30,6 +30,7 @@ import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.HORIZONT
 import static com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.context.GlimpseTargetStack;
@@ -326,10 +327,7 @@ public class PlotInfoImpl implements PlotInfo
     @Override
     public int hashCode( )
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
-        return result;
+        return Objects.hashCode( id );
     }
 
     @Override
@@ -339,12 +337,7 @@ public class PlotInfoImpl implements PlotInfo
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
         PlotInfoImpl other = ( PlotInfoImpl ) obj;
-        if ( id == null )
-        {
-            if ( other.id != null ) return false;
-        }
-        else if ( !id.equals( other.id ) ) return false;
-        return true;
+        return Objects.equals( id, other.id );
     }
 
     public static Comparator<PlotInfo> getComparator( )

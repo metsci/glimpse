@@ -419,6 +419,14 @@ public class TextureAtlas
         drawImage( context, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ) );
     }
 
+    public void drawImage( GlimpseContext context, Object id, Axis2D axis, double positionX, double positionY, double scaleX, double scaleY, float[] rgba )
+    {
+        ImageDataInternal data = getImageDataInternal( id );
+        double ppvX = axis.getAxisX( ).getPixelsPerValue( );
+        double ppvY = axis.getAxisY( ).getPixelsPerValue( );
+        drawImage( context, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, data.getCenterX( ), data.getCenterY( ), rgba );
+    }
+
     /**
      * Draws an image from the TextureAtlas using the given GL handle. The icon is
      * centered on the provided positionX, positionY in axis space.
@@ -541,15 +549,13 @@ public class TextureAtlas
         drawImage( context, 1.0, 1.0, data, positionX, positionY, 1.0, 1.0, data.getCenterX( ), data.getCenterY( ) );
     }
 
-    protected void drawImage( GlimpseContext context, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
+    public void drawImage( GlimpseContext context, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY )
     {
         drawImage( context, ppvX, ppvY, data, positionX, positionY, scaleX, scaleY, centerX, centerY, DEFAULT_COLOR );
     }
 
     protected void drawImage( GlimpseContext context, double ppvX, double ppvY, ImageDataInternal data, double positionX, double positionY, double scaleX, double scaleY, int centerX, int centerY, float[] rgba )
     {
-        GL3 gl3 = context.getGL( ).getGL3( );
-
         double vppX = 1.0 / ppvX;
         double vppY = 1.0 / ppvY;
 

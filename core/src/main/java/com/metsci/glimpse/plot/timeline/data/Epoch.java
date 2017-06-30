@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.plot.timeline.data;
 
+import static com.metsci.glimpse.util.units.time.Time.*;
+import static java.lang.Math.*;
+
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -43,7 +46,8 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  */
 public class Epoch
 {
-    protected TimeStamp epoch;
+    protected final TimeStamp epoch;
+    protected final long epoch_PMILLIS;
 
     public static Epoch posixEpoch( )
     {
@@ -57,12 +61,23 @@ public class Epoch
 
     public Epoch( TimeStamp epoch )
     {
-        this.epoch = epoch;
+        this( epoch.toPosixMillis( ) );
+    }
+
+    public Epoch( long epoch_PMILLIS )
+    {
+        this.epoch_PMILLIS = epoch_PMILLIS;
+        this.epoch = TimeStamp.fromPosixMillis( epoch_PMILLIS );
     }
 
     public TimeStamp getTimeStamp( )
     {
         return this.epoch;
+    }
+
+    public long getPosixMillis( )
+    {
+        return this.epoch_PMILLIS;
     }
 
     /**
@@ -72,10 +87,25 @@ public class Epoch
      *
      * @param axisValue a value returned by an Axis1D
      * @return a TimeStamp representing an absolute time
+     * @see #fromTimeStamp(TimeStamp)
      */
     public TimeStamp toTimeStamp( double axisValue )
     {
-        return TimeStamp.fromPosixSeconds( axisValue + epoch.toPosixSeconds( ) );
+        return TimeStamp.fromPosixMillis( this.toPosixMillis( axisValue ) );
+    }
+
+    /**
+     * Converts a value along an Axis1D into an absolute time by interpreting
+     * the values along the Axis1D as offsets in seconds from the point in
+     * time represented by this Epoch.
+     *
+     * @param axisValue a value returned by an Axis1D
+     * @return a long representing an absolute time, in milliseconds since the posix epoch
+     * @see #fromPosixMillis(long)
+     */
+    public long toPosixMillis( double axisValue )
+    {
+        return ( this.epoch_PMILLIS + round( secondsToMilliseconds( axisValue ) ) );
     }
 
     /**
@@ -87,6 +117,38 @@ public class Epoch
      */
     public double fromTimeStamp( TimeStamp time )
     {
-        return time.toPosixSeconds( ) - epoch.toPosixSeconds( );
+        return this.fromPosixMillis( time.toPosixMillis( ) );
+    }
+
+    /**
+     * Converts a time to a value along an Axis1D.
+     *
+     * @param time an absolute time, in milliseconds since the posix epoch
+     * @return an Axis1D value
+     * @see #toPosixMillis(double)
+     */
+    public double fromPosixMillis( long time_PMILLIS )
+    {
+        return millisecondsToSeconds( time_PMILLIS - this.epoch_PMILLIS );
+    }
+
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 12347;
+        int result = 1;
+        result = prime * result + Long.hashCode( this.epoch_PMILLIS );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        Epoch other = ( Epoch ) o;
+        return ( other.epoch_PMILLIS == this.epoch_PMILLIS );
     }
 }

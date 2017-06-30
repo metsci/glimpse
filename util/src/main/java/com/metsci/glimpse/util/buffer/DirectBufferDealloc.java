@@ -92,6 +92,11 @@ public class DirectBufferDealloc
         }
     }
 
+    public static void deallocateDirectBuffer( Buffer directBuffer )
+    {
+        deallocateDirectBuffer0( directBuffer );
+    }
+
     public static void deallocateDirectBuffer0( Object directBuffer )
     {
         if ( directBufferClass.isInstance( directBuffer ) )

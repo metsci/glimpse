@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metsci.glimpse</groupId>
+        <artifactId>glimpse-parent</artifactId>
+        <version>CURRENT-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>glimpse-extras-tinylaf</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>net.sf.tinylaf</groupId>
+            <artifactId>tinylaf</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

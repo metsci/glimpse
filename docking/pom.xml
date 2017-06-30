@@ -9,4 +9,20 @@
 
     <artifactId>glimpse-docking</artifactId>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-util</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-extras-tinylaf</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+    </dependencies>
+
 </project>

@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.support.shader.colormap;
 
-import static javax.media.opengl.GL.*;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -94,7 +95,7 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
      */
     public ColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
-        initialize( colorAxis, targetTexUnit, colorTexUnit );
+        this.initialize( colorAxis, targetTexUnit, colorTexUnit );
     }
 
     protected void addShaders( )
@@ -107,8 +108,8 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     {
         this.addShaders( );
 
-        this.dataMin = this.addUniformData( new GLUniformData( "dataMin", getMin( colorAxis ) ) );
-        this.dataMax = this.addUniformData( new GLUniformData( "dataMax", getMax( colorAxis ) ) );
+        this.dataMin = this.addUniformData( new GLUniformData( "dataMin", this.getMin( colorAxis ) ) );
+        this.dataMax = this.addUniformData( new GLUniformData( "dataMax", this.getMax( colorAxis ) ) );
         this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
         this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
 
@@ -137,18 +138,18 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     @Override
     public void axisUpdated( Axis1D axis )
     {
-        dataMin.setData( getMin( axis ) );
-        dataMax.setData( getMax( axis ) );
+        this.dataMin.setData( this.getMin( axis ) );
+        this.dataMax.setData( this.getMax( axis ) );
     }
 
     public void setTargetTexUnit( int unit )
     {
-        dataTexUnit.setData( unit );
+        this.dataTexUnit.setData( unit );
     }
 
     public void setColorTexUnit( int unit )
     {
-        colorTexUnit.setData( unit );
+        this.colorTexUnit.setData( unit );
     }
 
     protected float getMin( Axis1D axis )
@@ -173,9 +174,9 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     @Override
     public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
     {
-        setOrtho( context, xMin, xMax, yMin, yMax );
+        this.setOrtho( context, xMin, xMax, yMin, yMax );
 
-        begin( context );
+        this.begin( context );
     }
 
     public void begin( GlimpseContext context )
@@ -184,15 +185,13 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     }
 
     @Override
-    public void useProgram( GL gl, boolean on )
+    public void doUseProgram( GL gl, boolean on )
     {
-        super.useProgram( gl, on );
-
         GL3 gl3 = gl.getGL3( );
 
         if ( this.handles == null )
         {
-            this.handles = new ProgramHandles( gl3, getShaderProgram( ).program( ) );
+            this.handles = new ProgramHandles( gl3, this.getShaderProgram( ).program( ) );
         }
 
         if ( on )
@@ -209,12 +208,12 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
 
     public void setAxisOrtho( GlimpseContext context, Axis2D axis )
     {
-        setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+        this.setOrtho( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
     }
 
     public void setPixelOrtho( GlimpseContext context, GlimpseBounds bounds )
     {
-        setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
+        this.setOrtho( context, 0, bounds.getWidth( ), 0, bounds.getHeight( ) );
     }
 
     public void setOrtho( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
@@ -226,7 +225,7 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     public void draw( GlimpseContext context, int mode, GLEditableBuffer xyVbo, GLEditableBuffer sVbo, int first, int count )
     {
         GL gl = context.getGL( );
-        draw( context, mode, xyVbo.deviceBuffer( gl ), sVbo.deviceBuffer( gl ), first, count );
+        this.draw( context, mode, xyVbo.deviceBuffer( gl ), sVbo.deviceBuffer( gl ), first, count );
     }
 
     @Override
@@ -235,10 +234,10 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         GL3 gl = context.getGL( ).getGL3( );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-        gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
-        gl.glVertexAttribPointer( handles.inS, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }
