@@ -41,6 +41,7 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -145,7 +146,7 @@ public class TimeYAxisPainter extends TimeAxisPainter
                 float jMin = ( float ) ( axis.valueToScreenPixel( fromTimeStamp( timeStruct.start ) ) + halfTextHeight );
                 float jMax = ( float ) ( axis.valueToScreenPixel( fromTimeStamp( timeStruct.end ) ) - halfTextHeight );
                 float jApprox = axis.valueToScreenPixel( fromTimeStamp( timeStruct.textCenter ) );
-                float j = Math.max( jMin, Math.min( jMax, jApprox ) );
+                float j = GeneralUtils.clamp( jApprox, jMin, jMax );
                 if ( j - halfTextHeight < 0 || j + halfTextHeight > height ) continue;
 
                 float i = ( float ) ( iTimeText - dateTextRightPadding - 1 );

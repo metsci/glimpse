@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1525,10 +1526,7 @@ public class TrackPainter extends GlimpsePainterBase
         @Override
         public int hashCode( )
         {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ( ( trackId == null ) ? 0 : trackId.hashCode( ) );
-            return result;
+            return Objects.hashCode( trackId );
         }
 
         @Override
@@ -1538,12 +1536,7 @@ public class TrackPainter extends GlimpsePainterBase
             if ( obj == null ) return false;
             if ( getClass( ) != obj.getClass( ) ) return false;
             LoadedTrack other = ( LoadedTrack ) obj;
-            if ( trackId == null )
-            {
-                if ( other.trackId != null ) return false;
-            }
-            else if ( !trackId.equals( other.trackId ) ) return false;
-            return true;
+            return Objects.equals( trackId, other.trackId );
         }
 
         public void dispose( GL gl )
@@ -1963,7 +1956,7 @@ public class TrackPainter extends GlimpsePainterBase
             final int prime = 31;
             int result = 1;
             result = prime * result + getOuterType( ).hashCode( );
-            result = prime * result + ( ( trackId == null ) ? 0 : trackId.hashCode( ) );
+            result = prime * result + Objects.hashCode( trackId );
             return result;
         }
 
@@ -1975,12 +1968,7 @@ public class TrackPainter extends GlimpsePainterBase
             if ( getClass( ) != obj.getClass( ) ) return false;
             Track other = ( Track ) obj;
             if ( !getOuterType( ).equals( other.getOuterType( ) ) ) return false;
-            if ( trackId == null )
-            {
-                if ( other.trackId != null ) return false;
-            }
-            else if ( !trackId.equals( other.trackId ) ) return false;
-            return true;
+            return Objects.equals( trackId, other.trackId );
         }
 
         private TrackPainter getOuterType( )

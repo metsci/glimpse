@@ -34,7 +34,7 @@ import java.awt.event.WindowStateListener;
 
 import javax.swing.JFrame;
 
-@SuppressWarnings("serial")
+@SuppressWarnings( "serial" )
 public class DockingFrame extends JFrame
 {
 
@@ -46,29 +46,46 @@ public class DockingFrame extends JFrame
     public DockingFrame( MultiSplitPane docker )
     {
         this.docker = docker;
-        setContentPane( docker );
+        this.setContentPane( docker );
 
         this.normalBounds = getBounds( );
-        addWindowStateListener( new WindowStateListener( )
+
+        this.addWindowStateListener( new WindowStateListener( )
         {
             @Override
-            public void windowStateChanged( WindowEvent ev ) { updateNormalBounds( ); }
+            public void windowStateChanged( WindowEvent ev )
+            {
+                updateNormalBounds( );
+            }
         } );
-        addComponentListener( new ComponentAdapter( )
+
+        this.addComponentListener( new ComponentAdapter( )
         {
             @Override
-            public void componentMoved( ComponentEvent ev ) { updateNormalBounds( ); }
+            public void componentMoved( ComponentEvent ev )
+            {
+                updateNormalBounds( );
+            }
+
             @Override
-            public void componentResized( ComponentEvent ev ) { updateNormalBounds( ); }
+            public void componentResized( ComponentEvent ev )
+            {
+                updateNormalBounds( );
+            }
         } );
     }
 
     protected void updateNormalBounds( )
     {
-        if ( getExtendedState( ) == NORMAL )
+        if ( this.getExtendedState( ) == NORMAL )
         {
-            this.normalBounds = getBounds( );
+            this.normalBounds = this.getBounds( );
         }
+    }
+
+    public void setNormalBounds( Rectangle bounds )
+    {
+        this.setNormalBounds( bounds.x, bounds.y, bounds.width, bounds.height );
     }
 
     public void setNormalBounds( int x, int y, int width, int height )

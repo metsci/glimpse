@@ -33,6 +33,8 @@ import static java.lang.Math.exp;
 import static java.lang.Math.log;
 import static java.lang.Math.sin;
 
+import java.io.Serializable;
+
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -42,8 +44,10 @@ import com.metsci.glimpse.util.vector.Vector2d;
  *
  * @author ulman
  */
-public class MercatorProjection implements GeoProjection
+public class MercatorProjection implements GeoProjection, Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     protected final double originLon;
 
     public MercatorProjection( double originLongitudeDeg )

@@ -26,30 +26,20 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncDefaultUserFlatDir;
-import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabaseDirsByName;
-import static com.metsci.glimpse.dnc.convert.Vpf2Flat.readVpfDatabase;
-import static com.metsci.glimpse.dnc.convert.Vpf2Flat.writeFlatDatabase;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.examples.dnc.DncExampleUtils.addTextListener;
-import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
-import static com.metsci.glimpse.examples.dnc.DncExampleUtils.setTreeEnabled;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
-import static javax.swing.JFileChooser.APPROVE_OPTION;
-import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
-import static javax.swing.JOptionPane.ERROR_MESSAGE;
-import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
-import static javax.swing.JOptionPane.showMessageDialog;
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
-import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
-import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
-import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static com.google.common.base.Charsets.*;
+import static com.metsci.glimpse.dnc.DncDataPaths.*;
+import static com.metsci.glimpse.dnc.convert.Vpf.*;
+import static com.metsci.glimpse.dnc.convert.Vpf2Flat.*;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
+import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static javax.swing.JFileChooser.*;
+import static javax.swing.JOptionPane.*;
+import static javax.swing.ScrollPaneConstants.*;
+import static javax.swing.WindowConstants.*;
 
 import java.awt.Component;
 import java.awt.Dimension;

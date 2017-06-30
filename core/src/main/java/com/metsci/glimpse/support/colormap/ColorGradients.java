@@ -30,10 +30,12 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 
@@ -296,6 +298,23 @@ public class ColorGradients
     public static final ColorGradient autumn = fromCSV( "colormap/matplotlib/autumn.csv" );
     public static final ColorGradient accent = fromCSV( "colormap/matplotlib/accent.csv" );
 
+    public static ColorGradient twoColorFade( float[] color1, float[] color2 )
+    {
+        List<float[]> list = new ArrayList<>( );
+        list.add( color1 );
+        list.add( color2 );
+        return nColorFade( list );
+    }
+
+    public static ColorGradient threeColorFade( float[] color1, float[] color2, float[] color3 )
+    {
+        List<float[]> list = new ArrayList<>( );
+        list.add( color1 );
+        list.add( color2 );
+        list.add( color3 );
+        return nColorFade( list );
+    }
+
     public static ColorGradient nColorFade( final List<float[]> colors )
     {
         return new ColorGradient( )
@@ -364,8 +383,8 @@ public class ColorGradients
                 gradient.toColor( fraction, rgba );
 
                 //convert rgb to hsl
-                float xMax = Math.max( Math.max( rgba[0], rgba[1] ), rgba[2] );
-                float xMin = Math.min( Math.min( rgba[0], rgba[1] ), rgba[2] );
+                float xMax = GeneralUtils.max( rgba[0], rgba[1], rgba[2] );
+                float xMin = GeneralUtils.min( rgba[0], rgba[1], rgba[2] );
                 float light = ( xMax + xMin ) / 2, sat = 0, hue = 0, temp2 = 0;
 
                 if ( xMin == xMax )
@@ -472,7 +491,7 @@ public class ColorGradients
     {
         FloatsArray f = new FloatsArray( );
         String line = null;
-        try ( BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ) )
+        try (BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ))
         {
             while ( ( line = reader.readLine( ) ) != null )
             {

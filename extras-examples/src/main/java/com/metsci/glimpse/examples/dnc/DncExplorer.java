@@ -26,28 +26,21 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
-import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
-import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
-import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
-import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccFeatures;
-import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_NIGHT;
-import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
-import static com.metsci.glimpse.docking.DockingGroup.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
-import static com.metsci.glimpse.examples.dnc.DncExampleUtils.initTinyLaf;
-import static com.metsci.glimpse.examples.dnc.DncExampleUtils.newLabel;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
-import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
-import static java.awt.Font.BOLD;
+import static com.metsci.glimpse.dnc.DncDataPaths.*;
+import static com.metsci.glimpse.dnc.DncProjections.*;
+import static com.metsci.glimpse.dnc.facc.FaccIo.*;
+import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
+import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
+import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
+import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static com.metsci.glimpse.util.GlimpseDataPaths.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.awt.Font.*;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -90,10 +83,7 @@ import com.metsci.glimpse.dnc.facc.FaccFeature;
 import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
-import com.metsci.glimpse.docking.DockingGroup.DockingGroupAdapter;
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
-import com.metsci.glimpse.docking.TileFactories.TileFactoryStandard;
+import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -118,7 +108,6 @@ public class DncExplorer
         initializeLogging( "dnc-examples/logging.properties" );
         fixPlatformQuirks( );
         initTinyLaf( );
-        DockingTheme dockingTheme = tinyLafDockingTheme( );
         ToolTipManager.sharedInstance( ).setLightWeightPopupEnabled( false );
         JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
@@ -332,13 +321,11 @@ public class DncExplorer
             };
 
             String appName = "dnc-explorer";
-            DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+            DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
 
-            TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
-
             GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
-            dockingGroup.restoreArrangement( groupArr, tileFactory, views );
+            dockingGroup.setArrangement( groupArr );
             dockingGroup.addListener( new DockingGroupAdapter( )
             {
                 public void disposingAllFrames( DockingGroup group )
@@ -348,6 +335,8 @@ public class DncExplorer
                     animator.stop( );
                 }
             } );
+
+            dockingGroup.addViews( views );
         } );
     }
 

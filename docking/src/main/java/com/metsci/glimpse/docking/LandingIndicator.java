@@ -51,8 +51,6 @@ import java.util.Collection;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-
 public class LandingIndicator
 {
 
@@ -127,7 +125,7 @@ public class LandingIndicator
 
                 JFrame frame = new JFrame( ".", config );
 
-                @SuppressWarnings("serial")
+                @SuppressWarnings( "serial" )
                 JPanel content = new JPanel( )
                 {
                     // Custom paint seems to reduce flickering

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.plot.timeline.animate;
 
+import java.util.Objects;
+
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 
 public class DragKey
@@ -50,8 +52,8 @@ public class DragKey
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( id == null ) ? 0 : id.hashCode( ) );
-        result = prime * result + ( top ? 1231 : 1237 );
+        result = prime * result + Objects.hashCode( id );
+        result = prime * result + Boolean.hashCode( top );
         return result;
     }
 
@@ -61,12 +63,8 @@ public class DragKey
         if ( this == obj ) return true;
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
-        DragKey other = ( DragKey ) obj;
-        if ( id == null )
-        {
-            if ( other.id != null ) return false;
-        }
-        else if ( !id.equals( other.id ) ) return false;
+        DragInfo other = ( DragInfo ) obj;
+        if ( !Objects.equals( id, other.info ) ) return false;
         if ( top != other.top ) return false;
         return true;
     }

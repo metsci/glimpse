@@ -66,12 +66,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.sf.tinylaf</groupId>
-            <artifactId>tinylaf</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-docking</artifactId>
             <version>${project.parent.version}</version>
@@ -84,18 +78,5 @@
         </dependency>
 
     </dependencies>
-
-    <!-- Use Java 8 for this module -->
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

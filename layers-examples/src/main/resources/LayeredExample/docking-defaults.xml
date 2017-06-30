@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<group xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://glimpse.metsci.com/docking">
+    <frames>
+        <frame>
+            <x>0</x>
+            <y>0</y>
+            <width>1500</width>
+            <height>900</height>
+            <docker xsi:type="Split">
+                <arrangeVertically>false</arrangeVertically>
+                <splitFrac>0.2</splitFrac>
+                <childA xsi:type="Tile">
+                    <views>
+                        <view>com.metsci.glimpse.layers.geo.LayeredGui.layerCardsView</view>
+                    </views>
+                    <selectedView>com.metsci.glimpse.layers.geo.LayeredGui.layerCardsView</selectedView>
+                    <isMaximized>false</isMaximized>
+                </childA>
+                <childB xsi:type="Split">
+                    <arrangeVertically>true</arrangeVertically>
+                    <splitFrac>0.7</splitFrac>
+                    <childA xsi:type="Tile">
+                        <views>
+                            <view>com.metsci.glimpse.layers.geo.GeoView:0</view>
+                        </views>
+                        <selectedView>com.metsci.glimpse.layers.geo.GeoView:0</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childA>
+                    <childB xsi:type="Tile">
+                        <views>
+                            <view>com.metsci.glimpse.layers.time.TimelineView:0</view>
+                        </views>
+                        <selectedView>com.metsci.glimpse.layers.time.TimelineView:0</selectedView>
+                        <isMaximized>false</isMaximized>
+                    </childB>
+                </childB>
+            </docker>
+        </frame>
+    </frames>
+</group>

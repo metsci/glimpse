@@ -27,9 +27,9 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingGroup.pruneEmptyTileAndFrame;
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
-import static com.metsci.glimpse.docking.MiscUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
@@ -43,7 +43,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
-import com.metsci.glimpse.docking.TileFactories.TileFactory;
 
 public class DockingMouseAdapter extends MouseAdapter
 {
@@ -153,7 +152,7 @@ public class DockingMouseAdapter extends MouseAdapter
             {
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, tileFactory );
-                pruneEmptyTileAndFrame( dockingGroup, tile );
+                pruneEmptyTileAndFrame( tile );
             }
 
             this.dragging = false;

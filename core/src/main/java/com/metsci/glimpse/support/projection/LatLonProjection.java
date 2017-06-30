@@ -48,6 +48,7 @@ public class LatLonProjection implements InvertibleProjection
 
     protected GeoProjection projection;
 
+    protected boolean crossesAntimeridian;
     protected boolean latIsX;
 
     public LatLonProjection( GeoProjection projection, double minLat, double maxLat, double minLon, double maxLon, boolean latIsX )
@@ -59,9 +60,11 @@ public class LatLonProjection implements InvertibleProjection
         this.maxLat = maxLat;
         this.minLon = minLon;
         this.maxLon = maxLon;
+        
+        this.crossesAntimeridian = maxLon < minLon;
 
         this.diffLat = ( this.maxLat - this.minLat );
-        this.diffLon = ( this.maxLon - this.minLon );
+        this.diffLon = ( ( this.crossesAntimeridian ? 360.0 : 0 ) + this.maxLon - this.minLon );
     }
 
     public LatLonProjection( GeoProjection projection, double minLat, double maxLat, double minLon, double maxLon )
@@ -127,7 +130,7 @@ public class LatLonProjection implements InvertibleProjection
 
         if ( latIsX ^ getX )
         {
-            return ( latLon.getLonDeg( ) - minLon ) / diffLon;
+            return ( ( this.crossesAntimeridian ? 360.0 : 0 ) + latLon.getLonDeg( ) - minLon ) / diffLon;
         }
         else
         {

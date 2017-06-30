@@ -142,6 +142,12 @@ public abstract class AbstractGlimpseCanvas implements GlimpseCanvas
     @Override
     public void dispose( )
     {
+        // Stop the animator so that disposeAttached runs immediately in this thread
+        // instead of on the animator thread. If this is not the case, then destroy( )
+        // could run first and then the getGLDrawable( ).invoke( ) call will do nothing
+        // because the window is already destroyed
+        this.getGLDrawable( ).setAnimator( null );
+
         disposeAttached( );
         destroy( );
     }

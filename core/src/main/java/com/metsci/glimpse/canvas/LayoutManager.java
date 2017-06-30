@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -148,10 +149,7 @@ public class LayoutManager
         @Override
         public int hashCode( )
         {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ( ( layout == null ) ? 0 : layout.hashCode( ) );
-            return result;
+            return Objects.hashCode( layout );
         }
 
         @Override
@@ -161,12 +159,7 @@ public class LayoutManager
             if ( obj == null ) return false;
             if ( getClass( ) != obj.getClass( ) ) return false;
             LayoutOrder other = ( LayoutOrder ) obj;
-            if ( layout == null )
-            {
-                if ( other.layout != null ) return false;
-            }
-            else if ( !layout.equals( other.layout ) ) return false;
-            return true;
+            return Objects.equals( layout, other.layout );
         }
     }
 

@@ -285,6 +285,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
     protected void initialize( )
     {
         initializeArrays( );
+        initializeCenterAxis( );
         initializeLayout( );
         initializePainters( );
         initializeLookAndFeel( );
@@ -299,7 +300,10 @@ public class MultiAxisPlot2D extends GlimpseLayout
         this.axesLeftY = new LinkedHashMap<String, AxisInfo>( );
 
         this.axesAll = new LinkedHashMap<String, AxisInfo>( );
+    }
 
+    protected void initializeCenterAxis( )
+    {
         this.centerAxisX = new Axis1D( );
         this.centerAxisY = new Axis1D( );
     }
@@ -734,6 +738,16 @@ public class MultiAxisPlot2D extends GlimpseLayout
         validate( );
 
         return info;
+    }
+
+    public BackgroundPainter getBackgroundPainter( )
+    {
+        return this.backgroundPainter;
+    }
+
+    public BackgroundPainter getPlotBackgroundPainter( )
+    {
+        return this.plotBackgroundPainter;
     }
 
     protected void attachAxisMouseListener( Mouseable mouseable, AxisMouseListener listener )
