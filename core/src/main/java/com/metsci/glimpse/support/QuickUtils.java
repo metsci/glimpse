@@ -10,6 +10,7 @@ import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
+import java.awt.Container;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -22,6 +23,7 @@ import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
@@ -149,10 +151,21 @@ public class QuickUtils
         onWindowClosing( frame, ( ev ) ->
         {
             animator.stop( );
-            canvas.getCanvas( ).setNEWTChild( null );
-            frame.getContentPane( ).remove( canvas );
-            canvas.destroy( );
+            tearDownCanvas( canvas );
         } );
+    }
+
+    public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
+    {
+        canvas.getCanvas( ).setNEWTChild( null );
+
+        Container parent = canvas.getParent( );
+        if ( parent != null )
+        {
+            parent.remove( canvas );
+        }
+
+        canvas.destroy( );
     }
 
 }

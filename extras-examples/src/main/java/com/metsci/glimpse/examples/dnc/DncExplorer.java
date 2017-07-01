@@ -36,6 +36,7 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
+import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.GlimpseDataPaths.*;
@@ -324,8 +325,7 @@ public class DncExplorer
                 {
                     attrsTableModel.dispose( );
                     animator.stop( );
-                    geoCanvas.getCanvas( ).setNEWTChild( null );
-                    geoCanvas.destroy( );
+                    tearDownCanvas( geoCanvas );
                 }
             } );
 

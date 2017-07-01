@@ -34,6 +34,7 @@ import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDis
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
@@ -100,10 +101,8 @@ public class GlimpseDockingExample
                     public void disposingAllFrames( DockingGroup group )
                     {
                         glAnimator.stop( );
-                        aCanvas.getCanvas( ).setNEWTChild( null );
-                        bCanvas.getCanvas( ).setNEWTChild( null );
-                        aCanvas.destroy( );
-                        bCanvas.destroy( );
+                        tearDownCanvas( aCanvas );
+                        tearDownCanvas( bCanvas );
                     }
                 } );
 
