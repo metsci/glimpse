@@ -59,6 +59,21 @@ public class DisposableUtils
         };
     }
 
+    public static Disposable addItemListener( ItemSelectable itemSelectable, Runnable listener )
+    {
+        return addItemListener( itemSelectable, ( ev ) -> listener.run( ) );
+    }
+
+    public static Disposable addItemListener( boolean runImmediately, ItemSelectable itemSelectable, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        return addItemListener( itemSelectable, listener );
+    }
+
     public static Disposable addComponent( Container container, Component child )
     {
         return addComponent( container, child, null );
