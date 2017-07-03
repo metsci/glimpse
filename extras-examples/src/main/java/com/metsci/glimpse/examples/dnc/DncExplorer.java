@@ -36,6 +36,7 @@ import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
+import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.GlimpseDataPaths.*;
@@ -85,7 +86,6 @@ import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -112,7 +112,6 @@ public class DncExplorer
         JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
 
-
         // Render config
         //
 
@@ -123,7 +122,6 @@ public class DncExplorer
         RenderCache renderCache = new RenderCache( renderConfig, 4 );
 
 
-
         // Query config
         //
 
@@ -132,7 +130,6 @@ public class DncExplorer
         queryConfig.proj = renderConfig.proj;
 
         QueryCache queryCache = new QueryCache( queryConfig, 4 );
-
 
 
         // Create plot
@@ -163,24 +160,21 @@ public class DncExplorer
         plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
 
-
         // Create attrs table
         //
 
-        Map<String,FaccFeature> faccFeatures = readFaccFeatures( );
-        Map<String,FaccAttr> faccAttrs = readFaccAttrs( );
+        Map<String, FaccFeature> faccFeatures = readFaccFeatures( );
+        Map<String, FaccAttr> faccAttrs = readFaccAttrs( );
         DncExplorerTreeTableModel attrsTableModel = new DncExplorerTreeTableModel( faccFeatures, faccAttrs );
         JXTreeTable attrsTable = new JXTreeTable( attrsTableModel );
         attrsTable.getTableHeader( ).setReorderingAllowed( false );
         JScrollPane attrsScroller = new JScrollPane( attrsTable );
 
 
-
         // Create prefs panel
         //
 
         JPanel prefsPanel = new JPanel( new MigLayout( "fillx, wrap 1", "[fill,grow]" ) );
-
 
         prefsPanel.add( newLabel( "Color Theme", BOLD ), "gapy 12" );
 
@@ -214,7 +208,6 @@ public class DncExplorer
 
         standardThemeRadio.setSelected( true );
 
-
         prefsPanel.add( new JSeparator( ), "gapy 12, growx" );
         prefsPanel.add( newLabel( "Coverages", BOLD ) );
 
@@ -229,7 +222,6 @@ public class DncExplorer
             coverageCheckbox.setSelected( true );
             prefsPanel.add( coverageCheckbox, "gapleft 8" );
         }
-
 
 
         // Query
@@ -259,12 +251,12 @@ public class DncExplorer
             Collection<DncChunkKey> chunkKeys = dncPainter.activeChunkKeys( );
 
             Axis1D xAxis = plot.getAxisX( );
-            float xMin = ( float ) ( xAxis.getSelectionCenter( ) - 0.5*xAxis.getSelectionSize( ) );
-            float xMax = ( float ) ( xAxis.getSelectionCenter( ) + 0.5*xAxis.getSelectionSize( ) );
+            float xMin = ( float ) ( xAxis.getSelectionCenter( ) - 0.5 * xAxis.getSelectionSize( ) );
+            float xMax = ( float ) ( xAxis.getSelectionCenter( ) + 0.5 * xAxis.getSelectionSize( ) );
 
             Axis1D yAxis = plot.getAxisY( );
-            float yMin = ( float ) ( yAxis.getSelectionCenter( ) - 0.5*yAxis.getSelectionSize( ) );
-            float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5*yAxis.getSelectionSize( ) );
+            float yMin = ( float ) ( yAxis.getSelectionCenter( ) - 0.5 * yAxis.getSelectionSize( ) );
+            float yMax = ( float ) ( yAxis.getSelectionCenter( ) + 0.5 * yAxis.getSelectionSize( ) );
 
             queries.add( new DncQuery( chunkKeys, xMin, xMax, yMin, yMax ) );
         };
@@ -274,6 +266,8 @@ public class DncExplorer
         startThread( "DncQuery", true, new ThrowingRunnable( )
         {
             DncQuery oldQuery = null;
+
+            @Override
             public void runThrows( ) throws Exception
             {
                 while ( true )
@@ -299,7 +293,6 @@ public class DncExplorer
         } );
 
 
-
         // Show
         //
 
@@ -315,28 +308,29 @@ public class DncExplorer
 
             View[] views =
             {
-                new View( "geoView",   geoCanvas,     "Geo",      false, null, requireIcon( "icons/fugue/map.png"        ) ),
+                new View( "geoView", geoCanvas, "Geo", false, null, requireIcon( "icons/fugue/map.png" ) ),
                 new View( "attrsView", attrsScroller, "Features", false, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
-                new View( "prefsView", prefsPanel,    "Prefs",    false, null, requireIcon( "icons/fugue/equalizer.png"  ) ),
+                new View( "prefsView", prefsPanel, "Prefs", false, null, requireIcon( "icons/fugue/equalizer.png" ) ),
             };
 
             String appName = "dnc-explorer";
             DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
+            setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( DncExplorer.class, "dnc-examples/docking-defaults.xml" ) );
 
-            GroupArrangement groupArr = loadDockingArrangement( appName, DncExplorer.class.getClassLoader( ).getResource( "dnc-examples/docking-defaults.xml" ) );
-            dockingGroup.setArrangement( groupArr );
             dockingGroup.addListener( new DockingGroupAdapter( )
             {
+                @Override
                 public void disposingAllFrames( DockingGroup group )
                 {
-                    saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                     attrsTableModel.dispose( );
                     animator.stop( );
+                    tearDownCanvas( geoCanvas );
                 }
             } );
 
             dockingGroup.addViews( views );
+
         } );
     }
 

@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static java.util.Objects.requireNonNull;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.util.Objects.*;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -91,6 +91,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwingGlimpseCanvas( String glProfile, GLContext context )
     {
         this( GLProfile.get( glProfile ), context );
@@ -99,6 +100,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     /**
      * @deprecated Use {@link #NewtSwingGlimpseCanvas(GLContext)} instead. The context implicitly provides a GLProfile.
      */
+    @Deprecated
     public NewtSwingGlimpseCanvas( GLProfile glProfile, GLContext context )
     {
         init( glProfile, context );

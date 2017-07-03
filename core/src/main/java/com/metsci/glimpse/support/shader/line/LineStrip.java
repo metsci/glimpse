@@ -26,11 +26,14 @@
  */
 package com.metsci.glimpse.support.shader.line;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.support.shader.line.LinePathData.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.support.shader.line.LinePathData.updateMileageBuffer;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.sliced;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -103,6 +106,12 @@ public class LineStrip
     public int actualSize( )
     {
         return ( this.xyBuffer.sizeFloats( ) / 2 );
+    }
+
+    public FloatBuffer logicalXys( )
+    {
+        FloatBuffer actualXys = this.xyBuffer.hostFloats( );
+        return sliced( actualXys, 2 * logicalToActualIndex( 0 ), 2 * this.logicalSize( ) );
     }
 
     public void clear( )

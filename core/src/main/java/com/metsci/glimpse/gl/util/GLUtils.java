@@ -55,12 +55,20 @@ public class GLUtils
     public static boolean getBooleanProperty( String name, boolean unsetValue )
     {
         String prop = System.getProperty( name );
+
+        // if the property is not set, return the default unsetValue
         if ( prop == null )
             return unsetValue;
+        // if the property was set, but no explicit value was provided, return !unsetValue
+        else if ( prop.isEmpty( ) )
+            return !unsetValue;
+        // if the property was set to an explicit true value, return true
         else if ( prop.equals( "1" ) || prop.equalsIgnoreCase( "true" ) )
             return true;
+        // if the property was set to an explicit false value, return false
         else if ( prop.equals( "0" ) || prop.equalsIgnoreCase( "false" ) )
             return false;
+        // if the property was set to an unrecognized value, return unsetValue
         else
             return unsetValue;
     }

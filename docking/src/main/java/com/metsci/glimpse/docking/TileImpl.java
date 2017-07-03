@@ -26,19 +26,15 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
-import static com.metsci.glimpse.util.var.VarUtils.addOldNewListener;
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_MITER;
+import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.util.var.VarUtils.*;
+import static java.awt.BasicStroke.*;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.BorderLayout.NORTH;
-import static java.lang.Math.max;
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createMatteBorder;
-import static javax.swing.SwingConstants.LEFT;
+import static java.lang.Math.*;
+import static javax.swing.BorderFactory.*;
+import static javax.swing.SwingConstants.*;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -253,7 +249,7 @@ public class TileImpl extends Tile
 
     protected final List<MouseAdapter> dockingMouseAdapters;
 
-    protected final Map<String,ViewEntry> viewMap;
+    protected final Map<String, ViewEntry> viewMap;
     protected final List<View> views;
     protected View selectedView;
 
@@ -604,7 +600,7 @@ public class TileImpl extends Tile
         viewMap.put( view.viewId, new ViewEntry( view, card, tab, overflowMenuItem, disposables ) );
         views.add( viewNum, view );
 
-        for ( TileListener listener : listeners )
+        for ( TileListener listener : new ArrayList<>( listeners ) )
         {
             listener.addedView( view );
         }
@@ -632,7 +628,7 @@ public class TileImpl extends Tile
         cardPanel.remove( viewEntry.card );
         views.remove( view );
 
-        for ( TileListener listener : listeners )
+        for ( TileListener listener : new ArrayList<>( listeners ) )
         {
             listener.removedView( view );
         }
@@ -682,7 +678,7 @@ public class TileImpl extends Tile
         topBar.doLayout( );
         topBar.repaint( );
 
-        for ( TileListener listener : listeners )
+        for ( TileListener listener : new ArrayList<>( listeners ) )
         {
             listener.selectedView( view );
         }
