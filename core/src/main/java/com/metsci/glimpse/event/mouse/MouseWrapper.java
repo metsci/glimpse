@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.event.mouse;
 
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.context.TargetStackUtil.*;
 
 import java.util.LinkedList;
 import java.util.List;

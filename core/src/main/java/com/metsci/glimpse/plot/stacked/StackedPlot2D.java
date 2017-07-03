@@ -39,6 +39,8 @@ import java.util.UUID;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
@@ -185,6 +187,13 @@ public class StackedPlot2D extends GlimpseLayout
         this.setZOrder( this.fullOverlayLayout, Integer.MAX_VALUE );
         this.setZOrder( this.overlayLayout, Integer.MAX_VALUE );
         this.setZOrder( this.underlayLayout, Integer.MIN_VALUE );
+    }
+
+    @Override
+    protected void preLayout( GlimpseTargetStack stack, GlimpseBounds bounds )
+    {
+        super.preLayout( stack, bounds );
+        getCommonAxis( ).setSizePixels( getOrientation( ) == Orientation.VERTICAL ? bounds.getWidth( ) : bounds.getHeight( ) );
     }
 
     protected void updatePainterLayout( )
@@ -428,6 +437,7 @@ public class StackedPlot2D extends GlimpseLayout
      * @deprecated {@link #removePlot(Object)}
      * @param id
      */
+    @Deprecated
     public void deletePlot( Object id )
     {
         removePlot( id );

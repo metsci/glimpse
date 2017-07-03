@@ -202,7 +202,10 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public void add( GLAutoDrawable drawable )
     {
-        this.targets.add( drawable );
+        if ( !this.targets.contains( drawable ) )
+        {
+            this.targets.add( drawable );
+        }
     }
 
     @Override

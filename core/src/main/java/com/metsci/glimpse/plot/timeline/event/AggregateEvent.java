@@ -150,4 +150,21 @@ public class AggregateEvent extends Event
     {
         throw new UnsupportedOperationException( "Aggregate events cannot be edited." );
     }
+
+    @Override
+    public int hashCode( )
+    {
+        return children.hashCode( );
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( getClass( ) != obj.getClass( ) ) return false;
+        AggregateEvent other = ( AggregateEvent ) obj;
+        if ( !children.equals( other.children ) ) return false;
+        return true;
+    }
 }

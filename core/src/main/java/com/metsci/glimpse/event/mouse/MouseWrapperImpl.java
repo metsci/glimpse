@@ -68,10 +68,7 @@ public abstract class MouseWrapperImpl<I> extends MouseWrapper<I>
         // save the old hovered stacks
         List<GlimpseTargetStack> oldHovered = clearHovered( );
 
-        // update hovered stacks
-        getContainingTargets( event );
-
-        // get the new hovered stacks
+        // get the new hovered stacks (should be empty since mouse left)
         List<GlimpseTargetStack> newHovered = getHovered( );
 
         // send mouseExited and mouseEntered events based on the old/new hovered stacks

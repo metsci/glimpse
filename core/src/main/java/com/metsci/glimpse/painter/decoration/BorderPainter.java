@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.painter.decoration;
 
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.put1f;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.put2f;
+
+import java.nio.FloatBuffer;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
@@ -186,92 +191,104 @@ public class BorderPainter extends GlimpsePainterBase
 
             if ( drawBottom )
             {
-                // upper quad
-                xyBuffer.grow2f( 0, 0 );
-                xyBuffer.grow2f( drawLeft ? inset_PX : 0, inset_PX );
-                xyBuffer.grow2f( drawRight ? width - inset_PX : width, inset_PX );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawLeft ? mileage + inset_PX : mileage );
-                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
+                // upper quad
+                put2f( vBuf, 0, 0 );
+                put2f( vBuf, drawLeft ? inset_PX : 0, inset_PX );
+                put2f( vBuf, drawRight ? width - inset_PX : width, inset_PX );
+
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawLeft ? mileage + inset_PX : mileage );
+                put1f( mBuf, drawRight ? mileage + width - inset_PX : mileage + width );
 
                 // lower quad
-                xyBuffer.grow2f( 0, 0 );
-                xyBuffer.grow2f( drawRight ? width - inset_PX : width, inset_PX );
-                xyBuffer.grow2f( width, 0 );
+                put2f( vBuf, 0, 0 );
+                put2f( vBuf, drawRight ? width - inset_PX : width, inset_PX );
+                put2f( vBuf, width, 0 );
 
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( width );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawRight ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, width );
 
                 mileage += width;
             }
 
             if ( drawRight )
             {
-                // upper quad
-                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuffer.grow2f( width - inset_PX, drawTop ? height - inset_PX : height );
-                xyBuffer.grow2f( width, height );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( drawBottom ? mileage + inset_PX : mileage );
-                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
-                mileageBuffer.grow1f( mileage + height );
+                // upper quad
+                put2f( vBuf, width - inset_PX, drawBottom ? inset_PX : 0 );
+                put2f( vBuf, width - inset_PX, drawTop ? height - inset_PX : height );
+                put2f( vBuf, width, height );
+
+                put1f( mBuf, drawBottom ? mileage + inset_PX : mileage );
+                put1f( mBuf, drawTop ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, mileage + height );
 
                 // lower quad
-                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuffer.grow2f( width, height );
-                xyBuffer.grow2f( width, 0 );
+                put2f( vBuf, width - inset_PX, drawBottom ? inset_PX : 0 );
+                put2f( vBuf, width, height );
+                put2f( vBuf, width, 0 );
 
-                mileageBuffer.grow1f( drawBottom ? mileage + inset_PX : mileage );
-                mileageBuffer.grow1f( mileage + height );
-                mileageBuffer.grow1f( mileage );
+                put1f( mBuf, drawBottom ? mileage + inset_PX : mileage );
+                put1f( mBuf, mileage + height );
+                put1f( mBuf, mileage );
 
                 mileage += height;
             }
 
             if ( drawTop )
             {
-                // upper quad
-                xyBuffer.grow2f( drawLeft ? inset_PX : 0, height - inset_PX );
-                xyBuffer.grow2f( 0, height );
-                xyBuffer.grow2f( width, height );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( mileage + width );
-                mileageBuffer.grow1f( mileage );
+                // upper quad
+                put2f( vBuf, drawLeft ? inset_PX : 0, height - inset_PX );
+                put2f( vBuf, 0, height );
+                put2f( vBuf, width, height );
+
+                put1f( mBuf, drawLeft ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, mileage + width );
+                put1f( mBuf, mileage );
 
                 // lower quad
-                xyBuffer.grow2f( drawLeft ? inset_PX : 0, height - inset_PX );
-                xyBuffer.grow2f( width, height );
-                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height - inset_PX );
+                put2f( vBuf, drawLeft ? inset_PX : 0, height - inset_PX );
+                put2f( vBuf, width, height );
+                put2f( vBuf, drawRight ? width - inset_PX : width, height - inset_PX );
 
-                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawRight ? mileage + inset_PX : mileage );
+                put1f( mBuf, drawLeft ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawRight ? mileage + inset_PX : mileage );
 
                 mileage += width;
             }
 
             if ( drawLeft )
             {
-                // upper quad
-                xyBuffer.grow2f( 0, 0 );
-                xyBuffer.grow2f( 0, height );
-                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( mileage + height );
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawTop ? mileage + inset_PX : mileage );
+                // upper quad
+                put2f( vBuf, 0, 0 );
+                put2f( vBuf, 0, height );
+                put2f( vBuf, inset_PX, drawTop ? height - inset_PX : height );
+
+                put1f( mBuf, mileage + height );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawTop ? mileage + inset_PX : mileage );
 
                 // lower quad
-                xyBuffer.grow2f( 0, 0 );
-                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
-                xyBuffer.grow2f( inset_PX, drawBottom ? inset_PX : 0 );
+                put2f( vBuf, 0, 0 );
+                put2f( vBuf, inset_PX, drawTop ? height - inset_PX : height );
+                put2f( vBuf, inset_PX, drawBottom ? inset_PX : 0 );
 
-                mileageBuffer.grow1f( mileage + height );
-                mileageBuffer.grow1f( drawTop ? mileage + inset_PX : mileage );
-                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, mileage + height );
+                put1f( mBuf, drawTop ? mileage + inset_PX : mileage );
+                put1f( mBuf, drawBottom ? mileage + height - inset_PX : mileage + height );
 
                 mileage += height;
             }
@@ -310,92 +327,104 @@ public class BorderPainter extends GlimpsePainterBase
 
             if ( drawBottom )
             {
-                // upper quad
-                xyBuffer.grow2f( drawLeft ? inset_PX : 0, 0 );
-                xyBuffer.grow2f( drawLeft ? inset_PX : 0, inset_PX );
-                xyBuffer.grow2f( width, inset_PX );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                // upper quad
+                put2f( vBuf, drawLeft ? inset_PX : 0, 0 );
+                put2f( vBuf, drawLeft ? inset_PX : 0, inset_PX );
+                put2f( vBuf, width, inset_PX );
+
+                put1f( mBuf, mileage );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawLeft ? mileage + width - inset_PX : mileage + width );
 
                 // lower quad
-                xyBuffer.grow2f( drawLeft ? inset_PX : 0, 0 );
-                xyBuffer.grow2f( width, inset_PX );
-                xyBuffer.grow2f( width, 0 );
+                put2f( vBuf, drawLeft ? inset_PX : 0, 0 );
+                put2f( vBuf, width, inset_PX );
+                put2f( vBuf, width, 0 );
 
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( drawLeft ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawLeft ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, drawLeft ? mileage + width - inset_PX : mileage + width );
 
                 mileage += drawLeft ? width - inset_PX : width;
             }
 
             if ( drawRight )
             {
-                // upper quad
-                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuffer.grow2f( width - inset_PX, height );
-                xyBuffer.grow2f( width, height );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
-                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
+                // upper quad
+                put2f( vBuf, width - inset_PX, drawBottom ? inset_PX : 0 );
+                put2f( vBuf, width - inset_PX, height );
+                put2f( vBuf, width, height );
+
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawBottom ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, drawBottom ? mileage + height - inset_PX : mileage + height );
 
                 // lower quad
-                xyBuffer.grow2f( width - inset_PX, drawBottom ? inset_PX : 0 );
-                xyBuffer.grow2f( width, height );
-                xyBuffer.grow2f( width, drawBottom ? inset_PX : 0 );
+                put2f( vBuf, width - inset_PX, drawBottom ? inset_PX : 0 );
+                put2f( vBuf, width, height );
+                put2f( vBuf, width, drawBottom ? inset_PX : 0 );
 
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawBottom ? mileage + height - inset_PX : mileage + height );
-                mileageBuffer.grow1f( mileage );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawBottom ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, mileage );
 
                 mileage += drawBottom ? height - inset_PX : height;
             }
 
             if ( drawTop )
             {
-                // upper quad
-                xyBuffer.grow2f( 0, height - inset_PX );
-                xyBuffer.grow2f( 0, height );
-                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( mileage );
+                // upper quad
+                put2f( vBuf, 0, height - inset_PX );
+                put2f( vBuf, 0, height );
+                put2f( vBuf, drawRight ? width - inset_PX : width, height );
+
+                put1f( mBuf, drawRight ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, drawRight ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, mileage );
 
                 // lower quad
-                xyBuffer.grow2f( 0, height - inset_PX );
-                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height );
-                xyBuffer.grow2f( drawRight ? width - inset_PX : width, height - inset_PX );
+                put2f( vBuf, 0, height - inset_PX );
+                put2f( vBuf, drawRight ? width - inset_PX : width, height );
+                put2f( vBuf, drawRight ? width - inset_PX : width, height - inset_PX );
 
-                mileageBuffer.grow1f( drawRight ? mileage + width - inset_PX : mileage + width );
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( mileage );
+                put1f( mBuf, drawRight ? mileage + width - inset_PX : mileage + width );
+                put1f( mBuf, mileage );
+                put1f( mBuf, mileage );
 
                 mileage += drawRight ? width - inset_PX : width;
             }
 
             if ( drawLeft )
             {
-                // upper quad
-                xyBuffer.grow2f( 0, 0 );
-                xyBuffer.grow2f( 0, drawTop ? height - inset_PX : height );
-                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
+                FloatBuffer vBuf = xyBuffer.growFloats( 12 );
+                FloatBuffer mBuf = mileageBuffer.growFloats( 6 );
 
-                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( mileage );
+                // upper quad
+                put2f( vBuf, 0, 0 );
+                put2f( vBuf, 0, drawTop ? height - inset_PX : height );
+                put2f( vBuf, inset_PX, drawTop ? height - inset_PX : height );
+
+                put1f( mBuf, drawTop ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, mileage );
+                put1f( mBuf, mileage );
 
                 // lower quad
-                xyBuffer.grow2f( 0, 0 );
-                xyBuffer.grow2f( inset_PX, drawTop ? height - inset_PX : height );
-                xyBuffer.grow2f( inset_PX, 0 );
+                put2f( vBuf, 0, 0 );
+                put2f( vBuf, inset_PX, drawTop ? height - inset_PX : height );
+                put2f( vBuf, inset_PX, 0 );
 
-                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
-                mileageBuffer.grow1f( mileage );
-                mileageBuffer.grow1f( drawTop ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, drawTop ? mileage + height - inset_PX : mileage + height );
+                put1f( mBuf, mileage );
+                put1f( mBuf, drawTop ? mileage + height - inset_PX : mileage + height );
             }
 
             prog.draw( gl, xyBuffer, mileageBuffer, rgba );
