@@ -40,6 +40,8 @@ import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
+import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.gl.GLEventAdapter;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -210,6 +212,16 @@ public class DisposableUtils
         return ( ) ->
         {
             delegatePainter.removePainter( painter );
+        };
+    }
+
+    public static Disposable addAxisListener1D( Axis1D axis, AxisListener1D listener )
+    {
+        axis.addAxisListener( listener );
+
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener );
         };
     }
 
