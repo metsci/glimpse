@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.util.Objects.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.util.Objects.requireNonNull;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -130,8 +130,9 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     {
         this.glProfile = glProfile;
         this.glCapabilities = new GLCapabilities( glProfile );
+        this.glCapabilities.setStencilBits( 1 );
 
-        this.glWindow = createGLWindow( glCapabilities );
+        this.glWindow = createGLWindow( this.glCapabilities );
         if ( context != null ) this.glWindow.setSharedContext( context );
         this.glListener = createGLEventListener( );
         this.glWindow.addGLEventListener( this.glListener );

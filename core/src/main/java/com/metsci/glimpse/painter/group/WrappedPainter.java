@@ -82,7 +82,7 @@ public class WrappedPainter extends GlimpsePainterBase
 
     public WrappedPainter( )
     {
-        this( false );
+        this( true );
     }
 
     public WrappedPainter( boolean attachStencilBuffer )
