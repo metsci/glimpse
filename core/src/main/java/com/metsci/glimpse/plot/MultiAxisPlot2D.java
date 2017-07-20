@@ -696,6 +696,11 @@ public class MultiAxisPlot2D extends GlimpseLayout
         this.getLayoutCenter( ).removeAllGlimpseListeners( );
     }
     
+    public AxisMouseListener getLayoutCenterMouseListener( )
+    {
+        return this.mouseListenerXY;
+    }
+    
     //////////////////////////////////////
     //      Axis Creation Methods       //
     //////////////////////////////////////
