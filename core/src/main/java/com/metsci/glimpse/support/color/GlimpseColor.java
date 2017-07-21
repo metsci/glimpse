@@ -28,6 +28,7 @@ package com.metsci.glimpse.support.color;
 
 import java.awt.Color;
 import java.text.ParseException;
+import java.util.Arrays;
 
 import javax.media.opengl.GL;
 
@@ -186,6 +187,19 @@ public class GlimpseColor
 
             newColor[i] = color;
         }
+
+        return newColor;
+    }
+
+    public static float[] opaque( float[] color )
+    {
+        return withAlpha( color, 1f );
+    }
+
+    public static float[] withAlpha( float[] color, float newAlpha )
+    {
+        float[] newColor = Arrays.copyOf( color, 4 );
+        newColor[ 3 ] = newAlpha;
 
         return newColor;
     }
