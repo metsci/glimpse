@@ -138,6 +138,14 @@ public class GLUtils
     }
 
     /**
+     * See {@link #enableStandardBlending(GL)}.
+     */
+    public static void enableStandardBlending( GlimpseContext context )
+    {
+        enableStandardBlending( context.getGL( ) );
+    }
+
+    /**
      * Enables blending, and set the blend func that gives the intuitive
      * behavior for most situations.
      * <p>
@@ -158,6 +166,14 @@ public class GLUtils
     {
         gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_BLEND );
+    }
+
+    /**
+     * See {@link #disableBlending(GL)}.
+     */
+    public static void disableBlending( GlimpseContext context )
+    {
+        disableBlending( context.getGL( ) );
     }
 
     public static void disableBlending( GL gl )
