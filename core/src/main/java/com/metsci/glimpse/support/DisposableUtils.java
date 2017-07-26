@@ -227,6 +227,21 @@ public class DisposableUtils
         };
     }
 
+    public static Disposable addAxisListener1D( Axis1D axis, Runnable listener )
+    {
+        AxisListener1D listener2 = ( x ) ->
+        {
+            listener.run( );
+        };
+
+        axis.addAxisListener( listener2 );
+
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener2 );
+        };
+    }
+
     public static Disposable addAxisConstraint( TaggedAxis1D axis, Constraint constraint )
     {
         axis.addConstraint( constraint );
