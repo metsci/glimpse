@@ -36,10 +36,12 @@ import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 
-import com.jogamp.newt.event.MouseAdapter;
-import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.context.TargetStackUtil;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.layout.SimpleLayoutExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
@@ -86,23 +88,24 @@ public class PopupMenuExample
 
     protected static GlimpseLayout buildPlot( final NewtSwingGlimpseCanvas canvas ) throws Exception
     {
-        GlimpseLayout layout = new SimpleLayoutExample( ).getLayout( );
+        SimpleLayoutExample layout = new SimpleLayoutExample( );
 
         final JPopupMenu _popupMenu = createPopupMenu( );
 
-        canvas.getGLWindow( ).addMouseListener( new MouseAdapter( )
+        layout.getLeftPlot( ).getLayoutCenter( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
         {
             @Override
-            public void mouseClicked( MouseEvent event )
+            public void mousePressed( GlimpseMouseEvent event )
             {
-                if ( event.getButton( ) == MouseEvent.BUTTON3 )
+                if ( event.isButtonDown( MouseButton.Button3 ) )
                 {
+                    event = TargetStackUtil.translateCoordinates( event, canvas );
                     _popupMenu.show( canvas, event.getX( ), event.getY( ) );
                 }
             }
         } );
 
-        return layout;
+        return layout.getLayout( );
     }
 
     private static JPopupMenu createPopupMenu( )
