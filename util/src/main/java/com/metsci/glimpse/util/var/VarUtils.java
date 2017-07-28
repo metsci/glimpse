@@ -26,17 +26,21 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static com.google.common.base.Objects.*;
-import static com.google.common.collect.Sets.*;
-import static java.util.Collections.*;
+import static com.google.common.base.Objects.equal;
+import static com.google.common.collect.Sets.difference;
+import static java.util.Collections.emptySet;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import com.google.common.collect.ImmutableMap;
 
 public class VarUtils
 {
@@ -150,6 +154,69 @@ public class VarUtils
                 }
 
                 this.entriesOld = entriesNew;
+            }
+        } );
+    }
+
+    public static <K,V> Disposable addEntryVarListener( ReadableVar<ImmutableMap<K,? extends ReadableVar<V>>> mapVar, BiConsumer<? super VarEvent,? super K> listener )
+    {
+        return mapVar.addListener( true, new Consumer<VarEvent>( )
+        {
+            private final Map<ReadableVar<?>,Disposable> disposables = new HashMap<>( );
+            private ImmutableMap<K,? extends ReadableVar<V>> mapOld = null;
+
+            @Override
+            public void accept( VarEvent mapEv )
+            {
+                Set<K> keysUpdated = new LinkedHashSet<>( );
+
+                ImmutableMap<K,? extends ReadableVar<V>> mapNew = mapVar.v( );
+
+                if ( this.mapOld != null )
+                {
+                    for ( Entry<K,? extends ReadableVar<V>> en : this.mapOld.entrySet( ) )
+                    {
+                        K key = en.getKey( );
+                        ReadableVar<V> varOld = en.getValue( );
+                        ReadableVar<V> varNew = ( mapNew == null ? null : mapNew.get( key ) );
+                        if ( varNew != varOld )
+                        {
+                            if ( varOld != null )
+                            {
+                                this.disposables.remove( varOld ).dispose( );
+                            }
+                            keysUpdated.add( key );
+                        }
+                    }
+                }
+
+                if ( mapNew != null )
+                {
+                    for ( Entry<K,? extends ReadableVar<V>> en : mapNew.entrySet( ) )
+                    {
+                        K key = en.getKey( );
+                        ReadableVar<V> varNew = en.getValue( );
+                        ReadableVar<V> varOld = ( this.mapOld == null ? null : this.mapOld.get( key ) );
+                        if ( varNew != varOld )
+                        {
+                            if ( varNew != null )
+                            {
+                                this.disposables.put( varNew, varNew.addListener( false, ( ev ) ->
+                                {
+                                    listener.accept( ev, key );
+                                } ) );
+                            }
+                            keysUpdated.add( key );
+                        }
+                    }
+                }
+
+                this.mapOld = mapNew;
+
+                for ( K key : keysUpdated )
+                {
+                    listener.accept( mapEv, key );
+                }
             }
         } );
     }
