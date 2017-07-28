@@ -49,6 +49,8 @@ import com.metsci.glimpse.gl.GLEventAdapter;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
+import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class DisposableUtils
@@ -249,6 +251,16 @@ public class DisposableUtils
         return ( ) ->
         {
             axis.removeConstraint( constraint.getName( ) );
+        };
+    }
+
+    public static Disposable addEventPlotListener( EventPlotInfo eventPlotInfo, EventPlotListener listener )
+    {
+        eventPlotInfo.addEventPlotListener( listener );
+
+        return ( ) ->
+        {
+            eventPlotInfo.removeEventPlotListener( listener );
         };
     }
 
