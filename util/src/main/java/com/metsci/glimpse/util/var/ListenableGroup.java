@@ -58,12 +58,12 @@ public class ListenableGroup<T> implements Listenable<T>
     @Override
     public Disposable addListener( boolean runImmediately, Consumer<T> listener )
     {
-        DisposableGroup bindings = new DisposableGroup( );
+        DisposableGroup disposables = new DisposableGroup( );
         for ( Listenable<T> member : this.members )
         {
-            bindings.add( member.addListener( runImmediately, listener ) );
+            disposables.add( member.addListener( runImmediately, listener ) );
         }
-        return bindings;
+        return disposables;
     }
 
 }
