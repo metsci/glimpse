@@ -133,6 +133,28 @@ public class FrameUtils
     }
 
     /**
+     * WindowListeners are normally run in the order that Window.addWindowListener was called. This
+     * helper method inserts a WindowListener at the front of the list of listeners by removing all
+     * the existing listeners, inserting the new listener, and re-adding all the other listener in order.
+     */
+    public static void addWindowListenerFirst( Window window, WindowListener firstListener )
+    {
+        WindowListener[] listeners = window.getWindowListeners( );
+
+        for ( WindowListener listener : listeners )
+        {
+            window.removeWindowListener( listener );
+        }
+
+        window.addWindowListener( firstListener );
+
+        for ( WindowListener listener : listeners )
+        {
+            window.addWindowListener( listener );
+        }
+    }
+
+    /**
      * Size the frame, center it, and make it visible.
      *
      * The frame is sized to take up 85% of available horizontal and vertical space.
@@ -190,11 +212,24 @@ public class FrameUtils
      */
     public static void centerFrame( Frame frame, double screenExtentFraction )
     {
+        centerFrame( frame, screenFracSize( screenExtentFraction ) );
+    }
+
+    public static Dimension screenFracSize( double screenFrac )
+    {
         Rectangle maxWindowBounds = GraphicsEnvironment.getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
-        float frac = ( float ) screenExtentFraction;
-        int width = round( frac * maxWindowBounds.width );
-        int height = round( frac * maxWindowBounds.height );
-        centerFrame( frame, width, height );
+        int width = ( int ) round( screenFrac * maxWindowBounds.width );
+        int height = ( int ) round( screenFrac * maxWindowBounds.height );
+        return new Dimension( width, height );
+    }
+
+    /**
+     * Size the frame, and center it on the screen (usually the screen of the primary monitor,
+     * but may vary based on the platform's window manager). Does not make the frame visible.
+     */
+    public static void centerFrame( Frame frame, Dimension size )
+    {
+        centerFrame( frame, size.width, size.height );
     }
 
     /**

@@ -123,9 +123,20 @@ public abstract class AxisMouseListener implements GlimpseMouseAllListener
 
     public void mousePressed( GlimpseMouseEvent e, Axis1D axis, boolean horizontal )
     {
-        if ( e.isButtonDown( MouseButton.Button3 ) )
+        if ( e.isButtonDown( MouseButton.Button1 ) )
         {
+            anchor( axis, horizontal, e.getX( ), e.getY( ) );
+        }
+        else if ( e.isButtonDown( MouseButton.Button3 ) )
+        {
+            boolean wasLocked = axis.isSelectionLocked( );
+
             toggleSelectionLock( axis );
+
+            if ( wasLocked && !axis.isSelectionLocked( ) )
+            {
+                move( axis, horizontal, e.getX( ), e.getY( ) );
+            }
         }
     }
 

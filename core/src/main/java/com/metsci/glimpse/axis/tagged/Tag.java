@@ -29,6 +29,7 @@ package com.metsci.glimpse.axis.tagged;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.support.colormap.ColorGradient;
@@ -165,7 +166,7 @@ public class Tag
     @Override
     public int hashCode( )
     {
-        return 31 + ( ( name == null ) ? 0 : name.hashCode( ) );
+        return Objects.hash( name );
     }
 
     @Override
@@ -175,8 +176,7 @@ public class Tag
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
         Tag other = ( Tag ) obj;
-        if ( name == null ) return other.name == null;
-        return name.equals( other.name );
+        return Objects.equals( name,  other.name );
     }
 
     @Override

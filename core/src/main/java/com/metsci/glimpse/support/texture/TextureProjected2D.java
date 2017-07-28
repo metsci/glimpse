@@ -121,7 +121,7 @@ public abstract class TextureProjected2D implements DrawableTexture
 
         this.dataSizeX = dataSizeX;
         this.dataSizeY = dataSizeY;
-        this.data = newByteBuffer( );
+        this.data = this.newByteBuffer( );
     }
 
     protected abstract void prepare_setData( GL gl );
@@ -132,10 +132,10 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     public double getDataValue( double coordX, double coordY )
     {
-        lock.lock( );
+        this.lock.lock( );
         try
         {
-            Projection projection = getProjection( );
+            Projection projection = this.getProjection( );
 
             if ( projection == null ) return 0.0;
 
@@ -146,15 +146,15 @@ public abstract class TextureProjected2D implements DrawableTexture
                 double fracX = invProjection.getTextureFractionX( coordX, coordY );
                 double fracY = invProjection.getTextureFractionY( coordX, coordY );
 
-                int x = ( int ) Math.floor( fracX * dataSizeX );
-                int y = ( int ) Math.floor( fracY * dataSizeY );
+                int x = ( int ) Math.floor( fracX * this.dataSizeX );
+                int y = ( int ) Math.floor( fracY * this.dataSizeY );
 
-                return getDataValue( x, y );
+                return this.getDataValue( x, y );
             }
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
 
         return 0.0;
@@ -162,16 +162,16 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     public float getDataValue( int indexX, int indexY )
     {
-        lock.lock( );
+        this.lock.lock( );
         try
         {
-            if ( indexX < 0 || indexY < 0 || indexX >= dataSizeX || indexY >= dataSizeY ) return 0.0f;
+            if ( indexX < 0 || indexY < 0 || indexX >= this.dataSizeX || indexY >= this.dataSizeY ) return 0.0f;
 
-            return getData( indexY * dataSizeX + indexX );
+            return this.getData( indexY * this.dataSizeX + indexX );
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
     }
 
@@ -183,7 +183,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     @Override
     public int[] getHandles( )
     {
-        return textureHandles;
+        return this.textureHandles;
     }
 
     @Override
@@ -195,7 +195,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     @Override
     public boolean isDirty( )
     {
-        return dirty || projectionDirty;
+        return this.dirty || this.projectionDirty;
     }
 
     @Override
@@ -210,9 +210,9 @@ public abstract class TextureProjected2D implements DrawableTexture
         switch ( n )
         {
             case 0:
-                return dataSizeX;
+                return this.dataSizeX;
             case 1:
-                return dataSizeY;
+                return this.dataSizeY;
             default:
                 return 0;
         }
@@ -224,49 +224,49 @@ public abstract class TextureProjected2D implements DrawableTexture
         GL gl = context.getGL( );
 
         // should we check for dirtiness and allocation before lock to speed up?
-        lock.lock( );
+        this.lock.lock( );
         try
         {
-            if ( !glAllocated )
+            if ( !this.glAllocated )
             {
-                allocate_calcSizes( gl );
-                allocate_genTextureHandles( gl );
-                allocate_genBuffers( gl );
+                this.allocate_calcSizes( gl );
+                this.allocate_genTextureHandles( gl );
+                this.allocate_genBuffers( gl );
             }
 
-            prepare_glState( gl );
+            this.prepare_glState( gl );
 
-            if ( glAllocated && dirty )
+            if ( this.glAllocated && this.dirty )
             {
-                prepare_setData( gl );
-                dirty = false;
+                this.prepare_setData( gl );
+                this.dirty = false;
             }
 
-            if ( glAllocated && projectionDirty )
+            if ( this.glAllocated && this.projectionDirty )
             {
-                prepare_setCoords( gl );
-                projectionDirty = false;
+                this.prepare_setCoords( gl );
+                this.projectionDirty = false;
 
             }
 
-            return !isDirty( );
+            return !this.isDirty( );
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
     }
 
     public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit )
     {
-        draw( context, program, texUnit, Collections.<TextureUnit<Texture>> emptyList( ) );
+        this.draw( context, program, texUnit, Collections.<TextureUnit<Texture>> emptyList( ) );
     }
 
     @Override
     public void draw( GlimpseContext context, DrawableTextureProgram program, int texUnit, Collection<TextureUnit<Texture>> multiTextureList )
     {
         // prepare our texture
-        boolean ready = prepare( context, texUnit );
+        boolean ready = this.prepare( context, texUnit );
         if ( !ready )
         {
             logger.log( WARNING, "Unable to make ready." );
@@ -291,7 +291,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         program.begin( context, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
         try
         {
-            for ( int i = 0; i < numTextures; i++ )
+            for ( int i = 0; i < this.numTextures; i++ )
             {
                 // this TexturProjected2D defines the quad bounds to draw, but when
                 // multitexturing we also need to bind the others textures which
@@ -313,14 +313,14 @@ public abstract class TextureProjected2D implements DrawableTexture
                     gl.glBindTexture( type, texture.getHandles( )[i >= handles.length ? 0 : i] );
                 }
 
-                int type = getTextureType( );
+                int type = this.getTextureType( );
 
                 gl.glActiveTexture( getGLTextureUnit( texUnit ) );
-                gl.glBindTexture( type, textureHandles[i] );
+                gl.glBindTexture( type, this.textureHandles[i] );
 
-                int vertexCount = VERTICES_PER_QUAD * texQuadCounts[i];
+                int vertexCount = VERTICES_PER_QUAD * this.texQuadCounts[i];
 
-                program.draw( context, GL.GL_TRIANGLES, vertexCoordHandles[i], texCoordHandles[i], 0, vertexCount );
+                program.draw( context, GL.GL_TRIANGLES, this.vertexCoordHandles[i], this.texCoordHandles[i], 0, vertexCount );
             }
         }
         finally
@@ -334,19 +334,19 @@ public abstract class TextureProjected2D implements DrawableTexture
     {
         GL gl = context.getGL( );
 
-        if ( textureHandles != null && textureHandles.length != 0 )
+        if ( this.textureHandles != null && this.textureHandles.length != 0 )
         {
-            gl.glDeleteTextures( textureHandles.length, textureHandles, 0 );
+            gl.glDeleteTextures( this.textureHandles.length, this.textureHandles, 0 );
         }
 
-        if ( vertexCoordHandles != null && vertexCoordHandles.length != 0 )
+        if ( this.vertexCoordHandles != null && this.vertexCoordHandles.length != 0 )
         {
-            gl.glDeleteBuffers( vertexCoordHandles.length, vertexCoordHandles, 0 );
+            gl.glDeleteBuffers( this.vertexCoordHandles.length, this.vertexCoordHandles, 0 );
         }
 
-        if ( texCoordHandles != null && texCoordHandles.length != 0 )
+        if ( this.texCoordHandles != null && this.texCoordHandles.length != 0 )
         {
-            gl.glDeleteBuffers( texCoordHandles.length, texCoordHandles, 0 );
+            gl.glDeleteBuffers( this.texCoordHandles.length, this.texCoordHandles, 0 );
         }
     }
 
@@ -364,85 +364,85 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     protected void allocate_calcSizes( GL gl )
     {
-        maxTextureSize = getMaxGLTextureSize( gl );
+        this.maxTextureSize = getMaxGLTextureSize( gl );
 
-        textureCountX = dataSizeX / maxTextureSize;
-        textureCountY = dataSizeY / maxTextureSize;
+        this.textureCountX = this.dataSizeX / this.maxTextureSize;
+        this.textureCountY = this.dataSizeY / this.maxTextureSize;
 
-        if ( dataSizeX % maxTextureSize != 0 ) textureCountX++;
-        if ( dataSizeY % maxTextureSize != 0 ) textureCountY++;
+        if ( this.dataSizeX % this.maxTextureSize != 0 ) this.textureCountX++;
+        if ( this.dataSizeY % this.maxTextureSize != 0 ) this.textureCountY++;
 
-        numTextures = textureCountX * textureCountY;
+        this.numTextures = this.textureCountX * this.textureCountY;
     }
 
     protected void allocate_genTextureHandles( GL gl )
     {
-        if ( textureHandles != null && textureHandles.length != 0 )
+        if ( this.textureHandles != null && this.textureHandles.length != 0 )
         {
-            gl.glDeleteTextures( textureHandles.length, textureHandles, 0 );
+            gl.glDeleteTextures( this.textureHandles.length, this.textureHandles, 0 );
         }
 
-        if ( numTextures == 0 || projection == null ) return;
+        if ( this.numTextures == 0 || this.projection == null ) return;
 
-        textureHandles = new int[numTextures];
-        gl.glGenTextures( numTextures, textureHandles, 0 );
+        this.textureHandles = new int[this.numTextures];
+        gl.glGenTextures( this.numTextures, this.textureHandles, 0 );
 
     }
 
     protected void allocate_genBuffers( GL gl )
     {
-        if ( vertexCoordHandles != null && vertexCoordHandles.length != 0 )
+        if ( this.vertexCoordHandles != null && this.vertexCoordHandles.length != 0 )
         {
-            gl.glDeleteBuffers( vertexCoordHandles.length, vertexCoordHandles, 0 );
+            gl.glDeleteBuffers( this.vertexCoordHandles.length, this.vertexCoordHandles, 0 );
         }
 
-        if ( texCoordHandles != null && texCoordHandles.length != 0 )
+        if ( this.texCoordHandles != null && this.texCoordHandles.length != 0 )
         {
-            gl.glDeleteBuffers( texCoordHandles.length, texCoordHandles, 0 );
+            gl.glDeleteBuffers( this.texCoordHandles.length, this.texCoordHandles, 0 );
         }
 
-        if ( numTextures == 0 || projection == null ) return;
+        if ( this.numTextures == 0 || this.projection == null ) return;
 
-        vertexCoordHandles = new int[numTextures];
-        gl.glGenBuffers( numTextures, vertexCoordHandles, 0 );
+        this.vertexCoordHandles = new int[this.numTextures];
+        gl.glGenBuffers( this.numTextures, this.vertexCoordHandles, 0 );
 
-        texCoordHandles = new int[numTextures];
-        gl.glGenBuffers( numTextures, texCoordHandles, 0 );
+        this.texCoordHandles = new int[this.numTextures];
+        gl.glGenBuffers( this.numTextures, this.texCoordHandles, 0 );
 
-        texStartsX = new int[numTextures];
-        texStartsY = new int[numTextures];
-        texSizesX = new int[numTextures];
-        texSizesY = new int[numTextures];
-        texQuadCounts = new int[numTextures];
+        this.texStartsX = new int[this.numTextures];
+        this.texStartsY = new int[this.numTextures];
+        this.texSizesX = new int[this.numTextures];
+        this.texSizesY = new int[this.numTextures];
+        this.texQuadCounts = new int[this.numTextures];
 
         int index = 0;
-        for ( int x = 0; x < textureCountX; x++ )
+        for ( int x = 0; x < this.textureCountX; x++ )
         {
-            for ( int y = 0; y < textureCountY; y++ )
+            for ( int y = 0; y < this.textureCountY; y++ )
             {
-                int startX = x * maxTextureSize;
-                int startY = y * maxTextureSize;
-                int endX = Math.min( startX + maxTextureSize, dataSizeX );
-                int endY = Math.min( startY + maxTextureSize, dataSizeY );
+                int startX = x * this.maxTextureSize;
+                int startY = y * this.maxTextureSize;
+                int endX = Math.min( startX + this.maxTextureSize, this.dataSizeX );
+                int endY = Math.min( startY + this.maxTextureSize, this.dataSizeY );
                 int sizeX = endX - startX;
                 int sizeY = endY - startY;
 
-                texStartsX[index] = startX;
-                texStartsY[index] = startY;
+                this.texStartsX[index] = startX;
+                this.texStartsY[index] = startY;
 
-                texSizesX[index] = sizeX;
-                texSizesY[index] = sizeY;
+                this.texSizesX[index] = sizeX;
+                this.texSizesY[index] = sizeY;
 
-                texQuadCounts[index] = getQuadCountForTexture( index, startX, startY, sizeX, sizeY );
+                this.texQuadCounts[index] = this.getQuadCountForTexture( index, startX, startY, sizeX, sizeY );
 
                 index++;
             }
         }
 
-        glAllocated = true;
+        this.glAllocated = true;
 
-        makeDirty( );
-        makeProjectionDirty( );
+        this.makeDirty( );
+        this.makeProjectionDirty( );
     }
 
     public static int getMaxGLTextureSize( GL gl )
@@ -454,36 +454,36 @@ public abstract class TextureProjected2D implements DrawableTexture
 
     protected int getQuadCountForTexture( int texIndex, int texStartX, int texStartY, int texSizeX, int texSizeY )
     {
-        int quadCountX = projection.getSizeX( texSizeX );
-        int quadCountY = projection.getSizeY( texSizeY );
+        int quadCountX = this.projection.getSizeX( texSizeX );
+        int quadCountY = this.projection.getSizeY( texSizeY );
         return quadCountX * quadCountY;
     }
 
     protected void prepare_setCoords( GL gl )
     {
-        float[] temp = new float[floatsPerVertex];
+        float[] temp = new float[this.floatsPerVertex];
 
-        for ( int i = 0; i < numTextures; i++ )
+        for ( int i = 0; i < this.numTextures; i++ )
         {
-            int projectFloats = texQuadCounts[i] * VERTICES_PER_QUAD * floatsPerVertex;
-            if ( coordBuffer == null || coordBuffer.capacity( ) < projectFloats ) coordBuffer = Buffers.newDirectFloatBuffer( projectFloats );
+            int projectFloats = this.texQuadCounts[i] * VERTICES_PER_QUAD * this.floatsPerVertex;
+            if ( this.coordBuffer == null || this.coordBuffer.capacity( ) < projectFloats ) this.coordBuffer = Buffers.newDirectFloatBuffer( projectFloats );
 
-            coordBuffer.rewind( );
-            putVerticesCoords( i, texStartsX[i], texStartsY[i], texSizesX[i], texSizesY[i], temp );
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, vertexCoordHandles[i] );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, coordBuffer.rewind( ), GL2.GL_STATIC_DRAW );
+            this.coordBuffer.rewind( );
+            this.putVerticesCoords( i, this.texStartsX[i], this.texStartsY[i], this.texSizesX[i], this.texSizesY[i], temp );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, this.vertexCoordHandles[i] );
+            gl.glBufferData( GL2.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, this.coordBuffer.rewind( ), GL2.GL_STATIC_DRAW );
 
-            coordBuffer.rewind( );
-            putVerticesTexCoords( i, texStartsX[i], texStartsY[i], texSizesX[i], texSizesY[i] );
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, texCoordHandles[i] );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, coordBuffer.rewind( ), GL2.GL_STATIC_DRAW );
+            this.coordBuffer.rewind( );
+            this.putVerticesTexCoords( i, this.texStartsX[i], this.texStartsY[i], this.texSizesX[i], this.texSizesY[i] );
+            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, this.texCoordHandles[i] );
+            gl.glBufferData( GL2.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, this.coordBuffer.rewind( ), GL2.GL_STATIC_DRAW );
         }
     }
 
     protected void putVerticesCoords( int texIndex, int texStartX, int texStartY, int texSizeX, int texSizeY, float[] temp )
     {
-        int quadCountX = projection.getSizeX( texSizeX );
-        int quadCountY = projection.getSizeY( texSizeY );
+        int quadCountX = this.projection.getSizeX( texSizeX );
+        int quadCountY = this.projection.getSizeY( texSizeY );
 
         for ( int x = 0; x < quadCountX; x++ )
         {
@@ -496,39 +496,39 @@ public abstract class TextureProjected2D implements DrawableTexture
                 double texFracY1 = ( y + 1 ) / ( double ) quadCountY;
 
                 // first triangle
-                putVertexCoords( texIndex, texFracX0, texFracY0, temp );
-                putVertexCoords( texIndex, texFracX1, texFracY0, temp );
-                putVertexCoords( texIndex, texFracX1, texFracY1, temp );
+                this.putVertexCoords( texIndex, texFracX0, texFracY0, temp );
+                this.putVertexCoords( texIndex, texFracX1, texFracY0, temp );
+                this.putVertexCoords( texIndex, texFracX1, texFracY1, temp );
 
                 // second triangle
-                putVertexCoords( texIndex, texFracX0, texFracY0, temp );
-                putVertexCoords( texIndex, texFracX1, texFracY1, temp );
-                putVertexCoords( texIndex, texFracX0, texFracY1, temp );
+                this.putVertexCoords( texIndex, texFracX0, texFracY0, temp );
+                this.putVertexCoords( texIndex, texFracX1, texFracY1, temp );
+                this.putVertexCoords( texIndex, texFracX0, texFracY1, temp );
             }
         }
     }
 
     protected void putVertexCoords( int texIndex, double texFracX, double texFracY, float[] temp )
     {
-        double dataFracX = ( texStartsX[texIndex] + texSizesX[texIndex] * texFracX ) / dataSizeX;
-        double dataFracY = ( texStartsY[texIndex] + texSizesY[texIndex] * texFracY ) / dataSizeY;
+        double dataFracX = ( this.texStartsX[texIndex] + this.texSizesX[texIndex] * texFracX ) / this.dataSizeX;
+        double dataFracY = ( this.texStartsY[texIndex] + this.texSizesY[texIndex] * texFracY ) / this.dataSizeY;
 
-        if ( useVertexZCoord )
+        if ( this.useVertexZCoord )
         {
-            projection.getVertexXYZ( dataFracX, dataFracY, temp );
-            coordBuffer.put( temp[0] ).put( temp[1] ).put( temp[2] );
+            this.projection.getVertexXYZ( dataFracX, dataFracY, temp );
+            this.coordBuffer.put( temp[0] ).put( temp[1] ).put( temp[2] );
         }
         else
         {
-            projection.getVertexXY( dataFracX, dataFracY, temp );
-            coordBuffer.put( temp[0] ).put( temp[1] );
+            this.projection.getVertexXY( dataFracX, dataFracY, temp );
+            this.coordBuffer.put( temp[0] ).put( temp[1] );
         }
     }
 
     protected void putVerticesTexCoords( int texIndex, int texStartX, int texStartY, int texSizeX, int texSizeY )
     {
-        int quadCountX = projection.getSizeX( texSizeX );
-        int quadCountY = projection.getSizeY( texSizeY );
+        int quadCountX = this.projection.getSizeX( texSizeX );
+        int quadCountY = this.projection.getSizeY( texSizeY );
 
         for ( int x = 0; x < quadCountX; x++ )
         {
@@ -541,46 +541,48 @@ public abstract class TextureProjected2D implements DrawableTexture
                 double texFracY1 = ( y + 1 ) / ( double ) quadCountY;
 
                 // first triangle
-                putVertexTexCoords( texIndex, texFracX0, texFracY0 );
-                putVertexTexCoords( texIndex, texFracX1, texFracY0 );
-                putVertexTexCoords( texIndex, texFracX1, texFracY1 );
+                this.putVertexTexCoords( texIndex, texFracX0, texFracY0 );
+                this.putVertexTexCoords( texIndex, texFracX1, texFracY0 );
+                this.putVertexTexCoords( texIndex, texFracX1, texFracY1 );
 
                 // second triangle
-                putVertexTexCoords( texIndex, texFracX0, texFracY0 );
-                putVertexTexCoords( texIndex, texFracX1, texFracY1 );
-                putVertexTexCoords( texIndex, texFracX0, texFracY1 );
+                this.putVertexTexCoords( texIndex, texFracX0, texFracY0 );
+                this.putVertexTexCoords( texIndex, texFracX1, texFracY1 );
+                this.putVertexTexCoords( texIndex, texFracX0, texFracY1 );
             }
         }
     }
 
     protected void putVertexTexCoords( int texIndex, double texFracX, double texFracY )
     {
-        coordBuffer.put( ( float ) texFracX ).put( ( float ) texFracY );
+        this.coordBuffer.put( ( float ) texFracX ).put( ( float ) texFracY );
     }
 
     protected void prepare_setTexParameters( GL gl )
     {
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST );
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST );
+        GL3 gl3 = gl.getGL3( );
+        
+        gl3.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST );
+        gl3.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST );
 
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP );
-        gl.glTexParameteri( GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP );
+        gl3.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_S, GL3.GL_CLAMP_TO_EDGE );
+        gl3.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_WRAP_T, GL3.GL_CLAMP_TO_EDGE );
     }
 
     protected ByteBuffer newByteBuffer( )
     {
-        return Buffers.newDirectByteBuffer( getRequiredCapacityBytes( ) );
+        return Buffers.newDirectByteBuffer( this.getRequiredCapacityBytes( ) );
     }
 
     public boolean isResident( GL2 gl )
     {
-        lock.lock( );
+        this.lock.lock( );
         try
         {
-            if ( !glAllocated ) return false;
+            if ( !this.glAllocated ) return false;
 
-            byte[] resident = new byte[textureHandles.length];
-            gl.glAreTexturesResident( 1, textureHandles, 0, resident, 0 );
+            byte[] resident = new byte[this.textureHandles.length];
+            gl.glAreTexturesResident( 1, this.textureHandles, 0, resident, 0 );
 
             for ( int i = 0; i < resident.length; i++ )
             {
@@ -591,7 +593,7 @@ public abstract class TextureProjected2D implements DrawableTexture
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
     }
 
@@ -608,7 +610,7 @@ public abstract class TextureProjected2D implements DrawableTexture
      */
     public void resize( int dataSizeX, int dataSizeY )
     {
-        lock.lock( );
+        this.lock.lock( );
         try
         {
             this.dataSizeX = dataSizeX;
@@ -616,41 +618,41 @@ public abstract class TextureProjected2D implements DrawableTexture
 
             this.glAllocated = false;
 
-            if ( this.data == null || this.data.capacity( ) < getRequiredCapacityBytes( ) ) this.data = newByteBuffer( );
+            if ( this.data == null || this.data.capacity( ) < this.getRequiredCapacityBytes( ) ) this.data = this.newByteBuffer( );
 
-            makeDirty( );
-            makeProjectionDirty( );
+            this.makeDirty( );
+            this.makeProjectionDirty( );
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
     }
 
     public void setProjection( Projection projection )
     {
-        lock.lock( );
+        this.lock.lock( );
         try
         {
             this.projection = projection;
-            makeProjectionDirty( );
+            this.makeProjectionDirty( );
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
     }
 
     public Projection getProjection( )
     {
-        lock.lock( );
+        this.lock.lock( );
         try
         {
             return this.projection;
         }
         finally
         {
-            lock.unlock( );
+            this.lock.unlock( );
         }
     }
 }

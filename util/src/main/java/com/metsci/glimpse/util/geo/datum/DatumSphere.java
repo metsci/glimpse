@@ -34,7 +34,7 @@ import com.metsci.glimpse.util.geo.util.SphereUtil;
 /**
  * @author osborn
  */
-public class DatumSphere extends Datum
+public class DatumSphere extends Datum 
 {
     public DatumSphere( double radius )
     {

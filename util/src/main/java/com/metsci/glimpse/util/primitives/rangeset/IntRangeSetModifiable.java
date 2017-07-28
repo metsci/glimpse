@@ -148,6 +148,43 @@ public class IntRangeSetModifiable implements IntRangeSet
         this.ranges.clear( );
     }
 
+    public void remove( int first, int count )
+    {
+        if ( count > 0 )
+        {
+            int start = first;
+            int iBeforeStart = this.ranges.indexAtOrBefore( start );
+            boolean startsInExistingRange = ( iBeforeStart % 2 == 0 );
+
+            int end = first + count;
+            int iAfterEnd = this.ranges.indexAtOrAfter( end );
+            boolean endsInExistingRange = ( iAfterEnd % 2 == 1 );
+
+            if ( startsInExistingRange && endsInExistingRange )
+            {
+                this.ranges.removeRange( iBeforeStart + 1, iAfterEnd );
+
+                this.ranges.prepForInsert( iBeforeStart + 1, 2 );
+                this.ranges.a[ iBeforeStart + 1 ] = start;
+                this.ranges.a[ iBeforeStart + 2 ] = end;
+            }
+            else if ( startsInExistingRange )
+            {
+                this.ranges.a[ iBeforeStart + 1 ] = start;
+                this.ranges.removeRange( iBeforeStart + 2, iAfterEnd );
+            }
+            else if ( endsInExistingRange )
+            {
+                this.ranges.a[ iAfterEnd - 1 ] = end;
+                this.ranges.removeRange( iBeforeStart + 1, iAfterEnd - 1 );
+            }
+            else
+            {
+                this.ranges.removeRange( iBeforeStart + 1, iAfterEnd );
+            }
+        }
+    }
+
     @Override
     public String toString( )
     {

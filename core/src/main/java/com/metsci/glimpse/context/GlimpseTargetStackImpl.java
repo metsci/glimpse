@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import com.google.common.base.Objects;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 
 /**
@@ -164,18 +165,8 @@ public class GlimpseTargetStackImpl implements GlimpseTargetStack
         if ( this == obj ) return true;
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
-
         GlimpseTargetStackImpl other = ( GlimpseTargetStackImpl ) obj;
-        if ( targetStack == null )
-        {
-            if ( other.targetStack != null ) return false;
-        }
-        else if ( !targetStack.equals( other.targetStack ) )
-        {
-            return false;
-        }
-
-        return true;
+        return Objects.equal( targetStack, other.targetStack );
     }
 
     @Override

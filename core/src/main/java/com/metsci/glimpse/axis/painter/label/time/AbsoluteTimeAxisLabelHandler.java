@@ -36,6 +36,7 @@ import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
+import com.metsci.glimpse.util.GeneralUtils;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.metsci.glimpse.util.units.time.format.TimeStampFormat;
@@ -695,7 +696,7 @@ public class AbsoluteTimeAxisLabelHandler implements TimeAxisLabelHandler
             double duration = day.viewEnd.durationAfter( day.viewStart );
             TimeStamp midpoint = day.viewStart.add( 0.5 * duration );
             TimeStamp edge = ( day.viewStart.equals( day.start ) ? day.viewEnd : day.viewStart );
-            double edginess = 1 - Math.max( 0, Math.min( 1, duration / maxDayViewDuration ) );
+            double edginess = 1 - GeneralUtils.clamp( duration / maxDayViewDuration, 0, 1 );
             day.textCenter = midpoint.add( edginess * edge.durationAfter( midpoint ) );
         }
         

@@ -52,6 +52,11 @@ import com.metsci.glimpse.axis.painter.NumericXAxisPainter;
 import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.event.key.GlimpseKeyListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseWheelListener;
 import com.metsci.glimpse.event.mouse.Mouseable;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
@@ -285,8 +290,10 @@ public class MultiAxisPlot2D extends GlimpseLayout
     protected void initialize( )
     {
         initializeArrays( );
+        initializeCenterAxis( );
         initializeLayout( );
         initializePainters( );
+        initializeListeners( );
         initializeLookAndFeel( );
         updatePainterLayout( );
     }
@@ -299,7 +306,10 @@ public class MultiAxisPlot2D extends GlimpseLayout
         this.axesLeftY = new LinkedHashMap<String, AxisInfo>( );
 
         this.axesAll = new LinkedHashMap<String, AxisInfo>( );
+    }
 
+    protected void initializeCenterAxis( )
+    {
         this.centerAxisX = new Axis1D( );
         this.centerAxisY = new Axis1D( );
     }
@@ -360,17 +370,20 @@ public class MultiAxisPlot2D extends GlimpseLayout
         super.addPainter0( backgroundPainter, null, Integer.MIN_VALUE );
 
         this.titleLayout = new GlimpseLayout( this, "Title" );
-        this.axisLayoutXY = new GlimpseAxisLayout2D( this, "Center", new Axis2D( centerAxisX, centerAxisY ) );
+        this.axisLayoutXY = new GlimpseAxisLayout2D( this, "Center", new Axis2D( this.centerAxisX, this.centerAxisY ) );
 
         this.titlePainter = createTitlePainter( );
 
-        if ( titlePainter != null ) titleLayout.addPainter( titlePainter );
+        if ( this.titlePainter != null ) this.titleLayout.addPainter( this.titlePainter );
 
         this.plotBackgroundPainter = new BackgroundPainter( false );
         this.axisLayoutXY.addPainter( this.plotBackgroundPainter );
-
+    }
+    
+    protected void initializeListeners( )
+    {
         this.mouseListenerXY = createAxisMouseListenerXY( );
-        this.attachAxisMouseListener( axisLayoutXY, mouseListenerXY );
+        this.attachAxisMouseListener( this.axisLayoutXY, this.mouseListenerXY );
     }
 
     protected void initializeLookAndFeel( )
@@ -612,7 +625,82 @@ public class MultiAxisPlot2D extends GlimpseLayout
         updatePainterLayout( );
         validate( );
     }
+    
+    //////////////////////////////////////
+    //        Listener Methods          //
+    //////////////////////////////////////
 
+    @Override
+    public void addGlimpseMouseListener( GlimpseMouseListener listener )
+    {
+        this.getLayoutCenter( ).addGlimpseMouseListener( listener );
+    }
+
+    @Override
+    public void addGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
+    {
+        this.getLayoutCenter( ).addGlimpseMouseMotionListener( listener );
+    }
+
+    @Override
+    public void addGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
+    {
+        this.getLayoutCenter( ).addGlimpseMouseWheelListener( listener );
+    }
+
+    @Override
+    public void addGlimpseMouseAllListener( GlimpseMouseAllListener listener )
+    {
+        this.getLayoutCenter( ).addGlimpseMouseAllListener( listener );
+    }
+
+    @Override
+    public void removeGlimpseMouseAllListener( GlimpseMouseAllListener listener )
+    {
+        this.getLayoutCenter( ).removeGlimpseMouseAllListener( listener );
+    }
+
+    @Override
+    public void addGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        this.getLayoutCenter( ).addGlimpseKeyListener( listener );
+    }
+
+    @Override
+    public void removeGlimpseMouseListener( GlimpseMouseListener listener )
+    {
+        this.getLayoutCenter( ).removeGlimpseMouseListener( listener );
+    }
+
+    @Override
+    public void removeGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
+    {
+        this.getLayoutCenter( ).removeGlimpseMouseMotionListener( listener );
+    }
+
+    @Override
+    public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
+    {
+        this.getLayoutCenter( ).removeGlimpseMouseWheelListener( listener );
+    }
+
+    @Override
+    public void removeGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        this.getLayoutCenter( ).removeGlimpseKeyListener( listener );
+    }
+
+    @Override
+    public void removeAllGlimpseListeners( )
+    {
+        this.getLayoutCenter( ).removeAllGlimpseListeners( );
+    }
+    
+    public AxisMouseListener getLayoutCenterMouseListener( )
+    {
+        return this.mouseListenerXY;
+    }
+    
     //////////////////////////////////////
     //      Axis Creation Methods       //
     //////////////////////////////////////
@@ -734,6 +822,16 @@ public class MultiAxisPlot2D extends GlimpseLayout
         validate( );
 
         return info;
+    }
+
+    public BackgroundPainter getBackgroundPainter( )
+    {
+        return this.backgroundPainter;
+    }
+
+    public BackgroundPainter getPlotBackgroundPainter( )
+    {
+        return this.plotBackgroundPainter;
     }
 
     protected void attachAxisMouseListener( Mouseable mouseable, AxisMouseListener listener )

@@ -645,10 +645,10 @@ public class Event implements Iterable<Event>
      */
     public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
-        setTimes0( null, startTime, endTime, force );
+        setTimes( null, startTime, endTime, force );
     }
 
-    protected void setTimes0( GlimpseMouseEvent mouseEvent, TimeStamp startTime, TimeStamp endTime, boolean force )
+    public void setTimes( GlimpseMouseEvent mouseEvent, TimeStamp startTime, TimeStamp endTime, boolean force )
     {
         if ( !force )
         {

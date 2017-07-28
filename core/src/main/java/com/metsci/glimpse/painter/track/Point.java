@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.track;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 import com.metsci.glimpse.util.quadtree.Xy;
 
@@ -110,9 +111,9 @@ public class Point implements Xy
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( pointId == null ) ? 0 : pointId.hashCode( ) );
-        result = prime * result + ( int ) ( time ^ ( time >>> 32 ) );
-        result = prime * result + ( ( trackId == null ) ? 0 : trackId.hashCode( ) );
+        result = prime * result + Objects.hash( pointId );
+        result = prime * result + Long.hashCode( time );
+        result = prime * result + Objects.hash( trackId );
         return result;
     }
 
@@ -123,17 +124,10 @@ public class Point implements Xy
         if ( obj == null ) return false;
         if ( getClass( ) != obj.getClass( ) ) return false;
         Point other = ( Point ) obj;
-        if ( pointId == null )
-        {
-            if ( other.pointId != null ) return false;
-        }
-        else if ( !pointId.equals( other.pointId ) ) return false;
+        if ( !Objects.equals( pointId, other.pointId ) ) return false;
         if ( time != other.time ) return false;
-        if ( trackId == null )
-        {
-            if ( other.trackId != null ) return false;
-        }
-        else if ( !trackId.equals( other.trackId ) ) return false;
+        if ( !Objects.equals( trackId, other.trackId ) ) return false;
+
         return true;
     }
 

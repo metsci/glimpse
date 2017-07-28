@@ -28,14 +28,15 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
-import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
+import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
+import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
 import static java.awt.Color.gray;
@@ -53,13 +54,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.UIManager;
-
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
-
-import net.sf.tinylaf.Theme;
-import net.sf.tinylaf.TinyLookAndFeel;
 
 public class SimpleDockingExample
 {
@@ -67,13 +61,13 @@ public class SimpleDockingExample
     public static void main( String[] args ) throws Exception
     {
         fixPlatformQuirks( );
-        Theme.loadTheme( SimpleDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
-        UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        final DockingTheme dockingTheme = tinyLafDockingTheme( );
+        initTinyLaf( );
+        final DockingTheme dockingTheme = defaultDockingTheme( );
 
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
+            @Override
             public void run( )
             {
 
@@ -133,32 +127,26 @@ public class SimpleDockingExample
                 // Create views
                 //
 
-                View[] views = { new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-                                 new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-                                 new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-                                 new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-                                 new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-                                 new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-                                 new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-                                 new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar ) };
+                View[] views =
+                {
+                    new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
+                    new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
+                    new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
+                    new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
+                    new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
+                    new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
+                    new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
+                    new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar )
+                };
 
 
                 // Create and show the docking group
                 //
 
                 final String appName = "simple-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, dockingTheme );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
-
-                GroupArrangement groupArr = loadDockingArrangement( appName, SimpleDockingExample.class.getClassLoader( ).getResource( "docking/simple-arrangement-default.xml" ) );
-                dockingGroup.setArrangement( groupArr );
-                dockingGroup.addListener( new DockingGroupAdapter( )
-                {
-                    public void disposingAllFrames( DockingGroup group )
-                    {
-                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
-                    }
-                } );
+                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "docking/simple-arrangement-default.xml" ) );
 
                 dockingGroup.addViews( views );
 

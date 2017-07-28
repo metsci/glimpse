@@ -28,27 +28,22 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
-import static com.metsci.glimpse.docking.DockingThemes.tinyLafDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
+import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 
 import javax.media.opengl.GLOffscreenAutoDrawable;
-import javax.swing.UIManager;
 
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
-
-import net.sf.tinylaf.Theme;
-import net.sf.tinylaf.TinyLookAndFeel;
 
 public class GlimpseDockingExample
 {
@@ -56,13 +51,12 @@ public class GlimpseDockingExample
     public static void main( String[] args ) throws Exception
     {
         fixPlatformQuirks( );
-        Theme.loadTheme( GlimpseDockingExample.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
-        UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
-        final DockingTheme dockingTheme = tinyLafDockingTheme( );
+        initTinyLaf( );
 
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
+            @Override
             public void run( )
             {
 
@@ -86,25 +80,29 @@ public class GlimpseDockingExample
                 // Create views
                 //
 
-                View[] views = { new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ),
-                                 new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) ) };
+                View[] views =
+                {
+                    new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ),
+                    new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) )
+                };
 
 
                 // Create and show the docking group
                 //
 
                 final String appName = "glimpse-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( dockingTheme, DISPOSE_ALL_FRAMES );
+                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
+                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( GlimpseDockingExample.class, "docking/glimpse-arrangement-default.xml" ) );
 
-                GroupArrangement groupArr = loadDockingArrangement( appName, GlimpseDockingExample.class.getClassLoader( ).getResource( "docking/glimpse-arrangement-default.xml" ) );
-                dockingGroup.setArrangement( groupArr );
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
+                    @Override
                     public void disposingAllFrames( DockingGroup group )
                     {
-                        saveDockingArrangement( appName, dockingGroup.captureArrangement( ) );
                         glAnimator.stop( );
+                        tearDownCanvas( aCanvas );
+                        tearDownCanvas( bCanvas );
                     }
                 } );
 

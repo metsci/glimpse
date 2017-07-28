@@ -60,15 +60,22 @@
         <module>core</module>
         <module>core-examples</module>
 
+        <module>layers</module>
+        <module>layers-examples</module>
+
         <module>docking</module>
         <module>docking-examples</module>
 
+        <module>wizard</module>
+        <module>wizard-examples</module>
+        
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>
         <module>extras-swt</module>
         <module>extras-examples</module>
         <module>extras-worldwind</module>
+        <module>extras-tinylaf</module>
 
     </modules>
 

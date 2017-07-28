@@ -336,7 +336,7 @@ public class SplitPane extends JPanel
         invalidate( );
     }
 
-    protected static int[] computeChildSizes( int containerSize, int gapSize, int minChildSize, double splitFrac )
+    public static int[] computeChildSizes( int containerSize, int gapSize, int minChildSize, double splitFrac )
     {
         int maxSizeA = containerSize - gapSize - minChildSize;
 

@@ -370,6 +370,35 @@ public final class Vector3d implements Serializable
     }
 
     /**
+     * @param   theta  rotation angle around the specified axis.
+     * @param   axis   the axis about which to rotate.
+     * @return  rotated copy
+     */
+    public Vector3d rotated( double theta, Vector3d axis )
+    {
+        double axisNorm = axis.norm( );
+        if ( axisNorm == 0.0 )
+        {
+            throw new IllegalArgumentException( "Cannot rotate about the zero vector" );
+        }
+
+        double scale = 1.0 / axisNorm;
+        double ux = scale * axis.getX( );
+        double uy = scale * axis.getY( );
+        double uz = scale * axis.getZ( );
+
+        double theta_CCWRAD = AngleRelative.toCcwRad( theta );
+        double sin = Math.sin( theta_CCWRAD );
+        double cos = Math.cos( theta_CCWRAD );
+
+        double rotX = ( x *  ( cos + ux*ux*(1-cos) )   )  +  ( y * ( ux*uy*(1-cos) - uz*sin ) )  +  ( z * ( ux*uz*(1-cos) + uy*sin ) );
+        double rotY = ( x * ( ux*uy*(1-cos) + uz*sin ) )  +  ( y *  ( cos + uy*uy*(1-cos) )   )  +  ( z * ( uy*uz*(1-cos) - ux*sin ) );
+        double rotZ = ( x * ( ux*uz*(1-cos) - uy*sin ) )  +  ( y * ( uy*uz*(1-cos) + ux*sin ) )  +  ( z *  ( cos + uz*uz*(1-cos) )   );
+
+        return new Vector3d( rotX, rotY, rotZ );
+    }
+
+    /**
      * @param   theta  rotation angle around the x-axis.
      * @return  rotated copy
      */

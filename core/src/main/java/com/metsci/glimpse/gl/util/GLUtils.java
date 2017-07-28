@@ -35,10 +35,12 @@ import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 
 import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.texture.Texture;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GLUtils
@@ -89,9 +91,14 @@ public class GLUtils
 
     public static int genBuffer( GL gl )
     {
-        int[] handle = new int[1];
-        gl.glGenBuffers( 1, handle, 0 );
-        return handle[0];
+        return genBuffers( gl, 1 )[0];
+    }
+
+    public static int[] genBuffers( GL gl, int count )
+    {
+        int[] handles = new int[count];
+        gl.glGenBuffers( count, handles, 0 );
+        return handles;
     }
 
     public static void deleteBuffers( GL gl, int... handles )
@@ -101,9 +108,19 @@ public class GLUtils
 
     public static int genTexture( GL gl )
     {
-        int[] handle = new int[1];
-        gl.glGenTextures( 1, handle, 0 );
-        return handle[0];
+        return genTextures( gl, 1 )[0];
+    }
+
+    public static int[] genTextures( GL gl, int count )
+    {
+        int[] handles = new int[count];
+        gl.glGenTextures( count, handles, 0 );
+        return handles;
+    }
+
+    public static void deleteTextures( GL gl, int... handles )
+    {
+        gl.glDeleteTextures( handles.length, handles, 0 );
     }
 
     public static int queryGLInteger( int param, GL gl )
@@ -123,7 +140,15 @@ public class GLUtils
     }
 
     /**
-     * Enables blending, and set the blend func that gives the intuitive
+     * See {@link #enableStandardBlending(GL)}.
+     */
+    public static void enableStandardBlending( GlimpseContext context )
+    {
+        enableStandardBlending( context.getGL( ) );
+    }
+
+    /**
+     * Enable blending, and set the blend func that gives the intuitive
      * behavior for most situations.
      * <p>
      * Blended RGB will be the weighted average of source RGB and dest RGB:
@@ -143,6 +168,35 @@ public class GLUtils
     {
         gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_BLEND );
+    }
+
+    /**
+     * See {@link #enablePremultipliedAlphaBlending(GL)}.
+     */
+    public static void enablePremultipliedAlphaBlending( GlimpseContext context )
+    {
+        enablePremultipliedAlphaBlending( context.getGL( ) );
+    }
+
+    /**
+     * Enable blending, and set the blend func that is appropriate for drawing
+     * with premultiplied alpha.
+     * <p>
+     * This is typically what you want when rendering with JOGL {@link Texture},
+     * {@link TextureAtlas}, etc.
+     */
+    public static void enablePremultipliedAlphaBlending( GL gl )
+    {
+        gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL.GL_BLEND );
+    }
+
+    /**
+     * See {@link #disableBlending(GL)}.
+     */
+    public static void disableBlending( GlimpseContext context )
+    {
+        disableBlending( context.getGL( ) );
     }
 
     public static void disableBlending( GL gl )

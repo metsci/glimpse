@@ -28,6 +28,7 @@ package com.metsci.glimpse.axis.tagged;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -41,6 +42,20 @@ import com.metsci.glimpse.axis.listener.AxisListener1D;
  */
 public abstract class TaggedAxisListener1D implements AxisListener1D
 {
+
+    public static TaggedAxisListener1D newTaggedAxisListener1D( Consumer<TaggedAxis1D> tagsUpdatedFn )
+    {
+        return new TaggedAxisListener1D( )
+        {
+            @Override
+            public void tagsUpdated( TaggedAxis1D axis )
+            {
+                tagsUpdatedFn.accept( axis );
+            }
+        };
+    }
+
+
     protected List<Tag> previous;
 
     @Override

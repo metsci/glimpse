@@ -38,6 +38,9 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.key.GlimpseKeyEvent;
+import com.metsci.glimpse.event.key.GlimpseKeyListener;
+import com.metsci.glimpse.event.key.Keyable;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
@@ -65,7 +68,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  * @author ulman
  * @see GlimpseLayoutDelegate
  */
-public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
+public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable, Keyable
 {
     protected String name = "";
 
@@ -93,12 +96,14 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     protected Set<GlimpseMouseListener> mouseListeners;
     protected Set<GlimpseMouseMotionListener> mouseMotionListeners;
     protected Set<GlimpseMouseWheelListener> mouseWheelListeners;
+    protected Set<GlimpseKeyListener> keyListeners;
 
     // unmodifiable views to the above listeners for passing
     // to external classes
     protected Collection<GlimpseMouseListener> mouseListenersUnmodifiable;
     protected Collection<GlimpseMouseMotionListener> mouseMotionListenersUnmodifiable;
     protected Collection<GlimpseMouseWheelListener> mouseWheelListenersUnmodifiable;
+    protected Collection<GlimpseKeyListener> keyListenersUnmodifiable;
 
     // flags indicating event handling and repaint behavior
     protected boolean isEventGenerator = true;
@@ -118,10 +123,12 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         this.mouseListeners = new CopyOnWriteArraySet<GlimpseMouseListener>( );
         this.mouseMotionListeners = new CopyOnWriteArraySet<GlimpseMouseMotionListener>( );
         this.mouseWheelListeners = new CopyOnWriteArraySet<GlimpseMouseWheelListener>( );
+        this.keyListeners = new CopyOnWriteArraySet<GlimpseKeyListener>( );
 
         this.mouseListenersUnmodifiable = Collections.unmodifiableCollection( this.mouseListeners );
         this.mouseMotionListenersUnmodifiable = Collections.unmodifiableCollection( this.mouseMotionListeners );
         this.mouseWheelListenersUnmodifiable = Collections.unmodifiableCollection( this.mouseWheelListeners );
+        this.keyListenersUnmodifiable = Collections.unmodifiableCollection( this.keyListeners );
 
         this.name = name;
 
@@ -560,24 +567,28 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     }
 
     @Override
+    public Collection<GlimpseKeyListener> getGlimpseKeyListeners( )
+    {
+        return this.keyListenersUnmodifiable;
+
+    }
+
+    @Override
     public void addGlimpseMouseListener( GlimpseMouseListener listener )
     {
         this.mouseListeners.add( listener );
-
     }
 
     @Override
     public void addGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
     {
         this.mouseMotionListeners.add( listener );
-
     }
 
     @Override
     public void addGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
         this.mouseWheelListeners.add( listener );
-
     }
 
     @Override
@@ -597,24 +608,33 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
     }
 
     @Override
+    public void addGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        this.keyListeners.add( listener );
+    }
+
+    @Override
     public void removeGlimpseMouseListener( GlimpseMouseListener listener )
     {
         this.mouseListeners.remove( listener );
-
     }
 
     @Override
     public void removeGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
     {
         this.mouseMotionListeners.remove( listener );
-
     }
 
     @Override
     public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
         this.mouseWheelListeners.remove( listener );
+    }
 
+    @Override
+    public void removeGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        this.keyListeners.remove( listener );
     }
 
     @Override
@@ -626,6 +646,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
             this.mouseListeners.clear( );
             this.mouseWheelListeners.clear( );
             this.mouseMotionListeners.clear( );
+            this.keyListeners.clear( );
         }
         finally
         {
@@ -741,6 +762,28 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable
         for ( GlimpseMouseWheelListener listener : mouseWheelListeners )
         {
             listener.mouseWheelMoved( event );
+
+            if ( event.isHandled( ) ) break;
+        }
+    }
+
+    @Override
+    public void keyPressed( GlimpseKeyEvent event )
+    {
+        for ( GlimpseKeyListener listener : keyListeners )
+        {
+            listener.keyPressed( event );
+
+            if ( event.isHandled( ) ) break;
+        }
+    }
+
+    @Override
+    public void keyReleased( GlimpseKeyEvent event )
+    {
+        for ( GlimpseKeyListener listener : keyListeners )
+        {
+            listener.keyReleased( event );
 
             if ( event.isHandled( ) ) break;
         }

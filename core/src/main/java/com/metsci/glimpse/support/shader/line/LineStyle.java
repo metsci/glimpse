@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_NONE;
 
 import java.util.Arrays;
 
@@ -106,6 +106,11 @@ public class LineStyle
     }
 
     public LineStyle( LineStyle source )
+    {
+        this.setFrom( source );
+    }
+
+    public void setFrom( LineStyle source )
     {
         this.thickness_PX = source.thickness_PX;
         this.feather_PX = source.feather_PX;

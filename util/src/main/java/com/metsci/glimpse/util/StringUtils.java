@@ -51,6 +51,11 @@ public final class StringUtils
     {
     }
 
+    public static boolean equalIgnoreCase( String a, String b )
+    {
+        return ( a == b || ( a != null && a.equalsIgnoreCase( b ) ) );
+    }
+
     /**
      * This method splits a String into an array of values, the values being delimited with the given character. For
      * example <tt>splitIntoArray("one~two~three", '~')</tt> returns <tt>{"one", "two", "three" }</tt>. Consecutive

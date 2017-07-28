@@ -51,8 +51,6 @@ import java.util.Collection;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.docking.DockingThemes.DockingTheme;
-
 public class LandingIndicator
 {
 

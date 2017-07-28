@@ -49,8 +49,6 @@ public abstract class Tile extends JComponent
 
     public abstract void addView( View view, int viewNum );
 
-    public abstract void updateView( View view );
-
     public abstract void removeView( View view );
 
     public abstract boolean hasView( View view );
@@ -60,6 +58,8 @@ public abstract class Tile extends JComponent
     public abstract int viewNumForTabAt( int x, int y );
 
     public abstract Rectangle viewTabBounds( int viewNum );
+
+    public abstract boolean hasViewTab( int viewNum );
 
     public abstract void addDockingMouseAdapter( MouseAdapter mouseAdapter );
 

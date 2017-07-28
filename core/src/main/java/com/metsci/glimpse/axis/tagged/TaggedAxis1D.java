@@ -217,13 +217,12 @@ public class TaggedAxis1D extends Axis1D
     {
         HashSet<Axis1D> visitedCopy = new HashSet<>( visited );
 
-        super.broadcastAxisUpdateUp( source, visited );
-
         if ( source instanceof TaggedAxis1D )
         {
             broadcastTaggedAxisUpdateUp( ( TaggedAxis1D ) source, visitedCopy );
         }
 
+        super.broadcastAxisUpdateUp( source, visited );
     }
 
     protected void broadcastTaggedAxisUpdateUp( TaggedAxis1D source, Set<Axis1D> visited )
@@ -283,7 +282,8 @@ public class TaggedAxis1D extends Axis1D
             }
         }
 
-        //XXX should axis listeners be fired here like axisUpdated( )?
+        // axis listeners don't need to be fired here like axisUpdated( )
+        // they will be fired by axisUpdated( ), which happens directly afterward
     }
 
     protected void taggedAxisUpdated0( TaggedAxis1D axis )
