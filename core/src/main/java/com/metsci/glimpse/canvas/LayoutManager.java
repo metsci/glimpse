@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.layout.GlimpseLayout;
 
@@ -48,6 +50,7 @@ import com.metsci.glimpse.layout.GlimpseLayout;
 public class LayoutManager
 {
     protected LayoutOrderComparator comparator;
+    protected BiMap<Object, GlimpseLayout> keyMap;
     protected Map<GlimpseLayout, LayoutOrder> layoutMap;
     protected List<LayoutOrder> layoutList;
     protected List<GlimpseLayout> unmodifiableLayoutList;
@@ -55,6 +58,7 @@ public class LayoutManager
     public LayoutManager( )
     {
         this.comparator = new LayoutOrderComparator( );
+        this.keyMap = HashBiMap.create( );
         this.layoutList = new ArrayList<LayoutOrder>( );
         this.layoutMap = new LinkedHashMap<GlimpseLayout, LayoutOrder>( );
         this.unmodifiableLayoutList = Collections.emptyList( );
@@ -64,26 +68,40 @@ public class LayoutManager
     {
         LayoutOrder layoutOrder = this.layoutMap.remove( layout );
         this.layoutList.remove( layoutOrder );
+        this.keyMap.inverse( ).remove( layout );
         this.updateLayoutList( );
+    }
+    
+    public synchronized void removeLayoutByKey( Object key )
+    {
+        GlimpseLayout layout = this.keyMap.get( key );
+        if ( layout != null ) removeLayout( layout );
     }
 
     public synchronized void removeAllLayouts( )
     {
         this.layoutMap.clear( );
         this.layoutList.clear( );
+        this.keyMap.clear( );
         this.updateLayoutList( );
     }
 
     public synchronized void addLayout( GlimpseLayout layout )
     {
-        this.addLayout( layout, 0 );
+        this.addLayout( null, layout, 0 );
+    }
+    
+    public synchronized void addLayout( GlimpseLayout layout, int zOrder )
+    {
+        this.addLayout( null, layout, zOrder );
     }
 
-    public synchronized void addLayout( GlimpseLayout layout, int zOrder )
+    public synchronized void addLayout( Object key, GlimpseLayout layout, int zOrder )
     {
         LayoutOrder layoutOrder = new LayoutOrder( layout, zOrder );
         this.layoutMap.put( layout, layoutOrder );
         this.layoutList.add( layoutOrder );
+        if ( key != null ) this.keyMap.put( key, layout );
         this.updateLayoutList( );
     }
 
