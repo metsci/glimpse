@@ -28,10 +28,10 @@ package com.metsci.glimpse.util.var;
 
 import static com.google.common.base.Objects.equal;
 import static com.google.common.collect.Sets.difference;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
 import static java.util.Collections.emptySet;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -39,6 +39,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -68,12 +69,20 @@ public class VarUtils
 
     public static <T> Disposable addElementAddedListener( ReadableVar<? extends Collection<? extends T>> var, boolean runImmediately, Consumer<? super T> listener )
     {
-        return var.addListener( runImmediately, new Runnable( )
+        return addElementAddedListener( var, runImmediately, ( ev, value ) ->
+        {
+            listener.accept( value );
+        } );
+    }
+
+    public static <T> Disposable addElementAddedListener( ReadableVar<? extends Collection<? extends T>> var, boolean runImmediately, BiConsumer<VarEvent,? super T> listener )
+    {
+        return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
             private Set<T> valuesOld = emptySet( );
 
             @Override
-            public void run( )
+            public void accept( VarEvent ev )
             {
                 Set<T> valuesNew = new HashSet<>( var.v( ) );
 
@@ -81,7 +90,7 @@ public class VarUtils
                 Set<T> valuesAdded = difference( valuesNew, valuesOld );
                 for ( T value : valuesAdded )
                 {
-                    listener.accept( value );
+                    listener.accept( ev, value );
                 }
 
                 this.valuesOld = valuesNew;
@@ -91,12 +100,20 @@ public class VarUtils
 
     public static <T> Disposable addElementRemovedListener( ReadableVar<? extends Collection<? extends T>> var, Consumer<? super T> listener )
     {
-        return var.addListener( false, new Runnable( )
+        return addElementRemovedListener( var, ( ev, value ) ->
+        {
+            listener.accept( value );
+        } );
+    }
+
+    public static <T> Disposable addElementRemovedListener( ReadableVar<? extends Collection<? extends T>> var, BiConsumer<VarEvent,? super T> listener )
+    {
+        return var.addListener( false, new Consumer<VarEvent>( )
         {
             private Set<T> valuesOld = emptySet( );
 
             @Override
-            public void run( )
+            public void accept( VarEvent ev )
             {
                 Set<T> valuesNew = new HashSet<>( var.v( ) );
 
@@ -104,7 +121,7 @@ public class VarUtils
                 Set<T> valuesRemoved = difference( valuesOld, valuesNew );
                 for ( T value : valuesRemoved )
                 {
-                    listener.accept( value );
+                    listener.accept( ev, value );
                 }
 
                 this.valuesOld = valuesNew;
@@ -158,66 +175,50 @@ public class VarUtils
         } );
     }
 
-    public static <K,V> Disposable addEntryVarListener( ReadableVar<ImmutableMap<K,? extends ReadableVar<V>>> mapVar, BiConsumer<? super VarEvent,? super K> listener )
+    public static interface MapVarListener<K,V>
     {
-        return mapVar.addListener( true, new Consumer<VarEvent>( )
+        void accept( VarEvent ev, K key, V vOld, V vNew );
+    }
+
+    public static <K,V> Disposable addMapVarListener( ReadableVar<? extends Map<K,V>> var, boolean runImmediately, MapVarListener<? super K,? super V> listener )
+    {
+        return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
-            private final Map<ReadableVar<?>,Disposable> disposables = new HashMap<>( );
-            private ImmutableMap<K,? extends ReadableVar<V>> mapOld = null;
+            // FIXME: Handle ongoing flag carefully
+            private ImmutableMap<K,V> mapPrev = ImmutableMap.of( );
 
             @Override
-            public void accept( VarEvent mapEv )
+            public void accept( VarEvent ev )
             {
-                Set<K> keysUpdated = new LinkedHashSet<>( );
+                ImmutableMap<K,V> mapOld = this.mapPrev;
+                ImmutableMap<K,V> mapNew = ImmutableMap.copyOf( var.v( ) );
 
-                ImmutableMap<K,? extends ReadableVar<V>> mapNew = mapVar.v( );
+                // Update this.mapPrev BEFORE firing listeners, in case one of them triggers this method again
+                this.mapPrev = mapNew;
 
-                if ( this.mapOld != null )
+                Set<K> keys = new LinkedHashSet<>( );
+                keys.addAll( mapOld.keySet( ) );
+                keys.addAll( mapNew.keySet( ) );
+                for ( K k : keys )
                 {
-                    for ( Entry<K,? extends ReadableVar<V>> en : this.mapOld.entrySet( ) )
+                    V vOld = mapOld.get( k );
+                    V vNew = mapNew.get( k );
+                    if ( !equal( vNew, vOld ) )
                     {
-                        K key = en.getKey( );
-                        ReadableVar<V> varOld = en.getValue( );
-                        ReadableVar<V> varNew = ( mapNew == null ? null : mapNew.get( key ) );
-                        if ( varNew != varOld )
-                        {
-                            if ( varOld != null )
-                            {
-                                this.disposables.remove( varOld ).dispose( );
-                            }
-                            keysUpdated.add( key );
-                        }
+                        listener.accept( ev, k, vOld, vNew );
                     }
-                }
-
-                if ( mapNew != null )
-                {
-                    for ( Entry<K,? extends ReadableVar<V>> en : mapNew.entrySet( ) )
-                    {
-                        K key = en.getKey( );
-                        ReadableVar<V> varNew = en.getValue( );
-                        ReadableVar<V> varOld = ( this.mapOld == null ? null : this.mapOld.get( key ) );
-                        if ( varNew != varOld )
-                        {
-                            if ( varNew != null )
-                            {
-                                this.disposables.put( varNew, varNew.addListener( false, ( ev ) ->
-                                {
-                                    listener.accept( ev, key );
-                                } ) );
-                            }
-                            keysUpdated.add( key );
-                        }
-                    }
-                }
-
-                this.mapOld = mapNew;
-
-                for ( K key : keysUpdated )
-                {
-                    listener.accept( mapEv, key );
                 }
             }
+        } );
+    }
+
+    public static <K,V> void updateMapValue( Var<ImmutableMap<K,V>> var, boolean ongoing, K key, Function<? super V,? extends V> updateFn )
+    {
+        var.update( ongoing, ( map ) ->
+        {
+            V vOld = map.get( key );
+            V vNew = updateFn.apply( vOld );
+            return mapWith( map, key, vNew );
         } );
     }
 
