@@ -30,6 +30,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.ItemSelectable;
 import java.awt.Window;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -39,6 +40,7 @@ import java.util.function.Consumer;
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.swing.AbstractButton;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -104,6 +106,31 @@ public class DisposableUtils
         }
 
         return addItemListener( itemSelectable, listener );
+    }
+
+    public static Disposable addActionListener( AbstractButton button, ActionListener actionListener )
+    {
+        button.addActionListener( actionListener );
+
+        return ( ) ->
+        {
+            button.removeActionListener( actionListener );
+        };
+    }
+
+    public static Disposable addActionListener( AbstractButton button, Runnable listener )
+    {
+        return addActionListener( button, ( ev ) -> listener.run( ) );
+    }
+
+    public static Disposable addActionListener( boolean runImmediately, AbstractButton button, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        return addActionListener( button, listener );
     }
 
     public static Disposable addComponent( Container container, Component child )
