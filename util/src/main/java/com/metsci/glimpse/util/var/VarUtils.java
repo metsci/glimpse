@@ -110,7 +110,7 @@ public class VarUtils
     {
         return var.addListener( false, new Consumer<VarEvent>( )
         {
-            private Set<T> valuesOld = emptySet( );
+            private Set<T> valuesOld = new HashSet<>( var.v( ) );
 
             @Override
             public void accept( VarEvent ev )
@@ -156,7 +156,7 @@ public class VarUtils
     {
         return var.addListener( false, new Runnable( )
         {
-            private Set<Entry<K, V>> entriesOld = emptySet( );
+            private Set<Entry<K, V>> entriesOld = new HashSet<>( var.v( ).entrySet( ) );
 
             @Override
             public void run( )
