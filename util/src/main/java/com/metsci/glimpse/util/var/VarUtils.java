@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static com.google.common.base.Objects.equal;
-import static com.google.common.collect.Sets.difference;
-import static com.metsci.glimpse.util.ImmutableCollectionUtils.mapWith;
-import static java.util.Collections.emptySet;
+import static com.google.common.base.Objects.*;
+import static com.google.common.collect.Sets.*;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.*;
+import static java.util.Collections.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -212,6 +212,11 @@ public class VarUtils
         } );
     }
 
+    public static <K,V> void updateMapValue( Var<ImmutableMap<K,V>> var, K key, Function<? super V,? extends V> updateFn )
+    {
+        updateMapValue( var, false, key, updateFn );
+    }
+
     public static <K,V> void updateMapValue( Var<ImmutableMap<K,V>> var, boolean ongoing, K key, Function<? super V,? extends V> updateFn )
     {
         var.update( ongoing, ( map ) ->
@@ -219,6 +224,19 @@ public class VarUtils
             V vOld = map.get( key );
             V vNew = updateFn.apply( vOld );
             return mapWith( map, key, vNew );
+        } );
+    }
+
+    public static <K,V> void putMapValue( Var<ImmutableMap<K,V>> var, K key, V value )
+    {
+        putMapValue( var, false, key, value );
+    }
+
+    public static <K,V> void putMapValue( Var<ImmutableMap<K,V>> var, boolean ongoing, K key, V value )
+    {
+        var.update( ongoing, ( map ) ->
+        {
+            return mapWith( map, key, value );
         } );
     }
 
