@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util;
 
+import static java.lang.Double.doubleToLongBits;
+import static java.lang.Float.floatToIntBits;
 import static java.util.Collections.unmodifiableList;
 
 import java.math.BigDecimal;
@@ -518,6 +520,22 @@ public class GeneralUtils
     public static boolean approximateNotEqual( double d1, double d2, double epsilon )
     {
         return Math.abs( d1 - d2 ) > epsilon;
+    }
+
+    /**
+     * See {@link Double#equals(Object)}.
+     */
+    public static boolean doublesEqual( double d1, double d2 )
+    {
+        return ( doubleToLongBits( d1 ) == doubleToLongBits( d2 ) );
+    }
+
+    /**
+     * See {@link Float#equals(Object)}.
+     */
+    public static boolean floatsEqual( float f1, float f2 )
+    {
+        return ( floatToIntBits( f1 ) == floatToIntBits( f2 ) );
     }
 
     /**
