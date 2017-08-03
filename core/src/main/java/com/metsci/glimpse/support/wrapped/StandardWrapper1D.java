@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.support.wrapped;
 
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 import static java.lang.Math.abs;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
@@ -118,8 +119,8 @@ public class StandardWrapper1D implements Wrapper1D
         if ( o.getClass( ) != this.getClass( ) ) return false;
 
         StandardWrapper1D other = ( StandardWrapper1D ) o;
-        return ( Double.compare( other.wrapMin, this.wrapMin ) == 0
-              && Double.compare( other.wrapMax, this.wrapMax ) == 0 );
+        return ( doublesEqual( other.wrapMin, this.wrapMin )
+              && doublesEqual( other.wrapMax, this.wrapMax ) );
     }
 
 }
