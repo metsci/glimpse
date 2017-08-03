@@ -135,7 +135,7 @@ public final class Vector3d implements Serializable
     @Override
     public int hashCode( )
     {
-        return new Double( x ).hashCode( ) ^ new Double( y ).hashCode( ) ^ new Double( z ).hashCode( );
+        return Double.hashCode( x ) ^ Double.hashCode( y ) ^ Double.hashCode( z );
     }
 
     /**
