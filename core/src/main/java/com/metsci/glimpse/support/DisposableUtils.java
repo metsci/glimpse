@@ -71,7 +71,7 @@ public class DisposableUtils
         };
     }
 
-    public static Disposable onWindowClosing( Window window, Consumer<WindowEvent> fn )
+    public static Disposable onWindowClosing( Window window, Consumer<? super WindowEvent> fn )
     {
         return addWindowListener( window, new WindowAdapter( )
         {
@@ -83,7 +83,7 @@ public class DisposableUtils
         } );
     }
 
-    public static Disposable onWindowClosed( Window window, Consumer<WindowEvent> fn )
+    public static Disposable onWindowClosed( Window window, Consumer<? super WindowEvent> fn )
     {
         return addWindowListener( window, new WindowAdapter( )
         {
@@ -189,12 +189,12 @@ public class DisposableUtils
         };
     }
 
-    public static Disposable onGLInit( GlimpseCanvas canvas, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLInit( GlimpseCanvas canvas, Consumer<? super GLAutoDrawable> fn )
     {
         return onGLInit( canvas.getGLDrawable( ), fn );
     }
 
-    public static Disposable onGLInit( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLInit( GLAutoDrawable glDrawable, Consumer<? super GLAutoDrawable> fn )
     {
         return addGLEventListener( glDrawable, new GLEventAdapter( )
         {
@@ -206,12 +206,12 @@ public class DisposableUtils
         } );
     }
 
-    public static Disposable onGLDispose( GlimpseCanvas canvas, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLDispose( GlimpseCanvas canvas, Consumer<? super GLAutoDrawable> fn )
     {
         return onGLDispose( canvas.getGLDrawable( ), fn );
     }
 
-    public static Disposable onGLDispose( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLDispose( GLAutoDrawable glDrawable, Consumer<? super GLAutoDrawable> fn )
     {
         return addGLEventListener( glDrawable, new GLEventAdapter( )
         {
