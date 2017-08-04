@@ -83,6 +83,18 @@ public class DisposableUtils
         } );
     }
 
+    public static Disposable onWindowClosed( Window window, Consumer<WindowEvent> fn )
+    {
+        return addWindowListener( window, new WindowAdapter( )
+        {
+            @Override
+            public void windowClosed( WindowEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
     public static Disposable addItemListener( ItemSelectable itemSelectable, ItemListener itemListener )
     {
         itemSelectable.addItemListener( itemListener );
