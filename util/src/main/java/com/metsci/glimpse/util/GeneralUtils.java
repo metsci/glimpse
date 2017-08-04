@@ -42,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -272,6 +273,22 @@ public class GeneralUtils
     public static <T, U> T cast( U u )
     {
         return ( T ) u;
+    }
+
+    /**
+     * Return true iff the set contains any of the specified values.
+     */
+    @SafeVarargs
+    public static <T> boolean containsAny( Set<? super T> set, T... values )
+    {
+        for ( T value : values )
+        {
+            if ( set.contains( value ) )
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
