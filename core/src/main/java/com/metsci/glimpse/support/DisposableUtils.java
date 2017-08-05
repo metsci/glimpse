@@ -43,7 +43,9 @@ import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
+import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
@@ -271,6 +273,31 @@ public class DisposableUtils
     public static Disposable addAxisListener1D( Axis1D axis, Runnable listener )
     {
         AxisListener1D listener2 = ( x ) ->
+        {
+            listener.run( );
+        };
+
+        axis.addAxisListener( listener2 );
+
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener2 );
+        };
+    }
+
+    public static Disposable addAxisListener2D( Axis2D axis, AxisListener2D listener )
+    {
+        axis.addAxisListener( listener );
+
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener );
+        };
+    }
+
+    public static Disposable addAxisListener2D( Axis2D axis, Runnable listener )
+    {
+        AxisListener2D listener2 = ( x ) ->
         {
             listener.run( );
         };
