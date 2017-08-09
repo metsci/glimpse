@@ -31,16 +31,24 @@ import java.awt.Container;
 import java.awt.ItemSelectable;
 import java.awt.Window;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -145,6 +153,99 @@ public class DisposableUtils
         }
 
         return addActionListener( button, listener );
+    }
+
+    public static Disposable onFocusGained( boolean runImmediately, Component c, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        FocusListener focusListener = new FocusAdapter( )
+        {
+            @Override
+            public void focusGained( FocusEvent ev )
+            {
+                listener.run( );
+            }
+        };
+
+        c.addFocusListener( focusListener );
+
+        return ( ) ->
+        {
+            c.removeFocusListener( focusListener );
+        };
+    }
+
+    public static Disposable onFocusLost( boolean runImmediately, Component c, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        FocusListener focusListener = new FocusAdapter( )
+        {
+            @Override
+            public void focusLost( FocusEvent ev )
+            {
+                listener.run( );
+            }
+        };
+
+        c.addFocusListener( focusListener );
+
+        return ( ) ->
+        {
+            c.removeFocusListener( focusListener );
+        };
+    }
+
+    public static Disposable addTextListener( JTextComponent c, Runnable listener )
+    {
+        DocumentListener docListener = new DocumentListener( )
+        {
+            public void insertUpdate( DocumentEvent ev ) { listener.run( ); }
+            public void removeUpdate( DocumentEvent ev ) { listener.run( ); }
+            public void changedUpdate( DocumentEvent ev ) { listener.run( ); }
+        };
+
+        PropertyChangeListener propChangeListener = ( ev ) ->
+        {
+            Document oldDoc = ( Document ) ev.getOldValue( );
+            if ( oldDoc != null )
+            {
+                oldDoc.removeDocumentListener( docListener );
+            }
+
+            Document newDoc = ( Document ) ev.getNewValue( );
+            if ( newDoc != null )
+            {
+                newDoc.addDocumentListener( docListener );
+            }
+
+            listener.run( );
+        };
+        c.addPropertyChangeListener( "document", propChangeListener );
+
+        Document doc = c.getDocument( );
+        if ( doc != null )
+        {
+            doc.addDocumentListener( docListener );
+        }
+
+        return ( ) ->
+        {
+            c.removePropertyChangeListener( "document", propChangeListener );
+
+            Document doc2 = c.getDocument( );
+            if ( doc2 != null )
+            {
+                doc2.removeDocumentListener( docListener );
+            }
+        };
     }
 
     public static Disposable addComponent( Container container, Component child )
