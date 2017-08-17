@@ -166,22 +166,23 @@ public class WrappedPainter extends GlimpsePainterBase
             List<WrappedTextureBounds> boundsX = Lists.newArrayList( wrappedBoundsIterator( axisX, bounds.getWidth( ) ) );
             List<WrappedTextureBounds> boundsY = Lists.newArrayList( wrappedBoundsIterator( axisY, bounds.getHeight( ) ) );
 
-            // always require a redraw for the first image
-            boolean forceRedraw = true;
-
+            boolean isFirstTile = true;
             for ( WrappedTextureBounds boundX : boundsX )
             {
                 for ( WrappedTextureBounds boundY : boundsY )
                 {
-                    drawTile( context, axis, boundX, boundY, forceRedraw );
-                    forceRedraw = false;
+                    drawTile( context, axis, boundX, boundY, isFirstTile );
+                    isFirstTile = false;
                 }
             }
         }
     }
 
-    protected void drawTile( GlimpseContext context, Axis2D axis, WrappedTextureBounds boundsX, WrappedTextureBounds boundsY, boolean forceRedraw )
+    protected void drawTile( GlimpseContext context, Axis2D axis, WrappedTextureBounds boundsX, WrappedTextureBounds boundsY, boolean isFirstTile )
     {
+        // always require a redraw for the first image
+        boolean forceRedraw = isFirstTile;
+
         if ( boundsX.isRedraw( ) || boundsY.isRedraw( ) || forceRedraw )
         {
             GL3 gl = context.getGL( ).getGL3( );
@@ -202,7 +203,7 @@ public class WrappedPainter extends GlimpsePainterBase
                 this.fbo.reset( gl, boundsX.getTextureSize( ), boundsY.getTextureSize( ), 0 );
             }
 
-            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), ints( 1, 1 ), new Wrapper2D( axis ) );
+            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), ints( 1, 1 ), new Wrapper2D( axis ), isFirstTile );
             glimpseContext.getTargetStack( ).push( this.dummyLayout, new GlimpseBounds( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) ) );
 
             this.fbo.bind( gl );
