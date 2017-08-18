@@ -36,6 +36,7 @@ import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
 import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static javax.media.opengl.GLContext.CONTEXT_NOT_CURRENT;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -44,6 +45,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLAnimatorControl;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
 
@@ -88,7 +90,7 @@ public abstract class GlimpseCanvasView extends View
 
         this.canvas = null;
 
-        // XXX: Consider platform details when method is AUTO
+        // TODO: Consider platform details when method is AUTO
         if ( equal( glReparentingMethod, "FAST" ) )
         {
             // NEWT's reparenting works fine on some platforms, and is smoother than the method below
@@ -122,7 +124,7 @@ public abstract class GlimpseCanvasView extends View
     {
         if ( this.canvas == null )
         {
-            // XXX: FAST reparenting might require a shared context on some platforms
+            // TODO: FAST reparenting might require a shared context on some platforms
             this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
 
             // Once canvas is ready, do view-specific setup and install facets
@@ -236,15 +238,61 @@ public abstract class GlimpseCanvasView extends View
     public void glimpseInvoke( GlimpseRunnable runnable )
     {
         requireSwingThread( );
+        glimpseRun( this.canvas.getGlimpseContext( ), runnable );
+    }
 
-        boolean succeeded = this.canvas.getGLDrawable( ).invoke( true, ( glDrawable ) ->
-        {
-            return runnable.run( this.canvas.getGlimpseContext( ) );
-        } );
+    // TODO: This should go somewhere more general, once all its issues have been worked out
+    protected static void glimpseRun( GlimpseContext context, GlimpseRunnable runnable )
+    {
+        requireSwingThread( );
 
-        if ( !succeeded )
+        // TODO: Not sure what happens if context is not fully realized yet ... needs to be investigated, but will take some effort
+
+        GLContext glimpse = context.getGLContext( );
+        GLContext current = GLContext.getCurrent( );
+
+        if ( current == glimpse )
         {
-            throw new RuntimeException( "glimpseInvoke() failed" );
+            runnable.run( context );
+        }
+        else if ( current == null )
+        {
+            if ( glimpse.makeCurrent( ) == CONTEXT_NOT_CURRENT )
+            {
+                throw new RuntimeException( "Failed to make GLContext current in glimpseInvoke()" );
+            }
+            else
+            {
+                try
+                {
+                    runnable.run( context );
+                }
+                finally
+                {
+                    glimpse.release( );
+                }
+            }
+        }
+        else
+        {
+            try
+            {
+                if ( glimpse.makeCurrent( ) == CONTEXT_NOT_CURRENT )
+                {
+                    throw new RuntimeException( "Failed to make GLContext current in glimpseInvoke()" );
+                }
+                else
+                {
+                    runnable.run( context );
+                }
+            }
+            finally
+            {
+                if ( current.makeCurrent( ) == CONTEXT_NOT_CURRENT )
+                {
+                    throw new RuntimeException( "Failed to restore original GLContext after glimpseInvoke()" );
+                }
+            }
         }
     }
 
@@ -252,7 +300,7 @@ public abstract class GlimpseCanvasView extends View
     {
         requireSwingThread( );
 
-        // XXX: Should this be using glimpseInvoke()?  Or doing something completely different?        
+        // TODO: Should this be using glimpseInvoke()?  Or doing something completely different?
         return canvas.toBufferedImage( );
     }
 
