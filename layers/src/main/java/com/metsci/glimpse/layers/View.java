@@ -38,6 +38,7 @@ import static java.util.Collections.singletonMap;
 
 import java.awt.Component;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -132,9 +133,11 @@ public abstract class View
     public void setTraits( Map<? extends String,? extends Trait> newTraits )
     {
         // Uninstall layers
+        Map<Layer,FacetState> facetStates = new HashMap<>( );
         for ( Layer layer : this._layers.v( ) )
         {
-            this.uninstallLayer( layer, true );
+            FacetState state = this.uninstallLayer( layer, true );
+            facetStates.put( layer, state );
         }
 
         // Update traits map
@@ -170,7 +173,8 @@ public abstract class View
         // Re-install layers
         for ( Layer layer : this._layers.v( ) )
         {
-            this.installLayer( layer );
+            FacetState state = facetStates.get( layer );
+            this.installLayer( layer, state );
         }
     }
 
@@ -224,11 +228,11 @@ public abstract class View
         if ( !this._layers.v( ).contains( layer ) )
         {
             this._layers.update( ( v ) -> listPlus( v, layer ) );
-            this.installLayer( layer );
+            this.installLayer( layer, null );
         }
     }
 
-    protected void installLayer( Layer layer )
+    protected void installLayer( Layer layer, FacetState state )
     {
         try
         {
@@ -243,6 +247,10 @@ public abstract class View
         Facet facet = layer.facets( ).v( ).get( this );
         if ( facet != null )
         {
+            if ( state != null )
+            {
+                facet.applyState( state );
+            }
             this._facets.update( ( v ) -> mapWith( v, layer, facet ) );
         }
     }
@@ -261,10 +269,15 @@ public abstract class View
         }
     }
 
-    protected void uninstallLayer( Layer layer, boolean isReinstall )
+    protected FacetState uninstallLayer( Layer layer, boolean isReinstall )
     {
+        Facet facet = this._facets.v( ).get( layer );
+        FacetState facetState = ( facet == null ? null : facet.state( ) );
+
         this._facets.update( ( v ) -> mapMinus( v, layer ) );
         layer.uninstallFrom( this, isReinstall );
+
+        return facetState;
     }
 
     /**

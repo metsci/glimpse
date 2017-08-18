@@ -42,6 +42,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -78,6 +80,12 @@ public abstract class GlimpseCanvasView extends View
     public final JPanel canvasParent;
     protected NewtSwingEDTGlimpseCanvas canvas;
 
+    /**
+     * Stores facets states during a reparent -- populated from old facets in the old canvas's
+     * onGLDispose(), then applied to new facets (and cleared) in the new canvas's onGLInit().
+     */
+    protected final Map<Layer,FacetState> facetStatesBeforeReparent;
+
 
     public GlimpseCanvasView( GLProfile glProfile, Collection<? extends ViewOption> options )
     {
@@ -89,6 +97,8 @@ public abstract class GlimpseCanvasView extends View
         this.isCanvasReady = false;
 
         this.canvas = null;
+
+        this.facetStatesBeforeReparent = new HashMap<>( );
 
         // TODO: Consider platform details when method is AUTO
         if ( equal( glReparentingMethod, "FAST" ) )
@@ -142,8 +152,11 @@ public abstract class GlimpseCanvasView extends View
 
                 for ( Layer layer : this._layers.v( ) )
                 {
-                    this.installLayer( layer );
+                    FacetState state = facetStatesBeforeReparent.get( layer );
+                    this.installLayer( layer, state );
                 }
+
+                facetStatesBeforeReparent.clear( );
             } );
 
             // Before canvas gets destroyed, uninstall facets and do view-specific tear-down
@@ -158,7 +171,8 @@ public abstract class GlimpseCanvasView extends View
                     // or it is being re-parented (in which case we want isReinstall to be true)
                     boolean isReinstall = true;
 
-                    this.uninstallLayer( layer, isReinstall );
+                    FacetState state = this.uninstallLayer( layer, isReinstall );
+                    facetStatesBeforeReparent.put( layer, state );
                 }
 
                 this.doContextDying( this.canvas.getGlimpseContext( ) );
@@ -221,11 +235,11 @@ public abstract class GlimpseCanvasView extends View
     }
 
     @Override
-    protected void installLayer( Layer layer )
+    protected void installLayer( Layer layer, FacetState state )
     {
         if ( this.isCanvasReady )
         {
-            super.installLayer( layer );
+            super.installLayer( layer, state );
         }
     }
 
