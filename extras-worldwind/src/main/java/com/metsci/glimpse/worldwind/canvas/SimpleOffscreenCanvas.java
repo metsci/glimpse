@@ -29,10 +29,10 @@ package com.metsci.glimpse.worldwind.canvas;
 import java.awt.Dimension;
 import java.util.List;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLRunnable;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLRunnable;
 
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.canvas.GlimpseCanvas;

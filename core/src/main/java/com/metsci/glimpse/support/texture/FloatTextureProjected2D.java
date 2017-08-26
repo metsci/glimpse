@@ -32,9 +32,9 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
 
 /**
  * A texture class which stores 32 bit fixed point values (uncapped).

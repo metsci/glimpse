@@ -31,21 +31,21 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.nextPowerOfTwo;
 import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.lang.Math.min;
-import static javax.media.opengl.GL.GL_CLAMP_TO_EDGE;
-import static javax.media.opengl.GL.GL_NEAREST;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_S;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_T;
-import static javax.media.opengl.GL.GL_UNPACK_ALIGNMENT;
-import static javax.media.opengl.GL.GL_UNSIGNED_BYTE;
-import static javax.media.opengl.GL2ES3.GL_R8UI;
-import static javax.media.opengl.GL2ES3.GL_RED_INTEGER;
+import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
+import static com.jogamp.opengl.GL.GL_NEAREST;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
+import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.jogamp.opengl.GL2ES3.GL_R8UI;
+import static com.jogamp.opengl.GL2ES3.GL_RED_INTEGER;
 
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntIterator;

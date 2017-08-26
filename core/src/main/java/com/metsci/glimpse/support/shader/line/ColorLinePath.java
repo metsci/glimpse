@@ -29,11 +29,11 @@ package com.metsci.glimpse.support.shader.line;
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.support.color.GlimpseColor;

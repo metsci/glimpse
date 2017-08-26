@@ -33,9 +33,9 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLContext;
 
 /**
  * @author osborn

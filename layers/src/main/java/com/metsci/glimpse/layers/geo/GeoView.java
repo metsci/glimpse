@@ -29,11 +29,11 @@ package com.metsci.glimpse.layers.geo;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.support.DisposableUtils.addGlimpsePainter;
-import static javax.media.opengl.GLProfile.GL3;
+import static com.jogamp.opengl.GLProfile.GL3;
 
 import java.util.Collection;
 
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.google.common.collect.ImmutableSet;

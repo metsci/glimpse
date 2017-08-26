@@ -34,10 +34,10 @@ import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BYTE;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_BYTE;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
@@ -56,10 +56,10 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

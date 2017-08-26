@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.decoration;
 
 import static java.lang.Integer.parseInt;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;

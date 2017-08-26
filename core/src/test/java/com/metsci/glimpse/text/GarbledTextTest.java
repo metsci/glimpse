@@ -31,8 +31,8 @@ import static com.metsci.glimpse.support.font.FontUtils.*;
 import static java.awt.Color.*;
 import static javax.swing.WindowConstants.*;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 

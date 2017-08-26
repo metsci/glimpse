@@ -28,8 +28,8 @@ package com.metsci.glimpse.painter.info;
 
 import static com.metsci.glimpse.context.TargetStackUtil.*;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.factory.DefaultAxisFactory2D;

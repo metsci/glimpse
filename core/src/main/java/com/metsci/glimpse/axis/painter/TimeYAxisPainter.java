@@ -30,7 +30,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.axis.Axis1D;

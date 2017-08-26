@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

@@ -39,7 +39,7 @@ import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.io.IOException;
 
-import javax.media.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 

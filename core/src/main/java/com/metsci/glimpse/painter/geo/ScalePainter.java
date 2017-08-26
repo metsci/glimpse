@@ -31,8 +31,8 @@ import static com.metsci.glimpse.support.font.FontUtils.*;
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;

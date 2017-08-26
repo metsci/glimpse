@@ -30,8 +30,8 @@ import static com.metsci.glimpse.gl.util.GLUtils.*;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseContext;
 

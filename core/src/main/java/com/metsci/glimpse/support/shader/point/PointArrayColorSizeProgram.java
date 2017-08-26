@@ -27,12 +27,12 @@
 package com.metsci.glimpse.support.shader.point;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLES1;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLES1;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

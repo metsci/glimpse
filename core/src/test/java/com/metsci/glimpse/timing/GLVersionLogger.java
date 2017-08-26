@@ -32,8 +32,8 @@ import static java.util.logging.Level.*;
 
 import java.util.logging.Logger;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 

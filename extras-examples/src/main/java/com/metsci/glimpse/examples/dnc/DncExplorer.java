@@ -52,7 +52,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.media.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;

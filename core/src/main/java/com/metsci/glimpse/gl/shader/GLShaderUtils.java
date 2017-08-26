@@ -29,17 +29,17 @@ package com.metsci.glimpse.gl.shader;
 import static com.google.common.base.Charsets.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static java.lang.Thread.*;
-import static javax.media.opengl.GL.*;
-import static javax.media.opengl.GL2ES2.*;
-import static javax.media.opengl.GL3.*;
+import static com.jogamp.opengl.GL.*;
+import static com.jogamp.opengl.GL2ES2.*;
+import static com.jogamp.opengl.GL3.*;
 import static jogamp.opengl.glu.error.Error.*;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
 
 import com.google.common.io.Resources;
 import com.metsci.glimpse.util.primitives.IntsArray;

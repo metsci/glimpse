@@ -29,7 +29,7 @@ package com.metsci.glimpse.painter.shape;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;

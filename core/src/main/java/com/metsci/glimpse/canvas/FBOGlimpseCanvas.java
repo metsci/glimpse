@@ -32,14 +32,14 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLOffscreenAutoDrawable;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLRunnable;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLRunnable;
 
 import com.jogamp.opengl.FBObject.Colorbuffer;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
@@ -258,8 +258,8 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
     }
 
     @Override
-    public int[] getSurfaceScale( )
+    public float[] getSurfaceScale( )
     {
-        return new int[] { 1, 1 };
+        return new float[] { 1.0f, 1.0f };
     }
 }

@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BYTE;
-import static javax.media.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_BYTE;
+import static com.jogamp.opengl.GL.GL_FLOAT;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

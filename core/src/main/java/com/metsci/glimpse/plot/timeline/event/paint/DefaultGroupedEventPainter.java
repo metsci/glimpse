@@ -33,8 +33,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.math.Matrix4;

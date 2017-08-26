@@ -30,11 +30,11 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BLEND;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINE_STRIP;
-import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_BLEND;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_LINE_STRIP;
+import static com.jogamp.opengl.GL2ES2.GL_STREAM_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL3;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;

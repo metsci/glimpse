@@ -30,7 +30,7 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;

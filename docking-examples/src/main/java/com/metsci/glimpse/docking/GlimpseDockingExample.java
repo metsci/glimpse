@@ -39,7 +39,7 @@ import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 
-import javax.media.opengl.GLOffscreenAutoDrawable;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
 
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;

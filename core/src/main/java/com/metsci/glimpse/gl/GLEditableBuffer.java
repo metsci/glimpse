@@ -31,12 +31,12 @@ import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSetModifiable;

@@ -41,16 +41,16 @@ import static java.awt.Font.MONOSPACED;
 import static java.awt.Font.PLAIN;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static javax.swing.BorderFactory.createEmptyBorder;
 
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
 import javax.swing.JLabel;
 
 import com.jogamp.opengl.util.texture.Texture;

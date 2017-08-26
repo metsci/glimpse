@@ -45,9 +45,9 @@ import java.io.InputStream;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLProfile;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;

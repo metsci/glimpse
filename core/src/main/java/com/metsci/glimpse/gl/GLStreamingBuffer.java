@@ -29,14 +29,14 @@ package com.metsci.glimpse.gl;
 import static com.jogamp.common.nio.Buffers.*;
 import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static java.lang.Math.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 /**
  * Represents a device buffer that needs to be re-written frequently, and

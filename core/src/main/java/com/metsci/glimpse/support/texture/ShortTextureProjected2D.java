@@ -32,8 +32,8 @@ import java.nio.Buffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * A texture class which stores 16 bit integer values (uncapped).

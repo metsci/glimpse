@@ -28,7 +28,7 @@ package com.metsci.glimpse.support.wrapped;
 
 import static com.metsci.glimpse.support.wrapped.Wrapper2D.NOOP_WRAPPER_2D;
 
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseContextImpl;
@@ -65,7 +65,7 @@ public class WrappedGlimpseContext extends GlimpseContextImpl
     protected final boolean isFirstWrappedTile;
 
 
-    public WrappedGlimpseContext( GLContext glContext, int[] scale, Wrapper2D wrapper, boolean isFirstWrappedTile )
+    public WrappedGlimpseContext( GLContext glContext, float[] scale, Wrapper2D wrapper, boolean isFirstWrappedTile )
     {
         super( glContext, scale );
         this.wrapper = wrapper;

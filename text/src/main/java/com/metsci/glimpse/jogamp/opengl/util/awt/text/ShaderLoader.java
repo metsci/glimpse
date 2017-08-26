@@ -27,8 +27,8 @@
  */
 package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GLException;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GLException;
 
 import com.jogamp.opengl.util.glsl.ShaderUtil;
 

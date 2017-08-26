@@ -31,15 +31,15 @@ import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.util.Collections.unmodifiableCollection;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.google.common.base.Objects;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;

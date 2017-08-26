@@ -29,12 +29,12 @@ package com.metsci.glimpse.examples.layers;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_POINTS;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_POINTS;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

@@ -38,14 +38,14 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLRunnable;
-import javax.media.opengl.awt.GLJPanel;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLRunnable;
+import com.jogamp.opengl.awt.GLJPanel;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -492,8 +492,8 @@ public class SwingLightweightGlimpseCanvas extends JPanel implements GlimpseCanv
     }
 
     @Override
-    public int[] getSurfaceScale( )
+    public float[] getSurfaceScale( )
     {
-        return this.glCanvas.getCurrentSurfaceScale( new int[2] );
+        return this.glCanvas.getCurrentSurfaceScale( new float[2] );
     }
 }

@@ -28,12 +28,12 @@ package com.metsci.glimpse.support.shader.line;
 
 import static com.metsci.glimpse.support.shader.line.LinePathData.*;
 import static com.metsci.glimpse.support.shader.line.LineUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 

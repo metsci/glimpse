@@ -29,8 +29,8 @@ package com.metsci.glimpse.support.atlas.shader;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLUniformData;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.GLArrayDataClient;

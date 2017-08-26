@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.context.GlimpseContext;

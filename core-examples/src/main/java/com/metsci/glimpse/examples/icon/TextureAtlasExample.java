@@ -31,7 +31,7 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;

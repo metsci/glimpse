@@ -33,7 +33,7 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis2D;

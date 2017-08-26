@@ -38,9 +38,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLException;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLException;
 
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.metsci.glimpse.jogamp.opengl.util.awt.text.Check;

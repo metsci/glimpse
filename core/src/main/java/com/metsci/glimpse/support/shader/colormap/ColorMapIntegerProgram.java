@@ -29,7 +29,7 @@ package com.metsci.glimpse.support.shader.colormap;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GLUniformData;
+import com.jogamp.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
 

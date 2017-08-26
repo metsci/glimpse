@@ -28,18 +28,18 @@ package com.metsci.glimpse.dnc.util;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.metsci.glimpse.util.GeneralUtils.array;
-import static javax.media.opengl.GL.GL_NO_ERROR;
-import static javax.media.opengl.GL.GL_TRUE;
-import static javax.media.opengl.GL2ES2.GL_COMPILE_STATUS;
-import static javax.media.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static javax.media.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
-import static javax.media.opengl.GL2ES2.GL_LINK_STATUS;
-import static javax.media.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static javax.media.opengl.GL3.GL_GEOMETRY_SHADER;
+import static com.jogamp.opengl.GL.GL_NO_ERROR;
+import static com.jogamp.opengl.GL.GL_TRUE;
+import static com.jogamp.opengl.GL2ES2.GL_COMPILE_STATUS;
+import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
+import static com.jogamp.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
+import static com.jogamp.opengl.GL2ES2.GL_LINK_STATUS;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static com.jogamp.opengl.GL3.GL_GEOMETRY_SHADER;
 import static jogamp.opengl.glu.error.Error.gluErrorString;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
 
 import com.metsci.glimpse.util.primitives.IntsArray;
 

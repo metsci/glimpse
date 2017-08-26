@@ -36,7 +36,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import javax.media.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;

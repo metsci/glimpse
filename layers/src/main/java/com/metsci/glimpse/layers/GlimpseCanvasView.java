@@ -36,7 +36,7 @@ import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
 import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
-import static javax.media.opengl.GLContext.CONTEXT_NOT_CURRENT;
+import static com.jogamp.opengl.GLContext.CONTEXT_NOT_CURRENT;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -46,9 +46,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseContext;

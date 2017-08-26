@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

@@ -31,8 +31,8 @@ import static com.metsci.glimpse.axis.tagged.Tag.*;
 import java.io.IOException;
 import java.util.List;
 
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLUniformData;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;

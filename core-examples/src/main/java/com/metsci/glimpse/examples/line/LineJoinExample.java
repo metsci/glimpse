@@ -32,12 +32,12 @@ import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
 import static com.metsci.glimpse.support.shader.line.LineUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static java.lang.Math.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.jogamp.opengl.GLProfile.*;
 import static javax.swing.WindowConstants.*;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
-import javax.media.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 

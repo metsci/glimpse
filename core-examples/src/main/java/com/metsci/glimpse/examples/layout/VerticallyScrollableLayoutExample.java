@@ -33,9 +33,9 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLOffscreenAutoDrawable;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;

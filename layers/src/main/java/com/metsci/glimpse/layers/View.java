@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 

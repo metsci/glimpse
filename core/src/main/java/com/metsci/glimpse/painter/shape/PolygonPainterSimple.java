@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.gl.util.GLUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
 import java.io.Serializable;
 import java.nio.FloatBuffer;
@@ -38,7 +38,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;

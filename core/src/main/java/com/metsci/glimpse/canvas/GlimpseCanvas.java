@@ -26,11 +26,11 @@
  */
 package com.metsci.glimpse.canvas;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.GLRunnable;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.GLRunnable;
 
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -136,5 +136,5 @@ public interface GlimpseCanvas extends GlimpseTarget
      *
      * @return the scale factors as {scaleX, scaleY}
      */
-    public int[] getSurfaceScale( );
+    public float[] getSurfaceScale( );
 }

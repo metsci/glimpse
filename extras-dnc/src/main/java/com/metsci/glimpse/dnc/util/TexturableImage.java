@@ -29,9 +29,9 @@ package com.metsci.glimpse.dnc.util;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.awt.color.ColorSpace.CS_sRGB;
 import static java.awt.image.DataBuffer.TYPE_BYTE;
-import static javax.media.opengl.GL.GL_RGBA;
-import static javax.media.opengl.GL.GL_UNPACK_ALIGNMENT;
-import static javax.media.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.jogamp.opengl.GL.GL_RGBA;
+import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
 
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -40,7 +40,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 public class TexturableImage extends BufferedImage
 {

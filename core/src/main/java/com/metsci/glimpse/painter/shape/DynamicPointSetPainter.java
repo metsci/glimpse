@@ -27,7 +27,7 @@
 package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;

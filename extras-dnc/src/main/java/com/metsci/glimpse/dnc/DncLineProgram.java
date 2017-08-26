@@ -29,7 +29,7 @@ package com.metsci.glimpse.dnc;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 public class DncLineProgram
 {

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.gl.texture;
 
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.context.GlimpseContext;
 

@@ -29,7 +29,7 @@ package com.metsci.glimpse.support.shader.point;
 import java.io.IOException;
 import java.util.List;
 
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;

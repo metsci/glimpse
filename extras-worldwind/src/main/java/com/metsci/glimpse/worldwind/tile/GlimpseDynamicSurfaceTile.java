@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;

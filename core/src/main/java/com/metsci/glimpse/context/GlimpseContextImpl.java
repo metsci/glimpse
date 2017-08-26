@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.context;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 
@@ -39,9 +39,9 @@ public class GlimpseContextImpl implements GlimpseContext
     private GLContext glContext;
     private GlimpseTargetStack targetStack;
     private int dpi;
-    private final int[] scale;
+    private final float[] scale;
 
-    public GlimpseContextImpl( GLContext context, int[] scale )
+    public GlimpseContextImpl( GLContext context, float[] scale )
     {
         this.glContext = context;
         this.targetStack = new GlimpseTargetStackImpl( );
@@ -88,7 +88,7 @@ public class GlimpseContextImpl implements GlimpseContext
     }
 
     @Override
-    public int[] getSurfaceScale( )
+    public float[] getSurfaceScale( )
     {
         return scale;
     }

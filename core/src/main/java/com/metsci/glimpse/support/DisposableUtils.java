@@ -41,9 +41,9 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

@@ -28,8 +28,8 @@ package com.metsci.glimpse.gl.texture;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
 

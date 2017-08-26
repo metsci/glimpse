@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.layers;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLRunnable;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLRunnable;
 
 import com.metsci.glimpse.context.GlimpseContext;
 

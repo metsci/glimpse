@@ -33,13 +33,13 @@ import static com.metsci.glimpse.support.shader.line.LinePathData.updateMileageB
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.sliced;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static javax.media.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
 
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.support.shader.line.LineProgram.LineBufferHandles;

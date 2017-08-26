@@ -35,8 +35,8 @@ import java.nio.FloatBuffer;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 /**
  * A texture class which stores 4 channel RGBA colors. Each color channel

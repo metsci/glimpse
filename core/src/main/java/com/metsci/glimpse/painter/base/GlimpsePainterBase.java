@@ -28,7 +28,7 @@ package com.metsci.glimpse.painter.base;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;

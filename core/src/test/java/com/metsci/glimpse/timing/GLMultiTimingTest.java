@@ -31,16 +31,16 @@ import static com.metsci.glimpse.support.FrameUtils.*;
 import static com.metsci.glimpse.timing.GLVersionLogger.*;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.jogamp.opengl.GL.*;
 import static javax.swing.WindowConstants.*;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 

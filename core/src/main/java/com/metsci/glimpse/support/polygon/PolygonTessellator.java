@@ -28,10 +28,10 @@ package com.metsci.glimpse.support.polygon;
 
 import java.util.Iterator;
 
-import javax.media.opengl.GL3;
-import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.GLUtessellator;
-import javax.media.opengl.glu.GLUtessellatorCallback;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.GLUtessellator;
+import com.jogamp.opengl.glu.GLUtessellatorCallback;
 
 import com.metsci.glimpse.support.polygon.Polygon.Loop;
 

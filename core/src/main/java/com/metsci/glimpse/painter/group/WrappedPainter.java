@@ -26,15 +26,15 @@
  */
 package com.metsci.glimpse.painter.group;
 
-import static com.metsci.glimpse.util.GeneralUtils.ints;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.FBObject;
@@ -203,7 +203,7 @@ public class WrappedPainter extends GlimpsePainterBase
                 this.fbo.reset( gl, boundsX.getTextureSize( ), boundsY.getTextureSize( ), 0 );
             }
 
-            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), ints( 1, 1 ), new Wrapper2D( axis ), isFirstTile );
+            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), floats( 1, 1 ), new Wrapper2D( axis ), isFirstTile );
             glimpseContext.getTargetStack( ).push( this.dummyLayout, new GlimpseBounds( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) ) );
 
             this.fbo.bind( gl );

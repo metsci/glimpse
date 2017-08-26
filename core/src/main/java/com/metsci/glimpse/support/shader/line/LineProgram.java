@@ -28,15 +28,15 @@ package com.metsci.glimpse.support.shader.line;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_BYTE;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_BYTE;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;

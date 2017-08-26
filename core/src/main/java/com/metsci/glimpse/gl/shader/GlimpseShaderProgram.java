@@ -28,11 +28,11 @@ package com.metsci.glimpse.gl.shader;
 
 import java.util.Collection;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLArrayData;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLUniformData;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLArrayData;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLUniformData;
 
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.GLArrayDataClient;

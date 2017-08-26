@@ -31,7 +31,7 @@ import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.requireTimeZoneTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
-import static javax.media.opengl.GLProfile.GL3;
+import static com.jogamp.opengl.GLProfile.GL3;
 
 import java.time.ZoneId;
 import java.util.Collection;
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.google.common.collect.ImmutableSet;

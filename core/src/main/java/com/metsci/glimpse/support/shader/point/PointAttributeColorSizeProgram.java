@@ -30,10 +30,10 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLES1;
-import javax.media.opengl.GLUniformData;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLES1;
+import com.jogamp.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.GLArrayDataClient;

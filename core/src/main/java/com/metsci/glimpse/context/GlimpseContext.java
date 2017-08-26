@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.context;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLContext;
 
 /**
  * GlimpseContext wraps a {@link javax.media.opengl.GLContext} and
@@ -70,5 +70,5 @@ public interface GlimpseContext
      *
      * @return the scale factors as {scaleX, scaleY}
      */
-    public int[] getSurfaceScale( );
+    public float[] getSurfaceScale( );
 }

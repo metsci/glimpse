@@ -37,10 +37,10 @@ import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLContext;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;

@@ -29,8 +29,8 @@ package com.metsci.glimpse.plot.timeline.painter;
 import java.awt.Font;
 import java.util.List;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
