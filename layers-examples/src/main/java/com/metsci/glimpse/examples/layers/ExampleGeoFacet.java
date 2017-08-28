@@ -128,7 +128,6 @@ public class ExampleGeoFacet extends ExampleFacet
         this.view.glimpseInvoke( ( context ) ->
         {
             this.painter.dispose( context );
-            return true;
         } );
     }
 

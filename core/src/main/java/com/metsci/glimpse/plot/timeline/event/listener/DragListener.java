@@ -138,8 +138,11 @@ public class DragListener implements EventPlotListener, GlimpseMouseAllListener
         if ( this.dragEvent != null && ev.isButtonDown( MouseButton.Button1 ) )
         {
             // TODO: Find a less kludgy way to distinguish mouse-release from mouse-drag
-            GlimpseMouseEvent ev2 = new GlimpseMouseEvent( ev.getTargetStack( ), ev.getModifiers( ), ev.getButtons( ), ev.getAllX( ), ev.getAllY( ), ev.getWheelIncrement( ), -1 * ev.getClickCount( ), false );
-            this.doDrag( ev2 );
+            // If the mouse is outside the canvas when released, the incoming clickCount is zero; subtract 1 so that releaseClickCount is always negative
+            int releaseClickCount = ( -1 * ev.getClickCount( ) ) - 1;
+            GlimpseMouseEvent releaseEv = new GlimpseMouseEvent( ev.getTargetStack( ), ev.getModifiers( ), ev.getButtons( ), ev.getAllX( ), ev.getAllY( ), ev.getWheelIncrement( ), releaseClickCount, false );
+
+            this.doDrag( releaseEv );
             this.reset( );
             ev.setHandled( true );
         }

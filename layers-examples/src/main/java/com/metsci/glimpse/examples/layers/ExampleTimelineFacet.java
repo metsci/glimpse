@@ -145,7 +145,6 @@ public class ExampleTimelineFacet extends ExampleFacet
         this.view.glimpseInvoke( ( context ) ->
         {
             this.painter.dispose( context );
-            return true;
         } );
     }
 

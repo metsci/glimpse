@@ -35,7 +35,6 @@ import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.texture.Texture;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -182,8 +181,8 @@ public class GLUtils
      * Enable blending, and set the blend func that is appropriate for drawing
      * with premultiplied alpha.
      * <p>
-     * This is typically what you want when rendering with JOGL {@link Texture},
-     * {@link TextureAtlas}, etc.
+     * This is recommended in situations where GL may interpolate between colors
+     * (e.g. when using {@link TextureAtlas}).
      */
     public static void enablePremultipliedAlphaBlending( GL gl )
     {

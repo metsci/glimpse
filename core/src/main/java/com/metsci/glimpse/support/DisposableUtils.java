@@ -30,18 +30,30 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.ItemSelectable;
 import java.awt.Window;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
 
 import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.swing.AbstractButton;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
+import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
@@ -69,12 +81,24 @@ public class DisposableUtils
         };
     }
 
-    public static Disposable onWindowClosing( Window window, Consumer<WindowEvent> fn )
+    public static Disposable onWindowClosing( Window window, Consumer<? super WindowEvent> fn )
     {
         return addWindowListener( window, new WindowAdapter( )
         {
             @Override
             public void windowClosing( WindowEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onWindowClosed( Window window, Consumer<? super WindowEvent> fn )
+    {
+        return addWindowListener( window, new WindowAdapter( )
+        {
+            @Override
+            public void windowClosed( WindowEvent ev )
             {
                 fn.accept( ev );
             }
@@ -104,6 +128,124 @@ public class DisposableUtils
         }
 
         return addItemListener( itemSelectable, listener );
+    }
+
+    public static Disposable addActionListener( AbstractButton button, ActionListener actionListener )
+    {
+        button.addActionListener( actionListener );
+
+        return ( ) ->
+        {
+            button.removeActionListener( actionListener );
+        };
+    }
+
+    public static Disposable addActionListener( AbstractButton button, Runnable listener )
+    {
+        return addActionListener( button, ( ev ) -> listener.run( ) );
+    }
+
+    public static Disposable addActionListener( boolean runImmediately, AbstractButton button, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        return addActionListener( button, listener );
+    }
+
+    public static Disposable onFocusGained( boolean runImmediately, Component c, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        FocusListener focusListener = new FocusAdapter( )
+        {
+            @Override
+            public void focusGained( FocusEvent ev )
+            {
+                listener.run( );
+            }
+        };
+
+        c.addFocusListener( focusListener );
+
+        return ( ) ->
+        {
+            c.removeFocusListener( focusListener );
+        };
+    }
+
+    public static Disposable onFocusLost( boolean runImmediately, Component c, Runnable listener )
+    {
+        if ( runImmediately )
+        {
+            listener.run( );
+        }
+
+        FocusListener focusListener = new FocusAdapter( )
+        {
+            @Override
+            public void focusLost( FocusEvent ev )
+            {
+                listener.run( );
+            }
+        };
+
+        c.addFocusListener( focusListener );
+
+        return ( ) ->
+        {
+            c.removeFocusListener( focusListener );
+        };
+    }
+
+    public static Disposable addTextListener( JTextComponent c, Runnable listener )
+    {
+        DocumentListener docListener = new DocumentListener( )
+        {
+            public void insertUpdate( DocumentEvent ev ) { listener.run( ); }
+            public void removeUpdate( DocumentEvent ev ) { listener.run( ); }
+            public void changedUpdate( DocumentEvent ev ) { listener.run( ); }
+        };
+
+        PropertyChangeListener propChangeListener = ( ev ) ->
+        {
+            Document oldDoc = ( Document ) ev.getOldValue( );
+            if ( oldDoc != null )
+            {
+                oldDoc.removeDocumentListener( docListener );
+            }
+
+            Document newDoc = ( Document ) ev.getNewValue( );
+            if ( newDoc != null )
+            {
+                newDoc.addDocumentListener( docListener );
+            }
+
+            listener.run( );
+        };
+        c.addPropertyChangeListener( "document", propChangeListener );
+
+        Document doc = c.getDocument( );
+        if ( doc != null )
+        {
+            doc.addDocumentListener( docListener );
+        }
+
+        return ( ) ->
+        {
+            c.removePropertyChangeListener( "document", propChangeListener );
+
+            Document doc2 = c.getDocument( );
+            if ( doc2 != null )
+            {
+                doc2.removeDocumentListener( docListener );
+            }
+        };
     }
 
     public static Disposable addComponent( Container container, Component child )
@@ -150,12 +292,12 @@ public class DisposableUtils
         };
     }
 
-    public static Disposable onGLInit( GlimpseCanvas canvas, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLInit( GlimpseCanvas canvas, Consumer<? super GLAutoDrawable> fn )
     {
         return onGLInit( canvas.getGLDrawable( ), fn );
     }
 
-    public static Disposable onGLInit( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLInit( GLAutoDrawable glDrawable, Consumer<? super GLAutoDrawable> fn )
     {
         return addGLEventListener( glDrawable, new GLEventAdapter( )
         {
@@ -167,12 +309,12 @@ public class DisposableUtils
         } );
     }
 
-    public static Disposable onGLDispose( GlimpseCanvas canvas, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLDispose( GlimpseCanvas canvas, Consumer<? super GLAutoDrawable> fn )
     {
         return onGLDispose( canvas.getGLDrawable( ), fn );
     }
 
-    public static Disposable onGLDispose( GLAutoDrawable glDrawable, Consumer<GLAutoDrawable> fn )
+    public static Disposable onGLDispose( GLAutoDrawable glDrawable, Consumer<? super GLAutoDrawable> fn )
     {
         return addGLEventListener( glDrawable, new GLEventAdapter( )
         {
@@ -232,6 +374,31 @@ public class DisposableUtils
     public static Disposable addAxisListener1D( Axis1D axis, Runnable listener )
     {
         AxisListener1D listener2 = ( x ) ->
+        {
+            listener.run( );
+        };
+
+        axis.addAxisListener( listener2 );
+
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener2 );
+        };
+    }
+
+    public static Disposable addAxisListener2D( Axis2D axis, AxisListener2D listener )
+    {
+        axis.addAxisListener( listener );
+
+        return ( ) ->
+        {
+            axis.removeAxisListener( listener );
+        };
+    }
+
+    public static Disposable addAxisListener2D( Axis2D axis, Runnable listener )
+    {
+        AxisListener2D listener2 = ( x ) ->
         {
             listener.run( );
         };

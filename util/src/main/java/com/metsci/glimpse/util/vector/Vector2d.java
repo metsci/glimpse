@@ -94,7 +94,7 @@ public final class Vector2d implements Serializable
     @Override
     public int hashCode( )
     {
-        return new Double( x ).hashCode( ) ^ new Double( y ).hashCode( );
+        return Double.hashCode( x ) ^ Double.hashCode( y );
     }
 
     /**

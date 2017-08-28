@@ -227,6 +227,47 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable, 
             lock.unlock( );
         }
     }
+    
+    public void removeLayoutByKey( Object key )
+    {
+        lock.lock( );
+        try
+        {
+            manager.removeLayoutByKey( key );
+            layoutDelegate.removeLayoutByKey( key );
+            invalidateLayout( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public GlimpseLayout getLayoutByKey( Object key )
+    {
+        lock.lock( );
+        try
+        {
+            return layoutDelegate.getLayoutByKey( key );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
+    
+    public GlimpsePainter getPainterByKey( Object key )
+    {
+        lock.lock( );
+        try
+        {
+            return layoutDelegate.getPainterByKey( key );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    }
 
     /**
      * Removes all GlimpseLayouts added via {@code #addLayout(GlimpseLayout)}.
@@ -327,14 +368,19 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable, 
     {
         addLayout( layout, null, zOrder );
     }
-
+    
     public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
+    {
+        addLayout( null, layout, callback, zOrder );
+    }
+
+    public void addLayout( Object key, GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
     {
         lock.lock( );
         try
         {
-            manager.addLayout( layout, zOrder );
-            layoutDelegate.addLayout( layout, callback, zOrder );
+            manager.addLayout( key, layout, zOrder );
+            layoutDelegate.addLayout( key, layout, callback, zOrder );
             invalidateLayout( );
         }
         finally
@@ -345,7 +391,7 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable, 
 
     public void addPainter( GlimpsePainter painter )
     {
-        addPainter( painter, null, 0 );
+        addPainter( null, painter, null, 0 );
     }
 
     public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback )
@@ -355,27 +401,42 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable, 
 
     public void addPainter( GlimpsePainter painter, int zOrder )
     {
-        addPainter( painter, null, zOrder );
+        addPainter( null, painter, null, zOrder );
     }
 
     public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
+        addPainter( null, painter, callback, zOrder );
+    }
+    
+    public void addPainter( Object key, GlimpsePainter painter, int zOrder )
+    {
+        addPainter( key, painter, null, zOrder );
+    }
+    
+    public void addPainter( Object key, GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
         if ( painter instanceof GlimpseLayout )
         {
-            addLayout( ( GlimpseLayout ) painter, callback, zOrder );
+            addLayout( key, ( GlimpseLayout ) painter, callback, zOrder );
         }
         else
         {
-            addPainter0( painter, callback, zOrder );
+            addPainter0( key, painter, callback, zOrder );
         }
     }
-
+    
     protected void addPainter0( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        addPainter0( null, painter, callback, zOrder );
+    }
+
+    protected void addPainter0( Object key, GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
         lock.lock( );
         try
         {
-            layoutDelegate.addPainter( painter, callback, zOrder );
+            layoutDelegate.addPainter( key, painter, callback, zOrder );
             invalidateLayout( );
         }
         finally
@@ -383,6 +444,20 @@ public class GlimpseLayout implements GlimpsePainter, GlimpseTarget, Mouseable, 
             lock.unlock( );
         }
     }
+    
+    public void removePainterByKey( Object key )
+    {
+        lock.lock( );
+        try
+        {
+            layoutDelegate.removePainterByKey( key );
+            invalidateLayout( );
+        }
+        finally
+        {
+            lock.unlock( );
+        }
+    } 
 
     public void removePainter( GlimpsePainter painter )
     {

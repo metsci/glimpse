@@ -193,8 +193,13 @@ public class FloatTextureProjected2D extends TextureProjected2D
         public void mutate( FloatBuffer buffer, int dataSizeX, int dataSizeY )
         {
             if ( dataf != null )
+            {
                 mutatef( buffer, dataSizeX, dataSizeY );
-            else if ( datad != null ) mutated( buffer, dataSizeX, dataSizeY );
+            }
+            else if ( datad != null )
+            {
+                mutated( buffer, dataSizeX, dataSizeY );
+            }
         }
 
         public void mutatef( FloatBuffer buffer, int dataSizeX, int dataSizeY )
@@ -271,7 +276,7 @@ public class FloatTextureProjected2D extends TextureProjected2D
             {
                 if ( datad.length != dataSizeY || datad[0].length != dataSizeX )
                 {
-                    logWarning( logger, "Incorrectly sized data array passed to SetDataMutator. Expected %d %d. Got %d %d.", dataSizeX, dataSizeY, datad[0].length, dataf.length );
+                    logWarning( logger, "Incorrectly sized data array passed to SetDataMutator. Expected %d %d. Got %d %d.", dataSizeX, dataSizeY, datad[0].length, datad.length );
                     return;
                 }
 
