@@ -38,6 +38,9 @@ import java.util.function.Supplier;
 public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 {
 
+    protected static final VarEvent syntheticEvent = new VarEvent( false );
+
+
     protected static final ThreadLocal<Txn> activeTxn = new ThreadLocal<>( );
 
     public static void doTxn( Runnable task )
@@ -290,6 +293,15 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         {
             child.fireForSubtree( ev );
         }
+    }
+
+    /**
+     * Overridden so that listeners never receive a null event.
+     */
+    @Override
+    protected VarEvent getSyntheticEvent( )
+    {
+        return syntheticEvent;
     }
 
 }
