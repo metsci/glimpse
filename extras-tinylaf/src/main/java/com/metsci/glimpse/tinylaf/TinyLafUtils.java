@@ -73,6 +73,11 @@ public class TinyLafUtils
             UIManager.put( "MenuUI", TinyMenuUI2.class.getName( ) );
             UIManager.put( "Menu.border", createEmptyBorder( 6, 6, 4, 3 ) );
             UIManager.put( "MenuBar.border", createEmptyBorder( ) );
+
+            // TinyLaf menu item spacing needs tweaking
+            UIManager.put( "MenuItem.border", createEmptyBorder( 5, 8, 4, 8 ) );
+            UIManager.put( "CheckBoxMenuItem.border", createEmptyBorder( 5, 8, 4, 8 ) );
+            UIManager.put( "RadioButtonMenuItem.border", createEmptyBorder( 5, 8, 4, 8 ) );
         }
         catch ( UnsupportedLookAndFeelException e )
         {
