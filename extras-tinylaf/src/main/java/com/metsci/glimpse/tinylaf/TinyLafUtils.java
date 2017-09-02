@@ -28,6 +28,7 @@ package com.metsci.glimpse.tinylaf;
 
 import static java.lang.Boolean.FALSE;
 import static java.util.logging.Level.WARNING;
+import static javax.swing.BorderFactory.createEmptyBorder;
 
 import java.awt.Color;
 import java.net.URL;
@@ -65,8 +66,13 @@ public class TinyLafUtils
             // TinyLaf disables the "new folder" button in some cases ... not sure why
             UIManager.put( "FileChooser.readOnly", FALSE );
 
-            // TinyLaf progress bars look extremely dated
+            // TinyLaf progress bars look dated
             UIManager.put( "ProgressBarUI", TinyProgressBarUI2.class.getName( ) );
+
+            // TinyLaf top-level menus need tweaking
+            UIManager.put( "MenuUI", TinyMenuUI2.class.getName( ) );
+            UIManager.put( "Menu.border", createEmptyBorder( 6, 6, 4, 3 ) );
+            UIManager.put( "MenuBar.border", createEmptyBorder( ) );
         }
         catch ( UnsupportedLookAndFeelException e )
         {
