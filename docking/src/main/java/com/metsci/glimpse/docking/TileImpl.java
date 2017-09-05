@@ -503,13 +503,13 @@ public class TileImpl extends Tile
     }
 
     @Override
-    public void addView( final View view, int viewNum )
+    public void addView( View view, int viewNum )
     {
         DisposableGroup disposables = new DisposableGroup( );
 
         JPanel card = new JPanel( new BorderLayout( ) );
         {
-            disposables.add( addOldNewListener( view.component, true, ( componentOld, componentNew ) ->
+            disposables.add( addOldNewListener( view.component, true, ( ev, componentOld, componentNew ) ->
             {
                 if ( componentOld != null )
                 {

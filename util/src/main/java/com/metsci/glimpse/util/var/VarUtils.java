@@ -46,20 +46,46 @@ import com.google.common.collect.ImmutableMap;
 public class VarUtils
 {
 
-    public static <V> Disposable addOldNewListener( ReadableVar<? extends V> var, boolean runImmediately, BiConsumer<? super V, ? super V> oldNewListener )
+    public static interface OldNewListener<V>
     {
-        return var.addListener( runImmediately, new Runnable( )
+        void accept( VarEvent ev, V vOld, V vNew );
+    }
+
+    public static <V> Disposable addOldNewListener( ReadableVar<? extends V> var, boolean runImmediately, OldNewListener<? super V> oldNewListener )
+    {
+        return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
             private V valueOld = null;
 
             @Override
-            public void run( )
+            public void accept( VarEvent ev )
             {
                 V valueNew = var.v( );
 
                 if ( !equal( valueNew, valueOld ) )
                 {
-                    oldNewListener.accept( valueOld, valueNew );
+                    oldNewListener.accept( ev, valueOld, valueNew );
+                }
+
+                this.valueOld = valueNew;
+            }
+        } );
+    }
+
+    public static <K,V> Disposable addOldNewListener( ReadableVar<? extends Map<K,V>> mapVar, K key, boolean runImmediately, OldNewListener<? super V> oldNewListener )
+    {
+        return mapVar.addListener( runImmediately, new Consumer<VarEvent>( )
+        {
+            private V valueOld = null;
+
+            @Override
+            public void accept( VarEvent ev )
+            {
+                V valueNew = mapVar.v( ).get( key );
+
+                if ( !equal( valueNew, valueOld ) )
+                {
+                    oldNewListener.accept( ev, valueOld, valueNew );
                 }
 
                 this.valueOld = valueNew;
