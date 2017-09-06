@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.event.mouse.swing;
 
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
+
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -36,6 +38,7 @@ import java.awt.event.MouseWheelListener;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
@@ -45,7 +48,12 @@ public class MouseWrapperSwing extends MouseWrapperImpl<MouseEvent> implements M
 
     public MouseWrapperSwing( GlimpseCanvas canvas )
     {
-        super( canvas );
+        this( canvas, CLICK_FOCUS );
+    }
+
+    public MouseWrapperSwing( GlimpseCanvas canvas, FocusBehavior focusBehavior )
+    {
+        super( canvas, focusBehavior );
     }
 
     @Override

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.swt.event.mouse;
 
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -37,6 +39,7 @@ import org.eclipse.swt.widgets.Display;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 import com.metsci.glimpse.event.mouse.swing.GlimpseMouseWrapper;
@@ -46,7 +49,12 @@ public class MouseWrapperSWTBridge extends MouseWrapperImpl<MouseEvent> implemen
 {
     public MouseWrapperSWTBridge( GlimpseCanvas canvas )
     {
-        super( canvas );
+        this( canvas, CLICK_FOCUS );
+    }
+
+    public MouseWrapperSWTBridge( GlimpseCanvas canvas, FocusBehavior focusBehavior )
+    {
+        super( canvas, focusBehavior );
     }
 
     @Override
