@@ -370,7 +370,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
         super.addPainter0( backgroundPainter, null, Integer.MIN_VALUE );
 
         this.titleLayout = new GlimpseLayout( this, "Title" );
-        this.axisLayoutXY = new GlimpseAxisLayout2D( this, "Center", new Axis2D( this.centerAxisX, this.centerAxisY ) );
+        this.axisLayoutXY = createCenterLayout( "Center", new Axis2D( this.centerAxisX, this.centerAxisY ) );
 
         this.titlePainter = createTitlePainter( );
 
@@ -958,6 +958,11 @@ public class MultiAxisPlot2D extends GlimpseLayout
         painter.setHorizontalPosition( HorizontalPosition.Center );
         painter.setVerticalPosition( VerticalPosition.Center );
         return painter;
+    }
+
+    protected GlimpseAxisLayout2D createCenterLayout( String name, Axis2D axis )
+    {
+        return new GlimpseAxisLayout2D( this, name, axis );
     }
 
     protected boolean isTitleVisible( )
