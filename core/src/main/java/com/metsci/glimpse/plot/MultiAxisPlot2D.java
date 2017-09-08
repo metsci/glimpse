@@ -630,70 +630,169 @@ public class MultiAxisPlot2D extends GlimpseLayout
     //        Listener Methods          //
     //////////////////////////////////////
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void addGlimpseMouseListener( GlimpseMouseListener listener )
     {
-        this.getLayoutCenter( ).addGlimpseMouseListener( listener );
+        super.addGlimpseMouseListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseMotionListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void addGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
     {
-        this.getLayoutCenter( ).addGlimpseMouseMotionListener( listener );
+        super.addGlimpseMouseMotionListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseWheelListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void addGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
-        this.getLayoutCenter( ).addGlimpseMouseWheelListener( listener );
+        super.addGlimpseMouseWheelListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseAllListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void addGlimpseMouseAllListener( GlimpseMouseAllListener listener )
     {
-        this.getLayoutCenter( ).addGlimpseMouseAllListener( listener );
+        super.addGlimpseMouseAllListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseAllListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void removeGlimpseMouseAllListener( GlimpseMouseAllListener listener )
     {
-        this.getLayoutCenter( ).removeGlimpseMouseAllListener( listener );
+        super.removeGlimpseMouseAllListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseKeyListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void addGlimpseKeyListener( GlimpseKeyListener listener )
     {
-        this.getLayoutCenter( ).addGlimpseKeyListener( listener );
+        super.addGlimpseKeyListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void removeGlimpseMouseListener( GlimpseMouseListener listener )
     {
-        this.getLayoutCenter( ).removeGlimpseMouseListener( listener );
+        super.removeGlimpseMouseListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseMotionListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void removeGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
     {
-        this.getLayoutCenter( ).removeGlimpseMouseMotionListener( listener );
+        super.removeGlimpseMouseMotionListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseWheelListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
     {
-        this.getLayoutCenter( ).removeGlimpseMouseWheelListener( listener );
+        super.removeGlimpseMouseWheelListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseKeyListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void removeGlimpseKeyListener( GlimpseKeyListener listener )
     {
-        this.getLayoutCenter( ).removeGlimpseKeyListener( listener );
+        super.removeGlimpseKeyListener( listener );
     }
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeAllGlimpseListeners()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
     @Override
     public void removeAllGlimpseListeners( )
     {
-        this.getLayoutCenter( ).removeAllGlimpseListeners( );
+        super.removeAllGlimpseListeners( );
     }
     
     public AxisMouseListener getLayoutCenterMouseListener( )
