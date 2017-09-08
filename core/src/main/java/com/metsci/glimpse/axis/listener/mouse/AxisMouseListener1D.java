@@ -106,7 +106,7 @@ public class AxisMouseListener1D extends AxisMouseListener
     @Override
     public void mouseEntered( GlimpseMouseEvent event )
     {
-        // do nothing
+        this.mouseMoved( event );
     }
 
     @Override
