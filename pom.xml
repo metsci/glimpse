@@ -10,7 +10,7 @@
 
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
-    <version>3.2.0-rc3</version>
+    <version>3.2.0-rc4</version>
     <packaging>pom</packaging>
 
     <name>Glimpse</name>
@@ -68,7 +68,7 @@
 
         <module>wizard</module>
         <module>wizard-examples</module>
-        
+
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>
@@ -198,7 +198,7 @@
                         <include>**/*.gs</include>
                     </includes>
                     <mapping>
-                        <!-- using JAVADOC_STYLE can sometimes cause the 
+                        <!-- using JAVADOC_STYLE can sometimes cause the
                             license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
                         <java>SLASHSTAR_STYLE</java>
                         <fs>DOUBLESLASH_STYLE</fs>
@@ -207,8 +207,8 @@
                     </mapping>
                     <excludes>
                         <exclude>target/**</exclude>
-                        <!-- don't put license header on package descriptions. 
-                            If no other javadoc is provided, the first line of the license header ends 
+                        <!-- don't put license header on package descriptions.
+                            If no other javadoc is provided, the first line of the license header ends
                             up in the javadoc. -->
                         <exclude>**/package-info.java</exclude>
                         <!-- these classes have their own license headers -->
@@ -237,7 +237,7 @@
             </plugin>
 
             <plugin>
-                <!-- explicitly define maven-deploy-plugin after other to 
+                <!-- explicitly define maven-deploy-plugin after other to
                     force exec order -->
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.7</version>
@@ -253,7 +253,7 @@
             </plugin>
 
             <plugin>
-                <!-- explicitly define maven-install-plugin after other to 
+                <!-- explicitly define maven-install-plugin after other to
                     force exec order -->
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.3.1</version>
@@ -272,7 +272,7 @@
 
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
