@@ -24,62 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.event.mouse;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
-
-public class Notifier<T> implements Listenable<T>
+public enum FocusBehavior
 {
 
-    protected final CopyOnWriteArrayList<Consumer<T>> listeners;
-
-
-    public Notifier( )
-    {
-        this.listeners = new CopyOnWriteArrayList<>( );
-    }
-
-    @Override
-    public Disposable addListener( boolean runImmediately, Runnable runnable )
-    {
-        return this.addListener( runImmediately, ( ev ) -> runnable.run( ) );
-    }
-
-    @Override
-    public Disposable addListener( boolean runImmediately, Consumer<T> listener )
-    {
-        if ( runImmediately )
-        {
-            listener.accept( this.getSyntheticEvent( ) );
-        }
-
-        this.listeners.add( listener );
-
-        return ( ) ->
-        {
-            this.listeners.remove( listener );
-        };
-    }
-
-    /**
-     * Returns an object that should be passed to listeners when listeners need
-     * to be fired synthetically -- for example, when calling {@link #addListener(boolean, Consumer)}
-     * with {@code runImmediately = true}.
-     * <p>
-     * Defaults to null.
-     */
-    protected T getSyntheticEvent( )
-    {
-        return null;
-    }
-
-    public void fire( T ev )
-    {
-        for ( Consumer<T> listener : this.listeners )
-        {
-            listener.accept( ev );
-        }
-    }
+    CLICK_FOCUS, HOVER_FOCUS;
 
 }

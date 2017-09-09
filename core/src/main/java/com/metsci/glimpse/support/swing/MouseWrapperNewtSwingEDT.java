@@ -26,10 +26,13 @@
  */
 package com.metsci.glimpse.support.swing;
 
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
+
 import javax.swing.SwingUtilities;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 
 /**
@@ -41,7 +44,12 @@ public class MouseWrapperNewtSwingEDT extends MouseWrapperNewt
 
     public MouseWrapperNewtSwingEDT( NewtGlimpseCanvas canvas )
     {
-        super( canvas );
+        this( canvas, CLICK_FOCUS );
+    }
+
+    public MouseWrapperNewtSwingEDT( NewtGlimpseCanvas canvas, FocusBehavior focusBehavior )
+    {
+        super( canvas, focusBehavior );
     }
 
     @Override
