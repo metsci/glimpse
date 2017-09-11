@@ -56,18 +56,21 @@ public class VarUtils
         return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
             private V valueOld = null;
+            private boolean ongoingOld = true;
 
             @Override
             public void accept( VarEvent ev )
             {
                 V valueNew = var.v( );
+                boolean ongoingNew = ev.ongoing;
 
-                if ( !equal( valueNew, valueOld ) )
+                if ( ( !ongoingNew && this.ongoingOld ) || !equal( valueNew, this.valueOld ) )
                 {
                     oldNewListener.accept( ev, valueOld, valueNew );
                 }
 
                 this.valueOld = valueNew;
+                this.ongoingOld = ongoingNew;
             }
         } );
     }
@@ -77,18 +80,21 @@ public class VarUtils
         return mapVar.addListener( runImmediately, new Consumer<VarEvent>( )
         {
             private V valueOld = null;
+            private boolean ongoingOld = true;
 
             @Override
             public void accept( VarEvent ev )
             {
                 V valueNew = mapVar.v( ).get( key );
+                boolean ongoingNew = ev.ongoing;
 
-                if ( !equal( valueNew, valueOld ) )
+                if ( ( !ongoingNew && this.ongoingOld ) || !equal( valueNew, this.valueOld ) )
                 {
                     oldNewListener.accept( ev, valueOld, valueNew );
                 }
 
                 this.valueOld = valueNew;
+                this.ongoingOld = ongoingNew;
             }
         } );
     }
@@ -105,6 +111,7 @@ public class VarUtils
     {
         return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
+            // FIXME: Handle ongoing flag carefully
             private Set<T> valuesOld = emptySet( );
 
             @Override
@@ -141,6 +148,7 @@ public class VarUtils
             @Override
             public void accept( VarEvent ev )
             {
+                // FIXME: Handle ongoing flag carefully
                 Set<T> valuesNew = new HashSet<>( var.v( ) );
 
                 // difference() returns an unmodifiable view, which is what we want
@@ -159,6 +167,7 @@ public class VarUtils
     {
         return var.addListener( runImmediately, new Runnable( )
         {
+            // FIXME: Handle ongoing flag carefully
             private Set<Entry<K, V>> entriesOld = emptySet( );
 
             @Override
@@ -182,6 +191,7 @@ public class VarUtils
     {
         return var.addListener( false, new Runnable( )
         {
+            // FIXME: Handle ongoing flag carefully
             private Set<Entry<K, V>> entriesOld = new HashSet<>( var.v( ).entrySet( ) );
 
             @Override
