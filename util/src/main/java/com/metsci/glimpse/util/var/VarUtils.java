@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -55,22 +54,26 @@ public class VarUtils
     {
         return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
-            private V valueOld = null;
-            private boolean ongoingOld = true;
+            private V valuePrev = null;
+            private boolean ongoingPrev = true;
 
             @Override
             public void accept( VarEvent ev )
             {
+                V valueOld = this.valuePrev;
+                boolean ongoingOld = this.ongoingPrev;
+
                 V valueNew = var.v( );
                 boolean ongoingNew = ev.ongoing;
 
-                if ( ( !ongoingNew && this.ongoingOld ) || !equal( valueNew, this.valueOld ) )
+                // Update prev values BEFORE firing listeners, in case one of them triggers this method again
+                this.valuePrev = valueNew;
+                this.ongoingPrev = ongoingNew;
+
+                if ( ( !ongoingNew && ongoingOld ) || !equal( valueNew, valueOld ) )
                 {
                     oldNewListener.accept( ev, valueOld, valueNew );
                 }
-
-                this.valueOld = valueNew;
-                this.ongoingOld = ongoingNew;
             }
         } );
     }
@@ -79,22 +82,26 @@ public class VarUtils
     {
         return mapVar.addListener( runImmediately, new Consumer<VarEvent>( )
         {
-            private V valueOld = null;
-            private boolean ongoingOld = true;
+            private V valuePrev = null;
+            private boolean ongoingPrev = true;
 
             @Override
             public void accept( VarEvent ev )
             {
+                V valueOld = this.valuePrev;
+                boolean ongoingOld = this.ongoingPrev;
+
                 V valueNew = mapVar.v( ).get( key );
                 boolean ongoingNew = ev.ongoing;
 
-                if ( ( !ongoingNew && this.ongoingOld ) || !equal( valueNew, this.valueOld ) )
+                // Update prev values BEFORE firing listeners, in case one of them triggers this method again
+                this.valuePrev = valueNew;
+                this.ongoingPrev = ongoingNew;
+
+                if ( ( !ongoingNew && ongoingOld ) || !equal( valueNew, valueOld ) )
                 {
                     oldNewListener.accept( ev, valueOld, valueNew );
                 }
-
-                this.valueOld = valueNew;
-                this.ongoingOld = ongoingNew;
             }
         } );
     }
@@ -111,22 +118,43 @@ public class VarUtils
     {
         return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
-            // FIXME: Handle ongoing flag carefully
-            private Set<T> valuesOld = emptySet( );
+            private Set<T> ongoingPrev = emptySet( );
+            private Set<T> completePrev = emptySet( );
 
             @Override
             public void accept( VarEvent ev )
             {
-                Set<T> valuesNew = new HashSet<>( var.v( ) );
-
-                // difference() returns an unmodifiable view, which is what we want
-                Set<T> valuesAdded = difference( valuesNew, valuesOld );
-                for ( T value : valuesAdded )
+                if ( ev.ongoing )
                 {
-                    listener.accept( ev, value );
-                }
+                    Set<T> ongoingOld = this.ongoingPrev;
+                    Set<T> ongoingNew = new HashSet<>( var.v( ) );
 
-                this.valuesOld = valuesNew;
+                    // Update prev values BEFORE firing listeners, in case one of them triggers this method again
+                    this.ongoingPrev = ongoingNew;
+
+                    // difference() returns an unmodifiable view, which is what we want
+                    Set<T> ongoingAdded = difference( ongoingNew, ongoingOld );
+                    for ( T value : ongoingAdded )
+                    {
+                        listener.accept( ev, value );
+                    }
+                }
+                else
+                {
+                    Set<T> completeOld = this.completePrev;
+                    Set<T> completeNew = new HashSet<>( var.v( ) );
+
+                    // Update prev values BEFORE firing listeners, in case one of them triggers this method again
+                    this.ongoingPrev = completeNew;
+                    this.completePrev = completeNew;
+
+                    // difference() returns an unmodifiable view, which is what we want
+                    Set<T> completeAdded = difference( completeNew, completeOld );
+                    for ( T value : completeAdded )
+                    {
+                        listener.accept( ev, value );
+                    }
+                }
             }
         } );
     }
@@ -143,70 +171,44 @@ public class VarUtils
     {
         return var.addListener( false, new Consumer<VarEvent>( )
         {
-            private Set<T> valuesOld = new HashSet<>( var.v( ) );
+            private Set<T> ongoingPrev = new HashSet<>( var.v( ) );
+            private Set<T> completePrev = new HashSet<>( var.v( ) );
 
             @Override
             public void accept( VarEvent ev )
             {
-                // FIXME: Handle ongoing flag carefully
-                Set<T> valuesNew = new HashSet<>( var.v( ) );
-
-                // difference() returns an unmodifiable view, which is what we want
-                Set<T> valuesRemoved = difference( valuesOld, valuesNew );
-                for ( T value : valuesRemoved )
+                if ( ev.ongoing )
                 {
-                    listener.accept( ev, value );
+                    Set<T> ongoingOld = this.ongoingPrev;
+                    Set<T> ongoingNew = new HashSet<>( var.v( ) );
+
+                    // Update prev values BEFORE firing listeners, in case one of them triggers this method again
+                    this.ongoingPrev = ongoingNew;
+
+                    // difference() returns an unmodifiable view, which is what we want
+                    Set<T> ongoingRemoved = difference( ongoingOld, ongoingNew );
+                    for ( T value : ongoingRemoved )
+                    {
+                        listener.accept( ev, value );
+                    }
                 }
-
-                this.valuesOld = valuesNew;
-            }
-        } );
-    }
-
-    public static <K, V> Disposable addEntryAddedListener( ReadableVar<? extends Map<K, V>> var, boolean runImmediately, BiConsumer<? super K, ? super V> listener )
-    {
-        return var.addListener( runImmediately, new Runnable( )
-        {
-            // FIXME: Handle ongoing flag carefully
-            private Set<Entry<K, V>> entriesOld = emptySet( );
-
-            @Override
-            public void run( )
-            {
-                Set<Entry<K, V>> entriesNew = new HashSet<>( var.v( ).entrySet( ) );
-
-                // difference() returns an unmodifiable view, which is what we want
-                Set<Entry<K, V>> entriesAdded = difference( entriesNew, entriesOld );
-                for ( Entry<K, V> entry : entriesAdded )
+                else
                 {
-                    listener.accept( entry.getKey( ), entry.getValue( ) );
+                    Set<T> completeOld = this.completePrev;
+
+                    Set<T> completeNew = new HashSet<>( var.v( ) );
+
+                    // Update prev values BEFORE firing listeners, in case one of them triggers this method again
+                    this.ongoingPrev = completeNew;
+                    this.completePrev = completeNew;
+
+                    // difference() returns an unmodifiable view, which is what we want
+                    Set<T> completeRemoved = difference( completeOld, completeNew );
+                    for ( T value : completeRemoved )
+                    {
+                        listener.accept( ev, value );
+                    }
                 }
-
-                this.entriesOld = entriesNew;
-            }
-        } );
-    }
-
-    public static <K, V> Disposable addEntryRemovedListener( ReadableVar<? extends Map<K, V>> var, BiConsumer<? super K, ? super V> listener )
-    {
-        return var.addListener( false, new Runnable( )
-        {
-            // FIXME: Handle ongoing flag carefully
-            private Set<Entry<K, V>> entriesOld = new HashSet<>( var.v( ).entrySet( ) );
-
-            @Override
-            public void run( )
-            {
-                Set<Entry<K, V>> entriesNew = new HashSet<>( var.v( ).entrySet( ) );
-
-                // difference() returns an unmodifiable view, which is what we want
-                Set<Entry<K, V>> entriesRemoved = difference( entriesOld, entriesNew );
-                for ( Entry<K, V> entry : entriesRemoved )
-                {
-                    listener.accept( entry.getKey( ), entry.getValue( ) );
-                }
-
-                this.entriesOld = entriesNew;
             }
         } );
     }
@@ -220,28 +222,53 @@ public class VarUtils
     {
         return var.addListener( runImmediately, new Consumer<VarEvent>( )
         {
-            // FIXME: Handle ongoing flag carefully
-            private ImmutableMap<K,V> mapPrev = ImmutableMap.of( );
+            private ImmutableMap<K,V> ongoingPrev = ImmutableMap.of( );
+            private ImmutableMap<K,V> completePrev = ImmutableMap.of( );
 
             @Override
             public void accept( VarEvent ev )
             {
-                ImmutableMap<K,V> mapOld = this.mapPrev;
-                ImmutableMap<K,V> mapNew = ImmutableMap.copyOf( var.v( ) );
-
-                // Update this.mapPrev BEFORE firing listeners, in case one of them triggers this method again
-                this.mapPrev = mapNew;
-
-                Set<K> keys = new LinkedHashSet<>( );
-                keys.addAll( mapOld.keySet( ) );
-                keys.addAll( mapNew.keySet( ) );
-                for ( K k : keys )
+                if ( ev.ongoing )
                 {
-                    V vOld = mapOld.get( k );
-                    V vNew = mapNew.get( k );
-                    if ( !equal( vNew, vOld ) )
+                    ImmutableMap<K,V> ongoingOld = this.ongoingPrev;
+                    ImmutableMap<K,V> ongoingNew = ImmutableMap.copyOf( var.v( ) );
+
+                    // Update this.mapPrev BEFORE firing listeners, in case one of them triggers this method again
+                    this.ongoingPrev = ongoingNew;
+
+                    Set<K> keys = new LinkedHashSet<>( );
+                    keys.addAll( ongoingOld.keySet( ) );
+                    keys.addAll( ongoingNew.keySet( ) );
+                    for ( K k : keys )
                     {
-                        listener.accept( ev, k, vOld, vNew );
+                        V vOld = ongoingOld.get( k );
+                        V vNew = ongoingNew.get( k );
+                        if ( !equal( vNew, vOld ) )
+                        {
+                            listener.accept( ev, k, vOld, vNew );
+                        }
+                    }
+                }
+                else
+                {
+                    ImmutableMap<K,V> completeOld = this.completePrev;
+                    ImmutableMap<K,V> completeNew = ImmutableMap.copyOf( var.v( ) );
+
+                    // Update this.mapPrev BEFORE firing listeners, in case one of them triggers this method again
+                    this.ongoingPrev = completeNew;
+                    this.completePrev = completeNew;
+
+                    Set<K> keys = new LinkedHashSet<>( );
+                    keys.addAll( completeOld.keySet( ) );
+                    keys.addAll( completeNew.keySet( ) );
+                    for ( K k : keys )
+                    {
+                        V vOld = completeOld.get( k );
+                        V vNew = completeNew.get( k );
+                        if ( !equal( vNew, vOld ) )
+                        {
+                            listener.accept( ev, k, vOld, vNew );
+                        }
                     }
                 }
             }
