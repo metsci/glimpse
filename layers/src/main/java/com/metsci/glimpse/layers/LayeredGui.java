@@ -51,7 +51,7 @@ import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 import static com.metsci.glimpse.util.var.VarUtils.addElementAddedListener;
 import static com.metsci.glimpse.util.var.VarUtils.addElementRemovedListener;
-import static com.metsci.glimpse.util.var.VarUtils.addEntryRemovedListener;
+import static com.metsci.glimpse.util.var.VarUtils.addMapVarListener;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
@@ -254,7 +254,13 @@ public class LayeredGui
         addElementRemovedListener( this.layers, this::handleLayerRemoved );
         addElementAddedListener( this.layers, true, this::handleLayerAdded );
 
-        addEntryRemovedListener( this.linkageNames, ( k, v ) -> this.pruneLinkages( ) );
+        addMapVarListener( this.linkageNames, false, ( ev, k, vOld, vNew ) ->
+        {
+            if ( vNew == null )
+            {
+                this.pruneLinkages( );
+            }
+        } );
     }
 
     public DockingGroup getDockingGroup( )
