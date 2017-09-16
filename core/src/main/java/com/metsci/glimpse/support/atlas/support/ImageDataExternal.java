@@ -39,8 +39,8 @@ public class ImageDataExternal
 
     // the offset from the edge of the packed rectangle to the "center" of the image
     // (which might not be the middle of the image)
-    private int centerX;
-    private int centerY;
+    private double centerX;
+    private double centerY;
 
     // width and height of the image
     private int width;
@@ -49,7 +49,7 @@ public class ImageDataExternal
     // the Graphics2D routine used to draw the image
     private ImageDrawer drawer;
 
-    public ImageDataExternal( Object id, int centerX, int centerY, int width, int height, ImageDrawer drawer )
+    public ImageDataExternal( Object id, double centerX, double centerY, int width, int height, ImageDrawer drawer )
     {
         this.id = id;
         this.centerX = centerX;
@@ -59,12 +59,12 @@ public class ImageDataExternal
         this.drawer = drawer;
     }
 
-    public int getCenterY( )
+    public double getCenterY( )
     {
         return centerY;
     }
 
-    public int getCenterX( )
+    public double getCenterX( )
     {
         return centerX;
     }
