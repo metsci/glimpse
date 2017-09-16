@@ -26,31 +26,71 @@
  */
 package com.metsci.glimpse.wizard.error;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 import com.metsci.glimpse.wizard.WizardError;
 
-public class ErrorTableCellRenderer extends DefaultTableCellRenderer
+public class ErrorTableCellRenderer implements TableCellRenderer
 {
-    private static final long serialVersionUID = 1L;
-
+    protected DefaultTableCellRenderer deleagate;
+    protected JTextArea text;
+    protected JLabel icon;
+    protected JPanel background;
+    
+    public ErrorTableCellRenderer( )
+    {
+        this.deleagate = new DefaultTableCellRenderer( );
+        this.background = new JPanel( );
+        this.text = new JTextArea( );
+        this.icon = new JLabel( );
+        this.icon.setOpaque( true );
+        
+        this.background.setLayout( new BorderLayout( ) );
+        
+        this.text.setLineWrap(true);
+        this.text.setWrapStyleWord(true);
+    
+        this.background.add( this.text, BorderLayout.CENTER );
+        this.background.add( this.icon, BorderLayout.WEST );
+    }
+    
     public Component getTableCellRendererComponent( JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column )
     {
-        super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, column );
+        this.deleagate.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, column );
 
+        this.text.setBackground( this.deleagate.getBackground( ) );
+        this.text.setForeground( this.deleagate.getForeground( ) );
+        this.text.setFont( this.deleagate.getFont( ) );
+        
+        this.icon.setBackground( this.deleagate.getBackground( ) );
+        this.icon.setForeground( this.deleagate.getForeground( ) );
+
+        this.background.setBorder( this.deleagate.getBorder( ) );
+        
         // Column 0 contains the ErrorType, which should be displayed as an Icon
         if ( column == 0 )
         {
             WizardError error = ( WizardError ) value;
 
-            this.setIcon( error.getType( ).getSmallIcon( ) );
-            this.setText( error.getDescription( ) );
+            this.icon.setIcon( error.getType( ).getSmallIcon( ) );
+            this.text.setText( error.getDescription( ) );
+        }
+        
+        this.background.setSize( table.getColumnModel( ).getColumn( column ).getWidth( ), this.text.getPreferredSize( ).height );
+        if ( table.getRowHeight( row ) != this.text.getPreferredSize( ).height )
+        {
+            table.setRowHeight( row, this.text.getPreferredSize( ).height );
         }
 
-        return this;
+        return this.background;
     }
 }
