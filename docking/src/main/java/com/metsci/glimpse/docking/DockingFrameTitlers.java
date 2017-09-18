@@ -33,10 +33,15 @@ public class DockingFrameTitlers
 
     public static DockingFrameTitler createDefaultFrameTitler( String titleRoot )
     {
-        return new DockingFrameTitler( ( f ) -> getDefaultFrameTitle( titleRoot, f ) );
+        return createDefaultFrameTitler( titleRoot, false );
     }
 
-    public static String getDefaultFrameTitle( String titleRoot, DockingFrame frame )
+    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot, boolean viewTitleFirst )
+    {
+        return new DockingFrameTitler( ( f ) -> getDefaultFrameTitle( titleRoot, f, viewTitleFirst ) );
+    }
+
+    public static String getDefaultFrameTitle( String titleRoot, DockingFrame frame, boolean viewTitleFirst )
     {
         Tile tile = findLargestTile( frame.docker );
         if ( tile != null )
@@ -44,7 +49,8 @@ public class DockingFrameTitlers
             View view = tile.selectedView( );
             if ( view != null )
             {
-                return view.title.v( ) + " - " + titleRoot;
+                String viewTitle = view.title.v( );
+                return ( viewTitleFirst ? viewTitle + " - " + titleRoot : titleRoot + " - " + viewTitle );
             }
         }
         return titleRoot;

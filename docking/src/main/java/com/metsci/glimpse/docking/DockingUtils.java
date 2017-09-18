@@ -313,7 +313,7 @@ public class DockingUtils
         // does exist, run this block -- even if it is a dir or is unreadable, in which case
         // a warning will be logged.
         //
-        if ( file.exists( ) )
+        if ( file != null && file.exists( ) )
         {
             LOGGER.log( INFO, "Reading docking arrangement from file: file = " + file );
             try ( InputStream stream = new FileInputStream( file ) )

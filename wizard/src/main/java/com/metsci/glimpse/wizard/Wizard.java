@@ -333,7 +333,7 @@ public class Wizard<D>
         this.finishedListeners.add( listener );
     }
 
-    public void removeFinishedListener( WizardCancelledListener listener )
+    public void removeFinishedListener( WizardFinishedListener listener )
     {
         this.finishedListeners.remove( listener );
     }
