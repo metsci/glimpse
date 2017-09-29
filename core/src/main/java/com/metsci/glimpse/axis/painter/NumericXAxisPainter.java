@@ -29,6 +29,7 @@ package com.metsci.glimpse.axis.painter;
 import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
@@ -93,22 +94,50 @@ public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
             style.thickness_PX = tickLineWidth;
             style.rgba = tickColor;
 
-            for ( int i = 0; i < xTicks.length; i++ )
+            // handle case where axis min/max are reversed
+            if ( axis.getMin( ) > axis.getMax( ) )
+            {
+                for ( int i = 0; i < xTicks.length; i++ )
+                {
+                    double iTick = converter.fromAxisUnits( xTicks[i] );
+                    
+                    // don't draw ticks off the screen
+                    if ( iTick > axis.getMin( ) && !showLabelsForOffscreenTicks )
+                    {
+                        min = i;
+                        continue;
+                    }
+                    else if ( iTick < axis.getMax( ) && !showLabelsForOffscreenTicks )
+                    {
+                        max = i;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for ( int i = 0; i < xTicks.length; i++ )
+                {
+                    double iTick = converter.fromAxisUnits( xTicks[i] );
+                    
+                    // don't draw ticks off the screen
+                    if ( iTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
+                    {
+                        min = i;
+                        continue;
+                    }
+                    else if ( iTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
+                    {
+                        max = i;
+                        break;
+                    }
+                }
+            }
+            
+            for ( int i = min + 1; i < max; i++ )
             {
                 double iTick = converter.fromAxisUnits( xTicks[i] );
-
-                // don't draw ticks off the screen
-                if ( iTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
-                {
-                    min = i;
-                    continue;
-                }
-                else if ( iTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
-                {
-                    max = i;
-                    break;
-                }
-
+            
                 pathLine.moveTo( ( float ) iTick, ( float ) jTick0 );
                 pathLine.lineTo( ( float ) iTick, ( float ) jTick1 );
             }

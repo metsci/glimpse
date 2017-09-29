@@ -351,6 +351,16 @@ public class DisposableUtils
         };
     }
 
+    public static Disposable addGlimpsePainter( GlimpseLayout layout, int zOrder, GlimpsePainter painter )
+    {
+        layout.addPainter( painter, zOrder );
+
+        return ( ) ->
+        {
+            layout.removePainter( painter );
+        };
+    }
+
     public static Disposable addGlimpsePainter( DelegatePainter delegatePainter, GlimpsePainter painter )
     {
         delegatePainter.addPainter( painter );
