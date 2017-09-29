@@ -725,23 +725,48 @@ public class Axis1D
      */
     protected void applyBoundConstraints( )
     {
-        if ( minValue < absoluteMin )
+        // handle case where axis min/max are reversed
+        if ( minValue > maxValue )
         {
-            minValue = absoluteMin;
-            recalculateMaxValue0( );
-        }
+            if ( minValue > absoluteMin )
+            {
+                minValue = absoluteMin;
+                recalculateMaxValue0( );
+            }
 
-        if ( maxValue > absoluteMax )
-        {
-            maxValue = absoluteMax;
-            recalculateMinValue0( );
-        }
+            if ( maxValue < absoluteMax )
+            {
+                maxValue = absoluteMax;
+                recalculateMinValue0( );
+            }
 
-        if ( minValue < absoluteMin || maxValue > absoluteMax )
+            if ( minValue > absoluteMin || maxValue < absoluteMax )
+            {
+                minValue = absoluteMin;
+                maxValue = absoluteMax;
+                recalculatePixelsPerValue0( );
+            }
+        }
+        else
         {
-            minValue = absoluteMin;
-            maxValue = absoluteMax;
-            recalculatePixelsPerValue0( );
+            if ( minValue < absoluteMin )
+            {
+                minValue = absoluteMin;
+                recalculateMaxValue0( );
+            }
+
+            if ( maxValue > absoluteMax )
+            {
+                maxValue = absoluteMax;
+                recalculateMinValue0( );
+            }
+
+            if ( minValue < absoluteMin || maxValue > absoluteMax )
+            {
+                minValue = absoluteMin;
+                maxValue = absoluteMax;
+                recalculatePixelsPerValue0( );
+            }
         }
     }
 
