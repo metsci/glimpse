@@ -72,6 +72,21 @@ public abstract class RateLimitedEventDispatcher<D>
 
     public RateLimitedEventDispatcher( long _idleTimeMillis )
     {
+        this( _idleTimeMillis, "rate-limited-axis-listener" );
+    }
+
+    public RateLimitedEventDispatcher( String name )
+    {
+        this( 1000l / 60l, name );
+    }
+
+    public RateLimitedEventDispatcher( double maxFreqHz, String name )
+    {
+        this( ( long ) ( 1000 / maxFreqHz ), name );
+    }
+
+    public RateLimitedEventDispatcher( long _idleTimeMillis, String name )
+    {
         this.idleTimeMillis = _idleTimeMillis;
         this.lastRunTimeMillis = System.currentTimeMillis( ) - idleTimeMillis;
 
@@ -111,7 +126,10 @@ public abstract class RateLimitedEventDispatcher<D>
 
                     long time;
 
-                    if ( shutdown ) return;
+                    if ( shutdown )
+                    {
+                        return;
+                    }
 
                     // wait until enough time has passed between eventOccurred
                     while ( ( time = millisToNextUpdate( ) ) > 0 )
@@ -125,7 +143,10 @@ public abstract class RateLimitedEventDispatcher<D>
                         }
                     }
 
-                    if ( shutdown ) return;
+                    if ( shutdown )
+                    {
+                        return;
+                    }
 
                     eventDispatch0( );
                 }
@@ -133,7 +154,7 @@ public abstract class RateLimitedEventDispatcher<D>
         };
 
         this.thread.setDaemon( true );
-        this.thread.setName( "rate-limited-axis-listener" );
+        this.thread.setName( name );
 
         // XXX: FIX, Don't start a thread in the constructor b/c subclasses possibly won't function properly
         this.thread.start( );
