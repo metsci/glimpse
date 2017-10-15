@@ -135,25 +135,25 @@ public class Wizard<D>
      */
     public void reset( D data )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
-        
+        assert ( SwingUtilities.isEventDispatchThread( ) );
+
         this.isVisited.clear( );
         this.pageHistory.clear( );
         this.clearErrors( );
         this.setData( data );
         this.visitNextPage( );
     }
-    
+
     public void finish( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.fireFinished( );
     }
 
     public void cancel( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.fireCancelled( );
     }
@@ -165,10 +165,10 @@ public class Wizard<D>
 
     public void setData( D data )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.data = data;
-        
+
         // apply the new settings to each page
         this.getPageModel( ).getPages( ).forEach( ( page ) ->
         {
@@ -180,23 +180,22 @@ public class Wizard<D>
 
     public void visitAll( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
-        this.getPageModel( ).getPages( ).stream( ).forEach(  p ->
+        this.getPageModel( ).getPages( ).stream( ).forEach( p ->
         {
             this.isVisited.add( p.getId( ) );
             p.setData( this.data, false );
             Collection<WizardError> pageErrors = p.getErrors( );
             this.pageErrors.replaceValues( p.getId( ), pageErrors );
         } );
-        
+
         this.fireErrorsUpdated( );
     }
-    
 
     public WizardPage<D> visitPreviousPage( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.doLeavePage( this.getCurrentPage( ) );
         this.pageHistory.removeLast( );
@@ -208,7 +207,7 @@ public class Wizard<D>
 
     public WizardPage<D> visitNextPage( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.doLeavePage( this.getCurrentPage( ) );
         WizardPage<D> nextPage = this.model.getNextPage( this.getPageHistory( ), this.data );
@@ -223,7 +222,7 @@ public class Wizard<D>
      */
     public void visitPage( WizardPage<D> page )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.doLeavePage( this.getCurrentPage( ) );
         this.pageHistory.add( page.getId( ) );
@@ -235,10 +234,10 @@ public class Wizard<D>
      */
     public void updateData( WizardPage<D> page )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.data = page.updateData( this.data );
-        
+
         this.fireDataUpdated( data );
     }
 
@@ -247,7 +246,7 @@ public class Wizard<D>
      */
     public void setErrors( WizardPage<D> page )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         if ( this.isVisited( page.getId( ) ) )
         {
@@ -257,13 +256,13 @@ public class Wizard<D>
             this.fireErrorsUpdated( );
         }
     }
-    
+
     /**
      * @return the currently displayed page
      */
     public WizardPage<D> getCurrentPage( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         if ( this.pageHistory.isEmpty( ) )
         {
@@ -340,14 +339,14 @@ public class Wizard<D>
 
     public WizardPageModel<D> getPageModel( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return this.model;
     }
 
     public WizardUI<D> getUI( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return this.ui;
     }
@@ -355,7 +354,7 @@ public class Wizard<D>
     // only return errors pertaining to visited pages
     public Collection<WizardError> getErrors( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return Stream.concat( this.pageErrors.values( ).stream( ), this.userErrors.values( ).stream( ) )
                 .filter( error -> error.getPageId( ) == null || this.isVisited.contains( error.getPageId( ) ) )
@@ -364,14 +363,14 @@ public class Wizard<D>
 
     public Collection<WizardError> getErrors( WizardPage<?> page )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return this.getErrors( page.getId( ) );
     }
 
     public Collection<WizardError> getErrors( Object id )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         if ( this.isVisited.contains( id ) )
         {
@@ -388,7 +387,7 @@ public class Wizard<D>
 
     public void setErrors( Collection<WizardError> errors )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.userErrors.clear( );
 
@@ -402,7 +401,7 @@ public class Wizard<D>
 
     public void clearErrors( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.pageErrors.clear( );
         this.userErrors.clear( );
@@ -412,7 +411,7 @@ public class Wizard<D>
 
     public void addErrors( Collection<WizardError> errors )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         for ( WizardError error : errors )
         {
@@ -424,7 +423,7 @@ public class Wizard<D>
 
     public void addError( WizardError error )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.addError0( error );
 
@@ -433,7 +432,7 @@ public class Wizard<D>
 
     public LinkedList<WizardPage<D>> getPageHistory( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return new LinkedList<>( this.pageHistory
                 .stream( )
@@ -443,7 +442,7 @@ public class Wizard<D>
 
     public void dispose( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.model.dispose( );
         this.ui.dispose( );
@@ -470,6 +469,7 @@ public class Wizard<D>
         {
             this.data = currentPage.updateData( this.data );
             this.fireDataUpdated( data );
+            this.setErrors( currentPage );
             this.firePageExited( currentPage );
             currentPage.onExit( );
         }
@@ -481,7 +481,7 @@ public class Wizard<D>
 
         // update the page fields with the settings
         this.updatePage( page );
-        
+
         // have the UI show the page
         this.ui.show( page );
 

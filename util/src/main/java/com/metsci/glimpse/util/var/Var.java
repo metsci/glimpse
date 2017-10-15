@@ -56,29 +56,29 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     {
         if ( activeTxn.get( ) == null )
         {
+            T result;
             Txn txn = new Txn( );
+            activeTxn.set( txn );
             try
             {
-                T result;
-                activeTxn.set( txn );
-                try
-                {
-                    result = task.get( );
-                }
-                finally
-                {
-                    // Make sure we set activeTxn back to null before firing listeners
-                    activeTxn.set( null );
-                }
-
-                txn.commit( );
-                return result;
+                result = task.get( );
             }
             catch ( Exception e )
             {
+                // Re-throwing the exception will pop us out of the method,
+                // so exactly one of rollback() or commit() will be called
                 txn.rollback( );
                 throw e;
             }
+            finally
+            {
+                activeTxn.set( null );
+            }
+
+            // Guaranteed to commit the new values successfully; may then
+            // throw an exception while firing listeners, which is okay
+            txn.commit( );
+            return result;
         }
         else
         {

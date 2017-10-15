@@ -58,6 +58,14 @@ public class Txn
         this.subtreeMods.add( new SubtreeModification( root, ev ) );
     }
 
+    /**
+     * Guaranteed to commit new values to modified Vars without throwing
+     * an exception.
+     * <p>
+     * After committing, fires listeners of modified Vars. If a listener
+     * throws an exception, it will NOT be caught by this method -- it will
+     * be passed up to the caller, and subsequent listeners will not fire.
+     */
     public void commit( )
     {
         for ( SubtreeModification mod : this.subtreeMods )
@@ -68,7 +76,6 @@ public class Txn
         {
             mod.root.fireForSubtree( mod.ev );
         }
-        this.subtreeMods.clear( );
     }
 
     public void rollback( )
@@ -77,7 +84,6 @@ public class Txn
         {
             mod.root.rollbackForSubtree( );
         }
-        this.subtreeMods.clear( );
     }
 
 }
