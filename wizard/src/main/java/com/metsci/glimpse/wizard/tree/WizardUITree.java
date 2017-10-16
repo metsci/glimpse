@@ -57,6 +57,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardError;
@@ -191,18 +193,21 @@ public class WizardUITree<D> implements WizardUI<D>
         this.sidebar.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
         this.sidebar.setFocusable( false );
 
-        this.sidebar.addMouseListener( new MouseAdapter( )
+        this.sidebar.addListSelectionListener( new ListSelectionListener( )
         {
+
             @Override
-            public void mousePressed( MouseEvent e )
+            public void valueChanged( ListSelectionEvent arg0 )
             {
-                int index = WizardUITree.this.sidebar.locationToIndex( e.getPoint( ) );
+                int index = WizardUITree.this.sidebar.getSelectedIndex( );
                 if ( index >= 0 && index < WizardUITree.this.model.getSize( ) )
                 {
                     WizardPage<D> page = WizardUITree.this.model.getElementAt( index );
                     wizard.visitPage( page );
                 }
+
             }
+
         } );
 
         this.sidebarScroll = new JScrollPane( this.sidebar );
@@ -345,7 +350,7 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public Container getContainer( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return this.outerPanel;
     }
@@ -364,7 +369,7 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public void dispose( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.wizard.getPageModel( ).removeListener( this.modelListener );
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
@@ -421,7 +426,7 @@ public class WizardUITree<D> implements WizardUI<D>
 
     protected String getFullName( WizardPage<D> page )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         StringBuilder b = new StringBuilder( );
 
