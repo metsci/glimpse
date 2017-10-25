@@ -211,7 +211,6 @@ public class Wizard<D>
 
         this.doLeavePage( this.getCurrentPage( ) );
         WizardPage<D> nextPage = this.model.getNextPage( this.getPageHistory( ), this.data );
-        this.pageHistory.add( nextPage.getId( ) );
         this.doEnterPage( nextPage );
 
         return nextPage;
@@ -225,7 +224,11 @@ public class Wizard<D>
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.doLeavePage( this.getCurrentPage( ) );
-        this.pageHistory.add( page.getId( ) );
+        // Only add new pages to history, not when 'Previous' button is hit
+        if ( this.pageHistory.isEmpty( ) || !page.getId( ).equals( this.pageHistory.getLast( ) ) )
+        {
+            this.pageHistory.add( page.getId( ) );
+        }
         this.doEnterPage( page );
     }
 

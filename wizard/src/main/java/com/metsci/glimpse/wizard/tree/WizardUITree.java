@@ -197,13 +197,16 @@ public class WizardUITree<D> implements WizardUI<D>
         {
 
             @Override
-            public void valueChanged( ListSelectionEvent arg0 )
+            public void valueChanged( ListSelectionEvent lsEvent )
             {
-                int index = WizardUITree.this.sidebar.getSelectedIndex( );
-                if ( index >= 0 && index < WizardUITree.this.model.getSize( ) )
+                if ( !lsEvent.getValueIsAdjusting( ) )
                 {
-                    WizardPage<D> page = WizardUITree.this.model.getElementAt( index );
-                    wizard.visitPage( page );
+                    int index = WizardUITree.this.sidebar.getSelectedIndex( );
+                    if ( index >= 0 && index < WizardUITree.this.model.getSize( ) )
+                    {
+                        WizardPage<D> page = WizardUITree.this.model.getElementAt( index );
+                        wizard.visitPage( page );
+                    }
                 }
 
             }
