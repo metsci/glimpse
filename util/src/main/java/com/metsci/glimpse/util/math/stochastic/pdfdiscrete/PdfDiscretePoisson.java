@@ -24,57 +24,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfdiscrete;
 
-import java.util.Collection;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-import javax.swing.ImageIcon;
-
-import com.metsci.glimpse.docking.DockingUtils;
-
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public final class PdfDiscretePoisson implements PdfDiscrete
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final double _invMean;
+    private final boolean _meanZero;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfDiscretePoisson( double mean )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
-    }
-
-    public ImageIcon getSmallIcon( )
-    {
-        return this.smallIcon;
-    }
-
-    public ImageIcon getLargeIcon( )
-    {
-        return this.largeIcon;
-    }
-
-    public boolean isEqualOrWorse( WizardErrorType error )
-    {
-        return this.ordinal( ) >= error.ordinal( );
-    }
-
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
+        if ( mean == 0 )
         {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
+            _meanZero = true;
+            _invMean = 0;
+        }
+        else
+        {
+            _meanZero = false;
+            _invMean = 1.0 / mean;
+        }
+    }
+
+    @Override
+    public int draw( Generator g )
+    {
+        if ( _meanZero )
+        {
+            return 0;
         }
 
-        return maxType;
+        int x = 0;
+
+        double t = 0.0;
+        for ( ;; )
+        {
+            t = t - ( Math.log( g.nextDouble( ) ) * _invMean );
+
+            if ( t > 1.0 )
+            {
+                break;
+            }
+
+            x = x + 1;
+        }
+
+        return x;
     }
 }

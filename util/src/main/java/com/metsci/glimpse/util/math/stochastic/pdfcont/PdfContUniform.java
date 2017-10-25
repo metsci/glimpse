@@ -24,57 +24,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfcont;
 
-import java.util.Collection;
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 
-import javax.swing.ImageIcon;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-import com.metsci.glimpse.docking.DockingUtils;
-
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public class PdfContUniform implements PdfCont
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final double _min;
+    private final double _max;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfContUniform( double min, double max )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        _min = min;
+        _max = max;
     }
 
-    public ImageIcon getSmallIcon( )
+    @Override
+    public double draw( Generator g )
     {
-        return this.smallIcon;
+        return _min + ( _max - _min ) * g.nextDouble( );
     }
 
-    public ImageIcon getLargeIcon( )
+    @Override
+    public int hashCode( )
     {
-        return this.largeIcon;
+        final int prime = 20551;
+        int result = 1;
+        result = prime * result + Double.hashCode( _min );
+        result = prime * result + Double.hashCode( _max );
+        return result;
     }
 
-    public boolean isEqualOrWorse( WizardErrorType error )
+    @Override
+    public boolean equals( Object o )
     {
-        return this.ordinal( ) >= error.ordinal( );
-    }
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
 
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
-        {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
-        }
-
-        return maxType;
+        PdfContUniform other = ( PdfContUniform ) o;
+        return ( doublesEqual( other._min, _min )
+              && doublesEqual( other._max, _max ) );
     }
 }

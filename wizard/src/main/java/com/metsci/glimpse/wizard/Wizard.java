@@ -356,9 +356,16 @@ public class Wizard<D>
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
-        return Stream.concat( this.pageErrors.values( ).stream( ), this.userErrors.values( ).stream( ) )
+        Collection<WizardError> errors = Stream.concat( this.pageErrors.values( ).stream( ), this.userErrors.values( ).stream( ) )
                 .filter( error -> error.getPageId( ) == null || this.isVisited.contains( error.getPageId( ) ) )
                 .collect( Collectors.toList( ) );
+
+        if ( errors.isEmpty( ) )
+        {
+            errors.add( new WizardError( WizardErrorType.Good, "No Errors Detected" ) );
+        }
+
+        return errors;
     }
 
     public Collection<WizardError> getErrors( WizardPage<?> page )

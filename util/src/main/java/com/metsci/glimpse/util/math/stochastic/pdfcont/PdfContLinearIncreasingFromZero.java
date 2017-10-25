@@ -24,57 +24,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfcont;
 
-import java.util.Collection;
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 
-import javax.swing.ImageIcon;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-import com.metsci.glimpse.docking.DockingUtils;
-
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public class PdfContLinearIncreasingFromZero implements PdfCont
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final double _maxValue;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfContLinearIncreasingFromZero( double maxValue )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        _maxValue = maxValue;
     }
 
-    public ImageIcon getSmallIcon( )
+    @Override
+    public double draw( Generator g )
     {
-        return this.smallIcon;
+        return _maxValue * Math.sqrt( g.nextDouble( ) );
     }
 
-    public ImageIcon getLargeIcon( )
+    @Override
+    public int hashCode( )
     {
-        return this.largeIcon;
+        final int prime = 20549;
+        int result = 1;
+        result = prime * result + Double.hashCode( _maxValue );
+        return result;
     }
 
-    public boolean isEqualOrWorse( WizardErrorType error )
+    @Override
+    public boolean equals( Object o )
     {
-        return this.ordinal( ) >= error.ordinal( );
-    }
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
 
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
-        {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
-        }
-
-        return maxType;
+        PdfContLinearIncreasingFromZero other = ( PdfContLinearIncreasingFromZero ) o;
+        return doublesEqual( other._maxValue, _maxValue );
     }
 }

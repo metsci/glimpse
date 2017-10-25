@@ -24,57 +24,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfcont;
 
-import java.util.Collection;
+import java.util.Objects;
 
-import javax.swing.ImageIcon;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-import com.metsci.glimpse.docking.DockingUtils;
-
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public class PdfMirroredCont implements PdfCont
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final PdfCont _pdf;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfMirroredCont( PdfCont pdf )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        _pdf = pdf;
     }
 
-    public ImageIcon getSmallIcon( )
+    @Override
+    public final double draw( Generator g )
     {
-        return this.smallIcon;
-    }
-
-    public ImageIcon getLargeIcon( )
-    {
-        return this.largeIcon;
-    }
-
-    public boolean isEqualOrWorse( WizardErrorType error )
-    {
-        return this.ordinal( ) >= error.ordinal( );
-    }
-
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
+        double value = _pdf.draw( g );
+        if ( g.nextDouble( ) > 0.5 )
         {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
+            return value;
         }
+        else
+        {
+            return -value;
+        }
+    }
 
-        return maxType;
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 20563;
+        int result = 1;
+        result = prime * result + Objects.hashCode( _pdf );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        PdfMirroredCont other = ( PdfMirroredCont ) o;
+        return Objects.equals( other._pdf, _pdf );
     }
 }

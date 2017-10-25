@@ -24,57 +24,65 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfcont;
 
-import java.util.Collection;
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 
-import javax.swing.ImageIcon;
+import java.util.Objects;
 
-import com.metsci.glimpse.docking.DockingUtils;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public class PdfTruncatedCont implements PdfCont
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final PdfCont _pdf;
+    private final double _lowCutoff;
+    private final double _highCutoff;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfTruncatedCont( PdfCont pdf, double lowCutoff, double highCutoff )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        _pdf = pdf;
+        _lowCutoff = lowCutoff;
+        _highCutoff = highCutoff;
     }
 
-    public ImageIcon getSmallIcon( )
+    @Override
+    public final double draw( Generator g )
     {
-        return this.smallIcon;
-    }
+        double value;
 
-    public ImageIcon getLargeIcon( )
-    {
-        return this.largeIcon;
-    }
-
-    public boolean isEqualOrWorse( WizardErrorType error )
-    {
-        return this.ordinal( ) >= error.ordinal( );
-    }
-
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
+        do
         {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
+            value = _pdf.draw( g );
         }
+        while ( value < _lowCutoff || value > _highCutoff );
 
-        return maxType;
+        return value;
+    }
+
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 20593;
+        int result = 1;
+        result = prime * result + Objects.hashCode( _pdf );
+        result = prime * result + Double.hashCode( _lowCutoff );
+        result = prime * result + Double.hashCode( _highCutoff );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        PdfTruncatedCont other = ( PdfTruncatedCont ) o;
+        return ( Objects.equals( other._pdf, _pdf )
+              && doublesEqual( other._lowCutoff, _lowCutoff )
+              && doublesEqual( other._highCutoff, _highCutoff ) );
     }
 }

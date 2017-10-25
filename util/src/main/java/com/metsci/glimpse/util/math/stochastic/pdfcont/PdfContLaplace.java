@@ -24,57 +24,60 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfcont;
 
-import java.util.Collection;
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 
-import javax.swing.ImageIcon;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-import com.metsci.glimpse.docking.DockingUtils;
-
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public class PdfContLaplace implements PdfCont
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final double _invLambda;
+    private final double _mean;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfContLaplace( double mean, double sigma )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        _invLambda = sigma / Math.sqrt( 2 );
+        _mean = mean;
     }
 
-    public ImageIcon getSmallIcon( )
+    @Override
+    public final double draw( Generator g )
     {
-        return this.smallIcon;
-    }
+        double offset = Math.log( g.nextDouble( ) ) * _invLambda;
 
-    public ImageIcon getLargeIcon( )
-    {
-        return this.largeIcon;
-    }
-
-    public boolean isEqualOrWorse( WizardErrorType error )
-    {
-        return this.ordinal( ) >= error.ordinal( );
-    }
-
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
+        if ( g.nextDouble( ) > 0.5 )
         {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
+            return _mean + offset;
         }
+        else
+        {
+            return _mean - offset;
+        }
+    }
 
-        return maxType;
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 20543;
+        int result = 1;
+        result = prime * result + Double.hashCode( _invLambda );
+        result = prime * result + Double.hashCode( _mean );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        PdfContLaplace other = ( PdfContLaplace ) o;
+        return ( doublesEqual( other._invLambda, _invLambda )
+              && doublesEqual( other._mean, _mean ) );
     }
 }

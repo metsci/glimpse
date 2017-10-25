@@ -24,57 +24,61 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard;
+package com.metsci.glimpse.util.math.stochastic.pdfcont;
 
-import java.util.Collection;
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 
-import javax.swing.ImageIcon;
+import com.metsci.glimpse.util.math.stochastic.Generator;
 
-import com.metsci.glimpse.docking.DockingUtils;
-
-public enum WizardErrorType
+/**
+ * @author osborn
+ */
+public class PdfContGaussianBoxMuller implements PdfCont
 {
-    Good(DockingUtils.requireIcon( "icons/fugue-icon/tick-small-circle.png" ), DockingUtils.requireIcon( "icons/fugue-icon/tick-circle.png" )),
-    Info(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" )),
-    Warning(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" )),
-    Error(DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ));
+    private final double _mean;
+    private final double _stdev;
 
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    public PdfContGaussianBoxMuller( double mean, double stdev )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        _mean = mean;
+        _stdev = stdev;
     }
 
-    public ImageIcon getSmallIcon( )
+    @Override
+    public double draw( Generator g )
     {
-        return this.smallIcon;
-    }
-
-    public ImageIcon getLargeIcon( )
-    {
-        return this.largeIcon;
-    }
-
-    public boolean isEqualOrWorse( WizardErrorType error )
-    {
-        return this.ordinal( ) >= error.ordinal( );
-    }
-
-    public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
-    {
-        WizardErrorType maxType = Good;
-
-        for ( WizardError error : errors )
+        double v1, v2, s;
+        do
         {
-            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
-            {
-                maxType = error.getType( );
-            }
+            v1 = 2 * g.nextDouble( ) - 1; // between -1.0 and 1.0
+            v2 = 2 * g.nextDouble( ) - 1; // between -1.0 and 1.0
+            s = v1 * v1 + v2 * v2;
         }
+        while ( s >= 1 );
 
-        return maxType;
+        double norm = Math.sqrt( -2 * Math.log( s ) / s );
+        return _mean + _stdev * v1 * norm;
+    }
+
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 20509;
+        int result = 1;
+        result = prime * result + Double.hashCode( _mean );
+        result = prime * result + Double.hashCode( _stdev );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        PdfContGaussianBoxMuller other = ( PdfContGaussianBoxMuller ) o;
+        return ( doublesEqual( other._mean, _mean )
+              && doublesEqual( other._stdev, _stdev ) );
     }
 }

@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.UUID;
 
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
@@ -39,18 +42,28 @@ import net.miginfocom.swing.MigLayout;
 public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
 {
     protected String descriptionFile;
+    /**
+     * By default this is equal to {@link SimpleWizardPage#container container},
+     * however if you set <code>scrollableContent</code> to <code>true</code> in the constructor,
+     * then this is the content in the JScrollPane.
+     */
+    protected JPanel content;
 
     public DescriptionWizardPage( Object parentId, String title, String descriptionFile )
     {
         this( UUID.randomUUID( ), parentId, title, descriptionFile );
     }
-    
+
     public DescriptionWizardPage( Object id, Object parentId, String title, String descriptionFile )
+    {
+        this( id, parentId, title, descriptionFile, false );
+    }
+
+    public DescriptionWizardPage( Object id, Object parentId, String title, String descriptionFile, boolean scrollableContent )
     {
         super( id, parentId, title );
 
         this.descriptionFile = descriptionFile;
-        this.container.setLayout( new MigLayout( ) );
 
         JTextPane descriptionArea = new JTextPane( );
         descriptionArea.setEditable( false );
@@ -66,10 +79,26 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
             descriptionArea.setText( String.format( "Error: Unable to load page description from: %s", descriptionFile ) );
         }
 
-        this.container.add( descriptionArea, "split, span, pushx, growx, wrap" );
-        this.container.add( new JSeparator( SwingConstants.HORIZONTAL ), "split, span, gap 0 0 10 10, pushx, growx, wrap" );
+        if ( scrollableContent )
+        {
+            // layout constraints are setup such that when the scrollbar is invisible it will look exactly like pages that do not have scrollbars.
+            this.container.setLayout( new MigLayout( "", "", "[][]0px[]0px" ) );
+            this.container.add( descriptionArea, "split, span, pushx, growx, wrap" );
+            this.container.add( new JSeparator( SwingConstants.HORIZONTAL ), "split, span, gap 0 0 10 1, pushx, growx, wrap" );
+            this.content = new JPanel( new MigLayout( "fill, insets 9 0 0 0" ) );
+            JScrollPane scroll = new JScrollPane( this.content, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+            scroll.setBorder( BorderFactory.createEmptyBorder( ) );
+            this.container.add( scroll, "split, span, pushx, growx, wrap" );
+        }
+        else
+        {
+            this.container.setLayout( new MigLayout( ) );
+            this.container.add( descriptionArea, "split, span, pushx, growx, wrap" );
+            this.container.add( new JSeparator( SwingConstants.HORIZONTAL ), "split, span, gap 0 0 10 10, pushx, growx, wrap" );
+            this.content = this.container;
+        }
     }
-    
+
     protected URL getDescriptionResource( String descriptionFile )
     {
         return this.getClass( ).getClassLoader( ).getResource( descriptionFile );
