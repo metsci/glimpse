@@ -79,6 +79,7 @@ public class WizardUITree<D> implements WizardUI<D>
 
     protected JLabel title;
     protected JLabel errorButton;
+    protected boolean displayErrorButton;
 
     protected JScrollPane sidebarScroll;
     protected JList<WizardPage<D>> sidebar;
@@ -144,9 +145,14 @@ public class WizardUITree<D> implements WizardUI<D>
         }
     };
 
+    public WizardUITree( boolean displayErrorButton )
+    {
+        this.displayErrorButton = displayErrorButton;
+    }
+
     public WizardUITree( )
     {
-
+        this( true );
     }
 
     @Override
@@ -408,18 +414,25 @@ public class WizardUITree<D> implements WizardUI<D>
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
-        WizardErrorType maxSeverity = null;
-
-        if ( page != null )
+        if ( this.displayErrorButton )
         {
-            Collection<WizardError> errors = this.wizard.getErrors( page );
-            maxSeverity = WizardErrorType.getMaxSeverity( errors );
-        }
+            WizardErrorType maxSeverity = null;
 
-        if ( maxSeverity != null )
-        {
-            this.errorButton.setIcon( maxSeverity.getLargeIcon( ) );
-            this.errorButton.setVisible( true );
+            if ( page != null )
+            {
+                Collection<WizardError> errors = this.wizard.getErrors( page );
+                maxSeverity = WizardErrorType.getMaxSeverity( errors );
+            }
+
+            if ( maxSeverity != null )
+            {
+                this.errorButton.setIcon( maxSeverity.getLargeIcon( ) );
+                this.errorButton.setVisible( true );
+            }
+            else
+            {
+                this.errorButton.setVisible( false );
+            }
         }
         else
         {
