@@ -30,6 +30,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLRendererString;
 import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLVersionString;
+import static com.metsci.glimpse.layers.PopupMenuSupport.createNewtSwingEDTGlimpseCanvasWithPopupMenuSupport;
 import static com.metsci.glimpse.layers.misc.UiUtils.ensureAnimating;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
 import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
@@ -135,7 +136,7 @@ public abstract class GlimpseCanvasView extends View
         if ( this.canvas == null )
         {
             // TODO: FAST reparenting might require a shared context on some platforms
-            this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
+            this.canvas = createNewtSwingEDTGlimpseCanvasWithPopupMenuSupport( glProfile );
 
             // Once canvas is ready, do view-specific setup and install facets
             onGLInit( this.canvas, ( drawable ) ->
