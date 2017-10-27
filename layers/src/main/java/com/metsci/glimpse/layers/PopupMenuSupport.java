@@ -2,8 +2,6 @@ package com.metsci.glimpse.layers;
 
 import static com.jogamp.newt.event.MouseEvent.BUTTON3;
 
-import java.util.List;
-
 import javax.media.opengl.GLProfile;
 import javax.swing.JPopupMenu;
 import javax.swing.MenuSelectionManager;
@@ -15,10 +13,12 @@ import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.event.WindowListener;
 import com.metsci.glimpse.context.GlimpseTarget;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 import com.metsci.glimpse.support.swing.MouseWrapperNewtSwingEDT;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.Notifier;
 
 /**
  * Functions to support attaching popup menus to Glimpse layouts.
@@ -29,12 +29,17 @@ public class PopupMenuSupport
 {
 
     /**
-     * A canvas created by {@link PopupMenuSupport#createNewtSwingEDTGlimpseCanvasWithPopupMenuSupport(GLProfile)}
+     * A canvas created by {@link PopupMenuSupport#createNewtSwingEDTGlimpseCanvasWithPopup(GLProfile)}
      * will show popup menus appropriately for GlimpseTargets that implement this interface.
      */
-    public interface PopupMenuSupplier
+    public interface GlimpsePopupMenuTarget
     {
         JPopupMenu getPopupMenu( );
+
+        /**
+         * A notifier that will fire just before the popup menu becomes visible.
+         */
+        Notifier<GlimpseMouseEvent> getPopupMenuNotifier( );
     }
 
     /**
@@ -68,10 +73,28 @@ public class PopupMenuSupport
                         }
                         else if ( ev.getButton( ) == BUTTON3 )
                         {
-                            JPopupMenu menu = getPopupMenu( this.getContainingTargets( ev ) );
-                            if ( menu != null )
+                            GlimpseTargetStack stack = null;
+                            GlimpsePopupMenuTarget target = null;
+                            for ( GlimpseTargetStack stack0 : this.getContainingTargets( ev ) )
                             {
-                                menu.show( thisCanvas, ev.getX( ), ev.getY( ) );
+                                GlimpseTarget target0 = stack0.getTarget( );
+                                if ( target0 instanceof GlimpsePopupMenuTarget )
+                                {
+                                    stack = stack0;
+                                    target = ( ( GlimpsePopupMenuTarget ) target0 );
+                                    break;
+                                }
+                            }
+
+                            if ( target != null )
+                            {
+                                JPopupMenu menu = target.getPopupMenu( );
+                                if ( menu != null )
+                                {
+                                    GlimpseMouseEvent ev2 = this.toGlimpseEvent( ev, stack );
+                                    target.getPopupMenuNotifier( ).fire( ev2 );
+                                    menu.show( thisCanvas, ev.getX( ), ev.getY( ) );
+                                }
                                 ev.setConsumed( true );
                                 return true;
                             }
@@ -92,23 +115,6 @@ public class PopupMenuSupport
         disableNewtPopupHiding( canvas.getGLWindow( ) );
 
         return canvas;
-    }
-
-    public static JPopupMenu getPopupMenu( List<GlimpseTargetStack> stacks )
-    {
-        for ( GlimpseTargetStack stack : stacks )
-        {
-            GlimpseTarget target = stack.getTarget( );
-            if ( target instanceof PopupMenuSupplier )
-            {
-                JPopupMenu menu = ( ( PopupMenuSupplier ) target ).getPopupMenu( );
-                if ( menu != null )
-                {
-                    return menu;
-                }
-            }
-        }
-        return null;
     }
 
     public static Disposable disableNewtPopupHiding( Window window )
