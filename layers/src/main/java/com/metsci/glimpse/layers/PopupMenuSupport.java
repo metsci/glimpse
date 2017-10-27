@@ -45,7 +45,7 @@ public class PopupMenuSupport
      * use this method to create <em>all</em> its canvases -- because the canvases created here have
      * to cooperate with each other to hide the popup menu appropriately.
      */
-    public static NewtSwingEDTGlimpseCanvas createNewtSwingEDTGlimpseCanvasWithPopupMenuSupport( GLProfile glProfile )
+    public static NewtSwingEDTGlimpseCanvas createNewtSwingEDTGlimpseCanvasWithPopup( GLProfile glProfile )
     {
         NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glProfile )
         {
