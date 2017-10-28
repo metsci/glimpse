@@ -122,9 +122,14 @@ public class Wizard<D>
         } );
     }
 
+    public Wizard( boolean displayErrorButton )
+    {
+        this( null, new WizardPageModelTree<>( ), new WizardUITree<>( displayErrorButton ) );
+    }
+
     public Wizard( )
     {
-        this( null, new WizardPageModelTree<>( ), new WizardUITree<>( ) );
+        this( true );
     }
 
     /**
