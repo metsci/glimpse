@@ -370,7 +370,7 @@ public class Wizard<D>
 
         if ( errors.isEmpty( ) )
         {
-            errors.add( new WizardError( WizardErrorType.Good, "No Errors Detected" ) );
+            errors.add( new WizardError( WizardErrorType.Good, "No Errors Detected." ) );
         }
 
         return errors;
