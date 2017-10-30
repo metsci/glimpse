@@ -388,6 +388,8 @@ public class WizardUITree<D> implements WizardUI<D>
         this.wizard.getPageModel( ).removeListener( this.modelListener );
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
         this.wizard.removeErrorsUpdatedListener( this.errorsUpdatedListener );
+
+        this.errorPopup.dispose( );
     }
 
     protected void updatePageTree( )
