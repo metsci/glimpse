@@ -47,6 +47,8 @@ import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
@@ -160,6 +162,16 @@ public class DisposableUtils
         }
 
         return addActionListener( button, listener );
+    }
+
+    public static Disposable addTableModelListener( TableModel model, TableModelListener listener )
+    {
+        model.addTableModelListener( listener );
+
+        return ( ) ->
+        {
+            model.removeTableModelListener( listener );
+        };
     }
 
     public static Disposable onFocusGained( boolean runImmediately, Component c, Runnable listener )
