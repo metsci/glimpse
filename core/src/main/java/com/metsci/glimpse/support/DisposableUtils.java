@@ -47,6 +47,8 @@ import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
@@ -57,6 +59,13 @@ import com.metsci.glimpse.axis.listener.AxisListener2D;
 import com.metsci.glimpse.axis.tagged.Constraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.event.key.GlimpseKeyListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseWheelListener;
 import com.metsci.glimpse.gl.GLEventAdapter;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
@@ -153,6 +162,16 @@ public class DisposableUtils
         }
 
         return addActionListener( button, listener );
+    }
+
+    public static Disposable addTableModelListener( TableModel model, TableModelListener listener )
+    {
+        model.addTableModelListener( listener );
+
+        return ( ) ->
+        {
+            model.removeTableModelListener( listener );
+        };
     }
 
     public static Disposable onFocusGained( boolean runImmediately, Component c, Runnable listener )
@@ -368,6 +387,68 @@ public class DisposableUtils
         return ( ) ->
         {
             delegatePainter.removePainter( painter );
+        };
+    }
+
+    public static Disposable addGlimpseMouseListener( GlimpseLayout layout, GlimpseMouseListener listener )
+    {
+        layout.addGlimpseMouseListener( listener );
+
+        return ( ) ->
+        {
+            layout.removeGlimpseMouseListener( listener );
+        };
+    }
+
+    public static Disposable onGlimpseMousePress( GlimpseLayout layout, Consumer<? super GlimpseMouseEvent> fn )
+    {
+        return addGlimpseMouseListener( layout, new GlimpseMouseAdapter( )
+        {
+            @Override
+            public void mousePressed( GlimpseMouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable addGlimpseMouseMotionListener( GlimpseLayout layout, GlimpseMouseMotionListener listener )
+    {
+        layout.addGlimpseMouseMotionListener( listener );
+
+        return ( ) ->
+        {
+            layout.removeGlimpseMouseMotionListener( listener );
+        };
+    }
+
+    public static Disposable addGlimpseMouseWheelListener( GlimpseLayout layout, GlimpseMouseWheelListener listener )
+    {
+        layout.addGlimpseMouseWheelListener( listener );
+
+        return ( ) ->
+        {
+            layout.removeGlimpseMouseWheelListener( listener );
+        };
+    }
+
+    public static Disposable addGlimpseMouseAllListener( GlimpseLayout layout, GlimpseMouseAllListener listener )
+    {
+        layout.addGlimpseMouseAllListener( listener );
+
+        return ( ) ->
+        {
+            layout.removeGlimpseMouseAllListener( listener );
+        };
+    }
+
+    public static Disposable addGlimpseKeyListener( GlimpseLayout layout, GlimpseKeyListener listener )
+    {
+        layout.addGlimpseKeyListener( listener );
+
+        return ( ) ->
+        {
+            layout.removeGlimpseKeyListener( listener );
         };
     }
 

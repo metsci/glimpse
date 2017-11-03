@@ -37,6 +37,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -183,6 +184,10 @@ public class WizardUITree<D> implements WizardUI<D>
                     int width = ( int ) Math.min( containerSize.getWidth( ), ErrorPopupWidth );
                     Dimension popupSize = new Dimension( width, height );
                     Collection<WizardError> errors = wizard.getErrors( wizard.getCurrentPage( ) );
+                    if ( errors.isEmpty( ) )
+                    {
+                        errors = Collections.unmodifiableList( Arrays.asList( new WizardError( WizardErrorType.Good, "No Errors Detected." ) ) );
+                    }
                     WizardUITree.this.errorPopup.showErrorPopup( WizardUITree.this.errorButton, popupSize, errors );
                 }
                 else
@@ -383,6 +388,8 @@ public class WizardUITree<D> implements WizardUI<D>
         this.wizard.getPageModel( ).removeListener( this.modelListener );
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
         this.wizard.removeErrorsUpdatedListener( this.errorsUpdatedListener );
+
+        this.errorPopup.dispose( );
     }
 
     protected void updatePageTree( )
