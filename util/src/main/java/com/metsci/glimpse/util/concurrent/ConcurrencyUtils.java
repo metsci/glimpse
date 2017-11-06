@@ -26,8 +26,11 @@
  */
 package com.metsci.glimpse.util.concurrent;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.ReentrantLock;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public class ConcurrencyUtils
 {
@@ -51,6 +54,14 @@ public class ConcurrencyUtils
                 return thread;
             }
         };
+    }
+
+    public static ThreadFactory newDaemonThreadFactory( String nameFormat )
+    {
+        return new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) )
+                                          .setNameFormat( nameFormat )
+                                          .setDaemon( true )
+                                          .build( );
     }
 
 }
