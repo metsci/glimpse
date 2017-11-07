@@ -31,6 +31,7 @@ import static java.lang.Math.min;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
 
+import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.support.color.RGBA;
 
 public class ColorGradientUtils
@@ -158,6 +159,13 @@ public class ColorGradientUtils
         result[1] = wMin*rgbaMin[1] + wMax*rgbaMax[1];
         result[2] = wMin*rgbaMin[2] + wMax*rgbaMax[2];
         result[3] = wMin*rgbaMin[3] + wMax*rgbaMax[3];
+    }
+
+    public static ColorTexture1D newColorTable( ColorGradient gradient, int numLevels )
+    {
+        ColorTexture1D colorTable = new ColorTexture1D( numLevels );
+        colorTable.setColorGradient( gradient );
+        return colorTable;
     }
 
     public static ColorGradient buildCellColorGradient( final RGBA[] cellColors )
