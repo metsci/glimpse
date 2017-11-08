@@ -165,6 +165,14 @@ public class MappedFile
         return buffer;
     }
 
+    public void force( )
+    {
+        if ( this.writable )
+        {
+            force( this.fd, this.address, this.size );
+        }
+    }
+
     /**
      * <strong>IMPORTANT:</strong> This method must not be called while slices of this MappedFile are
      * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
@@ -400,6 +408,49 @@ public class MappedFile
         catch ( Exception e )
         {
             throw new RuntimeException( "Failed to create ByteBuffer", e );
+        }
+    }
+
+    /**
+     * long force0( FileDescriptor fd, long address, long length )
+     */
+    protected static final Method MappedByteBuffer_force0;
+    static
+    {
+        try
+        {
+            MappedByteBuffer_force0 = MappedByteBuffer.class.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
+            MappedByteBuffer_force0.setAccessible( true );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Cannot access " + MappedByteBuffer.class.getName( ) + ".force0()", e );
+        }
+    }
+
+    protected static void force( FileDescriptor fd, long address, long length ) throws RuntimeException
+    {
+        if ( length != 0 )
+        {
+            try
+            {
+                MappedByteBuffer buffer = asDirectBuffer( address, 1, fd, null, true );
+
+                long offsetIntoPage = address % pageSize;
+                if ( offsetIntoPage < 0 )
+                {
+                    offsetIntoPage += pageSize;
+                }
+
+                long pageStart = address - offsetIntoPage;
+                long lengthFromPageStart = length + offsetIntoPage;
+
+                MappedByteBuffer_force0.invoke( buffer, fd, pageStart, lengthFromPageStart );
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( "Failed to force mapped file contents to storage device", e );
+            }
         }
     }
 
