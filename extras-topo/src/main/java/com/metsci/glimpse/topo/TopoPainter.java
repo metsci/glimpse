@@ -299,6 +299,7 @@ public class TopoPainter extends GlimpsePainterBase
 
                 this.async.submit( ( ) ->
                 {
+                    // Include a 1-cell border, so that texture interpolation works right across tile boundaries
                     TopoHostTile hTile = createHostTile( this.levels, tileKey, 1 );
                     SwingUtilities.invokeLater( ( ) ->
                     {
