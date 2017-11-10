@@ -29,6 +29,7 @@ package com.metsci.glimpse.topo;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_TEXTURE0;
@@ -39,27 +40,14 @@ import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
 import javax.media.opengl.GL3;
 
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.topo.io.TopoDataType;
 
-public class TopoProgram
+public class MercatorTopoProgram
 {
 
-    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo.fs" );
-
-
-    public static float dataDenormFactor( TopoDataType dataType )
-    {
-        switch ( dataType )
-        {
-            case TOPO_I2: return 32767f;
-            case TOPO_F4: return 1f;
-            default: throw new RuntimeException( "Unrecognized data type: " + dataType );
-        }
-    }
+    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-mercator.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-mercator.fs" );
 
 
     public static class Handles
@@ -114,13 +102,13 @@ public class TopoProgram
     protected final float topoColormapMaxValue;
 
 
-    public TopoProgram( int dataTexUnit,
-                        int bathyColormapTexUnit,
-                        int topoColormapTexUnit,
-                        ColorTexture1D bathyColormapTexture,
-                        ColorTexture1D topoColormapTexture,
-                        float bathyColormapMinValue,
-                        float topoColormapMaxValue )
+    public MercatorTopoProgram( int dataTexUnit,
+                                int bathyColormapTexUnit,
+                                int topoColormapTexUnit,
+                                ColorTexture1D bathyColormapTexture,
+                                ColorTexture1D topoColormapTexture,
+                                float bathyColormapMinValue,
+                                float topoColormapMaxValue )
     {
         this.handles = null;
 
@@ -148,7 +136,7 @@ public class TopoProgram
         return this.handles;
     }
 
-    public void begin( GlimpseContext context, Axis2D axis )
+    public void begin( GlimpseContext context )
     {
         GL2ES3 gl = context.getGL( ).getGL2ES3( );
 

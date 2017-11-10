@@ -28,19 +28,15 @@ package com.metsci.glimpse.topo;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorGradient;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorTable;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.vc;
-import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.isFirstWrappedTile;
+import static com.metsci.glimpse.support.QuickUtils.requireSwingThread;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
+import static com.metsci.glimpse.topo.TopoUtils.intersect;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
-import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.logging.Level.FINE;
 import static javax.media.opengl.GL.GL_CLAMP_TO_EDGE;
 import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_LINEAR;
@@ -69,160 +65,55 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL3;
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.colormap.ColorGradient;
 import com.metsci.glimpse.topo.io.TopoDataset;
+import com.metsci.glimpse.topo.proj.NormalCylindricalProjection;
 
-public class TopoPainter extends GlimpsePainterBase
+public class TopoTileCache
 {
-    private static final Logger logger = getLogger( TopoPainter.class );
 
-    protected static final int maxRowsPerBand;
-    protected static final int maxColsPerTile;
-    protected static final int hTileDisposalsPerFrame;
-    protected static final int dTileDisposalsPerFrame;
-    protected static final int tileXfersPerFrame;
-    protected static final boolean preloadLowerResTiles;
-    protected static final boolean preloadHigherResTiles;
-    static
-    {
-        int level;
-
-        String s = System.getProperty( "topoPerfLevel" );
-        if ( s == null )
-        {
-            logger.fine( "JVM property 'topoPerfLevel' is not set" );
-            level = 0;
-        }
-        else
-        {
-            try
-            {
-                level = Integer.parseInt( s );
-            }
-            catch ( NumberFormatException e )
-            {
-                logger.warning( "JVM property 'topoPerfLevel' is not a parseable integer: " + s );
-                level = 0;
-            }
-        }
-
-        if ( level <= -1 )
-        {
-            maxRowsPerBand = 1024;
-            maxColsPerTile = 1024;
-            hTileDisposalsPerFrame = 1;
-            dTileDisposalsPerFrame = 1;
-            tileXfersPerFrame = 1;
-            preloadLowerResTiles = false;
-            preloadHigherResTiles = false;
-        }
-        else if ( level >= +1 )
-        {
-            maxRowsPerBand = 2048;
-            maxColsPerTile = 2048;
-            hTileDisposalsPerFrame = 1;
-            dTileDisposalsPerFrame = 1;
-            tileXfersPerFrame = 1;
-            preloadLowerResTiles = true;
-            preloadHigherResTiles = true;
-        }
-        else
-        {
-            maxRowsPerBand = 2048;
-            maxColsPerTile = 2048;
-            hTileDisposalsPerFrame = 1;
-            dTileDisposalsPerFrame = 1;
-            tileXfersPerFrame = 1;
-            preloadLowerResTiles = true;
-            preloadHigherResTiles = false;
-        }
-
-        if ( logger.isLoggable( FINE ) )
-        {
-            logger.fine( "Using topoPerfLevel " + level + ":"
-                       + "\n  maxRowsPerBand:         " + maxRowsPerBand
-                       + "\n  maxColsPerTile:         " + maxColsPerTile
-                       + "\n  hTileDisposalsPerFrame: " + hTileDisposalsPerFrame
-                       + "\n  dTileDisposalsPerFrame: " + dTileDisposalsPerFrame
-                       + "\n  tileXfersPerFrame:      " + tileXfersPerFrame
-                       + "\n  preloadLowerResTiles:   " + preloadLowerResTiles
-                       + "\n  preloadHigherResTiles:  " + preloadHigherResTiles
-                       + "\n" );
-        }
-        else
-        {
-            logger.info( "Using topoPerfLevel " + level );
-        }
-    }
-
-
-
-    public static final ColorGradient bathyColorGradient = newColorGradient( -11000f,
-                                                                             -0f,
-                                                                             vc( -10000f,  0.00f, 0.00f, 0.00f  ),
-                                                                             vc(  -8000f,  0.12f, 0.44f, 0.60f  ),
-                                                                             vc(  -7000f,  0.32f, 0.62f, 0.80f  ),
-                                                                             vc(  -6000f,  0.40f, 0.72f, 0.90f  ),
-                                                                             vc(  -5000f,  0.53f, 0.79f, 0.95f  ),
-                                                                             vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
-
-    public static final ColorGradient topoColorGradient = newColorGradient( +0f,
-                                                                            +8000f,
-                                                                            vc(     +0f,  0.36f, 0.63f, 0.31f  ),
-                                                                            vc(    +50f,  0.42f, 0.70f, 0.38f  ),
-                                                                            vc(   +750f,  0.49f, 0.76f, 0.45f  ),
-                                                                            vc(  +3000f,  0.67f, 0.90f, 0.65f  ),
-                                                                            vc(  +5500f,  0.90f, 0.95f, 0.90f  ),
-                                                                            vc(  +6500f,  0.99f, 0.99f, 0.99f  ) );
-
-    protected final TopoLevelSet levels;
+    public final TopoPainterConfig config;
+    public final TopoLevelSet levels;
+    public final NormalCylindricalProjection proj;
 
     protected final ExecutorService async;
 
     protected final Map<TopoTileKey,TopoHostTile> hTiles;
     protected final Map<TopoTileKey,TopoDeviceTile> dTiles;
-    protected final TopoProgram prog;
 
     protected long frameNum;
 
+    protected boolean disposed;
 
-    public TopoPainter( TopoDataset dataset )
+
+    public TopoTileCache( TopoDataset dataset, NormalCylindricalProjection proj, TopoPainterConfig config )
     {
-        this.levels = createTopoLevels( dataset, maxRowsPerBand, maxColsPerTile );
+        this.config = config;
+        this.levels = createTopoLevels( dataset, this.config.maxRowsPerBand, this.config.maxColsPerTile );
+        this.proj = proj;
 
-        this.async = newSingleThreadExecutor( newDaemonThreadFactory( "TopoPainter.Async.%d" ) );
+        this.async = newSingleThreadExecutor( newDaemonThreadFactory( "TopoTileCache.Async.%d" ) );
 
         // Create hTiles and dTiles with access ordering, so iteration visits the least recently accessed entry first
         this.hTiles = new LinkedHashMap<>( 16, 0.75f, /* accessOrder */ true );
         this.dTiles = new LinkedHashMap<>( 16, 0.75f, /* accessOrder */ true );
 
-        ColorTexture1D bathyColorTable = newColorTable( bathyColorGradient, 1024 );
-        ColorTexture1D topoColorTable = newColorTable( topoColorGradient, 1024 );
-        this.prog = new TopoProgram( 2, 3, 4, bathyColorTable, topoColorTable, -11000f, +8000f );
-
         this.frameNum = 0;
+
+        this.disposed = false;
     }
 
-    @Override
-    protected void doPaintTo( GlimpseContext context )
+    public List<TopoDeviceTile> update( GL3 gl, long frameNum, LatLonBox viewBounds, int levelNum )
     {
-        GL3 gl = context.getGL( ).getGL3( );
+        requireSwingThread( );
 
-        if ( isFirstWrappedTile( context ) )
-        {
-            this.frameNum++;
-        }
-
+        // Update latest frameNum
+        this.frameNum = frameNum;
 
         // Dispose of unneeded hTiles
         // We created hTiles with access ordering, so iteration visits the least recently accessed entry first
@@ -235,7 +126,7 @@ public class TopoPainter extends GlimpsePainterBase
             // If we've gone a complete frame without using this hTile, it's elligible for disposal
             if ( hTile != null && this.frameNum >= hTile.frameNumOfLastUse + 2 )
             {
-                if ( hTileDisposeCount < hTileDisposalsPerFrame )
+                if ( hTileDisposeCount < this.config.hTileDisposalsPerFrame )
                 {
                     it.remove( );
                     hTile.dispose( );
@@ -255,7 +146,7 @@ public class TopoPainter extends GlimpsePainterBase
             // If we've gone a complete frame without using this dTile, it's elligible for disposal
             if ( this.frameNum >= dTile.frameNumOfLastUse + 2 )
             {
-                if ( dTileDisposeCount < dTileDisposalsPerFrame )
+                if ( dTileDisposeCount < this.config.dTileDisposalsPerFrame )
                 {
                     it.remove( );
                     dTile.dispose( gl );
@@ -264,30 +155,23 @@ public class TopoPainter extends GlimpsePainterBase
             }
         }
 
-
-        // Identify visible levelNum
-        Axis2D axis = requireAxis2D( context );
-        double pixelSize_DEG = 1.0 / axis.getAxisX( ).getPixelsPerValue( );
-        int levelNum = min( this.levels.size( ) - 1, this.levels.cellSizes_DEG.indexAtOrAfter( pixelSize_DEG ) );
-
         // Identify tiles visible on the current level
-        Collection<TopoTileKey> tilesToDraw = this.findTiles( axis, levelNum );
+        Collection<TopoTileKey> tilesToDraw = this.findTiles( viewBounds, levelNum );
 
         // Identify tiles worth having ready
         List<TopoTileKey> tilesToPrep = new ArrayList<>( );
 
         tilesToPrep.addAll( tilesToDraw );
 
-        if ( preloadLowerResTiles && levelNum < this.levels.size( ) - 1 )
+        if ( this.config.preloadLowerResTiles && levelNum < this.levels.size( ) - 1 )
         {
-            tilesToPrep.addAll( this.findTiles( axis, levelNum + 1 ) );
+            tilesToPrep.addAll( this.findTiles( viewBounds, levelNum + 1 ) );
         }
 
-        if ( preloadHigherResTiles && levelNum > 0 )
+        if ( this.config.preloadHigherResTiles && levelNum > 0 )
         {
-            tilesToPrep.addAll( this.findTiles( axis, levelNum - 1 ) );
+            tilesToPrep.addAll( this.findTiles( viewBounds, levelNum - 1 ) );
         }
-
 
         // Load hTiles
         for ( TopoTileKey tileKey : tilesToPrep )
@@ -303,13 +187,19 @@ public class TopoPainter extends GlimpsePainterBase
                     TopoHostTile hTile = createHostTile( this.levels, tileKey, 1 );
                     SwingUtilities.invokeLater( ( ) ->
                     {
-                        this.hTiles.put( tileKey, hTile );
-                        hTile.frameNumOfLastUse = this.frameNum;
+                        if ( !this.disposed )
+                        {
+                            this.hTiles.put( tileKey, hTile );
+                            hTile.frameNumOfLastUse = this.frameNum;
+                        }
+                        else
+                        {
+                            hTile.dispose( );
+                        }
                     } );
                 } );
             }
         }
-
 
         // Xfer hTiles to device
         // TODO: Check whether GL_UNPACK_SWAP_BYTES is needed
@@ -317,9 +207,9 @@ public class TopoPainter extends GlimpsePainterBase
         for ( TopoTileKey tileKey : tilesToPrep )
         {
             TopoHostTile hTile = this.hTiles.get( tileKey );
-            if ( hTile != null && !this.dTiles.containsKey( tileKey ) && tileXferCount < tileXfersPerFrame )
+            if ( hTile != null && !this.dTiles.containsKey( tileKey ) && tileXferCount < this.config.tileXfersPerFrame )
             {
-                TopoDeviceTile dTile = xferHostTileToDevice( gl, hTile );
+                TopoDeviceTile dTile = xferHostTileToDevice( gl, hTile, this.proj );
                 this.dTiles.put( tileKey, dTile );
 
                 this.hTiles.remove( tileKey );
@@ -329,7 +219,6 @@ public class TopoPainter extends GlimpsePainterBase
             }
         }
 
-
         // Identify lower-res tiles we can use to fill in for missing tiles
         Set<TopoTileKey> fallbackTiles_UNORDERED = new HashSet<>( );
         for ( TopoTileKey tileKey : tilesToDraw )
@@ -337,15 +226,11 @@ public class TopoPainter extends GlimpsePainterBase
             if ( !this.dTiles.containsKey( tileKey ) )
             {
                 TopoTileBounds tileBounds = this.levels.get( tileKey.levelNum ).tileBounds( tileKey.bandNum, tileKey.tileNum );
-
-                double northLat_DEG = min( axis.getMaxY( ), tileBounds.northLat_DEG );
-                double southLat_DEG = max( axis.getMinY( ), tileBounds.southLat_DEG );
-                double westLon_DEG = max( axis.getMinX( ), tileBounds.westLon_DEG );
-                double eastLon_DEG = min( axis.getMaxX( ), tileBounds.eastLon_DEG );
+                LatLonBox missingBox = intersect( viewBounds, tileBounds );
 
                 for ( int fallbackLevelNum = tileKey.levelNum + 1; fallbackLevelNum < this.levels.size( ); fallbackLevelNum++ )
                 {
-                    Collection<TopoTileKey> tileKeys = this.findTiles( northLat_DEG, southLat_DEG, westLon_DEG, eastLon_DEG, fallbackLevelNum );
+                    Collection<TopoTileKey> tileKeys = this.findTiles( missingBox, fallbackLevelNum );
                     fallbackTiles_UNORDERED.addAll( tileKeys );
 
                     // If we have the dTiles necessary to completely cover the area of the missing tile,
@@ -367,7 +252,6 @@ public class TopoPainter extends GlimpsePainterBase
         {
             return ( -1 * Integer.compare( a.levelNum, b.levelNum ) );
         } );
-
 
         // Mark used tiles
         Collection<TopoTileKey> tilesToRetain = new LinkedHashSet<>( );
@@ -391,50 +275,40 @@ public class TopoPainter extends GlimpsePainterBase
             }
         }
 
+        // List tiles to be drawn
+        List<TopoDeviceTile> dTilesToDraw = new ArrayList<>( );
 
-        // Draw visible tiles
-        this.prog.begin( context, axis );
-        try
+        // Fallback tiles should be drawn from low-res to high-res
+        for ( TopoTileKey tileKey : fallbackTilesToDraw )
         {
-            // Draw fallback tiles, from low-res to high-res
-            for ( TopoTileKey tileKey : fallbackTilesToDraw )
+            TopoDeviceTile dTile = this.dTiles.get( tileKey );
+            if ( dTile != null )
             {
-                TopoDeviceTile dTile = this.dTiles.get( tileKey );
-                if ( dTile != null )
-                {
-                    this.prog.draw( context, dTile );
-                }
-            }
-
-            // Draw current-level tiles on top
-            for ( TopoTileKey tileKey : tilesToDraw )
-            {
-                TopoDeviceTile dTile = this.dTiles.get( tileKey );
-                if ( dTile != null )
-                {
-                    this.prog.draw( context, dTile );
-                }
+                dTilesToDraw.add( dTile );
             }
         }
-        finally
+
+        // Current-level tiles should be drawn on top
+        for ( TopoTileKey tileKey : tilesToDraw )
         {
-            this.prog.end( context );
+            TopoDeviceTile dTile = this.dTiles.get( tileKey );
+            if ( dTile != null )
+            {
+                dTilesToDraw.add( dTile );
+            }
         }
+
+        return dTilesToDraw;
     }
 
-    protected Collection<TopoTileKey> findTiles( Axis2D axis, int levelNum )
-    {
-        return findTiles( axis.getMaxY( ), axis.getMinY( ), axis.getMinX( ), axis.getMaxX( ), levelNum );
-    }
-
-    protected Collection<TopoTileKey> findTiles( double northLat_DEG, double southLat_DEG, double westLon_DEG, double eastLon_DEG, int levelNum )
+    protected Collection<TopoTileKey> findTiles( LatLonBox viewBounds, int levelNum )
     {
         TopoLevel level = this.levels.get( levelNum );
 
-        int minBandNum = ( int ) floor( ( level.northLat_DEG - northLat_DEG ) / level.bandHeight_DEG );
-        int maxBandNum = ( int ) ceil( ( level.northLat_DEG - southLat_DEG ) / level.bandHeight_DEG );
-        int minTileNum = ( int ) floor( ( westLon_DEG - level.westLon_DEG ) / level.tileWidth_DEG );
-        int maxTileNum = ( int ) ceil( ( eastLon_DEG - level.westLon_DEG ) / level.tileWidth_DEG );
+        int minBandNum = ( int ) floor( ( level.northLat_DEG - viewBounds.northLat_DEG ) / level.bandHeight_DEG );
+        int maxBandNum = ( int ) ceil( ( level.northLat_DEG - viewBounds.southLat_DEG ) / level.bandHeight_DEG );
+        int minTileNum = ( int ) floor( ( viewBounds.westLon_DEG - level.westLon_DEG ) / level.tileWidth_DEG );
+        int maxTileNum = ( int ) ceil( ( viewBounds.eastLon_DEG - level.westLon_DEG ) / level.tileWidth_DEG );
 
         Collection<TopoTileKey> tileKeys = new ArrayList<>( );
         for ( int bandNum = max( 0, minBandNum ); bandNum <= min( level.numBands - 1, maxBandNum ); bandNum++ )
@@ -454,7 +328,7 @@ public class TopoPainter extends GlimpsePainterBase
         return level.copyTile( tileKey.bandNum, tileKey.tileNum, numBorderCells );
     }
 
-    protected static TopoDeviceTile xferHostTileToDevice( GL3 gl, TopoHostTile hTile )
+    protected static TopoDeviceTile xferHostTileToDevice( GL3 gl, TopoHostTile hTile, NormalCylindricalProjection proj )
     {
         int texture = genTexture( gl );
         gl.glBindTexture( GL_TEXTURE_2D, texture );
@@ -487,11 +361,15 @@ public class TopoPainter extends GlimpsePainterBase
             }
         }
 
+        float xEast = ( float ) proj.lonToX( hTile.eastLon_DEG );
+        float xWest = ( float ) proj.lonToX( hTile.westLon_DEG );
+        float yNorth = ( float ) proj.latToY( hTile.northLat_DEG );
+        float ySouth = ( float ) proj.latToY( hTile.southLat_DEG );
         GLEditableBuffer xyBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 8 * SIZEOF_FLOAT );
-        xyBuffer.grow2f( ( float ) hTile.westLon_DEG, ( float ) hTile.northLat_DEG );
-        xyBuffer.grow2f( ( float ) hTile.westLon_DEG, ( float ) hTile.southLat_DEG );
-        xyBuffer.grow2f( ( float ) hTile.eastLon_DEG, ( float ) hTile.northLat_DEG );
-        xyBuffer.grow2f( ( float ) hTile.eastLon_DEG, ( float ) hTile.southLat_DEG );
+        xyBuffer.grow2f( xWest, yNorth );
+        xyBuffer.grow2f( xWest, ySouth );
+        xyBuffer.grow2f( xEast, yNorth );
+        xyBuffer.grow2f( xEast, ySouth );
 
         double sInset_FRAC = ( ( double ) hTile.numBorderCells ) / ( ( double ) hTile.numDataCols );
         double tInset_FRAC = ( ( double ) hTile.numBorderCells ) / ( ( double ) hTile.numDataRows );
@@ -506,9 +384,14 @@ public class TopoPainter extends GlimpsePainterBase
         return new TopoDeviceTile( texture, hTile.dataType, xyBuffer.deviceBuffer( gl ), stBuffer.deviceBuffer( gl ), numVertices, 0 );
     }
 
-    @Override
-    protected void doDispose( GlimpseContext context )
+    protected void dispose( GlimpseContext context )
     {
+        requireSwingThread( );
+
+        this.disposed = true;
+
+        this.async.shutdown( );
+
         this.levels.dispose( );
 
         for ( TopoHostTile hTile : this.hTiles.values( ) )

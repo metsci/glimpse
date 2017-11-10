@@ -30,6 +30,7 @@ import static com.metsci.glimpse.axis.UpdateMode.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.topo.io.TopoCache.*;
 import static com.metsci.glimpse.topo.io.TopoReader.*;
+import static com.metsci.glimpse.topo.proj.EquirectProjection.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static javax.media.opengl.GLProfile.*;
@@ -46,11 +47,11 @@ import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.group.WrappedPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.topo.TopoPainter;
+import com.metsci.glimpse.topo.EquirectTopoPainter;
 import com.metsci.glimpse.topo.io.TopoDataFile;
 import com.metsci.glimpse.topo.io.TopoDataset;
 
-public class TopoPainterExample
+public class EquirectTopoPainterExample
 {
 
     public static void main( String[] args ) throws Exception
@@ -88,7 +89,7 @@ public class TopoPainterExample
                 File topoDataFile = new File( "/path/to/etopo1_ice_g.flt" );
                 TopoDataFile topoBase = readTopoLevel( topoDataFile );
                 TopoDataset topoDataset = topoCacheDataset( topoBase );
-                TopoPainter topoPainter = new TopoPainter( topoDataset );
+                EquirectTopoPainter topoPainter = new EquirectTopoPainter( topoDataset, plateCarreeProj );
 
                 WrappedPainter wrappedPainter = new WrappedPainter( true );
                 wrappedPainter.addPainter( backgroundPainter );
@@ -98,7 +99,7 @@ public class TopoPainterExample
                 plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
                 plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-                quickGlimpseWindow( "TopoPainterExample", GL3, 0.8, plot );
+                quickGlimpseWindow( "EquirectTopoPainterExample", GL3, 0.8, plot );
             }
             catch ( Exception e )
             {

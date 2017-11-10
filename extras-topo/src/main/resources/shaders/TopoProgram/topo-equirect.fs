@@ -44,11 +44,14 @@ out vec4 outRgba;
 void main( )
 {
 
-    float zLinear = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, vSt ).r;
+    // For equirectangular proj, fraction-of-surface coords and fraction-of-texture coords are identical
+    vec2 uv = vSt;
+
+    float zLinear = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, uv ).r;
 
     ivec2 textureSize = textureSize( DATA_TEX_UNIT, 0 );
-    vec2 stNearest = ( floor( vSt * textureSize ) + 0.5 ) / textureSize;
-    float zNearest = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, stNearest ).r;
+    vec2 uvNearest = ( floor( uv * textureSize ) + 0.5 ) / textureSize;
+    float zNearest = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, uvNearest ).r;
 
     if ( zNearest < 0.0 )
     {
