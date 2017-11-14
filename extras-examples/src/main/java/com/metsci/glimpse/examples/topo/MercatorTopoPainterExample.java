@@ -30,6 +30,7 @@ import static com.metsci.glimpse.axis.UpdateMode.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.topo.io.TopoCache.*;
 import static com.metsci.glimpse.topo.io.TopoReader.*;
+import static com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static com.metsci.glimpse.util.math.MathConstants.*;
@@ -90,7 +91,7 @@ public class MercatorTopoPainterExample
                 File topoDataFile = new File( "/path/to/etopo1_ice_g.flt" );
                 TopoDataFile topoBase = readTopoLevel( topoDataFile );
                 TopoDataset topoDataset = topoCacheDataset( topoBase );
-                MercatorTopoPainter topoPainter = new MercatorTopoPainter( topoDataset );
+                MercatorTopoPainter topoPainter = new MercatorTopoPainter( topoDataset, standardMercatorProj );
 
                 WrappedPainter wrappedPainter = new WrappedPainter( true );
                 wrappedPainter.addPainter( backgroundPainter );

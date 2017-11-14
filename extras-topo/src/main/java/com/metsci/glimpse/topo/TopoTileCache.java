@@ -32,6 +32,7 @@ import static com.metsci.glimpse.support.QuickUtils.requireSwingThread;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
 import static com.metsci.glimpse.topo.TopoUtils.intersect;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
+import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 import static java.lang.Math.max;
@@ -361,27 +362,52 @@ public class TopoTileCache
             }
         }
 
-        float xEast = ( float ) proj.lonToX( hTile.eastLon_DEG );
-        float xWest = ( float ) proj.lonToX( hTile.westLon_DEG );
-        float yNorth = ( float ) proj.latToY( hTile.northLat_DEG );
-        float ySouth = ( float ) proj.latToY( hTile.southLat_DEG );
+
+
+        float yNorth;
+        double visibleNorthLat_RAD = hTile.northLat_RAD - hTile.borderSize_RAD;
+        if ( visibleNorthLat_RAD >= +HALF_PI )
+        {
+            yNorth = ( float ) proj.maxUsableY( );
+        }
+        else
+        {
+            yNorth = ( float ) min( proj.maxUsableY( ), proj.latToY( visibleNorthLat_RAD ) );
+        }
+
+        float ySouth;
+        double visibleSouthLat_RAD = hTile.southLat_RAD + hTile.borderSize_RAD;
+        if ( visibleSouthLat_RAD <= -HALF_PI )
+        {
+            ySouth = ( float ) proj.minUsableY( );
+        }
+        else
+        {
+            ySouth = ( float ) max( proj.minUsableY( ), proj.latToY( visibleSouthLat_RAD ) );
+        }
+
+        float xEast = ( float ) proj.lonToX( hTile.eastLon_RAD - hTile.borderSize_RAD );
+        float xWest = ( float ) proj.lonToX( hTile.westLon_RAD + hTile.borderSize_RAD );
         GLEditableBuffer xyBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 8 * SIZEOF_FLOAT );
         xyBuffer.grow2f( xWest, yNorth );
         xyBuffer.grow2f( xWest, ySouth );
         xyBuffer.grow2f( xEast, yNorth );
         xyBuffer.grow2f( xEast, ySouth );
 
-        double sInset_FRAC = ( ( double ) hTile.numBorderCells ) / ( ( double ) hTile.numDataCols );
-        double tInset_FRAC = ( ( double ) hTile.numBorderCells ) / ( ( double ) hTile.numDataRows );
-        GLEditableBuffer stBuffer = new GLEditableBuffer( GL_STATIC_DRAW, 8 * SIZEOF_FLOAT );
-        stBuffer.grow2f( ( float ) ( 0.0 + sInset_FRAC ), ( float ) ( 0.0 + tInset_FRAC ) );
-        stBuffer.grow2f( ( float ) ( 0.0 + sInset_FRAC ), ( float ) ( 1.0 - tInset_FRAC ) );
-        stBuffer.grow2f( ( float ) ( 1.0 - sInset_FRAC ), ( float ) ( 0.0 + tInset_FRAC ) );
-        stBuffer.grow2f( ( float ) ( 1.0 - sInset_FRAC ), ( float ) ( 1.0 - tInset_FRAC ) );
-
         int numVertices = xyBuffer.sizeFloats( ) / 2;
 
-        return new TopoDeviceTile( texture, hTile.dataType, xyBuffer.deviceBuffer( gl ), stBuffer.deviceBuffer( gl ), numVertices, 0 );
+        return new TopoDeviceTile( hTile.northLat_RAD,
+                                   hTile.southLat_RAD,
+                                   hTile.eastLon_RAD,
+                                   hTile.westLon_RAD,
+
+                                   texture,
+                                   hTile.dataType,
+
+                                   xyBuffer.deviceBuffer( gl ),
+                                   numVertices,
+
+                                   0 );
     }
 
     protected void dispose( GlimpseContext context )

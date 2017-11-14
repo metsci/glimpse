@@ -33,36 +33,40 @@ import static com.metsci.glimpse.topo.TopoColorUtils.topoColorTable;
 import static com.metsci.glimpse.topo.TopoColorUtils.topoColormapMaxValue;
 import static com.metsci.glimpse.topo.TopoPainterConfig.topoPainterConfig_DEFAULT;
 import static com.metsci.glimpse.topo.TopoUtils.axisBounds;
-import static com.metsci.glimpse.topo.proj.EquirectProjection.plateCarreeProj;
+import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
+import static java.lang.Math.min;
 
 import java.util.List;
 
 import javax.media.opengl.GL3;
 
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.topo.io.TopoDataset;
-import com.metsci.glimpse.topo.proj.EquirectProjection;
+import com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection;
 import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;
 
 public class MercatorTopoPainter extends GlimpsePainterBase
 {
 
+    protected final MercatorNormalCylindricalProjection proj;
     protected final TopoTileCache cache;
     protected final MercatorTopoProgram prog;
 
     protected long frameNum;
 
 
-    public MercatorTopoPainter( TopoDataset dataset )
+    public MercatorTopoPainter( TopoDataset dataset, MercatorNormalCylindricalProjection proj )
     {
-        this( dataset, plateCarreeProj, topoPainterConfig_DEFAULT );
+        this( dataset, proj, topoPainterConfig_DEFAULT );
     }
 
-    public MercatorTopoPainter( TopoDataset dataset, EquirectProjection proj, TopoPainterConfig config )
+    public MercatorTopoPainter( TopoDataset dataset, MercatorNormalCylindricalProjection proj, TopoPainterConfig config )
     {
-        this.cache = new TopoTileCache( dataset, proj, config );
+        this.proj = proj;
+        this.cache = new TopoTileCache( dataset, this.proj, config );
         this.prog = new MercatorTopoProgram( 2, 3, 4, bathyColorTable( ), topoColorTable( ), bathyColormapMinValue, topoColormapMaxValue );
 
         this.frameNum = 0;
@@ -77,18 +81,21 @@ public class MercatorTopoPainter extends GlimpsePainterBase
         }
 
         GL3 gl = context.getGL( ).getGL3( );
-
         Axis2D axis = requireAxis2D( context );
 
-        LatLonBox viewBounds = axisBounds( axis, this.cache.proj );
+        LatLonBox viewBounds = axisBounds( axis, this.proj );
 
-        // FIXME
+        // FIXME: maxPixelSize_DEG might not be the best number to use when choosing levelNum
+        Axis1D yAxis = axis.getAxisY( );
+        double dyPerPixel = 1.0 / yAxis.getPixelsPerValue( );
+        double maxPixelSize_DEG = dyPerPixel * this.cache.proj.maxDyToDlat_RAD( yAxis.getMin( ), yAxis.getMax( ) ) * radiansToDegrees;
+
         SortedDoubles levelCellSizes_DEG = this.cache.levels.cellSizes_DEG;
-        //int levelNum = min( levelCellSizes_DEG.n( ) - 1, levelCellSizes_DEG.indexAtOrAfter( pixelSize_DEG ) );
+        int levelNum = min( levelCellSizes_DEG.n( ) - 1, levelCellSizes_DEG.indexAtOrAfter( maxPixelSize_DEG ) );
 
         List<TopoDeviceTile> dTilesToDraw = this.cache.update( gl, this.frameNum, viewBounds, levelNum );
 
-        this.prog.begin( context );
+        this.prog.begin( context, this.proj );
         try
         {
             for ( TopoDeviceTile dTile : dTilesToDraw )

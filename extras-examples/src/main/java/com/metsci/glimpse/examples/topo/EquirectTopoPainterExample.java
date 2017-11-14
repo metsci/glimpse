@@ -30,9 +30,11 @@ import static com.metsci.glimpse.axis.UpdateMode.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.topo.io.TopoCache.*;
 import static com.metsci.glimpse.topo.io.TopoReader.*;
-import static com.metsci.glimpse.topo.proj.EquirectProjection.*;
+import static com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.math.MathConstants.*;
+import static java.lang.Math.*;
 import static javax.media.opengl.GLProfile.*;
 
 import java.io.File;
@@ -67,7 +69,7 @@ public class EquirectTopoPainterExample
                     @Override
                     protected void initializeCenterAxis( )
                     {
-                        this.centerAxisX = new WrappedAxis1D( -180, 180 );
+                        this.centerAxisX = new WrappedAxis1D( -PI, +PI );
                         this.centerAxisY = new Axis1D( );
                     }
                 };
@@ -79,7 +81,7 @@ public class EquirectTopoPainterExample
                 axis.lockAspectRatioXY( 1.0 );
                 axis.getAxisX( ).setUpdateMode( CenterScale );
                 axis.getAxisY( ).setUpdateMode( CenterScale );
-                axis.set( -180, 180, -90, 90 );
+                axis.set( -PI, +PI, -HALF_PI, +HALF_PI );
                 axis.validate( );
 
                 BackgroundPainter backgroundPainter = new BackgroundPainter( );

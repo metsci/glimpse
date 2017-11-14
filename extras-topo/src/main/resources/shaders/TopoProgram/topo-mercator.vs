@@ -54,13 +54,12 @@ vec4 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 uniform vec4 AXIS_RECT;
 
 in vec2 inXy;
-in vec2 inSt;
 
-out vec2 vSt;
+out vec2 vXy;
 
 
 void main( )
 {
-    vSt = inSt;
+    vXy = inXy;
     gl_Position = axisXyToNdc( inXy, AXIS_RECT );
 }

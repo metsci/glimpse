@@ -29,6 +29,7 @@ package com.metsci.glimpse.topo;
 import static com.jogamp.common.nio.Buffers.newDirectByteBuffer;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GeneralUtils.min;
+import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -48,10 +49,10 @@ public class TopoLevel
     public final int numRows;
     public final int numCols;
     public final double cellSize_DEG;
-    public final double southLat_DEG;
     public final double northLat_DEG;
-    public final double westLon_DEG;
+    public final double southLat_DEG;
     public final double eastLon_DEG;
+    public final double westLon_DEG;
 
     public final double tileWidth_DEG;
     public final double bandHeight_DEG;
@@ -71,10 +72,10 @@ public class TopoLevel
         this.numRows = this.file.numRows;
         this.numCols = this.file.numCols;
         this.cellSize_DEG = this.file.cellSize_DEG;
-        this.southLat_DEG = this.file.southLat_DEG;
         this.northLat_DEG = this.file.northLat_DEG;
-        this.westLon_DEG = this.file.westLon_DEG;
+        this.southLat_DEG = this.file.southLat_DEG;
         this.eastLon_DEG = this.file.eastLon_DEG;
+        this.westLon_DEG = this.file.westLon_DEG;
 
         int maxMemmappableRows = Integer.MAX_VALUE / ( this.numCols * this.file.dataType.numBytes );
         int rowsPerBand = min( maxRowsPerBand, this.numRows, maxMemmappableRows );
@@ -127,6 +128,12 @@ public class TopoLevel
     {
         TopoTileBounds tile = this.tileBounds[ bandNum ][ tileNum ];
 
+        double borderSize_RAD = degreesToRadians( numBorderCells * this.cellSize_DEG );
+        double dataNorthLat_RAD = degreesToRadians( tile.northLat_DEG ) + borderSize_RAD;
+        double dataSouthLat_RAD = degreesToRadians( tile.southLat_DEG ) - borderSize_RAD;
+        double dataEastLon_RAD = degreesToRadians( tile.eastLon_DEG ) + borderSize_RAD;
+        double dataWestLon_RAD = degreesToRadians( tile.westLon_DEG ) - borderSize_RAD;
+
         int rFirst = tile.firstRow - numBorderCells;
         int cFirst = tile.firstCol - numBorderCells;
         int rLast = tile.firstRow + tile.numRows + numBorderCells - 1;
@@ -169,16 +176,17 @@ public class TopoLevel
 
         dataBytes.flip( );
 
-        return new TopoHostTile( tile.northLat_DEG,
-                                 tile.southLat_DEG,
-                                 tile.westLon_DEG,
-                                 tile.eastLon_DEG,
+        return new TopoHostTile( dataNorthLat_RAD,
+                                 dataSouthLat_RAD,
+                                 dataEastLon_RAD,
+                                 dataWestLon_RAD,
 
                                  numDataRows,
                                  numDataCols,
-                                 numBorderCells,
                                  dataBytes,
                                  dataType,
+
+                                 borderSize_RAD,
 
                                  0 );
     }

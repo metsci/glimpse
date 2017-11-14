@@ -27,25 +27,23 @@
 
 #version 150
 
-#define PI 3.14159265358979323846
 #define HALF_PI 1.57079632679489661923
 
+uniform float ORIGIN_LON_RAD;
 
 uniform sampler2D DATA_TEX_UNIT;
 uniform float DATA_DENORM_FACTOR;
+uniform float DATA_LAT_MAX_RAD;
+uniform float DATA_LAT_SPAN_RAD;
+uniform float DATA_LON_MIN_RAD;
+uniform float DATA_LON_SPAN_RAD;
 
 uniform sampler1D BATHY_COLORMAP_TEX_UNIT;
 uniform float BATHY_COLORMAP_MIN_VALUE;
-
 uniform sampler1D TOPO_COLORMAP_TEX_UNIT;
 uniform float TOPO_COLORMAP_MAX_VALUE;
 
-uniform float Y_MIN;
-uniform float Y_SPAN;
-uniform float LAT_MIN_DEG;
-uniform float LAT_SPAN_DEG;
-
-in vec2 vSt;
+in vec2 vXy;
 
 out vec4 outRgba;
 
@@ -53,18 +51,15 @@ out vec4 outRgba;
 void main( )
 {
 
-    // For Plate-Carree, fraction-of-surface coords and fraction-of-texture coords are identical
-    vec2 uv = vSt;
+    float x = vXy.x;
+    float y = vXy.y;
 
+    float lon_RAD = ORIGIN_LON_RAD + x;
+    float lat_RAD = ( 2.0 * atan( exp( y ) ) ) - HALF_PI;
 
-
-    // FIXME: Account for border
-    float y = Y_MIN + ( vSt.t * Y_SPAN );
-    float latFrac = atan( exp( y ) ) / HALF_PI;
-    float lat_DEG = -90.0 + ( latFrac * 180.0 );
-    float v = ( lat_DEG - LAT_MIN_DEG ) / LAT_SPAN_DEG;
-
-
+    float u = ( lon_RAD - DATA_LON_MIN_RAD ) / DATA_LON_SPAN_RAD;
+    float v = ( DATA_LAT_MAX_RAD - lat_RAD ) / DATA_LAT_SPAN_RAD;
+    vec2 uv = vec2( u, v );
 
     float zLinear = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, uv ).r;
 

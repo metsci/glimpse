@@ -36,30 +36,57 @@ import com.metsci.glimpse.topo.io.TopoDataType;
 public class TopoDeviceTile
 {
 
+    /**
+     * North edge of data, INCLUDING border rows.
+     */
+    public final double northLat_RAD;
+
+    /**
+     * South edge of data, INCLUDING border rows.
+     */
+    public final double southLat_RAD;
+
+    /**
+     * East edge of data, INCLUDING border columns.
+     */
+    public final double eastLon_RAD;
+
+    /**
+     * West edge of data, INCLUDING border columns.
+     */
+    public final double westLon_RAD;
+
     public final int texture;
     public final TopoDataType textureDataType;
 
     public final int xyBuffer;
-    public final int stBuffer;
     public final int numVertices;
 
     public long frameNumOfLastUse;
 
 
-    public TopoDeviceTile( int texture,
+    public TopoDeviceTile( double northLat_RAD,
+                           double southLat_RAD,
+                           double eastLon_RAD,
+                           double westLon_RAD,
+
+                           int texture,
                            TopoDataType textureDataType,
 
                            int xyBuffer,
-                           int stBuffer,
                            int numVertices,
 
                            long frameNum )
     {
+        this.northLat_RAD = northLat_RAD;
+        this.southLat_RAD = southLat_RAD;
+        this.eastLon_RAD = eastLon_RAD;
+        this.westLon_RAD = westLon_RAD;
+
         this.texture = texture;
         this.textureDataType = textureDataType;
 
         this.xyBuffer = xyBuffer;
-        this.stBuffer = stBuffer;
         this.numVertices = numVertices;
 
         this.frameNumOfLastUse = frameNum;
@@ -67,7 +94,7 @@ public class TopoDeviceTile
 
     public void dispose( GL gl )
     {
-        deleteBuffers( gl, this.xyBuffer, this.stBuffer );
+        deleteBuffers( gl, this.xyBuffer );
         deleteTextures( gl, this.texture );
     }
 

@@ -29,6 +29,7 @@ package com.metsci.glimpse.topo;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
@@ -40,8 +41,10 @@ import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
 import javax.media.opengl.GL3;
 
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection;
 
 public class MercatorTopoProgram
 {
@@ -56,17 +59,21 @@ public class MercatorTopoProgram
 
         public final int AXIS_RECT;
 
+        public final int ORIGIN_LON_RAD;
+
         public final int DATA_TEX_UNIT;
         public final int DATA_DENORM_FACTOR;
+        public final int DATA_LAT_MAX_RAD;
+        public final int DATA_LAT_SPAN_RAD;
+        public final int DATA_LON_MIN_RAD;
+        public final int DATA_LON_SPAN_RAD;
 
         public final int BATHY_COLORMAP_TEX_UNIT;
         public final int BATHY_COLORMAP_MIN_VALUE;
-
         public final int TOPO_COLORMAP_TEX_UNIT;
         public final int TOPO_COLORMAP_MAX_VALUE;
 
         public final int inXy;
-        public final int inSt;
 
         public Handles( GL2ES2 gl )
         {
@@ -74,17 +81,21 @@ public class MercatorTopoProgram
 
             this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
 
+            this.ORIGIN_LON_RAD = gl.glGetUniformLocation( program, "ORIGIN_LON_RAD" );
+
             this.DATA_TEX_UNIT = gl.glGetUniformLocation( program, "DATA_TEX_UNIT" );
             this.DATA_DENORM_FACTOR = gl.glGetUniformLocation( program, "DATA_DENORM_FACTOR" );
+            this.DATA_LAT_MAX_RAD = gl.glGetUniformLocation( program, "DATA_LAT_MAX_RAD" );
+            this.DATA_LAT_SPAN_RAD = gl.glGetUniformLocation( program, "DATA_LAT_SPAN_RAD" );
+            this.DATA_LON_MIN_RAD = gl.glGetUniformLocation( program, "DATA_LON_MIN_RAD" );
+            this.DATA_LON_SPAN_RAD = gl.glGetUniformLocation( program, "DATA_LON_SPAN_RAD" );
 
             this.BATHY_COLORMAP_TEX_UNIT = gl.glGetUniformLocation( program, "BATHY_COLORMAP_TEX_UNIT" );
             this.BATHY_COLORMAP_MIN_VALUE = gl.glGetUniformLocation( program, "BATHY_COLORMAP_MIN_VALUE" );
-
             this.TOPO_COLORMAP_TEX_UNIT = gl.glGetUniformLocation( program, "TOPO_COLORMAP_TEX_UNIT" );
             this.TOPO_COLORMAP_MAX_VALUE = gl.glGetUniformLocation( program, "TOPO_COLORMAP_MAX_VALUE" );
 
             this.inXy = gl.glGetAttribLocation( program, "inXy" );
-            this.inSt = gl.glGetAttribLocation( program, "inSt" );
         }
     }
 
@@ -136,7 +147,7 @@ public class MercatorTopoProgram
         return this.handles;
     }
 
-    public void begin( GlimpseContext context )
+    public void begin( GlimpseContext context, MercatorNormalCylindricalProjection proj )
     {
         GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
@@ -148,7 +159,10 @@ public class MercatorTopoProgram
         gl.glBindVertexArray( defaultVertexAttributeArray( gl ) );
         gl.glUseProgram( this.handles.program );
 
+        Axis2D axis = requireAxis2D( context );
         gl.glUniform4f( this.handles.AXIS_RECT, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+
+        gl.glUniform1f( this.handles.ORIGIN_LON_RAD, ( float ) proj.originLon_RAD );
 
         gl.glUniform1i( this.handles.DATA_TEX_UNIT, this.dataTexUnit );
 
@@ -161,23 +175,24 @@ public class MercatorTopoProgram
         gl.glUniform1f( this.handles.TOPO_COLORMAP_MAX_VALUE, this.topoColormapMaxValue );
 
         gl.glEnableVertexAttribArray( this.handles.inXy );
-        gl.glEnableVertexAttribArray( this.handles.inSt );
     }
 
     public void draw( GlimpseContext context, TopoDeviceTile tile )
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
+        gl.glUniform1f( this.handles.DATA_DENORM_FACTOR, dataDenormFactor( tile.textureDataType ) );
+
+        gl.glUniform1f( this.handles.DATA_LAT_MAX_RAD,  ( float ) ( tile.northLat_RAD ) );
+        gl.glUniform1f( this.handles.DATA_LAT_SPAN_RAD, ( float ) ( tile.northLat_RAD - tile.southLat_RAD ) );
+        gl.glUniform1f( this.handles.DATA_LON_MIN_RAD,  ( float ) ( tile.westLon_RAD ) );
+        gl.glUniform1f( this.handles.DATA_LON_SPAN_RAD, ( float ) ( tile.eastLon_RAD - tile.westLon_RAD ) );
+
         gl.glActiveTexture( GL_TEXTURE0 + this.dataTexUnit );
         gl.glBindTexture( GL_TEXTURE_2D, tile.texture );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, tile.xyBuffer );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, tile.stBuffer );
-        gl.glVertexAttribPointer( this.handles.inSt, 2, GL_FLOAT, false, 0, 0 );
-
-        gl.glUniform1f( this.handles.DATA_DENORM_FACTOR, dataDenormFactor( tile.textureDataType ) );
 
         gl.glDrawArrays( GL_TRIANGLE_STRIP, 0, tile.numVertices );
     }
@@ -187,7 +202,6 @@ public class MercatorTopoProgram
         GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
         gl.glDisableVertexAttribArray( this.handles.inXy );
-        gl.glDisableVertexAttribArray( this.handles.inSt );
 
         gl.glUseProgram( 0 );
         gl.glBindVertexArray( 0 );

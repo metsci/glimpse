@@ -1,5 +1,6 @@
 package com.metsci.glimpse.topo;
 
+import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -12,10 +13,10 @@ public class TopoUtils
 
     public static LatLonBox axisBounds( Axis2D axis, NormalCylindricalProjection proj )
     {
-        double lonA_DEG = proj.xToLon_DEG( axis.getMinX( ) );
-        double lonB_DEG = proj.xToLon_DEG( axis.getMaxX( ) );
-        double latA_DEG = proj.yToLat_DEG( axis.getMinY( ) );
-        double latB_DEG = proj.yToLat_DEG( axis.getMaxY( ) );
+        double lonA_DEG = radiansToDegrees( proj.xToLon_RAD( axis.getMinX( ) ) );
+        double lonB_DEG = radiansToDegrees( proj.xToLon_RAD( axis.getMaxX( ) ) );
+        double latA_DEG = radiansToDegrees( proj.yToLat_RAD( axis.getMinY( ) ) );
+        double latB_DEG = radiansToDegrees( proj.yToLat_RAD( axis.getMaxY( ) ) );
 
         double northLat_DEG = max( latA_DEG, latB_DEG );
         double southLat_DEG = min( latA_DEG, latB_DEG );

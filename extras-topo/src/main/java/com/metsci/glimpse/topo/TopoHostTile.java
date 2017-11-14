@@ -36,24 +36,24 @@ public class TopoHostTile
 {
 
     /**
-     * North edge, NOT including border cells.
+     * North edge of data, INCLUDING border rows.
      */
-    public final double northLat_DEG;
+    public final double northLat_RAD;
 
     /**
-     * South edge, NOT including border cells.
+     * South edge of data, INCLUDING border rows.
      */
-    public final double southLat_DEG;
+    public final double southLat_RAD;
 
     /**
-     * West edge, NOT including border cells.
+     * West edge of data, INCLUDING border columns.
      */
-    public final double westLon_DEG;
+    public final double westLon_RAD;
 
     /**
-     * East edge, NOT including border cells.
+     * East edge of data, INCLUDING border columns.
      */
-    public final double eastLon_DEG;
+    public final double eastLon_RAD;
 
     /**
      * Number of rows in dataBytes, INCLUDING border rows.
@@ -65,23 +65,25 @@ public class TopoHostTile
      */
     public final int numDataCols;
 
-    public final int numBorderCells;
     public final ByteBuffer dataBytes;
     public final TopoDataType dataType;
+
+    public final double borderSize_RAD;
 
     public long frameNumOfLastUse;
 
 
-    public TopoHostTile( double northLat_DEG,
-                         double southLat_DEG,
-                         double westLon_DEG,
-                         double eastLon_DEG,
+    public TopoHostTile( double northLat_RAD,
+                         double southLat_RAD,
+                         double eastLon_RAD,
+                         double westLon_RAD,
 
                          int numDataRows,
                          int numDataCols,
-                         int numBorderCells,
                          ByteBuffer dataBytes,
                          TopoDataType dataType,
+
+                         double borderSize_RAD,
 
                          long frameNum )
     {
@@ -92,16 +94,17 @@ public class TopoHostTile
             throw new RuntimeException( "Unexpected buffer size: expected = " + expectedBytes + " bytes, found = " + actualBytes + " bytes" );
         }
 
-        this.northLat_DEG = northLat_DEG;
-        this.southLat_DEG = southLat_DEG;
-        this.westLon_DEG = westLon_DEG;
-        this.eastLon_DEG = eastLon_DEG;
+        this.northLat_RAD = northLat_RAD;
+        this.southLat_RAD = southLat_RAD;
+        this.eastLon_RAD = eastLon_RAD;
+        this.westLon_RAD = westLon_RAD;
 
         this.numDataRows = numDataRows;
         this.numDataCols = numDataCols;
-        this.numBorderCells = numBorderCells;
         this.dataBytes = dataBytes;
         this.dataType = dataType;
+
+        this.borderSize_RAD = borderSize_RAD;
 
         this.frameNumOfLastUse = frameNum;
     }
