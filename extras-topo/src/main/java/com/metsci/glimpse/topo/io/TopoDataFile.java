@@ -41,10 +41,10 @@ public class TopoDataFile
     public final int numRows;
     public final int numCols;
     public final double cellSize_DEG;
-    public final double southLat_DEG;
     public final double northLat_DEG;
-    public final double westLon_DEG;
+    public final double southLat_DEG;
     public final double eastLon_DEG;
+    public final double westLon_DEG;
 
     public final File dataFile;
     public final TopoDataType dataType;

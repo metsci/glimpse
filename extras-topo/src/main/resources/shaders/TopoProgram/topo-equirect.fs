@@ -27,16 +27,21 @@
 
 #version 150
 
+uniform float ORIGIN_LON_RAD;
+
 uniform sampler2D DATA_TEX_UNIT;
 uniform float DATA_DENORM_FACTOR;
+uniform float DATA_LAT_MAX_RAD;
+uniform float DATA_LAT_SPAN_RAD;
+uniform float DATA_LON_MIN_RAD;
+uniform float DATA_LON_SPAN_RAD;
 
 uniform sampler1D BATHY_COLORMAP_TEX_UNIT;
 uniform float BATHY_COLORMAP_MIN_VALUE;
-
 uniform sampler1D TOPO_COLORMAP_TEX_UNIT;
 uniform float TOPO_COLORMAP_MAX_VALUE;
 
-in vec2 vSt;
+in vec2 vXy;
 
 out vec4 outRgba;
 
@@ -44,11 +49,21 @@ out vec4 outRgba;
 void main( )
 {
 
-    float zLinear = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, vSt ).r;
+    float x = vXy.x;
+    float y = vXy.y;
+
+    float lon_RAD = ORIGIN_LON_RAD + x;
+    float lat_RAD = y;
+
+    float u = ( lon_RAD - DATA_LON_MIN_RAD ) / DATA_LON_SPAN_RAD;
+    float v = ( DATA_LAT_MAX_RAD - lat_RAD ) / DATA_LAT_SPAN_RAD;
+    vec2 uv = vec2( u, v );
+
+    float zLinear = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, uv ).r;
 
     ivec2 textureSize = textureSize( DATA_TEX_UNIT, 0 );
-    vec2 stNearest = ( floor( vSt * textureSize ) + 0.5 ) / textureSize;
-    float zNearest = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, stNearest ).r;
+    vec2 uvNearest = ( floor( uv * textureSize ) + 0.5 ) / textureSize;
+    float zNearest = DATA_DENORM_FACTOR * texture( DATA_TEX_UNIT, uvNearest ).r;
 
     if ( zNearest < 0.0 )
     {

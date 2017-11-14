@@ -29,6 +29,8 @@ package com.metsci.glimpse.topo;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
+import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
 import static javax.media.opengl.GL.GL_TEXTURE0;
@@ -42,24 +44,13 @@ import javax.media.opengl.GL3;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.topo.io.TopoDataType;
+import com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection;
 
-public class TopoProgram
+public class EquirectTopoProgram
 {
 
-    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo.fs" );
-
-
-    public static float dataDenormFactor( TopoDataType dataType )
-    {
-        switch ( dataType )
-        {
-            case TOPO_I2: return 32767f;
-            case TOPO_F4: return 1f;
-            default: throw new RuntimeException( "Unrecognized data type: " + dataType );
-        }
-    }
+    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect.vs" );
+    public static final String fragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect.fs" );
 
 
     public static class Handles
@@ -68,17 +59,21 @@ public class TopoProgram
 
         public final int AXIS_RECT;
 
+        public final int ORIGIN_LON_RAD;
+
         public final int DATA_TEX_UNIT;
         public final int DATA_DENORM_FACTOR;
+        public final int DATA_LAT_MAX_RAD;
+        public final int DATA_LAT_SPAN_RAD;
+        public final int DATA_LON_MIN_RAD;
+        public final int DATA_LON_SPAN_RAD;
 
         public final int BATHY_COLORMAP_TEX_UNIT;
         public final int BATHY_COLORMAP_MIN_VALUE;
-
         public final int TOPO_COLORMAP_TEX_UNIT;
         public final int TOPO_COLORMAP_MAX_VALUE;
 
         public final int inXy;
-        public final int inSt;
 
         public Handles( GL2ES2 gl )
         {
@@ -86,17 +81,21 @@ public class TopoProgram
 
             this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
 
+            this.ORIGIN_LON_RAD = gl.glGetUniformLocation( program, "ORIGIN_LON_RAD" );
+
             this.DATA_TEX_UNIT = gl.glGetUniformLocation( program, "DATA_TEX_UNIT" );
             this.DATA_DENORM_FACTOR = gl.glGetUniformLocation( program, "DATA_DENORM_FACTOR" );
+            this.DATA_LAT_MAX_RAD = gl.glGetUniformLocation( program, "DATA_LAT_MAX_RAD" );
+            this.DATA_LAT_SPAN_RAD = gl.glGetUniformLocation( program, "DATA_LAT_SPAN_RAD" );
+            this.DATA_LON_MIN_RAD = gl.glGetUniformLocation( program, "DATA_LON_MIN_RAD" );
+            this.DATA_LON_SPAN_RAD = gl.glGetUniformLocation( program, "DATA_LON_SPAN_RAD" );
 
             this.BATHY_COLORMAP_TEX_UNIT = gl.glGetUniformLocation( program, "BATHY_COLORMAP_TEX_UNIT" );
             this.BATHY_COLORMAP_MIN_VALUE = gl.glGetUniformLocation( program, "BATHY_COLORMAP_MIN_VALUE" );
-
             this.TOPO_COLORMAP_TEX_UNIT = gl.glGetUniformLocation( program, "TOPO_COLORMAP_TEX_UNIT" );
             this.TOPO_COLORMAP_MAX_VALUE = gl.glGetUniformLocation( program, "TOPO_COLORMAP_MAX_VALUE" );
 
             this.inXy = gl.glGetAttribLocation( program, "inXy" );
-            this.inSt = gl.glGetAttribLocation( program, "inSt" );
         }
     }
 
@@ -114,13 +113,13 @@ public class TopoProgram
     protected final float topoColormapMaxValue;
 
 
-    public TopoProgram( int dataTexUnit,
-                        int bathyColormapTexUnit,
-                        int topoColormapTexUnit,
-                        ColorTexture1D bathyColormapTexture,
-                        ColorTexture1D topoColormapTexture,
-                        float bathyColormapMinValue,
-                        float topoColormapMaxValue )
+    public EquirectTopoProgram( int dataTexUnit,
+                                int bathyColormapTexUnit,
+                                int topoColormapTexUnit,
+                                ColorTexture1D bathyColormapTexture,
+                                ColorTexture1D topoColormapTexture,
+                                float bathyColormapMinValue,
+                                float topoColormapMaxValue )
     {
         this.handles = null;
 
@@ -148,7 +147,7 @@ public class TopoProgram
         return this.handles;
     }
 
-    public void begin( GlimpseContext context, Axis2D axis )
+    public void begin( GlimpseContext context, EquirectNormalCylindricalProjection proj )
     {
         GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
@@ -160,7 +159,10 @@ public class TopoProgram
         gl.glBindVertexArray( defaultVertexAttributeArray( gl ) );
         gl.glUseProgram( this.handles.program );
 
+        Axis2D axis = requireAxis2D( context );
         gl.glUniform4f( this.handles.AXIS_RECT, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
+
+        gl.glUniform1f( this.handles.ORIGIN_LON_RAD, ( float ) proj.originLon_RAD );
 
         gl.glUniform1i( this.handles.DATA_TEX_UNIT, this.dataTexUnit );
 
@@ -173,23 +175,24 @@ public class TopoProgram
         gl.glUniform1f( this.handles.TOPO_COLORMAP_MAX_VALUE, this.topoColormapMaxValue );
 
         gl.glEnableVertexAttribArray( this.handles.inXy );
-        gl.glEnableVertexAttribArray( this.handles.inSt );
     }
 
     public void draw( GlimpseContext context, TopoDeviceTile tile )
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
+        gl.glUniform1f( this.handles.DATA_DENORM_FACTOR, dataDenormFactor( tile.textureDataType ) );
+
+        gl.glUniform1f( this.handles.DATA_LAT_MAX_RAD,  ( float ) ( tile.northLat_RAD ) );
+        gl.glUniform1f( this.handles.DATA_LAT_SPAN_RAD, ( float ) ( tile.northLat_RAD - tile.southLat_RAD ) );
+        gl.glUniform1f( this.handles.DATA_LON_MIN_RAD,  ( float ) ( tile.westLon_RAD ) );
+        gl.glUniform1f( this.handles.DATA_LON_SPAN_RAD, ( float ) ( tile.eastLon_RAD - tile.westLon_RAD ) );
+
         gl.glActiveTexture( GL_TEXTURE0 + this.dataTexUnit );
         gl.glBindTexture( GL_TEXTURE_2D, tile.texture );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, tile.xyBuffer );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
-
-        gl.glBindBuffer( GL_ARRAY_BUFFER, tile.stBuffer );
-        gl.glVertexAttribPointer( this.handles.inSt, 2, GL_FLOAT, false, 0, 0 );
-
-        gl.glUniform1f( this.handles.DATA_DENORM_FACTOR, dataDenormFactor( tile.textureDataType ) );
 
         gl.glDrawArrays( GL_TRIANGLE_STRIP, 0, tile.numVertices );
     }
@@ -199,7 +202,6 @@ public class TopoProgram
         GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
         gl.glDisableVertexAttribArray( this.handles.inXy );
-        gl.glDisableVertexAttribArray( this.handles.inSt );
 
         gl.glUseProgram( 0 );
         gl.glBindVertexArray( 0 );
