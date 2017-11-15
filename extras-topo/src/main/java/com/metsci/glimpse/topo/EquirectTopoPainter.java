@@ -51,7 +51,6 @@ import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;
 public class EquirectTopoPainter extends GlimpsePainterBase
 {
 
-    protected final EquirectNormalCylindricalProjection proj;
     protected final TopoTileCache cache;
     protected final EquirectTopoProgram prog;
 
@@ -65,9 +64,8 @@ public class EquirectTopoPainter extends GlimpsePainterBase
 
     public EquirectTopoPainter( TopoDataset dataset, EquirectNormalCylindricalProjection proj, TopoPainterConfig config )
     {
-        this.proj = proj;
-        this.cache = new TopoTileCache( dataset, this.proj, config );
-        this.prog = new EquirectTopoProgram( 2, 3, 4, bathyColorTable( ), topoColorTable( ), bathyColormapMinValue, topoColormapMaxValue );
+        this.cache = new TopoTileCache( dataset, proj, config );
+        this.prog = new EquirectTopoProgram( 2, 3, 4, bathyColorTable( ), topoColorTable( ), bathyColormapMinValue, topoColormapMaxValue, proj );
 
         this.frameNum = 0;
     }
@@ -84,7 +82,7 @@ public class EquirectTopoPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         Axis2D axis = requireAxis2D( context );
 
-        LatLonBox viewBounds = axisBounds( axis, this.proj );
+        LatLonBox viewBounds = axisBounds( axis, this.cache.proj );
 
         Axis1D yAxis = axis.getAxisY( );
         double dyPerPixel = 1.0 / yAxis.getPixelsPerValue( );
@@ -95,7 +93,7 @@ public class EquirectTopoPainter extends GlimpsePainterBase
 
         List<TopoDeviceTile> dTilesToDraw = this.cache.update( gl, this.frameNum, viewBounds, levelNum );
 
-        this.prog.begin( context, this.proj );
+        this.prog.begin( context );
         try
         {
             for ( TopoDeviceTile dTile : dTilesToDraw )

@@ -50,7 +50,14 @@ public class EquirectTopoProgram
 {
 
     public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect.fs" );
+
+    public static final String radiansFragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect-rad.fs" );
+    public static final String degreesFragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect-deg.fs" );
+
+    public static String fragShader_GLSL( boolean xyInDegrees )
+    {
+        return ( xyInDegrees ? degreesFragShader_GLSL : radiansFragShader_GLSL );
+    }
 
 
     public static class Handles
@@ -75,9 +82,9 @@ public class EquirectTopoProgram
 
         public final int inXy;
 
-        public Handles( GL2ES2 gl )
+        public Handles( GL2ES2 gl, boolean xyInDegrees )
         {
-            this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+            this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL( xyInDegrees ) );
 
             this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
 
@@ -112,6 +119,8 @@ public class EquirectTopoProgram
     protected final ColorTexture1D topoColormapTexture;
     protected final float topoColormapMaxValue;
 
+    protected final EquirectNormalCylindricalProjection proj;
+
 
     public EquirectTopoProgram( int dataTexUnit,
                                 int bathyColormapTexUnit,
@@ -119,7 +128,8 @@ public class EquirectTopoProgram
                                 ColorTexture1D bathyColormapTexture,
                                 ColorTexture1D topoColormapTexture,
                                 float bathyColormapMinValue,
-                                float topoColormapMaxValue )
+                                float topoColormapMaxValue,
+                                EquirectNormalCylindricalProjection proj )
     {
         this.handles = null;
 
@@ -132,6 +142,8 @@ public class EquirectTopoProgram
         this.topoColormapTexUnit = topoColormapTexUnit;
         this.topoColormapTexture = topoColormapTexture;
         this.topoColormapMaxValue = topoColormapMaxValue;
+
+        this.proj = proj;
     }
 
     /**
@@ -142,18 +154,18 @@ public class EquirectTopoProgram
     {
         if ( this.handles == null )
         {
-            this.handles = new Handles( gl );
+            this.handles = new Handles( gl, this.proj.xyInDegrees );
         }
         return this.handles;
     }
 
-    public void begin( GlimpseContext context, EquirectNormalCylindricalProjection proj )
+    public void begin( GlimpseContext context )
     {
         GL2ES3 gl = context.getGL( ).getGL2ES3( );
 
         if ( this.handles == null )
         {
-            this.handles = new Handles( gl );
+            this.handles = new Handles( gl, this.proj.xyInDegrees );
         }
 
         gl.glBindVertexArray( defaultVertexAttributeArray( gl ) );
@@ -162,7 +174,7 @@ public class EquirectTopoProgram
         Axis2D axis = requireAxis2D( context );
         gl.glUniform4f( this.handles.AXIS_RECT, ( float ) axis.getMinX( ), ( float ) axis.getMaxX( ), ( float ) axis.getMinY( ), ( float ) axis.getMaxY( ) );
 
-        gl.glUniform1f( this.handles.ORIGIN_LON_RAD, ( float ) proj.originLon_RAD );
+        gl.glUniform1f( this.handles.ORIGIN_LON_RAD, ( float ) this.proj.originLon_RAD );
 
         gl.glUniform1i( this.handles.DATA_TEX_UNIT, this.dataTexUnit );
 
