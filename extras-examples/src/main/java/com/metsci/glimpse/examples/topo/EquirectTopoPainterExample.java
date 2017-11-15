@@ -29,6 +29,7 @@ package com.metsci.glimpse.examples.topo;
 import static com.metsci.glimpse.axis.UpdateMode.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.topo.io.TopoCache.*;
+import static com.metsci.glimpse.topo.io.TopoDataPaths.*;
 import static com.metsci.glimpse.topo.io.TopoReader.*;
 import static com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
@@ -87,8 +88,7 @@ public class EquirectTopoPainterExample
                 BackgroundPainter backgroundPainter = new BackgroundPainter( );
                 backgroundPainter.setColor( floats( 0.7f, 0.7f, 0.7f, 1 ) );
 
-                // FIXME
-                File topoDataFile = new File( "/path/to/etopo1_ice_g.flt" );
+                File topoDataFile = requireTopoDataFile( );
                 TopoDataFile topoBase = readTopoLevel( topoDataFile );
                 TopoDataset topoDataset = topoCacheDataset( topoBase );
                 EquirectTopoPainter topoPainter = new EquirectTopoPainter( topoDataset, plateCarreeProj );

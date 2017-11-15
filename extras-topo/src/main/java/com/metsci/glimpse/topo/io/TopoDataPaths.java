@@ -26,18 +26,103 @@
  */
 package com.metsci.glimpse.topo.io;
 
+import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseSharedDataDir;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
+import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserDataDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.io.File;
 import java.util.logging.Logger;
 
+import com.google.common.collect.ImmutableList;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 
 public class TopoDataPaths
 {
-    private static final Logger logger = getLogger( TopoDataPaths.class );
+
+    /**
+     * Most code should NOT use this, but should use {@link TopoDataPaths#glimpseTopoDataDir} instead.
+     *
+     * This is provided for code that, for some reason, needs to bypass the ( userDir || sharedDir )
+     * fallback behavior and access the user dir specifically.
+     */
+    public static final File glimpseTopoDefaultUserDataDir = new File( glimpseUserDataDir, "TOPO" );
+
+    /**
+     * Most code should NOT use this, but should use {@link TopoDataPaths#glimpseTopoDataDir} instead.
+     *
+     * This is provided for code that, for some reason, needs to bypass the ( userDir || sharedDir )
+     * fallback behavior and access the shared dir specifically.
+     */
+    public static final File glimpseTopoDefaultSharedDataDir = new File( glimpseSharedDataDir, "TOPO" );
+
+    /**
+     * Standard dir for TOPO permanent data.
+     * <ol>
+     * <li>JVM prop (if defined): {@code glimpse.topo.dataDir}
+     * <li>Env var (if defined): {@code GLIMPSE_TOPO_DATA}
+     * <li>User default (if dir exists): subdir TOPO of {@link GlimpseDataPaths#glimpseUserDataDir}
+     * <li>Shared default: subdir TOPO of {@link GlimpseDataPaths#glimpseSharedDataDir}
+     * </ol>
+     */
+    public static final File glimpseTopoDataDir = glimpseTopoDataDir( );
+    private static File glimpseTopoDataDir( )
+    {
+        String jvmProp = System.getProperty( "glimpse.topo.dataDir" );
+        if ( jvmProp != null )
+        {
+            return new File( jvmProp );
+        }
+
+        String envVar = System.getenv( "GLIMPSE_TOPO_DATA" );
+        if ( envVar != null )
+        {
+            return new File( envVar );
+        }
+
+        return ( glimpseTopoDefaultUserDataDir.isDirectory( ) ? glimpseTopoDefaultUserDataDir : glimpseTopoDefaultSharedDataDir );
+    }
+
+    public static final ImmutableList<String> topoDataFilenames = ImmutableList.of( "etopo1_ice_c_i2.bin",
+                                                                                    "etopo1_ice_c.bin",
+                                                                                    "etopo1_ice_c_f4.flt",
+                                                                                    "etopo1_ice_c.flt",
+                                                                                    "etopo1_ice_g_i2.bin",
+                                                                                    "etopo1_ice_g.bin",
+                                                                                    "etopo1_ice_g_f4.flt",
+                                                                                    "etopo1_ice_g.flt" );
+
+    public static File requireTopoDataFile( )
+    {
+        return requireTopoDataFile( glimpseTopoDataDir );
+    }
+
+    public static File requireTopoDataFile( File dir )
+    {
+        File file = findTopoDataFile( dir );
+        if ( file == null )
+        {
+            throw new RuntimeException( "No topo data file found -- download one (e.g. from https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/cell_registered/binary/etopo1_ice_c_i2.zip) and extract it to " + dir.getAbsolutePath( ) );
+        }
+        else
+        {
+            return file;
+        }
+    }
+
+    public static File findTopoDataFile( File dir )
+    {
+        for ( String filename : topoDataFilenames )
+        {
+            File file = new File( dir, filename );
+            if ( file.isFile( ) && file.canRead( ) )
+            {
+                return file;
+            }
+        }
+        return null;
+    }
 
     /**
      * Standard dir for TOPO cache data.
@@ -66,8 +151,11 @@ public class TopoDataPaths
     }
 
     // Log dir locations, after they've been initialized
+    private static final Logger logger = getLogger( TopoDataPaths.class );
     static
     {
+        logInfo( logger, "Default TOPO user dir: %s", glimpseTopoDefaultUserDataDir );
+        logInfo( logger, "Default TOPO shared dir: %s", glimpseTopoDefaultSharedDataDir );
         logInfo( logger, "Standard TOPO_CACHE dir: %s", glimpseTopoCacheDir );
     }
 
