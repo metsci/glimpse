@@ -4,6 +4,8 @@ import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
 import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
 
+import com.metsci.glimpse.util.units.Angle;
+
 public class EquirectNormalCylindricalProjection implements NormalCylindricalProjection
 {
 
@@ -52,13 +54,13 @@ public class EquirectNormalCylindricalProjection implements NormalCylindricalPro
     @Override
     public double dyToDlat_RAD( double y )
     {
-        return 1.0;
+        return ( this.xyInDegrees ? degreesToRadians( 1.0 ) : 1.0 );
     }
 
     @Override
     public double maxDyToDlat_RAD( double yMin, double yMax )
     {
-        return 1.0;
+        return ( this.xyInDegrees ? degreesToRadians( 1.0 ) : 1.0 );
     }
 
     @Override
