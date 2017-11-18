@@ -1,6 +1,7 @@
 package com.metsci.glimpse.topo.proj;
 
 import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
+import static java.lang.Math.PI;
 import static java.lang.Math.atan;
 import static java.lang.Math.cos;
 import static java.lang.Math.exp;
@@ -20,7 +21,8 @@ public class MercatorNormalCylindricalProjection implements NormalCylindricalPro
 
     public MercatorNormalCylindricalProjection( double originLon_RAD )
     {
-        this( originLon_RAD, 3.0 );
+        // yCutoff of PI is a reasonable default, and happens to make the bounds square
+        this( originLon_RAD, PI );
     }
 
     public MercatorNormalCylindricalProjection( double originLon_RAD, double yCutoff )
