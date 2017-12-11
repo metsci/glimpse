@@ -87,6 +87,11 @@ public class DockingGroupAdapter implements DockingGroupListener
     }
 
     @Override
+    public void userRequestingDisposeFrame( DockingGroup group, DockingFrame frame )
+    {
+    }
+
+    @Override
     public void disposingFrame( DockingGroup group, DockingFrame frame )
     {
     }

@@ -51,6 +51,17 @@ public interface DockingGroupListener
 
     void addedFrame( DockingGroup group, DockingFrame frame );
 
+    /**
+     * Called when the user tries to close a frame in the {@link DockingGroup},
+     * e.g. by clicking the close button in the frame's title bar.
+     * <p>
+     * Depending on the {@link DockingFrameCloseOperation}, this call might be
+     * followed automatically by calls to {@link #disposingAllFrames(DockingGroup)},
+     * {@link #disposingFrame(DockingGroup, DockingFrame)}, and/or
+     * {@link #disposedFrame(DockingGroup, DockingFrame)}.
+     */
+    void userRequestingDisposeFrame( DockingGroup group, DockingFrame frame );
+
     void disposingAllFrames( DockingGroup group );
 
     void disposingFrame( DockingGroup group, DockingFrame frame );
