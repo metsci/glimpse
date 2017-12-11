@@ -85,7 +85,7 @@ public class TileFactoryStandard implements TileFactory
             @Override
             public Component createComponent( final Tile tile, final View view )
             {
-                if ( view.closeable )
+                if ( view.closeOperation != ViewCloseOperation.CANNOT_CLOSE )
                 {
                     JButton closeButton = new JButton( )
                     {
@@ -122,7 +122,17 @@ public class TileFactoryStandard implements TileFactory
                         @Override
                         public void actionPerformed( ActionEvent ev )
                         {
-                            dockingGroup.closeView( view );
+                            if ( view.closeOperation == ViewCloseOperation.REQUEST_CLOSE )
+                            {
+                                for ( DockingGroupListener listener : dockingGroup.listeners )
+                                {
+                                    listener.userRequestingCloseView( dockingGroup, view );
+                                }
+                            }
+                            else
+                            {
+                                dockingGroup.closeView( view );
+                            }
                         }
                     } );
 

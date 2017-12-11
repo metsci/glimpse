@@ -473,7 +473,7 @@ public class DockingUtils
     {
         for ( View view : views )
         {
-            if ( !view.closeable )
+            if ( view.closeOperation != ViewCloseOperation.CANNOT_CLOSE )
             {
                 return false;
             }

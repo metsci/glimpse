@@ -68,6 +68,8 @@ public interface DockingGroupListener
 
     void disposedFrame( DockingGroup group, DockingFrame frame );
 
+    void userRequestingCloseView( DockingGroup group, View view );
+
     void closingView( DockingGroup group, View view );
 
     void closedView( DockingGroup group, View view );

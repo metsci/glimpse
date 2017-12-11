@@ -102,6 +102,11 @@ public class DockingGroupAdapter implements DockingGroupListener
     }
 
     @Override
+    public void userRequestingCloseView( DockingGroup group, View view )
+    {
+    }
+
+    @Override
     public void closingView( DockingGroup group, View view )
     {
     }
