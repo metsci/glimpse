@@ -36,15 +36,15 @@ import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.docking.Side.RIGHT;
-import static com.metsci.glimpse.docking.ViewCloseOperation.CANNOT_CLOSE;
-import static com.metsci.glimpse.docking.ViewCloseOperation.CLOSE;
-import static com.metsci.glimpse.docking.ViewCloseOperation.REQUEST_CLOSE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_CUSTOM_CLOSEABLE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.layers.FpsOption.findFps;
 import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
-import static com.metsci.glimpse.layers.StandardViewOption.REQUEST_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_FACETS_MENU;
+import static com.metsci.glimpse.layers.StandardViewOption.REQUEST_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindButtonText;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
@@ -92,7 +92,7 @@ import com.metsci.glimpse.docking.DockingGroupUtils.BesideExistingNeighbor;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
 import com.metsci.glimpse.docking.DockingTheme;
-import com.metsci.glimpse.docking.ViewCloseOperation;
+import com.metsci.glimpse.docking.ViewCloseOption;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
@@ -250,7 +250,7 @@ public class LayeredGui
         {
             LayerCardsPanel layerCardsPanel = new LayerCardsPanel( this.layers );
             JScrollPane layerCardsScroller = new JScrollPane( layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-            com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", CANNOT_CLOSE, null, layersIcon, null );
+            com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", VIEW_NOT_CLOSEABLE, null, layersIcon, null );
             this.dockingGroup.addView( layersView );
         }
 
@@ -573,8 +573,8 @@ public class LayeredGui
         }
 
         String viewId = this.claimDockingViewId( view );
-        ViewCloseOperation closeOperation = view.viewOptions.contains( HIDE_CLOSE_BUTTON ) ? CANNOT_CLOSE : view.viewOptions.contains( REQUEST_CLOSE_BUTTON ) ? REQUEST_CLOSE : CLOSE;
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( viewId, view.getComponent( ), "", closeOperation, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        ViewCloseOption closeOption = ( view.viewOptions.contains( HIDE_CLOSE_BUTTON ) ? VIEW_NOT_CLOSEABLE : ( view.viewOptions.contains( REQUEST_CLOSE_BUTTON ) ? VIEW_CUSTOM_CLOSEABLE : VIEW_AUTO_CLOSEABLE ) );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( viewId, view.getComponent( ), "", closeOption, view.getTooltip( ), view.getIcon( ), view.toolbar );
         disposables.add( view.title.addListener( true, ( ) ->
         {
             dockingView.title.set( view.title.v( ) );
