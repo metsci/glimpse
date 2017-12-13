@@ -32,7 +32,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.docking.ViewCloseOperation.CANNOT_CLOSE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
@@ -83,8 +83,8 @@ public class GlimpseDockingExample
 
                 View[] views =
                 {
-                    new View( "aView", aCanvas, "View A", CANNOT_CLOSE, null, requireIcon( "icons/ViewA.png" ) ),
-                    new View( "bView", bCanvas, "View B", CANNOT_CLOSE, null, requireIcon( "icons/ViewB.png" ) )
+                    new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ) ),
+                    new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ) )
                 };
 
 

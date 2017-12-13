@@ -31,7 +31,7 @@ import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
+import static com.metsci.glimpse.docking.DockingUtils.allViewsAreAutoCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
@@ -139,7 +139,7 @@ public class DockingGroup
                     case DISPOSE_CLOSED_FRAME:
                     {
                         Set<View> views = findViews( frame.docker );
-                        if ( allViewsAreCloseable( views ) )
+                        if ( allViewsAreAutoCloseable( views ) )
                         {
                             for ( DockingGroupListener listener : listeners )
                             {
@@ -166,7 +166,7 @@ public class DockingGroup
                         }
                         else
                         {
-                            logger.warning( "Refusing to dispose frame, because it contains uncloseable views" );
+                            logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
                         }
                     }
                     break;

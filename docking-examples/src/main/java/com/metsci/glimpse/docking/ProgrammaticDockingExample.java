@@ -36,7 +36,7 @@ import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.SimpleDockingExample.newSolidPanel;
-import static com.metsci.glimpse.docking.ViewCloseOperation.CANNOT_CLOSE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
@@ -128,14 +128,15 @@ public class ProgrammaticDockingExample
                 // Create views
                 //
 
-                View aView = new View( "aView", aPanel, "View A", CANNOT_CLOSE, null, requireIcon( "icons/ViewA.png" ), aToolbar );
-                View bView = new View( "bView", bPanel, "View B", CANNOT_CLOSE, null, requireIcon( "icons/ViewB.png" ), bToolbar );
-                View cView = new View( "cView", cPanel, "View C", CANNOT_CLOSE, null, requireIcon( "icons/ViewC.png" ), cToolbar );
-                View dView = new View( "dView", dPanel, "View D", CANNOT_CLOSE, null, requireIcon( "icons/ViewD.png" ), dToolbar );
-                View eView = new View( "eView", ePanel, "View E", CANNOT_CLOSE, null, requireIcon( "icons/ViewE.png" ), eToolbar );
-                View fView = new View( "fView", fPanel, "View F", CANNOT_CLOSE, null, requireIcon( "icons/ViewF.png" ), fToolbar );
-                View gView = new View( "gView", gPanel, "View G", CANNOT_CLOSE, null, requireIcon( "icons/ViewG.png" ), gToolbar );
-                View hView = new View( "hView", hPanel, "View H", CANNOT_CLOSE, null, requireIcon( "icons/ViewH.png" ), hToolbar );
+                View aView = new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ), aToolbar );
+                View bView = new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ), bToolbar );
+                View cView = new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ), cToolbar );
+                View dView = new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ), dToolbar );
+                View eView = new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ), eToolbar );
+                View fView = new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ), fToolbar );
+                View gView = new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ), gToolbar );
+                View hView = new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ), hToolbar );
+
 
                 // Create and show the docking group
                 //

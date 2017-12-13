@@ -34,6 +34,7 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
 import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.ViewCloseOption.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
@@ -308,9 +309,9 @@ public class DncExplorer
 
             View[] views =
             {
-                new View( "geoView", geoCanvas, "Geo", false, null, requireIcon( "icons/fugue/map.png" ) ),
-                new View( "attrsView", attrsScroller, "Features", false, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
-                new View( "prefsView", prefsPanel, "Prefs", false, null, requireIcon( "icons/fugue/equalizer.png" ) ),
+                new View( "geoView",   geoCanvas,     "Geo",      VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/fugue/map.png"        ) ),
+                new View( "attrsView", attrsScroller, "Features", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
+                new View( "prefsView", prefsPanel,    "Prefs",    VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/fugue/equalizer.png"  ) ),
             };
 
             String appName = "dnc-explorer";
