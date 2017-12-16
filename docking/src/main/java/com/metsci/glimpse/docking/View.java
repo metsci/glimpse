@@ -70,7 +70,7 @@ public class View
 
     public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, Icon icon, JToolBar toolbar )
     {
-        this( viewId, component, title, ( autoCloseable ? VIEW_AUTO_CLOSEABLE : VIEW_NOT_CLOSEABLE ), tooltip, icon, null );
+        this( viewId, component, title, ( autoCloseable ? VIEW_AUTO_CLOSEABLE : VIEW_NOT_CLOSEABLE ), tooltip, icon, toolbar );
     }
 
     public View( String viewId, Component component, String title, ViewCloseOption closeOption )
