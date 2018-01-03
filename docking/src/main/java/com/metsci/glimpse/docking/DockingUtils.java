@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
 import static com.metsci.glimpse.util.AppConfigUtils.getAppConfigPath;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
@@ -469,11 +470,11 @@ public class DockingUtils
         return views;
     }
 
-    public static boolean allViewsAreCloseable( Iterable<View> views )
+    public static boolean allViewsAreAutoCloseable( Iterable<View> views )
     {
         for ( View view : views )
         {
-            if ( !view.closeable )
+            if ( view.closeOption != VIEW_AUTO_CLOSEABLE )
             {
                 return false;
             }

@@ -76,6 +76,7 @@
         <module>extras-examples</module>
         <module>extras-worldwind</module>
         <module>extras-tinylaf</module>
+        <module>extras-topo</module>
 
     </modules>
 

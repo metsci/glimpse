@@ -36,11 +36,15 @@ import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.docking.Side.RIGHT;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_CUSTOM_CLOSEABLE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.layers.FpsOption.findFps;
 import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_FACETS_MENU;
+import static com.metsci.glimpse.layers.StandardViewOption.REQUEST_CLOSE_BUTTON;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindButtonText;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.listMinus;
@@ -81,12 +85,14 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.metsci.glimpse.docking.DockingFrameCloseOperation;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupUtils.BesideExistingNeighbor;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
 import com.metsci.glimpse.docking.DockingTheme;
+import com.metsci.glimpse.docking.ViewCloseOption;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
@@ -178,10 +184,15 @@ public class LayeredGui
 
     public LayeredGui( String frameTitleRoot, DockingTheme theme, GuiOption... guiOptions )
     {
-        this( frameTitleRoot, theme, ImmutableSet.copyOf( guiOptions ) );
+        this( frameTitleRoot, theme, DISPOSE_ALL_FRAMES, guiOptions );
     }
 
-    public LayeredGui( String frameTitleRoot, DockingTheme theme, Collection<? extends GuiOption> guiOptions )
+    public LayeredGui( String frameTitleRoot, DockingTheme theme, DockingFrameCloseOperation closeOperation, GuiOption... guiOptions )
+    {
+        this( frameTitleRoot, theme, closeOperation, ImmutableSet.copyOf( guiOptions ) );
+    }
+
+    public LayeredGui( String frameTitleRoot, DockingTheme theme, DockingFrameCloseOperation closeOperation, Collection<? extends GuiOption> guiOptions )
     {
         // Model
         //
@@ -191,13 +202,12 @@ public class LayeredGui
         this.views = new Var<>( ImmutableSet.of( ), notNull );
         this.layers = new Var<>( ImmutableList.of( ), notNull );
 
-
         // View
         //
 
         this.viewDisposables = new HashMap<>( );
 
-        this.dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, theme );
+        this.dockingGroup = new DockingGroup( closeOperation, theme );
         this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
 
         // Don't start the animator here, since we might not ever get any views that
@@ -240,7 +250,7 @@ public class LayeredGui
         {
             LayerCardsPanel layerCardsPanel = new LayerCardsPanel( this.layers );
             JScrollPane layerCardsScroller = new JScrollPane( layerCardsPanel, VERTICAL_SCROLLBAR_AS_NEEDED, HORIZONTAL_SCROLLBAR_AS_NEEDED );
-            com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", false, null, layersIcon, null );
+            com.metsci.glimpse.docking.View layersView = new com.metsci.glimpse.docking.View( layerCardsViewId, layerCardsScroller, "Layers", VIEW_NOT_CLOSEABLE, null, layersIcon, null );
             this.dockingGroup.addView( layersView );
         }
 
@@ -266,6 +276,16 @@ public class LayeredGui
     public DockingGroup getDockingGroup( )
     {
         return this.dockingGroup;
+    }
+
+    public com.metsci.glimpse.docking.View getDockingView( View view )
+    {
+        return this.dockingViews.get( view );
+    }
+
+    public View getViewFromDocking( com.metsci.glimpse.docking.View view )
+    {
+        return this.dockingViews.inverse( ).get( view );
     }
 
     public void stopAnimator( )
@@ -553,8 +573,8 @@ public class LayeredGui
         }
 
         String viewId = this.claimDockingViewId( view );
-        boolean closeable = ( !view.viewOptions.contains( HIDE_CLOSE_BUTTON ) );
-        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( viewId, view.getComponent( ), "", closeable, view.getTooltip( ), view.getIcon( ), view.toolbar );
+        ViewCloseOption closeOption = ( view.viewOptions.contains( HIDE_CLOSE_BUTTON ) ? VIEW_NOT_CLOSEABLE : ( view.viewOptions.contains( REQUEST_CLOSE_BUTTON ) ? VIEW_CUSTOM_CLOSEABLE : VIEW_AUTO_CLOSEABLE ) );
+        com.metsci.glimpse.docking.View dockingView = new com.metsci.glimpse.docking.View( viewId, view.getComponent( ), "", closeOption, view.getTooltip( ), view.getIcon( ), view.toolbar );
         disposables.add( view.title.addListener( true, ( ) ->
         {
             dockingView.title.set( view.title.v( ) );

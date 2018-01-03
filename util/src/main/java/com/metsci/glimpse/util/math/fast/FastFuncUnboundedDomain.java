@@ -42,9 +42,14 @@ package com.metsci.glimpse.util.math.fast;
  */
 public abstract class FastFuncUnboundedDomain extends FastFunc
 {
+    protected final double gNegativeInfinity;
+    protected final double gPositiveInfinity;
+
     public FastFuncUnboundedDomain( int samples )
     {
         super( -1.0, 1.0, samples );
+        this.gNegativeInfinity = this.gNegativeInfinity( );
+        this.gPositiveInfinity = this.gPositiveInfinity( );
     }
 
     @Override
@@ -58,7 +63,19 @@ public abstract class FastFuncUnboundedDomain extends FastFunc
     @Override
     public double evaluate( double x )
     {
-        return super.evaluate( x / ( 1.0 + Math.abs( x ) ) );
+        // Must check for infinite x, to avoid passing NaN to evaluate()
+        if ( x == Double.POSITIVE_INFINITY )
+        {
+            return this.gPositiveInfinity;
+        }
+        else if ( x == Double.NEGATIVE_INFINITY )
+        {
+            return this.gNegativeInfinity;
+        }
+        else
+        {
+            return super.evaluate( x / ( 1.0 + Math.abs( x ) ) );
+        }
     }
 
     /**

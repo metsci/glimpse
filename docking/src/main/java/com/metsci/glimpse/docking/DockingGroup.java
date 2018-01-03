@@ -31,7 +31,7 @@ import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.allViewsAreCloseable;
+import static com.metsci.glimpse.docking.DockingUtils.allViewsAreAutoCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
@@ -123,6 +123,11 @@ public class DockingGroup
             // Frame's close button was clicked
             public void windowClosing( WindowEvent ev )
             {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.userRequestingDisposeFrame( DockingGroup.this, frame );
+                }
+
                 switch ( frameCloseOperation )
                 {
                     case DO_NOTHING:
@@ -134,7 +139,7 @@ public class DockingGroup
                     case DISPOSE_CLOSED_FRAME:
                     {
                         Set<View> views = findViews( frame.docker );
-                        if ( allViewsAreCloseable( views ) )
+                        if ( allViewsAreAutoCloseable( views ) )
                         {
                             for ( DockingGroupListener listener : listeners )
                             {
@@ -161,43 +166,20 @@ public class DockingGroup
                         }
                         else
                         {
-                            logger.warning( "Refusing to dispose frame, because it contains uncloseable views" );
+                            logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
                         }
                     }
                     break;
 
                     case DISPOSE_ALL_FRAMES:
                     {
-                        for ( DockingGroupListener listener : listeners )
-                        {
-                            listener.disposingAllFrames( DockingGroup.this );
-                        }
-                        for ( DockingFrame frame : frames )
-                        {
-                            for ( DockingGroupListener listener : listeners )
-                            {
-                                listener.disposingFrame( DockingGroup.this, frame );
-                            }
-                            frame.dispose( );
-                        }
+                        DockingGroup.this.disposeAllFrames( );
                     }
                     break;
 
                     case EXIT_JVM:
                     {
-                        for ( DockingGroupListener listener : listeners )
-                        {
-                            listener.disposingAllFrames( DockingGroup.this );
-                        }
-                        for ( DockingFrame frame : frames )
-                        {
-                            for ( DockingGroupListener listener : listeners )
-                            {
-                                listener.disposingFrame( DockingGroup.this, frame );
-                            }
-                            frame.dispose( );
-                        }
-                        // XXX: Can we keep this from interrupting the dispose calls? Should we?
+                        DockingGroup.this.disposeAllFrames( );
                         System.exit( 0 );
                     }
                     break;
@@ -231,6 +213,24 @@ public class DockingGroup
             listener.addedFrame( this, frame );
         }
         return frame;
+    }
+
+    public void disposeAllFrames( )
+    {
+        for ( DockingGroupListener listener : listeners )
+        {
+            listener.disposingAllFrames( DockingGroup.this );
+        }
+
+        for ( DockingFrame frame : frames )
+        {
+            for ( DockingGroupListener listener : listeners )
+            {
+                listener.disposingFrame( DockingGroup.this, frame );
+            }
+
+            frame.dispose( );
+        }
     }
 
     protected void attachListenerTo( final MultiSplitPane docker )

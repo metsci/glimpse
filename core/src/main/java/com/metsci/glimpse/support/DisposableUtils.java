@@ -464,17 +464,7 @@ public class DisposableUtils
 
     public static Disposable addAxisListener1D( Axis1D axis, Runnable listener )
     {
-        AxisListener1D listener2 = ( x ) ->
-        {
-            listener.run( );
-        };
-
-        axis.addAxisListener( listener2 );
-
-        return ( ) ->
-        {
-            axis.removeAxisListener( listener2 );
-        };
+        return addAxisListener1D( axis, ( x ) -> listener.run( ) );
     }
 
     public static Disposable addAxisListener2D( Axis2D axis, AxisListener2D listener )
@@ -489,17 +479,7 @@ public class DisposableUtils
 
     public static Disposable addAxisListener2D( Axis2D axis, Runnable listener )
     {
-        AxisListener2D listener2 = ( x ) ->
-        {
-            listener.run( );
-        };
-
-        axis.addAxisListener( listener2 );
-
-        return ( ) ->
-        {
-            axis.removeAxisListener( listener2 );
-        };
+        return addAxisListener2D( axis, ( x ) -> listener.run( ) );
     }
 
     public static Disposable addAxisConstraint( TaggedAxis1D axis, Constraint constraint )

@@ -35,6 +35,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
@@ -129,14 +130,14 @@ public class SimpleDockingExample
 
                 View[] views =
                 {
-                    new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-                    new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-                    new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-                    new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-                    new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-                    new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-                    new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-                    new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar )
+                    new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
+                    new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
+                    new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
+                    new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
+                    new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
+                    new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
+                    new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
+                    new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ), hToolbar )
                 };
 
 
