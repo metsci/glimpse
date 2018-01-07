@@ -83,8 +83,9 @@ public class TopoReader
         {
             try
             {
+                logger.info( "Reading a topo level with file header: data-file = " + dataFile.getAbsolutePath( ) + ", hdr-file = " + hdrFile.getAbsolutePath( ) );
                 TopoDataFile level = readTopoLevelWithFileHeader( dataFile, hdrFile );
-                logger.info( "Read a topo level with file header:\n" + level.toLongString( "  " ) );
+                logger.fine( "Read a topo level with file header:\n" + level.toLongString( "  " ) );
                 return level;
             }
             catch ( TopoParseException e )
@@ -93,8 +94,9 @@ public class TopoReader
             }
         }
 
+        logger.info( "Reading a topo level with inferred header: data-file = " + dataFile.getAbsolutePath( ) );
         TopoDataFile level = readTopoLevelWithGuessedHeader( dataFile );
-        logger.info( "Read a topo level with guessed header:\n" + level.toLongString( "  " ) );
+        logger.fine( "Read a topo level with inferred header:\n" + level.toLongString( "  " ) );
         return level;
     }
 

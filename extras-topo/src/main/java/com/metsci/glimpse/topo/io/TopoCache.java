@@ -80,7 +80,7 @@ public class TopoCache
             if ( !configFile.isFile( ) )
             {
                 // TODO: Notify a progress listener -- e.g. to show dialog box with progress bar
-                logger.info( "Writing topo cache: base-data = " + baseLevel.dataFile.getAbsolutePath( ) );
+                logger.info( "Writing topo cache: base-data = " + baseLevel.dataFile.getAbsolutePath( ) + ", cache-dir = " + cacheDir.getAbsolutePath( ) );
                 writeTopoDataset( baseLevel, cacheDir );
                 Files.asCharSink( configFile, UTF_8 ).write( configString );
             }
