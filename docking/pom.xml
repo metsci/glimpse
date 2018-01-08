@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>3.2.0-rc15</version>
+        <version>3.2.0-rc16</version>
     </parent>
 
     <artifactId>glimpse-docking</artifactId>
