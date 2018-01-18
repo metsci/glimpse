@@ -298,13 +298,6 @@ public class SimpleTextPainter extends GlimpsePainterBase
         }
     }
 
-    @Override
-    public void dispose( GlimpseContext context )
-    {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
-    }
-
     public Rectangle2D getTextBounds( )
     {
         return sizeText == null ? textRenderer.getBounds( text ) : textRenderer.getBounds( sizeText );
@@ -571,15 +564,16 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
     protected void updateTextRenderer( )
     {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = new TextRenderer( newFont, antialias, false );
-        newFont = null;
+        if ( this.textRenderer != null ) this.textRenderer.dispose( );
+        this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
+        this.newFont = null;
     }
 
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        this.textRenderer.dispose( );
+        if ( this.textRenderer != null ) this.textRenderer.dispose( );
+        this.textRenderer = null;
 
         this.lineProg.dispose( context.getGL( ).getGL3( ) );
         this.fillProg.dispose( context.getGL( ).getGL3( ) );

@@ -1389,7 +1389,7 @@ public class TrackPainter extends GlimpsePainterBase
         this.trackUpdateLock.lock( );
         try
         {
-            for ( LoadedTrack track : loadedTracks.values( ) )
+            for ( LoadedTrack track : this.loadedTracks.values( ) )
             {
                 track.dispose( gl );
             }
@@ -1399,10 +1399,10 @@ public class TrackPainter extends GlimpsePainterBase
             this.trackUpdateLock.unlock( );
         }
 
-        if ( fontRenderer != null )
+        if ( this.fontRenderer != null )
         {
-            fontRenderer.dispose( );
-            fontRenderer = null;
+            this.fontRenderer.dispose( );
+            this.fontRenderer = null;
         }
 
         GL3 gl3 = gl.getGL3( );
