@@ -118,7 +118,15 @@ public class MappedFile
                 this.size = raf.length( );
             }
 
-            this.address = memmap( raf.getChannel( ), 0, this.size, this.writable );
+            if ( this.size == 0 )
+            {
+                // If size is zero, then address doesn't matter -- we can just set it to zero, like FileChannelImpl does
+                this.address = 0;
+            }
+            else
+            {
+                this.address = memmap( raf.getChannel( ), 0, this.size, this.writable );
+            }
 
             this.fd = duplicateForMapping( raf.getFD( ) );
             Runnable unmapper = createUnmapper( this.address, this.size, 0, this.fd );
@@ -153,6 +161,11 @@ public class MappedFile
             // This block does all the same steps as the block below,
             // but without creating a temporary slice buffer
 
+            if ( size < 0 )
+            {
+                throw new IllegalArgumentException( "Illegal slice size: size = " + size );
+            }
+
             if ( position < 0 || position + size > this.size )
             {
                 throw new RuntimeException( format( "Slice falls outside bounds of file: slice-position = %d, slice-size = %d, file-size = %d", position, size, this.size ) );
@@ -181,6 +194,11 @@ public class MappedFile
 
     public MappedByteBuffer slice( long position, int size )
     {
+        if ( size < 0 )
+        {
+            throw new IllegalArgumentException( "Illegal slice size: size = " + size );
+        }
+
         if ( position < 0 || position + size > this.size )
         {
             throw new RuntimeException( format( "Slice falls outside bounds of file: slice-position = %d, slice-size = %d, file-size = %d", position, size, this.size ) );
@@ -193,7 +211,7 @@ public class MappedFile
 
     public void force( )
     {
-        if ( this.writable )
+        if ( this.writable && this.size > 0 )
         {
             force( this.fd, this.address, this.size );
         }
@@ -456,27 +474,24 @@ public class MappedFile
 
     protected static void force( FileDescriptor fd, long address, long length ) throws RuntimeException
     {
-        if ( length != 0 )
+        try
         {
-            try
+            MappedByteBuffer buffer = asDirectBuffer( address, 1, fd, null, true );
+
+            long offsetIntoPage = address % pageSize;
+            if ( offsetIntoPage < 0 )
             {
-                MappedByteBuffer buffer = asDirectBuffer( address, 1, fd, null, true );
-
-                long offsetIntoPage = address % pageSize;
-                if ( offsetIntoPage < 0 )
-                {
-                    offsetIntoPage += pageSize;
-                }
-
-                long pageStart = address - offsetIntoPage;
-                long lengthFromPageStart = length + offsetIntoPage;
-
-                MappedByteBuffer_force0.invoke( buffer, fd, pageStart, lengthFromPageStart );
+                offsetIntoPage += pageSize;
             }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( "Failed to force mapped file contents to storage device", e );
-            }
+
+            long pageStart = address - offsetIntoPage;
+            long lengthFromPageStart = length + offsetIntoPage;
+
+            MappedByteBuffer_force0.invoke( buffer, fd, pageStart, lengthFromPageStart );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Failed to force mapped file contents to storage device", e );
         }
     }
 
