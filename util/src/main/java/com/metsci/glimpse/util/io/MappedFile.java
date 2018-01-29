@@ -218,6 +218,16 @@ public class MappedFile
     }
 
     /**
+     * <strong>IMPORTANT:</strong> The clean() method of the returned Cleaner must not be called while
+     * slices of this MappedFile are still in use. If a slice is used after clean() is called, behavior
+     * is undefined.
+     */
+    public Cleaner cleaner( )
+    {
+        return this.cleaner;
+    }
+
+    /**
      * <strong>IMPORTANT:</strong> This method must not be called while slices of this MappedFile are
      * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
      */
