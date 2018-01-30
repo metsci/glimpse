@@ -4,8 +4,6 @@ import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
 import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
 
-import com.metsci.glimpse.util.units.Angle;
-
 public class EquirectNormalCylindricalProjection implements NormalCylindricalProjection
 {
 
