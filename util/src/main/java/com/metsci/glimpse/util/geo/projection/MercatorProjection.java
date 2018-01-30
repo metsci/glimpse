@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.util.geo.projection;
 
-import static java.lang.Math.PI;
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
+import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
+import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
+import static com.metsci.glimpse.util.units.Angle.normalizeAnglePi;
 import static java.lang.Math.atan;
 import static java.lang.Math.cos;
 import static java.lang.Math.exp;
@@ -36,7 +39,6 @@ import static java.lang.Math.sin;
 import java.io.Serializable;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.units.Angle;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
@@ -48,11 +50,13 @@ public class MercatorProjection implements GeoProjection, Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    protected final double originLon;
+    protected final double originLon_DEG;
+    protected final double originLon_RAD;
 
-    public MercatorProjection( double originLongitudeDeg )
+    public MercatorProjection( double originLon_DEG )
     {
-        this.originLon = Angle.degreesToRadians( originLongitudeDeg );
+        this.originLon_DEG = originLon_DEG;
+        this.originLon_RAD = degreesToRadians( this.originLon_DEG );
     }
 
     public MercatorProjection( )
@@ -60,14 +64,24 @@ public class MercatorProjection implements GeoProjection, Serializable
         this( 0.0 );
     }
 
+    public double originLon_DEG( )
+    {
+        return this.originLon_DEG;
+    }
+
+    public double originLon_RAD( )
+    {
+        return this.originLon_RAD;
+    }
+
     @Override
     public Vector2d project( LatLonGeo latLon )
     {
-        double lon = latLon.getLonRad( );
-        double lat = latLon.getLatRad( );
+        double lon_RAD = latLon.getLonRad( );
+        double lat_RAD = latLon.getLatRad( );
 
-        double x = Angle.normalizeAnglePi( lon - originLon );
-        double y = log( ( sin( lat ) + 1 ) / cos( lat ) );
+        double x = normalizeAnglePi( lon_RAD - this.originLon_RAD );
+        double y = log( ( sin( lat_RAD ) + 1.0 ) / cos( lat_RAD ) );
 
         return new Vector2d( x, y );
     }
@@ -75,10 +89,10 @@ public class MercatorProjection implements GeoProjection, Serializable
     @Override
     public LatLonGeo unproject( double x, double y )
     {
-        double lat = 2 * atan( exp( y ) ) - PI / 2;
-        double lon = x + originLon;
+        double lat_RAD = ( 2.0 * atan( exp( y ) ) ) - HALF_PI;
+        double lon_RAD = x + this.originLon_RAD;
 
-        return LatLonGeo.fromRad( lat, lon );
+        return LatLonGeo.fromRad( lat_RAD, lon_RAD );
     }
 
     @Override
@@ -93,4 +107,25 @@ public class MercatorProjection implements GeoProjection, Serializable
     {
         throw new UnsupportedOperationException( );
     }
+
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 50341;
+        int result = 1;
+        result = prime * result + Double.hashCode( this.originLon_DEG );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != getClass( ) ) return false;
+
+        MercatorProjection other = ( MercatorProjection ) o;
+        return doublesEqual( other.originLon_DEG, this.originLon_DEG );
+    }
+
 }
