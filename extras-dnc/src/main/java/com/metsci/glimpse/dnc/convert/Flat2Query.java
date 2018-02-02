@@ -137,6 +137,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.dnc.DncAreaFeature;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
@@ -244,7 +245,7 @@ public class Flat2Query
 
 
             String configString = queryConfigString( config );
-            String configHash = Hashing.md5( ).newHasher( ).putString( configString, US_ASCII ).hash( ).toString( );
+            String configHash = queryConfigHash( configString );
             File queryDir = new File( queryParentDir, "dncQueryCache_" + configHash );
             queryDir.mkdirs( );
 
@@ -633,8 +634,8 @@ public class Flat2Query
                 // Write chunk data to buffer
                 //
 
-                int libraryNum = libraryNums.get( library );
-                int coverageNum = coverageNums.get( coverage );
+                int libraryNum = libraryNums.getInt( library );
+                int coverageNum = coverageNums.getInt( coverage );
 
                 chunksBuf.put( libraryNum );
                 chunksBuf.put( coverageNum );
@@ -706,6 +707,14 @@ public class Flat2Query
         configString.append( "proj = " ).append( config.proj.configString( ) ).append( "\n" );
 
         return configString.toString( );
+    }
+
+    public static String queryConfigHash( String configString )
+    {
+        // MD5 is stable and ubiquitous, and we don't use it for security purposes
+        @SuppressWarnings( "deprecation" )
+        HashFunction hashFn = Hashing.md5( );
+        return hashFn.newHasher( ).putString( configString, US_ASCII ).hash( ).toString( );
     }
 
     public static int writeQueryLibrariesFile( QueryCacheConfig config, File file, Int2ObjectMap<QueryDatabase> databases ) throws IOException
@@ -858,8 +867,8 @@ public class Flat2Query
 
         public Int2ObjectMap<DncFeature> loadFeatures( DncChunkKey chunkKey, IntCollection featureNums )
         {
-            int flatLibraryNum = flatLibraryNums.get( chunkKey.library.libraryName );
-            int flatCoverageNum = flatCoverageNums.get( chunkKey.coverage.coverageName );
+            int flatLibraryNum = flatLibraryNums.getInt( chunkKey.library.libraryName );
+            int flatCoverageNum = flatCoverageNums.getInt( chunkKey.coverage.coverageName );
 
             Int2ObjectMap<DncFeature> features = new Int2ObjectOpenHashMap<>( );
 
@@ -962,8 +971,8 @@ public class Flat2Query
 
         public Tree createTree( DncLibrary library, DncCoverage coverage )
         {
-            int flatLibraryNum = flatLibraryNums.get( library.libraryName );
-            int flatCoverageNum = flatCoverageNums.get( coverage.coverageName );
+            int flatLibraryNum = flatLibraryNums.getInt( library.libraryName );
+            int flatCoverageNum = flatCoverageNums.getInt( coverage.coverageName );
 
             TreeBuilder tree = new TreeBuilder( library.xMin, library.xMax, library.yMin, library.yMax, exec );
 
