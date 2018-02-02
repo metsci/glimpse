@@ -27,7 +27,9 @@
 package com.metsci.glimpse.painter.group;
 
 import static com.metsci.glimpse.util.GeneralUtils.ints;
+import static java.util.Collections.sort;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,6 +38,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.FBObject;
 import com.jogamp.opengl.FBObject.TextureAttachment;
@@ -64,10 +68,31 @@ import com.metsci.glimpse.support.wrapped.Wrapper2D;
 public class WrappedPainter extends GlimpsePainterBase
 {
 
+    protected static class Entry
+    {
+        public final Object key;
+        public final GlimpsePainter painter;
+        public int zOrder;
+
+        public Entry( Object key, GlimpsePainter painter, int zOrder )
+        {
+            this.key = key;
+            this.painter = painter;
+            this.zOrder = zOrder;
+        }
+    }
+
+    protected static final Comparator<Entry> zOrderComparator = ( a, b ) ->
+    {
+        return Integer.compare( a.zOrder, b.zOrder );
+    };
+
     // XXX: This should probably be something more flexible, maybe along the lines of GLCapabilities
     private final boolean attachStencilBuffer;
 
-    private List<GlimpsePainter> painters;
+    private final List<Entry> entriesSorted;
+    private final BiMap<Object,Entry> entriesByKey;
+    private final BiMap<GlimpsePainter,Entry> entriesByPainter;
 
     private FBObject fbo;
     private TextureAttachment fboTextureAttachment;
@@ -89,7 +114,9 @@ public class WrappedPainter extends GlimpsePainterBase
     {
         this.attachStencilBuffer = attachStencilBuffer;
 
-        this.painters = new CopyOnWriteArrayList<GlimpsePainter>( );
+        this.entriesSorted = new CopyOnWriteArrayList<>( );
+        this.entriesByKey = HashBiMap.create( );
+        this.entriesByPainter = HashBiMap.create( );
 
         this.dummyAxis = new Axis2D( );
         this.dummyLayout = new GlimpseAxisLayout2D( dummyAxis );
@@ -97,17 +124,75 @@ public class WrappedPainter extends GlimpsePainterBase
 
     public void addPainter( GlimpsePainter painter )
     {
-        this.painters.add( painter );
+        this.putPainter( new Object( ), painter, 0 );
+    }
+
+    public void putPainter( Object key, GlimpsePainter painter, int zOrder )
+    {
+        this.removePainterByKey( key );
+
+        Entry en = new Entry( key, painter, zOrder );
+        this.entriesByKey.put( key, en );
+        this.entriesByPainter.put( painter, en );
+        this.entriesSorted.add( en );
+
+        sort( this.entriesSorted, zOrderComparator );
+    }
+
+    public GlimpsePainter getPainterByKey( Object key )
+    {
+        Entry en = this.entriesByKey.get( key );
+        return ( en == null ? null : en.painter );
+    }
+
+    public void setZOrder( GlimpsePainter painter, int zOrder )
+    {
+        Entry en = this.entriesByPainter.get( painter );
+        this.setZOrderForEntry( en, zOrder );
+    }
+
+    public void setZOrderByKey( Object key, int zOrder )
+    {
+        Entry en = this.entriesByKey.get( key );
+        this.setZOrderForEntry( en, zOrder );
+    }
+
+    protected void setZOrderForEntry( Entry en, int zOrder )
+    {
+        if ( en != null && en.zOrder != zOrder )
+        {
+            en.zOrder = zOrder;
+            sort( this.entriesSorted, zOrderComparator );
+        }
     }
 
     public void removePainter( GlimpsePainter painter )
     {
-        this.painters.remove( painter );
+        Entry en = this.entriesByPainter.get( painter );
+        this.removeEntry( en );
+    }
+
+    public void removePainterByKey( Object key )
+    {
+        Entry en = this.entriesByKey.get( key );
+        this.removeEntry( en );
+    }
+
+    protected void removeEntry( Entry en )
+    {
+        if ( en != null )
+        {
+            this.entriesSorted.remove( en );
+            this.entriesByKey.remove( en.key );
+            this.entriesByPainter.remove( en.painter );
+        }
     }
 
     public void removeAll( )
     {
-        this.painters.clear( );
+        this.entriesSorted.clear( );
+        this.entriesByKey.clear( );
+        this.entriesByPainter.clear( );
     }
 
     @Override
@@ -126,9 +211,9 @@ public class WrappedPainter extends GlimpsePainterBase
         // if no WrappedAxis1D is being used, simply paint normally
         if ( !wrapX && !wrapY )
         {
-            for ( GlimpsePainter painter : painters )
+            for ( Entry en : this.entriesSorted )
             {
-                painter.paintTo( context );
+                en.painter.paintTo( context );
             }
         }
         else
@@ -154,9 +239,9 @@ public class WrappedPainter extends GlimpsePainterBase
             }
 
             this.dummyLayout.removeAllLayouts( );
-            for ( GlimpsePainter painter : this.painters )
+            for ( Entry en : this.entriesSorted )
             {
-                this.dummyLayout.addPainter( painter );
+                this.dummyLayout.addPainter( en.painter );
             }
 
             // before figuring out which tiles need to be rendered, make sure constraints are applied, etc.
@@ -303,18 +388,21 @@ public class WrappedPainter extends GlimpsePainterBase
     @Override
     public void doDispose( GlimpseContext context )
     {
-        for ( GlimpsePainter painter : this.painters )
+        for ( Entry en : this.entriesSorted )
         {
-            painter.dispose( context );
+            en.painter.dispose( context );
         }
+        this.entriesSorted.clear( );
+        this.entriesByKey.clear( );
+        this.entriesByPainter.clear( );
     }
 
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
-        for ( GlimpsePainter painter : this.painters )
+        for ( Entry en : this.entriesSorted )
         {
-            painter.setLookAndFeel( laf );
+            en.painter.setLookAndFeel( laf );
         }
     }
 
