@@ -37,7 +37,7 @@ import java.util.List;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.dnc.DncProjections.DncProjection;
+import com.metsci.glimpse.dnc.proj.DncProjection;
 import com.metsci.glimpse.painter.group.WrappedPainter.WrappedTextureBounds;
 
 public class DncPainterSettingsImpl implements DncPainterSettings
