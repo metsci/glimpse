@@ -25,13 +25,13 @@ public class EquirectNormalCylindricalProjection implements NormalCylindricalPro
     public double xToLon_RAD( double x )
     {
         double x_RAD = ( this.xyInDegrees ? degreesToRadians( x ) : x );
-        return ( originLon_RAD + x_RAD );
+        return ( this.originLon_RAD + x_RAD );
     }
 
     @Override
     public double lonToX( double lon_RAD )
     {
-        double x_RAD = lon_RAD - originLon_RAD;
+        double x_RAD = lon_RAD - this.originLon_RAD;
         return ( this.xyInDegrees ? radiansToDegrees( x_RAD ) : x_RAD );
     }
 
