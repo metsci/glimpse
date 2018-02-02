@@ -281,7 +281,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         memberMap.put( layout, member );
         memberList.add( member );
         if ( key != null ) keyMap.put( key, layout );
-        updateMemeberList( );
+        updateMemberList( );
 
         GlimpseLayoutDelegate delegate = layout.getDelegate( );
         layoutChildren.add( delegate );
@@ -298,7 +298,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         memberMap.put( painter, member );
         memberList.add( member );
         if ( key != null ) keyMap.put( key, painter );
-        updateMemeberList( );
+        updateMemberList( );
     }
 
     public void removePainter( GlimpsePainter painter )
@@ -326,11 +326,11 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         if ( member != null )
         {
             member.setZOrder( zOrder );
-            updateMemeberList( );
+            updateMemberList( );
         }
     }
 
-    public void updateMemeberList( )
+    public void updateMemberList( )
     {
         Collections.sort( memberList, new Comparator<Member>( )
         {
