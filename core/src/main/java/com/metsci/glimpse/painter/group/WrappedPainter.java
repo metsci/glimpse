@@ -124,7 +124,12 @@ public class WrappedPainter extends GlimpsePainterBase
 
     public void addPainter( GlimpsePainter painter )
     {
-        this.putPainter( new Object( ), painter, 0 );
+        this.addPainter( painter, 0 );
+    }
+
+    public void addPainter( GlimpsePainter painter, int zOrder )
+    {
+        this.putPainter( new Object( ), painter, zOrder );
     }
 
     public void putPainter( Object key, GlimpsePainter painter, int zOrder )
