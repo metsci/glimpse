@@ -317,6 +317,8 @@ public class EventPainterManager extends GlimpsePainterBase
     protected void doDispose( GlimpseContext context )
     {
         this.atlas.dispose( );
-        this.textRenderer.dispose( );
+
+        if ( this.textRenderer != null ) this.textRenderer.dispose( );
+        this.textRenderer = null;
     }
 }
