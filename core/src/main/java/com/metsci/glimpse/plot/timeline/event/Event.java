@@ -72,6 +72,7 @@ public class Event implements Iterable<Event>
     protected float[] borderColor;
     protected float[] textColor;
     protected float borderThickness = 1.8f;
+    protected boolean useDefaultBorderThickness = true;
 
     protected TimeStamp startTime;
     protected TimeStamp endTime;
@@ -570,6 +571,7 @@ public class Event implements Iterable<Event>
     public void setBorderThickness( float thickness )
     {
         this.borderThickness = thickness;
+        this.useDefaultBorderThickness = false;
     }
 
     /**
@@ -579,6 +581,16 @@ public class Event implements Iterable<Event>
     public float getBorderThickness( )
     {
         return this.borderThickness;
+    }
+
+    public void setUseDefaultBorderThickness( boolean value )
+    {
+        this.useDefaultBorderThickness = value;
+    }
+
+    public boolean isUseDefaultBorderThickness( )
+    {
+        return this.useDefaultBorderThickness;
     }
 
     /**
