@@ -12,12 +12,12 @@ public interface NormalCylindricalProjection
     /**
      * Derivative of lat_RAD with respect to dy (i.e. dlat/dy), at the given y.
      */
-    double dyToDlat_RAD( double y );
+    double dLatDy_RAD( double y );
 
     /**
      * Maximum value of dlat/dy over all y values in [yMin,yMax].
      */
-    double maxDyToDlat_RAD( double yMin, double yMax );
+    double maxDlatDy_RAD( double yMin, double yMax );
 
     double minUsableY( );
     double maxUsableY( );

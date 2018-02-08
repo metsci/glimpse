@@ -50,13 +50,13 @@ public class EquirectNormalCylindricalProjection implements NormalCylindricalPro
     }
 
     @Override
-    public double dyToDlat_RAD( double y )
+    public double dLatDy_RAD( double y )
     {
         return ( this.xyInDegrees ? degreesToRadians( 1.0 ) : 1.0 );
     }
 
     @Override
-    public double maxDyToDlat_RAD( double yMin, double yMax )
+    public double maxDlatDy_RAD( double yMin, double yMax )
     {
         return ( this.xyInDegrees ? degreesToRadians( 1.0 ) : 1.0 );
     }
