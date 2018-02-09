@@ -1826,20 +1826,24 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.newPolygons.remove( polygon );
                 this.map.remove( polygon );
 
-                // if the polygon was selected when it is deleted, mark the selection changed
-                this.polygonsSelected = this.selectedPolygons.remove( polygon );
-                boolean newDeleted = this.newSelectedPolygons.remove( polygon );
-
                 int lineVertexCount = polygon.lineVertexCount;
-                this.totalLineVertexCount -= lineVertexCount;
-                if ( newDeleted ) this.lineInsertVertexCount -= lineVertexCount;
-
                 int fillVertexCount = polygon.fillVertexCount;
-                this.totalFillVertexCount -= fillVertexCount;
-                if ( newDeleted ) this.fillInsertVertexCount -= fillVertexCount;
 
-                this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
-                this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
+                this.totalLineVertexCount -= lineVertexCount;
+                this.totalFillVertexCount -= fillVertexCount;
+
+                if ( this.newSelectedPolygons.remove( polygon ) )
+                {
+                    this.lineInsertVertexCount -= lineVertexCount;
+                    this.fillInsertVertexCount -= fillVertexCount;
+                }
+
+                if ( this.selectedPolygons.remove( polygon ) )
+                {
+                    this.polygonsSelected = true;
+                    this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
+                    this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
+                }
             }
         }
 
