@@ -35,6 +35,7 @@ import static com.metsci.glimpse.gl.util.GLUtils.enablePremultipliedAlphaBlendin
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_BYTE;
@@ -83,6 +84,7 @@ import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.support.shader.line.StreamingLinePath;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 /**
  * Paints large collections of arbitrary polygons (including concave polygons).
@@ -1005,6 +1007,7 @@ public class PolygonPainter extends GlimpsePainterBase
         if ( !isGroupReady( loaded ) ) return;
 
         GlimpseBounds bounds = getBounds( context );
+        Wrapper2D wrapper = getWrapper2D( context );
         Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
@@ -1057,6 +1060,7 @@ public class PolygonPainter extends GlimpsePainterBase
             try
             {
                 lineProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                lineProg.setWrapper( gl, wrapper );
                 lineProg.setViewport( gl, bounds );
                 lineProg.setStyle( gl, loaded.lineStyle );
 
@@ -2154,6 +2158,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             public final int NEAR_FAR;
             public final int AXIS_RECT;
+            public final int WRAP_RECT;
             public final int VIEWPORT_SIZE_PX;
 
             public final int LINE_THICKNESS_PX;
@@ -2176,6 +2181,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
                 this.NEAR_FAR = gl.glGetUniformLocation( program, "NEAR_FAR" );
                 this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
+                this.WRAP_RECT = gl.glGetUniformLocation( program, "WRAP_RECT" );
                 this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
 
                 this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
@@ -2257,6 +2263,16 @@ public class PolygonPainter extends GlimpsePainterBase
         {
             gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
             gl.glUniform2f( this.handles.NEAR_FAR, near, far );
+        }
+
+        public void setWrapper( GL2ES2 gl, Wrapper2D wrapper )
+        {
+            this.setWrapper( gl, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+        }
+
+        public void setWrapper( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+        {
+            gl.glUniform4f( this.handles.WRAP_RECT, xMin, xMax, yMin, yMax );
         }
 
         public void setStyle( GL2ES2 gl, LineStyle style )
