@@ -56,14 +56,14 @@ public class MercatorNormalCylindricalProjection implements NormalCylindricalPro
     }
 
     @Override
-    public double dyToDlat_RAD( double y )
+    public double dLatDy_RAD( double y )
     {
         double expY = exp( y );
         return ( ( 2.0 * expY ) / ( 1.0 + expY*expY ) );
     }
 
     @Override
-    public double maxDyToDlat_RAD( double yMin, double yMax )
+    public double maxDlatDy_RAD( double yMin, double yMax )
     {
         // dlat/dy has a global maximum at y=0, and decreases monotonically
         // as y gets farther from 0 -- so we want to find dlat/dy at the y value
@@ -78,12 +78,12 @@ public class MercatorNormalCylindricalProjection implements NormalCylindricalPro
         else if ( yMin > 0.0 )
         {
             // The closest we can get to y=0 is yMin
-            return this.dyToDlat_RAD( yMin );
+            return this.dLatDy_RAD( yMin );
         }
         else
         {
             // The closest we can get to y=0 is yMax
-            return this.dyToDlat_RAD( yMax );
+            return this.dLatDy_RAD( yMax );
         }
     }
 

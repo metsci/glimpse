@@ -4,8 +4,6 @@ import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
 import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
 
-import com.metsci.glimpse.util.units.Angle;
-
 public class EquirectNormalCylindricalProjection implements NormalCylindricalProjection
 {
 
@@ -27,13 +25,13 @@ public class EquirectNormalCylindricalProjection implements NormalCylindricalPro
     public double xToLon_RAD( double x )
     {
         double x_RAD = ( this.xyInDegrees ? degreesToRadians( x ) : x );
-        return ( originLon_RAD + x_RAD );
+        return ( this.originLon_RAD + x_RAD );
     }
 
     @Override
     public double lonToX( double lon_RAD )
     {
-        double x_RAD = lon_RAD - originLon_RAD;
+        double x_RAD = lon_RAD - this.originLon_RAD;
         return ( this.xyInDegrees ? radiansToDegrees( x_RAD ) : x_RAD );
     }
 
@@ -52,13 +50,13 @@ public class EquirectNormalCylindricalProjection implements NormalCylindricalPro
     }
 
     @Override
-    public double dyToDlat_RAD( double y )
+    public double dLatDy_RAD( double y )
     {
         return ( this.xyInDegrees ? degreesToRadians( 1.0 ) : 1.0 );
     }
 
     @Override
-    public double maxDyToDlat_RAD( double yMin, double yMax )
+    public double maxDlatDy_RAD( double yMin, double yMax )
     {
         return ( this.xyInDegrees ? degreesToRadians( 1.0 ) : 1.0 );
     }

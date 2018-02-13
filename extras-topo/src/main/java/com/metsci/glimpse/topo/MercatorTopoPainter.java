@@ -88,7 +88,7 @@ public class MercatorTopoPainter extends GlimpsePainterBase
         // FIXME: maxPixelSize_DEG might not be the best number to use when choosing levelNum
         Axis1D yAxis = axis.getAxisY( );
         double dyPerPixel = 1.0 / yAxis.getPixelsPerValue( );
-        double maxPixelSize_DEG = dyPerPixel * this.cache.proj.maxDyToDlat_RAD( yAxis.getMin( ), yAxis.getMax( ) ) * radiansToDegrees;
+        double maxPixelSize_DEG = dyPerPixel * this.cache.proj.maxDlatDy_RAD( yAxis.getMin( ), yAxis.getMax( ) ) * radiansToDegrees;
 
         SortedDoubles levelCellSizes_DEG = this.cache.levels.cellSizes_DEG;
         int levelNum = min( levelCellSizes_DEG.n( ) - 1, levelCellSizes_DEG.indexAtOrAfter( maxPixelSize_DEG ) );

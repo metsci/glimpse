@@ -70,6 +70,7 @@ import com.metsci.glimpse.gl.GLEventAdapter;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
+import com.metsci.glimpse.painter.group.WrappedPainter;
 import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
 import com.metsci.glimpse.util.var.Disposable;
@@ -377,6 +378,46 @@ public class DisposableUtils
         return ( ) ->
         {
             layout.removePainter( painter );
+        };
+    }
+
+    public static Disposable putGlimpsePainter( GlimpseLayout layout, Object key, int zOrder, GlimpsePainter painter )
+    {
+        layout.addPainter( key, painter, zOrder );
+
+        return ( ) ->
+        {
+            layout.removePainter( painter );
+        };
+    }
+
+    public static Disposable addGlimpsePainter( WrappedPainter wrappedPainter, GlimpsePainter painter )
+    {
+        wrappedPainter.addPainter( painter );
+
+        return ( ) ->
+        {
+            wrappedPainter.removePainter( painter );
+        };
+    }
+
+    public static Disposable addGlimpsePainter( WrappedPainter wrappedPainter, int zOrder, GlimpsePainter painter )
+    {
+        wrappedPainter.addPainter( painter, zOrder );
+
+        return ( ) ->
+        {
+            wrappedPainter.removePainter( painter );
+        };
+    }
+
+    public static Disposable putGlimpsePainter( WrappedPainter wrappedPainter, Object key, int zOrder, GlimpsePainter painter )
+    {
+        wrappedPainter.putPainter( key, painter, zOrder );
+
+        return ( ) ->
+        {
+            wrappedPainter.removePainter( painter );
         };
     }
 

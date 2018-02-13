@@ -80,7 +80,7 @@ void main( )
     // Assume that ppv-aspect-ratio is 1.0 -- handling variable
     // ppv-aspect-ratio would be difficult, and not very useful
     float cumulativeDistance = inLineVertex.w;
-    vec2 ppv = axisSize( AXIS_RECT ) / VIEWPORT_SIZE_PX;
+    vec2 ppv = VIEWPORT_SIZE_PX / axisSize( AXIS_RECT );
     vCumulativeDistance_PX = cumulativeDistance * ppv.x;
 
     vec2 xy_AXIS = inLineVertex.xy;

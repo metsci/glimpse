@@ -29,6 +29,7 @@ package com.metsci.glimpse.painter.shape;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.BYTES_PER_FLOAT;
+import static com.metsci.glimpse.gl.util.GLUtils.deleteBuffers;
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
@@ -855,7 +856,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 // to be updated again and give it extra memory
                 if ( initialized )
                 {
-                    if ( handle > 0 ) gl.glDeleteBuffers( 1, new int[] { handle }, 0 );
+                    deleteBuffers( gl, handle );
                     maxSize = Math.max( ( int ) ( maxSize * 1.5 ), totalSize );
                 }
                 else
@@ -938,9 +939,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 // to be updated again and give it extra memory
                 if ( initialized )
                 {
-                    if ( xyHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { xyHandle }, 0 );
-                    if ( flagHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { flagHandle }, 0 );
-                    if ( mileageHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { mileageHandle }, 0 );
+                    deleteBuffers( gl, xyHandle, flagHandle, mileageHandle );
                     maxSize = Math.max( ( int ) ( maxSize * 1.5 ), totalSize );
                 }
                 else
@@ -1679,11 +1678,7 @@ public class PolygonPainter extends GlimpsePainterBase
             // release opengl vertex buffers
             if ( glLineBufferInitialized )
             {
-                // zero is a reserved buffer object name and is never returned by glGenBuffers
-                if ( glLineXyBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineXyBufferHandle }, 0 );
-                if ( glLineFlagBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineFlagBufferHandle }, 0 );
-                if ( glLineMileageBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glLineMileageBufferHandle }, 0 );
-                if ( glFillBufferHandle > 0 ) gl.glDeleteBuffers( 1, new int[] { glFillBufferHandle }, 0 );
+                deleteBuffers( gl, glLineXyBufferHandle, glLineFlagBufferHandle, glLineMileageBufferHandle, glFillBufferHandle );
             }
         }
     }
@@ -1831,20 +1826,24 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.newPolygons.remove( polygon );
                 this.map.remove( polygon );
 
-                // if the polygon was selected when it is deleted, mark the selection changed
-                this.polygonsSelected = this.selectedPolygons.remove( polygon );
-                boolean newDeleted = this.newSelectedPolygons.remove( polygon );
-
                 int lineVertexCount = polygon.lineVertexCount;
-                this.totalLineVertexCount -= lineVertexCount;
-                if ( newDeleted ) this.lineInsertVertexCount -= lineVertexCount;
-
                 int fillVertexCount = polygon.fillVertexCount;
-                this.totalFillVertexCount -= fillVertexCount;
-                if ( newDeleted ) this.fillInsertVertexCount -= fillVertexCount;
 
-                this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
-                this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
+                this.totalLineVertexCount -= lineVertexCount;
+                this.totalFillVertexCount -= fillVertexCount;
+
+                if ( this.newSelectedPolygons.remove( polygon ) )
+                {
+                    this.lineInsertVertexCount -= lineVertexCount;
+                    this.fillInsertVertexCount -= fillVertexCount;
+                }
+
+                if ( this.selectedPolygons.remove( polygon ) )
+                {
+                    this.polygonsSelected = true;
+                    this.selectedFillPrimitiveCount -= polygon.fillPrimitiveCount;
+                    this.selectedLinePrimitiveCount -= polygon.linePrimitiveCount;
+                }
             }
         }
 
