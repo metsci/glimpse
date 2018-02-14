@@ -68,14 +68,14 @@ vec2 rectSize( vec4 rect )
 
 vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
 {
-    vec2 xy_FRAC = ( xy_AXIS.xy - rectMin( axisRect ) ) / rectSize( axisRect );
+    vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
     return ( xy_FRAC * viewportSize_PX );
 }
 
-vec2 xyWrapped( vec2 xy, vec2 wrapMin, vec2 wrapSpan )
+float wrapValue( float value, float wrapMin, float wrapSpan )
 {
-    vec2 wrapCount = floor( ( xy - wrapMin ) / wrapSpan );
-    return ( xy - ( wrapCount * wrapSpan ) );
+    float wrapCount = floor( ( value - wrapMin ) / wrapSpan );
+    return ( value - ( wrapCount * wrapSpan ) );
 }
 
 
@@ -342,24 +342,54 @@ void main( )
             // Compute render-shift values for wrapping
             //
 
-            // FIXME: Handle non-wrapped axes without infinity problems
             vec2 wrapMin_PX = axisXyToPx( rectMin( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
             vec2 wrapMax_PX = axisXyToPx( rectMax( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
             vec2 wrapSpan_PX = wrapMax_PX - wrapMin_PX;
 
-            vec2 shiftFirst_PX = xyWrapped( bbMin_PX, wrapMin_PX, wrapSpan_PX ) - bbMin_PX;
-            vec2 shiftStep_PX = wrapSpan_PX;
-            vec2 shiftCount = ceil( ( ( bbMax_PX + shiftFirst_PX ) - wrapMin_PX ) / shiftStep_PX );
-            int iShiftCount = max( 0, int( shiftCount.x ) );
-            int jShiftCount = max( 0, int( shiftCount.y ) );
+            float xShiftFirst_PX;
+            float xShiftStep_PX;
+            int xShiftCount;
+            if ( isinf( wrapSpan_PX.x ) )
+            {
+                xShiftFirst_PX = 0.0;
+                xShiftStep_PX = 0.0;
+                xShiftCount = 1;
+            }
+            else
+            {
+                xShiftFirst_PX = wrapValue( bbMin_PX.x, wrapMin_PX.x, wrapSpan_PX.x ) - bbMin_PX.x;
+                xShiftStep_PX = wrapSpan_PX.x;
+                float xShiftCount0 = ceil( ( ( bbMax_PX.x + xShiftFirst_PX ) - wrapMin_PX.x ) / xShiftStep_PX );
+                xShiftCount = max( 0, int( xShiftCount0 ) );
+            }
+
+            float yShiftFirst_PX;
+            float yShiftStep_PX;
+            int yShiftCount;
+            if ( isinf( wrapSpan_PX.y ) )
+            {
+                yShiftFirst_PX = 0.0;
+                yShiftStep_PX = 0.0;
+                yShiftCount = 1;
+            }
+            else
+            {
+                yShiftFirst_PX = wrapValue( bbMin_PX.y, wrapMin_PX.y, wrapSpan_PX.y ) - bbMin_PX.y;
+                yShiftStep_PX = wrapSpan_PX.y;
+                float yShiftCount0 = ceil( ( ( bbMax_PX.y + yShiftFirst_PX ) - wrapMin_PX.y ) / yShiftStep_PX );
+                yShiftCount = max( 0, int( yShiftCount0 ) );
+            }
+
+            vec2 shiftFirst_PX = vec2( xShiftFirst_PX, yShiftFirst_PX );
+            vec2 shiftStep_PX = vec2( xShiftStep_PX, yShiftStep_PX );
 
 
             // Emit primitives for each render-shift
             //
 
-            for ( int iShift = 0; iShift < iShiftCount; iShift++ )
+            for ( int iShift = 0; iShift < xShiftCount; iShift++ )
             {
-                for ( int jShift = 0; jShift < jShiftCount; jShift++ )
+                for ( int jShift = 0; jShift < yShiftCount; jShift++ )
                 {
                     vec2 shift_PX = shiftFirst_PX - vec2( float( iShift ), float( jShift ) )*shiftStep_PX;
 
