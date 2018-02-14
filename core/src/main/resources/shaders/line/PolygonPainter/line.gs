@@ -28,7 +28,11 @@
 #version 150
 
 layout( lines_adjacency ) in;
-layout( triangle_strip, max_vertices = 18 ) out;
+
+// A single line segment takes 18 vertices, but with duplication for wrapping,
+// it can take arbitrarily many ... in practice we almost never need more than
+// four copies of a segment, so use max_vertices = 4*18 = 72
+layout( triangle_strip, max_vertices = 72 ) out;
 
 
 // Bit mask for whether to draw the line segment to the vertex in
