@@ -354,7 +354,7 @@ void main( )
             int jShiftCount = max( 0, int( shiftCount.y ) );
 
 
-            // Emit triangle-strip for line interior
+            // Emit primitives for each render-shift
             //
 
             for ( int iShift = 0; iShift < iShiftCount; iShift++ )
@@ -362,6 +362,10 @@ void main( )
                 for ( int jShift = 0; jShift < jShiftCount; jShift++ )
                 {
                     vec2 shift_PX = shiftFirst_PX - vec2( float( iShift ), float( jShift ) )*shiftStep_PX;
+
+
+                    // Emit triangle-strip for line interior
+                    //
 
                     gFeatherAlpha = 1.0;
 
@@ -396,18 +400,10 @@ void main( )
                     }
 
                     EndPrimitive( );
-                }
-            }
 
 
-            if ( FEATHER_THICKNESS_PX > 0.0 )
-            {
-                for ( int iShift = 0; iShift < iShiftCount; iShift++ )
-                {
-                    for ( int jShift = 0; jShift < jShiftCount; jShift++ )
+                    if ( FEATHER_THICKNESS_PX > 0.0 )
                     {
-                        vec2 shift_PX = shiftFirst_PX - vec2( float( iShift ), float( jShift ) )*shiftStep_PX;
-
 
                         // Emit triangle-strip for feather region below line
                         //
