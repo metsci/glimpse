@@ -49,26 +49,26 @@ vec4 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX, float z_NDC )
     return vec4( -1.0 + 2.0*xy_FRAC, z_NDC, 1.0 );
 }
 
-vec2 axisMin( vec4 axisRect )
+vec2 rectMin( vec4 rect )
 {
     // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
-    return axisRect.xz;
+    return rect.xz;
 }
 
-vec2 axisMax( vec4 axisRect )
+vec2 rectMax( vec4 rect )
 {
     // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
-    return axisRect.yw;
+    return rect.yw;
 }
 
-vec2 axisSize( vec4 axisRect )
+vec2 rectSize( vec4 rect )
 {
-    return ( axisMax( axisRect ) - axisMin( axisRect ) );
+    return ( rectMax( rect ) - rectMin( rect ) );
 }
 
 vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
 {
-    vec2 xy_FRAC = ( xy_AXIS.xy - axisMin( axisRect ) ) / axisSize( axisRect );
+    vec2 xy_FRAC = ( xy_AXIS.xy - rectMin( axisRect ) ) / rectSize( axisRect );
     return ( xy_FRAC * viewportSize_PX );
 }
 
@@ -79,7 +79,7 @@ vec2 xyWrapped( vec2 xy, vec2 wrapMin, vec2 wrapSpan )
 }
 
 
-// AXIS_RECT is (xMin, xMax, yMin, yMax)
+// RECT uniforms are (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
 uniform vec4 WRAP_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
@@ -343,8 +343,8 @@ void main( )
             //
 
             // FIXME: Handle non-wrapped axes without infinity problems
-            vec2 wrapMin_PX = axisXyToPx( axisMin( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
-            vec2 wrapMax_PX = axisXyToPx( axisMax( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
+            vec2 wrapMin_PX = axisXyToPx( rectMin( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
+            vec2 wrapMax_PX = axisXyToPx( rectMax( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
             vec2 wrapSpan_PX = wrapMax_PX - wrapMin_PX;
 
             vec2 shiftFirst_PX = xyWrapped( bbMin_PX, wrapMin_PX, wrapSpan_PX ) - bbMin_PX;
