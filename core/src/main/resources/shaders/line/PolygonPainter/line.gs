@@ -126,7 +126,7 @@ void main( )
     // "Above" and "below" mean up and down, respectively, along the normalBC axis.
     //
 
-    // Draw the whole segment at the z coordinate of the first vertex
+    // Draw the whole segment at the z coordinate of the B vertex
     float z_NDC = gl_in[ 1 ].gl_Position.z;
 
     bool connectBC = ( ( vFlags[ 2 ] & FLAGS_CONNECT ) != 0 );
