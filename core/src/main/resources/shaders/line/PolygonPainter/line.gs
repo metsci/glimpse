@@ -321,24 +321,6 @@ void main( )
             float mileageB_PX = vMileage_PX[ 1 ];
 
 
-            // Compute bounding-box, and then render-shift values for wrapping
-            //
-
-            vec2 bbMin_PX = outerJoinB_PX;
-            bbMin_PX = min( bbMin_PX, outerBelowB_PX );
-            bbMin_PX = min( bbMin_PX, outerBelowC_PX );
-            bbMin_PX = min( bbMin_PX, outerAboveC_PX );
-            bbMin_PX = min( bbMin_PX, outerAboveB_PX );
-            bbMin_PX = min( bbMin_PX, outerJoinC_PX );
-
-            vec2 bbMax_PX = outerJoinB_PX;
-            bbMax_PX = max( bbMax_PX, outerBelowB_PX );
-            bbMax_PX = max( bbMax_PX, outerBelowC_PX );
-            bbMax_PX = max( bbMax_PX, outerAboveC_PX );
-            bbMax_PX = max( bbMax_PX, outerAboveB_PX );
-            bbMax_PX = max( bbMax_PX, outerJoinC_PX );
-
-
             // Compute render-shift values for wrapping
             //
 
@@ -357,9 +339,23 @@ void main( )
             }
             else
             {
-                xShiftFirst_PX = wrapValue( bbMin_PX.x, wrapMin_PX.x, wrapSpan_PX.x ) - bbMin_PX.x;
+                float xMin_PX = outerJoinB_PX.x;
+                xMin_PX = min( xMin_PX, outerBelowB_PX.x );
+                xMin_PX = min( xMin_PX, outerBelowC_PX.x );
+                xMin_PX = min( xMin_PX, outerAboveC_PX.x );
+                xMin_PX = min( xMin_PX, outerAboveB_PX.x );
+                xMin_PX = min( xMin_PX, outerJoinC_PX.x );
+
+                float xMax_PX = outerJoinB_PX.x;
+                xMax_PX = max( xMax_PX, outerBelowB_PX.x );
+                xMax_PX = max( xMax_PX, outerBelowC_PX.x );
+                xMax_PX = max( xMax_PX, outerAboveC_PX.x );
+                xMax_PX = max( xMax_PX, outerAboveB_PX.x );
+                xMax_PX = max( xMax_PX, outerJoinC_PX.x );
+
+                xShiftFirst_PX = wrapValue( xMin_PX, wrapMin_PX.x, wrapSpan_PX.x ) - xMin_PX;
                 xShiftStep_PX = wrapSpan_PX.x;
-                float xShiftCount0 = ceil( ( ( bbMax_PX.x + xShiftFirst_PX ) - wrapMin_PX.x ) / xShiftStep_PX );
+                float xShiftCount0 = ceil( ( ( xMax_PX + xShiftFirst_PX ) - wrapMin_PX.x ) / xShiftStep_PX );
                 xShiftCount = max( 0, int( xShiftCount0 ) );
             }
 
@@ -374,9 +370,23 @@ void main( )
             }
             else
             {
-                yShiftFirst_PX = wrapValue( bbMin_PX.y, wrapMin_PX.y, wrapSpan_PX.y ) - bbMin_PX.y;
+                float yMin_PX = outerJoinB_PX.y;
+                yMin_PX = min( yMin_PX, outerBelowB_PX.y );
+                yMin_PX = min( yMin_PX, outerBelowC_PX.y );
+                yMin_PX = min( yMin_PX, outerAboveC_PX.y );
+                yMin_PX = min( yMin_PX, outerAboveB_PX.y );
+                yMin_PX = min( yMin_PX, outerJoinC_PX.y );
+
+                float yMax_PX = outerJoinB_PX.y;
+                yMax_PX = max( yMax_PX, outerBelowB_PX.y );
+                yMax_PX = max( yMax_PX, outerBelowC_PX.y );
+                yMax_PX = max( yMax_PX, outerAboveC_PX.y );
+                yMax_PX = max( yMax_PX, outerAboveB_PX.y );
+                yMax_PX = max( yMax_PX, outerJoinC_PX.y );
+
+                yShiftFirst_PX = wrapValue( yMin_PX, wrapMin_PX.y, wrapSpan_PX.y ) - yMin_PX;
                 yShiftStep_PX = wrapSpan_PX.y;
-                float yShiftCount0 = ceil( ( ( bbMax_PX.y + yShiftFirst_PX ) - wrapMin_PX.y ) / yShiftStep_PX );
+                float yShiftCount0 = ceil( ( ( yMax_PX + yShiftFirst_PX ) - wrapMin_PX.y ) / yShiftStep_PX );
                 yShiftCount = max( 0, int( yShiftCount0 ) );
             }
 
