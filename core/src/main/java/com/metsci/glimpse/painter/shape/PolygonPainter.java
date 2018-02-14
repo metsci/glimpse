@@ -35,6 +35,7 @@ import static com.metsci.glimpse.gl.util.GLUtils.enablePremultipliedAlphaBlendin
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_BYTE;
@@ -83,6 +84,7 @@ import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.support.shader.line.StreamingLinePath;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 /**
  * Paints large collections of arbitrary polygons (including concave polygons).
@@ -1005,6 +1007,7 @@ public class PolygonPainter extends GlimpsePainterBase
         if ( !isGroupReady( loaded ) ) return;
 
         GlimpseBounds bounds = getBounds( context );
+        Wrapper2D wrapper = getWrapper2D( context );
         Axis2D axis = requireAxis2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
@@ -1015,6 +1018,7 @@ public class PolygonPainter extends GlimpsePainterBase
             try
             {
                 triangleFlatProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                triangleFlatProg.setWrapper( gl, wrapper );
                 triangleFlatProg.setColor( gl, loaded.fillColor );
 
                 loaded.glFillOffsetBuffer.rewind( );
@@ -1057,6 +1061,7 @@ public class PolygonPainter extends GlimpsePainterBase
             try
             {
                 lineProg.setAxisOrtho( gl, axis, -1 << 23, 1 << 23 );
+                lineProg.setWrapper( gl, wrapper );
                 lineProg.setViewport( gl, bounds );
                 lineProg.setStyle( gl, loaded.lineStyle );
 
@@ -2007,6 +2012,7 @@ public class PolygonPainter extends GlimpsePainterBase
     public static class PolygonPainterFlatColorProgram
     {
         public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.vs" );
+        public static final String geomShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.gs" );
         public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.fs" );
 
         public static class ProgramHandles
@@ -2017,21 +2023,23 @@ public class PolygonPainter extends GlimpsePainterBase
 
             public final int NEAR_FAR;
             public final int AXIS_RECT;
+            public final int WRAP_RECT;
             public final int RGBA;
 
             // Vertex attributes
 
-            public final int inXy;
+            public final int inXyz;
 
             public ProgramHandles( GL2ES2 gl )
             {
-                this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+                this.program = createProgram( gl, vertShader_GLSL, geomShader_GLSL, fragShader_GLSL );
 
                 this.NEAR_FAR = gl.glGetUniformLocation( this.program, "NEAR_FAR" );
                 this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+                this.WRAP_RECT = gl.glGetUniformLocation( this.program, "WRAP_RECT" );
                 this.RGBA = gl.glGetUniformLocation( this.program, "RGBA" );
 
-                this.inXy = gl.glGetAttribLocation( this.program, "inXy" );
+                this.inXyz = gl.glGetAttribLocation( this.program, "inXyz" );
             }
         }
 
@@ -2061,7 +2069,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl.glUseProgram( this.handles.program );
-            gl.glEnableVertexAttribArray( this.handles.inXy );
+            gl.glEnableVertexAttribArray( this.handles.inXyz );
         }
 
         public void setColor( GL2ES2 gl, float r, float g, float b, float a )
@@ -2090,6 +2098,16 @@ public class PolygonPainter extends GlimpsePainterBase
             gl.glUniform2f( this.handles.NEAR_FAR, near, far );
         }
 
+        public void setWrapper( GL2ES2 gl, Wrapper2D wrapper )
+        {
+            this.setWrapper( gl, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+        }
+
+        public void setWrapper( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+        {
+            gl.glUniform4f( this.handles.WRAP_RECT, xMin, xMax, yMin, yMax );
+        }
+
         public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, int first, int count )
         {
             draw( gl, GL.GL_TRIANGLES, xyVbo, first, count );
@@ -2098,7 +2116,7 @@ public class PolygonPainter extends GlimpsePainterBase
         public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+            gl.glVertexAttribPointer( this.handles.inXyz, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
             gl.glDrawArrays( mode, first, count );
         }
@@ -2106,7 +2124,7 @@ public class PolygonPainter extends GlimpsePainterBase
         public void draw( GL2ES2 gl, int mode, int xyVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, 0 );
+            gl.glVertexAttribPointer( this.handles.inXyz, 3, GL_FLOAT, false, 0, 0 );
 
             gl.glDrawArrays( mode, first, count );
         }
@@ -2120,7 +2138,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
-            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glDisableVertexAttribArray( this.handles.inXyz );
             gl.glUseProgram( 0 );
             gl.getGL3( ).glBindVertexArray( 0 );
         }
@@ -2154,6 +2172,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             public final int NEAR_FAR;
             public final int AXIS_RECT;
+            public final int WRAP_RECT;
             public final int VIEWPORT_SIZE_PX;
 
             public final int LINE_THICKNESS_PX;
@@ -2166,7 +2185,7 @@ public class PolygonPainter extends GlimpsePainterBase
             public final int STIPPLE_SCALE;
             public final int STIPPLE_PATTERN;
 
-            public final int inXy;
+            public final int inXyz;
             public final int inFlags;
             public final int inMileage;
 
@@ -2176,6 +2195,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
                 this.NEAR_FAR = gl.glGetUniformLocation( program, "NEAR_FAR" );
                 this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
+                this.WRAP_RECT = gl.glGetUniformLocation( program, "WRAP_RECT" );
                 this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
 
                 this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
@@ -2188,7 +2208,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.STIPPLE_SCALE = gl.glGetUniformLocation( program, "STIPPLE_SCALE" );
                 this.STIPPLE_PATTERN = gl.glGetUniformLocation( program, "STIPPLE_PATTERN" );
 
-                this.inXy = gl.glGetAttribLocation( program, "inXy" );
+                this.inXyz = gl.glGetAttribLocation( program, "inXyz" );
                 this.inFlags = gl.glGetAttribLocation( program, "inFlags" );
                 this.inMileage = gl.glGetAttribLocation( program, "inMileage" );
             }
@@ -2228,7 +2248,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl.glUseProgram( this.handles.program );
-            gl.glEnableVertexAttribArray( this.handles.inXy );
+            gl.glEnableVertexAttribArray( this.handles.inXyz );
             gl.glEnableVertexAttribArray( this.handles.inFlags );
             gl.glEnableVertexAttribArray( this.handles.inMileage );
         }
@@ -2257,6 +2277,16 @@ public class PolygonPainter extends GlimpsePainterBase
         {
             gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
             gl.glUniform2f( this.handles.NEAR_FAR, near, far );
+        }
+
+        public void setWrapper( GL2ES2 gl, Wrapper2D wrapper )
+        {
+            this.setWrapper( gl, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+        }
+
+        public void setWrapper( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+        {
+            gl.glUniform4f( this.handles.WRAP_RECT, xMin, xMax, yMin, yMax );
         }
 
         public void setStyle( GL2ES2 gl, LineStyle style )
@@ -2310,7 +2340,7 @@ public class PolygonPainter extends GlimpsePainterBase
         public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+            gl.glVertexAttribPointer( this.handles.inXyz, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
             gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo.buffer( gl ) );
             gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
@@ -2324,7 +2354,7 @@ public class PolygonPainter extends GlimpsePainterBase
         public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, 0 );
+            gl.glVertexAttribPointer( this.handles.inXyz, 3, GL_FLOAT, false, 0, 0 );
 
             gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
             gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
@@ -2337,7 +2367,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
-            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glDisableVertexAttribArray( this.handles.inXyz );
             gl.glDisableVertexAttribArray( this.handles.inFlags );
             gl.glDisableVertexAttribArray( this.handles.inMileage );
             gl.glUseProgram( 0 );
