@@ -2171,7 +2171,7 @@ public class PolygonPainter extends GlimpsePainterBase
             public final int STIPPLE_SCALE;
             public final int STIPPLE_PATTERN;
 
-            public final int inXy;
+            public final int inXyz;
             public final int inFlags;
             public final int inMileage;
 
@@ -2194,7 +2194,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.STIPPLE_SCALE = gl.glGetUniformLocation( program, "STIPPLE_SCALE" );
                 this.STIPPLE_PATTERN = gl.glGetUniformLocation( program, "STIPPLE_PATTERN" );
 
-                this.inXy = gl.glGetAttribLocation( program, "inXy" );
+                this.inXyz = gl.glGetAttribLocation( program, "inXyz" );
                 this.inFlags = gl.glGetAttribLocation( program, "inFlags" );
                 this.inMileage = gl.glGetAttribLocation( program, "inMileage" );
             }
@@ -2234,7 +2234,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
             gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
             gl.glUseProgram( this.handles.program );
-            gl.glEnableVertexAttribArray( this.handles.inXy );
+            gl.glEnableVertexAttribArray( this.handles.inXyz );
             gl.glEnableVertexAttribArray( this.handles.inFlags );
             gl.glEnableVertexAttribArray( this.handles.inMileage );
         }
@@ -2326,7 +2326,7 @@ public class PolygonPainter extends GlimpsePainterBase
         public void draw( GL2ES3 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer flagsVbo, GLStreamingBuffer mileageVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+            gl.glVertexAttribPointer( this.handles.inXyz, 3, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
 
             gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo.buffer( gl ) );
             gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, flagsVbo.sealedOffset( ) );
@@ -2340,7 +2340,7 @@ public class PolygonPainter extends GlimpsePainterBase
         public void draw( GL2ES3 gl, int xyVbo, int flagsVbo, int mileageVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
-            gl.glVertexAttribPointer( this.handles.inXy, 3, GL_FLOAT, false, 0, 0 );
+            gl.glVertexAttribPointer( this.handles.inXyz, 3, GL_FLOAT, false, 0, 0 );
 
             gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
             gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
@@ -2353,7 +2353,7 @@ public class PolygonPainter extends GlimpsePainterBase
 
         public void end( GL2ES2 gl )
         {
-            gl.glDisableVertexAttribArray( this.handles.inXy );
+            gl.glDisableVertexAttribArray( this.handles.inXyz );
             gl.glDisableVertexAttribArray( this.handles.inFlags );
             gl.glDisableVertexAttribArray( this.handles.inMileage );
             gl.glUseProgram( 0 );
