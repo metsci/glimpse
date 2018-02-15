@@ -35,8 +35,9 @@ uniform float COLORMAP_MIN;
 uniform float COLORMAP_MAX;
 
 uniform float ALPHA;
-
 uniform bool DISCARD_NAN;
+uniform bool DISCARD_ABOVE;
+uniform bool DISCARD_BELOW;
 
 
 in vec2 gSt;
@@ -46,15 +47,21 @@ out vec4 outRgba;
 
 void main( )
 {
-    // retrieve the data value for this texel
     float value = texture( VALUES_TEXUNIT, gSt ).r;
-    if ( DISCARD_NAN )
+
+    if ( DISCARD_NAN && isnan( value ) )
     {
-        // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX
-        if ( !( value < 0.0 || 0.0 < value || value == 0.0 ) )
-        {
-            discard;
-        }
+        discard;
+    }
+
+    if ( DISCARD_BELOW && value < COLORMAP_MIN )
+    {
+        discard;
+    }
+
+    if ( DISCARD_ABOVE && value > COLORMAP_MAX )
+    {
+        discard;
     }
 
     float value_FRAC = ( value - COLORMAP_MIN ) / ( COLORMAP_MAX - COLORMAP_MIN );

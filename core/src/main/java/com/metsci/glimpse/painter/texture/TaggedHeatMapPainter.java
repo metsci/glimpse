@@ -26,20 +26,21 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.DisposableUtils.addAxisListener1D;
+import static com.metsci.glimpse.util.GeneralUtils.floatsEqual;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.List;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
-import com.metsci.glimpse.support.shader.colormap.ColorMapTaggedProgram;
+import com.metsci.glimpse.util.primitives.Floats;
+import com.metsci.glimpse.util.primitives.FloatsArray;
+import com.metsci.glimpse.util.var.DisposableGroup;
 
 /**
  * A HeatMapPainter whose coloring is controlled via a
@@ -47,159 +48,119 @@ import com.metsci.glimpse.support.shader.colormap.ColorMapTaggedProgram;
  *
  * @author ulman
  */
-public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener1D
+public class TaggedHeatMapPainter extends HeatMapPainter
 {
-    protected static final int DEFAULT_DATA_COORD_UNIT = 2;
-    protected static final int DEFAULT_TEX_COORD_UNIT = 3;
+    protected static final int tagFractionsTexUnit = colormapTexUnit + 1;
+    protected static final int tagValuesTexUnit = tagFractionsTexUnit + 1;
 
-    protected FloatTexture1D vertexCoordTex;
-    protected FloatTexture1D textureCoordTex;
 
-    protected TaggedAxis1D taggedAxis;
+    protected final DisposableGroup disposables;
 
-    public TaggedHeatMapPainter( TaggedAxis1D taggedAxis )
+    protected Floats tagStates;
+    protected FloatTexture1D tagFractionsTable;
+    protected FloatTexture1D tagValuesTable;
+
+
+    public TaggedHeatMapPainter( TaggedAxis1D colorAxis )
     {
-        super( taggedAxis );
+        super( new MultiTagHeatMapProgram( valuesTexUnit, colormapTexUnit, tagFractionsTexUnit, tagValuesTexUnit ) );
 
-        this.taggedAxis = taggedAxis;
-        this.updateTextureArrays( );
-        this.taggedAxis.addAxisListener( this );
+        this.disposables = new DisposableGroup( );
+
+        this.tagStates = new FloatsArray( );
+        this.tagFractionsTable = new FloatTexture1D( 0 );
+        this.tagValuesTable = new FloatTexture1D( 0 );
+
+        this.updateTagTables( colorAxis );
+        this.disposables.add( addAxisListener1D( colorAxis, ( ) ->
+        {
+            this.updateTagTables( colorAxis );
+        } ) );
     }
 
-    @Override
-    protected void loadDefaultPipeline( Axis1D axis ) throws IOException
+    protected void updateTagTables( TaggedAxis1D colorAxis )
     {
-        this.program = new ColorMapTaggedProgram( ( TaggedAxis1D ) axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, DEFAULT_DATA_COORD_UNIT, DEFAULT_TEX_COORD_UNIT );
+        Floats newTagStates = getTagStates( colorAxis );
+        if ( !allEqual( newTagStates, this.tagStates ) )
+        {
+            this.tagStates = newTagStates;
 
-        this.setProgram( this.program );
-    }
+            int tableSize = this.tagStates.n( ) / 2;
+            int tableCapacity = this.tagFractionsTable.getDimensionSize( 0 );
+            if ( tableSize != tableCapacity )
+            {
+                this.removeNonDrawableTexture( this.tagFractionsTable );
+                this.tagFractionsTable = new FloatTexture1D( tableSize );
+                this.addNonDrawableTexture( this.tagFractionsTable, tagFractionsTexUnit );
 
-    private ColorMapTaggedProgram getProgram( )
-    {
-        return ( ColorMapTaggedProgram ) this.program;
-    }
+                this.removeNonDrawableTexture( this.tagValuesTable );
+                this.tagValuesTable = new FloatTexture1D( tableSize );
+                this.addNonDrawableTexture( this.tagValuesTable, tagValuesTexUnit );
+            }
 
-    @Override
-    public void setAlpha( float alpha )
-    {
-        painterLock.lock( );
-        try
-        {
-            getProgram( ).setAlpha( alpha );
-        }
-        finally
-        {
-            painterLock.unlock( );
-        }
-    }
+            this.tagFractionsTable.mutate( new MutatorFloat1D( )
+            {
+                @Override
+                public void mutate( FloatBuffer buffer, int n0 )
+                {
+                    for ( int i = tableSize - 1; i >= 0; i-- )
+                    {
+                        float tagFraction = tagStates.v( 2*i + 0 );
+                        buffer.put( tagFraction );
+                    }
+                }
+            } );
 
-    @Override
-    public void setDiscardNaN( boolean discard )
-    {
-        painterLock.lock( );
-        try
-        {
-            getProgram( ).setDiscardNaN( discard );
-        }
-        finally
-        {
-            painterLock.unlock( );
-        }
-    }
-
-    public void setDiscardAbove( boolean discard )
-    {
-        painterLock.lock( );
-        try
-        {
-            getProgram( ).setDiscardAbove( discard );
-        }
-        finally
-        {
-            painterLock.unlock( );
-        }
-    }
-
-    public void setDiscardBelow( boolean discard )
-    {
-        painterLock.lock( );
-        try
-        {
-            getProgram( ).setDiscardBelow( discard );
-        }
-        finally
-        {
-            painterLock.unlock( );
+            this.tagValuesTable.mutate( new MutatorFloat1D( )
+            {
+                @Override
+                public void mutate( FloatBuffer buffer, int n0 )
+                {
+                    for ( int i = tableSize - 1; i >= 0; i-- )
+                    {
+                        float tagValue = tagStates.v( 2*i + 1 );
+                        buffer.put( tagValue );
+                    }
+                }
+            } );
         }
     }
 
-    @Override
-    public void axisUpdated( Axis1D axis )
+    protected static boolean allEqual( Floats a, Floats b )
     {
-        updateTextureArrays( );
+        if ( a.n( ) != b.n( ) )
+        {
+            return false;
+        }
+
+        int n = a.n( );
+        for ( int i = 0; i < n; i++ )
+        {
+            if ( !floatsEqual( a.v( i ), b.v( i ) ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    protected void updateTextureArrays( )
+    protected static Floats getTagStates( TaggedAxis1D axis )
     {
-        final List<Tag> tags = taggedAxis.getSortedTags( );
-
-        int count = 0;
+        List<Tag> tags = axis.getSortedTags( );
+        FloatsArray states = new FloatsArray( 2 * tags.size( ) );
         for ( Tag tag : tags )
         {
-            if ( tag.hasAttribute( TEX_COORD_ATTR ) ) count++;
-        }
-
-        if ( vertexCoordTex == null || vertexCoordTex.getDimensionSize( 0 ) != count )
-        {
-            this.removeNonDrawableTexture( vertexCoordTex );
-            this.vertexCoordTex = new FloatTexture1D( count );
-            this.addNonDrawableTexture( vertexCoordTex, DEFAULT_DATA_COORD_UNIT );
-        }
-
-        vertexCoordTex.mutate( new MutatorFloat1D( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int n0 )
+            Object attr = tag.getAttribute( TEX_COORD_ATTR );
+            if ( attr instanceof Number )
             {
-                int size = Math.min( tags.size( ), n0 );
-
-                for ( int i = size - 1; i >= 0; i-- )
-                {
-                    Tag tag = tags.get( i );
-
-                    if ( tag.hasAttribute( TEX_COORD_ATTR ) )
-                    {
-                        data.put( ( float ) tag.getValue( ) );
-                    }
-                }
+                float fraction = ( ( Number ) attr ).floatValue( );
+                float value = ( float ) tag.getValue( );
+                states.append( fraction );
+                states.append( value );
             }
-        } );
-
-        if ( textureCoordTex == null || textureCoordTex.getDimensionSize( 0 ) != count )
-        {
-            this.removeNonDrawableTexture( textureCoordTex );
-            this.textureCoordTex = new FloatTexture1D( count );
-            this.addNonDrawableTexture( textureCoordTex, DEFAULT_TEX_COORD_UNIT );
         }
-
-        textureCoordTex.mutate( new MutatorFloat1D( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int n0 )
-            {
-                int size = Math.min( tags.size( ), n0 );
-
-                for ( int i = size - 1; i >= 0; i-- )
-                {
-                    Tag tag = tags.get( i );
-
-                    if ( tag.hasAttribute( TEX_COORD_ATTR ) )
-                    {
-                        data.put( tag.getAttributeFloat( TEX_COORD_ATTR ) );
-                    }
-                }
-            }
-        } );
+        return states;
     }
 
     @Override
@@ -207,6 +168,13 @@ public class TaggedHeatMapPainter extends HeatMapPainter implements AxisListener
     {
         super.doDispose( context );
 
-        this.taggedAxis.removeAxisListener( this );
+        this.disposables.dispose( );
+
+        this.removeAllDrawableTextures( );
+        this.removeAllNonDrawableTextures( );
+
+        this.tagFractionsTable.dispose( context.getGLContext( ) );
+        this.tagValuesTable.dispose( context.getGLContext( ) );
     }
+
 }
