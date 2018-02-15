@@ -26,12 +26,18 @@
  */
 package com.metsci.glimpse.painter.info;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.metsci.glimpse.support.color.GlimpseColor.setColor;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
+import static java.lang.Math.round;
+
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
+import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
@@ -39,6 +45,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -377,7 +384,10 @@ public class AnnotationPainter extends GlimpsePainterBase
     public void doPaintTo( GlimpseContext context )
     {
         GlimpseBounds bounds = getBounds( context );
+        Wrapper2D wrapper = getWrapper2D( context );
         Axis2D axis = requireAxis2D( context );
+        Axis1D xAxis = axis.getAxisX( );
+        Axis1D yAxis = axis.getAxisY( );
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
@@ -390,49 +400,56 @@ public class AnnotationPainter extends GlimpsePainterBase
             {
                 for ( Annotation annotation : annotations )
                 {
-                    if ( !inTimeRange( annotation ) ) continue;
+                    if ( !inTimeRange( annotation ) )
+                    {
+                        continue;
+                    }
 
-                    float[] textColor = DEFAULT_COLOR;
-                    if ( annotation.color != null ) textColor = annotation.color;
+                    setColor( this.textRenderer, firstNonNull( annotation.color, DEFAULT_COLOR ) );
 
-                    Rectangle2D textBounds = textRenderer.getBounds( annotation.text );
+                    double x = annotation.x;
+                    double y = annotation.y;
 
-                    double textWidth = textBounds.getWidth( );
-                    // textBounds.getHeight( ) is too conservative (box is too large, perhaps to fit every conceivable character)
-                    double textHeight = textRenderer.getFont( ).getSize( );
-
-                    int halfTextWidth = ( int ) ( textWidth / 2d );
-                    int halfTextHeight = ( int ) ( textHeight / 2d );
-
-                    int x = axis.getAxisX( ).valueToScreenPixel( annotation.x );
-                    int y = axis.getAxisY( ).valueToScreenPixel( annotation.y );
-
+                    double xAlign;
                     switch ( annotation.hPos )
                     {
-                        case Left:
-                            break;
-                        case Center:
-                            x = x - halfTextWidth;
-                            break;
-                        case Right:
-                            x = x - ( int ) textWidth;
-                            break;
+                        case Left: xAlign = 0.0; break;
+                        case Center: xAlign = 0.5; break;
+                        case Right: xAlign = 1.0; break;
+                        default: xAlign = 0.5; break;
                     }
 
+                    double yAlign;
                     switch ( annotation.vPos )
                     {
-                        case Bottom:
-                            break;
-                        case Center:
-                            y = y - halfTextHeight;
-                            break;
-                        case Top:
-                            y = y - ( int ) textHeight;
-                            break;
+                        case Bottom: yAlign = 0.0; break;
+                        case Center: yAlign = 0.5; break;
+                        case Top: yAlign = 1.0; break;
+                        default: yAlign = 0.5; break;
                     }
 
-                    this.textRenderer.setColor( textColor[0], textColor[1], textColor[2], textColor[3] );
-                    this.textRenderer.draw( annotation.text, x + annotation.offset_x, y + annotation.offset_y );
+                    double xOffset_PX = annotation.offset_x;
+                    double yOffset_PX = annotation.offset_y;
+
+                    Rectangle2D textBounds = textRenderer.getBounds( annotation.text );
+                    int i = ( int ) round( axis.getAxisX( ).valueToScreenPixel( x ) - xAlign*( textBounds.getWidth( ) ) + xOffset_PX );
+                    int j = ( int ) round( axis.getAxisY( ).valueToScreenPixel( y ) - yAlign*( textBounds.getHeight( ) ) + yOffset_PX );
+
+                    double xMin = xAxis.screenPixelToValue( i );
+                    double xMax = xAxis.screenPixelToValue( i + textBounds.getWidth( ) );
+
+                    double yMin = yAxis.screenPixelToValue( j );
+                    double yMax = yAxis.screenPixelToValue( j + textBounds.getHeight( ) );
+
+                    for ( double yShift : wrapper.y.getRenderShifts( yMin, yMax ) )
+                    {
+                        for ( double xShift : wrapper.x.getRenderShifts( xMin, xMax ) )
+                        {
+                            int iShifted = ( int ) round( xAxis.valueToScreenPixel( x + xShift ) - xAlign*( textBounds.getWidth( ) ) + xOffset_PX );
+                            int jShifted = ( int ) round( yAxis.valueToScreenPixel( y + yShift ) - yAlign*( textBounds.getHeight( ) ) + yOffset_PX );
+                            textRenderer.draw( annotation.text, iShifted, jShifted );
+                        }
+                    }
                 }
             }
             finally
