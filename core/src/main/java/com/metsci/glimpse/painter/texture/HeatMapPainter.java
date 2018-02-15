@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.painter.texture;
 
+import java.util.function.DoubleSupplier;
+
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
@@ -50,7 +53,17 @@ public class HeatMapPainter extends ShadedTexturePainter
 
     public HeatMapPainter( Axis1D colorAxis )
     {
-        this.program = new HeatMapProgram( DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, colorAxis::getMin, colorAxis::getMax );
+        this( colorAxis::getMin, colorAxis::getMax );
+    }
+
+    public HeatMapPainter( Tag colormapMinTag, Tag colormapMaxTag )
+    {
+        this( colormapMinTag::getValue, colormapMaxTag::getValue );
+    }
+
+    public HeatMapPainter( DoubleSupplier colormapMinFn, DoubleSupplier colormapMaxFn )
+    {
+        this.program = new HeatMapProgram( DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, colormapMinFn, colormapMaxFn );
         this.setProgram( this.program );
     }
 
