@@ -26,16 +26,9 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-
-import java.io.IOException;
-import java.util.logging.Logger;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
@@ -48,150 +41,111 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class HeatMapPainter extends ShadedTexturePainter
 {
-    public static final Logger logger = Logger.getLogger( HeatMapPainter.class.getName( ) );
+
+    protected final HeatMapProgram program;
 
     protected FloatTextureProjected2D heatMap;
     protected ColorTexture1D colorScale;
 
-    protected DrawableTextureProgram program;
 
-    public HeatMapPainter( Axis1D axis )
+    public HeatMapPainter( Axis1D colorAxis )
     {
-        try
-        {
-            this.loadDefaultPipeline( axis );
-        }
-        catch ( IOException e )
-        {
-            logWarning( logger, "Unable to load HeatMapPainter shader.", e );
-        }
-    }
-
-    protected void loadDefaultPipeline( Axis1D axis ) throws IOException
-    {
-        this.program = new ColorMapProgram( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+        this.program = new HeatMapProgram( DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT, colorAxis::getMin, colorAxis::getMax );
         this.setProgram( this.program );
-    }
-
-    private ColorMapProgram getProgram( )
-    {
-        return ( ColorMapProgram ) this.program;
     }
 
     public void setDiscardNaN( boolean discard )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            getProgram( ).setDiscardNaN( discard );
+            this.program.setDiscardNans( discard );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setAlpha( float alpha )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            getProgram( ).setAlpha( alpha );
+            this.program.setAlpha( alpha );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public void setData( FloatTextureProjected2D texture )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            this.removeDrawableTexture( heatMap );
+            this.removeDrawableTexture( this.heatMap );
             this.heatMap = texture;
-            this.addDrawableTexture( heatMap, DEFAULT_DRAWABLE_TEXTURE_UNIT );
+            this.addDrawableTexture( this.heatMap, DEFAULT_DRAWABLE_TEXTURE_UNIT );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
-
     }
 
     public void setColorScale( ColorTexture1D texture )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            this.removeNonDrawableTexture( colorScale );
+            this.removeNonDrawableTexture( this.colorScale );
             this.colorScale = texture;
-            this.addNonDrawableTexture( colorScale, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+            this.addNonDrawableTexture( this.colorScale, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public ColorTexture1D getColorScale( )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            if ( heatMap != null )
-            {
-                return colorScale;
-            }
-            else
-            {
-                return null;
-            }
+            return ( this.heatMap == null ? null : this.colorScale );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public FloatTextureProjected2D getData( )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            if ( heatMap != null )
-            {
-                return heatMap;
-            }
-            else
-            {
-                return null;
-            }
+            return this.heatMap;
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public Projection getProjection( )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            if ( heatMap != null )
-            {
-                return heatMap.getProjection( );
-            }
-            else
-            {
-                return null;
-            }
+            return ( this.heatMap == null ? null : this.heatMap.getProjection( ) );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 }
