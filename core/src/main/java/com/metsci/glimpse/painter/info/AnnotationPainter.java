@@ -27,6 +27,8 @@
 package com.metsci.glimpse.painter.info;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.xAlign;
+import static com.metsci.glimpse.painter.info.SimpleTextPainter.yAlign;
 import static com.metsci.glimpse.support.color.GlimpseColor.setColor;
 import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 import static java.lang.Math.round;
@@ -58,14 +60,14 @@ public class AnnotationPainter extends GlimpsePainterBase
     {
         protected float x;
         protected float y;
-        protected int offset_x;
-        protected int offset_y;
+        protected int xOffset_PX;
+        protected int yOffset_PX;
         protected float[] color;
         protected String text;
-        protected HorizontalPosition hPos;
-        protected VerticalPosition vPos;
-        protected long startTime;
-        protected long endTime;
+        protected double xAlign;
+        protected double yAlign;
+        protected long startTime_PMILLIS;
+        protected long endTime_PMILLIS;
 
         public Annotation( String text, float x, float y )
         {
@@ -82,31 +84,50 @@ public class AnnotationPainter extends GlimpsePainterBase
             this( text, x, y, 0, 0, HorizontalPosition.Left, VerticalPosition.Bottom, color );
         }
 
-        public Annotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
+        public Annotation( String text, float x, float y, int xOffset_PX, int yOffset_PX, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
         {
-            this.x = x;
-            this.y = y;
-            this.offset_x = offset_x;
-            this.offset_y = offset_y;
-            this.text = text;
-            this.color = color;
-            this.hPos = hPos;
-            this.vPos = vPos;
+            this( text, x, y, xOffset_PX, yOffset_PX, hPos, vPos, color, 0L, 0L );
         }
 
-        public Annotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color, long startTime, long endTime )
+        public Annotation( String text, float x, float y, int xOffset_PX, int yOffset_PX, HorizontalPosition hPos, VerticalPosition vPos, float[] color, long startTime_PMILLIS, long endTime_PMILLIS )
         {
+            this( text, x, y, xOffset_PX, yOffset_PX, xAlign( hPos ), yAlign( vPos ), color, startTime_PMILLIS, endTime_PMILLIS );
+        }
+
+        public Annotation( String text,
+
+                           float x,
+                           float y,
+
+                           int xOffset_PX,
+                           int yOffset_PX,
+
+                           double xAlign,
+                           double yAlign,
+
+                           float[] color,
+
+                           long startTime_PMILLIS,
+                           long endTime_PMILLIS )
+        {
+            this.text = text;
+
             this.x = x;
             this.y = y;
-            this.offset_x = offset_x;
-            this.offset_y = offset_y;
-            this.text = text;
+
+            this.xOffset_PX = xOffset_PX;
+            this.yOffset_PX = yOffset_PX;
+
+            this.xAlign = xAlign;
+            this.yAlign = yAlign;
+
             this.color = color;
-            this.hPos = hPos;
-            this.vPos = vPos;
-            this.startTime = startTime;
-            this.endTime = endTime;
+
+            this.startTime_PMILLIS = startTime_PMILLIS;
+            this.endTime_PMILLIS = endTime_PMILLIS;
         }
+
+
         //@formatter:on
 
         /**
@@ -116,7 +137,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         @Deprecated
         public long getStartTime( )
         {
-            return startTime;
+            return startTime_PMILLIS;
         }
 
         /**
@@ -124,9 +145,9 @@ public class AnnotationPainter extends GlimpsePainterBase
          * @see #setStartTime(TimeStamp)
          */
         @Deprecated
-        public void setStartTime( long startTime )
+        public void setStartTime( long startTime_PMILLIS )
         {
-            this.startTime = startTime;
+            this.startTime_PMILLIS = startTime_PMILLIS;
         }
 
         /**
@@ -136,7 +157,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         @Deprecated
         public long getEndTime( )
         {
-            return endTime;
+            return endTime_PMILLIS;
         }
 
         /**
@@ -144,29 +165,29 @@ public class AnnotationPainter extends GlimpsePainterBase
          * @see #setEndTime(TimeStamp)
          */
         @Deprecated
-        public void setEndTime( long endTime )
+        public void setEndTime( long endTime_PMILLIS )
         {
-            this.endTime = endTime;
+            this.endTime_PMILLIS = endTime_PMILLIS;
         }
 
         public TimeStamp getStartTimeStamp( )
         {
-            return TimeStamp.fromPosixMillis( startTime );
+            return TimeStamp.fromPosixMillis( startTime_PMILLIS );
         }
 
         public void setStartTime( TimeStamp startTime )
         {
-            this.startTime = startTime.toPosixMillis( );
+            this.startTime_PMILLIS = startTime.toPosixMillis( );
         }
 
         public TimeStamp getEndTimeStamp( )
         {
-            return TimeStamp.fromPosixMillis( startTime );
+            return TimeStamp.fromPosixMillis( startTime_PMILLIS );
         }
 
         public void setEndTime( TimeStamp endTime )
         {
-            this.endTime = endTime.toPosixMillis( );
+            this.endTime_PMILLIS = endTime.toPosixMillis( );
         }
 
         public float getX( )
@@ -191,22 +212,22 @@ public class AnnotationPainter extends GlimpsePainterBase
 
         public int getOffset_x( )
         {
-            return offset_x;
+            return xOffset_PX;
         }
 
-        public void setOffset_x( int offset_x )
+        public void setOffset_x( int xOffset_PX )
         {
-            this.offset_x = offset_x;
+            this.xOffset_PX = xOffset_PX;
         }
 
         public int getOffset_y( )
         {
-            return offset_y;
+            return yOffset_PX;
         }
 
-        public void setOffset_y( int offset_y )
+        public void setOffset_y( int yOffset_PX )
         {
-            this.offset_y = offset_y;
+            this.yOffset_PX = yOffset_PX;
         }
 
         public float[] getColor( )
@@ -229,24 +250,34 @@ public class AnnotationPainter extends GlimpsePainterBase
             this.text = text;
         }
 
-        public HorizontalPosition getHorizontalPosition( )
+        public double getXAlign( )
         {
-            return this.hPos;
+            return this.xAlign;
+        }
+
+        public void setXAlign( double xAlign )
+        {
+            this.xAlign = xAlign;
         }
 
         public void setHorizontalPosition( HorizontalPosition hPos )
         {
-            this.hPos = hPos;
+            this.setXAlign( xAlign( hPos ) );
         }
 
-        public VerticalPosition getVerticalPosition( )
+        public double getYAlign( )
         {
-            return this.vPos;
+            return this.yAlign;
+        }
+
+        public void setYAlign( double yAlign )
+        {
+            this.yAlign = yAlign;
         }
 
         public void setVerticalPosition( VerticalPosition vPos )
         {
-            this.vPos = vPos;
+            this.setYAlign( yAlign( vPos ) );
         }
     }
 
@@ -409,27 +440,10 @@ public class AnnotationPainter extends GlimpsePainterBase
 
                     double x = annotation.x;
                     double y = annotation.y;
-
-                    double xAlign;
-                    switch ( annotation.hPos )
-                    {
-                        case Left: xAlign = 0.0; break;
-                        case Center: xAlign = 0.5; break;
-                        case Right: xAlign = 1.0; break;
-                        default: xAlign = 0.5; break;
-                    }
-
-                    double yAlign;
-                    switch ( annotation.vPos )
-                    {
-                        case Bottom: yAlign = 0.0; break;
-                        case Center: yAlign = 0.5; break;
-                        case Top: yAlign = 1.0; break;
-                        default: yAlign = 0.5; break;
-                    }
-
-                    double xOffset_PX = annotation.offset_x;
-                    double yOffset_PX = annotation.offset_y;
+                    double xAlign = annotation.xAlign;
+                    double yAlign = annotation.yAlign;
+                    double xOffset_PX = annotation.xOffset_PX;
+                    double yOffset_PX = annotation.yOffset_PX;
 
                     Rectangle2D textBounds = textRenderer.getBounds( annotation.text );
                     int i = ( int ) round( axis.getAxisX( ).valueToScreenPixel( x ) - xAlign*( textBounds.getWidth( ) ) + xOffset_PX );
