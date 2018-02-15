@@ -54,44 +54,36 @@ void main( )
         discard;
     }
 
-    float tagTableSize = float( textureSize( TAG_VALUES_TEXUNIT, 0 ) );
+    int numTags = textureSize( TAG_VALUES_TEXUNIT, 0 );
 
-    float minTagIndex = ( tagTableSize - 0.5 ) / tagTableSize;
-    if ( DISCARD_BELOW && value < texture( TAG_VALUES_TEXUNIT, minTagIndex ).r )
+    if ( DISCARD_BELOW && value < texelFetch( TAG_VALUES_TEXUNIT, numTags-1, 0 ).r )
     {
         discard;
     }
 
-    float maxTagIndex = 0.5 / tagTableSize;
-    if ( DISCARD_ABOVE && value > texture( TAG_VALUES_TEXUNIT, maxTagIndex ).r )
+    if ( DISCARD_ABOVE && value > texelFetch( TAG_VALUES_TEXUNIT, 0, 0 ).r )
     {
         discard;
     }
 
-
-    float i;
-    for ( i = 1.5; i < tagTableSize; i += 1.0 )
+    // Find the tags above and below value
+    int tagIndexBelow;
+    for ( tagIndexBelow = 1; tagIndexBelow < numTags; tagIndexBelow++ )
     {
-        float tagIndex = i / tagTableSize;
-        if ( value > texture( TAG_VALUES_TEXUNIT, tagIndex ).r )
+        if ( value > texelFetch( TAG_VALUES_TEXUNIT, tagIndexBelow, 0 ).r )
         {
             break;
         }
     }
+    int tagIndexAbove = tagIndexBelow - 1;
 
-    float upperTagIndex = ( i - 1.0 ) / tagTableSize;
-    float lowerTagIndex = i / tagTableSize;
-
-    float upperTagFraction = texture( TAG_FRACTIONS_TEXUNIT, upperTagIndex ).r;
-    float lowerTagFraction = texture( TAG_FRACTIONS_TEXUNIT, lowerTagIndex ).r;
-
-    float upperTagValue = texture( TAG_VALUES_TEXUNIT, upperTagIndex ).r;
-    float lowerTagValue = texture( TAG_VALUES_TEXUNIT, lowerTagIndex ).r;
-
-    float value_SEGMENTFRAC = ( value - lowerTagValue ) / ( upperTagValue - lowerTagValue );
-    float value_FRAC = lowerTagFraction + value_SEGMENTFRAC*( upperTagFraction - lowerTagFraction );
-
-
+    // Interpolate between the tags above and below value
+    float tagFractionAbove = texelFetch( TAG_FRACTIONS_TEXUNIT, tagIndexAbove, 0 ).r;
+    float tagFractionBelow = texelFetch( TAG_FRACTIONS_TEXUNIT, tagIndexBelow, 0 ).r;
+    float tagValueAbove = texelFetch( TAG_VALUES_TEXUNIT, tagIndexAbove, 0 ).r;
+    float tagValueBelow = texelFetch( TAG_VALUES_TEXUNIT, tagIndexBelow, 0 ).r;
+    float value_SEGMENTFRAC = ( value - tagValueBelow ) / ( tagValueAbove - tagValueBelow );
+    float value_FRAC = tagFractionBelow + value_SEGMENTFRAC*( tagFractionAbove - tagFractionBelow );
 
     outRgba.rgb = texture( COLORMAP_TEXUNIT, clamp( value_FRAC, 0.0, 1.0 ) ).rgb;
     outRgba.a = ALPHA;
