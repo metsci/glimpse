@@ -28,73 +28,43 @@
 #version 150
 
 
-vec2 rectMin( vec4 rect )
-{
-    // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
-    return rect.xz;
-}
+uniform sampler2D VALUES_TEXUNIT;
+uniform sampler1D COLORMAP_TEXUNIT;
 
-vec2 rectMax( vec4 rect )
-{
-    // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
-    return rect.yw;
-}
+uniform float COLORMAP_MIN;
+uniform float COLORMAP_MAX;
 
-vec2 rectSize( vec4 rect )
-{
-    return ( rectMax( rect ) - rectMin( rect ) );
-}
-
-vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
-{
-    vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
-    return ( xy_FRAC * viewportSize_PX );
-}
-
-float near( vec2 nearFar )
-{
-    // Swizzle near out of (near, far)
-    return nearFar.x;
-}
-
-float far( vec2 nearFar )
-{
-    // Swizzle far out of (near, far)
-    return nearFar.y;
-}
-
-float axisZToNdc( float z_AXIS, vec2 axisNearFar )
-{
-    float near = near( axisNearFar );
-    float far = far( axisNearFar );
-    return ( z_AXIS - near ) / ( far - near );
-}
+uniform float ALPHA;
+uniform bool DISCARD_NAN;
+uniform bool DISCARD_ABOVE;
+uniform bool DISCARD_BELOW;
 
 
-// RECT uniforms are (xMin, xMax, yMin, yMax)
-uniform vec4 AXIS_RECT;
-uniform vec2 NEAR_FAR;
-uniform vec2 VIEWPORT_SIZE_PX;
+in vec2 gSt;
 
-
-in vec3 inXyz;
-in int inFlags;
-in float inMileage;
-
-
-out int vFlags;
-out float vMileage_PX;
+out vec4 outRgba;
 
 
 void main( )
 {
-    vFlags = inFlags;
+    float value = texture( VALUES_TEXUNIT, gSt ).r;
 
-    float mileage_AXIS = inMileage;
-    vec2 ppv = VIEWPORT_SIZE_PX / rectSize( AXIS_RECT );
-    vMileage_PX = mileage_AXIS * ppv.x;
+    if ( DISCARD_NAN && isnan( value ) )
+    {
+        discard;
+    }
 
-    vec3 xyz_AXIS = inXyz;
-    gl_Position.xy = axisXyToPx( xyz_AXIS.xy, AXIS_RECT, VIEWPORT_SIZE_PX );
-    gl_Position.z = axisZToNdc( xyz_AXIS.z, NEAR_FAR );
+    if ( DISCARD_BELOW && value < COLORMAP_MIN )
+    {
+        discard;
+    }
+
+    if ( DISCARD_ABOVE && value > COLORMAP_MAX )
+    {
+        discard;
+    }
+
+    float value_FRAC = ( value - COLORMAP_MIN ) / ( COLORMAP_MAX - COLORMAP_MIN );
+    outRgba.rgb = texture( COLORMAP_TEXUNIT, clamp( value_FRAC, 0.0, 1.0 ) ).rgb;
+    outRgba.a = ALPHA;
 }

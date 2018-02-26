@@ -41,7 +41,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 
 /**
- * Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.
+ * Draws 2D point with feathered edges, a constant pixel radius, and a constant color.
  */
 public class PointFlatColorProgram
 {

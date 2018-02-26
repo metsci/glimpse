@@ -70,6 +70,28 @@ public class SimpleTextPainter extends GlimpsePainterBase
         Bottom, Center, Top;
     }
 
+    public static double xAlign( HorizontalPosition hPos )
+    {
+        switch ( hPos )
+        {
+            case Left: return 0.0;
+            case Center: return 0.5;
+            case Right: return 1.0;
+            default: throw new RuntimeException( "Unrecognized HorizontalPosition: " + hPos );
+        }
+    }
+
+    public static double yAlign( VerticalPosition vPos )
+    {
+        switch ( vPos )
+        {
+            case Bottom: return 0.0;
+            case Center: return 0.5;
+            case Top: return 1.0;
+            default: throw new RuntimeException( "Unrecognized VerticalPosition: " + vPos );
+        }
+    }
+
     protected float[] textColor = GlimpseColor.getWhite( );
     protected float[] textColorNoBackground = GlimpseColor.getBlack( );
     protected boolean textColorSet = false;

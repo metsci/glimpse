@@ -45,56 +45,26 @@ vec2 rectSize( vec4 rect )
     return ( rectMax( rect ) - rectMin( rect ) );
 }
 
-vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
+vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
 {
     vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
-    return ( xy_FRAC * viewportSize_PX );
-}
-
-float near( vec2 nearFar )
-{
-    // Swizzle near out of (near, far)
-    return nearFar.x;
-}
-
-float far( vec2 nearFar )
-{
-    // Swizzle far out of (near, far)
-    return nearFar.y;
-}
-
-float axisZToNdc( float z_AXIS, vec2 axisNearFar )
-{
-    float near = near( axisNearFar );
-    float far = far( axisNearFar );
-    return ( z_AXIS - near ) / ( far - near );
+    return ( -1.0 + 2.0*xy_FRAC );
 }
 
 
 // RECT uniforms are (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
-uniform vec2 NEAR_FAR;
-uniform vec2 VIEWPORT_SIZE_PX;
 
 
-in vec3 inXyz;
-in int inFlags;
-in float inMileage;
+in vec2 inXy;
+in vec2 inSt;
 
-
-out int vFlags;
-out float vMileage_PX;
+out vec2 vSt;
 
 
 void main( )
 {
-    vFlags = inFlags;
-
-    float mileage_AXIS = inMileage;
-    vec2 ppv = VIEWPORT_SIZE_PX / rectSize( AXIS_RECT );
-    vMileage_PX = mileage_AXIS * ppv.x;
-
-    vec3 xyz_AXIS = inXyz;
-    gl_Position.xy = axisXyToPx( xyz_AXIS.xy, AXIS_RECT, VIEWPORT_SIZE_PX );
-    gl_Position.z = axisZToNdc( xyz_AXIS.z, NEAR_FAR );
+    gl_Position.xy = axisXyToNdc( inXy, AXIS_RECT );
+    gl_Position.zw = vec2( 0.0, 1.0 );
+    vSt = inSt;
 }
