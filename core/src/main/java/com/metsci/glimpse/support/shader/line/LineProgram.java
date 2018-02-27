@@ -155,7 +155,7 @@ public class LineProgram
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inFlags );
 
-        // Init WRAP_RECT to defaults -- may be overridden by a later call to setWrapper()
+        // Init uniforms to defaults -- may be overridden by later calls
         this.setWrapper( gl, NOOP_WRAPPER_2D );
     }
 

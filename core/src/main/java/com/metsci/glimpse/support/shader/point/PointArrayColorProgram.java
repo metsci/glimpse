@@ -26,19 +26,25 @@
  */
 package com.metsci.glimpse.support.shader.point;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static javax.media.opengl.GL.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.gl.util.GLUtils.disablePointSprite;
+import static com.metsci.glimpse.gl.util.GLUtils.enablePointSprite;
+import static com.metsci.glimpse.support.wrapped.Wrapper2D.NOOP_WRAPPER_2D;
+import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
+import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_POINTS;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLES1;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 /**
  * Draws 2D point with feathered edges, a constant pixel radius, and a color specified per point.
@@ -46,6 +52,7 @@ import com.metsci.glimpse.gl.util.GLUtils;
 public class PointArrayColorProgram
 {
     public static final String vertShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.vs" );
+    public static final String geomShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.gs" );
     public static final String fragShader_GLSL = requireResourceText( "shaders/point/point_array_color/point.fs" );
 
     public static class ProgramHandles
@@ -55,6 +62,9 @@ public class PointArrayColorProgram
         // Uniforms
 
         public final int AXIS_RECT;
+        public final int WRAP_RECT;
+        public final int VIEWPORT_SIZE_PX;
+
         public final int POINT_SIZE_PX;
         public final int FEATHER_THICKNESS_PX;
 
@@ -65,9 +75,12 @@ public class PointArrayColorProgram
 
         public ProgramHandles( GL2ES2 gl )
         {
-            this.program = createProgram( gl, vertShader_GLSL, null, fragShader_GLSL );
+            this.program = createProgram( gl, vertShader_GLSL, geomShader_GLSL, fragShader_GLSL );
 
             this.AXIS_RECT = gl.glGetUniformLocation( this.program, "AXIS_RECT" );
+            this.WRAP_RECT = gl.glGetUniformLocation( program, "WRAP_RECT" );
+            this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
+
             this.POINT_SIZE_PX = gl.glGetUniformLocation( this.program, "POINT_SIZE_PX" );
             this.FEATHER_THICKNESS_PX = gl.glGetUniformLocation( this.program, "FEATHER_THICKNESS_PX" );
 
@@ -111,7 +124,10 @@ public class PointArrayColorProgram
         gl.glEnableVertexAttribArray( this.handles.inRgba );
 
         gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-        if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
+        enablePointSprite( gl );
+
+        // Init uniforms to defaults -- may be overridden by later calls
+        this.setWrapper( gl, NOOP_WRAPPER_2D );
     }
 
     public void setFeatherThickness( GL2ES2 gl, float value )
@@ -122,6 +138,16 @@ public class PointArrayColorProgram
     public void setPointSize( GL2ES2 gl, float value )
     {
         gl.glUniform1f( this.handles.POINT_SIZE_PX, value );
+    }
+
+    public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
+    {
+        this.setViewport( gl, bounds.getWidth( ), bounds.getHeight( ) );
+    }
+
+    public void setViewport( GL2ES2 gl, int viewportWidth, int viewportHeight )
+    {
+        gl.glUniform2f( this.handles.VIEWPORT_SIZE_PX, viewportWidth, viewportHeight );
     }
 
     public void setAxisOrtho( GL2ES2 gl, Axis2D axis )
@@ -137,6 +163,16 @@ public class PointArrayColorProgram
     public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
     {
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
+    }
+
+    public void setWrapper( GL2ES2 gl, Wrapper2D wrapper )
+    {
+        this.setWrapper( gl, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+    }
+
+    public void setWrapper( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+    {
+        gl.glUniform4f( this.handles.WRAP_RECT, xMin, xMax, yMin, yMax );
     }
 
     public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
@@ -178,7 +214,7 @@ public class PointArrayColorProgram
         gl.glUseProgram( 0 );
 
         gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-        if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
+        disablePointSprite( gl );
 
         gl.getGL3( ).glBindVertexArray( 0 );
     }

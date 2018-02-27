@@ -608,7 +608,7 @@ public class IconPainter extends GlimpsePainterBase
                         this.shader.useProgram( gl, false );
                     }
 
-                    GLErrorUtils.logGLError( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
+                    GLErrorUtils.logGLErrors( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
                 }
             }
             finally

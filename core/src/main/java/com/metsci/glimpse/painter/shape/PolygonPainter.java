@@ -808,7 +808,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.updateLock.unlock( );
             }
 
-            GLErrorUtils.logGLError( logger, gl, "Update Error" );
+            GLErrorUtils.logGLErrors( logger, gl, "Update Error" );
         }
 
         if ( loadedGroups.isEmpty( ) ) return;
@@ -818,7 +818,7 @@ public class PolygonPainter extends GlimpsePainterBase
             drawGroup( context, loaded );
         }
 
-        GLErrorUtils.logGLError( logger, gl, "Draw Error" );
+        GLErrorUtils.logGLErrors( logger, gl, "Draw Error" );
     }
 
     protected void updateVerticesFill( GL gl, LoadedGroup loaded, Group group )
