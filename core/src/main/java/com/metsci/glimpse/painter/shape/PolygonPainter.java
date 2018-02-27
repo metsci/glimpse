@@ -31,7 +31,6 @@ import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.BYTES_PER_FLOAT;
 import static com.metsci.glimpse.gl.util.GLUtils.deleteBuffers;
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
-import static com.metsci.glimpse.gl.util.GLUtils.enablePremultipliedAlphaBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
 import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
@@ -808,17 +807,25 @@ public class PolygonPainter extends GlimpsePainterBase
                 this.updateLock.unlock( );
             }
 
-            GLErrorUtils.logGLError( logger, gl, "Update Error" );
+            GLErrorUtils.logGLErrors( logger, gl, "Update Error" );
         }
 
         if ( loadedGroups.isEmpty( ) ) return;
 
-        for ( LoadedGroup loaded : loadedGroups.values( ) )
+        enableStandardBlending( context );
+        try
         {
-            drawGroup( context, loaded );
+            for ( LoadedGroup loaded : loadedGroups.values( ) )
+            {
+                drawGroup( context, loaded );
+            }
+        }
+        finally
+        {
+            disableBlending( context );
         }
 
-        GLErrorUtils.logGLError( logger, gl, "Draw Error" );
+        GLErrorUtils.logGLErrors( logger, gl, "Draw Error" );
     }
 
     protected void updateVerticesFill( GL gl, LoadedGroup loaded, Group group )
@@ -1013,7 +1020,6 @@ public class PolygonPainter extends GlimpsePainterBase
 
         if ( loaded.fillOn )
         {
-            enableStandardBlending( gl );
             triangleFlatProg.begin( gl );
             try
             {
@@ -1050,13 +1056,11 @@ public class PolygonPainter extends GlimpsePainterBase
             finally
             {
                 triangleFlatProg.end( gl );
-                disableBlending( gl );
             }
         }
 
         if ( loaded.linesOn )
         {
-            enablePremultipliedAlphaBlending( gl );
             lineProg.begin( gl );
             try
             {
@@ -1094,7 +1098,6 @@ public class PolygonPainter extends GlimpsePainterBase
             finally
             {
                 lineProg.end( gl );
-                disableBlending( gl );
             }
         }
     }

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
@@ -34,6 +36,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
@@ -47,6 +50,7 @@ import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 public class WrappedAxisExample implements GlimpseLayoutProvider
 {
@@ -134,12 +138,16 @@ public class WrappedAxisExample implements GlimpseLayoutProvider
             {
                 GL3 gl = context.getGL( ).getGL3( );
                 Axis2D axis = requireAxis2D( context );
+                Wrapper2D wrapper = getWrapper2D( context );
+                GlimpseBounds bounds = getBounds( context );
 
                 GLUtils.enableStandardBlending( gl );
                 prog.begin( gl );
                 try
                 {
                     prog.setAxisOrtho( gl, axis );
+                    prog.setWrapper( gl, wrapper );
+                    prog.setViewport( gl, bounds );
                     prog.setRgba( gl, GlimpseColor.getWhite( ) );
                     prog.setPointSize( gl, 20.0f );
 

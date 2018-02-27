@@ -27,6 +27,7 @@
 package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import javax.media.opengl.GL3;
 
@@ -41,6 +42,7 @@ import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 
 /**
@@ -190,6 +192,7 @@ public class LineSetPainter extends GlimpsePainterBase
     {
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = requireAxis2D( context );
+        Wrapper2D wrapper = getWrapper2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         enableStandardBlending( gl );
@@ -200,6 +203,7 @@ public class LineSetPainter extends GlimpsePainterBase
             {
                 prog.setViewport( gl, bounds );
                 prog.setAxisOrtho( gl, axis );
+                prog.setWrapper( gl, wrapper );
                 prog.setStyle( gl, style );
 
                 prog.draw( gl, style, path, LineUtils.ppvAspectRatio( axis ) );

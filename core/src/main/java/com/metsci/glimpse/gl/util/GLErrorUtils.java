@@ -26,9 +26,11 @@
  */
 package com.metsci.glimpse.gl.util;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static jogamp.opengl.glu.error.Error.*;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.getProgramInfoLog;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.getShaderInfoLog;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static javax.media.opengl.GL.GL_NO_ERROR;
+import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import java.util.logging.Logger;
 
@@ -40,7 +42,6 @@ public class GLErrorUtils
     public static void logGLShaderInfoLog( Logger logger, GL2ES2 gl, int shaderObject, String prefix )
     {
         String log = getShaderInfoLog( gl, shaderObject );
-
         if ( log != null && !log.isEmpty( ) )
         {
             logWarning( logger, "%s: %s", prefix, log );
@@ -50,35 +51,45 @@ public class GLErrorUtils
     public static void logGLProgramInfoLog( Logger logger, GL2ES2 gl, int programObject, String prefix )
     {
         String log = getProgramInfoLog( gl, programObject );
-
         if ( log != null && !log.isEmpty( ) )
         {
             logWarning( logger, "%s: %s", prefix, log );
         }
     }
 
-    public static boolean logGLError( Logger logger, GL gl, String prefix )
+    public static boolean logGLErrors( Logger logger, GL gl, String prefix )
     {
-        int error = gl.glGetError( );
-        if ( error != GL.GL_NO_ERROR )
+        // The API docs for glGetError say that "glGetError should
+        // always be called in a loop, until it returns GL_NO_ERROR"
+        boolean anyErrors = false;
+        while ( true )
         {
-            StackTraceElement[] traceArray = Thread.currentThread( ).getStackTrace( );
-            StringBuilder traceString = new StringBuilder( );
-
-            if ( traceArray != null && traceArray.length > 0 )
+            int error = gl.glGetError( );
+            if ( error == GL_NO_ERROR )
             {
-                for ( int i = 0; i < traceArray.length - 1; i++ )
-                {
-                    traceString.append( traceArray[i].toString( ) ).append( "\n" );
-                }
-                traceString.append( traceArray[traceArray.length - 1].toString( ) );
+                return anyErrors;
             }
 
-            String errorString = gluErrorString( error );
-            logWarning( logger, "%s (%d): %s%n%s", prefix, error, errorString, traceString.toString( ) );
-            return true;
+            logGLError( logger, error, prefix );
+            anyErrors = true;
+        }
+    }
+
+    public static void logGLError( Logger logger, int error, String prefix )
+    {
+        StringBuilder traceString = new StringBuilder( );
+
+        StackTraceElement[] traceArray = Thread.currentThread( ).getStackTrace( );
+        if ( traceArray != null && traceArray.length > 0 )
+        {
+            for ( int i = 0; i < traceArray.length - 1; i++ )
+            {
+                traceString.append( "\tat " ).append( traceArray[i].toString( ) ).append( "\n" );
+            }
+            traceString.append( "\tat " ).append( traceArray[traceArray.length - 1].toString( ) );
         }
 
-        return false;
+        String errorString = gluErrorString( error );
+        logWarning( logger, "%s (%d): %s%n%s", prefix, error, errorString, traceString.toString( ) );
     }
 }

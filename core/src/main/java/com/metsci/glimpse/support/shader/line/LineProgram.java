@@ -28,6 +28,7 @@ package com.metsci.glimpse.support.shader.line;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.support.wrapped.Wrapper2D.NOOP_WRAPPER_2D;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_BYTE;
 import static javax.media.opengl.GL.GL_FLOAT;
@@ -42,6 +43,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 /**
  * Represents the shader program for drawing lines. The program gets compiled and
@@ -61,6 +63,7 @@ public class LineProgram
         public final int program;
 
         public final int AXIS_RECT;
+        public final int WRAP_RECT;
         public final int VIEWPORT_SIZE_PX;
 
         public final int LINE_THICKNESS_PX;
@@ -82,6 +85,7 @@ public class LineProgram
             this.program = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
 
             this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
+            this.WRAP_RECT = gl.glGetUniformLocation( program, "WRAP_RECT" );
             this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
 
             this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
@@ -150,6 +154,9 @@ public class LineProgram
         gl.glUseProgram( this.handles.program );
         gl.glEnableVertexAttribArray( this.handles.inXy );
         gl.glEnableVertexAttribArray( this.handles.inFlags );
+
+        // Init uniforms to defaults -- may be overridden by later calls
+        this.setWrapper( gl, NOOP_WRAPPER_2D );
     }
 
     public void setViewport( GL2ES2 gl, GlimpseBounds bounds )
@@ -175,6 +182,16 @@ public class LineProgram
     public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
     {
         gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
+    }
+
+    public void setWrapper( GL2ES2 gl, Wrapper2D wrapper )
+    {
+        this.setWrapper( gl, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+    }
+
+    public void setWrapper( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+    {
+        gl.glUniform4f( this.handles.WRAP_RECT, xMin, xMax, yMin, yMax );
     }
 
     public void setStyle( GL2ES2 gl, LineStyle style )

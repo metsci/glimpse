@@ -27,46 +27,51 @@
 
 #version 150
 
-vec2 axisMin( vec4 axisRect )
+
+vec2 rectMin( vec4 rect )
 {
     // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
-    return axisRect.xz;
+    return rect.xz;
 }
 
-vec2 axisMax( vec4 axisRect )
+vec2 rectMax( vec4 rect )
 {
     // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
-    return axisRect.yw;
+    return rect.yw;
 }
 
-vec2 axisSize( vec4 axisRect )
+vec2 rectSize( vec4 rect )
 {
-    return ( axisMax( axisRect ) - axisMin( axisRect ) );
+    return ( rectMax( rect ) - rectMin( rect ) );
 }
 
 vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
 {
-    vec2 xy_FRAC = ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect );
+    vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
     return ( xy_FRAC * viewportSize_PX );
 }
 
-// AXIS_RECT is (xMin, xMax, yMin, yMax)
+
+// RECT uniforms are (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
+
 
 in vec2 inXy;
 in int inFlags;
 in float inMileage;
 
+
 out int vFlags;
 out float vMileage_PX;
+
 
 void main( )
 {
     vFlags = inFlags;
 
     float mileage_AXIS = inMileage;
-    vec2 ppv = VIEWPORT_SIZE_PX / axisSize( AXIS_RECT );
+    vec2 ppv = VIEWPORT_SIZE_PX / rectSize( AXIS_RECT );
     vMileage_PX = mileage_AXIS * ppv.x;
 
     vec2 xy_AXIS = inXy;
