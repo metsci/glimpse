@@ -198,13 +198,12 @@ public class WizardUITree<D> implements WizardUI<D>
         this.model = new DefaultListModel<>( );
         this.sidebar = new JList<>( );
         this.sidebar.setModel( this.model );
-        this.sidebar.setCellRenderer( new WizardPageListCellRenderer( this.wizard ) );
+        this.sidebar.setCellRenderer( new WizardPageListCellRenderer( this.wizard, this.getChildIndentString( ) ) );
         this.sidebar.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
         this.sidebar.setFocusable( false );
 
         this.sidebar.addListSelectionListener( new ListSelectionListener( )
         {
-
             @Override
             public void valueChanged( ListSelectionEvent lsEvent )
             {
@@ -217,9 +216,7 @@ public class WizardUITree<D> implements WizardUI<D>
                         wizard.visitPage( page );
                     }
                 }
-
             }
-
         } );
 
         this.sidebarScroll = new JScrollPane( this.sidebar );
@@ -455,5 +452,11 @@ public class WizardUITree<D> implements WizardUI<D>
         }
 
         return b.toString( );
+    }
+
+    // the string to use to indent child tree elements
+    protected String getChildIndentString( )
+    {
+        return "    ";
     }
 }
