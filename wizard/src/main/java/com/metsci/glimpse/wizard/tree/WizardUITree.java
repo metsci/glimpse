@@ -26,9 +26,7 @@
  */
 package com.metsci.glimpse.wizard.tree;
 
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createEtchedBorder;
+import static javax.swing.BorderFactory.*;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -297,29 +295,23 @@ public class WizardUITree<D> implements WizardUI<D>
             @Override
             public void onPagesRemoved( Collection<WizardPage<D>> removedPages )
             {
-                SwingUtilities.invokeLater( ( ) ->
+                for ( WizardPage<D> page : removedPages )
                 {
-                    for ( WizardPage<D> page : removedPages )
-                    {
-                        pageContainer.remove( page.getContainter( ) );
-                    }
+                    pageContainer.remove( page.getContainter( ) );
+                }
 
-                    updatePageTree( );
-                } );
+                updatePageTree( );
             }
 
             @Override
             public void onPagesAdded( Collection<WizardPage<D>> addedPages )
             {
-                SwingUtilities.invokeLater( ( ) ->
+                for ( WizardPage<D> page : addedPages )
                 {
-                    for ( WizardPage<D> page : addedPages )
-                    {
-                        pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
-                    }
+                    pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
+                }
 
-                    updatePageTree( );
-                } );
+                updatePageTree( );
             }
         };
 
