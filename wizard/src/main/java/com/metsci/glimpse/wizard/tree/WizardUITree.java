@@ -26,9 +26,7 @@
  */
 package com.metsci.glimpse.wizard.tree;
 
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createEtchedBorder;
+import static javax.swing.BorderFactory.*;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -200,13 +198,12 @@ public class WizardUITree<D> implements WizardUI<D>
         this.model = new DefaultListModel<>( );
         this.sidebar = new JList<>( );
         this.sidebar.setModel( this.model );
-        this.sidebar.setCellRenderer( new WizardPageListCellRenderer( this.wizard ) );
+        this.sidebar.setCellRenderer( new WizardPageListCellRenderer( this.wizard, this.getChildIndentString( ) ) );
         this.sidebar.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
         this.sidebar.setFocusable( false );
 
         this.sidebar.addListSelectionListener( new ListSelectionListener( )
         {
-
             @Override
             public void valueChanged( ListSelectionEvent lsEvent )
             {
@@ -219,9 +216,7 @@ public class WizardUITree<D> implements WizardUI<D>
                         wizard.visitPage( page );
                     }
                 }
-
             }
-
         } );
 
         this.sidebarScroll = new JScrollPane( this.sidebar );
@@ -297,29 +292,23 @@ public class WizardUITree<D> implements WizardUI<D>
             @Override
             public void onPagesRemoved( Collection<WizardPage<D>> removedPages )
             {
-                SwingUtilities.invokeLater( ( ) ->
+                for ( WizardPage<D> page : removedPages )
                 {
-                    for ( WizardPage<D> page : removedPages )
-                    {
-                        pageContainer.remove( page.getContainter( ) );
-                    }
+                    pageContainer.remove( page.getContainter( ) );
+                }
 
-                    updatePageTree( );
-                } );
+                updatePageTree( );
             }
 
             @Override
             public void onPagesAdded( Collection<WizardPage<D>> addedPages )
             {
-                SwingUtilities.invokeLater( ( ) ->
+                for ( WizardPage<D> page : addedPages )
                 {
-                    for ( WizardPage<D> page : addedPages )
-                    {
-                        pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
-                    }
+                    pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
+                }
 
-                    updatePageTree( );
-                } );
+                updatePageTree( );
             }
         };
 
@@ -463,5 +452,11 @@ public class WizardUITree<D> implements WizardUI<D>
         }
 
         return b.toString( );
+    }
+
+    // the string to use to indent child tree elements
+    protected String getChildIndentString( )
+    {
+        return "    ";
     }
 }
