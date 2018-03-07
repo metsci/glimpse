@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import javax.swing.SwingUtilities;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.metsci.glimpse.wizard.listener.DataUpdatedListener;
@@ -135,7 +136,7 @@ public class Wizard<D>
     /**
      * Reinitialized the Wizard to its default state. This is mainly used to
      * allow reuse of the Wizard dialog since it takes a few seconds to construct initially.
-     * 
+     *
      * @param settings the new initial settings to edit
      */
     public void reset( D data )
@@ -227,6 +228,9 @@ public class Wizard<D>
     public void visitPage( WizardPage<D> page )
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
+
+        // do nothing if we are re-visiting the current page
+        if ( this.getCurrentPage( ) != null && Objects.equal( this.getCurrentPage( ).getId( ), page.getId( ) ) ) return;
 
         this.doLeavePage( this.getCurrentPage( ) );
         // Only add new pages to history, not when 'Previous' button is hit
@@ -465,7 +469,7 @@ public class Wizard<D>
 
     /**
      * Update Wizard data to reflect edits made to the provided page and recalculate errors associated with the page.
-     * 
+     *
      * @param page the page to update
      */
     protected void updatePage( WizardPage<D> page )
