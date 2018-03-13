@@ -273,13 +273,19 @@ public class LineProgram
         gl.glBindBuffer( GL_ARRAY_BUFFER, flagsVbo );
         gl.glVertexAttribIPointer( this.handles.inFlags, 1, GL_BYTE, 0, 0 );
 
-        gl.glEnableVertexAttribArray( this.handles.inMileage );
-        gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
-        gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
+        if ( mileageVbo != 0 )
+        {
+            gl.glEnableVertexAttribArray( this.handles.inMileage );
+            gl.glBindBuffer( GL_ARRAY_BUFFER, mileageVbo );
+            gl.glVertexAttribPointer( this.handles.inMileage, 1, GL_FLOAT, false, 0, 0 );
+        }
 
         gl.glDrawArrays( GL_LINE_STRIP_ADJACENCY, first, count );
 
-        gl.glDisableVertexAttribArray( this.handles.inMileage );
+        if ( mileageVbo != 0 )
+        {
+            gl.glDisableVertexAttribArray( this.handles.inMileage );
+        }
     }
 
     public void draw( GL2ES3 gl, LineStyle style, LineStrip strip, double ppvAspectRatio )
