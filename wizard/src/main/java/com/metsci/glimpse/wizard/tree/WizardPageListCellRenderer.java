@@ -108,7 +108,7 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
 
         Collection<WizardError> errors = wizard.getErrors( page );
 
-        if ( !errors.isEmpty( ) )
+        if ( !errors.isEmpty( ) && page.showErrors( ) )
         {
             WizardErrorType type = WizardErrorType.getMaxSeverity( errors );
             ImageIcon errorIcon = type.getSmallIcon( );

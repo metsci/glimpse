@@ -42,7 +42,7 @@ public interface WizardPage<D>
      * Unique identifier for the Page.
      */
     public Object getId( );
-    
+
     /**
      * Unique identifier for this Page's parent Page.
      * <p>
@@ -94,14 +94,24 @@ public interface WizardPage<D>
      * @return a collection of problems with the data the user has entered
      */
     public Collection<WizardError> getErrors( );
-    
+
     /**
      * Callback method called by the Wizard when this page is visited.
      */
     public void onEnter( );
-    
+
     /**
      * Callback method called by the Wizard when this page stops being visited.
      */
     public void onExit( );
+
+    /**
+     * Can be used with wizard UI components to selectively hide error indicators.
+     * <p>
+     * Useful for pages that aggregate errors from other pages, but contain no errors themselves.
+     */
+    public default boolean showErrors( )
+    {
+        return true;
+    }
 }
