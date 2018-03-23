@@ -53,6 +53,8 @@
     <modules>
 
         <module>util</module>
+        <module>util-examples</module>
+
         <module>text</module>
 
         <module>platform-fixes</module>
