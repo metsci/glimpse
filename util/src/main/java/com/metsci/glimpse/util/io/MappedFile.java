@@ -36,17 +36,20 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
-import java.nio.channels.FileChannel;
+
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
+import com.metsci.glimpse.util.jnlu.FileUtils;
 
 import sun.misc.Cleaner;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
-import sun.nio.ch.FileChannelImpl;
 
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
@@ -59,6 +62,30 @@ import sun.nio.ch.FileChannelImpl;
 @SuppressWarnings( "restriction" )
 public class MappedFile
 {
+
+    static
+    {
+        try
+        {
+            URL resourceUrl = MappedFile.class.getClassLoader( ).getResource( "MappedFile/windows64/MappedFile.dll" );
+
+            File tempDir = FileUtils.createTempDir( "MappedFile" );
+            File tempFile = new File( tempDir, "MappedFile.dll" );
+
+            Resources.asByteSource( resourceUrl ).copyTo( Files.asByteSink( tempFile ) );
+
+            System.load( tempFile.getAbsolutePath( ) );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    private static native long _mapFile( FileDescriptor fileDescriptor, long position, long size, boolean writable ) throws IOException;
+    private static native void _unmapFile( long mappingAddr ) throws IOException;
+
+
 
     protected final File file;
     protected final boolean writable;
@@ -86,21 +113,21 @@ public class MappedFile
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
     {
-        this( file, byteOrder, false, -1L );
+        this( file, byteOrder, false );
     }
 
-    public MappedFile( File file, ByteOrder byteOrder, long size ) throws IOException
+    public MappedFile( File file, ByteOrder byteOrder, boolean writable ) throws IOException
     {
-        this( file, byteOrder, true, size );
+        this( file, byteOrder, writable, -1L );
     }
 
-    public MappedFile( File file, ByteOrder byteOrder, boolean writable, long size ) throws IOException
+    public MappedFile( File file, ByteOrder byteOrder, long setSize ) throws IOException
     {
-        if ( writable && size < 0 )
-        {
-            throw new IllegalArgumentException( "Illegal size for writable file: size = " + size );
-        }
+        this( file, byteOrder, true, setSize );
+    }
 
+    public MappedFile( File file, ByteOrder byteOrder, boolean writable, long setSize ) throws IOException
+    {
         this.file = file;
         this.writable = writable;
         this.byteOrder = byteOrder;
@@ -108,15 +135,13 @@ public class MappedFile
         String rafMode = ( this.writable ? "rw" : "r" );
         try ( RandomAccessFile raf = new RandomAccessFile( file, rafMode ) )
         {
-            if ( this.writable )
+            if ( setSize >= 0 )
             {
-                this.size = size;
-                raf.setLength( this.size );
+                raf.setLength( setSize );
             }
-            else
-            {
-                this.size = raf.length( );
-            }
+
+            this.size = raf.length( );
+            this.fd = duplicateForMapping( raf.getFD( ) );
 
             if ( this.size == 0 )
             {
@@ -125,11 +150,10 @@ public class MappedFile
             }
             else
             {
-                this.address = memmap( raf.getChannel( ), 0, this.size, this.writable );
+                this.address = memmap( this.fd, 0, this.size, this.writable );
             }
 
-            this.fd = duplicateForMapping( raf.getFD( ) );
-            Runnable unmapper = createUnmapper( this.address, this.size, 0, this.fd );
+            Runnable unmapper = createUnmapper( this.address, this.size, this.fd );
             this.cleaner = Cleaner.create( this, unmapper );
         }
     }
@@ -263,24 +287,7 @@ public class MappedFile
         }
     }
 
-    /**
-     * long map0( int mode, long position, long size )
-     */
-    protected static final Method FileChannelImpl_map0;
-    static
-    {
-        try
-        {
-            FileChannelImpl_map0 = FileChannelImpl.class.getDeclaredMethod( "map0", int.class, long.class, long.class );
-            FileChannelImpl_map0.setAccessible( true );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( "Cannot access " + FileChannelImpl.class.getName( ) + ".map0()", e );
-        }
-    }
-
-    protected static long memmap( FileChannel fileChannel, long position, long size, boolean writable ) throws RuntimeException
+    protected static long memmap( FileDescriptor fileDescriptor, long position, long size, boolean writable ) throws RuntimeException
     {
         if ( ( position % pageSize ) != 0 )
         {
@@ -289,8 +296,7 @@ public class MappedFile
 
         try
         {
-            int mapMode = ( writable ? 1 : 0 );
-            return ( ( long ) FileChannelImpl_map0.invoke( fileChannel, mapMode, position, size ) );
+            return _mapFile( fileDescriptor, position, size, writable );
         }
         catch ( Exception e )
         {
@@ -359,34 +365,22 @@ public class MappedFile
         }
     }
 
-    /**
-     * Unmapper( long address, long size, int capacity, FileDescriptor fd )
-     */
-    protected static final Constructor<?> Unmapper_init;
-    static
+    protected static Runnable createUnmapper( long address, long size, FileDescriptor fd )
     {
-        try
+        return ( ) ->
         {
-            Class<?> clazz = Class.forName( "sun.nio.ch.FileChannelImpl$Unmapper" );
-            Unmapper_init = clazz.getDeclaredConstructor( long.class, long.class, int.class, FileDescriptor.class );
-            Unmapper_init.setAccessible( true );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( "Cannot access sun.nio.ch.FileChannelImpl$Unmapper.<init>()", e );
-        }
-    }
-
-    protected static Runnable createUnmapper( long address, long size, int capacity, FileDescriptor fd )
-    {
-        try
-        {
-            return ( ( Runnable ) Unmapper_init.newInstance( address, size, capacity, fd ) );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( "Failed to create Unmapper", e );
-        }
+            if ( address != 0 )
+            {
+                try
+                {
+                    _unmapFile( address );
+                }
+                catch ( IOException e )
+                {
+                    throw new RuntimeException( e );
+                }
+            }
+        };
     }
 
     /**
