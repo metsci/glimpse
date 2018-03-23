@@ -1,5 +1,6 @@
 package com.metsci.glimpse.util.io;
 
+import static com.metsci.glimpse.util.io.MappedBufferStats.*;
 import static com.metsci.glimpse.util.io.MappedFile.*;
 
 import java.io.FileDescriptor;
@@ -85,8 +86,18 @@ public class FileMapperStandard implements FileMapper
     {
         try
         {
+            // Unmapper updates count and totalSize, but only accepts 32-bit capacity, so
+            // update totalCapacity manually. The manual update is not atomic with the update
+            // inside Unmapper ... but this is only used for monitoring, so that's okay.
+            addToMappedBufferStats( 0, 0, +size );
+
             FileDescriptor fd = getFileDescriptorForMapping( raf );
-            return ( ( Runnable ) Unmapper_init.newInstance( address, size, 0, fd ) );
+            Runnable unmapper = ( Runnable ) Unmapper_init.newInstance( address, size, 0, fd );
+            return ( ) ->
+            {
+                unmapper.run( );
+                addToMappedBufferStats( 0, 0, -size );
+            };
         }
         catch ( Exception e )
         {

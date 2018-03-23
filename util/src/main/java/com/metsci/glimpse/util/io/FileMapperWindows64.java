@@ -1,5 +1,6 @@
 package com.metsci.glimpse.util.io;
 
+import static com.metsci.glimpse.util.io.MappedBufferStats.*;
 import static com.metsci.glimpse.util.io.MappedFile.*;
 
 import java.io.File;
@@ -46,15 +47,15 @@ public class FileMapperWindows64 implements FileMapper
     @Override
     public Runnable createUnmapper( long address, long size, RandomAccessFile raf )
     {
-        // TODO: Add to totals in FileChannelImpl$Unmapper
+        addToMappedBufferStats( +1, +size, +size );
         return ( ) ->
         {
             if ( address != 0 )
             {
                 try
                 {
-                    // TODO: Subtract from totals in FileChannelImpl$Unmapper
                     _unmap( address );
+                    addToMappedBufferStats( -1, -size, -size );
                 }
                 catch ( IOException e )
                 {
