@@ -7,7 +7,7 @@ x86_64-w64-mingw32-gcc \
   -g \
   -Wall \
   -shared \
-  -o MappedFile.dll \
+  -o FileMapperWindows64.dll \
   -I"$JAVA_HOME/include" \
   -I"$JAVA_HOME/include/win32" \
-  MappedFile.c
+  FileMapperWindows64.c

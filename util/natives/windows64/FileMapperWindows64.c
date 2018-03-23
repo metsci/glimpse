@@ -7,18 +7,37 @@ jstring getErrorMessage( JNIEnv *env, const wchar_t *prefix, DWORD code )
     {
         wchar_t *detail;
         {
-            DWORD numCharsA = FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            wchar_t *charsPrelim = NULL;
+            DWORD numCharsPrelim = FormatMessageW( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                                               NULL,
                                               code,
                                               MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-                                              ( LPWSTR ) &detail,
+                                              ( LPWSTR ) &charsPrelim,
                                               0,
                                               NULL );
-            if ( numCharsA == 0 )
+            if ( numCharsPrelim > 0 )
             {
-                size_t maxNumCharsB = 1024;
-                detail = malloc( maxNumCharsB * sizeof( wchar_t ) );
-                _snwprintf_s( detail, maxNumCharsB, _TRUNCATE, L"%d", code );
+                // Trim trailing whitespace
+                while ( numCharsPrelim > 0 )
+                {
+                    if ( !iswspace( charsPrelim[ numCharsPrelim - 1 ] ) )
+                    {
+                        break;
+                    }
+                    numCharsPrelim--;
+                }
+
+                size_t numChars = numCharsPrelim + 1;
+                detail = malloc( numChars * sizeof( wchar_t ) );
+                _snwprintf_s( detail, numChars, _TRUNCATE, L"%s", charsPrelim );
+
+                LocalFree( charsPrelim );
+            }
+            else
+            {
+                size_t numChars = 1024;
+                detail = malloc( numChars * sizeof( wchar_t ) );
+                _snwprintf_s( detail, numChars, _TRUNCATE, L"%d", code );
             }
         }
 
@@ -26,15 +45,15 @@ jstring getErrorMessage( JNIEnv *env, const wchar_t *prefix, DWORD code )
 
         wchar_t *message;
         {
-            size_t maxNumChars = wcslen( prefix ) + wcslen( separator ) + wcslen( detail ) + 1;
-            message = malloc( maxNumChars * sizeof( wchar_t ) );
-            _snwprintf_s( message, maxNumChars, _TRUNCATE, L"%s%s%s", prefix, separator, detail );
+            size_t numChars = wcslen( prefix ) + wcslen( separator ) + wcslen( detail ) + 1;
+            message = malloc( numChars * sizeof( wchar_t ) );
+            _snwprintf_s( message, numChars, _TRUNCATE, L"%s%s%s", prefix, separator, detail );
         }
 
         s = ( *env )->NewString( env, ( const jchar * ) message, wcslen( message ) );
 
-        LocalFree( message );
-        LocalFree( detail );
+        free( message );
+        free( detail );
     }
     return s;
 }
@@ -68,12 +87,11 @@ void throwIOException( JNIEnv *env, const wchar_t *prefix )
     }
 }
 
-JNIEXPORT jlong JNICALL Java_com_metsci_glimpse_util_io_MappedFile__1mapFile( JNIEnv *env,
-                                                                              jclass clazz,
-                                                                              jobject fileDescriptor,
-                                                                              jlong position,
-                                                                              jlong size,
-                                                                              jboolean writable )
+JNIEXPORT jlong JNICALL Java_com_metsci_glimpse_util_io_FileMapperWindows64__1map( JNIEnv *env,
+                                                                                   jclass clazz,
+                                                                                   jobject fileDescriptor,
+                                                                                   jlong size,
+                                                                                   jboolean writable )
 {
     void *mappingPtr;
     {
@@ -88,9 +106,14 @@ JNIEXPORT jlong JNICALL Java_com_metsci_glimpse_util_io_MappedFile__1mapFile( JN
 
         HANDLE mappingHandle;
         {
-            jlong maxSize = position + size;
             DWORD fileProtect = ( writable == JNI_TRUE ? PAGE_READWRITE : PAGE_READONLY );
-            mappingHandle = CreateFileMapping( fileHandle, NULL, fileProtect, HIWORD( maxSize ), LOWORD( maxSize ), NULL );
+
+            LARGE_INTEGER size64;
+            size64.QuadPart = size;
+            DWORD sizeHi32 = size64.HighPart;
+            DWORD sizeLo32 = size64.LowPart;
+
+            mappingHandle = CreateFileMapping( fileHandle, NULL, fileProtect, sizeHi32, sizeLo32, NULL );
         }
         if ( mappingHandle == NULL )
         {
@@ -99,7 +122,8 @@ JNIEXPORT jlong JNICALL Java_com_metsci_glimpse_util_io_MappedFile__1mapFile( JN
         }
 
         DWORD mappingAccess = ( writable == JNI_TRUE ? FILE_MAP_WRITE : FILE_MAP_READ );
-        mappingPtr = MapViewOfFile( mappingHandle, mappingAccess, HIWORD( position ), LOWORD( position ), size );
+
+        mappingPtr = MapViewOfFile( mappingHandle, mappingAccess, 0, 0, size );
         if ( mappingPtr == NULL )
         {
             BOOL closeResult = CloseHandle( mappingHandle );
@@ -127,9 +151,9 @@ JNIEXPORT jlong JNICALL Java_com_metsci_glimpse_util_io_MappedFile__1mapFile( JN
     return mappingAddr;
 }
 
-JNIEXPORT void JNICALL Java_com_metsci_glimpse_util_io_MappedFile__1unmapFile( JNIEnv *env,
-                                                                               jclass clazz,
-                                                                               jlong mappingAddr )
+JNIEXPORT void JNICALL Java_com_metsci_glimpse_util_io_FileMapperWindows64__1unmap( JNIEnv *env,
+                                                                                    jclass clazz,
+                                                                                    jlong mappingAddr )
 {
     void *mappingPtr = ( void * ) mappingAddr;
     BOOL result = UnmapViewOfFile( mappingPtr );

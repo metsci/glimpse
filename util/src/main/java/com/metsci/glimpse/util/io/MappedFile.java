@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.io;
 
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
 import static java.lang.String.*;
 
 import java.io.File;
@@ -36,16 +37,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
-
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
-import com.metsci.glimpse.util.jnlu.FileUtils;
 
 import sun.misc.Cleaner;
 import sun.misc.Unsafe;
@@ -62,29 +58,18 @@ import sun.nio.ch.DirectBuffer;
 @SuppressWarnings( "restriction" )
 public class MappedFile
 {
-
+    protected static final FileMapper mapper;
     static
     {
-        try
+        if ( onPlatform( "win", "x86_64" ) || onPlatform( "win", "amd64" ) )
         {
-            URL resourceUrl = MappedFile.class.getClassLoader( ).getResource( "MappedFile/windows64/MappedFile.dll" );
-
-            File tempDir = FileUtils.createTempDir( "MappedFile" );
-            File tempFile = new File( tempDir, "MappedFile.dll" );
-
-            Resources.asByteSource( resourceUrl ).copyTo( Files.asByteSink( tempFile ) );
-
-            System.load( tempFile.getAbsolutePath( ) );
+            mapper = new FileMapperWindows64( );
         }
-        catch ( IOException e )
+        else
         {
-            throw new RuntimeException( e );
+            mapper = new FileMapperStandard( );
         }
     }
-
-    private static native long _mapFile( FileDescriptor fileDescriptor, long position, long size, boolean writable ) throws IOException;
-    private static native void _unmapFile( long mappingAddr ) throws IOException;
-
 
 
     protected final File file;
@@ -126,7 +111,7 @@ public class MappedFile
         this( file, byteOrder, true, setSize );
     }
 
-    public MappedFile( File file, ByteOrder byteOrder, boolean writable, long setSize ) throws IOException
+    protected MappedFile( File file, ByteOrder byteOrder, boolean writable, long setSize ) throws IOException
     {
         this.file = file;
         this.writable = writable;
@@ -150,10 +135,10 @@ public class MappedFile
             }
             else
             {
-                this.address = memmap( this.fd, 0, this.size, this.writable );
+                this.address = mapper.map( raf, this.size, this.writable );
             }
 
-            Runnable unmapper = createUnmapper( this.address, this.size, this.fd );
+            Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
             this.cleaner = Cleaner.create( this, unmapper );
         }
     }
@@ -287,23 +272,6 @@ public class MappedFile
         }
     }
 
-    protected static long memmap( FileDescriptor fileDescriptor, long position, long size, boolean writable ) throws RuntimeException
-    {
-        if ( ( position % pageSize ) != 0 )
-        {
-            throw new RuntimeException( format( "Memmap position is not divisible by pageSize: position = %d, pageSize = %d", position, pageSize ) );
-        }
-
-        try
-        {
-            return _mapFile( fileDescriptor, position, size, writable );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException( "Failed to memmap file", e );
-        }
-    }
-
     /**
      * FileDispatcherImpl( )
      */
@@ -340,6 +308,11 @@ public class MappedFile
         }
     }
 
+    public static FileDescriptor getFileDescriptorForMapping( RandomAccessFile raf ) throws IOException
+    {
+        return duplicateForMapping( raf.getFD( ) );
+    }
+
     protected static FileDescriptor duplicateForMapping( FileDescriptor fd ) throws IOException
     {
         try
@@ -363,24 +336,6 @@ public class MappedFile
         {
             throw new RuntimeException( "Failed to duplicate file descriptor", e );
         }
-    }
-
-    protected static Runnable createUnmapper( long address, long size, FileDescriptor fd )
-    {
-        return ( ) ->
-        {
-            if ( address != 0 )
-            {
-                try
-                {
-                    _unmapFile( address );
-                }
-                catch ( IOException e )
-                {
-                    throw new RuntimeException( e );
-                }
-            }
-        };
     }
 
     /**
