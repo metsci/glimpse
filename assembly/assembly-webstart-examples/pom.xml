@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>3.2.0-rc22</version>
+        <version>3.2.0-rc23</version>
     </parent>
 
     <artifactId>glimpse-webstart-examples-assembly</artifactId>
