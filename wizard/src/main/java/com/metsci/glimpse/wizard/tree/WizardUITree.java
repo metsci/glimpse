@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.wizard.tree;
 
-import static javax.swing.BorderFactory.*;
+import static javax.swing.BorderFactory.createCompoundBorder;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.BorderFactory.createEtchedBorder;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -410,25 +412,12 @@ public class WizardUITree<D> implements WizardUI<D>
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
-        if ( this.displayErrorButton )
+        if ( page != null && this.displayErrorButton && page.showErrors( ) )
         {
-            WizardErrorType maxSeverity = null;
-
-            if ( page != null )
-            {
-                Collection<WizardError> errors = this.wizard.getErrors( page );
-                maxSeverity = WizardErrorType.getMaxSeverity( errors );
-            }
-
-            if ( maxSeverity != null )
-            {
-                this.errorButton.setIcon( maxSeverity.getLargeIcon( ) );
-                this.errorButton.setVisible( true );
-            }
-            else
-            {
-                this.errorButton.setVisible( false );
-            }
+            Collection<WizardError> errors = this.wizard.getErrors( page );
+            WizardErrorType maxSeverity = WizardErrorType.getMaxSeverity( errors );
+            this.errorButton.setIcon( maxSeverity.getLargeIcon( ) );
+            this.errorButton.setVisible( true );
         }
         else
         {
