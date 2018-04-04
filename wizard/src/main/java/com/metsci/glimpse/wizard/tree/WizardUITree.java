@@ -26,15 +26,12 @@
  */
 package com.metsci.glimpse.wizard.tree;
 
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createEtchedBorder;
+import static javax.swing.BorderFactory.*;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
@@ -42,7 +39,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -102,49 +98,10 @@ public class WizardUITree<D> implements WizardUI<D>
     protected PageEnteredListener<D> pageEnteredListener;
     protected ErrorsUpdatedListener errorsUpdatedListener;
 
-    private final AbstractAction prevAction = new AbstractAction( "Back" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.visitPreviousPage( );
-        }
-    };
-
-    private final AbstractAction nextAction = new AbstractAction( "Next" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.visitNextPage( );
-        }
-    };
-
-    private final AbstractAction finishAction = new AbstractAction( "Finish" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.finish( );
-        }
-    };
-
-    private final AbstractAction cancelAction = new AbstractAction( "Cancel" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.cancel( );
-        }
-    };
+    protected JButton prevBtn;
+    protected JButton nextBtn;
+    protected JButton finishBtn;
+    protected JButton cancelBtn;
 
     public WizardUITree( boolean displayErrorButton )
     {
@@ -258,10 +215,14 @@ public class WizardUITree<D> implements WizardUI<D>
         this.templateContainer.add( splitPane, BorderLayout.CENTER );
         this.templateContainer.add( new JSeparator( SwingConstants.HORIZONTAL ), BorderLayout.SOUTH );
 
-        final JButton prevBtn = new JButton( this.prevAction );
-        final JButton nextBtn = new JButton( this.nextAction );
-        final JButton finishBtn = new JButton( this.finishAction );
-        final JButton cancelBtn = new JButton( this.cancelAction );
+        this.prevBtn = new JButton( "Back" );
+        this.prevBtn.addActionListener( ( e ) -> this.wizard.visitPreviousPage( ) );
+        this.nextBtn = new JButton( "Next" );
+        this.nextBtn.addActionListener( ( e ) -> this.wizard.visitNextPage( ) );
+        this.finishBtn = new JButton( "Finish" );
+        this.finishBtn.addActionListener( ( e ) -> this.wizard.finish( ) );
+        this.cancelBtn = new JButton( "Cancel" );
+        this.cancelBtn.addActionListener( ( e ) -> this.wizard.cancel( ) );
 
         this.extraButtonPanel = new JPanel( );
         this.extraButtonPanel.setLayout( new BoxLayout( this.extraButtonPanel, BoxLayout.LINE_AXIS ) );
@@ -324,11 +285,11 @@ public class WizardUITree<D> implements WizardUI<D>
                 LinkedList<WizardPage<D>> history = wizard.getPageHistory( );
 
                 // if there is no history, disable the ability to move backward
-                prevAction.setEnabled( history.size( ) > 1 );
+                prevBtn.setEnabled( history.size( ) > 1 );
                 // if there is a valid next page, enable the next action
                 WizardPageModel<D> pageModel = wizard.getPageModel( );
                 D data = wizard.getData( );
-                nextAction.setEnabled( pageModel.getNextPage( history, data ) != null );
+                nextBtn.setEnabled( pageModel.getNextPage( history, data ) != null );
 
                 getContainer( ).revalidate( );
                 getContainer( ).repaint( );
