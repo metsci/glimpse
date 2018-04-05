@@ -49,7 +49,7 @@ public class PdfContTriangle implements PdfCont
         }
         if ( mode > max )
         {
-            throw new IllegalArgumentException( String.format( "mode (%f) < max (%f)", mode, max ) );
+            throw new IllegalArgumentException( String.format( "mode (%f) > max (%f)", mode, max ) );
         }
         if ( min == max )
         {
