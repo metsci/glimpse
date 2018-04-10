@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.metsci.glimpse</groupId>
 		<artifactId>glimpse-parent</artifactId>
-		<version>3.2.0-rc24</version>
+		<version>3.2.0-rc25</version>
 	</parent>
 
 	<artifactId>glimpse-text</artifactId>
