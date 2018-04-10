@@ -191,7 +191,10 @@ public class Wizard<D>
         this.getPageModel( ).getPages( ).stream( ).forEach( p ->
         {
             this.isVisited.add( p.getId( ) );
+            //set the fields on the page using the data object
             p.setData( this.data, false );
+            //pull any default values from the page into the data object
+            p.updateData( this.data );
             Collection<WizardError> pageErrors = p.getErrors( );
             this.pageErrors.replaceValues( p.getId( ), pageErrors );
         } );
