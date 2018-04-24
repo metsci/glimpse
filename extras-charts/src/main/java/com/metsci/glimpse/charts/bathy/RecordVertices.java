@@ -26,26 +26,26 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
+
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
 
 /**
  * @author ulman
  */
 public class RecordVertices implements Render
 {
-    protected List<Float> coordsX;
-    protected List<Float> coordsY;
+    protected FloatList coordsX;
+    protected FloatList coordsY;
     protected GeoProjection projection;
 
     public RecordVertices( GeoProjection projection )
     {
-        this.coordsX = new ArrayList<Float>( );
-        this.coordsY = new ArrayList<Float>( );
+        this.coordsX = new FloatArrayList();
+        this.coordsY = new FloatArrayList();
         this.projection = projection;
     }
 
@@ -64,21 +64,11 @@ public class RecordVertices implements Render
 
     public float[] getCoordsX( )
     {
-        float[] coordsArrayX = new float[coordsX.size( )];
-        for ( int i = 0; i < coordsX.size( ); i++ )
-        {
-            coordsArrayX[i] = coordsX.get( i );
-        }
-        return coordsArrayX;
+        return coordsX.toFloatArray();
     }
 
     public float[] getCoordsY( )
     {
-        float[] coordsArrayY = new float[coordsY.size( )];
-        for ( int i = 0; i < coordsY.size( ); i++ )
-        {
-            coordsArrayY[i] = coordsY.get( i );
-        }
-        return coordsArrayY;
+        return coordsY.toFloatArray();
     }
 }
