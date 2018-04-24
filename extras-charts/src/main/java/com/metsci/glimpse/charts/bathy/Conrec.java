@@ -86,7 +86,7 @@ public class Conrec
      * @param z  - contour levels in increasing order.
      *
      */
-    public void contour( double[][] d, int ilb, int iub, int jlb, int jub, double[] x, double[] y, int nc, double[] z )
+    public void contour( float[][] d, int ilb, int iub, int jlb, int jub, double[] x, double[] y, int nc, double[] z )
     {
         int m1;
         int m2;
@@ -118,8 +118,8 @@ public class Conrec
 
         for ( i = ilb; i <= iub - 1; i++ )
         {
-            final double[] d_i0 = d[i];
-            final double[] d_i1 = d[i + 1];
+            final float[] d_i0 = d[i];
+            final float[] d_i1 = d[i + 1];
 
             for ( j = jlb; j <= jub - 1; j++ )
             {

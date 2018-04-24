@@ -59,7 +59,7 @@ public class BathymetryData
 
     protected GeoProjection projection;
 
-    protected double[][] data;
+    protected float[][] data;
 
     public BathymetryData( InputStream in, GeoProjection projection ) throws IOException
     {
@@ -172,7 +172,7 @@ public class BathymetryData
         startLon = uniqueLongitudes.first( ).centerLon - 0.5 * widthStep;
         startLat = uniqueLatitudes.first( ).centerLat - 0.5 * heightStep;
 
-        data = new double[imageWidth][imageHeight];
+        data = new float[imageWidth][imageHeight];
 
         for ( Row row : rows )
         {
@@ -283,7 +283,7 @@ public class BathymetryData
         return Math.max( swCorner.getY( ), neCorner.getY( ) );
     }
 
-    public double[][] getData( )
+    public float[][] getData( )
     {
         return data;
     }
