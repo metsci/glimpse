@@ -29,16 +29,22 @@ package com.metsci.glimpse.charts.bathy;
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
 import static com.metsci.glimpse.support.colormap.ColorGradients.bathymetry;
 import static com.metsci.glimpse.support.colormap.ColorGradients.topography;
+import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Length.fromKilometers;
 import static com.metsci.glimpse.util.units.Length.toMeters;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.System.currentTimeMillis;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.stream.Collectors.toList;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.Raster;
@@ -55,15 +61,14 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 import javax.media.jai.PlanarImage;
-import javax.swing.SwingWorker;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -80,9 +85,9 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
+import com.metsci.glimpse.support.PainterCache;
 import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -95,7 +100,7 @@ public class Etopo1Painter extends DelegatePainter
 {
     private static final Logger LOGGER = Logger.getLogger( Etopo1Painter.class.getName( ) );
 
-    private static final String ETOPO_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
+    public static final String ETOPO_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
 
     private static final int[] HI_RES_CONTOURS = new int[] { -20, -50, -100, -250, -500, -1_000, -2_000, -4_000, -5_000, -6_000, -8_000, -10_000 };
     private static final int[] LOW_RES_CONTOURS = new int[] { -100, -500, -1_000, -5_000, -10_000 };
@@ -103,50 +108,45 @@ public class Etopo1Painter extends DelegatePainter
 
     private GeoProjection projection;
     private GridCoverage2D topoData;
-    private Map<BathyTileKey, HeatMapPainter> bathyPainters;
-    private Map<ContourTileKey, ContourPainter> contourPainters;
+    private PainterCache<BathyTileKey, HeatMapPainter> bathyPainters;
     private ColorTexture1D elevationHeatMapColors;
 
     private Rectangle2D.Double lastAxis;
 
+    private Executor executor;
+
     public Etopo1Painter( GeoProjection projection )
     {
         this.projection = projection;
-        bathyPainters = new ConcurrentHashMap<>( );
-        contourPainters = new ConcurrentHashMap<>( );
+        this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
+        bathyPainters = new PainterCache<>( this::newBathyImagePainter, executor );
         lastAxis = new Rectangle2D.Double( 0, 0, 0, 0 );
 
         // create a color map which is half bathymetry color scale and half topography color scale
         elevationHeatMapColors = new ColorTexture1D( 1024 );
         elevationHeatMapColors.mutate( new ColorGradientConcatenator( bathymetry, topography ) );
 
-        new SwingWorker<GridCoverage2D, Void>( )
-        {
-            @Override
-            protected GridCoverage2D doInBackground( ) throws Exception
+        executor.execute( ( ) -> {
+            try
             {
                 File file = getCachedDataFile( );
-                GridCoverage2D grid = GeotiffTopoData.readGrid( file );
-                return grid;
+                topoData = GeotiffTopoData.readGrid( file );
             }
-
-            @Override
-            protected void done( )
+            catch ( IOException ex )
             {
-                try
-                {
-                    topoData = get( );
-                }
-                catch ( InterruptedException | ExecutionException ex )
-                {
-                    throw new RuntimeException( ex );
-                }
+                logWarning( LOGGER, "Could not load TOPO1 data", ex );
             }
-        }.execute( );
+        } );
     }
 
     @Override
     public void paintTo( GlimpseContext context )
+    {
+        checkNewState( context );
+        super.paintTo( context );
+    }
+
+    private void checkNewState( GlimpseContext context )
     {
         Axis2D axis = getAxis2D( context );
 
@@ -162,18 +162,23 @@ public class Etopo1Painter extends DelegatePainter
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
 
-            bathyPainters.values( ).forEach( p -> p.setVisible( false ) );
-            contourPainters.values( ).forEach( p -> p.setVisible( false ) );
+            Collection<BathyTileKey> tiles = getVisibleTiles( axis );
 
+            removeAll( );
             int[] levels = getVisibleContourLevels( axis );
-            Collection<BathyTileKey> keys = getVisibleTiles( axis );
-            for ( BathyTileKey k : keys )
+
+            List<HeatMapPainter> tilePainters = tiles.stream( ).map( bathyPainters::get ).collect( toList( ) );
+            tilePainters.stream( ).filter( Objects::nonNull ).forEach( this::addPainter );
+
+            if ( tilePainters.contains( null ) )
             {
-                loadTile( k, levels );
+                lastAxis = new Rectangle2D.Double( );
+            }
+            else
+            {
+                lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
             }
         }
-
-        super.paintTo( context );
     }
 
     private Collection<BathyTileKey> getVisibleTiles( Axis2D axis )
@@ -212,7 +217,7 @@ public class Etopo1Painter extends DelegatePainter
                 int tileX = px[0] / nPixelsX;
                 int tileY = px[1] / nPixelsY;
 
-                // Pad the image slightly to ensure contouring is ok, won't work at -180
+                // Pad the image slightly to ensure contouring is ok, ignore the 180/-180 boundary
                 int pixelX0 = max( 0, tileX * nPixelsX - 2 );
                 int pixelY0 = max( 0, tileY * nPixelsY - 2 );
                 int pixelWidth = min( img.getWidth( ) - pixelX0, nPixelsX + 4 );
@@ -238,27 +243,16 @@ public class Etopo1Painter extends DelegatePainter
         {
             levels = LOW_RES_CONTOURS;
         }
-        else
+        else if ( span < fromKilometers( 10_000 ) )
         {
             levels = MIN_CONTOURS;
         }
+        else
+        {
+            return new int[0];
+        }
 
         return levels;
-    }
-
-    private synchronized void addPainter( BathyTileKey key, GlimpsePainter painter )
-    {
-        painter.setVisible( false );
-        if ( painter instanceof HeatMapPainter )
-        {
-            bathyPainters.put( key, ( HeatMapPainter ) painter );
-            super.addPainter( painter, 0 );
-        }
-        else if ( painter instanceof ContourPainter )
-        {
-            contourPainters.put( ( ContourTileKey ) key, ( ContourPainter ) painter );
-            super.addPainter( painter );
-        }
     }
 
     private void loadTile( BathyTileKey key, int[] contourLevels )
@@ -294,8 +288,6 @@ public class Etopo1Painter extends DelegatePainter
         HeatMapPainter p = new HeatMapPainter( bathyAxis );
         p.setData( data.getTexture( ) );
         p.setColorScale( elevationHeatMapColors );
-
-        addPainter( key, p );
 
         return p;
     }
@@ -341,6 +333,7 @@ public class Etopo1Painter extends DelegatePainter
         File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/tile_%05d.bin", key.tileIdx ) );
         if ( cacheFile.isFile( ) )
         {
+            logFine( LOGGER, "Loading cached bathy tile from %s", cacheFile );
             try (InputStream is = new BufferedInputStream( new FileInputStream( cacheFile ) ))
             {
                 data = new CachedTopoData( is, projection );
@@ -354,7 +347,9 @@ public class Etopo1Painter extends DelegatePainter
         if ( data == null )
         {
             cacheFile.getParentFile( ).mkdirs( );
+            logFine( LOGGER, "Building bathy tile for %s", key );
             data = GeotiffTopoData.getTile( topoData, projection, key );
+            logFine( LOGGER, "Writing cached bathy tile to %s", cacheFile );
             try (OutputStream os = new BufferedOutputStream( new FileOutputStream( cacheFile ) ))
             {
                 CachedTopoData.write( os, data );
@@ -364,9 +359,11 @@ public class Etopo1Painter extends DelegatePainter
                 throw new RuntimeException( ex );
             }
 
-            BathymetryData bathyData = data;
-            IntStream.of( HI_RES_CONTOURS ).parallel( )
-                    .forEach( lvl -> computeAndWriteContour( key, bathyData, lvl ) );
+            BathymetryData d = data;
+            for ( int lvl : HI_RES_CONTOURS )
+            {
+                //                executor.execute( ( ) -> computeAndWriteContour( key, d, lvl ) );
+            }
         }
 
         return data;
@@ -403,7 +400,7 @@ public class Etopo1Painter extends DelegatePainter
         }
     }
 
-    private File getCachedDataFile( ) throws IOException
+    public static File getCachedDataFile( ) throws IOException
     {
         String name = "etopo/ETOPO1_Ice_g_geotiff.tif";
         File file = new File( GlimpseDataPaths.glimpseSharedDataDir, name );
@@ -454,6 +451,12 @@ public class Etopo1Painter extends DelegatePainter
         public boolean equals( Object obj )
         {
             return obj instanceof BathyTileKey && ( ( BathyTileKey ) obj ).tileIdx == tileIdx;
+        }
+
+        @Override
+        public String toString( )
+        {
+            return String.format( "BathyTileKey[id=%d, %d,%d width=%d,height=%d]", tileIdx, pixelX0, pixelY0, pixelWidth, pixelHeight );
         }
     }
 
