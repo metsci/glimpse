@@ -72,6 +72,7 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.support.PainterCache;
@@ -94,9 +95,8 @@ public class Etopo1Painter extends DelegatePainter
     private GridCoverage2D topoData;
     private Map<BathyTileKey, Area> tileBounds;
 
-    private PainterCache<BathyTileKey, HeatMapPainter> bathyPainters;
-    private ColorTexture1D elevationHeatMapColors;
-
+    private PainterCache<BathyTileKey, DrawableTexture> bathyTextures;
+    private HeatMapPainter bathyImagePainter;
     private Rectangle2D.Double lastAxis;
 
     private Executor executor;
@@ -105,24 +105,20 @@ public class Etopo1Painter extends DelegatePainter
     {
         this.projection = projection;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
-        bathyPainters = new PainterCache<>( this::newBathyImagePainter, executor );
-        lastAxis = new Rectangle2D.Double( 0, 0, 0, 0 );
+        bathyTextures = new PainterCache<>( this::newBathyImagePainter, executor );
+        lastAxis = new Rectangle2D.Double( );
 
+        Axis1D bathyAxis = new Axis1D( );
+        bathyAxis.setMin( -10_000 );
+        bathyAxis.setMax( +10_000 );
         // create a color map which is half bathymetry color scale and half topography color scale
-        elevationHeatMapColors = new ColorTexture1D( 1024 );
+        ColorTexture1D elevationHeatMapColors = new ColorTexture1D( 1024 );
         elevationHeatMapColors.mutate( new ColorGradientConcatenator( bathymetry, topography ) );
+        bathyImagePainter = new HeatMapPainter( bathyAxis );
+        bathyImagePainter.setColorScale( elevationHeatMapColors );
+        addPainter( bathyImagePainter );
 
-        executor.execute( ( ) -> {
-            try
-            {
-                File file = getCachedDataFile( );
-                topoData = GeotiffTopoData.readGrid( file );
-            }
-            catch ( IOException ex )
-            {
-                logWarning( LOGGER, "Could not load TOPO1 data", ex );
-            }
-        } );
+        executor.execute( this::initializeBathySourceData );
     }
 
     @Override
@@ -155,18 +151,18 @@ public class Etopo1Painter extends DelegatePainter
 
             Collection<BathyTileKey> tiles = getVisibleTiles( lastAxis );
 
-            removeAll( );
+            bathyImagePainter.removeAllDrawableTextures( );
             boolean anyMissed = false;
             for ( BathyTileKey key : tiles )
             {
-                HeatMapPainter painter = bathyPainters.get( key );
-                if ( painter == null )
+                DrawableTexture tex = bathyTextures.get( key );
+                if ( tex == null )
                 {
                     anyMissed = true;
                 }
                 else
                 {
-                    addPainter( painter );
+                    bathyImagePainter.addDrawableTexture( tex );
                 }
             }
 
@@ -253,18 +249,23 @@ public class Etopo1Painter extends DelegatePainter
         return keys;
     }
 
-    private HeatMapPainter newBathyImagePainter( BathyTileKey key )
+    private DrawableTexture newBathyImagePainter( BathyTileKey key )
     {
         BathymetryData data = loadBathyTileData( key );
+        return data.getTexture( );
+    }
 
-        Axis1D bathyAxis = new Axis1D( );
-        bathyAxis.setMin( -10_000 );
-        bathyAxis.setMax( +10_000 );
-        HeatMapPainter p = new HeatMapPainter( bathyAxis );
-        p.setData( data.getTexture( ) );
-        p.setColorScale( elevationHeatMapColors );
-
-        return p;
+    private void initializeBathySourceData( )
+    {
+        try
+        {
+            File file = getCachedDataFile( );
+            topoData = GeotiffTopoData.readGrid( file );
+        }
+        catch ( IOException ex )
+        {
+            logWarning( LOGGER, "Could not load TOPO1 data", ex );
+        }
     }
 
     private BathymetryData loadBathyTileData( BathyTileKey key )

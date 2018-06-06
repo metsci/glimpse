@@ -37,6 +37,7 @@ import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
+import com.metsci.glimpse.util.units.Length;
 
 /**
  * @author borkholder
@@ -59,6 +60,8 @@ public class Etopo1Example implements GlimpseLayoutProvider
     {
         MapPlot2D plot = new MapPlot2D( projection );
         plot.getLayoutCenter( ).addPainter( new Etopo1Painter( projection ) );
+        plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
+        plot.getAxis( ).validate( );
         return plot;
     }
 }
