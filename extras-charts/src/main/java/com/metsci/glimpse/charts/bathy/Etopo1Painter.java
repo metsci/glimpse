@@ -32,20 +32,14 @@ import static com.metsci.glimpse.support.colormap.ColorGradients.topography;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static com.metsci.glimpse.util.units.Length.fromKilometers;
-import static com.metsci.glimpse.util.units.Length.toMeters;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Runtime.getRuntime;
-import static java.lang.System.currentTimeMillis;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static java.util.stream.Collectors.toList;
 
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.Raster;
 import java.io.BufferedInputStream;
@@ -57,29 +51,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.InvalidGridGeometryException;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.geometry.DirectPosition2D;
 import org.geotools.referencing.CRS;
 import org.hsqldb.lib.DataOutputStream;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.TransformException;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -92,6 +79,7 @@ import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
  * @author borkholder
@@ -102,12 +90,10 @@ public class Etopo1Painter extends DelegatePainter
 
     public static final String ETOPO_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
 
-    private static final int[] HI_RES_CONTOURS = new int[] { -20, -50, -100, -250, -500, -1_000, -2_000, -4_000, -5_000, -6_000, -8_000, -10_000 };
-    private static final int[] LOW_RES_CONTOURS = new int[] { -100, -500, -1_000, -5_000, -10_000 };
-    private static final int[] MIN_CONTOURS = new int[] { -1_000, -5_000, -10_000 };
-
     private GeoProjection projection;
     private GridCoverage2D topoData;
+    private Map<BathyTileKey, Area> tileBounds;
+
     private PainterCache<BathyTileKey, HeatMapPainter> bathyPainters;
     private ColorTexture1D elevationHeatMapColors;
 
@@ -155,6 +141,11 @@ public class Etopo1Painter extends DelegatePainter
             return;
         }
 
+        if ( tileBounds == null )
+        {
+            tileBounds = createTileKeys( topoData );
+        }
+
         if ( lastAxis.getMinX( ) != axis.getMinX( ) ||
                 lastAxis.getMaxX( ) != axis.getMaxX( ) ||
                 lastAxis.getMinY( ) != axis.getMinY( ) ||
@@ -162,120 +153,104 @@ public class Etopo1Painter extends DelegatePainter
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
 
-            Collection<BathyTileKey> tiles = getVisibleTiles( axis );
+            Collection<BathyTileKey> tiles = getVisibleTiles( lastAxis );
 
             removeAll( );
-            int[] levels = getVisibleContourLevels( axis );
+            boolean anyMissed = false;
+            for ( BathyTileKey key : tiles )
+            {
+                HeatMapPainter painter = bathyPainters.get( key );
+                if ( painter == null )
+                {
+                    anyMissed = true;
+                }
+                else
+                {
+                    addPainter( painter );
+                }
+            }
 
-            List<HeatMapPainter> tilePainters = tiles.stream( ).map( bathyPainters::get ).collect( toList( ) );
-            tilePainters.stream( ).filter( Objects::nonNull ).forEach( this::addPainter );
-
-            if ( tilePainters.contains( null ) )
+            if ( anyMissed )
             {
                 lastAxis = new Rectangle2D.Double( );
-            }
-            else
-            {
-                lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
             }
         }
     }
 
-    private Collection<BathyTileKey> getVisibleTiles( Axis2D axis )
+    private Map<BathyTileKey, Area> createTileKeys( GridCoverage2D grid )
     {
-        PlanarImage img = ( PlanarImage ) topoData.getRenderedImage( );
+        PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
+        int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
+        double px2Lon = 360.0 / nLonLat[0];
+        double px2Lat = 180.0 / nLonLat[1];
 
-        double spanX = axis.getMaxX( ) - axis.getMinX( );
-        double spanY = axis.getMaxY( ) - axis.getMinY( );
+        int tilePixelsX = img.getWidth( ) / 30;
+        int tilePixelsY = img.getHeight( ) / 15;
 
-        /*
-         * TODO
-         * These are specific to the ETOPO1 file
-         */
-        int nPixelsX = img.getTileWidth( ) / 10;
-        int nPixelsY = img.getTileHeight( ) * 1_000;
-        int nTilesX = img.getNumXTiles( ) * 10;
-
-        Collection<BathyTileKey> keys = new HashSet<>( );
-
-        /*
-         * TODO
-         * This is slow, but sure way to get all tiles in any projection.
-         * Maybe there's a better way to do this.
-         */
-        int steps = 31;
-        double xStep = spanX / ( steps - 1 );
-        double yStep = spanY / ( steps - 1 );
-        for ( int i = 0; i < steps; i++ )
+        Map<BathyTileKey, Area> keys = new HashMap<>( );
+        for ( int pxX = 0; pxX < img.getWidth( ); pxX += tilePixelsX )
         {
-            for ( int j = 0; j < steps; j++ )
+            for ( int pxY = 0; pxY < img.getHeight( ); pxY += tilePixelsY )
             {
-                double x = axis.getMinX( ) - xStep / 2 + xStep * i;
-                double y = axis.getMinY( ) - yStep / 2 + yStep * j;
-                LatLonGeo ll = projection.unproject( x, y );
-                int[] px = GeotiffTopoData.getPixelXY( topoData, ll );
-                int tileX = px[0] / nPixelsX;
-                int tileY = px[1] / nPixelsY;
+                int pixelX0 = max( 0, pxX - 2 );
+                int pixelY0 = max( 0, pxY - 2 );
+                int pixelWidth = min( img.getWidth( ) - pixelX0, tilePixelsX + 4 );
+                int pixelHeight = min( img.getHeight( ) - pixelY0, tilePixelsY + 4 );
+                BathyTileKey key = new BathyTileKey( pixelX0, pixelY0, pixelWidth, pixelHeight );
 
-                // Pad the image slightly to ensure contouring is ok, ignore the 180/-180 boundary
-                int pixelX0 = max( 0, tileX * nPixelsX - 2 );
-                int pixelY0 = max( 0, tileY * nPixelsY - 2 );
-                int pixelWidth = min( img.getWidth( ) - pixelX0, nPixelsX + 4 );
-                int pixelHeight = min( img.getHeight( ) - pixelY0, nPixelsY + 4 );
-                int tileIdx = tileY * nTilesX + tileX;
-                keys.add( new BathyTileKey( tileIdx, pixelX0, pixelY0, pixelWidth, pixelHeight ) );
+                double lon = pixelX0 * px2Lon - 180;
+                double lat = 90 - ( pixelY0 + pixelHeight ) * px2Lat;
+                Vector2d sw = projection.project( LatLonGeo.fromDeg( lat, lon ) );
+                lat = 90 - pixelY0 * px2Lat;
+                Vector2d nw = projection.project( LatLonGeo.fromDeg( lat, lon ) );
+                lon = ( pixelX0 + pixelWidth ) * px2Lon - 180;
+                Vector2d ne = projection.project( LatLonGeo.fromDeg( lat, lon ) );
+                lat = 90 - ( pixelY0 + pixelHeight ) * px2Lat;
+                Vector2d se = projection.project( LatLonGeo.fromDeg( lat, lon ) );
+
+                /*
+                 * If the border is clockwise, the tile is valid in the current
+                 * projection. This test will fail for tiles at the edges of a
+                 * TangentPlane because of how skewed they are.
+                 */
+                double sumOverEdge = 0;
+                sumOverEdge += ( se.getX( ) - ne.getX( ) ) * ( se.getY( ) + ne.getY( ) );
+                sumOverEdge += ( sw.getX( ) - se.getX( ) ) * ( sw.getY( ) + se.getY( ) );
+                sumOverEdge += ( nw.getX( ) - sw.getX( ) ) * ( nw.getY( ) + sw.getY( ) );
+                sumOverEdge += ( ne.getX( ) - nw.getX( ) ) * ( ne.getY( ) + nw.getY( ) );
+                if ( sumOverEdge > 0 )
+                {
+                    Path2D path = new Path2D.Double( Path2D.WIND_EVEN_ODD );
+                    path.moveTo( sw.getX( ), sw.getY( ) );
+                    path.lineTo( nw.getX( ), nw.getY( ) );
+                    path.lineTo( ne.getX( ), ne.getY( ) );
+                    path.lineTo( se.getX( ), se.getY( ) );
+                    path.closePath( );
+                    keys.put( key, new Area( path ) );
+                }
             }
         }
 
         return keys;
     }
 
-    private int[] getVisibleContourLevels( Axis2D axis )
+    private Collection<BathyTileKey> getVisibleTiles( Rectangle2D bounds )
     {
-        double span = min( axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
+        // Pad for irregular projections
+        double padX = bounds.getWidth( ) * 0.02;
+        double padY = bounds.getHeight( ) * 0.02;
+        bounds = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
 
-        int[] levels;
-        if ( span < fromKilometers( 200 ) )
+        Collection<BathyTileKey> keys = new ArrayList<>( );
+        for ( Entry<BathyTileKey, Area> e : tileBounds.entrySet( ) )
         {
-            levels = HI_RES_CONTOURS;
-        }
-        else if ( span < fromKilometers( 1_000 ) )
-        {
-            levels = LOW_RES_CONTOURS;
-        }
-        else if ( span < fromKilometers( 10_000 ) )
-        {
-            levels = MIN_CONTOURS;
-        }
-        else
-        {
-            return new int[0];
-        }
-
-        return levels;
-    }
-
-    private void loadTile( BathyTileKey key, int[] contourLevels )
-    {
-        HeatMapPainter bathyPainter = bathyPainters.get( key );
-        if ( bathyPainter == null )
-        {
-            bathyPainter = newBathyImagePainter( key );
-        }
-
-        bathyPainter.setVisible( true );
-
-        for ( int lvl : contourLevels )
-        {
-            ContourTileKey ckey = new ContourTileKey( key, lvl );
-            ContourPainter contourPainter = contourPainters.get( ckey );
-            if ( contourPainter == null )
+            if ( e.getValue( ).intersects( bounds ) )
             {
-                contourPainter = newContourPainter( ckey, lvl );
+                keys.add( e.getKey( ) );
             }
-
-            contourPainter.setVisible( true );
         }
+
+        return keys;
     }
 
     private HeatMapPainter newBathyImagePainter( BathyTileKey key )
@@ -292,45 +267,10 @@ public class Etopo1Painter extends DelegatePainter
         return p;
     }
 
-    private ContourPainter newContourPainter( BathyTileKey key, int level )
-    {
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/contour_%d_%05d.bin", level, key.tileIdx ) );
-
-        float[] x, y;
-        try (RandomAccessFile rf = new RandomAccessFile( cacheFile, "r" ))
-        {
-            int nVertices = rf.readInt( );
-            x = new float[nVertices];
-            y = new float[nVertices];
-
-            ByteBuffer bbuf = ByteBuffer.allocateDirect( nVertices * Float.BYTES );
-            rf.getChannel( ).read( bbuf );
-            bbuf.rewind( );
-            bbuf.asFloatBuffer( ).get( x );
-            rf.getChannel( ).read( bbuf );
-            bbuf.rewind( );
-            bbuf.asFloatBuffer( ).get( y );
-        }
-        catch ( IOException ex )
-        {
-            throw new RuntimeException( ex );
-        }
-
-        // create a painter to display the contour lines
-        ContourPainter p = new ContourPainter( x, y );
-
-        p.setLineColor( 0.8f, 0.8f, 0.8f, 1f );
-        p.setLineWidth( 0.7f );
-
-        addPainter( key, p );
-
-        return p;
-    }
-
     private BathymetryData loadBathyTileData( BathyTileKey key )
     {
         BathymetryData data = null;
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/tile_%05d.bin", key.tileIdx ) );
+        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/tile_%x.bin", key.id ) );
         if ( cacheFile.isFile( ) )
         {
             logFine( LOGGER, "Loading cached bathy tile from %s", cacheFile );
@@ -358,46 +298,9 @@ public class Etopo1Painter extends DelegatePainter
             {
                 throw new RuntimeException( ex );
             }
-
-            BathymetryData d = data;
-            for ( int lvl : HI_RES_CONTOURS )
-            {
-                //                executor.execute( ( ) -> computeAndWriteContour( key, d, lvl ) );
-            }
         }
 
         return data;
-    }
-
-    private void computeAndWriteContour( BathyTileKey key, BathymetryData data, int level )
-    {
-        logInfo( LOGGER, "Computing contour for level %.0fm", toMeters( level ) );
-        long t0 = currentTimeMillis( );
-        ContourData contourData = new ContourData( data, projection, new double[] { level } );
-        logInfo( LOGGER, "Computed contour of %,d points in %,dms", contourData.getCoordsX( ).length, currentTimeMillis( ) - t0 );
-
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/contour_%d_%05d.bin", level, key.tileIdx ) );
-        float[] x = contourData.getCoordsX( );
-        float[] y = contourData.getCoordsY( );
-
-        int nBytes = x.length * 2 * Float.BYTES + Integer.BYTES;
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( nBytes );
-
-        bbuf.clear( );
-        bbuf.asIntBuffer( ).put( x.length );
-        bbuf.position( bbuf.position( ) + Integer.BYTES );
-        bbuf.asFloatBuffer( ).put( x ).put( y );
-        bbuf.rewind( );
-        bbuf.limit( nBytes );
-
-        try (FileChannel fc = FileChannel.open( cacheFile.toPath( ), WRITE, CREATE, TRUNCATE_EXISTING ))
-        {
-            fc.write( bbuf );
-        }
-        catch ( IOException ex )
-        {
-            throw new RuntimeException( ex );
-        }
     }
 
     public static File getCachedDataFile( ) throws IOException
@@ -426,60 +329,48 @@ public class Etopo1Painter extends DelegatePainter
 
     private static class BathyTileKey
     {
-        final int tileIdx;
+        final long id;
         final int pixelX0;
         final int pixelY0;
         final int pixelWidth;
         final int pixelHeight;
 
-        BathyTileKey( int tileIdx, int pixelX0, int pixelY0, int pixelWidth, int pixelHeight )
+        BathyTileKey( int pixelX0, int pixelY0, int pixelWidth, int pixelHeight )
         {
-            this.tileIdx = tileIdx;
             this.pixelX0 = pixelX0;
             this.pixelY0 = pixelY0;
             this.pixelWidth = pixelWidth;
             this.pixelHeight = pixelHeight;
+            this.id = ( ( long ) pixelX0 << 32 ) | pixelY0;
         }
 
         @Override
         public int hashCode( )
         {
-            return tileIdx;
+            return Long.hashCode( id );
         }
 
         @Override
         public boolean equals( Object obj )
         {
-            return obj instanceof BathyTileKey && ( ( BathyTileKey ) obj ).tileIdx == tileIdx;
+            if ( obj instanceof BathyTileKey )
+            {
+                BathyTileKey other = ( BathyTileKey ) obj;
+                return pixelHeight == other.pixelHeight &&
+                        pixelWidth == other.pixelWidth &&
+                        pixelX0 == other.pixelX0 &&
+                        pixelY0 == other.pixelY0;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         @Override
         public String toString( )
         {
-            return String.format( "BathyTileKey[id=%d, %d,%d width=%d,height=%d]", tileIdx, pixelX0, pixelY0, pixelWidth, pixelHeight );
-        }
-    }
-
-    private static class ContourTileKey extends BathyTileKey
-    {
-        final int contourIdx;
-
-        ContourTileKey( BathyTileKey parent, int level )
-        {
-            super( parent.tileIdx, parent.pixelX0, parent.pixelY0, parent.pixelWidth, parent.pixelHeight );
-            contourIdx = tileIdx * 100_000 + ( level + 20_000 );
-        }
-
-        @Override
-        public int hashCode( )
-        {
-            return contourIdx;
-        }
-
-        @Override
-        public boolean equals( Object obj )
-        {
-            return obj instanceof ContourTileKey && ( ( ContourTileKey ) obj ).contourIdx == contourIdx;
+            return String.format( "BathyTileKey[%d,%d width=%d,height=%d]", pixelX0, pixelY0, pixelWidth, pixelHeight );
         }
     }
 
@@ -529,20 +420,6 @@ public class Etopo1Painter extends DelegatePainter
                 return new GeotiffTopoData( grid, projection, key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
             }
             catch ( IOException ex )
-            {
-                throw new RuntimeException( ex );
-            }
-        }
-
-        public static int[] getPixelXY( GridCoverage2D grid, LatLonGeo ll )
-        {
-            try
-            {
-                DirectPosition2D pos = new DirectPosition2D( ll.getLonDeg( ), ll.getLatDeg( ) );
-                GridCoordinates2D coord = grid.getGridGeometry( ).worldToGrid( pos );
-                return new int[] { coord.x, coord.y };
-            }
-            catch ( InvalidGridGeometryException | TransformException ex )
             {
                 throw new RuntimeException( ex );
             }
