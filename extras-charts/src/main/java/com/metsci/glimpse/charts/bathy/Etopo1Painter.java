@@ -32,7 +32,6 @@ import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
-import static com.metsci.glimpse.util.units.Length.fromMeters;
 import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
@@ -48,17 +47,14 @@ import java.awt.Color;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.Raster;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,16 +63,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
-import javax.media.jai.PlanarImage;
-
-import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.gce.geotiff.GeoTiffFormat;
-import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.referencing.CRS;
-import org.hsqldb.lib.DataOutputStream;
-import org.opengis.referencing.FactoryException;
-
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
@@ -85,7 +71,6 @@ import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.support.PainterCache;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
-import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -103,10 +88,8 @@ public class Etopo1Painter extends DelegatePainter
     private static final double LIGHT_AZIMUTH = fromDeg( -135 );
     private static final float BATHY_HUE = 0.63f;
 
-    public static final String ETOPO_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
-
     private GeoProjection projection;
-    private GridCoverage2D topoData;
+    private BathyTileProvider tileProvider;
     private Map<BathyTileKey, Area> tileBounds;
 
     private PainterCache<BathyTileKey, DrawableTexture> bathyTextures;
@@ -115,17 +98,16 @@ public class Etopo1Painter extends DelegatePainter
 
     private Executor executor;
 
-    public Etopo1Painter( GeoProjection projection, Axis1D bathyAxis )
+    public Etopo1Painter( GeoProjection projection, BathyTileProvider tileProvider )
     {
         this.projection = projection;
+        this.tileProvider = tileProvider;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
         bathyTextures = new PainterCache<>( this::newBathyTexture, executor );
         lastAxis = new Rectangle2D.Double( );
 
         bathyImagePainter = new ShadedTexturePainter( );
         addPainter( bathyImagePainter );
-
-        executor.execute( this::initializeBathySourceData );
     }
 
     @Override
@@ -139,14 +121,9 @@ public class Etopo1Painter extends DelegatePainter
     {
         Axis2D axis = getAxis2D( context );
 
-        if ( topoData == null )
-        {
-            return;
-        }
-
         if ( tileBounds == null )
         {
-            tileBounds = createTileKeys( topoData );
+            tileBounds = createTileKeys( tileProvider );
         }
 
         if ( lastAxis.getMinX( ) != axis.getMinX( ) ||
@@ -180,25 +157,25 @@ public class Etopo1Painter extends DelegatePainter
         }
     }
 
-    private Map<BathyTileKey, Area> createTileKeys( GridCoverage2D grid )
+    private Map<BathyTileKey, Area> createTileKeys( BathyTileProvider grid )
     {
-        PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
-        int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
-        double px2Lon = 360.0 / nLonLat[0];
-        double px2Lat = 180.0 / nLonLat[1];
+        int pxWidth = grid.getPixelsX( );
+        int pxHeight = grid.getPixelsY( );
+        double px2Lon = 360.0 / pxWidth;
+        double px2Lat = 180.0 / pxHeight;
 
-        int tilePixelsX = img.getWidth( ) / 30;
-        int tilePixelsY = img.getHeight( ) / 15;
+        int tilePixelsX = pxWidth / 30;
+        int tilePixelsY = pxHeight / 15;
 
         Map<BathyTileKey, Area> keys = new HashMap<>( );
-        for ( int pxX = 0; pxX < img.getWidth( ); pxX += tilePixelsX )
+        for ( int pxX = 0; pxX < pxWidth; pxX += tilePixelsX )
         {
-            for ( int pxY = 0; pxY < img.getHeight( ); pxY += tilePixelsY )
+            for ( int pxY = 0; pxY < pxHeight; pxY += tilePixelsY )
             {
                 int pixelX0 = max( 0, pxX - 2 );
                 int pixelY0 = max( 0, pxY - 2 );
-                int pixelWidth = min( img.getWidth( ) - pixelX0, tilePixelsX + 4 );
-                int pixelHeight = min( img.getHeight( ) - pixelY0, tilePixelsY + 4 );
+                int pixelWidth = min( pxWidth - pixelX0, tilePixelsX + 4 );
+                int pixelHeight = min( pxHeight - pixelY0, tilePixelsY + 4 );
                 BathyTileKey key = new BathyTileKey( pixelX0, pixelY0, pixelWidth, pixelHeight );
 
                 double lon = pixelX0 * px2Lon - 180;
@@ -258,12 +235,44 @@ public class Etopo1Painter extends DelegatePainter
 
     private DrawableTexture newBathyTexture( BathyTileKey key )
     {
-        BathymetryData tile = loadBathyTileData( key );
-        float[][] hill = hillshade( tile );
+        CachedTileData rgba = null;
+        File cacheFile = new File( glimpseUserCacheDir, String.format( "bathymetry/tile_%s.bin", key.id ) );
+        if ( cacheFile.isFile( ) )
+        {
+            logFine( LOGGER, "Loading cached bathy tile from %s", cacheFile );
+            try
+            {
+                rgba = readCachedTile( cacheFile );
+            }
+            catch ( IOException ex )
+            {
+                logWarning( LOGGER, "Failed to read cache file", ex );
+            }
+        }
 
-        RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
-        texture.setProjection( tile.getProjection( ) );
+        if ( rgba == null )
+        {
+            logFine( LOGGER, "Building bathy tile for %s", key );
+            try
+            {
+                BathymetryData data = tileProvider.getTile( projection, key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
+                int[][] colored = new int[data.getImageWidth( )][data.getImageHeight( )];
+                hillshade( data, colored );
+                rgba = new CachedTileData( data, colored );
 
+                cacheFile.getParentFile( ).mkdirs( );
+                writeCachedTile( cacheFile, rgba );
+            }
+            catch ( IOException ex )
+            {
+                throw new RuntimeException( ex );
+            }
+        }
+
+        RGBATextureProjected2D texture = new RGBATextureProjected2D( rgba.getImageWidth( ), rgba.getImageHeight( ) );
+        texture.setProjection( rgba.getProjection( ) );
+
+        int[][] pixels = rgba.rgba;
         texture.mutate( new MutatorByte2D( )
         {
             @Override
@@ -273,14 +282,11 @@ public class Etopo1Painter extends DelegatePainter
                 {
                     for ( int c = 0; c < dataSizeX; c++ )
                     {
-                        float h = clamp( ( hill[c][r] - 0.4f ) / 0.5f, 0, 1 );
-                        float bri = 0.1f + 0.9f * h;
-                        float sat = 0.5f + 0.1f * ( 1 - h );
-                        int rgb = Color.HSBtoRGB( BATHY_HUE, sat, bri );
-                        data.put( ( byte ) ( rgb >> 16 & 0xff ) );
-                        data.put( ( byte ) ( rgb >> 8 & 0xff ) );
-                        data.put( ( byte ) ( rgb >> 0 & 0xff ) );
-                        data.put( ( byte ) 255 );
+                        int x = pixels[c][r];
+                        data.put( ( byte ) ( ( x >> 24 ) & 0xff ) );
+                        data.put( ( byte ) ( ( x >> 16 ) & 0xff ) );
+                        data.put( ( byte ) ( ( x >> 8 ) & 0xff ) );
+                        data.put( ( byte ) ( ( x >> 0 ) & 0xff ) );
                     }
                 }
             }
@@ -289,59 +295,58 @@ public class Etopo1Painter extends DelegatePainter
         return texture;
     }
 
-    private void initializeBathySourceData( )
+    private CachedTileData readCachedTile( File cacheFile ) throws IOException
     {
-        try
+        RandomAccessFile rf = new RandomAccessFile( cacheFile, "r" );
+
+        CachedTileData rgba = new CachedTileData( );
+        rgba.imageWidth = rf.readInt( );
+        rgba.imageHeight = rf.readInt( );
+        rgba.startLat = rf.readDouble( );
+        rgba.startLon = rf.readDouble( );
+        rgba.widthStep = rf.readDouble( );
+        rgba.heightStep = rf.readDouble( );
+
+        long size = rgba.getImageWidth( ) * rgba.getImageHeight( ) * Integer.BYTES;
+        MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_ONLY, rf.getFilePointer( ), size );
+        IntBuffer ib = mmap.asIntBuffer( );
+
+        rgba.rgba = new int[rgba.getImageWidth( )][rgba.getImageHeight( )];
+        for ( int[] row : rgba.rgba )
         {
-            File file = getCachedDataFile( );
-            topoData = GeotiffTopoData.readGrid( file );
+            ib.get( row );
         }
-        catch ( IOException ex )
-        {
-            logWarning( LOGGER, "Could not load TOPO1 data", ex );
-        }
+
+        rf.close( );
+        return rgba;
     }
 
-    private BathymetryData loadBathyTileData( BathyTileKey key )
+    private void writeCachedTile( File cacheFile, CachedTileData rgba ) throws IOException
     {
-        BathymetryData data = null;
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/tile_%s.bin", key.id ) );
-        if ( cacheFile.isFile( ) )
+        long size = rgba.getImageWidth( ) * rgba.getImageHeight( ) * Integer.BYTES;
+        RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
+        rf.setLength( 0 );
+
+        rf.writeInt( rgba.getImageWidth( ) );
+        rf.writeInt( rgba.getImageHeight( ) );
+        rf.writeDouble( rgba.getStartLat( ) );
+        rf.writeDouble( rgba.getStartLon( ) );
+        rf.writeDouble( rgba.getWidthStep( ) );
+        rf.writeDouble( rgba.getHeightStep( ) );
+
+        MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_WRITE, rf.getFilePointer( ), size );
+        IntBuffer fb = mmap.asIntBuffer( );
+
+        for ( int[] row : rgba.rgba )
         {
-            logFine( LOGGER, "Loading cached bathy tile from %s", cacheFile );
-            try (InputStream is = new BufferedInputStream( new FileInputStream( cacheFile ) ))
-            {
-                data = new CachedTopoData( is, projection );
-            }
-            catch ( IOException ex )
-            {
-                throw new RuntimeException( ex );
-            }
+            fb.put( row );
         }
 
-        if ( data == null )
-        {
-            cacheFile.getParentFile( ).mkdirs( );
-            logFine( LOGGER, "Building bathy tile for %s", key );
-            data = GeotiffTopoData.getTile( topoData, projection, key );
-            logFine( LOGGER, "Writing cached bathy tile to %s", cacheFile );
-            try (OutputStream os = new BufferedOutputStream( new FileOutputStream( cacheFile ) ))
-            {
-                CachedTopoData.write( os, data );
-            }
-            catch ( IOException ex )
-            {
-                throw new RuntimeException( ex );
-            }
-        }
-
-        return data;
+        rf.close( );
     }
 
-    private float[][] hillshade( BathymetryData data )
+    private void hillshade( BathymetryData data, int[][] dest )
     {
-        float[][] hill = new float[data.imageWidth][data.imageHeight];
-
         /*
          * dx certainly changes as we change latitude, but the transition is
          * uneven and visually disturbing. Also found that tweaking by 0.5
@@ -354,17 +359,26 @@ public class Etopo1Painter extends DelegatePainter
         {
             for ( int y = 1; y < data.imageHeight - 1; y++ )
             {
-                hill[x][y] = hillshade0( data.data, x, y, dx, dy );
+                float shaded = hillshade0( data.data, x, y, dx, dy );
+                int rgba = colorize( shaded );
+                dest[x][y] = rgba;
             }
 
-            hill[x][0] = hill[x][1];
-            hill[x][data.imageHeight - 1] = hill[x][data.imageHeight - 2];
+            dest[x][0] = dest[x][1];
+            dest[x][data.imageHeight - 1] = dest[x][data.imageHeight - 2];
         }
 
-        System.arraycopy( hill[1], 0, hill[0], 0, data.imageHeight );
-        System.arraycopy( hill[data.imageWidth - 2], 0, hill[data.imageWidth - 1], 0, data.imageHeight );
+        System.arraycopy( dest[1], 0, dest[0], 0, data.imageHeight );
+        System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
+    }
 
-        return hill;
+    private int colorize( float hillshade )
+    {
+        float h = clamp( ( hillshade - 0.4f ) / 0.5f, 0, 1 );
+        float bri = 0.1f + 0.9f * h;
+        float sat = 0.5f + 0.1f * ( 1 - h );
+        int rgb = Color.HSBtoRGB( BATHY_HUE, sat, bri );
+        return ( rgb << 8 ) | 0xff;
     }
 
     /**
@@ -387,30 +401,6 @@ public class Etopo1Painter extends DelegatePainter
 
         double hillshade = ( COS_LIGHT_ZENITH * cos( slope ) ) + ( SIN_LIGHT_ZENITH * sin( slope ) * cos( LIGHT_AZIMUTH - aspect ) );
         return ( float ) hillshade;
-    }
-
-    public static File getCachedDataFile( ) throws IOException
-    {
-        String name = "etopo/ETOPO1_Ice_g_geotiff.tif";
-        File file = new File( GlimpseDataPaths.glimpseSharedDataDir, name );
-        if ( file.isFile( ) )
-        {
-            return file;
-        }
-
-        file = new File( GlimpseDataPaths.glimpseUserDataDir, name );
-        if ( file.isFile( ) )
-        {
-            return file;
-        }
-
-        file = new File( GlimpseDataPaths.glimpseUserCacheDir, name );
-        if ( file.isFile( ) )
-        {
-            return file;
-        }
-
-        throw new IOException( "Must download data from " + ETOPO_URL );
     }
 
     private static class BathyTileKey
@@ -461,136 +451,31 @@ public class Etopo1Painter extends DelegatePainter
         }
     }
 
-    private static class GeotiffTopoData extends BathymetryData
+    private class CachedTileData extends BathymetryData
     {
-        public GeotiffTopoData( GridCoverage2D grid, GeoProjection projection, int pixelX0, int pixelY0, int pixelWidth, int pixelHeight ) throws IOException
+        private int[][] rgba;
+
+        CachedTileData( ) throws IOException
         {
-            super( null, projection );
-
-            int nLon = grid.getGridGeometry( ).getGridRange( ).getHigh( 0 );
-            int nLat = grid.getGridGeometry( ).getGridRange( ).getHigh( 1 );
-            widthStep = 360.0 / nLon;
-            heightStep = 180.0 / nLat;
-
-            startLon = pixelX0 * widthStep - 180;
-            startLat = 90 - ( pixelY0 + pixelHeight ) * heightStep;
-
-            imageWidth = pixelWidth;
-            imageHeight = pixelHeight;
-
-            data = new float[imageWidth][imageHeight];
-
-            PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
-            for ( int tileY = pixelY0; tileY < pixelY0 + pixelHeight; tileY++ )
-            {
-                int y = pixelHeight - ( tileY - pixelY0 ) - 1;
-                for ( int tileX = img.getMinTileX( ); tileX <= img.getMaxTileX( ); tileX++ )
-                {
-                    Raster tile = img.getTile( tileX, tileY );
-                    int minX = max( pixelX0, tile.getMinX( ) );
-                    int maxX = min( pixelX0 + pixelWidth - 1, tile.getMinX( ) + tile.getWidth( ) - 1 );
-
-                    for ( int i = minX; i <= maxX; i++ )
-                    {
-                        double v = tile.getSampleDouble( i, tile.getMinY( ), 0 );
-                        int x = i - pixelX0;
-                        data[x][y] = ( float ) fromMeters( v );
-                    }
-                }
-            }
+            super( null, Etopo1Painter.this.projection );
         }
 
-        public static GeotiffTopoData getTile( GridCoverage2D grid, GeoProjection projection, BathyTileKey key )
+        public CachedTileData( BathymetryData src, int[][] rgba ) throws IOException
         {
-            try
-            {
-                return new GeotiffTopoData( grid, projection, key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
-            }
-            catch ( IOException ex )
-            {
-                throw new RuntimeException( ex );
-            }
-        }
-
-        public static GridCoverage2D readGrid( File file ) throws IOException
-        {
-            // initialize the EPSG CRS
-            try
-            {
-                CRS.decode( "EPSG:4326" );
-            }
-            catch ( FactoryException ex )
-            {
-                throw new IOException( ex );
-            }
-
-            GeoTiffFormat format = new GeoTiffFormat( );
-            GeoTiffReader reader = format.getReader( file );
-            String[] names = reader.getGridCoverageNames( );
-            GridCoverage2D grid = reader.read( names[0], null );
-            reader.dispose( );
-
-            return grid;
+            this( );
+            this.data = null;
+            this.rgba = rgba;
+            this.imageWidth = src.getImageWidth( );
+            this.imageHeight = src.getImageHeight( );
+            this.heightStep = src.getHeightStep( );
+            this.widthStep = src.getWidthStep( );
+            this.startLat = src.getStartLat( );
+            this.startLon = src.getStartLon( );
         }
 
         @Override
         protected void read( InputStream in, GeoProjection tp ) throws IOException
         {
-            // nop
-        }
-    }
-
-    private static class CachedTopoData extends BathymetryData
-    {
-        public CachedTopoData( InputStream in, GeoProjection projection ) throws IOException
-        {
-            super( in, projection );
-        }
-
-        @Override
-        protected void read( InputStream in, GeoProjection tp ) throws IOException
-        {
-            DataInputStream is = new DataInputStream( in );
-
-            imageWidth = is.readInt( );
-            imageHeight = is.readInt( );
-            startLat = is.readDouble( );
-            startLon = is.readDouble( );
-            widthStep = is.readDouble( );
-            heightStep = is.readDouble( );
-
-            data = new float[imageWidth][imageHeight];
-            for ( int i = 0; i < imageWidth; i++ )
-            {
-                for ( int j = 0; j < imageHeight; j++ )
-                {
-                    data[i][j] = is.readShort( );
-                }
-            }
-        }
-
-        public static void write( OutputStream out, BathymetryData data ) throws IOException
-        {
-            @SuppressWarnings( "resource" )
-            DataOutputStream os = new DataOutputStream( out );
-
-            os.writeInt( data.getImageWidth( ) );
-            os.writeInt( data.getImageHeight( ) );
-            os.writeDouble( data.getStartLat( ) );
-            os.writeDouble( data.getStartLon( ) );
-            os.writeDouble( data.getWidthStep( ) );
-            os.writeDouble( data.getHeightStep( ) );
-
-            float[][] vals = data.getData( );
-            for ( int i = 0; i < data.getImageWidth( ); i++ )
-            {
-                for ( int j = 0; j < data.getImageHeight( ); j++ )
-                {
-                    os.writeShort( ( short ) vals[i][j] );
-                }
-            }
-
-            os.flush( );
         }
     }
 }

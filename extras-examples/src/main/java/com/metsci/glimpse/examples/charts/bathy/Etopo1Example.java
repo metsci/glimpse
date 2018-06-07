@@ -29,12 +29,15 @@ package com.metsci.glimpse.examples.charts.bathy;
 import static com.metsci.glimpse.examples.Example.showWithSwing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 
+import java.io.IOException;
 import java.util.logging.Level;
 
+import com.metsci.glimpse.charts.bathy.BathyTileProvider;
 import com.metsci.glimpse.charts.bathy.Etopo1Painter;
+import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -54,15 +57,19 @@ public class Etopo1Example implements GlimpseLayoutProvider
     @Override
     public GlimpseLayout getLayout( )
     {
-        return getLayout( new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) ) );
-    }
-
-    public GlimpseLayout getLayout( GeoProjection projection )
-    {
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
-        plot.getLayoutCenter( ).addPainter( new Etopo1Painter( projection, plot.getAxisZ( ) ) );
-        plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
-        plot.getAxis( ).validate( );
-        return plot;
+        try
+        {
+            GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
+            MapPlot2D plot = new MapPlot2D( projection );
+            BathyTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
+            plot.getLayoutCenter( ).addPainter( new Etopo1Painter( projection, tileProvider ) );
+            plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
+            plot.getAxis( ).validate( );
+            return plot;
+        }
+        catch ( IOException ex )
+        {
+            throw new RuntimeException( ex );
+        }
     }
 }
