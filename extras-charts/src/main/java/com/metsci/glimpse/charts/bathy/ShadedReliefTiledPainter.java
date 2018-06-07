@@ -78,32 +78,32 @@ import com.metsci.glimpse.util.vector.Vector2d;
 /**
  * @author borkholder
  */
-public class Etopo1Painter extends DelegatePainter
+public class ShadedReliefTiledPainter extends DelegatePainter
 {
-    private static final Logger LOGGER = Logger.getLogger( Etopo1Painter.class.getName( ) );
+    private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
 
     private static final long VERSION_ID = 1;
     private static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
     private static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
     private static final double LIGHT_AZIMUTH = fromDeg( -135 );
-    private static final float BATHY_HUE = 0.63f;
+    private static final float HUE = 0.63f;
 
     private GeoProjection projection;
     private TopoTileProvider tileProvider;
-    private Map<BathyTileKey, Area> tileBounds;
+    private Map<TopoTileKey, Area> tileBounds;
 
-    private PainterCache<BathyTileKey, DrawableTexture> topoTextures;
+    private PainterCache<TopoTileKey, DrawableTexture> topoTextures;
     private ShadedTexturePainter topoImagePainter;
     private Rectangle2D.Double lastAxis;
 
     private Executor executor;
 
-    public Etopo1Painter( GeoProjection projection, TopoTileProvider tileProvider )
+    public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
     {
         this.projection = projection;
         this.tileProvider = tileProvider;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
-        topoTextures = new PainterCache<>( this::newBathyTexture, executor );
+        topoTextures = new PainterCache<>( this::newTopoTexture, executor );
         lastAxis = new Rectangle2D.Double( );
 
         topoImagePainter = new ShadedTexturePainter( );
@@ -133,11 +133,11 @@ public class Etopo1Painter extends DelegatePainter
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
 
-            Collection<BathyTileKey> tiles = getVisibleTiles( lastAxis );
+            Collection<TopoTileKey> tiles = getVisibleTiles( lastAxis );
 
             topoImagePainter.removeAllDrawableTextures( );
             boolean anyMissed = false;
-            for ( BathyTileKey key : tiles )
+            for ( TopoTileKey key : tiles )
             {
                 DrawableTexture tex = topoTextures.get( key );
                 if ( tex == null )
@@ -157,7 +157,7 @@ public class Etopo1Painter extends DelegatePainter
         }
     }
 
-    private Map<BathyTileKey, Area> createTileKeys( TopoTileProvider grid )
+    private Map<TopoTileKey, Area> createTileKeys( TopoTileProvider grid )
     {
         int pxWidth = grid.getPixelsX( );
         int pxHeight = grid.getPixelsY( );
@@ -167,7 +167,7 @@ public class Etopo1Painter extends DelegatePainter
         int tilePixelsX = pxWidth / 30;
         int tilePixelsY = pxHeight / 15;
 
-        Map<BathyTileKey, Area> keys = new HashMap<>( );
+        Map<TopoTileKey, Area> keys = new HashMap<>( );
         for ( int pxX = 0; pxX < pxWidth; pxX += tilePixelsX )
         {
             for ( int pxY = 0; pxY < pxHeight; pxY += tilePixelsY )
@@ -176,7 +176,7 @@ public class Etopo1Painter extends DelegatePainter
                 int pixelY0 = max( 0, pxY - 2 );
                 int pixelWidth = min( pxWidth - pixelX0, tilePixelsX + 4 );
                 int pixelHeight = min( pxHeight - pixelY0, tilePixelsY + 4 );
-                BathyTileKey key = new BathyTileKey( pixelX0, pixelY0, pixelWidth, pixelHeight );
+                TopoTileKey key = new TopoTileKey( pixelX0, pixelY0, pixelWidth, pixelHeight );
 
                 double lon = pixelX0 * px2Lon - 180;
                 double lat = 90 - ( pixelY0 + pixelHeight ) * px2Lat;
@@ -214,15 +214,15 @@ public class Etopo1Painter extends DelegatePainter
         return keys;
     }
 
-    private Collection<BathyTileKey> getVisibleTiles( Rectangle2D bounds )
+    private Collection<TopoTileKey> getVisibleTiles( Rectangle2D bounds )
     {
         // Pad for irregular projections
         double padX = bounds.getWidth( ) * 0.02;
         double padY = bounds.getHeight( ) * 0.02;
         bounds = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
 
-        Collection<BathyTileKey> keys = new ArrayList<>( );
-        for ( Entry<BathyTileKey, Area> e : tileBounds.entrySet( ) )
+        Collection<TopoTileKey> keys = new ArrayList<>( );
+        for ( Entry<TopoTileKey, Area> e : tileBounds.entrySet( ) )
         {
             if ( e.getValue( ).intersects( bounds ) )
             {
@@ -233,13 +233,13 @@ public class Etopo1Painter extends DelegatePainter
         return keys;
     }
 
-    private DrawableTexture newBathyTexture( BathyTileKey key )
+    private DrawableTexture newTopoTexture( TopoTileKey key )
     {
         CachedTileData rgba = null;
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "bathymetry/tile_%s.bin", key.id ) );
+        File cacheFile = new File( glimpseUserCacheDir, String.format( "topo/tile_%s.bin", key.id ) );
         if ( cacheFile.isFile( ) )
         {
-            logFine( LOGGER, "Loading cached bathy tile from %s", cacheFile );
+            logFine( LOGGER, "Loading cached topo tile from %s", cacheFile );
             try
             {
                 rgba = readCachedTile( cacheFile );
@@ -252,7 +252,7 @@ public class Etopo1Painter extends DelegatePainter
 
         if ( rgba == null )
         {
-            logFine( LOGGER, "Building bathy tile for %s", key );
+            logFine( LOGGER, "Building topo tile for %s", key );
             try
             {
                 TopographyData data = tileProvider.getTile( key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
@@ -377,7 +377,7 @@ public class Etopo1Painter extends DelegatePainter
         float h = clamp( ( hillshade - 0.4f ) / 0.5f, 0, 1 );
         float bri = 0.1f + 0.9f * h;
         float sat = 0.5f + 0.1f * ( 1 - h );
-        int rgb = Color.HSBtoRGB( BATHY_HUE, sat, bri );
+        int rgb = Color.HSBtoRGB( HUE, sat, bri );
         return ( rgb << 8 ) | 0xff;
     }
 
@@ -403,7 +403,7 @@ public class Etopo1Painter extends DelegatePainter
         return ( float ) hillshade;
     }
 
-    private static class BathyTileKey
+    private static class TopoTileKey
     {
         final String id;
         final int pixelX0;
@@ -411,7 +411,7 @@ public class Etopo1Painter extends DelegatePainter
         final int pixelWidth;
         final int pixelHeight;
 
-        BathyTileKey( int pixelX0, int pixelY0, int pixelWidth, int pixelHeight )
+        TopoTileKey( int pixelX0, int pixelY0, int pixelWidth, int pixelHeight )
         {
             this.pixelX0 = pixelX0;
             this.pixelY0 = pixelY0;
@@ -430,9 +430,9 @@ public class Etopo1Painter extends DelegatePainter
         @Override
         public boolean equals( Object obj )
         {
-            if ( obj instanceof BathyTileKey )
+            if ( obj instanceof TopoTileKey )
             {
-                BathyTileKey other = ( BathyTileKey ) obj;
+                TopoTileKey other = ( TopoTileKey ) obj;
                 return pixelHeight == other.pixelHeight &&
                         pixelWidth == other.pixelWidth &&
                         pixelX0 == other.pixelX0 &&
@@ -447,7 +447,7 @@ public class Etopo1Painter extends DelegatePainter
         @Override
         public String toString( )
         {
-            return String.format( "BathyTileKey[%d,%d width=%d,height=%d]", pixelX0, pixelY0, pixelWidth, pixelHeight );
+            return String.format( "TileKey[%d,%d width=%d,height=%d]", pixelX0, pixelY0, pixelWidth, pixelHeight );
         }
     }
 
