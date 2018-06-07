@@ -18,14 +18,13 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 
 import com.metsci.glimpse.util.GlimpseDataPaths;
-import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
  * Reads a Geotiff file in pieces and provides tiles.
  *
  * @author borkholder
  */
-public class GeotiffTileProvider implements BathyTileProvider
+public class GeotiffTileProvider implements TopoTileProvider
 {
     public static final String ETOPO1_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
     public static final String ETOPO1_CACHE_FILE = "etopo/ETOPO1_Ice_g_geotiff.tif";
@@ -57,9 +56,9 @@ public class GeotiffTileProvider implements BathyTileProvider
     }
 
     @Override
-    public BathymetryData getTile( GeoProjection projection, int pixelX0, int pixelY0, int pixelWidth, int pixelHeight ) throws IOException
+    public TopographyData getTile( int pixelX0, int pixelY0, int pixelWidth, int pixelHeight ) throws IOException
     {
-        return new GeoToolsBathyData( topoData, projection, pixelX0, pixelY0, pixelWidth, pixelHeight );
+        return new GeoToolsTopoData( topoData, pixelX0, pixelY0, pixelWidth, pixelHeight );
     }
 
     /**
@@ -122,11 +121,11 @@ public class GeotiffTileProvider implements BathyTileProvider
         return grid;
     }
 
-    private class GeoToolsBathyData extends BathymetryData
+    private class GeoToolsTopoData extends TopographyData
     {
-        public GeoToolsBathyData( GridCoverage2D grid, GeoProjection projection, int pixelX0, int pixelY0, int pixelWidth, int pixelHeight ) throws IOException
+        public GeoToolsTopoData( GridCoverage2D grid, int pixelX0, int pixelY0, int pixelWidth, int pixelHeight ) throws IOException
         {
-            super( null, projection );
+            super( null );
 
             widthStep = 360.0 / width;
             heightStep = 180.0 / height;
@@ -160,7 +159,7 @@ public class GeotiffTileProvider implements BathyTileProvider
         }
 
         @Override
-        protected void read( InputStream in, GeoProjection tp ) throws IOException
+        protected void read( InputStream in ) throws IOException
         {
             // nop
         }

@@ -32,7 +32,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import com.metsci.glimpse.charts.bathy.BathyTileProvider;
+import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.Etopo1Painter;
 import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -61,7 +61,7 @@ public class Etopo1Example implements GlimpseLayoutProvider
         {
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
-            BathyTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
+            TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
             plot.getLayoutCenter( ).addPainter( new Etopo1Painter( projection, tileProvider ) );
             plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
             plot.getAxis( ).validate( );

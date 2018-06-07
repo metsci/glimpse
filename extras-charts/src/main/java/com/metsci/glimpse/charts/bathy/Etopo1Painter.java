@@ -89,25 +89,25 @@ public class Etopo1Painter extends DelegatePainter
     private static final float BATHY_HUE = 0.63f;
 
     private GeoProjection projection;
-    private BathyTileProvider tileProvider;
+    private TopoTileProvider tileProvider;
     private Map<BathyTileKey, Area> tileBounds;
 
-    private PainterCache<BathyTileKey, DrawableTexture> bathyTextures;
-    private ShadedTexturePainter bathyImagePainter;
+    private PainterCache<BathyTileKey, DrawableTexture> topoTextures;
+    private ShadedTexturePainter topoImagePainter;
     private Rectangle2D.Double lastAxis;
 
     private Executor executor;
 
-    public Etopo1Painter( GeoProjection projection, BathyTileProvider tileProvider )
+    public Etopo1Painter( GeoProjection projection, TopoTileProvider tileProvider )
     {
         this.projection = projection;
         this.tileProvider = tileProvider;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
-        bathyTextures = new PainterCache<>( this::newBathyTexture, executor );
+        topoTextures = new PainterCache<>( this::newBathyTexture, executor );
         lastAxis = new Rectangle2D.Double( );
 
-        bathyImagePainter = new ShadedTexturePainter( );
-        addPainter( bathyImagePainter );
+        topoImagePainter = new ShadedTexturePainter( );
+        addPainter( topoImagePainter );
     }
 
     @Override
@@ -135,18 +135,18 @@ public class Etopo1Painter extends DelegatePainter
 
             Collection<BathyTileKey> tiles = getVisibleTiles( lastAxis );
 
-            bathyImagePainter.removeAllDrawableTextures( );
+            topoImagePainter.removeAllDrawableTextures( );
             boolean anyMissed = false;
             for ( BathyTileKey key : tiles )
             {
-                DrawableTexture tex = bathyTextures.get( key );
+                DrawableTexture tex = topoTextures.get( key );
                 if ( tex == null )
                 {
                     anyMissed = true;
                 }
                 else
                 {
-                    bathyImagePainter.addDrawableTexture( tex );
+                    topoImagePainter.addDrawableTexture( tex );
                 }
             }
 
@@ -157,7 +157,7 @@ public class Etopo1Painter extends DelegatePainter
         }
     }
 
-    private Map<BathyTileKey, Area> createTileKeys( BathyTileProvider grid )
+    private Map<BathyTileKey, Area> createTileKeys( TopoTileProvider grid )
     {
         int pxWidth = grid.getPixelsX( );
         int pxHeight = grid.getPixelsY( );
@@ -255,7 +255,7 @@ public class Etopo1Painter extends DelegatePainter
             logFine( LOGGER, "Building bathy tile for %s", key );
             try
             {
-                BathymetryData data = tileProvider.getTile( projection, key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
+                TopographyData data = tileProvider.getTile( key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
                 int[][] colored = new int[data.getImageWidth( )][data.getImageHeight( )];
                 hillshade( data, colored );
                 rgba = new CachedTileData( data, colored );
@@ -270,7 +270,7 @@ public class Etopo1Painter extends DelegatePainter
         }
 
         RGBATextureProjected2D texture = new RGBATextureProjected2D( rgba.getImageWidth( ), rgba.getImageHeight( ) );
-        texture.setProjection( rgba.getProjection( ) );
+        texture.setProjection( rgba.getProjection( projection ) );
 
         int[][] pixels = rgba.rgba;
         texture.mutate( new MutatorByte2D( )
@@ -345,7 +345,7 @@ public class Etopo1Painter extends DelegatePainter
         rf.close( );
     }
 
-    private void hillshade( BathymetryData data, int[][] dest )
+    private void hillshade( TopographyData data, int[][] dest )
     {
         /*
          * dx certainly changes as we change latitude, but the transition is
@@ -394,8 +394,8 @@ public class Etopo1Painter extends DelegatePainter
         float g = data[x - 1][y - 1];
         float h = data[x + 0][y - 1];
         float i = data[x + 1][y - 1];
-        double dzdx = ( ( 3 * a + 10 * d + 3 * g ) - ( 3 * c + 10 * f + 3 * i ) ) / ( 32 * dx );
-        double dzdy = ( ( 3 * a + 10 * b + 3 * c ) - ( 3 * g + 10 * h + 3 * i ) ) / ( 32 * dy );
+        double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
+        double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
         double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
         double aspect = atan2( dzdy, -dzdx );
 
@@ -451,16 +451,16 @@ public class Etopo1Painter extends DelegatePainter
         }
     }
 
-    private class CachedTileData extends BathymetryData
+    private class CachedTileData extends TopographyData
     {
         private int[][] rgba;
 
         CachedTileData( ) throws IOException
         {
-            super( null, Etopo1Painter.this.projection );
+            super( null );
         }
 
-        public CachedTileData( BathymetryData src, int[][] rgba ) throws IOException
+        public CachedTileData( TopographyData src, int[][] rgba ) throws IOException
         {
             this( );
             this.data = null;
@@ -474,8 +474,9 @@ public class Etopo1Painter extends DelegatePainter
         }
 
         @Override
-        protected void read( InputStream in, GeoProjection tp ) throws IOException
+        protected void read( InputStream in ) throws IOException
         {
+            // nop
         }
     }
 }

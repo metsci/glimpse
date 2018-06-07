@@ -44,7 +44,7 @@ public class ContourData implements Render
     protected FloatList coordsY;
     protected GeoProjection projection;
 
-    public ContourData( BathymetryData bathymetryData, GeoProjection tp, double[] levels )
+    public ContourData( TopographyData bathymetryData, GeoProjection tp, double[] levels )
     {
         this.coordsX = new FloatArrayList();
         this.coordsY = new FloatArrayList();
@@ -67,7 +67,7 @@ public class ContourData implements Render
         }
     }
 
-    protected double[] getLatitudes( BathymetryData bathymetryDataSet )
+    protected double[] getLatitudes( TopographyData bathymetryDataSet )
     {
         double startLat = bathymetryDataSet.getStartLat( );
         double heightStep = bathymetryDataSet.getHeightStep( );
@@ -83,7 +83,7 @@ public class ContourData implements Render
         return latitudes;
     }
 
-    protected double[] getLongitudes( BathymetryData bathymetryDataSet )
+    protected double[] getLongitudes( TopographyData bathymetryDataSet )
     {
         double startLon = bathymetryDataSet.getStartLon( );
         double widthStep = bathymetryDataSet.getWidthStep( );

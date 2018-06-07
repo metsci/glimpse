@@ -46,7 +46,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
 /**
  * @author ulman
  */
-public class BathymetryData
+public class TopographyData
 {
     protected double widthStep;
     protected double heightStep;
@@ -57,15 +57,12 @@ public class BathymetryData
     protected int imageHeight;
     protected int imageWidth;
 
-    protected GeoProjection projection;
-
     protected float[][] data;
 
-    public BathymetryData( InputStream in, GeoProjection projection ) throws IOException
+    public TopographyData( InputStream in ) throws IOException
     {
         super( );
-        this.projection = projection;
-        read( in, projection );
+        read( in );
     }
 
     private static class Row
@@ -82,7 +79,7 @@ public class BathymetryData
         }
     }
 
-    protected void read( InputStream in, GeoProjection tp ) throws IOException
+    protected void read( InputStream in ) throws IOException
     {
         BufferedReader reader = new BufferedReader( new InputStreamReader( in ) );
 
@@ -191,20 +188,20 @@ public class BathymetryData
         startLon = Angle.normalizeAngle180( startLon );
     }
 
-    public FloatTextureProjected2D getTexture( )
+    public FloatTextureProjected2D getTexture( GeoProjection projection )
     {
         // create an OpenGL texture wrapper object
         FloatTextureProjected2D texture = new FloatTextureProjected2D( imageWidth, imageHeight );
 
-        Projection projection = getProjection( );
+        Projection texProj = getProjection( projection );
 
-        texture.setProjection( projection );
+        texture.setProjection( texProj );
         texture.setData( data );
 
         return texture;
     }
 
-    public LatLonProjection getProjection( )
+    public LatLonProjection getProjection( GeoProjection projection )
     {
         double endLat = startLat + heightStep * imageHeight;
         double endLon = startLon + widthStep * imageWidth;
@@ -212,13 +209,15 @@ public class BathymetryData
         return new LatLonProjection( projection, startLat, endLat, startLon, endLon, false );
     }
 
-    public void setAxisBounds( Axis2D axis )
+    public void setAxisBounds( Axis2D axis, GeoProjection projection )
     {
-        axis.getAxisX( ).setMin( getMinX( ) );
-        axis.getAxisX( ).setMax( getMaxX( ) );
+        Vector2d swCorner = projection.project( LatLonGeo.fromDeg( startLat, startLon ) );
+        Vector2d neCorner = projection.project( LatLonGeo.fromDeg( startLat + heightStep * imageHeight, startLon + widthStep * imageWidth ) );
 
-        axis.getAxisY( ).setMin( getMinY( ) );
-        axis.getAxisY( ).setMax( getMaxY( ) );
+        axis.getAxisX( ).setMin( Math.min( swCorner.getX( ), neCorner.getX( ) ) );
+        axis.getAxisX( ).setMax( Math.max( swCorner.getX( ), neCorner.getX( ) ) );
+        axis.getAxisY( ).setMin( Math.min( swCorner.getY( ), neCorner.getY( ) ) );
+        axis.getAxisY( ).setMax( Math.max( swCorner.getY( ), neCorner.getY( ) ) );
     }
 
     public double getStartLon( )
@@ -249,38 +248,6 @@ public class BathymetryData
     public int getImageWidth( )
     {
         return imageWidth;
-    }
-
-    public double getMinX( )
-    {
-        Vector2d swCorner = projection.project( LatLonGeo.fromDeg( startLat, startLon ) );
-        Vector2d neCorner = projection.project( LatLonGeo.fromDeg( startLat + heightStep * imageHeight, startLon + widthStep * imageWidth ) );
-
-        return Math.min( swCorner.getX( ), neCorner.getX( ) );
-    }
-
-    public double getMaxX( )
-    {
-        Vector2d swCorner = projection.project( LatLonGeo.fromDeg( startLat, startLon ) );
-        Vector2d neCorner = projection.project( LatLonGeo.fromDeg( startLat + heightStep * imageHeight, startLon + widthStep * imageWidth ) );
-
-        return Math.max( swCorner.getX( ), neCorner.getX( ) );
-    }
-
-    public double getMinY( )
-    {
-        Vector2d swCorner = projection.project( LatLonGeo.fromDeg( startLat, startLon ) );
-        Vector2d neCorner = projection.project( LatLonGeo.fromDeg( startLat + heightStep * imageHeight, startLon + widthStep * imageWidth ) );
-
-        return Math.min( swCorner.getY( ), neCorner.getY( ) );
-    }
-
-    public double getMaxY( )
-    {
-        Vector2d swCorner = projection.project( LatLonGeo.fromDeg( startLat, startLon ) );
-        Vector2d neCorner = projection.project( LatLonGeo.fromDeg( startLat + heightStep * imageHeight, startLon + widthStep * imageWidth ) );
-
-        return Math.max( swCorner.getY( ), neCorner.getY( ) );
     }
 
     public float[][] getData( )
