@@ -32,8 +32,9 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 import java.util.logging.Level;
 
 import com.metsci.glimpse.charts.bathy.Etopo1Painter;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.plot.MapPlot2D;
+import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -51,15 +52,15 @@ public class Etopo1Example implements GlimpseLayoutProvider
     }
 
     @Override
-    public MapPlot2D getLayout( )
+    public GlimpseLayout getLayout( )
     {
         return getLayout( new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) ) );
     }
 
-    public MapPlot2D getLayout( GeoProjection projection )
+    public GlimpseLayout getLayout( GeoProjection projection )
     {
-        MapPlot2D plot = new MapPlot2D( projection );
-        plot.getLayoutCenter( ).addPainter( new Etopo1Painter( projection ) );
+        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
+        plot.getLayoutCenter( ).addPainter( new Etopo1Painter( projection, plot.getAxisZ( ) ) );
         plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
         plot.getAxis( ).validate( );
         return plot;

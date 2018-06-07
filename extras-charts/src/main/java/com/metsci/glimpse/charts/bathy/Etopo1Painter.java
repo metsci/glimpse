@@ -27,14 +27,21 @@
 package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
-import static com.metsci.glimpse.support.colormap.ColorGradients.bathymetry;
-import static com.metsci.glimpse.support.colormap.ColorGradients.topography;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.units.Angle.fromDeg;
+import static com.metsci.glimpse.util.units.Azimuth.fromNavDeg;
+import static com.metsci.glimpse.util.units.Length.fromKilometers;
+import static com.metsci.glimpse.util.units.Length.fromMeters;
+import static java.lang.Math.atan;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -76,7 +83,9 @@ import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.support.PainterCache;
-import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
+import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -88,6 +97,8 @@ import com.metsci.glimpse.util.vector.Vector2d;
 public class Etopo1Painter extends DelegatePainter
 {
     private static final Logger LOGGER = Logger.getLogger( Etopo1Painter.class.getName( ) );
+
+    private static final long VERSION_ID = 1;
 
     public static final String ETOPO_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
 
@@ -101,21 +112,22 @@ public class Etopo1Painter extends DelegatePainter
 
     private Executor executor;
 
-    public Etopo1Painter( GeoProjection projection )
+    public Etopo1Painter( GeoProjection projection, Axis1D bathyAxis )
     {
         this.projection = projection;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
         bathyTextures = new PainterCache<>( this::newBathyImagePainter, executor );
         lastAxis = new Rectangle2D.Double( );
 
-        Axis1D bathyAxis = new Axis1D( );
-        bathyAxis.setMin( -10_000 );
-        bathyAxis.setMax( +10_000 );
+//        Axis1D bathyAxis = new Axis1D( );
+        bathyAxis.setMin( 0 );
+        bathyAxis.setMax( 255 );
         // create a color map which is half bathymetry color scale and half topography color scale
-        ColorTexture1D elevationHeatMapColors = new ColorTexture1D( 1024 );
-        elevationHeatMapColors.mutate( new ColorGradientConcatenator( bathymetry, topography ) );
+        ColorTexture1D heatMapColors = new ColorTexture1D( 1024 );
+        //        elevationHeatMapColors.mutate( new ColorGradientConcatenator( bathymetry, topography ) );
+        heatMapColors.setColorGradient( ColorGradients.gray );
         bathyImagePainter = new HeatMapPainter( bathyAxis );
-        bathyImagePainter.setColorScale( elevationHeatMapColors );
+        bathyImagePainter.setColorScale( heatMapColors );
         addPainter( bathyImagePainter );
 
         executor.execute( this::initializeBathySourceData );
@@ -252,7 +264,14 @@ public class Etopo1Painter extends DelegatePainter
     private DrawableTexture newBathyImagePainter( BathyTileKey key )
     {
         BathymetryData data = loadBathyTileData( key );
-        return data.getTexture( );
+
+        FloatTextureProjected2D texture = new FloatTextureProjected2D( data.imageWidth, data.imageHeight );
+        texture.setProjection( data.getProjection( ) );
+
+        float[][] hillshadeData = hillshade( data );
+        texture.setData( hillshadeData );
+
+        return texture;
     }
 
     private void initializeBathySourceData( )
@@ -271,7 +290,7 @@ public class Etopo1Painter extends DelegatePainter
     private BathymetryData loadBathyTileData( BathyTileKey key )
     {
         BathymetryData data = null;
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/tile_%x.bin", key.id ) );
+        File cacheFile = new File( glimpseUserCacheDir, String.format( "etopo/tile_%s.bin", key.id ) );
         if ( cacheFile.isFile( ) )
         {
             logFine( LOGGER, "Loading cached bathy tile from %s", cacheFile );
@@ -304,6 +323,54 @@ public class Etopo1Painter extends DelegatePainter
         return data;
     }
 
+    private float[][] hillshade( BathymetryData data )
+    {
+        float[][] hill = new float[data.imageWidth][data.imageHeight];
+        // XXX need to make this change per latitude
+        double dx = fromKilometers( 111 ) * data.widthStep;
+        double dy = fromKilometers( 111 ) * data.heightStep;
+        for ( int x = 1; x < data.imageWidth - 1; x++ )
+        {
+            for ( int y = 1; y < data.imageHeight - 1; y++ )
+            {
+                hill[x][y] = hillshade0( data.data, x, y, dx, dy );
+            }
+
+            hill[x][0] = hill[x][1];
+            hill[x][data.imageHeight - 1] = hill[x][data.imageHeight - 2];
+        }
+
+        System.arraycopy( hill[1], 0, hill[0], 0, data.imageHeight );
+        System.arraycopy( hill[data.imageWidth - 2], 0, hill[data.imageWidth - 1], 0, data.imageHeight );
+
+        return hill;
+    }
+
+    /**
+     * From http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
+     */
+    private float hillshade0( float[][] data, int x, int y, double dx, double dy )
+    {
+        float a = data[x - 1][y - 1];
+        float b = data[x + 0][y - 1];
+        float c = data[x + 1][y - 1];
+        float d = data[x - 1][y + 0];
+        float f = data[x + 1][y + 0];
+        float g = data[x - 1][y + 1];
+        float h = data[x + 0][y + 1];
+        float i = data[x + 1][y + 1];
+        double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
+        double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
+        double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
+        double aspect = atan2( dzdy, -dzdx );
+
+        double zenith = fromDeg( 45 );
+        double azimuth = fromNavDeg( 315 );
+
+        double hillshade = 255 * ( ( cos( zenith ) * cos( slope ) ) + ( sin( zenith ) * sin( slope ) * cos( azimuth - aspect ) ) );
+        return ( float ) hillshade;
+    }
+
     public static File getCachedDataFile( ) throws IOException
     {
         String name = "etopo/ETOPO1_Ice_g_geotiff.tif";
@@ -330,7 +397,7 @@ public class Etopo1Painter extends DelegatePainter
 
     private static class BathyTileKey
     {
-        final long id;
+        final String id;
         final int pixelX0;
         final int pixelY0;
         final int pixelWidth;
@@ -342,13 +409,14 @@ public class Etopo1Painter extends DelegatePainter
             this.pixelY0 = pixelY0;
             this.pixelWidth = pixelWidth;
             this.pixelHeight = pixelHeight;
-            this.id = ( ( long ) pixelX0 << 32 ) | pixelY0;
+
+            id = String.format( "%x-%x%x-%x%x", VERSION_ID, pixelX0, pixelY0, pixelWidth, pixelHeight );
         }
 
         @Override
         public int hashCode( )
         {
-            return Long.hashCode( id );
+            return id.hashCode( );
         }
 
         @Override
@@ -408,7 +476,7 @@ public class Etopo1Painter extends DelegatePainter
                     {
                         double v = tile.getSampleDouble( i, tile.getMinY( ), 0 );
                         int x = i - pixelX0;
-                        data[x][y] = ( float ) v;
+                        data[x][y] = ( float ) fromMeters( v );
                     }
                 }
             }
