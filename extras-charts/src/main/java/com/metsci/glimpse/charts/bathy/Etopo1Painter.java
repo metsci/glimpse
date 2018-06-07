@@ -45,6 +45,7 @@ import static java.lang.Math.sqrt;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import java.awt.Color;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -58,6 +59,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -78,14 +80,12 @@ import org.opengis.referencing.FactoryException;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.group.DelegatePainter;
-import com.metsci.glimpse.painter.texture.HeatMapPainter;
+import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.support.PainterCache;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
+import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -107,7 +107,7 @@ public class Etopo1Painter extends DelegatePainter
     private Map<BathyTileKey, Area> tileBounds;
 
     private PainterCache<BathyTileKey, DrawableTexture> bathyTextures;
-    private HeatMapPainter bathyImagePainter;
+    private ShadedTexturePainter bathyImagePainter;
     private Rectangle2D.Double lastAxis;
 
     private Executor executor;
@@ -116,18 +116,10 @@ public class Etopo1Painter extends DelegatePainter
     {
         this.projection = projection;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
-        bathyTextures = new PainterCache<>( this::newBathyImagePainter, executor );
+        bathyTextures = new PainterCache<>( this::newBathyTexture, executor );
         lastAxis = new Rectangle2D.Double( );
 
-//        Axis1D bathyAxis = new Axis1D( );
-        bathyAxis.setMin( 0 );
-        bathyAxis.setMax( 255 );
-        // create a color map which is half bathymetry color scale and half topography color scale
-        ColorTexture1D heatMapColors = new ColorTexture1D( 1024 );
-        //        elevationHeatMapColors.mutate( new ColorGradientConcatenator( bathymetry, topography ) );
-        heatMapColors.setColorGradient( ColorGradients.gray );
-        bathyImagePainter = new HeatMapPainter( bathyAxis );
-        bathyImagePainter.setColorScale( heatMapColors );
+        bathyImagePainter = new ShadedTexturePainter( );
         addPainter( bathyImagePainter );
 
         executor.execute( this::initializeBathySourceData );
@@ -261,15 +253,37 @@ public class Etopo1Painter extends DelegatePainter
         return keys;
     }
 
-    private DrawableTexture newBathyImagePainter( BathyTileKey key )
+    private DrawableTexture newBathyTexture( BathyTileKey key )
     {
-        BathymetryData data = loadBathyTileData( key );
+        BathymetryData tile = loadBathyTileData( key );
+        float[][] depth = tile.getData( );
+        float[][] hill = hillshade( tile );
 
-        FloatTextureProjected2D texture = new FloatTextureProjected2D( data.imageWidth, data.imageHeight );
-        texture.setProjection( data.getProjection( ) );
+        RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
+        texture.setProjection( tile.getProjection( ) );
 
-        float[][] hillshadeData = hillshade( data );
-        texture.setData( hillshadeData );
+        texture.mutate( new MutatorByte2D( )
+        {
+            @Override
+            public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
+            {
+                for ( int c = 0; c < dataSizeX; c++ )
+                {
+                    for ( int r = 0; r < dataSizeY; r++ )
+                    {
+                        float d = 1 + clamp( ( depth[r][c] - 5_000 / 15_000 ), -1, 0 );
+                        float hue = 0.67f;
+                        float sat = 1;
+                        float bri = clamp( ( hill[r][c] - 0.4f ) / 0.5f, 0, 1 );
+                        int rgb = Color.HSBtoRGB( hue, sat, bri );
+                        data.put( ( byte ) ( rgb >> 16 & 0xff ) );
+                        data.put( ( byte ) ( rgb >> 8 & 0xff ) );
+                        data.put( ( byte ) ( rgb >> 0 & 0xff ) );
+                        data.put( ( byte ) 255 );
+                    }
+                }
+            }
+        } );
 
         return texture;
     }
@@ -367,7 +381,11 @@ public class Etopo1Painter extends DelegatePainter
         double zenith = fromDeg( 45 );
         double azimuth = fromNavDeg( 315 );
 
-        double hillshade = 255 * ( ( cos( zenith ) * cos( slope ) ) + ( sin( zenith ) * sin( slope ) * cos( azimuth - aspect ) ) );
+        double hillshade = ( cos( zenith ) * cos( slope ) ) + ( sin( zenith ) * sin( slope ) * cos( azimuth - aspect ) );
+        if ( !Double.isFinite( hillshade ) )
+        {
+            System.out.println( );
+        }
         return ( float ) hillshade;
     }
 
