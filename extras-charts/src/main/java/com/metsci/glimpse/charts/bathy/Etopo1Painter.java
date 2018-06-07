@@ -32,9 +32,8 @@ import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
-import static com.metsci.glimpse.util.units.Azimuth.fromNavDeg;
-import static com.metsci.glimpse.util.units.Length.fromKilometers;
 import static com.metsci.glimpse.util.units.Length.fromMeters;
+import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
@@ -99,6 +98,10 @@ public class Etopo1Painter extends DelegatePainter
     private static final Logger LOGGER = Logger.getLogger( Etopo1Painter.class.getName( ) );
 
     private static final long VERSION_ID = 1;
+    private static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
+    private static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
+    private static final double LIGHT_AZIMUTH = fromDeg( -135 );
+    private static final float BATHY_HUE = 0.63f;
 
     public static final String ETOPO_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
 
@@ -256,7 +259,6 @@ public class Etopo1Painter extends DelegatePainter
     private DrawableTexture newBathyTexture( BathyTileKey key )
     {
         BathymetryData tile = loadBathyTileData( key );
-        float[][] depth = tile.getData( );
         float[][] hill = hillshade( tile );
 
         RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
@@ -267,15 +269,14 @@ public class Etopo1Painter extends DelegatePainter
             @Override
             public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
             {
-                for ( int c = 0; c < dataSizeX; c++ )
+                for ( int r = 0; r < dataSizeY; r++ )
                 {
-                    for ( int r = 0; r < dataSizeY; r++ )
+                    for ( int c = 0; c < dataSizeX; c++ )
                     {
-                        float d = 1 + clamp( ( depth[r][c] - 5_000 / 15_000 ), -1, 0 );
-                        float hue = 0.67f;
-                        float sat = 1;
-                        float bri = clamp( ( hill[r][c] - 0.4f ) / 0.5f, 0, 1 );
-                        int rgb = Color.HSBtoRGB( hue, sat, bri );
+                        float h = clamp( ( hill[c][r] - 0.4f ) / 0.5f, 0, 1 );
+                        float bri = 0.1f + 0.9f * h;
+                        float sat = 0.5f + 0.1f * ( 1 - h );
+                        int rgb = Color.HSBtoRGB( BATHY_HUE, sat, bri );
                         data.put( ( byte ) ( rgb >> 16 & 0xff ) );
                         data.put( ( byte ) ( rgb >> 8 & 0xff ) );
                         data.put( ( byte ) ( rgb >> 0 & 0xff ) );
@@ -340,9 +341,15 @@ public class Etopo1Painter extends DelegatePainter
     private float[][] hillshade( BathymetryData data )
     {
         float[][] hill = new float[data.imageWidth][data.imageHeight];
-        // XXX need to make this change per latitude
-        double dx = fromKilometers( 111 ) * data.widthStep;
-        double dy = fromKilometers( 111 ) * data.heightStep;
+
+        /*
+         * dx certainly changes as we change latitude, but the transition is
+         * uneven and visually disturbing. Also found that tweaking by 0.5
+         * helps increase visual separation.
+         */
+        double dy = 60 * fromNauticalMiles( 1 ) * data.heightStep / 2;
+        double dx = 60 * fromNauticalMiles( 1 ) * data.widthStep / 2;
+
         for ( int x = 1; x < data.imageWidth - 1; x++ )
         {
             for ( int y = 1; y < data.imageHeight - 1; y++ )
@@ -365,27 +372,20 @@ public class Etopo1Painter extends DelegatePainter
      */
     private float hillshade0( float[][] data, int x, int y, double dx, double dy )
     {
-        float a = data[x - 1][y - 1];
-        float b = data[x + 0][y - 1];
-        float c = data[x + 1][y - 1];
+        float a = data[x - 1][y + 1];
+        float b = data[x + 0][y + 1];
+        float c = data[x + 1][y + 1];
         float d = data[x - 1][y + 0];
         float f = data[x + 1][y + 0];
-        float g = data[x - 1][y + 1];
-        float h = data[x + 0][y + 1];
-        float i = data[x + 1][y + 1];
-        double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
-        double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
+        float g = data[x - 1][y - 1];
+        float h = data[x + 0][y - 1];
+        float i = data[x + 1][y - 1];
+        double dzdx = ( ( 3 * a + 10 * d + 3 * g ) - ( 3 * c + 10 * f + 3 * i ) ) / ( 32 * dx );
+        double dzdy = ( ( 3 * a + 10 * b + 3 * c ) - ( 3 * g + 10 * h + 3 * i ) ) / ( 32 * dy );
         double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
         double aspect = atan2( dzdy, -dzdx );
 
-        double zenith = fromDeg( 45 );
-        double azimuth = fromNavDeg( 315 );
-
-        double hillshade = ( cos( zenith ) * cos( slope ) ) + ( sin( zenith ) * sin( slope ) * cos( azimuth - aspect ) );
-        if ( !Double.isFinite( hillshade ) )
-        {
-            System.out.println( );
-        }
+        double hillshade = ( COS_LIGHT_ZENITH * cos( slope ) ) + ( SIN_LIGHT_ZENITH * sin( slope ) * cos( LIGHT_AZIMUTH - aspect ) );
         return ( float ) hillshade;
     }
 
