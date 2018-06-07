@@ -28,15 +28,19 @@ public class GeotiffTileProvider implements TopoTileProvider
 {
     public static final String ETOPO1_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
     public static final String ETOPO1_CACHE_FILE = "etopo/ETOPO1_Ice_g_geotiff.tif";
+    public static final String ETOPO1_ATTRIBUTION = "ETOPO1 Global Relief Model - NOAA";
     public static final String GEBCO2014_URL = "https://www.gebco.net/data_and_products/gridded_bathymetry_data/gebco_30_second_grid/";
     public static final String GEBCO2014_CACHE_FILE = "GEBCO/GEBCO_2014_2D.tif";
+    public static final String GEBCO2014_ATTRIBUTION = "The GEBCO_2014 Grid, version 20150318, www.gebco.net";
 
     private final GridCoverage2D topoData;
     private final int width;
     private final int height;
+    private final String attribution;
 
-    public GeotiffTileProvider( GridCoverage2D grid )
+    public GeotiffTileProvider( GridCoverage2D grid, String attribution )
     {
+        this.attribution = attribution;
         topoData = grid;
         int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
         width = nLonLat[0];
@@ -61,26 +65,42 @@ public class GeotiffTileProvider implements TopoTileProvider
         return new GeoToolsTopoData( topoData, pixelX0, pixelY0, pixelWidth, pixelHeight );
     }
 
+    @Override
+    public String getAttribution( )
+    {
+        return attribution;
+    }
+
     /**
      * To get the cached file
-     * ...
+     *
+     * <ol>
+     * <li>Go to {@link #GEBCO2014_URL} and download the 2D NetCDF global grid</li>
+     * <li>You'll need to setup an account to download.</li>
+     * <li>Extract the zip and run {@code gdal_translate GEBCO_2014_2D.nc GEBCO_2014_2D.tif}</li>
+     * <li>Put the geotiff file into {@link #GEBCO2014_CACHE_FILE} in your Glimpse user data dir</li>
+     * </ol>
      */
     public static GeotiffTileProvider getGebco2014( ) throws IOException
     {
         File file = getCachedDataFile( GEBCO2014_CACHE_FILE, GEBCO2014_URL );
         GridCoverage2D grid = readGeotiff( file );
-        return new GeotiffTileProvider( grid );
+        return new GeotiffTileProvider( grid, GEBCO2014_ATTRIBUTION );
     }
 
     /**
      * To get the cached file
-     * ...
+     *
+     * <ol>
+     * <li>Go to {@link #ETOPO1_URL} and download the zip file</li>
+     * <li>Extract the zip and the geotiff file into {@link #ETOPO1_CACHE_FILE} in your Glimpse user data dir</li>
+     * </ol>
      */
     public static GeotiffTileProvider getEtopo1( ) throws IOException
     {
         File file = getCachedDataFile( ETOPO1_CACHE_FILE, ETOPO1_URL );
         GridCoverage2D grid = readGeotiff( file );
-        return new GeotiffTileProvider( grid );
+        return new GeotiffTileProvider( grid, ETOPO1_ATTRIBUTION );
     }
 
     public static File getCachedDataFile( String cacheFile, String topoUrl ) throws IOException

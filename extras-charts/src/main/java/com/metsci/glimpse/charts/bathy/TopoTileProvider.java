@@ -14,4 +14,6 @@ public interface TopoTileProvider
     int getPixelsY( );
 
     TopographyData getTile( int pixelX0, int pixelY0, int pixelWidth, int pixelHeight ) throws IOException;
+
+    String getAttribution( );
 }

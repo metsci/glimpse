@@ -27,6 +27,7 @@
 package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
+import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
@@ -67,6 +68,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.group.DelegatePainter;
+import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.support.PainterCache;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
@@ -108,6 +110,17 @@ public class ShadedReliefTiledPainter extends DelegatePainter
 
         topoImagePainter = new ShadedTexturePainter( );
         addPainter( topoImagePainter );
+
+        if ( tileProvider.getAttribution( ) != null )
+        {
+            SimpleTextPainter attributionPainter = new SimpleTextPainter( );
+            attributionPainter.setPaintBackground( false );
+            attributionPainter.setPaintBorder( false );
+            attributionPainter.setFont( 10, false );
+            attributionPainter.setColor( getBlack( 0.4f ) );
+            attributionPainter.setText( tileProvider.getAttribution( ) );
+            addPainter( attributionPainter );
+        }
     }
 
     @Override
