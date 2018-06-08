@@ -47,11 +47,9 @@ import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.io.LittleEndianDataInput;
 
 /**
- * The class can parse GSHHS version 1 files.
+ * The class can parse GSHHS version 2 files.
  *
- * The GSHHS dataset can be downloaded from ftp://ftp.soest.hawaii.edu/pwessel/gshhs/ .
- *
- * An alternate source: http://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/oldversions/
+ * The GSHHS dataset can be downloaded from http://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/latest/
  *
  * @author hogye
  */
