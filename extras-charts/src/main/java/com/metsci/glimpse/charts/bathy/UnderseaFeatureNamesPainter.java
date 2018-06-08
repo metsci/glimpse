@@ -1,10 +1,11 @@
 package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.support.font.FontUtils.getDefaultPlain;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.nio.file.Files.copy;
 
-import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileReader;
@@ -13,7 +14,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -36,13 +36,13 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.AnnotationPainter;
 import com.metsci.glimpse.painter.info.AnnotationPainter.Annotation;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.MercatorProjection;
-import com.metsci.glimpse.util.quadtree.QuadTree.Accumulator;
 import com.metsci.glimpse.util.quadtree.QuadTreeObjects;
 import com.metsci.glimpse.util.vector.Vector2d;
 
@@ -56,7 +56,8 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
     public static final String DOWNLOAD_URL = "https://www.ngdc.noaa.gov/gazetteer/feature/export?aoi=&name=&featureType=&proposer.id=&discoverer.id=&meeting=&status=&format=csv";
     public static final String CACHE_FILE = "NOAA_Gazeteer.csv";
 
-    private AnnotationPainter annotationPainter;
+    private AnnotationPainter smallAnnotationPainter;
+    private AnnotationPainter bigAnnotationPainter;
     private Int2ObjectMap<Annotation2> id2Annotation;
     private QuadTreeObjects<Annotation2> quadTree;
 
@@ -65,8 +66,12 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
     public UnderseaFeatureNamesPainter( GeoProjection projection ) throws IOException, NoSuchAuthorityCodeException, FactoryException, ParseException
     {
         lastAxis = new Rectangle2D.Double( );
-        annotationPainter = new AnnotationPainter( );
-        addPainter( annotationPainter );
+        TextRenderer renderer = new TextRenderer( getDefaultPlain( 14 ) );
+        smallAnnotationPainter = new AnnotationPainter( renderer );
+        renderer = new TextRenderer( getDefaultBold( 16 ) );
+        bigAnnotationPainter = new AnnotationPainter( renderer );
+        addPainter( smallAnnotationPainter );
+        addPainter( bigAnnotationPainter );
         id2Annotation = new Int2ObjectOpenHashMap<>( );
         quadTree = new QuadTreeObjects<Annotation2>( 10 )
         {
@@ -96,7 +101,6 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
             groupId++;
             String name = record.get( 0 );
             String type = record.get( 1 );
-            int priority = getPriority( type );
 
             String wkt = record.get( 9 );
             if ( wkt.contains( "MULTIPOINT" ) )
@@ -123,7 +127,7 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
                 LatLonGeo ll = LatLonGeo.fromDeg( coord[1], coord[0] );
                 Vector2d v = projection.project( ll );
                 id++;
-                add( id, groupId, name, priority, v.getX( ), v.getY( ) );
+                add( id, groupId, name, type, v.getX( ), v.getY( ) );
             }
             else if ( geom instanceof LineString )
             {
@@ -134,7 +138,7 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
                     LatLonGeo ll = LatLonGeo.fromDeg( coord[1], coord[0] );
                     Vector2d v = projection.project( ll );
                     id++;
-                    add( id, groupId, name, priority, v.getX( ), v.getY( ) );
+                    add( id, groupId, name, type, v.getX( ), v.getY( ) );
                 }
             }
             else if ( geom instanceof MultiPoint )
@@ -146,7 +150,7 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
                     LatLonGeo ll = LatLonGeo.fromDeg( coord[1], coord[0] );
                     Vector2d v = projection.project( ll );
                     id++;
-                    add( id, groupId, name, priority, v.getX( ), v.getY( ) );
+                    add( id, groupId, name, type, v.getX( ), v.getY( ) );
                 }
             }
 
@@ -172,7 +176,8 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
                 lastAxis.getMaxY( ) != axis.getMaxY( ) )
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
-            annotationPainter.clearAnnotations( );
+            smallAnnotationPainter.clearAnnotations( );
+            bigAnnotationPainter.clearAnnotations( );
 
             List<Annotation2> toView = new ArrayList<>( );
             double xStep = 0.99 * lastAxis.getWidth( );
@@ -183,22 +188,22 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
                 for ( double y = axis.getMinY( ); y < axis.getMaxY( ); y += yStep )
                 {
                     float minY = ( float ) y, maxY = ( float ) ( y + xStep );
-                    quadTree.accumulate( minX, maxX, minY, maxY, new Accumulator<Collection<Annotation2>>( )
-                    {
-                        @Override
-                        public void accumulate( Collection<Annotation2> bucket, float xMinBucket, float xMaxBucket, float yMinBucket, float yMaxBucket )
-                        {
-                            // Adding everything in a bucket to avoid edge effects
-                            toView.addAll( bucket );
-                        }
-                    } );
+                    quadTree.search( minX, maxX, minY, maxY, toView );
 
                     toView.sort( ( a, b ) -> Integer.compare( a.priority, b.priority ) );
                     if ( toView.size( ) > 0 )
                     {
-                        System.out.println( toView.get( 0 ).getText( ) );
-                        toView.forEach( annotationPainter::addAnnotation );
-//                        annotationPainter.addAnnotation( toView.get( 0 ) );
+                        for ( Annotation2 an : toView.subList( 0, Math.min( 30, toView.size( ) ) ) )
+                        {
+                            if ( an.priority < 3 )
+                            {
+                                bigAnnotationPainter.addAnnotation( an );
+                            }
+                            else
+                            {
+                                smallAnnotationPainter.addAnnotation( an );
+                            }
+                        }
                     }
 
                     toView.clear( );
@@ -210,24 +215,36 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
     private int getPriority( String type )
     {
         String[] orderedTypes = new String[] {
+                "continental slope",
+                "channel",
+                "sea channel",
+                "seachannel",
+                "pass",
+                "canyon",
+                "plain",
+                "shelf",
+                "shoal",
+                "trench",
+                "plateau",
+                "reef",
+                "seamount",
+                "ridge",
+                "valley",
+                "deep",
+                "ground",
+                "basin",
                 "abyssal plain",
                 "apron",
                 "bank",
-                "basin",
                 "borderland",
                 "caldera",
-                "canyon",
                 "cap",
-                "channel",
                 "cone",
-                "continental slope",
-                "deep",
                 "discordance",
                 "escarpment",
                 "fan",
                 "fracture zone",
                 "gap",
-                "ground",
                 "guyot",
                 "hill",
                 "hole",
@@ -235,33 +252,21 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
                 "levee",
                 "mound",
                 "mud volcano",
-                "pass",
                 "peak",
-                "plain",
-                "plateau",
                 "promontory",
                 "province",
-                "reef",
-                "ridge",
                 "rift",
                 "rise",
                 "saddle",
                 "salt dome province",
                 "sand ridge province",
-                "sea channel",
                 "seabight",
-                "seachannel",
-                "seamount",
-                "shelf",
-                "shoal",
                 "sill",
                 "slope",
                 "spur",
                 "tablemount",
                 "terrace",
-                "trench",
                 "trough",
-                "valley",
         };
 
         type = type.toLowerCase( );
@@ -276,9 +281,12 @@ public class UnderseaFeatureNamesPainter extends DelegatePainter
         return orderedTypes.length;
     }
 
-    private void add( int id, int groupId, String text, int priority, double x, double y )
+    private void add( int id, int groupId, String text, String type, double x, double y )
     {
-        Annotation2 an = new Annotation2( groupId, priority, text, x, y );
+        int priority = getPriority( type );
+        Annotation2 an = new Annotation2( groupId, priority, text + " " + type, x, y );
+        an.setHorizontalPosition( HorizontalPosition.Center );
+        an.setVerticalPosition( VerticalPosition.Bottom );
         an.setColor( GlimpseColor.getWhite( ) );
         id2Annotation.put( id, an );
         quadTree.add( an );
