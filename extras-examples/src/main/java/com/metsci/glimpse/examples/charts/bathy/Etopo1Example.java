@@ -30,9 +30,13 @@ import static com.metsci.glimpse.examples.Example.showWithSwing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.logging.Level;
 
+import org.opengis.referencing.FactoryException;
+
 import com.metsci.glimpse.charts.bathy.TopoTileProvider;
+import com.metsci.glimpse.charts.bathy.UnderseaFeatureNamesPainter;
 import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
 import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -63,11 +67,12 @@ public class Etopo1Example implements GlimpseLayoutProvider
             MapPlot2D plot = new MapPlot2D( projection );
             TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
             plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
             plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
             plot.getAxis( ).validate( );
             return plot;
         }
-        catch ( IOException ex )
+        catch ( IOException | FactoryException | ParseException ex )
         {
             throw new RuntimeException( ex );
         }

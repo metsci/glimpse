@@ -27,10 +27,10 @@ import com.metsci.glimpse.util.GlimpseDataPaths;
 public class GeotiffTileProvider implements TopoTileProvider
 {
     public static final String ETOPO1_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
-    public static final String ETOPO1_CACHE_FILE = "etopo/ETOPO1_Ice_g_geotiff.tif";
+    public static final String ETOPO1_CACHE_FILE = "ETOPO1_Ice_g_geotiff.tif";
     public static final String ETOPO1_ATTRIBUTION = "ETOPO1 Global Relief Model - NOAA";
     public static final String GEBCO2014_URL = "https://www.gebco.net/data_and_products/gridded_bathymetry_data/gebco_30_second_grid/";
-    public static final String GEBCO2014_CACHE_FILE = "GEBCO/GEBCO_2014_2D.tif";
+    public static final String GEBCO2014_CACHE_FILE = "GEBCO_2014_2D.tif";
     public static final String GEBCO2014_ATTRIBUTION = "The GEBCO_2014 Grid, version 20150318, www.gebco.net";
 
     private final GridCoverage2D topoData;
