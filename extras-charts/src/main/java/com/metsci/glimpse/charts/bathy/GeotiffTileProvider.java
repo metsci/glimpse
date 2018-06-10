@@ -24,7 +24,7 @@ import com.metsci.glimpse.util.GlimpseDataPaths;
  *
  * @author borkholder
  */
-public class GeotiffTileProvider implements TopoTileProvider
+public class GeotiffTileProvider implements TileProvider
 {
     public static final String ETOPO1_URL = "https://www.ngdc.noaa.gov/mgg/global/relief/ETOPO1/data/ice_surface/grid_registered/georeferenced_tiff/ETOPO1_Ice_g_geotiff.zip";
     public static final String ETOPO1_CACHE_FILE = "ETOPO1_Ice_g_geotiff.tif";

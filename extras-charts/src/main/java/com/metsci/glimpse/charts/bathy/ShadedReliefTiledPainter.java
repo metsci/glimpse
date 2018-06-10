@@ -91,7 +91,7 @@ public class ShadedReliefTiledPainter extends DelegatePainter
     private static final float HUE = 0.63f;
 
     private GeoProjection projection;
-    private TopoTileProvider tileProvider;
+    private TileProvider tileProvider;
     private Map<TopoTileKey, Area> tileBounds;
 
     private PainterCache<TopoTileKey, DrawableTexture> topoTextures;
@@ -100,7 +100,7 @@ public class ShadedReliefTiledPainter extends DelegatePainter
 
     private Executor executor;
 
-    public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
+    public ShadedReliefTiledPainter( GeoProjection projection, TileProvider tileProvider )
     {
         this.projection = projection;
         this.tileProvider = tileProvider;
@@ -170,7 +170,7 @@ public class ShadedReliefTiledPainter extends DelegatePainter
         }
     }
 
-    private Map<TopoTileKey, Area> createTileKeys( TopoTileProvider grid )
+    private Map<TopoTileKey, Area> createTileKeys( TileProvider grid )
     {
         int pxWidth = grid.getPixelsX( );
         int pxHeight = grid.getPixelsY( );
