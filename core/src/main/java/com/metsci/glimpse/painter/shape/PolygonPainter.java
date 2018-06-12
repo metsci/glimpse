@@ -1059,7 +1059,7 @@ public class PolygonPainter extends GlimpsePainterBase
             }
         }
 
-        if ( loaded.linesOn )
+        if ( loaded.linesOn && loaded.glTotalLinePrimitives > 0 )
         {
             lineProg.begin( gl );
             try
@@ -1104,7 +1104,12 @@ public class PolygonPainter extends GlimpsePainterBase
 
     protected boolean isGroupReady( LoadedGroup loaded )
     {
-        return loaded.glFillBufferInitialized && loaded.glLineBufferInitialized && loaded.glLineOffsetBuffer != null && loaded.glLineCountBuffer != null && loaded.glFillOffsetBuffer != null && loaded.glFillCountBuffer != null;
+        return loaded.glFillBufferInitialized &&
+                loaded.glLineBufferInitialized &&
+                ( loaded.glLineOffsetBuffer != null || loaded.glTotalLinePrimitives == 0 ) &&
+                ( loaded.glLineCountBuffer != null || loaded.glTotalLinePrimitives == 0 ) &&
+                loaded.glFillOffsetBuffer != null &&
+                loaded.glFillCountBuffer != null;
     }
 
     public static Polygon buildPolygon( float[] geometryX, float[] geometryY )
@@ -1194,24 +1199,34 @@ public class PolygonPainter extends GlimpsePainterBase
      */
     public static class TessellatedPolygon
     {
-        protected Polygon polygon;
+        protected final Polygon polygon;
 
-        protected float[] fillVertices;
+        protected final float[] fillVertices;
 
-        protected int lineVertexCount;
-        protected int fillVertexCount;
+        protected final int lineVertexCount;
+        protected final int fillVertexCount;
 
-        protected int linePrimitiveCount;
-        protected int fillPrimitiveCount;
+        protected final int linePrimitiveCount;
+        protected final int fillPrimitiveCount;
 
         public TessellatedPolygon( Polygon polygon, PolygonTessellator tessellator )
         {
-            this.polygon = polygon;
-            this.calculateLineCounts( );
-            this.calculateFillCounts( tessellator );
+            this( polygon, polygon == null ? new float[ 0 ] : tessellate( polygon, tessellator ) );
         }
 
-        protected void calculateLineCounts( )
+        public TessellatedPolygon( Polygon polygon, float[] fillVertices )
+        {
+            this.polygon = polygon;
+            int[] tmp = calculateLineCounts( );
+            lineVertexCount = tmp[0];
+            linePrimitiveCount = tmp[1];
+
+            this.fillVertices = fillVertices;
+            this.fillVertexCount = fillVertices.length / 2;
+            this.fillPrimitiveCount = 1;
+        }
+
+        protected int[] calculateLineCounts( )
         {
             int vertexCount = 0;
             int primitiveCount = 0;
@@ -1230,23 +1245,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 }
             }
 
-            this.lineVertexCount = vertexCount;
-            this.linePrimitiveCount = primitiveCount;
-        }
-
-        protected void calculateFillCounts( PolygonTessellator tessellator )
-        {
-            if ( this.polygon != null )
-            {
-                this.fillVertices = tessellate( this.polygon, tessellator );
-            }
-            else
-            {
-                this.fillVertices = new float[ 0 ];
-            }
-
-            this.fillVertexCount = this.fillVertices.length / 2;
-            this.fillPrimitiveCount = 1;
+            return new int[] { vertexCount, primitiveCount };
         }
 
         protected static float[] tessellate( Polygon polygon, PolygonTessellator tessellator )
@@ -1334,6 +1333,8 @@ public class PolygonPainter extends GlimpsePainterBase
          */
         public int loadLineVerticesIntoBuffer( FloatBuffer xyBuffer, ByteBuffer flagBuffer, FloatBuffer mileageBuffer, float zCoord, int offsetVertex, double ppvAspectRatio )
         {
+            if ( geometry.polygon == null ) return 0;
+
             int totalSize = 0;
             int primitiveCount = 0;
             Iterator<Loop> iter = geometry.polygon.getIterator( );
