@@ -39,7 +39,7 @@ import org.opengis.referencing.FactoryException;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
 import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
-import com.metsci.glimpse.charts.bathy.TileProvider;
+import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.UnderseaFeatureNamesPainter;
 import com.metsci.glimpse.charts.shoreline.LandBox;
 import com.metsci.glimpse.charts.shoreline.LandShapePainter;
@@ -73,21 +73,21 @@ public class Etopo1Example implements GlimpseLayoutProvider
         {
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
-            TileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
+            TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
             LandBox box = new LandBox( 60, 10, -100, -50, false );
-            GshhsFile f = new GshhsFile( new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_h.b" ), box, PolygonType.land );
-            LandShapePainter landPainter = new LandShapePainter( );
-            landPainter.setShowLines( false );
-            landPainter.loadLandFileAndCenterAxis( f.toShape( ), projection, new Axis2D( ) );
+//            GshhsFile f = new GshhsFile( new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_h.b" ), box, PolygonType.land );
+//            LandShapePainter landPainter = new LandShapePainter( );
+//            landPainter.setShowLines( false );
+//            landPainter.loadLandFileAndCenterAxis( f.toShape( ), projection, new Axis2D( ) );
 
             plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
             plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
-            plot.getLayoutCenter( ).addPainter( landPainter );
+//            plot.getLayoutCenter( ).addPainter( landPainter );
             plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
             plot.getAxis( ).validate( );
             return plot;
         }
-        catch ( IOException | FactoryException | ParseException | UnrecognizedValueException ex )
+        catch ( Exception ex )
         {
             throw new RuntimeException( ex );
         }

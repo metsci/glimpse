@@ -7,7 +7,7 @@ public class TileKey
     public final double minLon;
     public final double maxLon;
 
-    public TileKey( String id, double minLat, double maxLat, double minLon, double maxLon )
+    public TileKey( double minLat, double maxLat, double minLon, double maxLon )
     {
         this.minLat = minLat;
         this.maxLat = maxLat;

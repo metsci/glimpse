@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
 import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
@@ -34,20 +33,14 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
 import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
+import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
-import static java.lang.Runtime.getRuntime;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import java.awt.Color;
-import java.awt.geom.Area;
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,31 +49,21 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
-import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.support.PainterCache;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
-import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
  * @author borkholder
  */
-public class ShadedReliefTiledPainter extends DelegatePainter
+public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
 
@@ -90,23 +73,13 @@ public class ShadedReliefTiledPainter extends DelegatePainter
     private static final double LIGHT_AZIMUTH = fromDeg( -135 );
     private static final float HUE = 0.63f;
 
-    private GeoProjection projection;
-    private TileProvider tileProvider;
-    private Map<TopoTileKey, Area> tileBounds;
-
-    private PainterCache<TopoTileKey, DrawableTexture> topoTextures;
+    private TopoTileProvider tileProvider;
     private ShadedTexturePainter topoImagePainter;
-    private Rectangle2D.Double lastAxis;
 
-    private Executor executor;
-
-    public ShadedReliefTiledPainter( GeoProjection projection, TileProvider tileProvider )
+    public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
     {
-        this.projection = projection;
+        super( projection );
         this.tileProvider = tileProvider;
-        this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
-        topoTextures = new PainterCache<>( this::newTopoTexture, executor );
-        lastAxis = new Rectangle2D.Double( );
 
         topoImagePainter = new ShadedTexturePainter( );
         addPainter( topoImagePainter );
@@ -124,132 +97,12 @@ public class ShadedReliefTiledPainter extends DelegatePainter
     }
 
     @Override
-    public void paintTo( GlimpseContext context )
-    {
-        checkNewState( context );
-        super.paintTo( context );
-    }
-
-    private void checkNewState( GlimpseContext context )
-    {
-        Axis2D axis = getAxis2D( context );
-
-        if ( tileBounds == null )
-        {
-            tileBounds = createTileKeys( tileProvider );
-        }
-
-        if ( lastAxis.getMinX( ) != axis.getMinX( ) ||
-                lastAxis.getMaxX( ) != axis.getMaxX( ) ||
-                lastAxis.getMinY( ) != axis.getMinY( ) ||
-                lastAxis.getMaxY( ) != axis.getMaxY( ) )
-        {
-            lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
-
-            Collection<TopoTileKey> tiles = getVisibleTiles( lastAxis );
-
-            topoImagePainter.removeAllDrawableTextures( );
-            boolean anyMissed = false;
-            for ( TopoTileKey key : tiles )
-            {
-                DrawableTexture tex = topoTextures.get( key );
-                if ( tex == null )
-                {
-                    anyMissed = true;
-                }
-                else
-                {
-                    topoImagePainter.addDrawableTexture( tex );
-                }
-            }
-
-            if ( anyMissed )
-            {
-                lastAxis = new Rectangle2D.Double( );
-            }
-        }
-    }
-
-    private Map<TopoTileKey, Area> createTileKeys( TileProvider grid )
-    {
-        int pxWidth = grid.getPixelsX( );
-        int pxHeight = grid.getPixelsY( );
-        double px2Lon = 360.0 / pxWidth;
-        double px2Lat = 180.0 / pxHeight;
-
-        int tilePixelsX = pxWidth / 30;
-        int tilePixelsY = pxHeight / 15;
-
-        Map<TopoTileKey, Area> keys = new HashMap<>( );
-        for ( int pxX = 0; pxX < pxWidth; pxX += tilePixelsX )
-        {
-            for ( int pxY = 0; pxY < pxHeight; pxY += tilePixelsY )
-            {
-                int pixelX0 = max( 0, pxX - 2 );
-                int pixelY0 = max( 0, pxY - 2 );
-                int pixelWidth = min( pxWidth - pixelX0, tilePixelsX + 4 );
-                int pixelHeight = min( pxHeight - pixelY0, tilePixelsY + 4 );
-                TopoTileKey key = new TopoTileKey( pixelX0, pixelY0, pixelWidth, pixelHeight );
-
-                double lon = pixelX0 * px2Lon - 180;
-                double lat = 90 - ( pixelY0 + pixelHeight ) * px2Lat;
-                Vector2d sw = projection.project( LatLonGeo.fromDeg( lat, lon ) );
-                lat = 90 - pixelY0 * px2Lat;
-                Vector2d nw = projection.project( LatLonGeo.fromDeg( lat, lon ) );
-                lon = ( pixelX0 + pixelWidth ) * px2Lon - 180;
-                Vector2d ne = projection.project( LatLonGeo.fromDeg( lat, lon ) );
-                lat = 90 - ( pixelY0 + pixelHeight ) * px2Lat;
-                Vector2d se = projection.project( LatLonGeo.fromDeg( lat, lon ) );
-
-                /*
-                 * If the border is clockwise, the tile is valid in the current
-                 * projection. This test will fail for tiles at the edges of a
-                 * TangentPlane because of how skewed they are.
-                 */
-                double sumOverEdge = 0;
-                sumOverEdge += ( se.getX( ) - ne.getX( ) ) * ( se.getY( ) + ne.getY( ) );
-                sumOverEdge += ( sw.getX( ) - se.getX( ) ) * ( sw.getY( ) + se.getY( ) );
-                sumOverEdge += ( nw.getX( ) - sw.getX( ) ) * ( nw.getY( ) + sw.getY( ) );
-                sumOverEdge += ( ne.getX( ) - nw.getX( ) ) * ( ne.getY( ) + nw.getY( ) );
-                if ( sumOverEdge > 0 )
-                {
-                    Path2D path = new Path2D.Double( Path2D.WIND_EVEN_ODD );
-                    path.moveTo( sw.getX( ), sw.getY( ) );
-                    path.lineTo( nw.getX( ), nw.getY( ) );
-                    path.lineTo( ne.getX( ), ne.getY( ) );
-                    path.lineTo( se.getX( ), se.getY( ) );
-                    path.closePath( );
-                    keys.put( key, new Area( path ) );
-                }
-            }
-        }
-
-        return keys;
-    }
-
-    private Collection<TopoTileKey> getVisibleTiles( Rectangle2D bounds )
-    {
-        // Pad for irregular projections
-        double padX = bounds.getWidth( ) * 0.02;
-        double padY = bounds.getHeight( ) * 0.02;
-        bounds = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
-
-        Collection<TopoTileKey> keys = new ArrayList<>( );
-        for ( Entry<TopoTileKey, Area> e : tileBounds.entrySet( ) )
-        {
-            if ( e.getValue( ).intersects( bounds ) )
-            {
-                keys.add( e.getKey( ) );
-            }
-        }
-
-        return keys;
-    }
-
-    private DrawableTexture newTopoTexture( TopoTileKey key )
+    protected DrawableTexture loadTileData( TileKey key )
     {
         CachedTileData rgba = null;
-        File cacheFile = new File( glimpseUserCacheDir, String.format( "topo/tile_%s.bin", key.id ) );
+        String name = String.format( "topo/tile_v%d_%x%x%x%x.bin", VERSION_ID, doubleToRawLongBits( key.minLat ), doubleToRawLongBits( key.minLon ),
+                doubleToRawLongBits( key.maxLat ), doubleToRawLongBits( key.maxLon ) );
+        File cacheFile = new File( glimpseUserCacheDir, name );
         if ( cacheFile.isFile( ) )
         {
             logFine( LOGGER, "Loading cached topo tile from %s", cacheFile );
@@ -268,7 +121,7 @@ public class ShadedReliefTiledPainter extends DelegatePainter
             logFine( LOGGER, "Building topo tile for %s", key );
             try
             {
-                TopographyData data = tileProvider.getTile( key.pixelX0, key.pixelY0, key.pixelWidth, key.pixelHeight );
+                TopographyData data = tileProvider.getTile( key );
                 int[][] colored = new int[data.getImageWidth( )][data.getImageHeight( )];
                 hillshade( data, colored );
                 rgba = new CachedTileData( data, colored );
@@ -416,54 +269,6 @@ public class ShadedReliefTiledPainter extends DelegatePainter
         return ( float ) hillshade;
     }
 
-    private static class TopoTileKey
-    {
-        final String id;
-        final int pixelX0;
-        final int pixelY0;
-        final int pixelWidth;
-        final int pixelHeight;
-
-        TopoTileKey( int pixelX0, int pixelY0, int pixelWidth, int pixelHeight )
-        {
-            this.pixelX0 = pixelX0;
-            this.pixelY0 = pixelY0;
-            this.pixelWidth = pixelWidth;
-            this.pixelHeight = pixelHeight;
-
-            id = String.format( "%x-%x%x-%x%x", VERSION_ID, pixelX0, pixelY0, pixelWidth, pixelHeight );
-        }
-
-        @Override
-        public int hashCode( )
-        {
-            return id.hashCode( );
-        }
-
-        @Override
-        public boolean equals( Object obj )
-        {
-            if ( obj instanceof TopoTileKey )
-            {
-                TopoTileKey other = ( TopoTileKey ) obj;
-                return pixelHeight == other.pixelHeight &&
-                        pixelWidth == other.pixelWidth &&
-                        pixelX0 == other.pixelX0 &&
-                        pixelY0 == other.pixelY0;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        @Override
-        public String toString( )
-        {
-            return String.format( "TileKey[%d,%d width=%d,height=%d]", pixelX0, pixelY0, pixelWidth, pixelHeight );
-        }
-    }
-
     private class CachedTileData extends TopographyData
     {
         private int[][] rgba;
@@ -491,5 +296,21 @@ public class ShadedReliefTiledPainter extends DelegatePainter
         {
             // nop
         }
+    }
+
+    @Override
+    protected void replaceTileData( Collection<Entry<TileKey, DrawableTexture>> tileData )
+    {
+        topoImagePainter.removeAllDrawableTextures( );
+        for ( Entry<TileKey, DrawableTexture> e : tileData )
+        {
+            topoImagePainter.addDrawableTexture( e.getValue( ) );
+        }
+    }
+
+    @Override
+    protected Collection<TileKey> allKeys( )
+    {
+        return tileProvider.keys( );
     }
 }

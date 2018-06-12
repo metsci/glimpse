@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -56,12 +55,9 @@ import com.metsci.glimpse.util.vector.Vector2d;
 /**
  * @author borkholder
  */
-public abstract class TiledPainter<V> extends DelegatePainter
+public abstract class TilePainter<V> extends DelegatePainter
 {
-    private static final Logger LOGGER = Logger.getLogger( TiledPainter.class.getName( ) );
-
     protected GeoProjection projection;
-    protected TileProvider tileProvider;
     protected Map<TileKey, Area> tileBounds;
 
     protected PainterCache<TileKey, V> cacheData;
@@ -69,10 +65,9 @@ public abstract class TiledPainter<V> extends DelegatePainter
 
     protected Executor executor;
 
-    public TiledPainter( GeoProjection projection, TileProvider tileProvider )
+    public TilePainter( GeoProjection projection )
     {
         this.projection = projection;
-        this.tileProvider = tileProvider;
         this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
         cacheData = new PainterCache<>( this::loadTileData, executor );
         lastAxis = new Rectangle2D.Double( );
@@ -166,10 +161,10 @@ public abstract class TiledPainter<V> extends DelegatePainter
         // Pad for irregular projections
         double padX = bounds.getWidth( ) * 0.02;
         double padY = bounds.getHeight( ) * 0.02;
-        bounds = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
+        Rectangle2D b = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
 
         return tileBounds.entrySet( ).stream( )
-                .filter( e -> e.getValue( ).intersects( bounds ) )
+                .filter( e -> e.getValue( ).intersects( b ) )
                 .map( Entry::getKey )
                 .collect( Collectors.toList( ) );
     }
