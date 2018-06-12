@@ -30,26 +30,16 @@ import static com.metsci.glimpse.examples.Example.showWithSwing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.logging.Level;
 
-import org.opengis.referencing.FactoryException;
-
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
 import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
 import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.UnderseaFeatureNamesPainter;
-import com.metsci.glimpse.charts.shoreline.LandBox;
-import com.metsci.glimpse.charts.shoreline.LandShapePainter;
-import com.metsci.glimpse.charts.shoreline.gshhs.GshhsFile;
-import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
-import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
+import com.metsci.glimpse.charts.shoreline.ShorelineTilePainter;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.MapPlot2D;
-import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -74,15 +64,11 @@ public class Etopo1Example implements GlimpseLayoutProvider
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
             TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
-            LandBox box = new LandBox( 60, 10, -100, -50, false );
-//            GshhsFile f = new GshhsFile( new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_h.b" ), box, PolygonType.land );
-//            LandShapePainter landPainter = new LandShapePainter( );
-//            landPainter.setShowLines( false );
-//            landPainter.loadLandFileAndCenterAxis( f.toShape( ), projection, new Axis2D( ) );
+//            plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+//            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
 
-            plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
-            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
-//            plot.getLayoutCenter( ).addPainter( landPainter );
+            ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "/home/borkholder/Desktop/tmp.bin" ) );
+            plot.getLayoutCenter( ).addPainter( landPainter );
             plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
             plot.getAxis( ).validate( );
             return plot;

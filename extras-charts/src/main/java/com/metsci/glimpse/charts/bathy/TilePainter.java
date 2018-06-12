@@ -169,9 +169,22 @@ public abstract class TilePainter<V> extends DelegatePainter
                 .collect( Collectors.toList( ) );
     }
 
+    /**
+     * Provides all available keys.  This does not need to cover the globe.
+     */
+    protected abstract Collection<TileKey> allKeys( );
+
+    /**
+     * Loads the tile data for a specific key.  This method must be thread-safe
+     * and will be called on multiple threads at the same time.
+     */
     protected abstract V loadTileData( TileKey key );
 
+    /**
+     * Loads the given tile data into the painter.  This is called on the painter
+     * thread and all given tile data is valid.  However, not all tiles in the
+     * visible area are loaded and provided here.  This method may be called
+     * multiple times successively as new tiles are loaded into the view.
+     */
     protected abstract void replaceTileData( Collection<Entry<TileKey, V>> tileData );
-
-    protected abstract Collection<TileKey> allKeys( );
 }
