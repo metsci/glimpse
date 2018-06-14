@@ -41,4 +41,15 @@
 
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>boundless</id>
+            <url>https://repo.boundlessgeo.com/main/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>
+

@@ -12,11 +12,11 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.google.common.primitives.Floats;
 import com.metsci.glimpse.charts.bathy.TileKey;
@@ -27,7 +27,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.util.logging.LoggerUtils;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
@@ -38,7 +37,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     protected final Map<TileKey, Long> keys;
     protected final PolygonPainter painter;
 
-    private TileKey[] paintingTiles;
+    private Set<TileKey> loadedGroups;
 
     public ShorelineTilePainter( GeoProjection projection, File file ) throws IOException
     {
@@ -47,7 +46,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
         painter = new PolygonPainter( );
         painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
         addPainter( painter );
-        paintingTiles = new TileKey[0];
+        loadedGroups = new HashSet<>( );
         keys = loadOffsets( file );
         logInfo( LOGGER, "Found %,d files in %s", keys.size( ), file );
     }
@@ -137,34 +136,28 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     @Override
     protected void replaceTileData( Collection<Entry<TileKey, TessellatedPolygon[]>> tileData )
     {
-        Set<TileKey> newTiles = tileData.stream( ).map( Entry::getKey ).collect( Collectors.toSet( ) );
-
-        for ( TileKey old : paintingTiles )
+        for ( TileKey old : loadedGroups )
         {
-            if ( newTiles.contains( old ) )
-            {
-                // don't add again
-                newTiles.remove( old );
-            }
-            else
-            {
-                painter.clearGroup( tileData );
-            }
+            painter.setFill( old, false );
         }
 
         for ( Entry<TileKey, TessellatedPolygon[]> e : tileData )
         {
-            if ( newTiles.contains( e.getKey( ) ) )
+            TileKey groupId = e.getKey( );
+            if ( loadedGroups.contains( groupId ) )
             {
-                configurePainter( e.getKey( ) );
+                painter.setFill( groupId, true );
+            }
+            else
+            {
+                loadedGroups.add( groupId );
+                configurePainter( groupId );
                 for ( TessellatedPolygon p : e.getValue( ) )
                 {
-                    painter.addPolygon( e.getKey( ), p, p, 0 );
+                    painter.addPolygon( groupId, p, p, 0 );
                 }
             }
         }
-
-        paintingTiles = tileData.stream( ).map( Entry::getKey ).toArray( TileKey[]::new );
     }
 
     private void configurePainter( Object groupId )

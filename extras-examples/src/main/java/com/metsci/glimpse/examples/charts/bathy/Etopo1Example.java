@@ -29,21 +29,38 @@ package com.metsci.glimpse.examples.charts.bathy;
 import static com.metsci.glimpse.examples.Example.showWithSwing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 
+import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
-import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
-import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
-import com.metsci.glimpse.charts.bathy.TopoTileProvider;
-import com.metsci.glimpse.charts.bathy.UnderseaFeatureNamesPainter;
+import com.metsci.glimpse.charts.shoreline.LandBox;
+import com.metsci.glimpse.charts.shoreline.LandSegment;
+import com.metsci.glimpse.charts.shoreline.LandShape;
+import com.metsci.glimpse.charts.shoreline.LandVertex;
 import com.metsci.glimpse.charts.shoreline.ShorelineTilePainter;
+import com.metsci.glimpse.charts.shoreline.gshhs.GshhsFile;
+import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
+import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.painter.shape.PolygonPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
+import com.metsci.glimpse.support.colormap.ColorGenerator;
+import com.metsci.glimpse.support.polygon.Polygon;
+import com.metsci.glimpse.support.polygon.Polygon.Interior;
+import com.metsci.glimpse.support.polygon.Polygon.Loop;
+import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
+import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
+import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.units.Length;
+import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
  * @author borkholder
@@ -63,12 +80,32 @@ public class Etopo1Example implements GlimpseLayoutProvider
         {
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
-            TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
-//            plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
-//            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
+            //            TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
+            //            plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+            //            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
 
-            ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "/home/borkholder/Desktop/tmp.bin" ) );
-            plot.getLayoutCenter( ).addPainter( landPainter );
+                        ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "/home/borkholder/Desktop/tmp.bin" ) );
+                        plot.getLayoutCenter( ).addPainter( landPainter );
+
+//            PolygonPainter p = new PolygonPainter( );
+//            int i = 0;
+//            ColorGenerator g = new ColorGenerator( );
+//            for ( Polygon p0 : load( projection ) )
+//            {
+//                p.addPolygon( i, 0, p0, 0 );
+//
+//                p.setFill( i, false );
+//                float[] rgba = new float[4];
+//                g.next( rgba );
+//                p.setLineColor( i, rgba );
+//                p.setShowLines( i, true );
+//                p.setLineWidth( i, 4 );
+//
+//                i++;
+//            }
+//
+//            plot.getLayoutCenter( ).addPainter( p );
+
             plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
             plot.getAxis( ).validate( );
             return plot;
@@ -77,5 +114,67 @@ public class Etopo1Example implements GlimpseLayoutProvider
         {
             throw new RuntimeException( ex );
         }
+    }
+
+    public static Polygon[] load( GeoProjection p ) throws IOException, UnrecognizedValueException, TessellationException
+    {
+        setTerseConsoleLogger( Level.FINE );
+
+        LandBox box = new LandBox( 90, -90, -180, 180, false );
+        GshhsFile f = new GshhsFile( new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_l.b" ), box, PolygonType.land );
+        LandShape shape = f.toShape( );
+
+        List<Polygon> list = new ArrayList<>( );
+
+        int tileWidth = 10;
+        int tileHeight = 5;
+        for ( int x = -180; x < 180; x += tileWidth )
+        {
+            for ( int y = -90; y < 90; y += tileHeight )
+            {
+                Rectangle2D bounds = new Rectangle2D.Double( x - 1, y - 1, tileWidth + 2, tileHeight + 2 );
+
+                List<Polygon> polys = shape.getSegments( ).stream( ).parallel( )
+                        .map( seg -> tileAndTesselate( p, bounds, seg ) )
+                        .filter( p0 -> p0.getIterator( ).hasNext( ) )
+                        .collect( Collectors.toList( ) );
+                list.addAll( polys );
+            }
+        }
+
+        return list.toArray( new Polygon[0] );
+    }
+
+    static Polygon tileAndTesselate( GeoProjection proj, Rectangle2D bounds, LandSegment segment )
+    {
+        final double minX = bounds.getMinX( );
+        final double maxX = bounds.getMaxX( );
+        final double minY = bounds.getMinY( );
+        final double maxY = bounds.getMaxY( );
+
+        double[] v2 = new double[2];
+        LoopBuilder bldr = new LoopBuilder( );
+        for ( LandVertex v : segment.vertices )
+        {
+            if ( minY <= v.lat && v.lat <= maxY &&
+                    ( ( minX - 360 <= v.lon && v.lon <= maxX - 360 ) ||
+                            ( minX <= v.lon && v.lon <= maxX ) ||
+                            ( minX + 360 <= v.lon && v.lon <= maxX + 360 ) ) )
+            {
+                Vector2d s = proj.project( LatLonGeo.fromDeg( v.lat, v.lon ) );
+                v2[0] = s.getX( );
+                v2[1] = s.getY( );
+                bldr.addVertices( v2, 1 );
+            }
+        }
+
+        Loop loop = bldr.complete( Interior.onLeft );
+        Polygon p = new Polygon( );
+        if ( loop.size( ) > 0 )
+        {
+            p.add( loop );
+        }
+
+        return p;
     }
 }
