@@ -1,9 +1,14 @@
 package com.metsci.glimpse.charts.shoreline;
 
+import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static java.lang.Math.max;
 import static java.lang.Math.toDegrees;
+import static java.util.Arrays.binarySearch;
 
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -17,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import com.google.common.primitives.Floats;
 import com.metsci.glimpse.charts.bathy.TileKey;
@@ -34,7 +40,8 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     private static final Logger LOGGER = Logger.getLogger( ShorelineTilePainter.class.getName( ) );
 
     protected final File file;
-    protected final Map<TileKey, Long> keys;
+    protected final double[] lengthScale;
+    protected final Map<MultiLevelKey, Long> keys;
     protected final PolygonPainter painter;
 
     private Set<TileKey> loadedGroups;
@@ -47,30 +54,51 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
         painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
         addPainter( painter );
         loadedGroups = new HashSet<>( );
+        lengthScale = loadLengthScale( file );
         keys = loadOffsets( file );
         logInfo( LOGGER, "Found %,d files in %s", keys.size( ), file );
     }
 
-    protected Map<TileKey, Long> loadOffsets( File file ) throws IOException
+    protected double[] loadLengthScale( File file ) throws IOException
     {
-        try (RandomAccessFile shorelineTileFile = new RandomAccessFile( file, "r" ))
+        try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
         {
-            Map<TileKey, Long> offsets = new HashMap<>( );
-            long len = shorelineTileFile.length( );
-            while ( shorelineTileFile.getFilePointer( ) < len )
+            @SuppressWarnings( "unused" )
+            int version = rf.readByte( );
+            int numLevels = rf.readInt( );
+            double[] levels = new double[numLevels];
+            for ( int i = 0; i < levels.length; i++ )
             {
-                long pos = shorelineTileFile.getFilePointer( );
-                float minLat = ( float ) toDegrees( shorelineTileFile.readFloat( ) );
-                float maxLat = ( float ) toDegrees( shorelineTileFile.readFloat( ) );
-                float minLon = ( float ) toDegrees( shorelineTileFile.readFloat( ) );
-                float maxLon = ( float ) toDegrees( shorelineTileFile.readFloat( ) );
-                offsets.put( new TileKey( minLat, maxLat, minLon, maxLon ), pos );
+                levels[i] = rf.readDouble( );
+            }
 
-                int numPolys = shorelineTileFile.readInt( );
+            return levels;
+        }
+    }
+
+    protected Map<MultiLevelKey, Long> loadOffsets( File file ) throws IOException
+    {
+        try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
+        {
+            rf.seek( Byte.BYTES + Integer.BYTES + lengthScale.length * Double.BYTES );
+
+            Map<MultiLevelKey, Long> offsets = new HashMap<>( );
+            long len = rf.length( );
+            while ( rf.getFilePointer( ) < len )
+            {
+                long pos = rf.getFilePointer( );
+                int level = rf.readByte( );
+                float minLat = ( float ) toDegrees( rf.readFloat( ) );
+                float maxLat = ( float ) toDegrees( rf.readFloat( ) );
+                float minLon = ( float ) toDegrees( rf.readFloat( ) );
+                float maxLon = ( float ) toDegrees( rf.readFloat( ) );
+                offsets.put( new MultiLevelKey( level, minLat, maxLat, minLon, maxLon ), pos );
+
+                int numPolys = rf.readInt( );
                 for ( int i = 0; i < numPolys; i++ )
                 {
-                    int numFloats = shorelineTileFile.readInt( );
-                    shorelineTileFile.seek( shorelineTileFile.getFilePointer( ) + numFloats * Floats.BYTES );
+                    int numFloats = rf.readInt( );
+                    rf.seek( rf.getFilePointer( ) + numFloats * Floats.BYTES );
                 }
             }
 
@@ -95,7 +123,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     {
         long offset = keys.get( key );
         logFine( LOGGER, "Reading tile at offset %,d", offset );
-        rf.seek( offset + 4 * Float.BYTES );
+        rf.seek( offset + Byte.BYTES + 4 * Float.BYTES );
 
         int numPolys = rf.readInt( );
         logFine( LOGGER, "Reading %,d polygons in %s", numPolys, key );
@@ -122,6 +150,14 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
             {
                 float lat = verts[j];
                 float lon = verts[j + 1];
+                if ( lon == -180 )
+                {
+                    lon += 1e-3;
+                }
+                else if ( lon == 180 )
+                {
+                    lon -= 1e-3;
+                }
                 Vector2d v = projection.project( LatLonGeo.fromRad( lat, lon ) );
                 verts[j] = ( float ) v.getX( );
                 verts[j + 1] = ( float ) v.getY( );
@@ -163,13 +199,62 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     private void configurePainter( Object groupId )
     {
         painter.setFill( groupId, true );
-        painter.setFillColor( groupId, GlimpseColor.getGreen( ) );
+        painter.setFillColor( groupId, GlimpseColor.getBlack( ) );
         painter.setShowLines( groupId, false );
+    }
+
+    @Override
+    protected Collection<TileKey> getVisibleTiles( Rectangle2D bounds, Stream<Entry<TileKey, Area>> keys )
+    {
+        int level = getLevel( bounds );
+        keys = keys.filter( e -> ( ( MultiLevelKey ) e.getKey( ) ).level == level );
+        return super.getVisibleTiles( bounds, keys );
+    }
+
+    protected int getLevel( Rectangle2D bounds )
+    {
+        LatLonGeo c = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMinY( ) + bounds.getHeight( ) / 2 );
+        LatLonGeo a = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMaxY( ) );
+        LatLonGeo b = projection.unproject( bounds.getMaxX( ), bounds.getMinY( ) + bounds.getHeight( ) / 2 );
+
+        double dist = max( c.getDistanceTo( a ), c.getDistanceTo( b ) );
+        int idx = binarySearch( lengthScale, dist );
+        if ( idx < 0 )
+        {
+            idx = -idx - 1;
+        }
+
+        idx = clamp( idx, 0, lengthScale.length - 1 );
+        System.out.println( dist + " " + idx );
+        return idx;
     }
 
     @Override
     protected Collection<TileKey> allKeys( )
     {
         return Collections.unmodifiableCollection( keys.keySet( ) );
+    }
+
+    protected static class MultiLevelKey extends TileKey
+    {
+        public final int level;
+
+        public MultiLevelKey( int level, double minLat, double maxLat, double minLon, double maxLon )
+        {
+            super( minLat, maxLat, minLon, maxLon );
+            this.level = level;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            return super.hashCode( ) * 31 + level;
+        }
+
+        @Override
+        public boolean equals( Object obj )
+        {
+            return super.equals( obj ) && obj instanceof MultiLevelKey && ( ( MultiLevelKey ) obj ).level == level;
+        }
     }
 }

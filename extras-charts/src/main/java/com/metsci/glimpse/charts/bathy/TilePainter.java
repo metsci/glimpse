@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -96,7 +97,7 @@ public abstract class TilePainter<V> extends DelegatePainter
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
 
-            Collection<TileKey> tiles = getVisibleTiles( lastAxis );
+            Collection<TileKey> tiles = getVisibleTiles( lastAxis, tileBounds.entrySet( ).stream( ) );
             List<Entry<TileKey, V>> newTileData = new ArrayList<>( tiles.size( ) );
             boolean anyMissed = false;
             for ( TileKey key : tiles )
@@ -156,15 +157,14 @@ public abstract class TilePainter<V> extends DelegatePainter
         return keys;
     }
 
-    protected Collection<TileKey> getVisibleTiles( Rectangle2D bounds )
+    protected Collection<TileKey> getVisibleTiles( Rectangle2D bounds, Stream<Entry<TileKey, Area>> keys )
     {
         // Pad for irregular projections
         double padX = bounds.getWidth( ) * 0.02;
         double padY = bounds.getHeight( ) * 0.02;
         Rectangle2D b = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
 
-        return tileBounds.entrySet( ).stream( )
-                .filter( e -> e.getValue( ).intersects( b ) )
+        return keys.filter( e -> e.getValue( ).intersects( b ) )
                 .map( Entry::getKey )
                 .collect( Collectors.toList( ) );
     }
