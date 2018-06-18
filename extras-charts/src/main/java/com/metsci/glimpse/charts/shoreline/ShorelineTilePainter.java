@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+import java.nio.DoubleBuffer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.google.common.primitives.Floats;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TilePainter;
 import com.metsci.glimpse.painter.shape.PolygonPainter;
@@ -69,7 +68,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
             double[] levels = new double[numLevels];
             for ( int i = 0; i < levels.length; i++ )
             {
-                levels[i] = rf.readDouble( );
+                levels[i] = rf.readFloat( );
             }
 
             return levels;
@@ -80,7 +79,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     {
         try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
         {
-            rf.seek( Byte.BYTES + Integer.BYTES + lengthScale.length * Double.BYTES );
+            rf.seek( Byte.BYTES + Integer.BYTES + lengthScale.length * Float.BYTES );
 
             Map<MultiLevelKey, Long> offsets = new HashMap<>( );
             long len = rf.length( );
@@ -97,8 +96,8 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
                 int numPolys = rf.readInt( );
                 for ( int i = 0; i < numPolys; i++ )
                 {
-                    int numFloats = rf.readInt( );
-                    rf.seek( rf.getFilePointer( ) + numFloats * Floats.BYTES );
+                    int numVals = rf.readInt( );
+                    rf.seek( rf.getFilePointer( ) + numVals * Double.BYTES );
                 }
             }
 
@@ -129,27 +128,26 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
         logFine( LOGGER, "Reading %,d polygons in %s", numPolys, key );
         TessellatedPolygon[] polys = new TessellatedPolygon[numPolys];
 
-        ByteBuffer buf = null;
+        ByteBuffer bbuf = null;
         for ( int i = 0; i < numPolys; i++ )
         {
-            int numFloats = rf.readInt( );
-            if ( buf == null || buf.capacity( ) < numFloats * Float.BYTES )
+            int numValues = rf.readInt( );
+            if ( bbuf == null || bbuf.capacity( ) < numValues * Double.BYTES )
             {
-                buf = ByteBuffer.allocate( numFloats * Float.BYTES );
+                bbuf = ByteBuffer.allocate( numValues * Double.BYTES );
             }
 
-            buf.limit( numFloats * Float.BYTES );
-            buf.rewind( );
-            rf.getChannel( ).read( buf );
-            buf.rewind( );
-            FloatBuffer fbuf = buf.asFloatBuffer( );
-            float[] verts = new float[fbuf.limit( )];
-            fbuf.get( verts );
+            bbuf.limit( numValues * Double.BYTES );
+            bbuf.rewind( );
+            rf.getChannel( ).read( bbuf );
+            bbuf.rewind( );
+            DoubleBuffer buf = bbuf.asDoubleBuffer( );
 
+            float[] verts = new float[buf.limit( )];
             for ( int j = 0; j < verts.length; j += 2 )
             {
-                float lat = verts[j];
-                float lon = verts[j + 1];
+                double lat = buf.get( );
+                double lon = buf.get( );
                 if ( lon == -180 )
                 {
                     lon += 1e-3;

@@ -32,9 +32,12 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop;
 import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
 import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
-import com.metsci.glimpse.support.polygon.SimpleVertexAccumulator;
+import com.metsci.glimpse.support.polygon.VertexAccumulator;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.units.Length;
+
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 
 public class ShorelineTiler
 {
@@ -52,10 +55,10 @@ public class ShorelineTiler
         o.writeByte( 0 );
 
         o.writeInt( 4 );
-        o.writeDouble( Length.fromNauticalMiles( 10 ) );
-        o.writeDouble( Length.fromNauticalMiles( 100 ) );
-        o.writeDouble( Length.fromNauticalMiles( 500 ) );
-        o.writeDouble( Length.fromNauticalMiles( 1000 ) );
+        o.writeFloat( ( float ) Length.fromNauticalMiles( 10 ) );
+        o.writeFloat( ( float ) Length.fromNauticalMiles( 100 ) );
+        o.writeFloat( ( float ) Length.fromNauticalMiles( 500 ) );
+        o.writeFloat( ( float ) Length.fromNauticalMiles( 1000 ) );
 
         File gshhsF = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_f.b" );
         LandShape land = new GshhsFile( gshhsF, box, PolygonType.land ).toShape( );
@@ -80,7 +83,7 @@ public class ShorelineTiler
     {
         createTiles( tileWidth_DEG, tileHeight_DEG ).parallel( )
                 .forEach( b -> {
-                    Collection<float[]> tess = land.getSegments( ).stream( ).parallel( )
+                    Collection<double[]> tess = land.getSegments( ).stream( ).parallel( )
                             .map( s -> toArea( s ) )
                             .map( s -> tile( s, b ) )
                             .filter( a -> !a.isEmpty( ) )
@@ -107,13 +110,13 @@ public class ShorelineTiler
                             out.writeFloat( ( float ) toRadians( bounds0.getMinX( ) ) );
                             out.writeFloat( ( float ) toRadians( bounds0.getMaxX( ) ) );
                             out.writeInt( tess.size( ) );
-                            for ( float[] verts : tess )
+                            for ( double[] verts : tess )
                             {
                                 out.writeInt( verts.length );
                                 for ( int i = 0; i < verts.length; i += 2 )
                                 {
-                                    out.writeFloat( ( float ) toRadians( verts[i + 1] ) );
-                                    out.writeFloat( ( float ) toRadians( verts[i] ) );
+                                    out.writeDouble( toRadians( verts[i + 1] ) );
+                                    out.writeDouble( toRadians( verts[i] ) );
                                 }
                             }
                         }
@@ -227,15 +230,37 @@ public class ShorelineTiler
         return all.stream( );
     }
 
-    static float[] tesselate( Loop loop )
+    static double[] tesselate( Loop loop )
     {
         Polygon p = new Polygon( );
         p.add( loop );
-        SimpleVertexAccumulator accum = new SimpleVertexAccumulator( );
+
+        DoubleList list = new DoubleArrayList( );
         try
         {
             PolygonTessellator tess = new PolygonTessellator( );
-            tess.tessellate( p, accum );
+            tess.tessellate( p, new VertexAccumulator( )
+            {
+                @Override
+                public void addVertices( float[] vertexData, int nVertices )
+                {
+                    for ( int i = 0; i < nVertices; i++ )
+                    {
+                        list.add( vertexData[i * 2] );
+                        list.add( vertexData[i * 2 + 1] );
+                    }
+                }
+
+                @Override
+                public void addVertices( double[] vertexData, int nVertices )
+                {
+                    for ( int i = 0; i < nVertices; i++ )
+                    {
+                        list.add( vertexData[i * 2] );
+                        list.add( vertexData[i * 2 + 1] );
+                    }
+                }
+            } );
             tess.destroy( );
         }
         catch ( TessellationException ex )
@@ -243,6 +268,6 @@ public class ShorelineTiler
             throw new RuntimeException( ex );
         }
 
-        return accum.getVertices( );
+        return list.toDoubleArray( );
     }
 }
