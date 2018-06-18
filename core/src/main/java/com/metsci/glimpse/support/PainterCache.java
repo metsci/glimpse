@@ -139,4 +139,12 @@ public class PainterCache<K, V>
         }
     }
 
+    public void clear( )
+    {
+        synchronized ( locks )
+        {
+            locks.clear( );
+            cache.invalidateAll( );
+        }
+    }
 }

@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
+import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Collection;
@@ -71,15 +71,16 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
     private static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
     private static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
     private static final double LIGHT_AZIMUTH = fromDeg( -135 );
-    private static final float HUE = 0.63f;
 
-    private TopoTileProvider tileProvider;
-    private ShadedTexturePainter topoImagePainter;
+    protected float hue;
+    protected TopoTileProvider tileProvider;
+    protected ShadedTexturePainter topoImagePainter;
 
     public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
     {
         super( projection );
         this.tileProvider = tileProvider;
+        setHue( 0.63f );
 
         topoImagePainter = new ShadedTexturePainter( );
         addPainter( topoImagePainter );
@@ -96,10 +97,16 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         }
     }
 
+    public void setHue( float hue )
+    {
+        this.hue = hue;
+        cacheData.clear( );
+    }
+
     @Override
     protected DrawableTexture loadTileData( TileKey key )
     {
-        CachedTileData rgba = null;
+        CachedTileData tile = null;
         String name = String.format( "topo/tile_v%d_%x%x%x%x.bin", VERSION_ID, doubleToRawLongBits( key.minLat ), doubleToRawLongBits( key.minLon ),
                 doubleToRawLongBits( key.maxLat ), doubleToRawLongBits( key.maxLon ) );
         File cacheFile = new File( glimpseUserCacheDir, name );
@@ -108,7 +115,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             logFine( LOGGER, "Loading cached topo tile from %s", cacheFile );
             try
             {
-                rgba = readCachedTile( cacheFile );
+                tile = readCachedTile( cacheFile );
             }
             catch ( IOException ex )
             {
@@ -116,18 +123,18 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             }
         }
 
-        if ( rgba == null )
+        if ( tile == null )
         {
             logFine( LOGGER, "Building topo tile for %s", key );
             try
             {
                 TopographyData data = tileProvider.getTile( key );
-                int[][] colored = new int[data.getImageWidth( )][data.getImageHeight( )];
-                hillshade( data, colored );
-                rgba = new CachedTileData( data, colored );
+                float[][] shaded = new float[data.getImageWidth( )][data.getImageHeight( )];
+                hillshade( data, shaded );
+                tile = new CachedTileData( data, shaded );
 
                 cacheFile.getParentFile( ).mkdirs( );
-                writeCachedTile( cacheFile, rgba );
+                writeCachedTile( cacheFile, tile );
             }
             catch ( IOException ex )
             {
@@ -135,10 +142,10 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             }
         }
 
-        RGBATextureProjected2D texture = new RGBATextureProjected2D( rgba.getImageWidth( ), rgba.getImageHeight( ) );
-        texture.setProjection( rgba.getProjection( projection ) );
+        RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
+        texture.setProjection( tile.getProjection( projection ) );
 
-        int[][] pixels = rgba.rgba;
+        float[][] shaded = tile.data;
         texture.mutate( new MutatorByte2D( )
         {
             @Override
@@ -148,7 +155,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
                 {
                     for ( int c = 0; c < dataSizeX; c++ )
                     {
-                        int x = pixels[c][r];
+                        float shade = shaded[c][r];
+                        int x = colorize( shade );
                         data.put( ( byte ) ( ( x >> 24 ) & 0xff ) );
                         data.put( ( byte ) ( ( x >> 16 ) & 0xff ) );
                         data.put( ( byte ) ( ( x >> 8 ) & 0xff ) );
@@ -161,7 +169,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         return texture;
     }
 
-    private CachedTileData readCachedTile( File cacheFile ) throws IOException
+    protected CachedTileData readCachedTile( File cacheFile ) throws IOException
     {
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "r" );
 
@@ -175,35 +183,35 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
         long size = rgba.getImageWidth( ) * rgba.getImageHeight( ) * Integer.BYTES;
         MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_ONLY, rf.getFilePointer( ), size );
-        IntBuffer ib = mmap.asIntBuffer( );
+        FloatBuffer fb = mmap.asFloatBuffer( );
 
-        rgba.rgba = new int[rgba.getImageWidth( )][rgba.getImageHeight( )];
-        for ( int[] row : rgba.rgba )
+        rgba.data = new float[rgba.getImageWidth( )][rgba.getImageHeight( )];
+        for ( float[] row : rgba.data )
         {
-            ib.get( row );
+            fb.get( row );
         }
 
         rf.close( );
         return rgba;
     }
 
-    private void writeCachedTile( File cacheFile, CachedTileData rgba ) throws IOException
+    protected void writeCachedTile( File cacheFile, CachedTileData tile ) throws IOException
     {
-        long size = rgba.getImageWidth( ) * rgba.getImageHeight( ) * Integer.BYTES;
+        long size = tile.getImageWidth( ) * tile.getImageHeight( ) * Integer.BYTES;
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
         rf.setLength( 0 );
 
-        rf.writeInt( rgba.getImageWidth( ) );
-        rf.writeInt( rgba.getImageHeight( ) );
-        rf.writeDouble( rgba.getStartLat( ) );
-        rf.writeDouble( rgba.getStartLon( ) );
-        rf.writeDouble( rgba.getWidthStep( ) );
-        rf.writeDouble( rgba.getHeightStep( ) );
+        rf.writeInt( tile.getImageWidth( ) );
+        rf.writeInt( tile.getImageHeight( ) );
+        rf.writeDouble( tile.getStartLat( ) );
+        rf.writeDouble( tile.getStartLon( ) );
+        rf.writeDouble( tile.getWidthStep( ) );
+        rf.writeDouble( tile.getHeightStep( ) );
 
         MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_WRITE, rf.getFilePointer( ), size );
-        IntBuffer fb = mmap.asIntBuffer( );
+        FloatBuffer fb = mmap.asFloatBuffer( );
 
-        for ( int[] row : rgba.rgba )
+        for ( float[] row : tile.data )
         {
             fb.put( row );
         }
@@ -211,7 +219,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         rf.close( );
     }
 
-    private void hillshade( TopographyData data, int[][] dest )
+    protected void hillshade( TopographyData data, float[][] dest )
     {
         /*
          * dx certainly changes as we change latitude, but the transition is
@@ -238,19 +246,19 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
     }
 
-    private int colorize( float hillshade )
+    protected int colorize( float hillshade )
     {
         float h = clamp( ( hillshade - 0.4f ) / 0.5f, 0, 1 );
         float bri = 0.1f + 0.9f * h;
         float sat = 0.5f + 0.1f * ( 1 - h );
-        int rgb = Color.HSBtoRGB( HUE, sat, bri );
+        int rgb = Color.HSBtoRGB( hue, sat, bri );
         return ( rgb << 8 ) | 0xff;
     }
 
     /**
      * From http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
      */
-    private float hillshade0( float[][] data, int x, int y, double dx, double dy )
+    protected float hillshade0( float[][] data, int x, int y, double dx, double dy )
     {
         float a = data[x - 1][y + 1];
         float b = data[x + 0][y + 1];
@@ -269,20 +277,17 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         return ( float ) hillshade;
     }
 
-    private class CachedTileData extends TopographyData
+    protected class CachedTileData extends TopographyData
     {
-        private int[][] rgba;
-
         CachedTileData( ) throws IOException
         {
             super( null );
         }
 
-        public CachedTileData( TopographyData src, int[][] rgba ) throws IOException
+        public CachedTileData( TopographyData src, float[][] shaded ) throws IOException
         {
             this( );
-            this.data = null;
-            this.rgba = rgba;
+            this.data = shaded;
             this.imageWidth = src.getImageWidth( );
             this.imageHeight = src.getImageHeight( );
             this.heightStep = src.getHeightStep( );
