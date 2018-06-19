@@ -9,7 +9,10 @@ import static java.util.Arrays.binarySearch;
 
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -24,6 +27,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import com.google.common.io.CountingInputStream;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TilePainter;
 import com.metsci.glimpse.painter.shape.PolygonPainter;
@@ -58,12 +62,13 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
         logInfo( LOGGER, "Found %,d files in %s", keys.size( ), file );
     }
 
+    @SuppressWarnings( "unused" )
     protected double[] loadLengthScale( File file ) throws IOException
     {
         try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
         {
-            @SuppressWarnings( "unused" )
             int version = rf.readByte( );
+            long dataStart = rf.readLong( );
             int numLevels = rf.readInt( );
             double[] levels = new double[numLevels];
             for ( int i = 0; i < levels.length; i++ )
@@ -77,28 +82,33 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
 
     protected Map<MultiLevelKey, Long> loadOffsets( File file ) throws IOException
     {
-        try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
+        try (CountingInputStream cis = new CountingInputStream( new BufferedInputStream( new FileInputStream( file ) ) ))
         {
-            rf.seek( Byte.BYTES + Integer.BYTES + lengthScale.length * Float.BYTES );
+            DataInputStream dis = new DataInputStream( cis );
+
+            // version
+            dis.readByte( );
+            long dataStart = dis.readLong( );
+            long offset = dataStart;
+
+            // read levels
+            int nLevels = dis.readInt( );
+            for ( int i = 0; i < nLevels; i++ )
+            {
+                dis.readFloat( );
+            }
 
             Map<MultiLevelKey, Long> offsets = new HashMap<>( );
-            long len = rf.length( );
-            while ( rf.getFilePointer( ) < len )
+            while ( cis.getCount( ) < dataStart )
             {
-                long pos = rf.getFilePointer( );
-                int level = rf.readByte( );
-                float minLat = ( float ) toDegrees( rf.readFloat( ) );
-                float maxLat = ( float ) toDegrees( rf.readFloat( ) );
-                float minLon = ( float ) toDegrees( rf.readFloat( ) );
-                float maxLon = ( float ) toDegrees( rf.readFloat( ) );
-                offsets.put( new MultiLevelKey( level, minLat, maxLat, minLon, maxLon ), pos );
-
-                int numPolys = rf.readInt( );
-                for ( int i = 0; i < numPolys; i++ )
-                {
-                    int numVals = rf.readInt( );
-                    rf.seek( rf.getFilePointer( ) + numVals * Double.BYTES );
-                }
+                int level = dis.readByte( );
+                float minLat = ( float ) toDegrees( dis.readFloat( ) );
+                float maxLat = ( float ) toDegrees( dis.readFloat( ) );
+                float minLon = ( float ) toDegrees( dis.readFloat( ) );
+                float maxLon = ( float ) toDegrees( dis.readFloat( ) );
+                long bytesData = dis.readLong( );
+                offsets.put( new MultiLevelKey( level, minLat, maxLat, minLon, maxLon ), offset );
+                offset += bytesData;
             }
 
             return offsets;
@@ -122,7 +132,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     {
         long offset = keys.get( key );
         logFine( LOGGER, "Reading tile at offset %,d", offset );
-        rf.seek( offset + Byte.BYTES + 4 * Float.BYTES );
+        rf.seek( offset );
 
         int numPolys = rf.readInt( );
         logFine( LOGGER, "Reading %,d polygons in %s", numPolys, key );

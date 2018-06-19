@@ -14,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import com.google.common.io.Files;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsFile;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
@@ -47,39 +49,59 @@ public class ShorelineTiler
     {
         setTerseConsoleLogger( Level.FINE );
 
+        File destFile = new File( "./gshhs_tiled.bin" );
+        File idxFile = new File( destFile + ".idx" );
+        File dataFile = new File( destFile + ".data" );
+
+        DataOutputStream idxOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( idxFile ) ) );
+        DataOutputStream dataOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( dataFile ) ) );
+
+        idxOut.writeInt( 5 );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 10 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 100 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 500 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 1000 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 10000 ) );
+
         LandBox box = new LandBox( 90, -90, -180, 180, false );
-
-        File destFile = new File( "/home/borkholder/Desktop/tmp.bin" );
-        DataOutputStream o = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( destFile ) ) );
-        // version
-        o.writeByte( 0 );
-
-        o.writeInt( 4 );
-        o.writeFloat( ( float ) Length.fromNauticalMiles( 10 ) );
-        o.writeFloat( ( float ) Length.fromNauticalMiles( 100 ) );
-        o.writeFloat( ( float ) Length.fromNauticalMiles( 500 ) );
-        o.writeFloat( ( float ) Length.fromNauticalMiles( 1000 ) );
-
         File gshhsF = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_f.b" );
         LandShape land = new GshhsFile( gshhsF, box, PolygonType.land ).toShape( );
-        write( o, land, 0, 2, 1 );
+        write( idxOut, dataOut, land, 0, 2, 1 );
 
         File gshhsH = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_h.b" );
         land = new GshhsFile( gshhsH, box, PolygonType.land ).toShape( );
-        write( o, land, 1, 5, 3 );
+        write( idxOut, dataOut, land, 1, 5, 3 );
 
         File gshhsI = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_i.b" );
         land = new GshhsFile( gshhsI, box, PolygonType.land ).toShape( );
-        write( o, land, 2, 20, 10 );
+        write( idxOut, dataOut, land, 2, 20, 10 );
 
         File gshhsL = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_l.b" );
         land = new GshhsFile( gshhsL, box, PolygonType.land ).toShape( );
-        write( o, land, 3, 30, 10 );
+        write( idxOut, dataOut, land, 3, 30, 10 );
 
-        o.close( );
+        File gshhsC = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_c.b" );
+        land = new GshhsFile( gshhsC, box, PolygonType.land ).toShape( );
+        write( idxOut, dataOut, land, 4, 60, 30 );
+
+        idxOut.close( );
+        dataOut.close( );
+
+        try (OutputStream os = new FileOutputStream( destFile ))
+        {
+            DataOutputStream dos = new DataOutputStream( os );
+            // version
+            dos.writeByte( 0 );
+            dos.writeLong( idxFile.length( ) + Byte.BYTES + Long.BYTES );
+            Files.copy( idxFile, dos );
+            Files.copy( dataFile, dos );
+        }
+
+        idxFile.delete( );
+        dataFile.delete( );
     }
 
-    static void write( DataOutputStream out, LandShape land, int level, int tileWidth_DEG, int tileHeight_DEG ) throws IOException
+    static void write( DataOutputStream idxOut, DataOutputStream dataOut, LandShape land, int level, int tileWidth_DEG, int tileHeight_DEG ) throws IOException
     {
         createTiles( tileWidth_DEG, tileHeight_DEG ).parallel( )
                 .forEach( b -> {
@@ -102,23 +124,28 @@ public class ShorelineTiler
                         long nVerts = tess.stream( ).mapToLong( l -> l.length ).sum( ) / 2;
                         logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), level, nVerts );
 
-                        synchronized ( out )
+                        synchronized ( idxOut )
                         {
-                            out.writeByte( ( byte ) level );
-                            out.writeFloat( ( float ) toRadians( bounds0.getMinY( ) ) );
-                            out.writeFloat( ( float ) toRadians( bounds0.getMaxY( ) ) );
-                            out.writeFloat( ( float ) toRadians( bounds0.getMinX( ) ) );
-                            out.writeFloat( ( float ) toRadians( bounds0.getMaxX( ) ) );
-                            out.writeInt( tess.size( ) );
+                            long bytesData = Integer.BYTES;
+                            dataOut.writeInt( tess.size( ) );
                             for ( double[] verts : tess )
                             {
-                                out.writeInt( verts.length );
+                                bytesData += Integer.BYTES;
+                                bytesData += Double.BYTES * verts.length;
+                                dataOut.writeInt( verts.length );
                                 for ( int i = 0; i < verts.length; i += 2 )
                                 {
-                                    out.writeDouble( toRadians( verts[i + 1] ) );
-                                    out.writeDouble( toRadians( verts[i] ) );
+                                    dataOut.writeDouble( toRadians( verts[i + 1] ) );
+                                    dataOut.writeDouble( toRadians( verts[i] ) );
                                 }
                             }
+
+                            idxOut.writeByte( ( byte ) level );
+                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMinY( ) ) );
+                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxY( ) ) );
+                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMinX( ) ) );
+                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxX( ) ) );
+                            idxOut.writeLong( bytesData );
                         }
                     }
                     catch ( IOException ex )
