@@ -233,9 +233,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         {
             for ( int y = 1; y < data.imageHeight - 1; y++ )
             {
-                float shaded = hillshade0( data.data, x, y, dx, dy );
-                int rgba = colorize( shaded );
-                dest[x][y] = rgba;
+                dest[x][y] = hillshade0( data.data, x, y, dx, dy );
             }
 
             dest[x][0] = dest[x][1];
