@@ -16,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -142,22 +142,22 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
         for ( int i = 0; i < numPolys; i++ )
         {
             int numValues = rf.readInt( );
-            if ( bbuf == null || bbuf.capacity( ) < numValues * Double.BYTES )
+            if ( bbuf == null || bbuf.capacity( ) < numValues * Float.BYTES )
             {
-                bbuf = ByteBuffer.allocate( numValues * Double.BYTES );
+                bbuf = ByteBuffer.allocate( numValues * Float.BYTES );
             }
 
-            bbuf.limit( numValues * Double.BYTES );
+            bbuf.limit( numValues * Float.BYTES );
             bbuf.rewind( );
             rf.getChannel( ).read( bbuf );
             bbuf.rewind( );
-            DoubleBuffer buf = bbuf.asDoubleBuffer( );
+            FloatBuffer buf = bbuf.asFloatBuffer( );
 
             float[] verts = new float[buf.limit( )];
             for ( int j = 0; j < verts.length; j += 2 )
             {
-                double lat = buf.get( );
-                double lon = buf.get( );
+                float lat = buf.get( );
+                float lon = buf.get( );
                 if ( lon == -180 )
                 {
                     lon += 1e-3;

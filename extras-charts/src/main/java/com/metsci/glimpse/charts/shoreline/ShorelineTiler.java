@@ -103,10 +103,13 @@ public class ShorelineTiler
 
     static void write( DataOutputStream idxOut, DataOutputStream dataOut, LandShape land, int level, int tileWidth_DEG, int tileHeight_DEG ) throws IOException
     {
+        List<Area> areas = land.getSegments( ).stream( ).parallel( )
+                .map( s -> toArea( s ) )
+                .collect( Collectors.toList( ) );
+
         createTiles( tileWidth_DEG, tileHeight_DEG ).parallel( )
                 .forEach( b -> {
-                    Collection<double[]> tess = land.getSegments( ).stream( ).parallel( )
-                            .map( s -> toArea( s ) )
+                    Collection<double[]> tess = areas.stream( ).parallel( )
                             .map( s -> tile( s, b ) )
                             .filter( a -> !a.isEmpty( ) )
                             .flatMap( s -> split( s ) )
@@ -135,8 +138,8 @@ public class ShorelineTiler
                                 dataOut.writeInt( verts.length );
                                 for ( int i = 0; i < verts.length; i += 2 )
                                 {
-                                    dataOut.writeDouble( toRadians( verts[i + 1] ) );
-                                    dataOut.writeDouble( toRadians( verts[i] ) );
+                                    dataOut.writeFloat( (float) toRadians( verts[i + 1] ) );
+                                    dataOut.writeFloat( (float) toRadians( verts[i] ) );
                                 }
                             }
 
