@@ -17,16 +17,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
+import java.util.stream.StreamSupport;
+
+import org.geotools.data.DataStore;
+import org.geotools.data.DataStoreFinder;
+import org.geotools.data.FeatureSource;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.FeatureIterator;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
 
 import com.google.common.io.Files;
-import com.metsci.glimpse.charts.shoreline.gshhs.GshhsFile;
-import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
@@ -35,8 +46,10 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
 import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.support.polygon.VertexAccumulator;
-import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.units.Length;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
@@ -49,41 +62,32 @@ public class ShorelineTiler
     {
         setTerseConsoleLogger( Level.FINE );
 
-        File destFile = new File( "./gshhs_tiled.bin" );
+        File destFile = new File( "./osm_tiled.bin" );
         File idxFile = new File( destFile + ".idx" );
         File dataFile = new File( destFile + ".data" );
+
+        File file = new File( "land-polygons-complete-4326/land_polygons.shp" );
 
         DataOutputStream idxOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( idxFile ) ) );
         DataOutputStream dataOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( dataFile ) ) );
 
-        idxOut.writeInt( 5 );
+        idxOut.writeInt( 1 );
         idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 2 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 20 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 100 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 200 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 2000 ) );
 
-        LandBox box = new LandBox( 90, -90, -180, 180, false );
-        File gshhsF = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_f.b" );
-        LandShape land = new GshhsFile( gshhsF, box, PolygonType.land ).toShape( );
-        write( idxOut, dataOut, land, 0, 2, 1 );
+        DataStore dataStore = DataStoreFinder.getDataStore( Collections.singletonMap( "url", file.toURI( ).toURL( ) ) );
+        String typeName = dataStore.getTypeNames( )[0];
+        FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource( typeName );
+        FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures( Filter.INCLUDE );
 
-        File gshhsH = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_h.b" );
-        land = new GshhsFile( gshhsH, box, PolygonType.land ).toShape( );
-        write( idxOut, dataOut, land, 1, 5, 3 );
+        Collection<Rectangle2D[]> tiles = createTiles( 30, 10 );
 
-        File gshhsI = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_i.b" );
-        land = new GshhsFile( gshhsI, box, PolygonType.land ).toShape( );
-        write( idxOut, dataOut, land, 2, 20, 10 );
+        FeatureIterator<SimpleFeature> features = collection.features( );
+        toStream( features )
+                .map( ShorelineTiler::toArea )
+//                .limit( 100_000 )
+                .forEach( a -> write( idxOut, dataOut, tiles, a, 0 ) );
 
-        File gshhsL = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_l.b" );
-        land = new GshhsFile( gshhsL, box, PolygonType.land ).toShape( );
-        write( idxOut, dataOut, land, 3, 30, 10 );
-
-        File gshhsC = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_c.b" );
-        land = new GshhsFile( gshhsC, box, PolygonType.land ).toShape( );
-        write( idxOut, dataOut, land, 4, 60, 30 );
-
+        features.close( );
         idxOut.close( );
         dataOut.close( );
 
@@ -101,19 +105,86 @@ public class ShorelineTiler
         dataFile.delete( );
     }
 
-    static void write( DataOutputStream idxOut, DataOutputStream dataOut, LandShape land, int level, int tileWidth_DEG, int tileHeight_DEG ) throws IOException
+    static Stream<com.vividsolutions.jts.geom.Polygon> toStream( FeatureIterator<SimpleFeature> features )
     {
-        List<Area> areas = land.getSegments( ).stream( ).parallel( )
-                .map( s -> toArea( s ) )
-                .collect( Collectors.toList( ) );
+        Iterator<MultiPolygon> itr = new Iterator<MultiPolygon>( )
+        {
+            @Override
+            public boolean hasNext( )
+            {
+                return features.hasNext( );
+            }
 
-        createTiles( tileWidth_DEG, tileHeight_DEG ).parallel( )
+            @Override
+            public synchronized MultiPolygon next( )
+            {
+                SimpleFeature feat = features.next( );
+                MultiPolygon poly = ( MultiPolygon ) feat.getDefaultGeometryProperty( ).getValue( );
+                return poly;
+            }
+        };
+
+        Spliterator<MultiPolygon> spliterator = Spliterators.spliteratorUnknownSize( itr, Spliterator.IMMUTABLE | Spliterator.DISTINCT | Spliterator.ORDERED );
+        return StreamSupport.stream( spliterator, false )
+                .flatMap( m -> {
+                    com.vividsolutions.jts.geom.Polygon[] g = new com.vividsolutions.jts.geom.Polygon[m.getNumGeometries( )];
+                    for ( int i = 0; i < g.length; i++ )
+                    {
+                        g[i] = ( com.vividsolutions.jts.geom.Polygon ) m.getGeometryN( i );
+                    }
+                    return Stream.of( g );
+                } );
+    }
+
+    static Area toArea( com.vividsolutions.jts.geom.Polygon poly )
+    {
+        LineString ring = poly.getExteriorRing( );
+
+        double lastLon = 0;
+        Path2D.Double p = new Path2D.Double( Path2D.WIND_NON_ZERO );
+        for ( int i = 0; i < ring.getNumPoints( ); i++ )
+        {
+            Coordinate c = ring.getCoordinateN( i );
+            double x = c.x;
+            double y = c.y;
+
+            // unroll the longitude so it doesn't wrap
+            while ( x - lastLon > 180 )
+            {
+                x -= 360;
+            }
+            while ( lastLon - x > 180 )
+            {
+                x += 360;
+            }
+            lastLon = x;
+
+            if ( i == 0 )
+            {
+                p.moveTo( x, y );
+            }
+            else
+            {
+                p.lineTo( x, y );
+            }
+        }
+        p.closePath( );
+
+        return new Area( p );
+    }
+
+    static void write( DataOutputStream idxOut, DataOutputStream dataOut, Collection<Rectangle2D[]> tiles, Area area, int level )
+    {
+        tiles.stream( ).parallel( )
                 .forEach( b -> {
-                    Collection<double[]> tess = areas.stream( ).parallel( )
-                            .map( s -> tile( s, b ) )
-                            .filter( a -> !a.isEmpty( ) )
-                            .flatMap( s -> split( s ) )
-                            .map( s -> tesselate( s ) )
+                    Area tiled = tile( area, b );
+                    if ( tiled.isEmpty( ) )
+                    {
+                        return;
+                    }
+
+                    Collection<double[]> tess = split( tiled )
+                            .map( ShorelineTiler::tesselate )
                             .collect( Collectors.toList( ) );
 
                     if ( tess.isEmpty( ) )
@@ -134,12 +205,12 @@ public class ShorelineTiler
                             for ( double[] verts : tess )
                             {
                                 bytesData += Integer.BYTES;
-                                bytesData += Double.BYTES * verts.length;
+                                bytesData += Float.BYTES * verts.length;
                                 dataOut.writeInt( verts.length );
                                 for ( int i = 0; i < verts.length; i += 2 )
                                 {
-                                    dataOut.writeFloat( (float) toRadians( verts[i + 1] ) );
-                                    dataOut.writeFloat( (float) toRadians( verts[i] ) );
+                                    dataOut.writeFloat( ( float ) toRadians( verts[i + 1] ) );
+                                    dataOut.writeFloat( ( float ) toRadians( verts[i] ) );
                                 }
                             }
 
@@ -158,9 +229,9 @@ public class ShorelineTiler
                 } );
     }
 
-    static Stream<Rectangle2D[]> createTiles( int tileWidth_DEG, int tileHeight_DEG )
+    static Collection<Rectangle2D[]> createTiles( int tileWidth_DEG, int tileHeight_DEG )
     {
-        Builder<Rectangle2D[]> bldr = Stream.builder( );
+        Collection<Rectangle2D[]> tiles = new ArrayList<>( );
         for ( int lon = -180; lon < 180; lon += tileWidth_DEG )
         {
             for ( int lat = -90; lat < 90; lat += tileHeight_DEG )
@@ -168,11 +239,11 @@ public class ShorelineTiler
                 Rectangle2D bounds0 = new Rectangle2D.Double( lon - 1, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
                 Rectangle2D bounds1 = new Rectangle2D.Double( lon - 1 - 360, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
                 Rectangle2D bounds2 = new Rectangle2D.Double( lon - 1 + 360, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
-                bldr.add( new Rectangle2D[] { bounds0, bounds1, bounds2 } );
+                tiles.add( new Rectangle2D[] { bounds0, bounds1, bounds2 } );
             }
         }
 
-        return bldr.build( );
+        return tiles;
     }
 
     static Area toArea( LandSegment segment )
