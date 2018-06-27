@@ -84,7 +84,7 @@ public class ShorelineTiler
         FeatureIterator<SimpleFeature> features = collection.features( );
         toStream( features )
                 .map( ShorelineTiler::toArea )
-//                .limit( 100_000 )
+//                .limit( 10_000 )
                 .forEach( a -> write( idxOut, dataOut, tiles, a, 0 ) );
 
         features.close( );
@@ -195,18 +195,16 @@ public class ShorelineTiler
                     try
                     {
                         Rectangle2D bounds0 = b[0];
-                        long nVerts = tess.stream( ).mapToLong( l -> l.length ).sum( ) / 2;
-                        logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), level, nVerts );
+                        int nVertices = ( int ) tess.stream( ).mapToLong( l -> l.length ).sum( ) / 2;
+                        logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), level, nVertices );
 
                         synchronized ( idxOut )
                         {
-                            long bytesData = Integer.BYTES;
-                            dataOut.writeInt( tess.size( ) );
+                            long bytesData = Integer.BYTES + Float.BYTES * nVertices * 2;
+                            dataOut.writeInt( nVertices );
+
                             for ( double[] verts : tess )
                             {
-                                bytesData += Integer.BYTES;
-                                bytesData += Float.BYTES * verts.length;
-                                dataOut.writeInt( verts.length );
                                 for ( int i = 0; i < verts.length; i += 2 )
                                 {
                                     dataOut.writeFloat( ( float ) toRadians( verts[i + 1] ) );

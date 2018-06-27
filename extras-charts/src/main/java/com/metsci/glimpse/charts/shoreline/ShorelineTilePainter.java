@@ -38,7 +38,7 @@ import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
+public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
 {
     private static final Logger LOGGER = Logger.getLogger( ShorelineTilePainter.class.getName( ) );
 
@@ -116,7 +116,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
     }
 
     @Override
-    protected TessellatedPolygon[] loadTileData( TileKey key )
+    protected TessellatedPolygon loadTileData( TileKey key )
     {
         try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
         {
@@ -128,64 +128,51 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
         }
     }
 
-    protected TessellatedPolygon[] readTile( RandomAccessFile rf, TileKey key ) throws IOException
+    protected TessellatedPolygon readTile( RandomAccessFile rf, TileKey key ) throws IOException
     {
         long offset = keys.get( key );
         logFine( LOGGER, "Reading tile at offset %,d", offset );
         rf.seek( offset );
 
-        int numPolys = rf.readInt( );
-        logFine( LOGGER, "Reading %,d polygons in %s", numPolys, key );
-        TessellatedPolygon[] polys = new TessellatedPolygon[numPolys];
+        int numVertices = rf.readInt( );
+        logFine( LOGGER, "Reading polygon with %,d vertices in %s", numVertices, key );
+        ByteBuffer bbuf = ByteBuffer.allocate( numVertices * 2 * Float.BYTES );
 
-        ByteBuffer bbuf = null;
-        for ( int i = 0; i < numPolys; i++ )
+        bbuf.rewind( );
+        rf.getChannel( ).read( bbuf );
+        bbuf.rewind( );
+        FloatBuffer buf = bbuf.asFloatBuffer( );
+
+        float[] verts = new float[buf.limit( )];
+        for ( int j = 0; j < verts.length; j += 2 )
         {
-            int numValues = rf.readInt( );
-            if ( bbuf == null || bbuf.capacity( ) < numValues * Float.BYTES )
+            float lat = buf.get( );
+            float lon = buf.get( );
+            if ( lon == -180 )
             {
-                bbuf = ByteBuffer.allocate( numValues * Float.BYTES );
+                lon += 1e-3;
             }
-
-            bbuf.limit( numValues * Float.BYTES );
-            bbuf.rewind( );
-            rf.getChannel( ).read( bbuf );
-            bbuf.rewind( );
-            FloatBuffer buf = bbuf.asFloatBuffer( );
-
-            float[] verts = new float[buf.limit( )];
-            for ( int j = 0; j < verts.length; j += 2 )
+            else if ( lon == 180 )
             {
-                float lat = buf.get( );
-                float lon = buf.get( );
-                if ( lon == -180 )
-                {
-                    lon += 1e-3;
-                }
-                else if ( lon == 180 )
-                {
-                    lon -= 1e-3;
-                }
-                Vector2d v = projection.project( LatLonGeo.fromRad( lat, lon ) );
-                verts[j] = ( float ) v.getX( );
-                verts[j + 1] = ( float ) v.getY( );
+                lon -= 1e-3;
             }
-
-            polys[i] = new TessellatedPolygon( new Polygon( ), verts );
+            Vector2d v = projection.project( LatLonGeo.fromRad( lat, lon ) );
+            verts[j] = ( float ) v.getX( );
+            verts[j + 1] = ( float ) v.getY( );
         }
 
-        return polys;
+        return new TessellatedPolygon( new Polygon( ), verts );
     }
 
     @Override
-    protected void replaceTileData( Collection<Entry<TileKey, TessellatedPolygon[]>> tileData )
+    protected void replaceTileData( Collection<Entry<TileKey, TessellatedPolygon>> tileData )
     {
         for ( TileKey old : loadedGroups )
         {
             painter.setFill( old, false );
         }
 
-        for ( Entry<TileKey, TessellatedPolygon[]> e : tileData )
+        for ( Entry<TileKey, TessellatedPolygon> e : tileData )
         {
             TileKey groupId = e.getKey( );
             if ( loadedGroups.contains( groupId ) )
@@ -196,10 +183,8 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon[]>
             {
                 loadedGroups.add( groupId );
                 configurePainter( groupId );
-                for ( TessellatedPolygon p : e.getValue( ) )
-                {
-                    painter.addPolygon( groupId, p, p, 0 );
-                }
+                TessellatedPolygon p = e.getValue( );
+                painter.addPolygon( groupId, p, p, 0 );
             }
         }
     }
