@@ -218,7 +218,7 @@ public class GeotiffTileProvider implements TopoTileProvider
                             double v = tile.getSampleDouble( i, j, 0 );
                             int x = i - pixelX0;
                             int y = imageHeight - ( j - pixelY0 ) - 1;
-                            data[x][y] = ( float ) -fromMeters( v );
+                            data[x][y] = ( float ) fromMeters( v );
                         }
                     }
                 }

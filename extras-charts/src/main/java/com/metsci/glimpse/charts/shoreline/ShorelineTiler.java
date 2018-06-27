@@ -57,11 +57,11 @@ public class ShorelineTiler
         DataOutputStream dataOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( dataFile ) ) );
 
         idxOut.writeInt( 5 );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 10 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 2 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 20 ) );
         idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 100 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 500 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 1000 ) );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 10000 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 200 ) );
+        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 2000 ) );
 
         LandBox box = new LandBox( 90, -90, -180, 180, false );
         File gshhsF = new File( GlimpseDataPaths.glimpseUserDataDir, "gshhs/gshhs_f.b" );

@@ -39,6 +39,7 @@ import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
+import static java.lang.System.currentTimeMillis;
 
 import java.awt.Color;
 import java.io.File;
@@ -52,6 +53,9 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
 
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -67,12 +71,11 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
 
-    private static final long VERSION_ID = 1;
+    private static final long VERSION_ID = 2;
     private static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
     private static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
     private static final double LIGHT_AZIMUTH = fromDeg( -135 );
 
-    protected float hue;
     protected TopoTileProvider tileProvider;
     protected ShadedTexturePainter topoImagePainter;
 
@@ -80,7 +83,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
     {
         super( projection );
         this.tileProvider = tileProvider;
-        setHue( 0.63f );
 
         topoImagePainter = new ShadedTexturePainter( );
         addPainter( topoImagePainter );
@@ -95,12 +97,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             attributionPainter.setText( tileProvider.getAttribution( ) );
             addPainter( attributionPainter );
         }
-    }
-
-    public void setHue( float hue )
-    {
-        this.hue = hue;
-        cacheData.clear( );
     }
 
     @Override
@@ -142,10 +138,21 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             }
         }
 
-        RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
+        RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) )
+        {
+            @Override
+            protected void prepare_setTexParameters( GL gl )
+            {
+                GL3 gl3 = gl.getGL3( );
+                gl3.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR );
+                gl3.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
+            }
+        };
         texture.setProjection( tile.getProjection( projection ) );
 
-        float[][] shaded = tile.data;
+        float[][] shaded = tile.shaded;
+        float[][] elev = tile.data;
+        long start = currentTimeMillis( );
         texture.mutate( new MutatorByte2D( )
         {
             @Override
@@ -155,8 +162,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
                 {
                     for ( int c = 0; c < dataSizeX; c++ )
                     {
-                        float shade = shaded[c][r];
-                        int x = colorize( shade );
+                        int x = colorize( shaded[c][r], elev[c][r] );
                         data.put( ( byte ) ( ( x >> 24 ) & 0xff ) );
                         data.put( ( byte ) ( ( x >> 16 ) & 0xff ) );
                         data.put( ( byte ) ( ( x >> 8 ) & 0xff ) );
@@ -165,6 +171,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
                 }
             }
         } );
+        long stop = currentTimeMillis( );
+        logFine( LOGGER, "Took %,dms to load texture", stop - start );
 
         return texture;
     }
@@ -173,26 +181,34 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
     {
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "r" );
 
-        CachedTileData rgba = new CachedTileData( );
-        rgba.imageWidth = rf.readInt( );
-        rgba.imageHeight = rf.readInt( );
-        rgba.startLat = rf.readDouble( );
-        rgba.startLon = rf.readDouble( );
-        rgba.widthStep = rf.readDouble( );
-        rgba.heightStep = rf.readDouble( );
+        CachedTileData cached = new CachedTileData( );
+        cached.imageWidth = rf.readInt( );
+        cached.imageHeight = rf.readInt( );
+        cached.startLat = rf.readDouble( );
+        cached.startLon = rf.readDouble( );
+        cached.widthStep = rf.readDouble( );
+        cached.heightStep = rf.readDouble( );
 
-        long size = rgba.getImageWidth( ) * rgba.getImageHeight( ) * Integer.BYTES;
+        long size = cached.getImageWidth( ) * cached.getImageHeight( ) * Integer.BYTES;
         MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_ONLY, rf.getFilePointer( ), size );
         FloatBuffer fb = mmap.asFloatBuffer( );
 
-        rgba.data = new float[rgba.getImageWidth( )][rgba.getImageHeight( )];
-        for ( float[] row : rgba.data )
+        cached.data = new float[cached.getImageWidth( )][cached.getImageHeight( )];
+        for ( float[] row : cached.data )
+        {
+            fb.get( row );
+        }
+
+        mmap = rf.getChannel( ).map( MapMode.READ_ONLY, rf.getFilePointer( ) + size, size );
+        fb = mmap.asFloatBuffer( );
+        cached.shaded = new float[cached.getImageWidth( )][cached.getImageHeight( )];
+        for ( float[] row : cached.shaded )
         {
             fb.get( row );
         }
 
         rf.close( );
-        return rgba;
+        return cached;
     }
 
     protected void writeCachedTile( File cacheFile, CachedTileData tile ) throws IOException
@@ -210,11 +226,19 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
         MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_WRITE, rf.getFilePointer( ), size );
         FloatBuffer fb = mmap.asFloatBuffer( );
-
         for ( float[] row : tile.data )
         {
             fb.put( row );
         }
+        mmap.force( );
+
+        mmap = rf.getChannel( ).map( MapMode.READ_WRITE, rf.getFilePointer( ) + size, size );
+        fb = mmap.asFloatBuffer( );
+        for ( float[] row : tile.shaded )
+        {
+            fb.put( row );
+        }
+        mmap.force( );
 
         rf.close( );
     }
@@ -244,12 +268,12 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
     }
 
-    protected int colorize( float hillshade )
+    protected int colorize( float hillshade, float elevation )
     {
         float h = clamp( ( hillshade - 0.4f ) / 0.5f, 0, 1 );
         float bri = 0.1f + 0.9f * h;
         float sat = 0.5f + 0.1f * ( 1 - h );
-        int rgb = Color.HSBtoRGB( hue, sat, bri );
+        int rgb = Color.HSBtoRGB( 0.63f, sat, bri );
         return ( rgb << 8 ) | 0xff;
     }
 
@@ -258,14 +282,14 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
      */
     protected float hillshade0( float[][] data, int x, int y, double dx, double dy )
     {
-        float a = data[x - 1][y + 1];
-        float b = data[x + 0][y + 1];
-        float c = data[x + 1][y + 1];
-        float d = data[x - 1][y + 0];
-        float f = data[x + 1][y + 0];
-        float g = data[x - 1][y - 1];
-        float h = data[x + 0][y - 1];
-        float i = data[x + 1][y - 1];
+        float a = -data[x - 1][y + 1];
+        float b = -data[x + 0][y + 1];
+        float c = -data[x + 1][y + 1];
+        float d = -data[x - 1][y + 0];
+        float f = -data[x + 1][y + 0];
+        float g = -data[x - 1][y - 1];
+        float h = -data[x + 0][y - 1];
+        float i = -data[x + 1][y - 1];
         double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
         double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
         double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
@@ -277,6 +301,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
     protected class CachedTileData extends TopographyData
     {
+        float[][] shaded;
+
         CachedTileData( ) throws IOException
         {
             super( null );
@@ -285,7 +311,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         public CachedTileData( TopographyData src, float[][] shaded ) throws IOException
         {
             this( );
-            this.data = shaded;
+            this.data = src.data;
+            this.shaded = shaded;
             this.imageWidth = src.getImageWidth( );
             this.imageHeight = src.getImageHeight( );
             this.heightStep = src.getHeightStep( );

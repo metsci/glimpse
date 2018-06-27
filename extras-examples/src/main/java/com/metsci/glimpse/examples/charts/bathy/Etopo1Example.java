@@ -37,19 +37,19 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import com.metsci.glimpse.charts.bathy.GeotiffTileProvider;
+import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
+import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.shoreline.LandBox;
 import com.metsci.glimpse.charts.shoreline.LandSegment;
 import com.metsci.glimpse.charts.shoreline.LandShape;
 import com.metsci.glimpse.charts.shoreline.LandVertex;
-import com.metsci.glimpse.charts.shoreline.ShorelineTilePainter;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsFile;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.shape.PolygonPainter;
 import com.metsci.glimpse.plot.MapPlot2D;
-import com.metsci.glimpse.support.colormap.ColorGenerator;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop;
@@ -80,12 +80,12 @@ public class Etopo1Example implements GlimpseLayoutProvider
         {
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
-            //            TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
-            //            plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+                        TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
+                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
             //            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
 
-                        ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "/home/borkholder/Desktop/tmp.bin" ) );
-                        plot.getLayoutCenter( ).addPainter( landPainter );
+//                        ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "/home/borkholder/Desktop/tmp.bin" ) );
+//                        plot.getLayoutCenter( ).addPainter( landPainter );
 
 //            PolygonPainter p = new PolygonPainter( );
 //            int i = 0;

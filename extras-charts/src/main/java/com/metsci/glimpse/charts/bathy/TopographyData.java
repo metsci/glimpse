@@ -57,6 +57,9 @@ public class TopographyData
     protected int imageHeight;
     protected int imageWidth;
 
+    /**
+     * Data should be positive up.
+     */
     protected float[][] data;
 
     public TopographyData( InputStream in ) throws IOException
