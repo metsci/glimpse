@@ -46,6 +46,7 @@ import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
 import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.support.polygon.VertexAccumulator;
+import com.metsci.glimpse.util.Pair;
 import com.metsci.glimpse.util.units.Length;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
@@ -83,9 +84,11 @@ public class ShorelineTiler
 
         FeatureIterator<SimpleFeature> features = collection.features( );
         toStream( features )
-                .map( ShorelineTiler::toArea )
 //                .limit( 10_000 )
-                .forEach( a -> write( idxOut, dataOut, tiles, a, 0 ) );
+                .parallel( )
+                .map( ShorelineTiler::toArea )
+                .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
+                .forEach( p -> write( idxOut, dataOut, p.first( ), p.second( ), 0 ) );
 
         features.close( );
         idxOut.close( );
@@ -173,58 +176,55 @@ public class ShorelineTiler
         return new Area( p );
     }
 
-    static void write( DataOutputStream idxOut, DataOutputStream dataOut, Collection<Rectangle2D[]> tiles, Area area, int level )
+    static void write( DataOutputStream idxOut, DataOutputStream dataOut, Rectangle2D[] tile, Area area, int level )
     {
-        tiles.stream( ).parallel( )
-                .forEach( b -> {
-                    Area tiled = tile( area, b );
-                    if ( tiled.isEmpty( ) )
+        Area tiled = tile( area, tile );
+        if ( tiled.isEmpty( ) )
+        {
+            return;
+        }
+
+        Collection<double[]> tess = split( tiled )
+                .map( ShorelineTiler::tesselate )
+                .collect( Collectors.toList( ) );
+
+        if ( tess.isEmpty( ) )
+        {
+            return;
+        }
+
+        try
+        {
+            Rectangle2D bounds0 = tile[0];
+            int nVertices = ( int ) tess.stream( ).mapToLong( l -> l.length ).sum( ) / 2;
+            logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), level, nVertices );
+
+            synchronized ( idxOut )
+            {
+                long bytesData = Integer.BYTES + Float.BYTES * nVertices * 2;
+                dataOut.writeInt( nVertices );
+
+                for ( double[] verts : tess )
+                {
+                    for ( int i = 0; i < verts.length; i += 2 )
                     {
-                        return;
+                        dataOut.writeFloat( ( float ) toRadians( verts[i + 1] ) );
+                        dataOut.writeFloat( ( float ) toRadians( verts[i] ) );
                     }
+                }
 
-                    Collection<double[]> tess = split( tiled )
-                            .map( ShorelineTiler::tesselate )
-                            .collect( Collectors.toList( ) );
-
-                    if ( tess.isEmpty( ) )
-                    {
-                        return;
-                    }
-
-                    try
-                    {
-                        Rectangle2D bounds0 = b[0];
-                        int nVertices = ( int ) tess.stream( ).mapToLong( l -> l.length ).sum( ) / 2;
-                        logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), level, nVertices );
-
-                        synchronized ( idxOut )
-                        {
-                            long bytesData = Integer.BYTES + Float.BYTES * nVertices * 2;
-                            dataOut.writeInt( nVertices );
-
-                            for ( double[] verts : tess )
-                            {
-                                for ( int i = 0; i < verts.length; i += 2 )
-                                {
-                                    dataOut.writeFloat( ( float ) toRadians( verts[i + 1] ) );
-                                    dataOut.writeFloat( ( float ) toRadians( verts[i] ) );
-                                }
-                            }
-
-                            idxOut.writeByte( ( byte ) level );
-                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMinY( ) ) );
-                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxY( ) ) );
-                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMinX( ) ) );
-                            idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxX( ) ) );
-                            idxOut.writeLong( bytesData );
-                        }
-                    }
-                    catch ( IOException ex )
-                    {
-                        throw new RuntimeException( ex );
-                    }
-                } );
+                idxOut.writeByte( ( byte ) level );
+                idxOut.writeFloat( ( float ) toRadians( bounds0.getMinY( ) ) );
+                idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxY( ) ) );
+                idxOut.writeFloat( ( float ) toRadians( bounds0.getMinX( ) ) );
+                idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxX( ) ) );
+                idxOut.writeLong( bytesData );
+            }
+        }
+        catch ( IOException ex )
+        {
+            throw new RuntimeException( ex );
+        }
     }
 
     static Collection<Rectangle2D[]> createTiles( int tileWidth_DEG, int tileHeight_DEG )

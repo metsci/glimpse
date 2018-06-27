@@ -44,6 +44,7 @@ import com.metsci.glimpse.charts.shoreline.LandBox;
 import com.metsci.glimpse.charts.shoreline.LandSegment;
 import com.metsci.glimpse.charts.shoreline.LandShape;
 import com.metsci.glimpse.charts.shoreline.LandVertex;
+import com.metsci.glimpse.charts.shoreline.ShorelineTilePainter;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsFile;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
@@ -81,11 +82,11 @@ public class Etopo1Example implements GlimpseLayoutProvider
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
                         TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
-                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+//                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
             //            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
 
-//                        ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "/home/borkholder/Desktop/tmp.bin" ) );
-//                        plot.getLayoutCenter( ).addPainter( landPainter );
+                        ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "../extras-charts/osm_tiled.bin" ) );
+                        plot.getLayoutCenter( ).addPainter( landPainter );
 
 //            PolygonPainter p = new PolygonPainter( );
 //            int i = 0;
