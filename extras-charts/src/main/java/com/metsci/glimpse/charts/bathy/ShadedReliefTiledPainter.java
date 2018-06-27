@@ -270,11 +270,49 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
     protected int colorize( float hillshade, float elevation )
     {
-        float h = clamp( ( hillshade - 0.4f ) / 0.5f, 0, 1 );
-        float bri = 0.1f + 0.9f * h;
-        float sat = 0.5f + 0.1f * ( 1 - h );
-        int rgb = Color.HSBtoRGB( 0.63f, sat, bri );
-        return ( rgb << 8 ) | 0xff;
+        int rgb = 0;
+        if ( elevation > 0 )
+        {
+            return 0;
+        }
+        else if ( elevation > -20 )
+        {
+            rgb = 0xc9dfef;
+        }
+        else if ( elevation > -100 )
+        {
+            rgb = 0xbbd9f0;
+        }
+        else if ( elevation > -500 )
+        {
+            rgb = 0xb0cee8;
+        }
+        else if ( elevation > -1_000 )
+        {
+            rgb = 0xa3c9e6;
+        }
+        else if ( elevation > -2_000 )
+        {
+            rgb = 0x81acd6;
+        }
+        else if ( elevation > -4_000 )
+        {
+            rgb = 0x76a5cf;
+        }
+        else if ( elevation > -8_000 )
+        {
+            rgb = 0x6499c1;
+        }
+        else
+        {
+            rgb = 0x3c6e98;
+        }
+
+        float h = clamp( ( hillshade - 0.4f ), 0, 0.6f ) + 0.7f;
+        float[] hsb = Color.RGBtoHSB( ( rgb >> 16 ) & 0xff, ( rgb >> 8 ) & 0xff, rgb & 0xff, new float[3] );
+        hsb[2] = clamp( hsb[2] * h, 0, 1 );
+
+        return ( Color.HSBtoRGB( hsb[0], hsb[1], hsb[2] ) << 8 ) | 0xff;
     }
 
     /**
