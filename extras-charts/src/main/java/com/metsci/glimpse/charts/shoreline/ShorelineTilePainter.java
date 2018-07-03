@@ -89,7 +89,6 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
             // version
             dis.readByte( );
             long dataStart = dis.readLong( );
-            long offset = dataStart;
 
             // read levels
             int nLevels = dis.readInt( );
@@ -106,9 +105,8 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
                 float maxLat = ( float ) toDegrees( dis.readFloat( ) );
                 float minLon = ( float ) toDegrees( dis.readFloat( ) );
                 float maxLon = ( float ) toDegrees( dis.readFloat( ) );
-                long bytesData = dis.readLong( );
+                long offset = dis.readLong( );
                 offsets.put( new MultiLevelKey( level, minLat, maxLat, minLon, maxLon ), offset );
-                offset += bytesData;
             }
 
             return offsets;

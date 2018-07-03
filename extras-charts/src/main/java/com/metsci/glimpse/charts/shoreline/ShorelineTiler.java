@@ -14,7 +14,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,48 +63,60 @@ public class ShorelineTiler
         setTerseConsoleLogger( Level.FINE );
 
         File destFile = new File( "./osm_tiled.bin" );
-        File idxFile = new File( destFile + ".idx" );
-        File dataFile = new File( destFile + ".data" );
 
         File file = new File( "land-polygons-complete-4326/land_polygons.shp" );
-
-        DataOutputStream idxOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( idxFile ) ) );
-        DataOutputStream dataOut = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( dataFile ) ) );
-
-        idxOut.writeInt( 1 );
-        idxOut.writeFloat( ( float ) Length.fromNauticalMiles( 2 ) );
+        File destDir = new File( "." );
+        int nLevels = 1;
 
         DataStore dataStore = DataStoreFinder.getDataStore( Collections.singletonMap( "url", file.toURI( ).toURL( ) ) );
         String typeName = dataStore.getTypeNames( )[0];
         FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource( typeName );
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures( Filter.INCLUDE );
 
-        Collection<Rectangle2D[]> tiles = createTiles( 30, 10 );
+        Collection<TileOutInfo> tiles = createTiles( 0, destDir, 30, 10 );
 
         FeatureIterator<SimpleFeature> features = collection.features( );
         toStream( features )
-//                .limit( 10_000 )
                 .parallel( )
                 .map( ShorelineTiler::toArea )
                 .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
-                .forEach( p -> write( idxOut, dataOut, p.first( ), p.second( ), 0 ) );
+                .forEach( p -> write( p.first( ), p.second( ) ) );
 
         features.close( );
-        idxOut.close( );
-        dataOut.close( );
 
-        try (OutputStream os = new FileOutputStream( destFile ))
+        Collection<TileOutInfo> validTiles = new ArrayList<>( tiles );
+        validTiles.removeIf( t -> !t.tmpFile.isFile( ) );
+
+        try (DataOutputStream out = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( destFile ) ) ))
         {
-            DataOutputStream dos = new DataOutputStream( os );
-            // version
-            dos.writeByte( 0 );
-            dos.writeLong( idxFile.length( ) + Byte.BYTES + Long.BYTES );
-            Files.copy( idxFile, dos );
-            Files.copy( dataFile, dos );
-        }
+            long dataOffset = Byte.BYTES + Long.BYTES + Integer.BYTES + Float.BYTES * nLevels + validTiles.size( ) * ( Byte.BYTES + 4 * Float.BYTES + Long.BYTES );
 
-        idxFile.delete( );
-        dataFile.delete( );
+            // version
+            out.writeByte( 0 );
+            out.writeLong( dataOffset );
+            out.writeInt( nLevels );
+            out.writeFloat( ( float ) Length.fromNauticalMiles( 2 ) );
+
+            for ( TileOutInfo info : validTiles )
+            {
+                out.writeByte( ( byte ) info.level );
+                out.writeFloat( ( float ) toRadians( info.bounds[0].getMinY( ) ) );
+                out.writeFloat( ( float ) toRadians( info.bounds[0].getMaxY( ) ) );
+                out.writeFloat( ( float ) toRadians( info.bounds[0].getMinX( ) ) );
+                out.writeFloat( ( float ) toRadians( info.bounds[0].getMaxX( ) ) );
+                out.writeLong( dataOffset );
+
+                dataOffset += Integer.BYTES + info.tmpFile.length( );
+            }
+
+            for ( TileOutInfo info : validTiles )
+            {
+                int nVertices = ( int ) ( info.tmpFile.length( ) / Float.BYTES / 2 );
+                out.writeInt( nVertices );
+                Files.copy( info.tmpFile, out );
+                info.tmpFile.delete( );
+            }
+        }
     }
 
     static Stream<com.vividsolutions.jts.geom.Polygon> toStream( FeatureIterator<SimpleFeature> features )
@@ -137,6 +148,22 @@ public class ShorelineTiler
                     }
                     return Stream.of( g );
                 } );
+    }
+
+    static class TileOutInfo
+    {
+        final int level;
+        final long tileKey;
+        final Rectangle2D[] bounds;
+        final File tmpFile;
+
+        TileOutInfo( int level, long tileKey, Rectangle2D[] bounds, File tmpFile )
+        {
+            this.level = level;
+            this.tileKey = tileKey;
+            this.bounds = bounds;
+            this.tmpFile = tmpFile;
+        }
     }
 
     static Area toArea( com.vividsolutions.jts.geom.Polygon poly )
@@ -176,9 +203,9 @@ public class ShorelineTiler
         return new Area( p );
     }
 
-    static void write( DataOutputStream idxOut, DataOutputStream dataOut, Rectangle2D[] tile, Area area, int level )
+    static void write( TileOutInfo info, Area area )
     {
-        Area tiled = tile( area, tile );
+        Area tiled = tile( area, info.bounds );
         if ( tiled.isEmpty( ) )
         {
             return;
@@ -195,30 +222,22 @@ public class ShorelineTiler
 
         try
         {
-            Rectangle2D bounds0 = tile[0];
             int nVertices = ( int ) tess.stream( ).mapToLong( l -> l.length ).sum( ) / 2;
-            logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), level, nVertices );
+            logInfo( LOGGER, "Found %,d polygons in tile level %d with %,d vertices", tess.size( ), info.level, nVertices );
 
-            synchronized ( idxOut )
+            synchronized ( info )
             {
-                long bytesData = Integer.BYTES + Float.BYTES * nVertices * 2;
-                dataOut.writeInt( nVertices );
-
-                for ( double[] verts : tess )
+                try (DataOutputStream out = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( info.tmpFile, true ) ) ))
                 {
-                    for ( int i = 0; i < verts.length; i += 2 )
+                    for ( double[] verts : tess )
                     {
-                        dataOut.writeFloat( ( float ) toRadians( verts[i + 1] ) );
-                        dataOut.writeFloat( ( float ) toRadians( verts[i] ) );
+                        for ( int i = 0; i < verts.length; i += 2 )
+                        {
+                            out.writeFloat( ( float ) toRadians( verts[i + 1] ) );
+                            out.writeFloat( ( float ) toRadians( verts[i] ) );
+                        }
                     }
                 }
-
-                idxOut.writeByte( ( byte ) level );
-                idxOut.writeFloat( ( float ) toRadians( bounds0.getMinY( ) ) );
-                idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxY( ) ) );
-                idxOut.writeFloat( ( float ) toRadians( bounds0.getMinX( ) ) );
-                idxOut.writeFloat( ( float ) toRadians( bounds0.getMaxX( ) ) );
-                idxOut.writeLong( bytesData );
             }
         }
         catch ( IOException ex )
@@ -227,9 +246,11 @@ public class ShorelineTiler
         }
     }
 
-    static Collection<Rectangle2D[]> createTiles( int tileWidth_DEG, int tileHeight_DEG )
+    static Collection<TileOutInfo> createTiles( int level, File destDir, int tileWidth_DEG, int tileHeight_DEG )
     {
-        Collection<Rectangle2D[]> tiles = new ArrayList<>( );
+        long key = ( tileWidth_DEG * 1_000 + tileHeight_DEG ) * 1_000_000;
+
+        Collection<TileOutInfo> tiles = new ArrayList<>( );
         for ( int lon = -180; lon < 180; lon += tileWidth_DEG )
         {
             for ( int lat = -90; lat < 90; lat += tileHeight_DEG )
@@ -237,7 +258,8 @@ public class ShorelineTiler
                 Rectangle2D bounds0 = new Rectangle2D.Double( lon - 1, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
                 Rectangle2D bounds1 = new Rectangle2D.Double( lon - 1 - 360, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
                 Rectangle2D bounds2 = new Rectangle2D.Double( lon - 1 + 360, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
-                tiles.add( new Rectangle2D[] { bounds0, bounds1, bounds2 } );
+                File tmpFile = new File( destDir, String.format( "data_%x", key++ ) );
+                tiles.add( new TileOutInfo( level, key, new Rectangle2D[] { bounds0, bounds1, bounds2 }, tmpFile ) );
             }
         }
 
