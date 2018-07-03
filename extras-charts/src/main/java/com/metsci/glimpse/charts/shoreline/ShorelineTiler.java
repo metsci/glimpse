@@ -53,6 +53,8 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
 
 public class ShorelineTiler
 {
@@ -66,26 +68,67 @@ public class ShorelineTiler
 
         File file = new File( "land-polygons-complete-4326/land_polygons.shp" );
         File destDir = new File( "." );
-        int nLevels = 1;
+
+        FloatList levels = new FloatArrayList( );
 
         DataStore dataStore = DataStoreFinder.getDataStore( Collections.singletonMap( "url", file.toURI( ).toURL( ) ) );
         String typeName = dataStore.getTypeNames( )[0];
         FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource( typeName );
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures( Filter.INCLUDE );
 
-        Collection<TileOutInfo> tiles = createTiles( 0, destDir, 30, 10 );
+        Collection<TileOutInfo> allTiles = new ArrayList<>( );
 
-        FeatureIterator<SimpleFeature> features = collection.features( );
-        toStream( features )
-                .parallel( )
-                .map( ShorelineTiler::toArea )
-                .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
-                .forEach( p -> write( p.first( ), p.second( ) ) );
+        {
+            levels.add( ( float ) Length.fromNauticalMiles( 100 ) );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 5, 3 );
+            allTiles.addAll( tiles );
 
-        features.close( );
+            FeatureIterator<SimpleFeature> features = collection.features( );
+            toStream( features )
+                    .parallel( )
+                    .map( ShorelineTiler::toArea )
+                    .filter( a -> !a.isEmpty( ) )
+                    .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
+                    .forEach( p -> write( p.first( ), p.second( ) ) );
 
-        Collection<TileOutInfo> validTiles = new ArrayList<>( tiles );
+            features.close( );
+        }
+
+        {
+            levels.add( ( float ) Length.fromNauticalMiles( 1_000 ) );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 10, 5 );
+            allTiles.addAll( tiles );
+
+            FeatureIterator<SimpleFeature> features = collection.features( );
+            toStream( features )
+                    .parallel( )
+                    .map( f -> toArea( f, 10 ) )
+                    .filter( a -> !a.isEmpty( ) )
+                    .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
+                    .forEach( p -> write( p.first( ), p.second( ) ) );
+
+            features.close( );
+        }
+
+        {
+            levels.add( ( float ) Length.fromNauticalMiles( 10_000 ) );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 30, 10 );
+            allTiles.addAll( tiles );
+
+            FeatureIterator<SimpleFeature> features = collection.features( );
+            toStream( features )
+                    .parallel( )
+                    .map( f -> toArea( f, 100 ) )
+                    .filter( a -> !a.isEmpty( ) )
+                    .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
+                    .forEach( p -> write( p.first( ), p.second( ) ) );
+
+            features.close( );
+        }
+
+        Collection<TileOutInfo> validTiles = new ArrayList<>( allTiles );
         validTiles.removeIf( t -> !t.tmpFile.isFile( ) );
+        int nLevels = levels.size( );
 
         try (DataOutputStream out = new DataOutputStream( new BufferedOutputStream( new FileOutputStream( destFile ) ) ))
         {
@@ -95,7 +138,10 @@ public class ShorelineTiler
             out.writeByte( 0 );
             out.writeLong( dataOffset );
             out.writeInt( nLevels );
-            out.writeFloat( ( float ) Length.fromNauticalMiles( 2 ) );
+            for ( float v : levels )
+            {
+                out.writeFloat( v );
+            }
 
             for ( TileOutInfo info : validTiles )
             {
@@ -168,12 +214,27 @@ public class ShorelineTiler
 
     static Area toArea( com.vividsolutions.jts.geom.Polygon poly )
     {
+        return toArea( poly, 1 );
+    }
+
+    static Area toArea( com.vividsolutions.jts.geom.Polygon poly, int decimate )
+    {
         LineString ring = poly.getExteriorRing( );
+
+        if ( ring.getNumPoints( ) / decimate < 3 )
+        {
+            return new Area( );
+        }
 
         double lastLon = 0;
         Path2D.Double p = new Path2D.Double( Path2D.WIND_NON_ZERO );
         for ( int i = 0; i < ring.getNumPoints( ); i++ )
         {
+            if ( decimate > 1 && i % decimate != 0 )
+            {
+                continue;
+            }
+
             Coordinate c = ring.getCoordinateN( i );
             double x = c.x;
             double y = c.y;
@@ -198,6 +259,7 @@ public class ShorelineTiler
                 p.lineTo( x, y );
             }
         }
+
         p.closePath( );
 
         return new Area( p );
@@ -248,7 +310,7 @@ public class ShorelineTiler
 
     static Collection<TileOutInfo> createTiles( int level, File destDir, int tileWidth_DEG, int tileHeight_DEG )
     {
-        long key = ( tileWidth_DEG * 1_000 + tileHeight_DEG ) * 1_000_000;
+        long key = ( ( tileWidth_DEG * 1_000 + tileHeight_DEG ) * 100 + level ) * 1_000_000;
 
         Collection<TileOutInfo> tiles = new ArrayList<>( );
         for ( int lon = -180; lon < 180; lon += tileWidth_DEG )
@@ -264,42 +326,6 @@ public class ShorelineTiler
         }
 
         return tiles;
-    }
-
-    static Area toArea( LandSegment segment )
-    {
-        double lastLon = 0;
-
-        Path2D.Double p = new Path2D.Double( Path2D.WIND_NON_ZERO );
-        for ( int i = 0; i < segment.vertices.size( ); i++ )
-        {
-            LandVertex v = segment.vertices.get( i );
-            double x = v.lon;
-            double y = v.lat;
-
-            // unroll the longitude so it doesn't wrap
-            while ( x - lastLon > 180 )
-            {
-                x -= 360;
-            }
-            while ( lastLon - x > 180 )
-            {
-                x += 360;
-            }
-            lastLon = x;
-
-            if ( i == 0 )
-            {
-                p.moveTo( x, y );
-            }
-            else
-            {
-                p.lineTo( x, y );
-            }
-        }
-        p.closePath( );
-
-        return new Area( p );
     }
 
     static Area tile( Area shape, Rectangle2D... bounds )
