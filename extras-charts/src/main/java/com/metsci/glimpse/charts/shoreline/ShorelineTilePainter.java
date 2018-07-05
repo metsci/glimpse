@@ -47,19 +47,31 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
     protected final Map<MultiLevelKey, Long> keys;
     protected final PolygonPainter painter;
 
-    private Set<TileKey> loadedGroups;
+    protected Set<TileKey> loadedGroups;
+    protected float[] landColor;
 
     public ShorelineTilePainter( GeoProjection projection, File file ) throws IOException
     {
         super( projection );
         this.file = file;
-        painter = new PolygonPainter( );
-        painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
-        addPainter( painter );
         loadedGroups = new HashSet<>( );
         lengthScale = loadLengthScale( file );
         keys = loadOffsets( file );
         logInfo( LOGGER, "Found %,d files in %s", keys.size( ), file );
+
+        painter = new PolygonPainter( );
+        painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
+        addPainter( painter );
+        setLandColor( GlimpseColor.getBlack( ) );
+    }
+
+    public void setLandColor( float[] landColor )
+    {
+        this.landColor = landColor;
+        for ( TileKey groupId : loadedGroups )
+        {
+            painter.setFillColor( groupId, landColor );
+        }
     }
 
     @SuppressWarnings( "unused" )
@@ -187,10 +199,10 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         }
     }
 
-    private void configurePainter( Object groupId )
+    protected void configurePainter( Object groupId )
     {
         painter.setFill( groupId, true );
-        painter.setFillColor( groupId, GlimpseColor.getBlack( ) );
+        painter.setFillColor( groupId, landColor );
         painter.setShowLines( groupId, false );
     }
 
@@ -216,7 +228,6 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         }
 
         idx = clamp( idx, 0, lengthScale.length - 1 );
-        System.out.println( dist + " " + idx );
         return idx;
     }
 

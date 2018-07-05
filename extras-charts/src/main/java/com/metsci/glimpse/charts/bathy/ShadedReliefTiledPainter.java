@@ -271,11 +271,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
     protected int colorize( float hillshade, float elevation )
     {
         int rgb = 0;
-        if ( elevation > 0 )
-        {
-            return 0;
-        }
-        else if ( elevation > -20 )
+        if ( elevation > -20 )
         {
             rgb = 0xc9dfef;
         }

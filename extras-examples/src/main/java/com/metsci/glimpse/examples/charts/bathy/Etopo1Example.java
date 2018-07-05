@@ -51,6 +51,7 @@ import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.Unrecognized
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.MapPlot2D;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop;
@@ -82,10 +83,13 @@ public class Etopo1Example implements GlimpseLayoutProvider
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
             MapPlot2D plot = new MapPlot2D( projection );
                         TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
-//                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
             //            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
 
                         ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "../extras-charts/osm_tiled.bin" ) );
+                        landPainter.setLandColor( GlimpseColor.fromColorHex( "#ece4d2" ) );
+//                        landPainter.setLandColor( GlimpseColor.fromColorHex( "#e8eae0" ) );
+//                        landPainter.setLandColor( GlimpseColor.fromColorHex( "#d3dcc8" ) );
                         plot.getLayoutCenter( ).addPainter( landPainter );
 
 //            PolygonPainter p = new PolygonPainter( );
