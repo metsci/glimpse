@@ -120,7 +120,7 @@ public class ShorelineTiler
             FeatureIterator<SimpleFeature> features = collection.features( );
             toStream( features )
                     .parallel( )
-                    .map( f -> toArea( f, 100 ) )
+                    .map( f -> toArea( f, 1000 ) )
                     .filter( a -> !a.isEmpty( ) )
                     .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
                     .forEach( p -> write( p.first( ), p.second( ) ) );
