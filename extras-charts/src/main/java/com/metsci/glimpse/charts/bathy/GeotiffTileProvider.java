@@ -1,6 +1,9 @@
 package com.metsci.glimpse.charts.bathy;
 
+import static com.metsci.glimpse.util.units.Length.fromKilometers;
 import static com.metsci.glimpse.util.units.Length.fromMeters;
+import static java.lang.Math.ceil;
+import static java.lang.Math.floor;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
@@ -38,6 +41,7 @@ public class GeotiffTileProvider implements TopoTileProvider
     public static final String GEBCO2014_ATTRIBUTION = "The GEBCO_2014 Grid, version 20150318, www.gebco.net";
     private static final int DEF_NUM_TILES_X = 30;
     private static final int DEF_NUM_TILES_Y = 15;
+    private static final TileKey GLOBAL_TILE_KEY = new TileKey( fromKilometers( 2_000 ), -90, 90, -180, 180 );
 
     private final GridCoverage2D topoData;
     private final Collection<TileKey> tileKeys;
@@ -63,6 +67,7 @@ public class GeotiffTileProvider implements TopoTileProvider
         int tilePixelsY = pxHeight / nTilesY;
 
         Collection<TileKey> keys = new ArrayList<>( );
+        keys.add( GLOBAL_TILE_KEY );
         for ( int pxX = 0; pxX < pxWidth; pxX += tilePixelsX )
         {
             for ( int pxY = 0; pxY < pxHeight; pxY += tilePixelsY )
@@ -93,7 +98,14 @@ public class GeotiffTileProvider implements TopoTileProvider
     @Override
     public TopographyData getTile( TileKey key ) throws IOException
     {
-        return new GeoToolsTopoData( topoData, key );
+        if ( GLOBAL_TILE_KEY.equals( key ) )
+        {
+            return new GeoToolsSampledGlobalTopoData( topoData );
+        }
+        else
+        {
+            return new GeoToolsTopoData( topoData, key );
+        }
     }
 
     @Override
@@ -170,6 +182,56 @@ public class GeotiffTileProvider implements TopoTileProvider
         reader.dispose( );
 
         return grid;
+    }
+
+    private class GeoToolsSampledGlobalTopoData extends TopographyData
+    {
+        public GeoToolsSampledGlobalTopoData( GridCoverage2D grid ) throws IOException
+        {
+            super( null );
+
+            int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
+            startLon = -180;
+            startLat = -90;
+
+            imageWidth = nLonLat[0] / 10 + 1;
+            imageHeight = nLonLat[1] / 10 + 1;
+
+            widthStep = 360.0 / imageWidth;
+            heightStep = 180.0 / imageHeight;
+
+            data = new float[imageWidth][imageHeight];
+
+            PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
+            for ( int tileY = 0; tileY <= img.getMaxTileY( ); tileY += 10 )
+            {
+                for ( int tileX = 0; tileX <= img.getMaxTileX( ); tileX += 10 )
+                {
+                    Raster tile = img.getTile( tileX, tileY );
+                    int minX = ( int ) ceil( tile.getMinX( ) / 10.0 ) * 10;
+                    int maxX = ( int ) floor( ( tile.getMinX( ) + tile.getWidth( ) - 1 ) / 10.0 ) * 10;
+                    int minY = ( int ) ceil( tile.getMinY( ) / 10.0 ) * 10;
+                    int maxY = ( int ) floor( ( tile.getMinY( ) + tile.getHeight( ) - 1 ) / 10.0 ) * 10;
+
+                    for ( int i = minX; i <= maxX; i++ )
+                    {
+                        for ( int j = minY; j <= maxY; j++ )
+                        {
+                            double v = tile.getSampleDouble( i, j, 0 );
+                            int x = i / 10;
+                            int y = imageHeight - j / 10 - 1;
+                            data[x][y] = ( float ) fromMeters( v );
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void read( InputStream in ) throws IOException
+        {
+            // nop
+        }
     }
 
     private class GeoToolsTopoData extends TopographyData

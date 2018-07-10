@@ -65,6 +65,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
 public abstract class TilePainter<V> extends DelegatePainter
 {
     protected static final double ANTIMERIDIAN_EPSILON = 1e-5;
+    protected static Executor SHARED_EXEC;
 
     protected GeoProjection projection;
     protected SortedDoubles lengthScale;
@@ -73,14 +74,21 @@ public abstract class TilePainter<V> extends DelegatePainter
     protected PainterCache<TileKey, V> cacheData;
     protected Rectangle2D.Double lastAxis;
 
-    protected Executor executor;
-
     public TilePainter( GeoProjection projection )
+
     {
         this.projection = projection;
-        this.executor = newFixedThreadPool( clamp( getRuntime( ).availableProcessors( ) - 2, 1, 3 ) );
-        cacheData = new PainterCache<>( this::loadTileData, executor );
         lastAxis = new Rectangle2D.Double( );
+
+        synchronized ( TilePainter.class )
+        {
+            if ( SHARED_EXEC == null )
+            {
+                SHARED_EXEC = newFixedThreadPool( max( getRuntime( ).availableProcessors( ) - 2, 1 ) );
+            }
+        }
+
+        cacheData = new PainterCache<>( this::loadTileData, SHARED_EXEC );
     }
 
     @Override
@@ -137,15 +145,20 @@ public abstract class TilePainter<V> extends DelegatePainter
         return clamp( lon_DEG, -180 + ANTIMERIDIAN_EPSILON, 180 - ANTIMERIDIAN_EPSILON );
     }
 
+    protected double clampNorthSouth( double lat_DEG )
+    {
+        return clamp( lat_DEG, -90 + ANTIMERIDIAN_EPSILON, 90 - ANTIMERIDIAN_EPSILON );
+    }
+
     private Map<TileKey, Area> createTileAreas( )
     {
         Map<TileKey, Area> keys = new HashMap<>( );
         for ( TileKey key : allKeys( ) )
         {
-            Vector2d sw = projection.project( LatLonGeo.fromDeg( key.minLat, clampAntiMeridian( key.minLon ) ) );
-            Vector2d nw = projection.project( LatLonGeo.fromDeg( key.maxLat, clampAntiMeridian( key.minLon ) ) );
-            Vector2d ne = projection.project( LatLonGeo.fromDeg( key.maxLat, clampAntiMeridian( key.maxLon ) ) );
-            Vector2d se = projection.project( LatLonGeo.fromDeg( key.minLat, clampAntiMeridian( key.maxLon ) ) );
+            Vector2d sw = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.minLat ), clampAntiMeridian( key.minLon ) ) );
+            Vector2d nw = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.maxLat ), clampAntiMeridian( key.minLon ) ) );
+            Vector2d ne = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.maxLat ), clampAntiMeridian( key.maxLon ) ) );
+            Vector2d se = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.minLat ), clampAntiMeridian( key.maxLon ) ) );
 
             /*
              * If the border is clockwise, the tile is valid in the current

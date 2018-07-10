@@ -33,7 +33,6 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
 import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
-import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
@@ -50,6 +49,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -57,6 +57,7 @@ import java.util.logging.Logger;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
+import com.google.common.hash.Hashing;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
@@ -71,7 +72,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
 
-    private static final long VERSION_ID = 2;
+    private static final int VERSION_ID = 3;
     private static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
     private static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
     private static final double LIGHT_AZIMUTH = fromDeg( -135 );
@@ -102,9 +103,18 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
     @Override
     protected DrawableTexture loadTileData( TileKey key )
     {
+        String hash = Hashing.murmur3_128( ).newHasher( )
+                .putString( tileProvider.getAttribution( ), Charset.defaultCharset( ) )
+                .putDouble( key.lengthScale )
+                .putDouble( key.minLat )
+                .putDouble( key.maxLat )
+                .putDouble( key.minLon )
+                .putDouble( key.maxLon )
+                .hash( )
+                .toString( );
+
         CachedTileData tile = null;
-        String name = String.format( "topo/tile_v%d_%x%x%x%x.bin", VERSION_ID, doubleToRawLongBits( key.minLat ), doubleToRawLongBits( key.minLon ),
-                doubleToRawLongBits( key.maxLat ), doubleToRawLongBits( key.maxLon ) );
+        String name = String.format( "topo/tile_v%d_%s.bin", VERSION_ID, hash );
         File cacheFile = new File( glimpseUserCacheDir, name );
         if ( cacheFile.isFile( ) )
         {
