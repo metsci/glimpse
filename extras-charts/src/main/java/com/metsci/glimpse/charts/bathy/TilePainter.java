@@ -28,6 +28,7 @@ package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
+import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -51,7 +52,12 @@ import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.support.PainterCache;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;
+import com.metsci.glimpse.util.primitives.sorted.SortedDoublesArray;
 import com.metsci.glimpse.util.vector.Vector2d;
+
+import it.unimi.dsi.fastutil.doubles.DoubleAVLTreeSet;
+import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
 
 /**
  * @author borkholder
@@ -61,6 +67,7 @@ public abstract class TilePainter<V> extends DelegatePainter
     protected static final double ANTIMERIDIAN_EPSILON = 1e-5;
 
     protected GeoProjection projection;
+    protected SortedDoubles lengthScale;
     protected Map<TileKey, Area> tileBounds;
 
     protected PainterCache<TileKey, V> cacheData;
@@ -90,6 +97,7 @@ public abstract class TilePainter<V> extends DelegatePainter
         if ( tileBounds == null )
         {
             tileBounds = createTileAreas( );
+            lengthScale = populateLengthScale( tileBounds.keySet( ) );
         }
 
         if ( lastAxis.getMinX( ) != axis.getMinX( ) ||
@@ -164,16 +172,43 @@ public abstract class TilePainter<V> extends DelegatePainter
         return keys;
     }
 
+    protected SortedDoubles populateLengthScale( Collection<TileKey> allKeys )
+    {
+        DoubleSortedSet set = new DoubleAVLTreeSet( );
+        allKeys.forEach( k -> set.add( k.lengthScale ) );
+        return new SortedDoublesArray( set.toDoubleArray( ) );
+    }
+
     protected Collection<TileKey> getVisibleTiles( Rectangle2D bounds, Stream<Entry<TileKey, Area>> keys )
     {
         // Pad for irregular projections
         double padX = bounds.getWidth( ) * 0.02;
         double padY = bounds.getHeight( ) * 0.02;
         Rectangle2D b = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
+        double scale = getLengthScale( bounds );
 
-        return keys.filter( e -> e.getValue( ).intersects( b ) )
+        return keys.filter( e -> ( e.getKey( ) ).lengthScale == scale )
+                .filter( e -> e.getValue( ).intersects( b ) )
                 .map( Entry::getKey )
                 .collect( Collectors.toList( ) );
+    }
+
+    protected double getLengthScale( Rectangle2D bounds )
+    {
+        if ( lengthScale.n( ) == 1 )
+        {
+            return lengthScale.v( 0 );
+        }
+
+        LatLonGeo center = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMinY( ) + bounds.getHeight( ) / 2 );
+        LatLonGeo n = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMaxY( ) );
+        LatLonGeo s = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMinY( ) );
+        LatLonGeo e = projection.unproject( bounds.getMaxX( ), bounds.getMinY( ) + bounds.getHeight( ) / 2 );
+        LatLonGeo w = projection.unproject( bounds.getMinX( ), bounds.getMinY( ) + bounds.getHeight( ) / 2 );
+
+        double dist = max( center.getDistanceTo( n ), max( center.getDistanceTo( s ), max( center.getDistanceTo( w ), center.getDistanceTo( e ) ) ) );
+        int idx = max( 0, lengthScale.indexAtOrBefore( dist ) );
+        return lengthScale.v( idx );
     }
 
     /**

@@ -1,15 +1,10 @@
 package com.metsci.glimpse.charts.shoreline;
 
-import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
-import static java.lang.Math.max;
 import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
-import static java.util.Arrays.binarySearch;
 
-import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -26,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import com.google.common.io.CountingInputStream;
 import com.metsci.glimpse.charts.bathy.TileKey;
@@ -44,8 +38,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
     private static final Logger LOGGER = Logger.getLogger( ShorelineTilePainter.class.getName( ) );
 
     protected final File file;
-    protected final double[] lengthScale;
-    protected final Map<MultiLevelKey, Long> keys;
+    protected final Map<TileKey, Long> offsets;
     protected final PolygonPainter painter;
 
     protected Set<TileKey> loadedGroups;
@@ -56,9 +49,8 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         super( projection );
         this.file = file;
         loadedGroups = new HashSet<>( );
-        lengthScale = loadLengthScale( file );
-        keys = loadOffsets( file );
-        logInfo( LOGGER, "Found %,d files in %s", keys.size( ), file );
+        offsets = loadOffsets( file );
+        logInfo( LOGGER, "Found %,d files in %s", offsets.size( ), file );
 
         painter = new PolygonPainter( );
         painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
@@ -75,42 +67,23 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         }
     }
 
-    @SuppressWarnings( "unused" )
-    protected double[] loadLengthScale( File file ) throws IOException
-    {
-        try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
-        {
-            int version = rf.readByte( );
-            long dataStart = rf.readLong( );
-            int numLevels = rf.readInt( );
-            double[] levels = new double[numLevels];
-            for ( int i = 0; i < levels.length; i++ )
-            {
-                levels[i] = rf.readFloat( );
-            }
-
-            return levels;
-        }
-    }
-
-    protected Map<MultiLevelKey, Long> loadOffsets( File file ) throws IOException
+    protected Map<TileKey, Long> loadOffsets( File file ) throws IOException
     {
         try (CountingInputStream cis = new CountingInputStream( new BufferedInputStream( new FileInputStream( file ) ) ))
         {
             DataInputStream dis = new DataInputStream( cis );
 
-            // version
-            dis.readByte( );
+            @SuppressWarnings( "unused" )
+            int version = dis.readByte( );
             long dataStart = dis.readLong( );
-
-            // read levels
-            int nLevels = dis.readInt( );
-            for ( int i = 0; i < nLevels; i++ )
+            int numLevels = dis.readInt( );
+            double[] levels = new double[numLevels];
+            for ( int i = 0; i < levels.length; i++ )
             {
-                dis.readFloat( );
+                levels[i] = dis.readFloat( );
             }
 
-            Map<MultiLevelKey, Long> offsets = new HashMap<>( );
+            Map<TileKey, Long> offsets = new HashMap<>( );
             while ( cis.getCount( ) < dataStart )
             {
                 int level = dis.readByte( );
@@ -119,7 +92,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
                 float minLon = ( float ) toDegrees( dis.readFloat( ) );
                 float maxLon = ( float ) toDegrees( dis.readFloat( ) );
                 long offset = dis.readLong( );
-                offsets.put( new MultiLevelKey( level, minLat, maxLat, minLon, maxLon ), offset );
+                offsets.put( new TileKey( levels[level], minLat, maxLat, minLon, maxLon ), offset );
             }
 
             return offsets;
@@ -141,7 +114,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
 
     protected TessellatedPolygon readTile( RandomAccessFile rf, TileKey key ) throws IOException
     {
-        long offset = keys.get( key );
+        long offset = offsets.get( key );
         logFine( LOGGER, "Reading tile at offset %,d", offset );
         rf.seek( offset );
 
@@ -201,56 +174,8 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
     }
 
     @Override
-    protected Collection<TileKey> getVisibleTiles( Rectangle2D bounds, Stream<Entry<TileKey, Area>> keys )
-    {
-        int level = getLevel( bounds );
-        keys = keys.filter( e -> ( ( MultiLevelKey ) e.getKey( ) ).level == level );
-        return super.getVisibleTiles( bounds, keys );
-    }
-
-    protected int getLevel( Rectangle2D bounds )
-    {
-        LatLonGeo c = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMinY( ) + bounds.getHeight( ) / 2 );
-        LatLonGeo a = projection.unproject( bounds.getMinX( ) + bounds.getWidth( ) / 2, bounds.getMaxY( ) );
-        LatLonGeo b = projection.unproject( bounds.getMaxX( ), bounds.getMinY( ) + bounds.getHeight( ) / 2 );
-
-        double dist = max( c.getDistanceTo( a ), c.getDistanceTo( b ) );
-        int idx = binarySearch( lengthScale, dist );
-        if ( idx < 0 )
-        {
-            idx = -idx - 1;
-        }
-
-        idx = clamp( idx, 0, lengthScale.length - 1 );
-        return idx;
-    }
-
-    @Override
     protected Collection<TileKey> allKeys( )
     {
-        return Collections.unmodifiableCollection( keys.keySet( ) );
-    }
-
-    protected static class MultiLevelKey extends TileKey
-    {
-        public final int level;
-
-        public MultiLevelKey( int level, double minLat, double maxLat, double minLon, double maxLon )
-        {
-            super( minLat, maxLat, minLon, maxLon );
-            this.level = level;
-        }
-
-        @Override
-        public int hashCode( )
-        {
-            return super.hashCode( ) * 31 + level;
-        }
-
-        @Override
-        public boolean equals( Object obj )
-        {
-            return super.equals( obj ) && obj instanceof MultiLevelKey && ( ( MultiLevelKey ) obj ).level == level;
-        }
+        return Collections.unmodifiableCollection( offsets.keySet( ) );
     }
 }

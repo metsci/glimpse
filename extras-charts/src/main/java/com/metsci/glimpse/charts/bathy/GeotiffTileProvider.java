@@ -77,7 +77,7 @@ public class GeotiffTileProvider implements TopoTileProvider
                 double maxLat = pixelY1 * px2Lat - 90;
                 double maxLon = pixelX1 * px2Lon - 180;
 
-                keys.add( new TileKey( minLat, maxLat, minLon, maxLon ) );
+                keys.add( new TileKey( 0, minLat, maxLat, minLon, maxLon ) );
             }
         }
 
