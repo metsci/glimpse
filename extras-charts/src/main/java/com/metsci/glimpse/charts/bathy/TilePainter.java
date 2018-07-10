@@ -58,6 +58,8 @@ import com.metsci.glimpse.util.vector.Vector2d;
  */
 public abstract class TilePainter<V> extends DelegatePainter
 {
+    protected static final double ANTIMERIDIAN_EPSILON = 1e-5;
+
     protected GeoProjection projection;
     protected Map<TileKey, Area> tileBounds;
 
@@ -122,15 +124,20 @@ public abstract class TilePainter<V> extends DelegatePainter
         }
     }
 
+    protected double clampAntiMeridian( double lon_DEG )
+    {
+        return clamp( lon_DEG, -180 + ANTIMERIDIAN_EPSILON, 180 - ANTIMERIDIAN_EPSILON );
+    }
+
     private Map<TileKey, Area> createTileAreas( )
     {
         Map<TileKey, Area> keys = new HashMap<>( );
         for ( TileKey key : allKeys( ) )
         {
-            Vector2d sw = projection.project( LatLonGeo.fromDeg( key.minLat, key.minLon ) );
-            Vector2d nw = projection.project( LatLonGeo.fromDeg( key.maxLat, key.minLon ) );
-            Vector2d ne = projection.project( LatLonGeo.fromDeg( key.maxLat, key.maxLon ) );
-            Vector2d se = projection.project( LatLonGeo.fromDeg( key.minLat, key.maxLon ) );
+            Vector2d sw = projection.project( LatLonGeo.fromDeg( key.minLat, clampAntiMeridian( key.minLon ) ) );
+            Vector2d nw = projection.project( LatLonGeo.fromDeg( key.maxLat, clampAntiMeridian( key.minLon ) ) );
+            Vector2d ne = projection.project( LatLonGeo.fromDeg( key.maxLat, clampAntiMeridian( key.maxLon ) ) );
+            Vector2d se = projection.project( LatLonGeo.fromDeg( key.minLat, clampAntiMeridian( key.maxLon ) ) );
 
             /*
              * If the border is clockwise, the tile is valid in the current

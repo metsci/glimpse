@@ -1,5 +1,8 @@
 package com.metsci.glimpse.charts.bathy;
 
+/**
+ * A bounding box for a tile. Tiles are expected to be in lat/lon space and must not cross the antimeridian.
+ */
 public class TileKey
 {
     public final double minLat;

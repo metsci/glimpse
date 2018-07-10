@@ -60,6 +60,7 @@ import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationExcepti
 import com.metsci.glimpse.util.GlimpseDataPaths;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 import com.metsci.glimpse.util.units.Length;
 import com.metsci.glimpse.util.vector.Vector2d;
@@ -81,9 +82,10 @@ public class Etopo1Example implements GlimpseLayoutProvider
         try
         {
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
+            projection = new MercatorProjection( );
             MapPlot2D plot = new MapPlot2D( projection );
                         TopoTileProvider tileProvider = GeotiffTileProvider.getGebco2014( );
-                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
+//                        plot.getLayoutCenter( ).addPainter( new ShadedReliefTiledPainter( projection, tileProvider ) );
             //            plot.getLayoutCenter( ).addPainter( new UnderseaFeatureNamesPainter( projection ) );
 
                         ShorelineTilePainter landPainter = new ShorelineTilePainter( projection, new File( "../extras-charts/osm_tiled.bin" ) );
@@ -111,7 +113,7 @@ public class Etopo1Example implements GlimpseLayoutProvider
 //
 //            plot.getLayoutCenter( ).addPainter( p );
 
-            plot.getAxis( ).set( 0, Length.fromNauticalMiles( 300 ), 0, Length.fromNauticalMiles( 300 ) );
+            plot.getAxis( ).set( 0, 1, 0, 1 );
             plot.getAxis( ).validate( );
             return plot;
         }

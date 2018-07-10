@@ -5,6 +5,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static java.lang.Math.max;
 import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
 import static java.util.Arrays.binarySearch;
 
 import java.awt.geom.Area;
@@ -158,14 +159,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         {
             float lat = buf.get( );
             float lon = buf.get( );
-            if ( lon == -180 )
-            {
-                lon += 1e-3;
-            }
-            else if ( lon == 180 )
-            {
-                lon -= 1e-3;
-            }
+            lon = ( float ) toRadians( clampAntiMeridian( toDegrees( lon ) ) );
             Vector2d v = projection.project( LatLonGeo.fromRad( lat, lon ) );
             verts[j] = ( float ) v.getX( );
             verts[j + 1] = ( float ) v.getY( );

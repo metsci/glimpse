@@ -2,6 +2,8 @@ package com.metsci.glimpse.charts.shoreline;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.Math.toRadians;
 
 import java.awt.Shape;
@@ -317,9 +319,14 @@ public class ShorelineTiler
         {
             for ( int lat = -90; lat < 90; lat += tileHeight_DEG )
             {
-                Rectangle2D bounds0 = new Rectangle2D.Double( lon - 1, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
-                Rectangle2D bounds1 = new Rectangle2D.Double( lon - 1 - 360, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
-                Rectangle2D bounds2 = new Rectangle2D.Double( lon - 1 + 360, lat - 1, tileWidth_DEG + 2, tileHeight_DEG + 2 );
+                double minLon = max( lon - 1, -180 );
+                double width = min( tileWidth_DEG + 2, 180 - minLon );
+                double minLat = max( lat - 1, -90 );
+                double height = min( tileHeight_DEG + 2, 90 - minLat );
+
+                Rectangle2D bounds0 = new Rectangle2D.Double( minLon, minLat, width, height );
+                Rectangle2D bounds1 = new Rectangle2D.Double( minLon - 360, minLat, width, height );
+                Rectangle2D bounds2 = new Rectangle2D.Double( minLon + 360, minLat, width, height );
                 File tmpFile = new File( destDir, String.format( "data_%x", key++ ) );
                 tiles.add( new TileOutInfo( level, key, new Rectangle2D[] { bounds0, bounds1, bounds2 }, tmpFile ) );
             }
