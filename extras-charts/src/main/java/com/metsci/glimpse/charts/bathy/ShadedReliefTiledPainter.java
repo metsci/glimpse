@@ -153,6 +153,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             @Override
             protected void prepare_setTexParameters( GL gl )
             {
+                super.prepare_setTexParameters( gl );
+
                 GL3 gl3 = gl.getGL3( );
                 gl3.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR );
                 gl3.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
