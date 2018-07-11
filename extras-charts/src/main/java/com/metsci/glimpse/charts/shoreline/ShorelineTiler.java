@@ -97,14 +97,14 @@ public class ShorelineTiler
         }
 
         {
-            levels.add( ( float ) Length.fromNauticalMiles( 1_000 ) );
+            levels.add( ( float ) Length.fromNauticalMiles( 500 ) );
             Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 10, 5 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
             toStream( features )
                     .parallel( )
-                    .map( f -> toArea( f, 10 ) )
+                    .map( f -> toArea( f, 100 ) )
                     .filter( a -> !a.isEmpty( ) )
                     .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
                     .forEach( p -> write( p.first( ), p.second( ) ) );
@@ -113,14 +113,14 @@ public class ShorelineTiler
         }
 
         {
-            levels.add( ( float ) Length.fromNauticalMiles( 10_000 ) );
+            levels.add( ( float ) Length.fromNauticalMiles( 5_000 ) );
             Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 30, 10 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
             toStream( features )
                     .parallel( )
-                    .map( f -> toArea( f, 1000 ) )
+                    .map( f -> toArea( f, 1_000 ) )
                     .filter( a -> !a.isEmpty( ) )
                     .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
                     .forEach( p -> write( p.first( ), p.second( ) ) );
