@@ -156,10 +156,15 @@ public abstract class TilePainter<V> extends DelegatePainter
         Map<TileKey, Area> keys = new HashMap<>( );
         for ( TileKey key : allKeys( ) )
         {
-            Vector2d sw = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.minLat ), clampAntiMeridian( key.minLon ) ) );
-            Vector2d nw = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.maxLat ), clampAntiMeridian( key.minLon ) ) );
-            Vector2d ne = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.maxLat ), clampAntiMeridian( key.maxLon ) ) );
-            Vector2d se = projection.project( LatLonGeo.fromDeg( clampNorthSouth( key.minLat ), clampAntiMeridian( key.maxLon ) ) );
+            double minLat = clampNorthSouth( key.minLat );
+            double minLon = clampAntiMeridian( key.minLon );
+            double maxLat = clampNorthSouth( key.maxLat );
+            double maxLon = clampAntiMeridian( key.maxLon );
+
+            Vector2d sw = projection.project( LatLonGeo.fromDeg( minLat, minLon ) );
+            Vector2d nw = projection.project( LatLonGeo.fromDeg( maxLat, minLon ) );
+            Vector2d ne = projection.project( LatLonGeo.fromDeg( maxLat, maxLon ) );
+            Vector2d se = projection.project( LatLonGeo.fromDeg( minLat, maxLon ) );
 
             /*
              * If the border is clockwise, the tile is valid in the current
@@ -173,11 +178,45 @@ public abstract class TilePainter<V> extends DelegatePainter
             sumOverEdge += ( ne.getX( ) - nw.getX( ) ) * ( ne.getY( ) + nw.getY( ) );
             if ( sumOverEdge > 0 )
             {
+                /*
+                 * Now we're going to create a shape in the projection with enough points to compute a reasonable intersection with the viewport.
+                 */
+                double dlat = ( maxLat - minLat ) / 5;
+                double dlon = ( maxLon - minLon ) / 5;
                 Path2D path = new Path2D.Double( Path2D.WIND_EVEN_ODD );
+
+                // sw to nw
                 path.moveTo( sw.getX( ), sw.getY( ) );
+                for ( double lat = minLat + dlat; lat < maxLat; lat += dlat )
+                {
+                    Vector2d p = projection.project( LatLonGeo.fromDeg( lat, minLon ) );
+                    path.lineTo( p.getX( ), p.getY( ) );
+                }
+
+                // nw to ne
                 path.lineTo( nw.getX( ), nw.getY( ) );
+                for ( double lon = minLon + dlon; lon < maxLon; lon += dlon )
+                {
+                    Vector2d p = projection.project( LatLonGeo.fromDeg( maxLat, lon ) );
+                    path.lineTo( p.getX( ), p.getY( ) );
+                }
+
+                // ne to se
                 path.lineTo( ne.getX( ), ne.getY( ) );
+                for ( double lat = maxLat - dlat; lat > minLat; lat -= dlat )
+                {
+                    Vector2d p = projection.project( LatLonGeo.fromDeg( lat, maxLon ) );
+                    path.lineTo( p.getX( ), p.getY( ) );
+                }
+
+                // se to sw
                 path.lineTo( se.getX( ), se.getY( ) );
+                for ( double lon = maxLon - dlon; lon > minLon; lon -= dlon )
+                {
+                    Vector2d p = projection.project( LatLonGeo.fromDeg( minLat, lon ) );
+                    path.lineTo( p.getX( ), p.getY( ) );
+                }
+
                 path.closePath( );
                 keys.put( key, new Area( path ) );
             }
