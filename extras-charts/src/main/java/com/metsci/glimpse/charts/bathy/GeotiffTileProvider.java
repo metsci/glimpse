@@ -29,7 +29,6 @@ package com.metsci.glimpse.charts.bathy;
 import static com.metsci.glimpse.util.units.Length.fromKilometers;
 import static com.metsci.glimpse.util.units.Length.fromMeters;
 import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
@@ -67,7 +66,7 @@ public class GeotiffTileProvider implements TopoTileProvider
     public static final String GEBCO2014_ATTRIBUTION = "The GEBCO_2014 Grid, version 20150318, www.gebco.net";
     private static final int DEF_NUM_TILES_X = 30;
     private static final int DEF_NUM_TILES_Y = 15;
-    private static final TileKey GLOBAL_TILE_KEY = new TileKey( fromKilometers( 2_000 ), -90, 90, -180, 180 );
+    private static final double GLOBAL_TILE_LEVEL = fromKilometers( 2_000 );
 
     private final GridCoverage2D topoData;
     private final Collection<TileKey> tileKeys;
@@ -93,7 +92,10 @@ public class GeotiffTileProvider implements TopoTileProvider
         int tilePixelsY = pxHeight / nTilesY;
 
         Collection<TileKey> keys = new ArrayList<>( );
-        keys.add( GLOBAL_TILE_KEY );
+        keys.add( new TileKey( GLOBAL_TILE_LEVEL, -90, 0, -180, 0 ) );
+        keys.add( new TileKey( GLOBAL_TILE_LEVEL, 0, 90, -180, 0 ) );
+        keys.add( new TileKey( GLOBAL_TILE_LEVEL, -90, 0, 0, 180 ) );
+        keys.add( new TileKey( GLOBAL_TILE_LEVEL, 0, 90, 0, 180 ) );
         for ( int pxX = 0; pxX < pxWidth; pxX += tilePixelsX )
         {
             for ( int pxY = 0; pxY < pxHeight; pxY += tilePixelsY )
@@ -124,9 +126,9 @@ public class GeotiffTileProvider implements TopoTileProvider
     @Override
     public TopographyData getTile( TileKey key ) throws IOException
     {
-        if ( GLOBAL_TILE_KEY.equals( key ) )
+        if ( key.lengthScale == GLOBAL_TILE_LEVEL )
         {
-            return new GeoToolsSampledGlobalTopoData( topoData );
+            return new GeoToolsSampledGlobalTopoData( topoData, key, 10 );
         }
         else
         {
@@ -212,43 +214,41 @@ public class GeotiffTileProvider implements TopoTileProvider
 
     private class GeoToolsSampledGlobalTopoData extends TopographyData
     {
-        public GeoToolsSampledGlobalTopoData( GridCoverage2D grid ) throws IOException
+        public GeoToolsSampledGlobalTopoData( GridCoverage2D grid, TileKey key, int decimate ) throws IOException
         {
             super( null );
 
             int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
-            startLon = -180;
-            startLat = -90;
+            widthStep = 360.0 / nLonLat[0] * decimate;
+            heightStep = 180.0 / nLonLat[1] * decimate;
 
-            imageWidth = nLonLat[0] / 10 + 1;
-            imageHeight = nLonLat[1] / 10 + 1;
+            startLon = key.minLon;
+            startLat = key.minLat;
 
-            widthStep = 360.0 / imageWidth;
-            heightStep = 180.0 / imageHeight;
+            double lon2px = nLonLat[0] / 360.0;
+            double lat2px = nLonLat[1] / 180.0;
+            int pixelX0 = ( int ) round( ( key.minLon + 180 ) * lon2px );
+            int pixelX1 = ( int ) round( ( key.maxLon + 180 ) * lon2px );
+            int pixelY0 = ( int ) round( ( 180 - ( key.maxLat + 90 ) ) * lat2px );
+            int pixelY1 = ( int ) round( ( 180 - ( key.minLat + 90 ) ) * lat2px );
+
+            imageWidth = ( int ) ceil( ( pixelX1 - pixelX0 + 1 ) / ( double ) decimate );
+            imageHeight = ( int ) ceil( ( pixelY1 - pixelY0 + 1 ) / ( double ) decimate );
 
             data = new float[imageWidth][imageHeight];
 
             PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
-            for ( int tileY = 0; tileY <= img.getMaxTileY( ); tileY += 10 )
+            for ( int j = pixelY0; j <= pixelY1; j += decimate )
             {
-                for ( int tileX = 0; tileX <= img.getMaxTileX( ); tileX += 10 )
+                int tileY = img.YToTileY( j );
+                for ( int i = pixelX0; i <= pixelX1; i += decimate )
                 {
+                    int tileX = img.XToTileX( i );
                     Raster tile = img.getTile( tileX, tileY );
-                    int minX = ( int ) ceil( tile.getMinX( ) / 10.0 ) * 10;
-                    int maxX = ( int ) floor( ( tile.getMinX( ) + tile.getWidth( ) - 1 ) / 10.0 ) * 10;
-                    int minY = ( int ) ceil( tile.getMinY( ) / 10.0 ) * 10;
-                    int maxY = ( int ) floor( ( tile.getMinY( ) + tile.getHeight( ) - 1 ) / 10.0 ) * 10;
-
-                    for ( int i = minX; i <= maxX; i++ )
-                    {
-                        for ( int j = minY; j <= maxY; j++ )
-                        {
-                            double v = tile.getSampleDouble( i, j, 0 );
-                            int x = i / 10;
-                            int y = imageHeight - j / 10 - 1;
-                            data[x][y] = ( float ) fromMeters( v );
-                        }
-                    }
+                    double v = tile.getSampleDouble( i, j, 0 );
+                    int x = ( i - pixelX0 ) / decimate;
+                    int y = imageHeight - ( j - pixelY0 ) / decimate - 1;
+                    data[x][y] = ( float ) fromMeters( v );
                 }
             }
         }
