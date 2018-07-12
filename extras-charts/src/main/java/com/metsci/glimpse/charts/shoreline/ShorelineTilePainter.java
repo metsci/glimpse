@@ -76,7 +76,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         this.file = file;
         loadedGroups = new HashSet<>( );
         offsets = loadOffsets( file );
-        logInfo( LOGGER, "Found %,d files in %s", offsets.size( ), file );
+        logInfo( LOGGER, "Found %,d tiles in %s", offsets.size( ), file );
 
         painter = new PolygonPainter( );
         painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );

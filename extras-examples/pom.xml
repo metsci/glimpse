@@ -83,6 +83,23 @@
             <version>${project.parent.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-shapefile</artifactId>
+            <version>19.1</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>boundless</id>
+            <url>https://repo.boundlessgeo.com/main/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

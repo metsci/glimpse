@@ -84,7 +84,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 
 /**
- * This class takes shoreline polygons (OSM polygons specifically but can be extended to GSHHS) then tiles and tesselates them for faster loading in a painter.
+ * This class takes shoreline polygons (OSM polygons specifically but can be extended to GSHHS) then tiles and tessellates them for faster loading in a painter.
  */
 public class ShorelineTiler
 {
@@ -316,7 +316,7 @@ public class ShorelineTiler
         }
 
         Collection<double[]> tess = split( tiled )
-                .map( ShorelineTiler::tesselate )
+                .map( ShorelineTiler::tessellate )
                 .collect( Collectors.toList( ) );
 
         if ( tess.isEmpty( ) )
@@ -424,7 +424,7 @@ public class ShorelineTiler
         return all.stream( );
     }
 
-    static double[] tesselate( Loop loop )
+    static double[] tessellate( Loop loop )
     {
         Polygon p = new Polygon( );
         p.add( loop );
