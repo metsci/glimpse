@@ -57,12 +57,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -79,27 +79,28 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
 
-    @SuppressWarnings( "serial" )
-    public static final Map<Float, float[]> BATHYMETRY_LIGHT_COLORS = new TreeMap<Float, float[]>( )
+    public static final Map<Float, float[]> BATHYMETRY_LIGHT_COLORS;
+
+    static
     {
+        try
         {
-            try
-            {
-                put( Float.POSITIVE_INFINITY, GlimpseColor.fromColorHex( "#c9dfef" ) );
-                put( -20f, GlimpseColor.fromColorHex( "#bbd9f0" ) );
-                put( -100f, GlimpseColor.fromColorHex( "#b0cee8" ) );
-                put( -500f, GlimpseColor.fromColorHex( "#a3c9e6" ) );
-                put( -1_000f, GlimpseColor.fromColorHex( "#81acd6" ) );
-                put( -2_000f, GlimpseColor.fromColorHex( "#76a5cf" ) );
-                put( -4_000f, GlimpseColor.fromColorHex( "#6499c1" ) );
-                put( -8_000f, GlimpseColor.fromColorHex( "#3c6e98" ) );
-            }
-            catch ( Exception ex )
-            {
-                throw new RuntimeException( ex );
-            }
+            BATHYMETRY_LIGHT_COLORS = ImmutableMap.<Float, float[]> builder( )
+                    .put( Float.POSITIVE_INFINITY, GlimpseColor.fromColorHex( "#c9dfef" ) )
+                    .put( -20f, GlimpseColor.fromColorHex( "#bbd9f0" ) )
+                    .put( -100f, GlimpseColor.fromColorHex( "#b0cee8" ) )
+                    .put( -500f, GlimpseColor.fromColorHex( "#a3c9e6" ) )
+                    .put( -1_000f, GlimpseColor.fromColorHex( "#81acd6" ) )
+                    .put( -2_000f, GlimpseColor.fromColorHex( "#76a5cf" ) )
+                    .put( -4_000f, GlimpseColor.fromColorHex( "#6499c1" ) )
+                    .put( -8_000f, GlimpseColor.fromColorHex( "#3c6e98" ) )
+                    .build( );
         }
-    };
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( ex );
+        }
+    }
 
     protected static final int VERSION_ID = 3;
     protected static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
