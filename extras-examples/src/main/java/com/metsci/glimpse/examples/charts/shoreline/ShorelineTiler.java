@@ -1,4 +1,4 @@
-package com.metsci.glimpse.charts.shoreline;
+package com.metsci.glimpse.examples.charts.shoreline;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
@@ -39,7 +39,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 
 import com.google.common.io.Files;
-import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop;
@@ -58,31 +57,46 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 
+/**
+ * This class takes shoreline polygons (OSM polygons specifically but can be extended to GSHHS) then tiles and tesselates them for faster loading in a painter.
+ */
 public class ShorelineTiler
 {
     private static final Logger LOGGER = Logger.getLogger( ShorelineTiler.class.getName( ) );
 
-    public static void main( String[] args ) throws IOException, UnrecognizedValueException, TessellationException
+    public static void main( String[] args ) throws Exception
     {
         setTerseConsoleLogger( Level.FINE );
 
-        File destFile = new File( "./osm_tiled.bin" );
+        /*
+         * 1. The source shape file
+         */
+        File inputFile = new File( "land-polygons-complete-4326/land_polygons.shp" );
 
-        File file = new File( "land-polygons-complete-4326/land_polygons.shp" );
-        File destDir = new File( "." );
+        /*
+         * 2. The final product file
+         */
+        File destFile = new File( "./osm_shoreline_tiled.bin" );
 
-        FloatList levels = new FloatArrayList( );
+        /*
+         * 3. Intermediate files will be written here, then deleted
+         */
+        File tmpDir = new File( "." );
 
-        DataStore dataStore = DataStoreFinder.getDataStore( Collections.singletonMap( "url", file.toURI( ).toURL( ) ) );
+        DataStore dataStore = DataStoreFinder.getDataStore( Collections.singletonMap( "url", inputFile.toURI( ).toURL( ) ) );
         String typeName = dataStore.getTypeNames( )[0];
         FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource( typeName );
         FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures( Filter.INCLUDE );
 
+        FloatList levels = new FloatArrayList( );
         Collection<TileOutInfo> allTiles = new ArrayList<>( );
 
+        /*
+         * 4. Add one block here for each level you want to generate. Set the length scale for the zoom, the size of the tiles, and the factor to decimate by.
+         */
         {
             levels.add( ( float ) Length.fromNauticalMiles( 100 ) );
-            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 5, 3 );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 5, 3 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
@@ -98,7 +112,7 @@ public class ShorelineTiler
 
         {
             levels.add( ( float ) Length.fromNauticalMiles( 500 ) );
-            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 10, 5 );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 10, 5 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
@@ -114,7 +128,7 @@ public class ShorelineTiler
 
         {
             levels.add( ( float ) Length.fromNauticalMiles( 5_000 ) );
-            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, destDir, 30, 10 );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 30, 10 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
