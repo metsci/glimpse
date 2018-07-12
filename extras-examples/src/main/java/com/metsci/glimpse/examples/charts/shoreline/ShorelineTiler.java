@@ -28,6 +28,7 @@ package com.metsci.glimpse.examples.charts.shoreline;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
+import static com.metsci.glimpse.util.units.Length.fromKilometers;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.toRadians;
@@ -73,7 +74,6 @@ import com.metsci.glimpse.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.support.polygon.VertexAccumulator;
 import com.metsci.glimpse.util.Pair;
-import com.metsci.glimpse.util.units.Length;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -121,8 +121,8 @@ public class ShorelineTiler
          * 4. Add one block here for each level you want to generate. Set the length scale for the zoom, the size of the tiles, and the factor to decimate by.
          */
         {
-            levels.add( ( float ) Length.fromNauticalMiles( 100 ) );
-            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 5, 3 );
+            levels.add( ( float ) fromKilometers( 100 ) );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 2, 1 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
@@ -137,8 +137,24 @@ public class ShorelineTiler
         }
 
         {
-            levels.add( ( float ) Length.fromNauticalMiles( 500 ) );
-            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 10, 5 );
+            levels.add( ( float ) fromKilometers( 500 ) );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 3, 2 );
+            allTiles.addAll( tiles );
+
+            FeatureIterator<SimpleFeature> features = collection.features( );
+            toStream( features )
+                    .parallel( )
+                    .map( f -> toArea( f, 10 ) )
+                    .filter( a -> !a.isEmpty( ) )
+                    .flatMap( a -> tiles.stream( ).map( t -> new Pair<>( t, a ) ) )
+                    .forEach( p -> write( p.first( ), p.second( ) ) );
+
+            features.close( );
+        }
+
+        {
+            levels.add( ( float ) fromKilometers( 1_000 ) );
+            Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 5, 3 );
             allTiles.addAll( tiles );
 
             FeatureIterator<SimpleFeature> features = collection.features( );
@@ -153,7 +169,7 @@ public class ShorelineTiler
         }
 
         {
-            levels.add( ( float ) Length.fromNauticalMiles( 5_000 ) );
+            levels.add( ( float ) fromKilometers( 10_000 ) );
             Collection<TileOutInfo> tiles = createTiles( levels.size( ) - 1, tmpDir, 30, 10 );
             allTiles.addAll( tiles );
 
@@ -355,14 +371,15 @@ public class ShorelineTiler
         long key = ( ( tileWidth_DEG * 1_000 + tileHeight_DEG ) * 100 + level ) * 1_000_000;
 
         Collection<TileOutInfo> tiles = new ArrayList<>( );
+        double pad_DEG = 0.01 * max( tileWidth_DEG, tileHeight_DEG );
         for ( int lon = -180; lon < 180; lon += tileWidth_DEG )
         {
             for ( int lat = -90; lat < 90; lat += tileHeight_DEG )
             {
-                double minLon = max( lon - 1, -180 );
-                double width = min( tileWidth_DEG + 2, 180 - minLon );
-                double minLat = max( lat - 1, -90 );
-                double height = min( tileHeight_DEG + 2, 90 - minLat );
+                double minLon = max( lon - pad_DEG, -180 );
+                double width = min( tileWidth_DEG + 2 * pad_DEG, 180 - minLon );
+                double minLat = max( lat - pad_DEG, -90 );
+                double height = min( tileHeight_DEG + 2 * pad_DEG, 90 - minLat );
 
                 Rectangle2D bounds0 = new Rectangle2D.Double( minLon, minLat, width, height );
                 Rectangle2D bounds1 = new Rectangle2D.Double( minLon - 360, minLat, width, height );
