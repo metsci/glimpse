@@ -41,6 +41,7 @@ import static java.lang.Math.sqrt;
 import static java.lang.System.currentTimeMillis;
 
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,8 +51,13 @@ import java.nio.FloatBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
@@ -61,6 +67,7 @@ import com.google.common.hash.Hashing;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
@@ -72,18 +79,47 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
 
-    private static final int VERSION_ID = 3;
-    private static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
-    private static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
-    private static final double LIGHT_AZIMUTH = fromDeg( -135 );
+    @SuppressWarnings( "serial" )
+    public static final Map<Float, float[]> BATHYMETRY_LIGHT_COLORS = new TreeMap<Float, float[]>( )
+    {
+        {
+            try
+            {
+                put( Float.POSITIVE_INFINITY, GlimpseColor.fromColorHex( "#c9dfef" ) );
+                put( -20f, GlimpseColor.fromColorHex( "#bbd9f0" ) );
+                put( -100f, GlimpseColor.fromColorHex( "#b0cee8" ) );
+                put( -500f, GlimpseColor.fromColorHex( "#a3c9e6" ) );
+                put( -1_000f, GlimpseColor.fromColorHex( "#81acd6" ) );
+                put( -2_000f, GlimpseColor.fromColorHex( "#76a5cf" ) );
+                put( -4_000f, GlimpseColor.fromColorHex( "#6499c1" ) );
+                put( -8_000f, GlimpseColor.fromColorHex( "#3c6e98" ) );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( ex );
+            }
+        }
+    };
+
+    protected static final int VERSION_ID = 3;
+    protected static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
+    protected static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
+    protected static final double LIGHT_AZIMUTH = fromDeg( -135 );
 
     protected TopoTileProvider tileProvider;
     protected ShadedTexturePainter topoImagePainter;
+
+    /**
+     * The first dimension is the number of colors, the second is {elevation threshold, hue, saturation, brightness}.
+     */
+    protected float[][] colors;
 
     public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
     {
         super( projection );
         this.tileProvider = tileProvider;
+
+        setColors( BATHYMETRY_LIGHT_COLORS );
 
         topoImagePainter = new ShadedTexturePainter( );
         addPainter( topoImagePainter );
@@ -98,6 +134,33 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             attributionPainter.setText( tileProvider.getAttribution( ) );
             addPainter( attributionPainter );
         }
+    }
+
+    /**
+     * Sets color scale.  The map from the maximum elevation to the color for that elevation. The color
+     * shade is changed with the hillshade value.
+     */
+    public void setColors( Map<Float, float[]> elevation2Colors )
+    {
+        List<Entry<Float, float[]>> entries = new ArrayList<>( elevation2Colors.entrySet( ) );
+        entries.sort( Comparator.comparing( Entry::getKey ) );
+
+        float[][] newColors = new float[entries.size( )][4];
+        for ( int i = 0; i < entries.size( ); i++ )
+        {
+            Color awt = GlimpseColor.toColorAwt( entries.get( i ).getValue( ) );
+            Color.RGBtoHSB( awt.getRed( ), awt.getGreen( ), awt.getBlue( ), newColors[i] );
+            newColors[i][3] = newColors[i][2];
+            newColors[i][2] = newColors[i][1];
+            newColors[i][1] = newColors[i][0];
+            newColors[i][0] = entries.get( i ).getKey( );
+        }
+
+        colors = newColors;
+
+        // force recalculate textures
+        cacheData.clear( );
+        lastAxis = new Rectangle2D.Double( );
     }
 
     @Override
@@ -282,45 +345,23 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
     protected int colorize( float hillshade, float elevation )
     {
-        int rgb = 0;
-        if ( elevation > -20 )
+        float h = 0;
+        float s = 0;
+        float b = 0;
+        for ( int i = 0; i < colors.length; i++ )
         {
-            rgb = 0xc9dfef;
-        }
-        else if ( elevation > -100 )
-        {
-            rgb = 0xbbd9f0;
-        }
-        else if ( elevation > -500 )
-        {
-            rgb = 0xb0cee8;
-        }
-        else if ( elevation > -1_000 )
-        {
-            rgb = 0xa3c9e6;
-        }
-        else if ( elevation > -2_000 )
-        {
-            rgb = 0x81acd6;
-        }
-        else if ( elevation > -4_000 )
-        {
-            rgb = 0x76a5cf;
-        }
-        else if ( elevation > -8_000 )
-        {
-            rgb = 0x6499c1;
-        }
-        else
-        {
-            rgb = 0x3c6e98;
+            if ( elevation <= colors[i][0] )
+            {
+                h = colors[i][1];
+                s = colors[i][2];
+                b = colors[i][3];
+                break;
+            }
         }
 
-        float h = clamp( ( hillshade - 0.4f ), 0, 0.6f ) + 0.7f;
-        float[] hsb = Color.RGBtoHSB( ( rgb >> 16 ) & 0xff, ( rgb >> 8 ) & 0xff, rgb & 0xff, new float[3] );
-        hsb[2] = clamp( hsb[2] * h, 0, 1 );
-
-        return ( Color.HSBtoRGB( hsb[0], hsb[1], hsb[2] ) << 8 ) | 0xff;
+        float alpha = clamp( ( hillshade - 0.4f ), 0, 0.6f ) + 0.7f;
+        b = clamp( b * alpha, 0, 1 );
+        return ( Color.HSBtoRGB( h, s, b ) << 8 ) | 0xff;
     }
 
     /**
