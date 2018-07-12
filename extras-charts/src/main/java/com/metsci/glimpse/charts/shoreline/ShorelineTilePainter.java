@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.charts.shoreline;
 
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static java.lang.Math.toDegrees;
@@ -42,55 +44,85 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL3;
+
 import com.google.common.io.CountingInputStream;
+import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TilePainter;
-import com.metsci.glimpse.painter.shape.PolygonPainter;
-import com.metsci.glimpse.painter.shape.PolygonPainter.TessellatedPolygon;
+import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.polygon.Polygon;
+import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
+/**
+ * @author borkholder
+ */
+public class ShorelineTilePainter extends TilePainter<float[]>
 {
     private static final Logger LOGGER = Logger.getLogger( ShorelineTilePainter.class.getName( ) );
 
     protected final File file;
     protected final Map<TileKey, Long> offsets;
-    protected final PolygonPainter painter;
 
-    protected Set<TileKey> loadedGroups;
+    protected FlatColorProgram prog;
+    protected GLEditableBuffer buffer;
+    protected int nVertices;
+
     protected float[] landColor;
 
     public ShorelineTilePainter( GeoProjection projection, File file ) throws IOException
     {
         super( projection );
         this.file = file;
-        loadedGroups = new HashSet<>( );
         offsets = loadOffsets( file );
         logInfo( LOGGER, "Found %,d tiles in %s", offsets.size( ), file );
 
-        painter = new PolygonPainter( );
-        painter.displayTimeRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
-        addPainter( painter );
+        prog = new FlatColorProgram( );
+        buffer = new GLEditableBuffer( GL.GL_DYNAMIC_DRAW, 0 );
         setLandColor( GlimpseColor.getBlack( ) );
+    }
+
+    @Override
+    public void paintTo( GlimpseContext context )
+    {
+        super.paintTo( context );
+
+        if ( !isVisible( ) )
+        {
+            return;
+        }
+
+        Axis2D axis = requireAxis2D( context );
+        GL3 gl = context.getGL( ).getGL3( );
+
+        enableStandardBlending( gl );
+        prog.begin( gl );
+        try
+        {
+            prog.setAxisOrtho( gl, axis );
+            prog.setColor( gl, landColor );
+            prog.draw( gl, buffer, 0, nVertices );
+        }
+        finally
+        {
+            prog.end( gl );
+            GLUtils.disableBlending( gl );
+        }
     }
 
     public void setLandColor( float[] landColor )
     {
         this.landColor = landColor;
-        for ( TileKey groupId : loadedGroups )
-        {
-            painter.setFillColor( groupId, landColor );
-        }
     }
 
     protected Map<TileKey, Long> loadOffsets( File file ) throws IOException
@@ -126,7 +158,7 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
     }
 
     @Override
-    protected TessellatedPolygon loadTileData( TileKey key )
+    protected float[] loadTileData( TileKey key )
     {
         try (RandomAccessFile rf = new RandomAccessFile( file, "r" ))
         {
@@ -138,12 +170,10 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
         }
     }
 
-    protected TessellatedPolygon readTile( RandomAccessFile rf, TileKey key ) throws IOException
+    protected float[] readTile( RandomAccessFile rf, TileKey key ) throws IOException
     {
         long offset = offsets.get( key );
-        logFine( LOGGER, "Reading tile at offset %,d", offset );
         rf.seek( offset );
-
         int numVertices = rf.readInt( );
         logFine( LOGGER, "Reading polygon with %,d vertices in %s", numVertices, key );
         ByteBuffer bbuf = ByteBuffer.allocate( numVertices * 2 * Float.BYTES );
@@ -164,39 +194,27 @@ public class ShorelineTilePainter extends TilePainter<TessellatedPolygon>
             verts[j + 1] = ( float ) v.getY( );
         }
 
-        return new TessellatedPolygon( new Polygon( ), verts );
+        return verts;
     }
 
     @Override
-    protected void replaceTileData( Collection<Entry<TileKey, TessellatedPolygon>> tileData )
+    protected void replaceTileData( Collection<Entry<TileKey, float[]>> tileData )
     {
-        for ( TileKey old : loadedGroups )
+        int nFloats = 0;
+        for ( Entry<?, float[]> e : tileData )
         {
-            painter.setFill( old, false );
+            nFloats += e.getValue( ).length;
         }
 
-        for ( Entry<TileKey, TessellatedPolygon> e : tileData )
+        buffer.clear( );
+        buffer.ensureCapacityFloats( nFloats );
+        FloatBuffer fbuf = buffer.editFloats( 0, nFloats );
+        for ( Entry<?, float[]> e : tileData )
         {
-            TileKey groupId = e.getKey( );
-            if ( loadedGroups.contains( groupId ) )
-            {
-                painter.setFill( groupId, true );
-            }
-            else
-            {
-                loadedGroups.add( groupId );
-                configurePainter( groupId );
-                TessellatedPolygon p = e.getValue( );
-                painter.addPolygon( groupId, p, p, 0 );
-            }
+            fbuf.put( e.getValue( ) );
         }
-    }
 
-    protected void configurePainter( Object groupId )
-    {
-        painter.setFill( groupId, true );
-        painter.setFillColor( groupId, landColor );
-        painter.setShowLines( groupId, false );
+        nVertices = nFloats / 2;
     }
 
     @Override
