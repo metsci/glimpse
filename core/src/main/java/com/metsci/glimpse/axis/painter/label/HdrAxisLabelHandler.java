@@ -49,11 +49,50 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler
     protected int orderDelta;
     protected double baseValue;
 
+    protected String prefix;
+    protected String suffix;
+
+    public HdrAxisLabelHandler( )
+    {
+        prefix = "";
+        suffix = "";
+    }
+
+    @Override
+    public void setAxisLabel( String label )
+    {
+        super.setAxisLabel( label );
+
+        if ( label == null || label.isEmpty( ) )
+        {
+            prefix = "";
+        }
+        else
+        {
+            prefix = label + " ";
+        }
+    }
+
+    @Override
+    public void setAxisUnits( String milliUnits, String units, String kiloUnits )
+    {
+        super.setAxisUnits( milliUnits, units, kiloUnits );
+
+        if ( units == null || units.isEmpty( ) )
+        {
+            suffix = " " + units;
+        }
+        else
+        {
+            suffix = "";
+        }
+    }
+
     @Override
     public String getAxisLabel( Axis1D axis )
     {
-        double min = axis.getMin( );
-        double max = axis.getMax( );
+        double min = converter.toAxisUnits( axis.getMin( ) );
+        double max = converter.toAxisUnits( axis.getMax( ) );
 
         orderAxis = getOrderTick( abs( min ) );
         orderDelta = getOrderTick( abs( max - min ) );
@@ -68,7 +107,7 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler
         orderAxis = ( int ) floor( orderAxis / 3.0 ) * 3;
         orderDelta = ( int ) ceil( orderDelta / 3.0 ) * 3;
 
-        String s = "";
+        String s = null;
         if ( zoomedIn )
         {
             double e = pow( 10, orderDelta + 1 );
@@ -95,12 +134,50 @@ public class HdrAxisLabelHandler extends GridAxisLabelHandler
             s = format( "x e%d", orderAxis );
         }
 
-        if ( axisUnits.length( ) != 0 )
+        if ( !prefix.isEmpty( ) || !suffix.isEmpty( ) )
         {
-            s = s + " " + axisUnits;
+            s = prefix + s + suffix;
         }
 
         return s;
+    }
+
+    @Override
+    protected double[] tickPositions( Axis1D axis, double tickInterval )
+    {
+        double min = converter.toAxisUnits( axis.getMin( ) );
+        double max = converter.toAxisUnits( axis.getMax( ) );
+
+        double cacheMin = min;
+        double cacheMax = max;
+        if ( min >= max )
+        {
+            cacheMin = max;
+            cacheMax = min;
+        }
+
+        double minTickNumber = floor( cacheMin / tickInterval );
+        int tickCount = ( int ) ceil( ( cacheMax - cacheMin ) / tickInterval );
+
+        double[] ticks = new double[tickCount + 1];
+        for ( int i = 0; i < ticks.length; i++ )
+        {
+            ticks[i] = ( i + minTickNumber ) * tickInterval;
+        }
+
+        // handle case where axis min/max are reversed
+        if ( min >= max )
+        {
+            int size = ticks.length;
+            for ( int i = 0; i < size / 2; i++ )
+            {
+                double temp = ticks[i];
+                ticks[i] = ticks[size - i - 1];
+                ticks[size - i - 1] = temp;
+            }
+        }
+
+        return ticks;
     }
 
     @Override
