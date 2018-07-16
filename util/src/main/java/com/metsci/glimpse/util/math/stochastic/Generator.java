@@ -42,4 +42,10 @@ public interface Generator
      */
     int nextInt( int n );
 
+    /**
+     * Returns an int of which the {@code numBits} low-order bits are pseudo-random.
+     * {@code numBits} should be between 1 and 32 (inclusive).
+     */
+    int nextBits( int numBits );
+
 }

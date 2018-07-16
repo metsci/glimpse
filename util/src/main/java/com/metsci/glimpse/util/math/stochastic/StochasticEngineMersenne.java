@@ -143,5 +143,11 @@ public final class StochasticEngineMersenne implements StochasticEngine
             while ( bits - val + ( n - 1 ) < 0 );
             return val;
         }
+
+        @Override
+        public final int nextBits( int numBits )
+        {
+            return next( numBits );
+        }
     }
 }
