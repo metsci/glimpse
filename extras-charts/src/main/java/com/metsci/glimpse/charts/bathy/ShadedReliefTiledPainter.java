@@ -47,9 +47,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel.MapMode;
+import java.nio.IntBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -234,15 +235,14 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             @Override
             public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
             {
+                data.order( ByteOrder.BIG_ENDIAN );
+                IntBuffer buf = data.asIntBuffer( );
                 for ( int r = 0; r < dataSizeY; r++ )
                 {
                     for ( int c = 0; c < dataSizeX; c++ )
                     {
-                        int x = colorize( shaded[c][r], elev[c][r] );
-                        data.put( ( byte ) ( ( x >> 24 ) & 0xff ) );
-                        data.put( ( byte ) ( ( x >> 16 ) & 0xff ) );
-                        data.put( ( byte ) ( ( x >> 8 ) & 0xff ) );
-                        data.put( ( byte ) ( ( x >> 0 ) & 0xff ) );
+                        int rgba = colorize( shaded[c][r], elev[c][r] );
+                        buf.put( rgba );
                     }
                 }
             }
@@ -265,21 +265,25 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         cached.widthStep = rf.readDouble( );
         cached.heightStep = rf.readDouble( );
 
-        long size = cached.getImageWidth( ) * cached.getImageHeight( ) * Integer.BYTES;
-        MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_ONLY, rf.getFilePointer( ), size );
-        FloatBuffer fb = mmap.asFloatBuffer( );
+        FileChannel ch = rf.getChannel( );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.getImageWidth( ) * Float.BYTES );
+        FloatBuffer fb = bbuf.asFloatBuffer( );
 
         cached.data = new float[cached.getImageWidth( )][cached.getImageHeight( )];
         for ( float[] row : cached.data )
         {
+            bbuf.rewind( );
+            ch.read( bbuf );
+            fb.rewind( );
             fb.get( row );
         }
 
-        mmap = rf.getChannel( ).map( MapMode.READ_ONLY, rf.getFilePointer( ) + size, size );
-        fb = mmap.asFloatBuffer( );
         cached.shaded = new float[cached.getImageWidth( )][cached.getImageHeight( )];
         for ( float[] row : cached.shaded )
         {
+            bbuf.rewind( );
+            ch.read( bbuf );
+            fb.rewind( );
             fb.get( row );
         }
 
@@ -289,7 +293,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
     protected void writeCachedTile( File cacheFile, CachedTileData tile ) throws IOException
     {
-        long size = tile.getImageWidth( ) * tile.getImageHeight( ) * Integer.BYTES;
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
         rf.setLength( 0 );
 
@@ -300,21 +303,24 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         rf.writeDouble( tile.getWidthStep( ) );
         rf.writeDouble( tile.getHeightStep( ) );
 
-        MappedByteBuffer mmap = rf.getChannel( ).map( MapMode.READ_WRITE, rf.getFilePointer( ), size );
-        FloatBuffer fb = mmap.asFloatBuffer( );
+        FileChannel ch = rf.getChannel( );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.getImageWidth( ) * Float.BYTES );
+        FloatBuffer fb = bbuf.asFloatBuffer( );
         for ( float[] row : tile.data )
         {
+            bbuf.rewind( );
+            fb.rewind( );
             fb.put( row );
+            ch.write( bbuf );
         }
-        mmap.force( );
 
-        mmap = rf.getChannel( ).map( MapMode.READ_WRITE, rf.getFilePointer( ) + size, size );
-        fb = mmap.asFloatBuffer( );
         for ( float[] row : tile.shaded )
         {
+            bbuf.rewind( );
+            fb.rewind( );
             fb.put( row );
+            ch.write( bbuf );
         }
-        mmap.force( );
 
         rf.close( );
     }
