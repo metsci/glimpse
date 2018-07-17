@@ -44,7 +44,7 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.charts.bathy.BathymetryData;
+import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.charts.bathy.ContourData;
 import com.metsci.glimpse.charts.bathy.ContourPainter;
 import com.metsci.glimpse.examples.Example;
@@ -158,10 +158,10 @@ public class BathymetryExample implements GlimpseLayoutProvider
 
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
-        BathymetryData bathymetryData;
+        TopographyData bathymetryData;
         try
         {
-            bathymetryData = new BathymetryData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ), projection );
+            bathymetryData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
         }
         catch ( IOException e )
         {
@@ -172,7 +172,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         // create an OpenGL texture wrapper object
         // the BathymetryData helper class automatically loads
         // the appropriate data and projection into the texture
-        FloatTextureProjected2D texture = bathymetryData.getTexture( );
+        FloatTextureProjected2D texture = bathymetryData.getTexture( projection );
 
         // create a color map which is half bathymetry color scale and half topography color scale
         ColorTexture1D elevationColors = new ColorTexture1D( 1024 );
@@ -198,7 +198,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         contourPainter.setLineWidth( 1.6f );
 
         // set the x and y axis bounds based on the extent of the bathemetry data
-        bathymetryData.setAxisBounds( plot.getAxis( ) );
+        bathymetryData.setAxisBounds( plot.getAxis( ), projection );
 
         // set the size of the z axis (MapFrame hides it by default)
         plot.setAxisSizeZ( 60 );

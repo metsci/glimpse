@@ -26,59 +26,61 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.util.vector.Vector2d;
+import static com.metsci.glimpse.util.units.Length.toKilometers;
 
 /**
- * @author ulman
+ * A bounding box for a tile. Tiles are expected to be in lat/lon space and must not cross the antimeridian.
  */
-public class RecordVertices implements Render
+public class TileKey
 {
-    protected List<Float> coordsX;
-    protected List<Float> coordsY;
-    protected GeoProjection projection;
+    public final double lengthScale;
+    public final double minLat;
+    public final double maxLat;
+    public final double minLon;
+    public final double maxLon;
 
-    public RecordVertices( GeoProjection projection )
+    public TileKey( double lengthScale, double minLat, double maxLat, double minLon, double maxLon )
     {
-        this.coordsX = new ArrayList<Float>( );
-        this.coordsY = new ArrayList<Float>( );
-        this.projection = projection;
+        this.lengthScale = lengthScale;
+        this.minLat = minLat;
+        this.maxLat = maxLat;
+        this.minLon = minLon;
+        this.maxLon = maxLon;
     }
 
     @Override
-    public void drawContour( double startX, double startY, double endX, double endY, double contourLevel )
+    public int hashCode( )
     {
-        Vector2d startVertex = this.projection.project( LatLonGeo.fromDeg( startY, startX ) );
-        Vector2d endVertex = this.projection.project( LatLonGeo.fromDeg( endY, endX ) );
-
-        coordsX.add( ( float ) startVertex.getX( ) );
-        coordsY.add( ( float ) startVertex.getY( ) );
-
-        coordsX.add( ( float ) endVertex.getX( ) );
-        coordsY.add( ( float ) endVertex.getY( ) );
+        int hash = 0;
+        hash += 31 * Double.hashCode( lengthScale );
+        hash += 31 * Double.hashCode( minLat );
+        hash += 31 * Double.hashCode( maxLat );
+        hash += 31 * Double.hashCode( minLon );
+        hash += 31 * Double.hashCode( maxLon );
+        return hash;
     }
 
-    public float[] getCoordsX( )
+    @Override
+    public boolean equals( Object obj )
     {
-        float[] coordsArrayX = new float[coordsX.size( )];
-        for ( int i = 0; i < coordsX.size( ); i++ )
+        if ( obj instanceof TileKey )
         {
-            coordsArrayX[i] = coordsX.get( i );
+            TileKey other = ( TileKey ) obj;
+            return lengthScale == other.lengthScale &&
+                    minLat == other.minLat &&
+                    maxLat == other.maxLat &&
+                    minLon == other.minLon &&
+                    maxLon == other.maxLon;
         }
-        return coordsArrayX;
+        else
+        {
+            return false;
+        }
     }
 
-    public float[] getCoordsY( )
+    @Override
+    public String toString( )
     {
-        float[] coordsArrayY = new float[coordsY.size( )];
-        for ( int i = 0; i < coordsY.size( ); i++ )
-        {
-            coordsArrayY[i] = coordsY.get( i );
-        }
-        return coordsArrayY;
+        return String.format( "TileKey[scale=%f; lat=%f,%f; lon=%f,%f]", toKilometers( lengthScale ), minLat, maxLat, minLon, maxLon );
     }
 }

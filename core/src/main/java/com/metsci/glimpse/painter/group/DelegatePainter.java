@@ -43,10 +43,10 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
  */
 public class DelegatePainter implements GlimpsePainter
 {
-    private List<GlimpsePainter> painters;
+    protected List<GlimpsePainter> painters;
 
-    private boolean isVisible = true;
-    private boolean isDisposed = false;
+    protected boolean isVisible = true;
+    protected boolean isDisposed = false;
 
     public DelegatePainter( )
     {
@@ -83,11 +83,13 @@ public class DelegatePainter implements GlimpsePainter
         return painters.indexOf( painter );
     }
 
+    @Override
     public boolean isVisible( )
     {
         return this.isVisible;
     }
 
+    @Override
     public void setVisible( boolean visible )
     {
         this.isVisible = visible;
