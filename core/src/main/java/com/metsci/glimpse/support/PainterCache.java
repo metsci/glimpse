@@ -47,7 +47,7 @@ import com.google.common.cache.CacheBuilder;
  * public class MyPainter extends GlimpsePainterBase
  * {
  *     int paintFrame;
- *     PaintingCache<Integer, V> cache;
+ *     PaintingCache&lt;Integer, V> cache;
  *
  *     public MyPainter( )
  *     {
@@ -55,7 +55,6 @@ import com.google.common.cache.CacheBuilder;
  *         cache = new PaintingCache<>( this::computeForFrame );
  *     }
  *
- *     @Override
  *     public void doPaintTo( GlimpseContext context )
  *     {
  *         int selectedFrame = // ...
@@ -75,7 +74,7 @@ import com.google.common.cache.CacheBuilder;
  *         }
  *     }
  *
- *     V computeForFrame( int key )
+ *     public V computeForFrame( int key )
  *     {
  *         // ...
  *     }
