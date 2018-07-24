@@ -494,10 +494,11 @@ public class TooltipPainter extends SimpleTextPainter
             // draw text
             if ( lines != null && textRenderer != null )
             {
-                GlimpseColor.setColor( textRenderer, textColor );
                 textRenderer.beginRendering( width, height );
                 try
                 {
+                    GlimpseColor.setColor( textRenderer, textColor );
+
                     double posX = x + iconSize + borderSize;
 
                     if ( iconIds != null && !iconIds.isEmpty( ) )
