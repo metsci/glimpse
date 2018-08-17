@@ -19,34 +19,12 @@
         </dependency>
 
         <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-geotiff</artifactId>
-            <version>19.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-hsql</artifactId>
-            <version>19.1</version>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-core</artifactId>
+            <version>1.4.0</version>
         </dependency>
 
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>boundless</id>
-            <url>https://repo.boundlessgeo.com/main/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>osgeo</id>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
 </project>
 

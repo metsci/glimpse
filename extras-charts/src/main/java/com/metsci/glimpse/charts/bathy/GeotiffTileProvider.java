@@ -35,24 +35,29 @@ import static java.lang.Math.round;
 import static java.util.Collections.unmodifiableCollection;
 
 import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.media.jai.PlanarImage;
-
-import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.gce.geotiff.GeoTiffFormat;
-import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.referencing.CRS;
-import org.opengis.referencing.FactoryException;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import com.metsci.glimpse.util.GlimpseDataPaths;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+
 /**
  * Reads a Geotiff file in pieces and provides tiles.
+ *
+ * <p>
+ * Note: An assumption of this tile provider is that the TIFF is equirectangular
+ * and covers the entire globe starting at -90 Latitude and -180 Longitude.
+ * </p>
  *
  * @author borkholder
  */
@@ -68,11 +73,11 @@ public class GeotiffTileProvider implements TopoTileProvider
     private static final int DEF_NUM_TILES_Y = 15;
     private static final double GLOBAL_TILE_LEVEL = fromKilometers( 2_000 );
 
-    private final GridCoverage2D topoData;
+    private final RenderedImage topoData;
     private final Collection<TileKey> tileKeys;
     private final String attribution;
 
-    public GeotiffTileProvider( GridCoverage2D grid, String attribution, int nTilesX, int nTilesY )
+    public GeotiffTileProvider( RenderedImage grid, String attribution, int nTilesX, int nTilesY )
     {
         this.attribution = attribution;
         topoData = grid;
@@ -81,9 +86,8 @@ public class GeotiffTileProvider implements TopoTileProvider
 
     protected Collection<TileKey> createTileKeys( int nTilesX, int nTilesY )
     {
-        int[] nLonLat = topoData.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
-        int pxWidth = nLonLat[0];
-        int pxHeight = nLonLat[1];
+        int pxWidth = topoData.getWidth( );
+        int pxHeight = topoData.getHeight( );
 
         double px2Lon = 360.0 / pxWidth;
         double px2Lat = 180.0 / pxHeight;
@@ -148,14 +152,16 @@ public class GeotiffTileProvider implements TopoTileProvider
      * <ol>
      * <li>Go to {@link #GEBCO2014_URL} and download the 2D NetCDF global grid</li>
      * <li>You'll need to setup an account to download.</li>
-     * <li>Extract the zip and run {@code gdal_translate GEBCO_2014_2D.nc GEBCO_2014_2D.tif}</li>
-     * <li>Put the geotiff file into {@link #GEBCO2014_CACHE_FILE} in your Glimpse user data dir</li>
+     * <li>Extract the zip and run
+     * {@code gdal_translate GEBCO_2014_2D.nc GEBCO_2014_2D.tif}</li>
+     * <li>Put the geotiff file into {@link #GEBCO2014_CACHE_FILE} in your Glimpse
+     * user data dir</li>
      * </ol>
      */
     public static GeotiffTileProvider getGebco2014( ) throws IOException
     {
         File file = getCachedDataFile( GEBCO2014_CACHE_FILE, GEBCO2014_URL );
-        GridCoverage2D grid = readGeotiff( file );
+        RenderedImage grid = readGeotiff( file );
         return new GeotiffTileProvider( grid, GEBCO2014_ATTRIBUTION, DEF_NUM_TILES_X, DEF_NUM_TILES_Y );
     }
 
@@ -164,13 +170,14 @@ public class GeotiffTileProvider implements TopoTileProvider
      *
      * <ol>
      * <li>Go to {@link #ETOPO1_URL} and download the zip file</li>
-     * <li>Extract the zip and the geotiff file into {@link #ETOPO1_CACHE_FILE} in your Glimpse user data dir</li>
+     * <li>Extract the zip and the geotiff file into {@link #ETOPO1_CACHE_FILE} in
+     * your Glimpse user data dir</li>
      * </ol>
      */
     public static GeotiffTileProvider getEtopo1( ) throws IOException
     {
         File file = getCachedDataFile( ETOPO1_CACHE_FILE, ETOPO1_URL );
-        GridCoverage2D grid = readGeotiff( file );
+        RenderedImage grid = readGeotiff( file );
         return new GeotiffTileProvider( grid, ETOPO1_ATTRIBUTION, DEF_NUM_TILES_X, DEF_NUM_TILES_Y );
     }
 
@@ -191,60 +198,77 @@ public class GeotiffTileProvider implements TopoTileProvider
         throw new IOException( "Must download data from " + topoUrl );
     }
 
-    public static GridCoverage2D readGeotiff( File file ) throws IOException
+    public static RenderedImage readGeotiff( File file ) throws IOException
     {
-        // initialize the EPSG CRS
-        try
+        ImageInputStream iis = ImageIO.createImageInputStream( file );
+        ImageReader reader = ImageIO.getImageReaders( iis ).next( );
+        reader.setInput( iis );
+        return reader.readAsRenderedImage( 0, null );
+    }
+
+    private static int XToTileX( RenderedImage img, int x )
+    {
+        x -= img.getTileGridXOffset( );
+        if ( x < 0 )
         {
-            CRS.decode( "EPSG:4326" );
-        }
-        catch ( FactoryException ex )
-        {
-            throw new IOException( ex );
+            x += 1 - img.getTileWidth( );
         }
 
-        GeoTiffFormat format = new GeoTiffFormat( );
-        GeoTiffReader reader = format.getReader( file );
-        String[] names = reader.getGridCoverageNames( );
-        GridCoverage2D grid = reader.read( names[0], null );
-        reader.dispose( );
+        return ( x / img.getTileWidth( ) );
+    }
 
-        return grid;
+    private static int YToTileY( RenderedImage img, int y )
+    {
+        y -= img.getTileGridYOffset( );
+        if ( y < 0 )
+        {
+            y += 1 - img.getTileHeight( );
+        }
+        return ( y / img.getTileHeight( ) );
     }
 
     private class GeoToolsSampledGlobalTopoData extends TopographyData
     {
-        public GeoToolsSampledGlobalTopoData( GridCoverage2D grid, TileKey key, int decimate ) throws IOException
+        public GeoToolsSampledGlobalTopoData( RenderedImage grid, TileKey key, int decimate ) throws IOException
         {
             super( null );
 
-            int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
-            widthStep = 360.0 / nLonLat[0] * decimate;
-            heightStep = 180.0 / nLonLat[1] * decimate;
+            widthStep = 360.0 / grid.getWidth( ) * decimate;
+            heightStep = 180.0 / grid.getHeight( ) * decimate;
 
             startLon = key.minLon;
             startLat = key.minLat;
 
-            double lon2px = nLonLat[0] / 360.0;
-            double lat2px = nLonLat[1] / 180.0;
+            double lon2px = grid.getWidth( ) / 360.0;
+            double lat2px = grid.getHeight( ) / 180.0;
             int pixelX0 = ( int ) round( ( key.minLon + 180 ) * lon2px );
             int pixelX1 = ( int ) round( ( key.maxLon + 180 ) * lon2px );
             int pixelY0 = ( int ) round( ( 180 - ( key.maxLat + 90 ) ) * lat2px );
             int pixelY1 = ( int ) round( ( 180 - ( key.minLat + 90 ) ) * lat2px );
+            pixelY1 = min( pixelY1, grid.getHeight( ) - 1 );
+            pixelX1 = min( pixelX1, grid.getWidth( ) - 1 );
 
             imageWidth = ( int ) ceil( ( pixelX1 - pixelX0 + 1 ) / ( double ) decimate );
             imageHeight = ( int ) ceil( ( pixelY1 - pixelY0 + 1 ) / ( double ) decimate );
 
             data = new float[imageWidth][imageHeight];
 
-            PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
+            Int2ObjectMap<Raster> tileCache = new Int2ObjectOpenHashMap<>( );
             for ( int j = pixelY0; j <= pixelY1; j += decimate )
             {
-                int tileY = img.YToTileY( j );
+                int tileY = YToTileY( grid, j );
                 for ( int i = pixelX0; i <= pixelX1; i += decimate )
                 {
-                    int tileX = img.XToTileX( i );
-                    Raster tile = img.getTile( tileX, tileY );
+                    int tileX = XToTileX( grid, i );
+
+                    int k = tileX * grid.getNumYTiles( ) + tileY;
+                    Raster tile = tileCache.get( k );
+                    if ( tile == null )
+                    {
+                        tile = grid.getTile( tileX, tileY );
+                        tileCache.put( k, tile );
+                    }
+
                     double v = tile.getSampleDouble( i, j, 0 );
                     int x = ( i - pixelX0 ) / decimate;
                     int y = imageHeight - ( j - pixelY0 ) / decimate - 1;
@@ -262,13 +286,12 @@ public class GeotiffTileProvider implements TopoTileProvider
 
     private class GeoToolsTopoData extends TopographyData
     {
-        public GeoToolsTopoData( GridCoverage2D grid, TileKey key ) throws IOException
+        public GeoToolsTopoData( RenderedImage grid, TileKey key ) throws IOException
         {
             super( null );
 
-            int[] nLonLat = grid.getGridGeometry( ).getGridRange( ).getHigh( ).getCoordinateValues( );
-            widthStep = 360.0 / nLonLat[0];
-            heightStep = 180.0 / nLonLat[1];
+            widthStep = 360.0 / grid.getWidth( );
+            heightStep = 180.0 / grid.getHeight( );
 
             startLon = key.minLon;
             startLat = key.minLat;
@@ -277,23 +300,24 @@ public class GeotiffTileProvider implements TopoTileProvider
             int pixelX1 = ( int ) round( ( key.maxLon + 180 ) / widthStep );
             int pixelY0 = ( int ) round( ( 180 - ( key.maxLat + 90 ) ) / heightStep );
             int pixelY1 = ( int ) round( ( 180 - ( key.minLat + 90 ) ) / heightStep );
+            pixelY1 = min( pixelY1, grid.getHeight( ) - 1 );
+            pixelX1 = min( pixelX1, grid.getWidth( ) - 1 );
 
             imageWidth = pixelX1 - pixelX0 + 1;
             imageHeight = pixelY1 - pixelY0 + 1;
 
             data = new float[imageWidth][imageHeight];
 
-            PlanarImage img = ( PlanarImage ) grid.getRenderedImage( );
-            int tileX0 = img.XToTileX( pixelX0 );
-            int tileX1 = img.XToTileX( pixelX1 );
-            int tileY0 = img.YToTileY( pixelY0 );
-            int tileY1 = img.YToTileY( pixelY1 );
+            int tileX0 = XToTileX( grid, pixelX0 );
+            int tileX1 = XToTileX( grid, pixelX1 );
+            int tileY0 = YToTileY( grid, pixelY0 );
+            int tileY1 = YToTileY( grid, pixelY1 );
 
             for ( int tileX = tileX0; tileX <= tileX1; tileX++ )
             {
                 for ( int tileY = tileY0; tileY <= tileY1; tileY++ )
                 {
-                    Raster tile = img.getTile( tileX, tileY );
+                    Raster tile = grid.getTile( tileX, tileY );
                     int minX = max( pixelX0, tile.getMinX( ) );
                     int maxX = min( pixelX1, tile.getMinX( ) + tile.getWidth( ) - 1 );
                     int minY = max( pixelY0, tile.getMinY( ) );
