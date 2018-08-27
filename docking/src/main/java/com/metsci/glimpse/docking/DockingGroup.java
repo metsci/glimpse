@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastDockerListener;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastTileListener;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyAddedFrame;
@@ -37,8 +36,9 @@ import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposi
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingFrame;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingDisposeFrame;
 import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
-import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
+import static com.metsci.glimpse.docking.DockingGroupUtils.withPlacement;
+import static com.metsci.glimpse.docking.DockingGroupUtils.withPlannedPlacements;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreAutoCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
@@ -60,7 +60,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
@@ -243,7 +242,7 @@ public class DockingGroup
     }
 
     /**
-     * Public for use by {@link TileFactory} impls.
+     * Intended for use by {@link TileFactory} impls.
      */
     public void attachListenerTo( Tile tile )
     {
@@ -275,67 +274,17 @@ public class DockingGroup
 
     public GroupArrangement captureArrangement( )
     {
-        // Start arrangement with existing views
-        GroupArrangement groupArr = toGroupRealization( this ).groupArr;
-
-        // Put existing viewIds into a convenient data structure
-        Set<String> existingViewIds = findViewIds( groupArr );
-
-        // Add placements for planned non-existing views
-        for ( String planViewId : findViewIds( this.planArr ) )
-        {
-            if ( !existingViewIds.contains( planViewId ) )
-            {
-                ViewPlacement viewPlacement = chooseViewPlacement( groupArr, this.planArr, planViewId );
-                viewPlacement.placeView( groupArr, planViewId );
-            }
-        }
-
-        // Return complete arrangement
-        return groupArr;
+        GroupArrangement existingArr = toGroupRealization( this ).groupArr;
+        return withPlannedPlacements( existingArr, this.planArr );
     }
 
     /**
-     * This method does not currently support changing the placement of existing views. If there
-     * is an existing view for the specified {@code viewId}, an exception will be thrown.
-     * <p>
-     * The {@link ViewPlacement} returned by {@code placementRule} will be used for its
-     * {@link ViewPlacement#placeView(GroupArrangement, String)} method only. (In most cases --
-     * but NOT in all cases -- this means that {@code placementRule} doesn't need to worry about
-     * arguments called {@code planFrame} or {@code planTile}, and can simply use {@code null} for
-     * those args. But it depends on the particular implementation of {@link ViewPlacement}.)
+     * @see DockingGroupUtils#withViewPlacement(GroupArrangement, GroupArrangement, String, ViewPlacementRule)
      */
     public void addViewPlacement( String viewId, ViewPlacementRule placementRule )
     {
-        // Start arrangement with existing views
-        GroupArrangement newPlanArr = toGroupRealization( this ).groupArr;
-
-        // Remember which viewIds currently exist
-        Set<String> existingViewIds = ImmutableSet.copyOf( findViewIds( newPlanArr ) );
-        if ( existingViewIds.contains( viewId ) )
-        {
-            // XXX: Maybe remove the existing view, insert placement, and re-add
-            throw new UnsupportedOperationException( "This method does not currently support changing the placement of an existing view" );
-        }
-
-        // Add viewIds that don't exist, but have planned placements
-        for ( String planViewId : findViewIds( this.planArr ) )
-        {
-            // The view in question will be placed below, rather than here
-            if ( !existingViewIds.contains( planViewId ) && !equal( planViewId, viewId ) )
-            {
-                ViewPlacement viewPlacement = chooseViewPlacement( newPlanArr, this.planArr, planViewId );
-                viewPlacement.placeView( newPlanArr, planViewId );
-            }
-        }
-
-        // Place new view
-        ViewPlacement placement = placementRule.getPlacement( newPlanArr, existingViewIds );
-        if ( placement != null )
-        {
-            placement.placeView( newPlanArr, viewId );
-            this.planArr = newPlanArr;
-        }
+        GroupArrangement existingArr = toGroupRealization( this ).groupArr;
+        this.planArr = withPlacement( existingArr, this.planArr, viewId, placementRule );
     }
 
     public void addView( View view )

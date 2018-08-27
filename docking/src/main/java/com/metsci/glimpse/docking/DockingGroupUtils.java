@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.intersection;
@@ -63,6 +64,142 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroupUtils
 {
+
+    public static GroupArrangement withPlannedPlacements( GroupArrangement existingArr, GroupArrangement planArr )
+    {
+        // Remember which viewIds currently exist
+        Set<String> existingViewIds = findViewIds( existingArr );
+
+        // Create a new arrangement, starting with existing views
+        GroupArrangement groupArr = copyGroupArr( existingArr );
+
+        // Add viewIds that don't exist, but do have planned placements
+        for ( String planViewId : findViewIds( planArr ) )
+        {
+            if ( !existingViewIds.contains( planViewId ) )
+            {
+                ViewPlacement viewPlacement = chooseViewPlacement( groupArr, planArr, planViewId );
+                viewPlacement.placeView( groupArr, planViewId );
+            }
+        }
+
+        // Return complete arrangement
+        return groupArr;
+    }
+
+    /**
+     * This method does not currently support changing the placement of existing views. If there
+     * is an existing view for the specified {@code viewId}, an exception will be thrown.
+     * <p>
+     * The {@link ViewPlacement} returned by {@code placementRule} will be used for its
+     * {@link ViewPlacement#placeView(GroupArrangement, String)} method only. (In most cases --
+     * but NOT in all cases -- this means that {@code placementRule} doesn't need to worry about
+     * arguments called {@code planFrame} or {@code planTile}, and can simply use {@code null} for
+     * those args. But it depends on the particular implementation of {@link ViewPlacement}.)
+     */
+    public static GroupArrangement withPlacement( GroupArrangement existingArr, GroupArrangement planArr, String viewId, ViewPlacementRule placementRule )
+    {
+        // Remember which viewIds currently exist
+        Set<String> existingViewIds = findViewIds( existingArr );
+        if ( existingViewIds.contains( viewId ) )
+        {
+            // TODO: Maybe remove the existing view, insert placement, and re-add
+            throw new UnsupportedOperationException( "This method does not currently support changing the placement of an existing view" );
+        }
+
+        // Create a new arrangement, starting with existing views
+        GroupArrangement newPlanArr = copyGroupArr( existingArr );
+
+        // Add viewIds that don't exist, but do have planned placements
+        for ( String planViewId : findViewIds( planArr ) )
+        {
+            // Skip the new viewId here, because it will be placed below
+            if ( !existingViewIds.contains( planViewId ) && !equal( planViewId, viewId ) )
+            {
+                ViewPlacement viewPlacement = chooseViewPlacement( newPlanArr, planArr, planViewId );
+                viewPlacement.placeView( newPlanArr, planViewId );
+            }
+        }
+
+        // Add the new view
+        ViewPlacement placement = placementRule.getPlacement( newPlanArr, existingViewIds );
+        if ( placement != null )
+        {
+            placement.placeView( newPlanArr, viewId );
+        }
+
+        // Return complete arrangement
+        return newPlanArr;
+    }
+
+    public static GroupArrangement copyGroupArr( GroupArrangement groupArr )
+    {
+        GroupArrangement copy = new GroupArrangement( );
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            copy.frameArrs.add( copyFrameArr( frameArr ) );
+        }
+        return copy;
+    }
+
+    public static FrameArrangement copyFrameArr( FrameArrangement frameArr )
+    {
+        FrameArrangement copy = new FrameArrangement( );
+
+        copy.x = frameArr.x;
+        copy.y = frameArr.y;
+        copy.width = frameArr.width;
+        copy.height = frameArr.height;
+        copy.isMaximizedHoriz = frameArr.isMaximizedHoriz;
+        copy.isMaximizedVert = frameArr.isMaximizedVert;
+
+        copy.dockerArr = copyArrNode( frameArr.dockerArr );
+
+        return copy;
+    }
+
+    public static DockerArrangementNode copyArrNode( DockerArrangementNode arrNode )
+    {
+        if ( arrNode instanceof DockerArrangementTile )
+        {
+            return copyArrTile( ( DockerArrangementTile ) arrNode );
+        }
+        else if ( arrNode instanceof DockerArrangementSplit )
+        {
+            return copyArrSplit( ( DockerArrangementSplit ) arrNode );
+        }
+        else if ( arrNode == null )
+        {
+            return null;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
+        }
+    }
+
+    public static DockerArrangementTile copyArrTile( DockerArrangementTile arrTile )
+    {
+        DockerArrangementTile copy = new DockerArrangementTile( );
+
+        copy.viewIds.addAll( arrTile.viewIds );
+        copy.selectedViewId = arrTile.selectedViewId;
+        copy.isMaximized = arrTile.isMaximized;
+
+        return copy;
+    }
+
+    public static DockerArrangementSplit copyArrSplit( DockerArrangementSplit arrSplit )
+    {
+        DockerArrangementSplit copy = new DockerArrangementSplit( );
+
+        copy.arrangeVertically = arrSplit.arrangeVertically;
+        copy.splitFrac = arrSplit.splitFrac;
+        copy.childA = copyArrNode( arrSplit.childA );
+        copy.childB = copyArrNode( arrSplit.childB );
+
+        return copy;
+    }
 
     public static class GroupRealization
     {
@@ -134,7 +271,7 @@ public class DockingGroupUtils
             }
             else
             {
-                // XXX: Handle non-Tile components
+                // TODO: Handle non-Tile components
             }
 
             DockerArrangementTile arrTile = new DockerArrangementTile( );
@@ -142,7 +279,7 @@ public class DockingGroupUtils
             arrTile.selectedViewId = selectedViewId;
             arrTile.isMaximized = leaf.isMaximized;
 
-            // XXX: Handle non-Tile components
+            // TODO: Handle non-Tile components
             components_INOUT.put( arrTile, c );
 
             return arrTile;
@@ -233,7 +370,7 @@ public class DockingGroupUtils
         @Override
         public ViewDestination placeView( GroupRealization existing, View newView )
         {
-            // XXX: Handle non-Tile components
+            // TODO: Handle non-Tile components
             Tile tile = ( Tile ) existing.components.get( this.existingTile );
             tile.addView( newView, viewNum );
 
