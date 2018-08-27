@@ -27,6 +27,8 @@
 package com.metsci.glimpse.docking;
 
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.docking.DockingGroupUtils.attachMulticastDockerListener;
+import static com.metsci.glimpse.docking.DockingGroupUtils.attachMulticastTileListener;
 import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
@@ -39,7 +41,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
-import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -233,88 +234,14 @@ public class DockingGroup
         }
     }
 
-    protected void attachListenerTo( final MultiSplitPane docker )
+    protected void attachListenerTo( MultiSplitPane docker )
     {
-        docker.addListener( new MultiSplitPaneListener( )
-        {
-            public void addedLeaf( Component leaf )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.addedLeaf( docker, leaf );
-                }
-            }
-
-            public void removedLeaf( Component leaf )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.removedLeaf( docker, leaf );
-                }
-            }
-
-            public void movedDivider( SplitPane splitPane )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.movedDivider( docker, splitPane );
-                }
-            }
-
-            public void maximizedLeaf( Component leaf )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.maximizedLeaf( docker, leaf );
-                }
-            }
-
-            public void unmaximizedLeaf( Component leaf )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.unmaximizedLeaf( docker, leaf );
-                }
-            }
-
-            public void restoredTree( )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.restoredTree( docker );
-                }
-            }
-        } );
+        attachMulticastDockerListener( docker, this.listeners );
     }
 
-    protected void attachListenerTo( final Tile tile )
+    protected void attachListenerTo( Tile tile )
     {
-        tile.addListener( new TileListener( )
-        {
-            public void addedView( View view )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.addedView( tile, view );
-                }
-            }
-
-            public void removedView( View view )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.removedView( tile, view );
-                }
-            }
-
-            public void selectedView( View view )
-            {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.selectedView( tile, view );
-                }
-            }
-        } );
+        attachMulticastTileListener( tile, this.listeners );
     }
 
     public void bringFrameToFront( DockingFrame frame )
@@ -415,6 +342,11 @@ public class DockingGroup
         }
     }
 
+    public void addView( View view )
+    {
+        this.addViews( view );
+    }
+
     public void addViews( View... views )
     {
         this.addViews( asList( views ) );
@@ -445,6 +377,28 @@ public class DockingGroup
             }
         }
 
+        // Restore maximized tiles
+        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
+            {
+                maximizedTiles.put( dest.frame, dest.tile );
+            }
+        }
+        for ( ViewDestination dest : viewDestinations )
+        {
+            // Maximizing tiles in existing frames could be obnoxious for the user
+            if ( dest.isNewFrame )
+            {
+                Tile tile = maximizedTiles.get( dest.frame );
+                if ( tile != null )
+                {
+                    dest.frame.docker.maximizeLeaf( tile );
+                }
+            }
+        }
+
         // Stack planned new frames in front of existing frames, in plan order
         Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
         for ( ViewDestination dest : viewDestinations )
@@ -459,6 +413,7 @@ public class DockingGroup
             DockingFrame frame = plannedNewFrames.get( frameArr );
             if ( frame != null )
             {
+                // Has no effect on some platforms, but there's no good workaround
                 frame.toFront( );
             }
         }
@@ -468,37 +423,10 @@ public class DockingGroup
         {
             if ( dest.isNewFrame && dest.planFrame == null )
             {
+                // Has no effect on some platforms, but there's no good workaround
                 dest.frame.toFront( );
             }
         }
-
-        // Restore maximized tiles -- but only in newly created frames
-        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
-        for ( ViewDestination dest : viewDestinations )
-        {
-            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
-            {
-                maximizedTiles.put( dest.frame, dest.tile );
-            }
-        }
-        for ( ViewDestination dest : viewDestinations )
-        {
-            if ( dest.isNewFrame )
-            {
-                Tile tile = maximizedTiles.get( dest.frame );
-                if ( tile != null )
-                {
-                    dest.frame.docker.maximizeLeaf( tile );
-                }
-            }
-        }
-    }
-
-    public void addView( View view )
-    {
-        GroupRealization existing = toGroupRealization( this );
-        ViewPlacement placement = chooseViewPlacement( existing.groupArr, this.planArr, view.viewId );
-        placement.placeView( existing, view );
     }
 
     public void closeView( View view )

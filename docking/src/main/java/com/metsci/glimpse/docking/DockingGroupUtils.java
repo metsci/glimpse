@@ -48,6 +48,7 @@ import static java.util.Objects.requireNonNull;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -60,9 +61,123 @@ import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroupUtils
 {
+
+    public static Disposable attachDockerListener( MultiSplitPane docker, MultiSplitPaneListener listener )
+    {
+        docker.addListener( listener );
+
+        return ( ) ->
+        {
+            docker.removeListener( listener );
+        };
+    }
+
+    public static Disposable attachMulticastDockerListener( MultiSplitPane docker, Collection<? extends DockingGroupListener> listeners )
+    {
+        return attachDockerListener( docker, new MultiSplitPaneListener( )
+        {
+            @Override
+            public void addedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.addedLeaf( docker, leaf );
+                }
+            }
+
+            @Override
+            public void removedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.removedLeaf( docker, leaf );
+                }
+            }
+
+            @Override
+            public void movedDivider( SplitPane splitPane )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.movedDivider( docker, splitPane );
+                }
+            }
+
+            @Override
+            public void maximizedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.maximizedLeaf( docker, leaf );
+                }
+            }
+
+            @Override
+            public void unmaximizedLeaf( Component leaf )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.unmaximizedLeaf( docker, leaf );
+                }
+            }
+
+            @Override
+            public void restoredTree( )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.restoredTree( docker );
+                }
+            }
+        } );
+    }
+
+    public static Disposable attachTileListener( Tile tile, TileListener listener )
+    {
+        tile.addListener( listener );
+
+        return ( ) ->
+        {
+            tile.removeListener( listener );
+        };
+    }
+
+    public static Disposable attachMulticastTileListener( Tile tile, Collection<? extends DockingGroupListener> listeners )
+    {
+        return attachTileListener( tile, new TileListener( )
+        {
+            @Override
+            public void addedView( View view )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.addedView( tile, view );
+                }
+            }
+
+            @Override
+            public void removedView( View view )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.removedView( tile, view );
+                }
+            }
+
+            @Override
+            public void selectedView( View view )
+            {
+                for ( DockingGroupListener listener : listeners )
+                {
+                    listener.selectedView( tile, view );
+                }
+            }
+        } );
+    }
 
     public static class GroupRealization
     {
