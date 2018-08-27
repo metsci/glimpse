@@ -105,7 +105,7 @@ public class DockingMouseAdapter extends MouseAdapter
             if ( !dragging )
             {
                 DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
-                dockingGroup.bringFrameToFront( frame );
+                dockingGroup.onWindowRaised( frame );
 
                 // Cause the system's window-manager to show our frames in an order
                 // consistent with the way we're going to iterate through them to

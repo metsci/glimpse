@@ -27,8 +27,15 @@
 package com.metsci.glimpse.docking;
 
 import static com.google.common.base.Objects.equal;
-import static com.metsci.glimpse.docking.DockingGroupUtils.attachMulticastDockerListener;
-import static com.metsci.glimpse.docking.DockingGroupUtils.attachMulticastTileListener;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastDockerListener;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastTileListener;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyAddedFrame;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosedView;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosingView;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposedFrame;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingAllFrames;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingFrame;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingDisposeFrame;
 import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.findViewIds;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
@@ -60,6 +67,7 @@ import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroup
 {
@@ -89,179 +97,167 @@ public class DockingGroup
         this.tileFactory = new TileFactoryStandard( this );
 
         this.framesMod = new ArrayList<>( );
-        this.frames = unmodifiableList( framesMod );
+        this.frames = unmodifiableList( this.framesMod );
         this.planArr = new GroupArrangement( );
 
-        this.landingIndicator = new LandingIndicator( theme );
+        this.landingIndicator = new LandingIndicator( this.theme );
 
         this.listeners = new LinkedHashSet<>( );
     }
 
-    public void addListener( DockingGroupListener listener )
+    public Disposable addListener( DockingGroupListener listener )
     {
-        listeners.add( listener );
+        this.listeners.add( listener );
+
+        return ( ) ->
+        {
+            this.removeListener( listener );
+        };
     }
 
     public void removeListener( DockingGroupListener listener )
     {
-        listeners.remove( listener );
+        this.listeners.remove( listener );
     }
 
     public DockingFrame addNewFrame( )
     {
-        MultiSplitPane docker = new MultiSplitPane( theme.dividerSize );
-        attachListenerTo( docker );
+        MultiSplitPane docker = new MultiSplitPane( this.theme.dividerSize );
+        attachMulticastDockerListener( docker, this.listeners );
 
-        final DockingFrame frame = new DockingFrame( docker );
+        DockingFrame frame = new DockingFrame( docker );
         frame.setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
         frame.addWindowListener( new WindowAdapter( )
         {
+            @Override
             public void windowActivated( WindowEvent ev )
             {
-                bringFrameToFront( frame );
+                DockingGroup.this.onWindowRaised( frame );
             }
 
-            // Frame's close button was clicked
+            @Override
             public void windowClosing( WindowEvent ev )
             {
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.userRequestingDisposeFrame( DockingGroup.this, frame );
-                }
-
-                switch ( frameCloseOperation )
-                {
-                    case DO_NOTHING:
-                    {
-                        // Do nothing
-                    }
-                    break;
-
-                    case DISPOSE_CLOSED_FRAME:
-                    {
-                        Set<View> views = findViews( frame.docker );
-                        if ( allViewsAreAutoCloseable( views ) )
-                        {
-                            for ( DockingGroupListener listener : listeners )
-                            {
-                                listener.disposingFrame( DockingGroup.this, frame );
-                            }
-
-                            for ( View view : views )
-                            {
-                                for ( DockingGroupListener listener : listeners )
-                                {
-                                    listener.closingView( DockingGroup.this, view );
-                                }
-                            }
-
-                            frame.dispose( );
-
-                            for ( View view : views )
-                            {
-                                for ( DockingGroupListener listener : listeners )
-                                {
-                                    listener.closedView( DockingGroup.this, view );
-                                }
-                            }
-                        }
-                        else
-                        {
-                            logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
-                        }
-                    }
-                    break;
-
-                    case DISPOSE_ALL_FRAMES:
-                    {
-                        DockingGroup.this.disposeAllFrames( );
-                    }
-                    break;
-
-                    case EXIT_JVM:
-                    {
-                        DockingGroup.this.disposeAllFrames( );
-                        System.exit( 0 );
-                    }
-                    break;
-                }
+                DockingGroup.this.onWindowCloseButton( frame );
             }
 
-            // Frame has been disposed, including programmatically
+            @Override
             public void windowClosed( WindowEvent ev )
             {
-                framesMod.remove( frame );
-
-                for ( DockingGroupListener listener : listeners )
-                {
-                    listener.disposedFrame( DockingGroup.this, frame );
-                }
-
-                if ( frames.isEmpty( ) )
-                {
-                    // Dispose the landingIndicator frame, so that the JVM can shut
-                    // down if appropriate. If the landingIndicator is needed again
-                    // (e.g. after a new frame is added to the group), it will be
-                    // automatically resurrected, and will work fine.
-                    landingIndicator.dispose( );
-                }
+                DockingGroup.this.onWindowClosed( frame );
             }
         } );
 
-        framesMod.add( 0, frame );
-        for ( DockingGroupListener listener : listeners )
-        {
-            listener.addedFrame( this, frame );
-        }
+        this.framesMod.add( 0, frame );
+        notifyAddedFrame( this.listeners, this, frame );
         return frame;
     }
 
-    public void disposeAllFrames( )
+    public void onWindowRaised( DockingFrame frame )
     {
-        for ( DockingGroupListener listener : listeners )
-        {
-            listener.disposingAllFrames( DockingGroup.this );
-        }
-
-        for ( DockingFrame frame : frames )
-        {
-            for ( DockingGroupListener listener : listeners )
-            {
-                listener.disposingFrame( DockingGroup.this, frame );
-            }
-
-            frame.dispose( );
-        }
-    }
-
-    protected void attachListenerTo( MultiSplitPane docker )
-    {
-        attachMulticastDockerListener( docker, this.listeners );
-    }
-
-    protected void attachListenerTo( Tile tile )
-    {
-        attachMulticastTileListener( tile, this.listeners );
-    }
-
-    public void bringFrameToFront( DockingFrame frame )
-    {
-        boolean found = framesMod.remove( frame );
+        boolean found = this.framesMod.remove( frame );
         if ( !found )
         {
             throw new RuntimeException( "Frame does not belong to this docking-group" );
         }
 
-        framesMod.add( 0, frame );
+        this.framesMod.add( 0, frame );
+    }
+
+    protected void onWindowCloseButton( DockingFrame frame )
+    {
+        notifyUserRequestingDisposeFrame( this.listeners, this, frame );
+
+        switch ( this.frameCloseOperation )
+        {
+            case DO_NOTHING:
+            {
+                // Do nothing
+            }
+            break;
+
+            case DISPOSE_CLOSED_FRAME:
+            {
+                Set<View> views = findViews( frame.docker );
+                if ( allViewsAreAutoCloseable( views ) )
+                {
+                    notifyDisposingFrame( this.listeners, this, frame );
+
+                    for ( View view : views )
+                    {
+                        notifyClosingView( this.listeners, this, view );
+                    }
+
+                    frame.dispose( );
+
+                    for ( View view : views )
+                    {
+                        notifyClosedView( this.listeners, this, view );
+                    }
+                }
+                else
+                {
+                    logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
+                }
+            }
+            break;
+
+            case DISPOSE_ALL_FRAMES:
+            {
+                this.disposeAllFrames( );
+            }
+            break;
+
+            case EXIT_JVM:
+            {
+                this.disposeAllFrames( );
+                System.exit( 0 );
+            }
+            break;
+        }
+    }
+
+    protected void onWindowClosed( DockingFrame frame )
+    {
+        this.framesMod.remove( frame );
+        notifyDisposedFrame( this.listeners, this, frame );
+
+        if ( this.frames.isEmpty( ) )
+        {
+            // Dispose the landingIndicator window, so that the JVM can shut
+            // down if appropriate -- if the landingIndicator is needed again
+            // (e.g. after a new frame is added to the group), it will be
+            // automatically resurrected
+            this.landingIndicator.dispose( );
+        }
+    }
+
+    public void disposeAllFrames( )
+    {
+        notifyDisposingAllFrames( this.listeners, this );
+        for ( DockingFrame frame : this.frames )
+        {
+            notifyDisposingFrame( this.listeners, this, frame );
+            frame.dispose( );
+        }
+    }
+
+    /**
+     * Public for use by {@link TileFactory} impls.
+     */
+    public void attachListenerTo( Tile tile )
+    {
+        attachMulticastTileListener( tile, this.listeners );
     }
 
     public void setLandingIndicator( Rectangle bounds )
     {
-        landingIndicator.setBounds( bounds );
+        this.landingIndicator.setBounds( bounds );
     }
 
     public void setArrangement( GroupArrangement groupArr )
     {
+        // Remember existing views
         Collection<View> views = findViews( this.frames );
 
         // Remove existing views, pruning empty tiles and frames
@@ -437,18 +433,12 @@ public class DockingGroup
             throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
         }
 
-        for ( DockingGroupListener listener : listeners )
-        {
-            listener.closingView( this, view );
-        }
+        notifyClosingView( this.listeners, this, view );
 
         tile.removeView( view );
         pruneEmptyTileAndFrame( tile );
 
-        for ( DockingGroupListener listener : listeners )
-        {
-            listener.closedView( this, view );
-        }
+        notifyClosedView( this.listeners, this, view );
     }
 
     public static void pruneEmptyTileAndFrame( Tile tile )
