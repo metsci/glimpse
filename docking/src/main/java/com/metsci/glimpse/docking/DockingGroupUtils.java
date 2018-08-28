@@ -70,7 +70,7 @@ public class DockingGroupUtils
     /**
      * Restore selected views in newly created tiles.
      */
-    public static void restoreSelectedViews( Collection<? extends ViewDestination> viewDestinations )
+    public static void restoreSelectedViewsInNewTiles( Collection<? extends ViewDestination> viewDestinations )
     {
         for ( ViewDestination dest : viewDestinations )
         {
@@ -83,36 +83,36 @@ public class DockingGroupUtils
     }
 
     /**
-     * Restore maximized tiles in newly created frames.
+     * Restore maximized tiles in newly created dockers.
      */
-    public static void restoreMaximizedTiles( Collection<? extends ViewDestination> viewDestinations )
+    public static void restoreMaximizedTilesInNewDockers( Collection<? extends ViewDestination> viewDestinations )
     {
-        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
+        Map<MultiSplitPane,Tile> maximizedTiles = new LinkedHashMap<>( );
         for ( ViewDestination dest : viewDestinations )
         {
             if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
             {
-                maximizedTiles.put( dest.frame, dest.tile );
+                maximizedTiles.put( dest.docker, dest.tile );
             }
         }
 
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewFrame )
+            if ( dest.isNewDocker )
             {
-                Tile tile = maximizedTiles.get( dest.frame );
+                Tile tile = maximizedTiles.get( dest.docker );
                 if ( tile != null )
                 {
-                    dest.frame.docker.maximizeLeaf( tile );
+                    dest.docker.maximizeLeaf( tile );
                 }
             }
         }
     }
 
     /**
-     * Restore stacking order of newly created frames.
+     * Make newly created frames visible, honoring planned stacking order as much as possible.
      */
-    public static void restoreFrameOrder( Collection<? extends ViewDestination> viewDestinations, List<? extends FrameArrangement> orderedFrameArrs )
+    public static void showNewFrames( Collection<? extends ViewDestination> viewDestinations, List<? extends FrameArrangement> orderedFrameArrs )
     {
         // Stack planned new frames in front of existing frames, in plan order
         Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
@@ -128,8 +128,7 @@ public class DockingGroupUtils
             DockingFrame frame = plannedNewFrames.get( frameArr );
             if ( frame != null )
             {
-                // Has no effect on some platforms, but there's no good workaround
-                frame.toFront( );
+                frame.setVisible( true );
             }
         }
 
@@ -138,8 +137,7 @@ public class DockingGroupUtils
         {
             if ( dest.isNewFrame && dest.planFrame == null )
             {
-                // Has no effect on some platforms, but there's no good workaround
-                dest.frame.toFront( );
+                dest.frame.setVisible( true );
             }
         }
     }
@@ -421,6 +419,9 @@ public class DockingGroupUtils
         public final boolean isNewFrame;
         public final DockingFrame frame;
 
+        public final boolean isNewDocker;
+        public final MultiSplitPane docker;
+
         public final DockerArrangementTile planTile;
         public final boolean isNewTile;
         public final Tile tile;
@@ -429,6 +430,9 @@ public class DockingGroupUtils
                                 boolean isNewFrame,
                                 DockingFrame frame,
 
+                                boolean isNewDocker,
+                                MultiSplitPane docker,
+
                                 DockerArrangementTile planTile,
                                 boolean isNewTile,
                                 Tile tile )
@@ -436,6 +440,9 @@ public class DockingGroupUtils
             this.planFrame = planFrame;
             this.isNewFrame = isNewFrame;
             this.frame = frame;
+
+            this.isNewDocker = isNewDocker;
+            this.docker = docker;
 
             this.planTile = planTile;
             this.isNewTile = isNewTile;
@@ -473,7 +480,9 @@ public class DockingGroupUtils
 
             DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
 
-            return new ViewDestination( this.planFrame, false, frame, this.planTile, false, tile );
+            return new ViewDestination( this.planFrame, false, frame,
+                                        false, frame.docker,
+                                        this.planTile, false, tile );
         }
     }
 
@@ -523,7 +532,9 @@ public class DockingGroupUtils
             DockingFrame frame = getAncestorOfClass( DockingFrame.class, neighbor );
             frame.docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
 
-            return new ViewDestination( this.planFrame, false, frame, this.planTile, true, newTile );
+            return new ViewDestination( this.planFrame, false, frame,
+                                        false, frame.docker,
+                                        this.planTile, true, newTile );
         }
     }
 
@@ -575,9 +586,10 @@ public class DockingGroupUtils
             newFrame.setBounds( this.planFrame.x, this.planFrame.y, this.planFrame.width, this.planFrame.height );
             newFrame.setNormalBounds( this.planFrame.x, this.planFrame.y, this.planFrame.width, this.planFrame.height );
             newFrame.setExtendedState( getFrameExtendedState( this.planFrame.isMaximizedHoriz, this.planFrame.isMaximizedVert ) );
-            newFrame.setVisible( true );
 
-            return new ViewDestination( this.planFrame, true, newFrame, this.planTile, true, newTile );
+            return new ViewDestination( this.planFrame, true, newFrame,
+                                        true, newFrame.docker,
+                                        this.planTile, true, newTile );
         }
     }
 
@@ -618,9 +630,10 @@ public class DockingGroupUtils
             newFrame.setBounds( newFrameBounds );
             newFrame.setNormalBounds( newFrameBounds );
             newFrame.setExtendedState( getFrameExtendedState( false, false ) );
-            newFrame.setVisible( true );
 
-            return new ViewDestination( null, true, newFrame, null, true, newTile );
+            return new ViewDestination( null, true, newFrame,
+                                        true, newFrame.docker,
+                                        null, true, newTile );
         }
     }
 

@@ -39,9 +39,9 @@ import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposi
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingDisposeFrame;
 import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.pruneEmptyTile;
-import static com.metsci.glimpse.docking.DockingGroupUtils.restoreFrameOrder;
-import static com.metsci.glimpse.docking.DockingGroupUtils.restoreMaximizedTiles;
-import static com.metsci.glimpse.docking.DockingGroupUtils.restoreSelectedViews;
+import static com.metsci.glimpse.docking.DockingGroupUtils.restoreMaximizedTilesInNewDockers;
+import static com.metsci.glimpse.docking.DockingGroupUtils.restoreSelectedViewsInNewTiles;
+import static com.metsci.glimpse.docking.DockingGroupUtils.showNewFrames;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
 import static com.metsci.glimpse.docking.DockingGroupUtils.withPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.withPlannedPlacements;
@@ -135,6 +135,8 @@ public class DockingGroup
             @Override
             public void windowActivated( WindowEvent ev )
             {
+                // Assumes windows get raised when activated -- not always true (e.g. with
+                // a focus-follows-mouse WM), but it's as close as we can get with Swing
                 DockingGroup.this.onWindowRaised( frame );
             }
 
@@ -218,10 +220,9 @@ public class DockingGroup
 
         if ( this.frames.isEmpty( ) )
         {
-            // Dispose the landingIndicator window, so that the JVM can shut
-            // down if appropriate -- if the landingIndicator is needed again
-            // (e.g. after a new frame is added to the group), it will be
-            // automatically resurrected
+            // Dispose the landingIndicator window, so that the JVM can shut down if
+            // appropriate -- if the landingIndicator is needed again (e.g. after a
+            // new frame is added to the group), it will be automatically resurrected
             this.landingIndicator.dispose( );
         }
     }
@@ -303,9 +304,9 @@ public class DockingGroup
             viewDestinations.add( destination );
         }
 
-        restoreSelectedViews( viewDestinations );
-        restoreMaximizedTiles( viewDestinations );
-        restoreFrameOrder( viewDestinations, this.planArr.frameArrs );
+        restoreSelectedViewsInNewTiles( viewDestinations );
+        restoreMaximizedTilesInNewDockers( viewDestinations );
+        showNewFrames( viewDestinations, this.planArr.frameArrs );
     }
 
     public void closeView( View view )
