@@ -154,11 +154,27 @@ public class DockingGroupListenerUtils
         }
     }
 
+    public static void notifyClosingViews( Collection<? extends DockingGroupListener> listeners, DockingGroup group, Collection<? extends View> views )
+    {
+        for ( View view : views )
+        {
+            notifyClosingView( listeners, group, view );
+        }
+    }
+
     public static void notifyClosingView( Collection<? extends DockingGroupListener> listeners, DockingGroup group, View view )
     {
         for ( DockingGroupListener listener : listeners )
         {
             listener.closingView( group, view );
+        }
+    }
+
+    public static void notifyClosedViews( Collection<? extends DockingGroupListener> listeners, DockingGroup group, Collection<? extends View> views )
+    {
+        for ( View view : views )
+        {
+            notifyClosedView( listeners, group, view );
         }
     }
 

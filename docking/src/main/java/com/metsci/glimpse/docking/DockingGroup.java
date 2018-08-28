@@ -30,12 +30,18 @@ import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMultica
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastTileListener;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyAddedFrame;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosedView;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosedViews;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosingView;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosingViews;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposedFrame;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingAllFrames;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingFrame;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingDisposeFrame;
 import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
+import static com.metsci.glimpse.docking.DockingGroupUtils.pruneEmptyTile;
+import static com.metsci.glimpse.docking.DockingGroupUtils.restoreFrameOrder;
+import static com.metsci.glimpse.docking.DockingGroupUtils.restoreMaximizedTiles;
+import static com.metsci.glimpse.docking.DockingGroupUtils.restoreSelectedViews;
 import static com.metsci.glimpse.docking.DockingGroupUtils.toGroupRealization;
 import static com.metsci.glimpse.docking.DockingGroupUtils.withPlacement;
 import static com.metsci.glimpse.docking.DockingGroupUtils.withPlannedPlacements;
@@ -43,7 +49,6 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreAutoCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
-import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -53,10 +58,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -64,13 +67,13 @@ import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
-import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroup
 {
     private static final Logger logger = Logger.getLogger( DockingGroup.class.getName( ) );
+
 
     public final DockingTheme theme;
     public final DockingFrameCloseOperation frameCloseOperation;
@@ -83,6 +86,7 @@ public class DockingGroup
     protected final LandingIndicator landingIndicator;
 
     protected final Set<DockingGroupListener> listeners;
+
 
     public DockingGroup( DockingFrameCloseOperation frameCloseOperation )
     {
@@ -181,18 +185,9 @@ public class DockingGroup
                 if ( allViewsAreAutoCloseable( views ) )
                 {
                     notifyDisposingFrame( this.listeners, this, frame );
-
-                    for ( View view : views )
-                    {
-                        notifyClosingView( this.listeners, this, view );
-                    }
-
+                    notifyClosingViews( this.listeners, this, views );
                     frame.dispose( );
-
-                    for ( View view : views )
-                    {
-                        notifyClosedView( this.listeners, this, view );
-                    }
+                    notifyClosedViews( this.listeners, this, views );
                 }
                 else
                 {
@@ -299,79 +294,18 @@ public class DockingGroup
 
     public void addViews( Collection<View> views )
     {
-        // Remember view destinations, for operations that happen after adding all views
         Collection<ViewDestination> viewDestinations = new ArrayList<>( );
-
-        // Add views, and remember destinations
         for ( View view : views )
         {
             GroupRealization existing = toGroupRealization( this );
             ViewPlacement placement = chooseViewPlacement( existing.groupArr, this.planArr, view.viewId );
             ViewDestination destination = placement.placeView( existing, view );
-
             viewDestinations.add( destination );
         }
 
-        // Restore selected views in newly created tiles
-        for ( ViewDestination dest : viewDestinations )
-        {
-            if ( dest.isNewTile && dest.planTile != null )
-            {
-                View view = dest.tile.view( dest.planTile.selectedViewId );
-                dest.tile.selectView( view );
-            }
-        }
-
-        // Restore maximized tiles
-        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
-        for ( ViewDestination dest : viewDestinations )
-        {
-            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
-            {
-                maximizedTiles.put( dest.frame, dest.tile );
-            }
-        }
-        for ( ViewDestination dest : viewDestinations )
-        {
-            // Maximizing tiles in existing frames could be obnoxious for the user
-            if ( dest.isNewFrame )
-            {
-                Tile tile = maximizedTiles.get( dest.frame );
-                if ( tile != null )
-                {
-                    dest.frame.docker.maximizeLeaf( tile );
-                }
-            }
-        }
-
-        // Stack planned new frames in front of existing frames, in plan order
-        Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
-        for ( ViewDestination dest : viewDestinations )
-        {
-            if ( dest.isNewFrame && dest.planFrame != null )
-            {
-                plannedNewFrames.put( dest.planFrame, dest.frame );
-            }
-        }
-        for ( FrameArrangement frameArr : reversed( this.planArr.frameArrs ) )
-        {
-            DockingFrame frame = plannedNewFrames.get( frameArr );
-            if ( frame != null )
-            {
-                // Has no effect on some platforms, but there's no good workaround
-                frame.toFront( );
-            }
-        }
-
-        // Stack unplanned new frames in front of existing frames
-        for ( ViewDestination dest : viewDestinations )
-        {
-            if ( dest.isNewFrame && dest.planFrame == null )
-            {
-                // Has no effect on some platforms, but there's no good workaround
-                dest.frame.toFront( );
-            }
-        }
+        restoreSelectedViews( viewDestinations );
+        restoreMaximizedTiles( viewDestinations );
+        restoreFrameOrder( viewDestinations, this.planArr.frameArrs );
     }
 
     public void closeView( View view )
@@ -385,27 +319,9 @@ public class DockingGroup
         notifyClosingView( this.listeners, this, view );
 
         tile.removeView( view );
-        pruneEmptyTileAndFrame( tile );
+        pruneEmptyTile( tile, true );
 
         notifyClosedView( this.listeners, this, view );
-    }
-
-    public static void pruneEmptyTileAndFrame( Tile tile )
-    {
-        if ( tile.numViews( ) == 0 )
-        {
-            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-            docker.removeLeaf( tile );
-
-            if ( docker.numLeaves( ) == 0 )
-            {
-                DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
-                if ( frame != null && frame.getContentPane( ) == docker )
-                {
-                    frame.dispose( );
-                }
-            }
-        }
     }
 
 }

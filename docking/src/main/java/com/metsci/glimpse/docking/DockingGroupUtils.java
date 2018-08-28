@@ -30,6 +30,7 @@ import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
 import static com.metsci.glimpse.docking.MiscUtils.intersection;
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.MiscUtils.union;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -49,6 +50,7 @@ import static java.util.Objects.requireNonNull;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,6 +66,83 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroupUtils
 {
+
+    /**
+     * Restore selected views in newly created tiles.
+     */
+    public static void restoreSelectedViews( Collection<? extends ViewDestination> viewDestinations )
+    {
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile && dest.planTile != null )
+            {
+                View view = dest.tile.view( dest.planTile.selectedViewId );
+                dest.tile.selectView( view );
+            }
+        }
+    }
+
+    /**
+     * Restore maximized tiles in newly created frames.
+     */
+    public static void restoreMaximizedTiles( Collection<? extends ViewDestination> viewDestinations )
+    {
+        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
+            {
+                maximizedTiles.put( dest.frame, dest.tile );
+            }
+        }
+
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame )
+            {
+                Tile tile = maximizedTiles.get( dest.frame );
+                if ( tile != null )
+                {
+                    dest.frame.docker.maximizeLeaf( tile );
+                }
+            }
+        }
+    }
+
+    /**
+     * Restore stacking order of newly created frames.
+     */
+    public static void restoreFrameOrder( Collection<? extends ViewDestination> viewDestinations, List<? extends FrameArrangement> orderedFrameArrs )
+    {
+        // Stack planned new frames in front of existing frames, in plan order
+        Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame && dest.planFrame != null )
+            {
+                plannedNewFrames.put( dest.planFrame, dest.frame );
+            }
+        }
+        for ( FrameArrangement frameArr : reversed( orderedFrameArrs ) )
+        {
+            DockingFrame frame = plannedNewFrames.get( frameArr );
+            if ( frame != null )
+            {
+                // Has no effect on some platforms, but there's no good workaround
+                frame.toFront( );
+            }
+        }
+
+        // Stack unplanned new frames in front of existing frames
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.isNewFrame && dest.planFrame == null )
+            {
+                // Has no effect on some platforms, but there's no good workaround
+                dest.frame.toFront( );
+            }
+        }
+    }
 
     public static GroupArrangement withPlannedPlacements( GroupArrangement existingArr, GroupArrangement planArr )
     {
@@ -199,6 +278,24 @@ public class DockingGroupUtils
         copy.childB = copyArrNode( arrSplit.childB );
 
         return copy;
+    }
+
+    public static void pruneEmptyTile( Tile tile, boolean disposeEmptyFrame )
+    {
+        if ( tile.numViews( ) == 0 )
+        {
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
+            docker.removeLeaf( tile );
+
+            if ( disposeEmptyFrame && docker.numLeaves( ) == 0 )
+            {
+                DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
+                if ( frame != null && frame.getContentPane( ) == docker )
+                {
+                    frame.dispose( );
+                }
+            }
+        }
     }
 
     public static class GroupRealization

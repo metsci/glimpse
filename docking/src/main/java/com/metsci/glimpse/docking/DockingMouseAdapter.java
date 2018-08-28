@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingGroup.pruneEmptyTileAndFrame;
+import static com.metsci.glimpse.docking.DockingGroupUtils.pruneEmptyTile;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
@@ -152,7 +152,7 @@ public class DockingMouseAdapter extends MouseAdapter
             {
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, tileFactory );
-                pruneEmptyTileAndFrame( tile );
+                pruneEmptyTile( tile, true );
             }
 
             this.dragging = false;
