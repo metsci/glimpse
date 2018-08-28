@@ -43,6 +43,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
+import com.metsci.glimpse.docking.frame.DockingFrame;
 
 public class DockingMouseAdapter extends MouseAdapter
 {
@@ -116,7 +117,7 @@ public class DockingMouseAdapter extends MouseAdapter
                 // possible to kludge a solution together using Robot.getPixelColor
                 // ... but it would be ugly at best.
                 //
-                for ( DockingFrame f : reversed( dockingGroup.frames ) )
+                for ( DockingFrame f : reversed( dockingGroup.windows( ) ) )
                 {
                     f.toFront( );
                 }
@@ -152,7 +153,7 @@ public class DockingMouseAdapter extends MouseAdapter
             {
                 tile.removeView( draggedView );
                 landingRegion.placeView( draggedView, tileFactory );
-                pruneEmptyTile( tile, true );
+                pruneEmptyTile( tile, true ); // FIXME
             }
 
             this.dragging = false;

@@ -28,6 +28,8 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 
+import com.metsci.glimpse.docking.frame.DockingFrame;
+
 public class DockingFrameTitlers
 {
 

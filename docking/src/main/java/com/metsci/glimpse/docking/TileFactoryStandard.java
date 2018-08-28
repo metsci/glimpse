@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastTileListener;
+import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingCloseView;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
@@ -64,7 +66,7 @@ public class TileFactoryStandard implements TileFactory
     @Override
     public Tile newTile( )
     {
-        final DockingTheme theme = dockingGroup.theme;
+        final DockingTheme theme = dockingGroup.theme( );
 
         final Tile[] tileRef = { null };
 
@@ -124,10 +126,7 @@ public class TileFactoryStandard implements TileFactory
                         @Override
                         public void actionPerformed( ActionEvent ev )
                         {
-                            for ( DockingGroupListener listener : dockingGroup.listeners )
-                            {
-                                listener.userRequestingCloseView( dockingGroup, view );
-                            }
+                            notifyUserRequestingCloseView( dockingGroup.listeners( ), dockingGroup, view );
 
                             if ( view.closeOption == VIEW_AUTO_CLOSEABLE )
                             {
@@ -150,7 +149,7 @@ public class TileFactoryStandard implements TileFactory
         final Tile tile = new TileImpl( theme, tabCornerComponentFactory, new Component[] { maximizeButton } );
         tileRef[0] = tile;
 
-        dockingGroup.attachListenerTo( tile );
+        attachMulticastTileListener( tile, dockingGroup.listeners( ) );
 
         final DockingMouseAdapter mouseAdapter = new DockingMouseAdapter( tile, dockingGroup, this );
         tile.addDockingMouseAdapter( mouseAdapter );

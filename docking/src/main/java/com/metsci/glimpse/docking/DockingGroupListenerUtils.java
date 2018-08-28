@@ -29,6 +29,7 @@ package com.metsci.glimpse.docking;
 import java.awt.Component;
 import java.util.Collection;
 
+import com.metsci.glimpse.docking.frame.DockingFrame;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroupListenerUtils

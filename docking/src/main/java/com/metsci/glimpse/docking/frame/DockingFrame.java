@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.frame;
 
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -33,6 +33,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 
 import javax.swing.JFrame;
+
+import com.metsci.glimpse.docking.MultiSplitPane;
 
 @SuppressWarnings( "serial" )
 public class DockingFrame extends JFrame

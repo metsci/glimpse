@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.metsci.glimpse.docking.frame.DockingFrame;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
@@ -321,7 +322,7 @@ public class DockingGroupUtils
         Map<DockerArrangementNode,Component> componentsMap = new LinkedHashMap<>( );
 
         GroupArrangement groupArr = new GroupArrangement( );
-        for ( DockingFrame frame : group.frames )
+        for ( DockingFrame frame : group.windows( ) )
         {
             FrameArrangement frameArr = new FrameArrangement( );
 
@@ -524,7 +525,7 @@ public class DockingGroupUtils
         @Override
         public ViewDestination placeView( GroupRealization existing, View newView )
         {
-            Tile newTile = existing.group.tileFactory.newTile( );
+            Tile newTile = existing.group.createNewTile( );
             newTile.addView( newView, 0 );
 
             Component neighbor = existing.components.get( this.neighborNode );
@@ -577,10 +578,10 @@ public class DockingGroupUtils
         @Override
         public ViewDestination placeView( GroupRealization existing, View newView )
         {
-            Tile newTile = existing.group.tileFactory.newTile( );
+            Tile newTile = existing.group.createNewTile( );
             newTile.addView( newView, 0 );
 
-            DockingFrame newFrame = existing.group.addNewFrame( );
+            DockingFrame newFrame = existing.group.addNewWindow( );
             newFrame.docker.addInitialLeaf( newTile );
 
             newFrame.setBounds( this.planFrame.x, this.planFrame.y, this.planFrame.width, this.planFrame.height );
@@ -620,10 +621,10 @@ public class DockingGroupUtils
         @Override
         public ViewDestination placeView( GroupRealization existing, View newView )
         {
-            Tile newTile = existing.group.tileFactory.newTile( );
+            Tile newTile = existing.group.createNewTile( );
             newTile.addView( newView, 0 );
 
-            DockingFrame newFrame = existing.group.addNewFrame( );
+            DockingFrame newFrame = existing.group.addNewWindow( );
             newFrame.docker.addInitialLeaf( newTile );
 
             Rectangle newFrameBounds = getNewFallbackFrameBounds( );

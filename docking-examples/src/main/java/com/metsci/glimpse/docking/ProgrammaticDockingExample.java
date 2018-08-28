@@ -57,6 +57,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+import com.metsci.glimpse.docking.frame.DockingFrame;
+
 public class ProgrammaticDockingExample
 {
 
