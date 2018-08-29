@@ -56,9 +56,10 @@ import com.metsci.glimpse.docking.TileImpl.TabComponentFactory;
 public class TileFactoryStandard implements TileFactory
 {
 
-    protected final DockingGroup dockingGroup;
+    protected final DockingGroupBase dockingGroup;
 
-    public TileFactoryStandard( DockingGroup dockingGroup )
+
+    public TileFactoryStandard( DockingGroupBase dockingGroup )
     {
         this.dockingGroup = dockingGroup;
     }

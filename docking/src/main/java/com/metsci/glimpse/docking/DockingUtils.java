@@ -393,7 +393,7 @@ public class DockingUtils
         }
     }
 
-    public static <C extends Component> C findLargestComponent( Collection<C> components )
+    public static <C extends Component> C findLargestComponent( Collection<? extends C> components )
     {
         int largestArea = -1;
         C largestComponent = null;
@@ -471,7 +471,7 @@ public class DockingUtils
         return views;
     }
 
-    public static boolean allViewsAreAutoCloseable( Iterable<View> views )
+    public static boolean allViewsAreAutoCloseable( Iterable<? extends View> views )
     {
         for ( View view : views )
         {
@@ -483,7 +483,7 @@ public class DockingUtils
         return true;
     }
 
-    public static void appendViewsToTile( Tile tile, Collection<View> views )
+    public static void appendViewsToTile( Tile tile, Collection<? extends View> views )
     {
         for ( View view : views )
         {

@@ -26,41 +26,26 @@
  */
 package com.metsci.glimpse.docking;
 
-import java.awt.Rectangle;
 import java.util.Collection;
-import java.util.List;
 
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
-import com.metsci.glimpse.docking.frame.DockingFrame;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.util.var.Disposable;
 
+/**
+ * Docking group API for use by client code.
+ * <p>
+ * The internals of the docking code are written in terms of {@link DockingGroupBase},
+ * which has several additional public methods.
+ */
 public interface DockingGroup
 {
+
+    DockingTheme theme( );
 
     Disposable addListener( DockingGroupListener listener );
 
     void removeListener( DockingGroupListener listener );
-
-    Collection<DockingGroupListener> listeners( );
-
-    DockingTheme theme( );
-
-    void setLandingIndicator( Rectangle bounds );
-
-    void setArrangement( GroupArrangement groupArr );
-
-    GroupArrangement captureArrangement( );
-
-    List<DockingFrame> windows( );
-
-    DockingFrame addNewWindow( );
-
-    void disposeAllWindows( );
-
-    void onWindowRaised( DockingFrame frame );
-
-    Tile createNewTile( );
 
     void addViewPlacement( String viewId, ViewPlacementRule placementRule );
 
@@ -71,5 +56,11 @@ public interface DockingGroup
     void addViews( Collection<View> views );
 
     void closeView( View view );
+
+    void setArrangement( GroupArrangement groupArr );
+
+    GroupArrangement captureArrangement( );
+
+    void dispose( );
 
 }

@@ -26,12 +26,9 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingGroupUtils.pruneEmptyTile;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
-import static com.metsci.glimpse.docking.LandingRegions.findLandingRegion;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
-import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
@@ -43,23 +40,23 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
-import com.metsci.glimpse.docking.frame.DockingFrame;
 
 public class DockingMouseAdapter extends MouseAdapter
 {
 
     protected final Tile tile;
-    protected final DockingGroup dockingGroup;
+    protected final DockingGroupBase group;
     protected final TileFactory tileFactory;
 
     protected boolean dragging = false;
     protected View draggedView = null;
     protected int draggedViewNum = -1;
 
-    public DockingMouseAdapter( Tile tile, DockingGroup dockingGroup, TileFactory tileFactory )
+
+    public DockingMouseAdapter( Tile tile, DockingGroupBase group, TileFactory tileFactory )
     {
         this.tile = tile;
-        this.dockingGroup = dockingGroup;
+        this.group = group;
         this.tileFactory = tileFactory;
 
         this.dragging = false;
@@ -73,25 +70,25 @@ public class DockingMouseAdapter extends MouseAdapter
         int buttonsDown = ( ev.getModifiersEx( ) & ( BUTTON1_DOWN_MASK | BUTTON2_DOWN_MASK | BUTTON3_DOWN_MASK ) );
         if ( buttonsDown == BUTTON1_DOWN_MASK )
         {
-            Point p = pointRelativeToAncestor( ev, tile );
-            int viewNum = tile.viewNumForTabAt( p.x, p.y );
-            if ( 0 <= viewNum && viewNum < tile.numViews( ) )
+            Point p = pointRelativeToAncestor( ev, this.tile );
+            int viewNum = this.tile.viewNumForTabAt( p.x, p.y );
+            if ( 0 <= viewNum && viewNum < this.tile.numViews( ) )
             {
-                this.draggedView = tile.view( viewNum );
+                this.draggedView = this.tile.view( viewNum );
                 this.draggedViewNum = viewNum;
                 this.dragging = false;
 
                 // double-click to toggle maximize view
                 if ( ev.getClickCount( ) == 2 )
                 {
-                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-                    if ( docker.getMaximizedLeaf( ) == tile )
+                    MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, this.tile );
+                    if ( docker.getMaximizedLeaf( ) == this.tile )
                     {
                         docker.unmaximizeLeaf( );
                     }
                     else
                     {
-                        docker.maximizeLeaf( tile );
+                        docker.maximizeLeaf( this.tile );
                     }
                 }
             }
@@ -101,39 +98,24 @@ public class DockingMouseAdapter extends MouseAdapter
     @Override
     public void mouseDragged( MouseEvent ev )
     {
-        if ( draggedView != null )
+        if ( this.draggedView != null )
         {
-            if ( !dragging )
+            if ( !this.dragging )
             {
-                DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
-                dockingGroup.onWindowRaised( frame );
-
-                // Cause the system's window-manager to show our frames in an order
-                // consistent with the way we're going to iterate through them to
-                // choose the landing-region.
-                //
-                // This is necessary because Java does not provide a way to ask the
-                // window-manager which window is on top at a given spot. It might be
-                // possible to kludge a solution together using Robot.getPixelColor
-                // ... but it would be ugly at best.
-                //
-                for ( DockingFrame f : reversed( dockingGroup.windows( ) ) )
-                {
-                    f.toFront( );
-                }
+                this.group.onDragStarting( this.tile );
             }
 
             this.dragging = true;
 
-            LandingRegion region = findLandingRegion( dockingGroup, tile, draggedViewNum, ev.getLocationOnScreen( ) );
+            LandingRegion region = this.group.findLandingRegion( this.tile, this.draggedViewNum, ev.getLocationOnScreen( ) );
             if ( region != null )
             {
-                dockingGroup.setLandingIndicator( region.getIndicator( ) );
+                this.group.setLandingIndicator( region.getIndicator( ) );
             }
             else
             {
-                Point pOnScreen = convertPointToScreen( tile, new Point( 0, 0 ) );
-                dockingGroup.setLandingIndicator( new Rectangle( pOnScreen.x, pOnScreen.y, tile.getWidth( ), tile.getHeight( ) ) );
+                Point pOnScreen = convertPointToScreen( this.tile, new Point( 0, 0 ) );
+                this.group.setLandingIndicator( new Rectangle( pOnScreen.x, pOnScreen.y, this.tile.getWidth( ), this.tile.getHeight( ) ) );
             }
         }
     }
@@ -141,25 +123,25 @@ public class DockingMouseAdapter extends MouseAdapter
     @Override
     public void mouseReleased( MouseEvent ev )
     {
-        mouseReleased( ev.getButton( ), ev.getLocationOnScreen( ) );
+        this.mouseReleased( ev.getButton( ), ev.getLocationOnScreen( ) );
     }
 
     public void mouseReleased( int button, Point locationOnScreen )
     {
-        if ( button == BUTTON1 && dragging )
+        if ( button == BUTTON1 && this.dragging )
         {
-            LandingRegion landingRegion = findLandingRegion( dockingGroup, tile, draggedViewNum, locationOnScreen );
-            if ( landingRegion != null )
+            LandingRegion region = this.group.findLandingRegion( this.tile, this.draggedViewNum, locationOnScreen );
+            if ( region != null )
             {
-                tile.removeView( draggedView );
-                landingRegion.placeView( draggedView, tileFactory );
-                pruneEmptyTile( tile, true ); // FIXME
+                this.tile.removeView( this.draggedView );
+                region.placeView( this.draggedView, this.tileFactory );
+                this.group.pruneEmptyTile( this.tile );
             }
 
             this.dragging = false;
             this.draggedView = null;
             this.draggedViewNum = -1;
-            dockingGroup.setLandingIndicator( null );
+            this.group.setLandingIndicator( null );
         }
     }
 

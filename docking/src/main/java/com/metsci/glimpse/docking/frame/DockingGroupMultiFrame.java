@@ -28,16 +28,14 @@ package com.metsci.glimpse.docking.frame;
 
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastDockerListener;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyAddedFrame;
-import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosedView;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosedViews;
-import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosingView;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosingViews;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposedFrame;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingAllFrames;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyDisposingFrame;
 import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingDisposeFrame;
 import static com.metsci.glimpse.docking.DockingGroupUtils.chooseViewPlacement;
-import static com.metsci.glimpse.docking.DockingGroupUtils.pruneEmptyTile;
+import static com.metsci.glimpse.docking.DockingGroupUtils.pruneEmpty;
 import static com.metsci.glimpse.docking.DockingGroupUtils.restoreMaximizedTilesInNewDockers;
 import static com.metsci.glimpse.docking.DockingGroupUtils.restoreSelectedViewsInNewTiles;
 import static com.metsci.glimpse.docking.DockingGroupUtils.showNewFrames;
@@ -48,53 +46,47 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.allViewsAreAutoCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableSet;
+import static com.metsci.glimpse.docking.LandingRegions.landingInExistingDocker;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
+import static java.awt.Frame.ICONIFIED;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import com.metsci.glimpse.docking.DockingFrameCloseOperation;
 import com.metsci.glimpse.docking.DockingGroup;
-import com.metsci.glimpse.docking.DockingGroupListener;
+import com.metsci.glimpse.docking.DockingGroupBase;
 import com.metsci.glimpse.docking.DockingGroupUtils.GroupRealization;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewDestination;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
 import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
 import com.metsci.glimpse.docking.DockingTheme;
-import com.metsci.glimpse.docking.LandingIndicator;
+import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking.MultiSplitPane;
 import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.TileFactory;
-import com.metsci.glimpse.docking.TileFactoryStandard;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
-import com.metsci.glimpse.util.var.Disposable;
 
-public class DockingGroupMultiFrame implements DockingGroup
+public class DockingGroupMultiFrame extends DockingGroupBase
 {
     private static final Logger logger = Logger.getLogger( DockingGroup.class.getName( ) );
 
 
-    protected final DockingTheme theme;
-    protected final DockingFrameCloseOperation frameCloseOperation;
-    protected final TileFactory tileFactory;
-
     protected final List<DockingFrame> frames;
     protected GroupArrangement planArr;
-
-    protected final LandingIndicator landingIndicator;
-
-    protected final Set<DockingGroupListener> listeners;
 
 
     public DockingGroupMultiFrame( DockingFrameCloseOperation frameCloseOperation )
@@ -104,87 +96,12 @@ public class DockingGroupMultiFrame implements DockingGroup
 
     public DockingGroupMultiFrame( DockingFrameCloseOperation frameCloseOperation, DockingTheme theme )
     {
-        this.theme = theme;
-        this.frameCloseOperation = frameCloseOperation;
-        this.tileFactory = new TileFactoryStandard( this );
-
+        super( frameCloseOperation, theme );
         this.frames = new ArrayList<>( );
         this.planArr = new GroupArrangement( );
-
-        this.landingIndicator = new LandingIndicator( this.theme );
-
-        this.listeners = new LinkedHashSet<>( );
     }
 
-    @Override
-    public Disposable addListener( DockingGroupListener listener )
-    {
-        this.listeners.add( listener );
-
-        return ( ) ->
-        {
-            this.removeListener( listener );
-        };
-    }
-
-    @Override
-    public void removeListener( DockingGroupListener listener )
-    {
-        this.listeners.remove( listener );
-    }
-
-    @Override
-    public Collection<DockingGroupListener> listeners( )
-    {
-        return unmodifiableSet( this.listeners );
-    }
-
-    @Override
-    public DockingTheme theme( )
-    {
-        return this.theme;
-    }
-
-    @Override
-    public void setLandingIndicator( Rectangle bounds )
-    {
-        this.landingIndicator.setBounds( bounds );
-    }
-
-    @Override
-    public void setArrangement( GroupArrangement groupArr )
-    {
-        // Remember existing views
-        Collection<View> views = findViews( this.frames );
-
-        // Remove existing views, pruning empty tiles and frames
-        for ( View view : views )
-        {
-            this.closeView( view );
-        }
-
-        // Set the arrangement plan
-        this.planArr = groupArr;
-
-        // Re-add views
-        this.addViews( views );
-    }
-
-    @Override
-    public GroupArrangement captureArrangement( )
-    {
-        GroupArrangement existingArr = toGroupRealization( this ).groupArr;
-        return withPlannedPlacements( existingArr, this.planArr );
-    }
-
-    @Override
-    public List<DockingFrame> windows( )
-    {
-        return unmodifiableList( this.frames );
-    }
-
-    @Override
-    public DockingFrame addNewWindow( )
+    public DockingFrame addNewFrame( )
     {
         MultiSplitPane docker = new MultiSplitPane( this.theme.dividerSize );
         attachMulticastDockerListener( docker, this.listeners );
@@ -219,8 +136,7 @@ public class DockingGroupMultiFrame implements DockingGroup
         return frame;
     }
 
-    @Override
-    public void onWindowRaised( DockingFrame frame )
+    protected void onWindowRaised( DockingFrame frame )
     {
         boolean found = this.frames.remove( frame );
         if ( !found )
@@ -238,13 +154,10 @@ public class DockingGroupMultiFrame implements DockingGroup
         switch ( this.frameCloseOperation )
         {
             case DO_NOTHING:
-            {
                 // Do nothing
-            }
-            break;
+                break;
 
             case DISPOSE_CLOSED_FRAME:
-            {
                 Set<View> views = findViews( frame.docker );
                 if ( allViewsAreAutoCloseable( views ) )
                 {
@@ -257,21 +170,16 @@ public class DockingGroupMultiFrame implements DockingGroup
                 {
                     logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
                 }
-            }
-            break;
+                break;
 
             case DISPOSE_ALL_FRAMES:
-            {
-                this.disposeAllWindows( );
-            }
-            break;
+                this.dispose( );
+                break;
 
             case EXIT_JVM:
-            {
-                this.disposeAllWindows( );
+                this.dispose( );
                 System.exit( 0 );
-            }
-            break;
+                break;
         }
     }
 
@@ -290,39 +198,10 @@ public class DockingGroupMultiFrame implements DockingGroup
     }
 
     @Override
-    public void disposeAllWindows( )
-    {
-        notifyDisposingAllFrames( this.listeners, this );
-        for ( DockingFrame frame : this.frames )
-        {
-            notifyDisposingFrame( this.listeners, this, frame );
-            frame.dispose( );
-        }
-    }
-
-    @Override
-    public Tile createNewTile( )
-    {
-        return this.tileFactory.newTile( );
-    }
-
-    @Override
     public void addViewPlacement( String viewId, ViewPlacementRule placementRule )
     {
         GroupArrangement existingArr = toGroupRealization( this ).groupArr;
         this.planArr = withPlacement( existingArr, this.planArr, viewId, placementRule );
-    }
-
-    @Override
-    public void addView( View view )
-    {
-        this.addViews( view );
-    }
-
-    @Override
-    public void addViews( View... views )
-    {
-        this.addViews( asList( views ) );
     }
 
     @Override
@@ -343,20 +222,140 @@ public class DockingGroupMultiFrame implements DockingGroup
     }
 
     @Override
-    public void closeView( View view )
+    public void setArrangement( GroupArrangement groupArr )
     {
-        Tile tile = getAncestorOfClass( Tile.class, view.component.v( ) );
-        if ( tile == null )
+        Collection<View> views = findViews( this.frames );
+
+        for ( View view : views )
         {
-            throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
+            this.closeView( view );
         }
 
-        notifyClosingView( this.listeners, this, view );
+        this.planArr = groupArr;
 
-        tile.removeView( view );
-        pruneEmptyTile( tile, true ); // FIXME
+        this.addViews( views );
+    }
 
-        notifyClosedView( this.listeners, this, view );
+    @Override
+    public GroupArrangement captureArrangement( )
+    {
+        GroupArrangement existingArr = toGroupRealization( this ).groupArr;
+        return withPlannedPlacements( existingArr, this.planArr );
+    }
+
+    @Override
+    public void pruneEmptyTile( Tile tile )
+    {
+        pruneEmpty( tile, true );
+    }
+
+    @Override
+    public void onDragStarting( Tile fromTile )
+    {
+        DockingFrame fromFrame = getAncestorOfClass( DockingFrame.class, fromTile );
+        this.onWindowRaised( fromFrame );
+
+        // When choosing a landing-region, it's important to iterate over windows
+        // according to stacking order. Unfortunately, Swing does not provide a
+        // mechanism for checking the existing stacking order.
+        //
+        // As a workaround, we do our best to reconstruct the stacking order, by
+        // listening for various events. Before we choose a landing-region, we
+        // re-stack our windows to match our reconstructed ordering. This causes
+        // the actual ordering to match the reconstructed ordering. We can then
+        // iterate according to the reconstruction.
+        //
+        for ( DockingFrame frame : reversed( this.frames ) )
+        {
+            frame.toFront( );
+        }
+    }
+
+    @Override
+    public LandingRegion findLandingRegion( Tile fromTile, int fromViewNum, Point pOnScreen )
+    {
+        for ( DockingFrame frame : this.frames )
+        {
+            MultiSplitPane docker = frame.docker;
+            if ( docker.isVisible( ) && frame.isVisible( ) && ( frame.getExtendedState( ) & ICONIFIED ) == 0 )
+            {
+                Point pInDocker = convertPointFromScreen( pOnScreen, docker );
+                if ( docker.contains( pInDocker ) )
+                {
+                    return landingInExistingDocker( docker, fromTile, fromViewNum, pOnScreen );
+                }
+            }
+        }
+        return this.landingInNewFrame( fromTile, fromViewNum, pOnScreen );
+    }
+
+    protected LandingRegion landingInNewFrame( Tile fromTile, int fromViewNum, Point pOnScreen )
+    {
+        int xFrameInset;
+        int yFrameInset;
+        {
+            DockingFrame frame = getAncestorOfClass( DockingFrame.class, fromTile );
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, fromTile );
+            Point frameOrigin = convertPointToScreen( frame, new Point( 0, 0 ) );
+            Point dockerOrigin = convertPointToScreen( docker, new Point( 0, 0 ) );
+            Insets dockerInsets = docker.getInsets( );
+            xFrameInset = ( dockerOrigin.x - frameOrigin.x ) + dockerInsets.left;
+            yFrameInset = ( dockerOrigin.y - frameOrigin.y ) + dockerInsets.top;
+        }
+
+        Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
+        Rectangle leftmostTabBounds = draggedTabBounds;
+        for ( int i = 0; i < fromTile.numViews( ); i++ )
+        {
+            if ( fromTile.hasViewTab( i ) )
+            {
+                leftmostTabBounds = fromTile.viewTabBounds( i );
+                break;
+            }
+        }
+
+        // TODO: Could do better by accounting for the mouse-press point
+        int xTileOffset = leftmostTabBounds.x + 7 * draggedTabBounds.width / 16;
+        int yTileOffset = leftmostTabBounds.y + 5 * draggedTabBounds.height / 8;
+        int xRegionOnScreen = pOnScreen.x - xTileOffset;
+        int yRegionOnScreen = pOnScreen.y - yTileOffset;
+
+        int regionWidth = fromTile.getWidth( );
+        int regionHeight = fromTile.getHeight( );
+
+        return new LandingRegion( )
+        {
+            @Override
+            public Rectangle getIndicator( )
+            {
+                return new Rectangle( xRegionOnScreen, yRegionOnScreen, regionWidth, regionHeight );
+            }
+
+            @Override
+            public void placeView( View view, TileFactory tileFactory )
+            {
+                Tile tile = tileFactory.newTile( );
+                tile.addView( view, 0 );
+
+                DockingFrame frame = DockingGroupMultiFrame.this.addNewFrame( );
+                frame.docker.addInitialLeaf( tile );
+                frame.setLocation( xRegionOnScreen - xFrameInset, yRegionOnScreen - yFrameInset );
+                tile.setPreferredSize( new Dimension( regionWidth, regionHeight ) );
+                frame.pack( );
+                frame.setVisible( true );
+            }
+        };
+    }
+
+    @Override
+    public void dispose( )
+    {
+        notifyDisposingAllFrames( this.listeners, this );
+        for ( DockingFrame frame : this.frames )
+        {
+            notifyDisposingFrame( this.listeners, this, frame );
+            frame.dispose( );
+        }
     }
 
 }

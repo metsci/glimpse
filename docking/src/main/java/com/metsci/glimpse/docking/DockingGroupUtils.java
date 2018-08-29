@@ -75,10 +75,10 @@ public class DockingGroupUtils
     {
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewTile && dest.planTile != null )
+            if ( dest.createdTile != null && dest.planTile != null )
             {
-                View view = dest.tile.view( dest.planTile.selectedViewId );
-                dest.tile.selectView( view );
+                View view = dest.createdTile.view( dest.planTile.selectedViewId );
+                dest.createdTile.selectView( view );
             }
         }
     }
@@ -91,21 +91,18 @@ public class DockingGroupUtils
         Map<MultiSplitPane,Tile> maximizedTiles = new LinkedHashMap<>( );
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewTile && dest.planTile != null && dest.planTile.isMaximized )
+            if ( dest.createdDocker != null && dest.createdTile != null && dest.planTile != null && dest.planTile.isMaximized )
             {
-                maximizedTiles.put( dest.docker, dest.tile );
+                maximizedTiles.put( dest.createdDocker, dest.createdTile );
             }
         }
 
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewDocker )
+            Tile tile = maximizedTiles.get( dest.createdDocker );
+            if ( tile != null )
             {
-                Tile tile = maximizedTiles.get( dest.docker );
-                if ( tile != null )
-                {
-                    dest.docker.maximizeLeaf( tile );
-                }
+                dest.createdDocker.maximizeLeaf( tile );
             }
         }
     }
@@ -119,9 +116,9 @@ public class DockingGroupUtils
         Map<FrameArrangement,DockingFrame> plannedNewFrames = new LinkedHashMap<>( );
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewFrame && dest.planFrame != null )
+            if ( dest.createdFrame != null && dest.planFrame != null )
             {
-                plannedNewFrames.put( dest.planFrame, dest.frame );
+                plannedNewFrames.put( dest.planFrame, dest.createdFrame );
             }
         }
         for ( FrameArrangement frameArr : reversed( orderedFrameArrs ) )
@@ -136,9 +133,9 @@ public class DockingGroupUtils
         // Stack unplanned new frames in front of existing frames
         for ( ViewDestination dest : viewDestinations )
         {
-            if ( dest.isNewFrame && dest.planFrame == null )
+            if ( dest.createdFrame != null && dest.planFrame == null )
             {
-                dest.frame.setVisible( true );
+                dest.createdFrame.setVisible( true );
             }
         }
     }
@@ -279,7 +276,7 @@ public class DockingGroupUtils
         return copy;
     }
 
-    public static void pruneEmptyTile( Tile tile, boolean disposeEmptyFrame )
+    public static void pruneEmpty( Tile tile, boolean disposeEmptyFrame )
     {
         if ( tile.numViews( ) == 0 )
         {
@@ -299,12 +296,12 @@ public class DockingGroupUtils
 
     public static class GroupRealization
     {
-        public final DockingGroup group;
+        public final DockingGroupBase group;
         public final GroupArrangement groupArr;
         public final Map<FrameArrangement,DockingFrame> frames;
         public final Map<DockerArrangementNode,Component> components;
 
-        public GroupRealization( DockingGroup group,
+        public GroupRealization( DockingGroupBase group,
                                  GroupArrangement groupArr,
                                  Map<FrameArrangement,DockingFrame> frames,
                                  Map<DockerArrangementNode,Component> components )
@@ -316,7 +313,7 @@ public class DockingGroupUtils
         }
     }
 
-    public static GroupRealization toGroupRealization( DockingGroup group )
+    public static GroupRealization toGroupRealization( DockingGroupBase group )
     {
         Map<FrameArrangement,DockingFrame> framesMap = new LinkedHashMap<>( );
         Map<DockerArrangementNode,Component> componentsMap = new LinkedHashMap<>( );
@@ -416,38 +413,29 @@ public class DockingGroupUtils
 
     public static class ViewDestination
     {
+        public final DockingFrame createdFrame;
         public final FrameArrangement planFrame;
-        public final boolean isNewFrame;
-        public final DockingFrame frame;
 
-        public final boolean isNewDocker;
-        public final MultiSplitPane docker;
+        public final MultiSplitPane createdDocker;
 
+        public final Tile createdTile;
         public final DockerArrangementTile planTile;
-        public final boolean isNewTile;
-        public final Tile tile;
 
-        public ViewDestination( FrameArrangement planFrame,
-                                boolean isNewFrame,
-                                DockingFrame frame,
+        public ViewDestination( DockingFrame createdFrame,
+                                FrameArrangement planFrame,
 
-                                boolean isNewDocker,
-                                MultiSplitPane docker,
+                                MultiSplitPane createdDocker,
 
-                                DockerArrangementTile planTile,
-                                boolean isNewTile,
-                                Tile tile )
+                                Tile createdTile,
+                                DockerArrangementTile planTile )
         {
+            this.createdFrame = createdFrame;
             this.planFrame = planFrame;
-            this.isNewFrame = isNewFrame;
-            this.frame = frame;
 
-            this.isNewDocker = isNewDocker;
-            this.docker = docker;
+            this.createdDocker = createdDocker;
 
+            this.createdTile = createdTile;
             this.planTile = planTile;
-            this.isNewTile = isNewTile;
-            this.tile = tile;
         }
     }
 
@@ -479,11 +467,7 @@ public class DockingGroupUtils
             Tile tile = ( Tile ) existing.components.get( this.existingTile );
             tile.addView( newView, viewNum );
 
-            DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
-
-            return new ViewDestination( this.planFrame, false, frame,
-                                        false, frame.docker,
-                                        this.planTile, false, tile );
+            return new ViewDestination( null, null, null, null, null );
         }
     }
 
@@ -530,12 +514,10 @@ public class DockingGroupUtils
 
             Component neighbor = existing.components.get( this.neighborNode );
 
-            DockingFrame frame = getAncestorOfClass( DockingFrame.class, neighbor );
-            frame.docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, neighbor );
+            docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
 
-            return new ViewDestination( this.planFrame, false, frame,
-                                        false, frame.docker,
-                                        this.planTile, true, newTile );
+            return new ViewDestination( null, null, null, newTile, this.planTile );
         }
     }
 
@@ -588,9 +570,7 @@ public class DockingGroupUtils
             newFrame.setNormalBounds( this.planFrame.x, this.planFrame.y, this.planFrame.width, this.planFrame.height );
             newFrame.setExtendedState( getFrameExtendedState( this.planFrame.isMaximizedHoriz, this.planFrame.isMaximizedVert ) );
 
-            return new ViewDestination( this.planFrame, true, newFrame,
-                                        true, newFrame.docker,
-                                        this.planTile, true, newTile );
+            return new ViewDestination( newFrame, this.planFrame, newFrame.docker, newTile, this.planTile );
         }
     }
 
@@ -632,9 +612,7 @@ public class DockingGroupUtils
             newFrame.setNormalBounds( newFrameBounds );
             newFrame.setExtendedState( getFrameExtendedState( false, false ) );
 
-            return new ViewDestination( null, true, newFrame,
-                                        true, newFrame.docker,
-                                        null, true, newTile );
+            return new ViewDestination( newFrame, null, newFrame.docker, newTile, null );
         }
     }
 
