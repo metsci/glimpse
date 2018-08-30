@@ -68,7 +68,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import com.google.common.collect.ImmutableList;
-import com.metsci.glimpse.docking.frame.DockingFrame;
+import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;

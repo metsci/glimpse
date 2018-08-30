@@ -40,6 +40,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
+import com.metsci.glimpse.docking.group.DockingGroupBase;
 
 public class DockingMouseAdapter extends MouseAdapter
 {

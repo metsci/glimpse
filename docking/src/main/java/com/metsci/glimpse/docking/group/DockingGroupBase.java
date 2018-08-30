@@ -24,11 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.group;
 
-import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosedView;
-import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyClosingView;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyClosedView;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyClosingView;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
@@ -38,7 +38,16 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.metsci.glimpse.docking.DockingFrameCloseOperation;
+import com.metsci.glimpse.docking.DockingGroup;
+import com.metsci.glimpse.docking.DockingGroupListener;
+import com.metsci.glimpse.docking.DockingTheme;
+import com.metsci.glimpse.docking.LandingIndicator;
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
+import com.metsci.glimpse.docking.Tile;
+import com.metsci.glimpse.docking.TileFactory;
+import com.metsci.glimpse.docking.TileFactoryStandard;
+import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.util.var.Disposable;
 
 public abstract class DockingGroupBase implements DockingGroup

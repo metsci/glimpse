@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.metsci.glimpse.docking.frame.DockingFrame;
+import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 

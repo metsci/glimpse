@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingGroupListenerUtils.attachMulticastTileListener;
-import static com.metsci.glimpse.docking.DockingGroupListenerUtils.notifyUserRequestingCloseView;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_CUSTOM_CLOSEABLE;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.attachMulticastTileListener;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyUserRequestingCloseView;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.lang.Math.ceil;
@@ -51,6 +51,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 
 import com.metsci.glimpse.docking.TileImpl.TabComponentFactory;
+import com.metsci.glimpse.docking.group.DockingGroupBase;
 
 @SuppressWarnings( "serial" )
 public class TileFactoryStandard implements TileFactory

@@ -24,12 +24,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.group;
 
 import java.awt.Component;
 import java.util.Collection;
 
-import com.metsci.glimpse.docking.frame.DockingFrame;
+import com.metsci.glimpse.docking.DockingGroup;
+import com.metsci.glimpse.docking.DockingGroupListener;
+import com.metsci.glimpse.docking.MultiSplitPane;
+import com.metsci.glimpse.docking.MultiSplitPaneListener;
+import com.metsci.glimpse.docking.SplitPane;
+import com.metsci.glimpse.docking.Tile;
+import com.metsci.glimpse.docking.TileListener;
+import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroupListenerUtils

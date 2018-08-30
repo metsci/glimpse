@@ -27,8 +27,10 @@
 package com.metsci.glimpse.docking;
 
 import java.util.Collection;
+import java.util.Set;
 
-import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
+import com.metsci.glimpse.docking.group.DockingGroupBase;
+import com.metsci.glimpse.docking.group.ViewPlacementRule;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.util.var.Disposable;
 
@@ -46,6 +48,8 @@ public interface DockingGroup
     Disposable addListener( DockingGroupListener listener );
 
     void removeListener( DockingGroupListener listener );
+
+    Set<View> views( );
 
     void addViewPlacement( String viewId, ViewPlacementRule placementRule );
 

@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Component;
 
-import com.metsci.glimpse.docking.frame.DockingFrame;
+import com.metsci.glimpse.docking.group.frame.DockingFrame;
 
 public interface DockingGroupListener
 {
