@@ -32,10 +32,12 @@ import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyC
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.metsci.glimpse.docking.DockingFrameCloseOperation;
@@ -48,6 +50,8 @@ import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.TileFactory;
 import com.metsci.glimpse.docking.TileFactoryStandard;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.xml.DockerArrangementNode;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.util.var.Disposable;
 
 public abstract class DockingGroupBase implements DockingGroup
@@ -114,6 +118,15 @@ public abstract class DockingGroupBase implements DockingGroup
     {
         this.addViews( asList( views ) );
     }
+
+    /**
+     * Returns a {@link GroupArrangement} that reflects only existing components,
+     * <em>not</em> the planned arrangement of potential future components.
+     * <p>
+     * If {@code componentsMap} is non-null, it will be populated with mappings
+     * from {@link DockerArrangementNode}s to corresponding {@link Component}s.
+     */
+    public abstract GroupArrangement existingArrangement( Map<DockerArrangementNode,Component> componentsMap );
 
     public void onDragStarting( Tile fromTile )
     {

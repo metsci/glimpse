@@ -42,7 +42,7 @@ public class ViewPlacementUtils
         }
 
         // Create a new arrangement, starting with existing views
-        GroupArrangement newPlanArr = existingArr;
+        GroupArrangement newPlanArr = group.existingArrangement( null );
 
         // Add viewIds that don't exist, but do have planned placements
         for ( String planViewId : findViewIds( planArr ) )
@@ -67,7 +67,7 @@ public class ViewPlacementUtils
         Set<String> existingViewIds = existingViewIds( group );
 
         // Create a new arrangement, starting with existing views
-        GroupArrangement newPlanArr = existingArr;
+        GroupArrangement newPlanArr = group.existingArrangement( null );
 
         // Add viewIds that don't exist, but do have planned placements
         for ( String planViewId : findViewIds( planArr ) )

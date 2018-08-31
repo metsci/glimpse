@@ -247,13 +247,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
         return rebuildPlanArr( this, this.planArr );
     }
 
-    /**
-     * Returns a {@link GroupArrangement} that reflects only existing components,
-     * <em>not</em> the planned arrangement of potential future components.
-     * <p>
-     * If {@code componentsMap} is non-null, it will be populated with mappings
-     * from {@link DockerArrangementNode}s to corresponding {@link Component}s.
-     */
+    @Override
     public GroupArrangement existingArrangement( Map<DockerArrangementNode,Component> componentsMap )
     {
         GroupArrangement groupArr = new GroupArrangement( );
