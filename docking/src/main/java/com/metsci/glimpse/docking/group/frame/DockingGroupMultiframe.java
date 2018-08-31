@@ -270,9 +270,8 @@ public class DockingGroupMultiframe extends DockingGroupBase
         GroupArrangement newPlanArr = this.getExistingArr( null );
         for ( String futureViewId : futureViewIds( this, this.planArr ) )
         {
-            GroupArrangement existingArr = this.getExistingArr( null );
             ViewPlacerMultiframeArr placer = new ViewPlacerMultiframeArr( newPlanArr, futureViewId );
-            placeView( existingArr, this.planArr, futureViewId, placer );
+            placeView( newPlanArr, this.planArr, futureViewId, placer );
         }
         return newPlanArr;
     }
