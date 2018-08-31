@@ -1,11 +1,14 @@
 package com.metsci.glimpse.docking.group;
 
+import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.docking.MiscUtils.union;
 import static com.metsci.glimpse.docking.SplitPane.computeChildSizes;
 import static java.util.Collections.unmodifiableSet;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,9 +67,113 @@ public class ArrangementUtils
         }
     }
 
+    public static void removeView( GroupArrangement groupArr, String viewId )
+    {
+        DockerArrangementTile tile = findArrTileContaining( groupArr, viewId );
+        if ( tile != null )
+        {
+            tile.viewIds.remove( viewId );
+
+            if ( tile.viewIds.isEmpty( ) )
+            {
+                pruneEmpty( groupArr );
+            }
+            else if ( equal( tile.selectedViewId, viewId ) )
+            {
+                tile.selectedViewId = tile.viewIds.get( 0 );
+            }
+        }
+    }
+
+    public static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, String viewId )
+    {
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            DockerArrangementTile tile = findArrTileContaining( frameArr.dockerArr, viewId );
+            if ( tile != null )
+            {
+                return frameArr;
+            }
+        }
+        return null;
+    }
+
     public static DockerArrangementTile findArrTileContaining( GroupArrangement groupArr, String viewId )
     {
-        return findArrTileContaining( groupArr, buildSubtreeViewIdsMap( groupArr ), viewId );
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            DockerArrangementTile tile = findArrTileContaining( frameArr.dockerArr, viewId );
+            if ( tile != null )
+            {
+                return tile;
+            }
+        }
+        return null;
+    }
+
+    public static DockerArrangementTile findArrTileContaining( DockerArrangementNode arrNode, String viewId )
+    {
+        for ( DockerArrangementTile tile : findTiles( arrNode ) )
+        {
+            if ( tile.viewIds.contains( viewId ) )
+            {
+                return tile;
+            }
+        }
+        return null;
+    }
+
+    public static void pruneEmpty( GroupArrangement groupArr )
+    {
+        List<FrameArrangement> newFrameArrs = new ArrayList<>( );
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            frameArr.dockerArr = pruneEmpty( frameArr.dockerArr );
+            if ( frameArr.dockerArr != null )
+            {
+                newFrameArrs.add( frameArr );
+            }
+        }
+        groupArr.frameArrs = newFrameArrs;
+    }
+
+    public static DockerArrangementNode pruneEmpty( DockerArrangementNode arrNode )
+    {
+        if ( arrNode instanceof DockerArrangementTile )
+        {
+            DockerArrangementTile tile = ( DockerArrangementTile ) arrNode;
+            return ( tile.viewIds.isEmpty( ) ? null : tile );
+        }
+        else if ( arrNode instanceof DockerArrangementSplit )
+        {
+            DockerArrangementSplit split = ( DockerArrangementSplit ) arrNode;
+            split.childA = pruneEmpty( split.childA );
+            split.childB = pruneEmpty( split.childB );
+            if ( split.childA != null && split.childB != null )
+            {
+                return split;
+            }
+            else if ( split.childA != null )
+            {
+                return split.childA;
+            }
+            else if ( split.childB != null )
+            {
+                return split.childB;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else if ( arrNode == null )
+        {
+            return null;
+        }
+        else
+        {
+            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
+        }
     }
 
     public static Map<DockerArrangementNode,Set<String>> buildSubtreeViewIdsMap( GroupArrangement groupArr )
@@ -111,73 +218,6 @@ public class ArrangementUtils
         else
         {
             throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + arrNode.getClass( ).getName( ) );
-        }
-    }
-
-    public static DockerArrangementTile findArrTileContaining( GroupArrangement groupArr, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
-    {
-        FrameArrangement frame = findFrameArrContaining( groupArr, subtreeViewIds, viewId );
-        return ( frame == null ? null : findArrTileContaining( frame.dockerArr, subtreeViewIds, viewId ) );
-    }
-
-    public static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
-    {
-        for ( FrameArrangement frameArr : groupArr.frameArrs )
-        {
-            if ( containsView( frameArr.dockerArr, subtreeViewIds, viewId ) )
-            {
-                return frameArr;
-            }
-        }
-
-        return null;
-    }
-
-    protected static boolean containsView( DockerArrangementNode node, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
-    {
-        Set<String> viewIds = subtreeViewIds.get( node );
-        return ( viewIds != null && viewIds.contains( viewId ) );
-    }
-
-    protected static DockerArrangementTile findArrTileContaining( DockerArrangementNode node, Map<DockerArrangementNode,Set<String>> subtreeViewIds, String viewId )
-    {
-        if ( node instanceof DockerArrangementTile )
-        {
-            DockerArrangementTile tile = ( DockerArrangementTile ) node;
-            if ( subtreeViewIds.get( tile ).contains( viewId ) )
-            {
-                return tile;
-            }
-
-            return null;
-        }
-        else if ( node instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit split = ( DockerArrangementSplit ) node;
-            if ( subtreeViewIds.get( split ).contains( viewId ) )
-            {
-                DockerArrangementTile resultA = findArrTileContaining( split.childA, subtreeViewIds, viewId );
-                if ( resultA != null )
-                {
-                    return resultA;
-                }
-
-                DockerArrangementTile resultB = findArrTileContaining( split.childB, subtreeViewIds, viewId );
-                if ( resultB != null )
-                {
-                    return resultB;
-                }
-            }
-
-            return null;
-        }
-        else if ( node == null )
-        {
-            return null;
-        }
-        else
-        {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + node.getClass( ).getName( ) );
         }
     }
 
@@ -251,7 +291,7 @@ public class ArrangementUtils
         }
     }
 
-    protected static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, DockerArrangementNode node )
+    public static FrameArrangement findFrameArrContaining( GroupArrangement groupArr, DockerArrangementNode node )
     {
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
@@ -260,7 +300,6 @@ public class ArrangementUtils
                 return frameArr;
             }
         }
-
         return null;
     }
 

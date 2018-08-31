@@ -1,6 +1,5 @@
 package com.metsci.glimpse.docking.group;
 
-import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.docking.MiscUtils.intersection;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findViewIds;
 import static java.lang.Math.max;
@@ -12,8 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.metsci.glimpse.docking.DockingGroup;
-import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
@@ -22,74 +19,16 @@ public class ViewPlacementUtils
 {
 
     /**
-     * This method does not currently support changing the placement of existing views. If there
-     * is an existing view for the specified {@code viewId}, an exception will be thrown.
-     * <p>
-     * The {@link ViewPlacement} returned by {@code placementRule} will be used for its
-     * {@link ViewPlacement#placeView(GroupArrangement, String)} method only. (In most cases --
-     * but NOT in all cases -- this means that {@code placementRule} doesn't need to worry about
-     * arguments called {@code planFrame} or {@code planTile}, and can simply use {@code null} for
-     * those args. But it depends on the particular implementation of {@link ViewPlacement}.)
+     * Returns the set of viewIds which don't currently exist, but do appear in the plan.
      */
-    public static GroupArrangement rebuildPlanArr( DockingGroupBase group, GroupArrangement planArr, ViewPlacementRule placementRule, String viewId )
+    public static Set<String> futureViewIds( DockingGroupBase group, GroupArrangement planArr )
     {
-        // Remember which viewIds currently exist
-        Set<String> existingViewIds = existingViewIds( group );
-        if ( existingViewIds.contains( viewId ) )
+        Set<String> result = findViewIds( planArr );
+        for ( String viewId : group.views( ).keySet( ) )
         {
-            // TODO: Maybe remove the existing view, insert placement, and re-add
-            throw new UnsupportedOperationException( "This method does not currently support changing the placement of an existing view" );
+            result.remove( viewId );
         }
-
-        // Create a new arrangement, starting with existing views
-        GroupArrangement newPlanArr = group.existingArrangement( null );
-
-        // Add viewIds that don't exist, but do have planned placements
-        for ( String planViewId : findViewIds( planArr ) )
-        {
-            // Skip the new viewId here, because it will be added below
-            if ( !existingViewIds.contains( planViewId ) && !equal( planViewId, viewId ) )
-            {
-                addToArr( newPlanArr, planArr, planViewId );
-            }
-        }
-
-        // Add the new view
-        addToArr( newPlanArr, placementRule, existingViewIds, viewId );
-
-        // Return complete arrangement
-        return newPlanArr;
-    }
-
-    public static GroupArrangement rebuildPlanArr( DockingGroupBase group, GroupArrangement planArr )
-    {
-        // Remember which viewIds currently exist
-        Set<String> existingViewIds = existingViewIds( group );
-
-        // Create a new arrangement, starting with existing views
-        GroupArrangement newPlanArr = group.existingArrangement( null );
-
-        // Add viewIds that don't exist, but do have planned placements
-        for ( String planViewId : findViewIds( planArr ) )
-        {
-            if ( !existingViewIds.contains( planViewId ) )
-            {
-                addToArr( newPlanArr, planArr, planViewId );
-            }
-        }
-
-        // Return complete arrangement
-        return newPlanArr;
-    }
-
-    public static Set<String> existingViewIds( DockingGroup group )
-    {
-        Set<String> viewIds = new LinkedHashSet<>( );
-        for ( View view : group.views( ) )
-        {
-            viewIds.add( view.viewId );
-        }
-        return viewIds;
+        return result;
     }
 
     public static int chooseViewNum( List<String> planViewIds, List<String> existingViewIds, String newViewId )

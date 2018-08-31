@@ -6,9 +6,7 @@ import static com.metsci.glimpse.docking.Side.TOP;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.replaceArrNode;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.fallbackFrameBounds;
 
-import java.awt.Component;
 import java.awt.Rectangle;
-import java.util.Map;
 
 import com.metsci.glimpse.docking.Side;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
@@ -31,14 +29,14 @@ class ViewPlacerMultiframeArr implements ViewPlacerMultiframe<Void>
     }
 
     @Override
-    public Void addToTile( DockerArrangementTile existingTile, int viewNum, Map<DockerArrangementNode,Component> componentsMap )
+    public Void addToTile( DockerArrangementTile existingTile, int viewNum )
     {
         existingTile.viewIds.add( viewNum, this.newViewId );
         return null;
     }
 
     @Override
-    public Void addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap )
+    public Void addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( this.newViewId );

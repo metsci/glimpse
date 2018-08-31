@@ -27,7 +27,7 @@
 package com.metsci.glimpse.docking;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.Map;
 
 import com.metsci.glimpse.docking.group.DockingGroupBase;
 import com.metsci.glimpse.docking.group.ViewPlacementRule;
@@ -49,7 +49,7 @@ public interface DockingGroup
 
     void removeListener( DockingGroupListener listener );
 
-    Set<View> views( );
+    Map<String,View> views( );
 
     void addViewPlacement( String viewId, ViewPlacementRule placementRule );
 

@@ -48,7 +48,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -448,24 +450,25 @@ public class DockingUtils
         return tiles;
     }
 
-    public static Set<View> findViews( Collection<? extends DockingFrame> frames )
+    public static Map<String,View> findViews( Collection<? extends DockingFrame> frames )
     {
-        Set<View> views = new LinkedHashSet<>( );
+        Map<String,View> views = new LinkedHashMap<>( );
         for ( DockingFrame frame : frames )
         {
-            views.addAll( findViews( frame.docker ) );
+            views.putAll( findViews( frame.docker ) );
         }
         return views;
     }
 
-    public static Set<View> findViews( MultiSplitPane docker )
+    public static Map<String,View> findViews( MultiSplitPane docker )
     {
-        Set<View> views = new LinkedHashSet<>( );
+        Map<String,View> views = new LinkedHashMap<>( );
         for ( Tile tile : findTiles( docker ) )
         {
             for ( int i = 0; i < tile.numViews( ); i++ )
             {
-                views.add( tile.view( i ) );
+                View view = tile.view( i );
+                views.put( view.viewId, view );
             }
         }
         return views;

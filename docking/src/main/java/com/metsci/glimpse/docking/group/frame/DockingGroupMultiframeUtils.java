@@ -42,17 +42,17 @@ public class DockingGroupMultiframeUtils
         Map<DockerArrangementNode,Set<String>> existingSubtreeViewIds = buildSubtreeViewIdsMap( existingArr );
         Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildSubtreeViewIdsMap( group.planArr );
 
-        FrameArrangement planFrame = findFrameArrContaining( planArr, planSubtreeViewIds, viewId );
+        FrameArrangement planFrame = findFrameArrContaining( planArr, viewId );
         if ( planFrame != null )
         {
             // Add to an existing tile that is similar to the planned tile
-            DockerArrangementTile planTile = findArrTileContaining( planArr, planSubtreeViewIds, viewId );
+            DockerArrangementTile planTile = findArrTileContaining( planFrame.dockerArr, viewId );
             Set<String> planTileViewIds = planSubtreeViewIds.get( planTile );
             DockerArrangementTile existingTile = findSimilarArrTile( existingSubtreeViewIds, planTileViewIds );
             if ( existingTile != null )
             {
                 int viewNum = chooseViewNum( planTile.viewIds, existingTile.viewIds, viewId );
-                return viewPlacer.addToTile( existingTile, viewNum, componentsMap );
+                return viewPlacer.addToTile( existingTile, viewNum );
             }
 
             // Create a new tile, beside an existing neighbor that is similar to the planned neighbor
@@ -74,7 +74,7 @@ public class DockingGroupMultiframeUtils
                 {
                     Side sideOfNeighbor = ( planParent.arrangeVertically ? ( newIsChildA ? TOP : BOTTOM ) : ( newIsChildA ? LEFT : RIGHT ) );
                     double extentFrac = ( newIsChildA ? planParent.splitFrac : 1.0 - planParent.splitFrac );
-                    return viewPlacer.addBesideNeighbor( planTile, existingNeighbor, sideOfNeighbor, extentFrac, componentsMap );
+                    return viewPlacer.addBesideNeighbor( planTile, existingNeighbor, sideOfNeighbor, extentFrac );
                 }
 
                 // Go one level up the tree and try again
@@ -90,7 +90,7 @@ public class DockingGroupMultiframeUtils
         if ( existingLargest != null )
         {
             int viewNum = existingLargest.viewIds.size( );
-            return viewPlacer.addToTile( existingLargest, viewNum, componentsMap );
+            return viewPlacer.addToTile( existingLargest, viewNum );
         }
 
         // Final fallback is in a new frame

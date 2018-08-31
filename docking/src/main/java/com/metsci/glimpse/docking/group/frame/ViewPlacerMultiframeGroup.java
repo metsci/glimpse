@@ -6,7 +6,6 @@ import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils
 
 import java.awt.Component;
 import java.awt.Rectangle;
-import java.util.Map;
 
 import com.metsci.glimpse.docking.MultiSplitPane;
 import com.metsci.glimpse.docking.Side;
@@ -30,7 +29,7 @@ class ViewPlacerMultiframeGroup implements ViewPlacerMultiframe<ViewDestinationM
     }
 
     @Override
-    public ViewDestinationMultiframe addToTile( DockerArrangementTile existingTile, int newViewNum, Map<DockerArrangementNode,Component> componentsMap )
+    public ViewDestinationMultiframe addToTile( DockerArrangementTile existingTile, int newViewNum )
     {
         Tile tile = ( Tile ) componentsMap.get( existingTile );
         tile.addView( this.newView, newViewNum );
@@ -38,7 +37,7 @@ class ViewPlacerMultiframeGroup implements ViewPlacerMultiframe<ViewDestinationM
     }
 
     @Override
-    public ViewDestinationMultiframe addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap )
+    public ViewDestinationMultiframe addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );

@@ -34,6 +34,7 @@ import static com.metsci.glimpse.docking.LandingRegions.landingInExistingDocker;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
+import static com.metsci.glimpse.docking.group.ArrangementUtils.removeView;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.attachMulticastDockerListener;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyAddedFrame;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyClosedViews;
@@ -45,7 +46,7 @@ import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyU
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.pruneEmpty;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreSelectedViewsInNewTiles;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.toArrNode;
-import static com.metsci.glimpse.docking.group.ViewPlacementUtils.rebuildPlanArr;
+import static com.metsci.glimpse.docking.group.ViewPlacementUtils.futureViewIds;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.placeView;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.restoreMaximizedTilesInNewDockers;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.showNewFrames;
@@ -160,7 +161,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
                 break;
 
             case DISPOSE_CLOSED_FRAME:
-                Set<View> views = findViews( frame.docker );
+                Collection<View> views = findViews( frame.docker ).values( );
                 if ( allViewsAreAutoCloseable( views ) )
                 {
                     notifyDisposingFrame( this.listeners, this, frame );
@@ -200,9 +201,28 @@ public class DockingGroupMultiframe extends DockingGroupBase
     }
 
     @Override
-    public void addViewPlacement( String viewId, ViewPlacementRule placementRule )
+    public void addViewPlacement( String viewId, ViewPlacementRule rule )
     {
-        this.planArr = rebuildPlanArr( this, this.planArr, placementRule, viewId );
+        Map<String,View> existingViews = this.views( );
+        View view = existingViews.remove( viewId );
+        if ( view != null )
+        {
+            this.closeView( view );
+        }
+
+        GroupArrangement newPlanArr = this.captureArrangement( );
+        removeView( newPlanArr, viewId );
+
+        Set<String> existingViewIds = existingViews.keySet( );
+        ViewPlacerMultiframeArr placer = new ViewPlacerMultiframeArr( newPlanArr, viewId );
+        rule.placeView( newPlanArr, existingViewIds, placer );
+
+        this.planArr = newPlanArr;
+
+        if ( view != null )
+        {
+            this.addView( view );
+        }
     }
 
     @Override
@@ -211,8 +231,8 @@ public class DockingGroupMultiframe extends DockingGroupBase
         Collection<ViewDestinationMultiframe> viewDestinations = new ArrayList<>( );
         for ( View view : views )
         {
-            ViewPlacerMultiframeGroup viewPlacer = new ViewPlacerMultiframeGroup( this, view );
-            ViewDestinationMultiframe destination = placeView( this, this.planArr, view.viewId, viewPlacer );
+            ViewPlacerMultiframeGroup placer = new ViewPlacerMultiframeGroup( this, view );
+            ViewDestinationMultiframe destination = placeView( this, this.planArr, view.viewId, placer );
             viewDestinations.add( destination );
         }
 
@@ -222,7 +242,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
     }
 
     @Override
-    public Set<View> views( )
+    public Map<String,View> views( )
     {
         return findViews( this.frames );
     }
@@ -230,7 +250,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
     @Override
     public void setArrangement( GroupArrangement groupArr )
     {
-        Collection<View> views = this.views( );
+        Collection<View> views = this.views( ).values( );
         for ( View view : views )
         {
             this.closeView( view );
@@ -244,7 +264,13 @@ public class DockingGroupMultiframe extends DockingGroupBase
     @Override
     public GroupArrangement captureArrangement( )
     {
-        return rebuildPlanArr( this, this.planArr );
+        GroupArrangement groupArr = this.existingArrangement( null );
+        for ( String futureViewId : futureViewIds( this, this.planArr ) )
+        {
+            ViewPlacerMultiframeArr placer = new ViewPlacerMultiframeArr( groupArr, futureViewId );
+            placeView( this, this.planArr, futureViewId, placer );
+        }
+        return groupArr;
     }
 
     @Override
