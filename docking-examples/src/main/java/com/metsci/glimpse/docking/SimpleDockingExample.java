@@ -56,6 +56,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
+
 public class SimpleDockingExample
 {
 
@@ -145,7 +147,7 @@ public class SimpleDockingExample
                 //
 
                 final String appName = "simple-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, dockingTheme );
+                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
                 setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "docking/simple-arrangement-default.xml" ) );
 

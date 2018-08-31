@@ -42,6 +42,7 @@ import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 
 import javax.media.opengl.GLOffscreenAutoDrawable;
 
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
@@ -92,7 +93,7 @@ public class GlimpseDockingExample
                 //
 
                 final String appName = "glimpse-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
+                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
                 setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( GlimpseDockingExample.class, "docking/glimpse-arrangement-default.xml" ) );
 

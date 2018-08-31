@@ -57,7 +57,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
-import com.metsci.glimpse.docking.frame.DockingFrame;
+import com.metsci.glimpse.docking.group.frame.DockingFrame;
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 
 public class ProgrammaticDockingExample
 {
@@ -143,7 +144,7 @@ public class ProgrammaticDockingExample
                 // Create and show the docking group
                 //
 
-                DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, dockingTheme );
+                DockingGroupMultiframe dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
                 dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
                 TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 

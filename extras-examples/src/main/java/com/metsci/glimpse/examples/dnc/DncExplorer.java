@@ -87,6 +87,7 @@ import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -315,7 +316,7 @@ public class DncExplorer
             };
 
             String appName = "dnc-explorer";
-            DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
+            DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
             setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( DncExplorer.class, "dnc-examples/docking-defaults.xml" ) );
 
