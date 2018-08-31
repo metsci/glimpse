@@ -35,7 +35,7 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class DockingGroupMultiframeUtils
 {
 
-    public static <T> T placeView( DockingGroupMultiframe group, String viewId, ViewPlacerMultiframe<T> viewPlacer )
+    public static <T> T placeView( DockingGroupMultiframe group, GroupArrangement planArr, String viewId, ViewPlacerMultiframe<T> viewPlacer )
     {
         Map<DockerArrangementNode,Component> componentsMap = new LinkedHashMap<>( );
         GroupArrangement existingArr = group.existingArrangement( componentsMap );
@@ -45,9 +45,8 @@ public class DockingGroupMultiframeUtils
         FrameArrangement planFrame = findFrameArrContaining( planArr, planSubtreeViewIds, viewId );
         if ( planFrame != null )
         {
-            DockerArrangementTile planTile = findArrTileContaining( planArr, planSubtreeViewIds, viewId );
-
             // Add to an existing tile that is similar to the planned tile
+            DockerArrangementTile planTile = findArrTileContaining( planArr, planSubtreeViewIds, viewId );
             Set<String> planTileViewIds = planSubtreeViewIds.get( planTile );
             DockerArrangementTile existingTile = findSimilarArrTile( existingSubtreeViewIds, planTileViewIds );
             if ( existingTile != null )
@@ -75,7 +74,7 @@ public class DockingGroupMultiframeUtils
                 {
                     Side sideOfNeighbor = ( planParent.arrangeVertically ? ( newIsChildA ? TOP : BOTTOM ) : ( newIsChildA ? LEFT : RIGHT ) );
                     double extentFrac = ( newIsChildA ? planParent.splitFrac : 1.0 - planParent.splitFrac );
-                    return viewPlacer.addBesideNeighbor( existingNeighbor, sideOfNeighbor, extentFrac, componentsMap );
+                    return viewPlacer.addBesideNeighbor( planTile, existingNeighbor, sideOfNeighbor, extentFrac, componentsMap );
                 }
 
                 // Go one level up the tree and try again
@@ -83,7 +82,7 @@ public class DockingGroupMultiframeUtils
             }
 
             // Create a new frame, with size and position from the planned arrangement
-            return viewPlacer.addInNewFrame( planFrame );
+            return viewPlacer.addInNewFrame( planFrame, planTile );
         }
 
         // First fallback is in the largest tile

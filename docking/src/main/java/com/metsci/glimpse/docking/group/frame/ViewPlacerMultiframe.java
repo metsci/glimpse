@@ -13,9 +13,9 @@ public interface ViewPlacerMultiframe<R>
 
     R addToTile( DockerArrangementTile existingTile, int viewNum, Map<DockerArrangementNode,Component> componentsMap );
 
-    R addBesideNeighbor( DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap );
+    R addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap );
 
-    R addInNewFrame( FrameArrangement planFrame );
+    R addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile );
 
     R addInNewFallbackFrame( );
 

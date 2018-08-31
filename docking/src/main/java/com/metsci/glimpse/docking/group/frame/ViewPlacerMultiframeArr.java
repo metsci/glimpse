@@ -38,7 +38,7 @@ class ViewPlacerMultiframeArr implements ViewPlacerMultiframe<Void>
     }
 
     @Override
-    public Void addBesideNeighbor( DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap )
+    public Void addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( this.newViewId );
@@ -58,7 +58,7 @@ class ViewPlacerMultiframeArr implements ViewPlacerMultiframe<Void>
     }
 
     @Override
-    public Void addInNewFrame( FrameArrangement planFrame )
+    public Void addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );

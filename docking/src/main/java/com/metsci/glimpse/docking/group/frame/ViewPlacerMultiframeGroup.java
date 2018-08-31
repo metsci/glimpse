@@ -38,7 +38,7 @@ class ViewPlacerMultiframeGroup implements ViewPlacerMultiframe<ViewDestinationM
     }
 
     @Override
-    public ViewDestinationMultiframe addBesideNeighbor( DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap )
+    public ViewDestinationMultiframe addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac, Map<DockerArrangementNode,Component> componentsMap )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
@@ -48,11 +48,11 @@ class ViewPlacerMultiframeGroup implements ViewPlacerMultiframe<ViewDestinationM
         MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, neighbor );
         docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
 
-        return new ViewDestinationMultiframe( null, null, newTile, asdf );
+        return new ViewDestinationMultiframe( null, null, newTile, planTile );
     }
 
     @Override
-    public ViewDestinationMultiframe addInNewFrame( FrameArrangement planFrame )
+    public ViewDestinationMultiframe addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
@@ -64,7 +64,7 @@ class ViewPlacerMultiframeGroup implements ViewPlacerMultiframe<ViewDestinationM
         newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
         newFrame.setExtendedState( getFrameExtendedState( planFrame.isMaximizedHoriz, planFrame.isMaximizedVert ) );
 
-        return new ViewDestinationMultiframe( newFrame, planFrame, newTile, asdf );
+        return new ViewDestinationMultiframe( newFrame, planFrame, newTile, planTile );
     }
 
     @Override

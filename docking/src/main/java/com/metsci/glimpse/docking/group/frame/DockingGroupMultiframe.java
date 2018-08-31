@@ -211,7 +211,8 @@ public class DockingGroupMultiframe extends DockingGroupBase
         Collection<ViewDestinationMultiframe> viewDestinations = new ArrayList<>( );
         for ( View view : views )
         {
-            ViewDestinationMultiframe destination = placeView( this, view.viewId, viewPlacer );
+            ViewPlacerMultiframeGroup viewPlacer = new ViewPlacerMultiframeGroup( this, view );
+            ViewDestinationMultiframe destination = placeView( this, this.planArr, view.viewId, viewPlacer );
             viewDestinations.add( destination );
         }
 
