@@ -44,7 +44,7 @@ import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.charts.bathy.BathymetryData;
+import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -108,11 +108,13 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
 
         AxisUnitConverter unitConverter = new AxisUnitConverter( )
         {
+            @Override
             public double fromAxisUnits( double value )
             {
                 return Length.fromNauticalMiles( value );
             }
 
+            @Override
             public double toAxisUnits( double value )
             {
                 return Length.toNauticalMiles( value );
@@ -166,17 +168,17 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
 
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
-        BathymetryData bathyData;
+        TopographyData bathyData;
         try
         {
-            bathyData = new BathymetryData( openBathyFile( ), initPlane );
+            bathyData = new TopographyData( openBathyFile( ) );
         }
         catch ( IOException e )
         {
             e.printStackTrace( );
             throw new RuntimeException( e );
         }
-        bathyData.setAxisBounds( xyAxis );
+        bathyData.setAxisBounds( xyAxis, initPlane );
 
         final FloatTextureProjected2D texture = new FloatTextureProjected2D( bathyData.getImageWidth( ), bathyData.getImageHeight( ), true );
         texture.setData( bathyData.getData( ) );
@@ -192,10 +194,12 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
             double earthCircumference = 2 * PI * LatLonGeo.defaultDatum.getRadius( );
             double oneOverDistanceThreshold = 1.0 / ( 0.4 * earthCircumference );
 
+            @Override
             public void run( TangentPlane plane )
             {
                 LatLonProjection newProjection = new LatLonProjection( plane, startLat, endLat, startLon, endLon, false )
                 {
+                    @Override
                     public void getVertexXYZ( double textureFractionX, double textureFractionY, float[] resultXYZ )
                     {
                         Vector2d xy = project( textureFractionX, textureFractionY );
@@ -221,6 +225,7 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
         {
             TangentPlane currentPlane = initPlane;
 
+            @Override
             public void axisUpdated( Axis2D axis )
             {
                 // Using the center of the viewport would be more
@@ -267,6 +272,7 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
         {
             return new Runnable( )
             {
+                @Override
                 public void run( )
                 {
                     RunnableOn.this.run( t );
@@ -278,6 +284,7 @@ public class GlobalDynamicReprojectionExample implements GlimpseLayoutProvider
         {
             return new RunnableOn<T>( )
             {
+                @Override
                 public void run( T t )
                 {
                     runnable.run( );

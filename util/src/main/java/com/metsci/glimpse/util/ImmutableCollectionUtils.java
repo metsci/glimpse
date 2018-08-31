@@ -126,6 +126,13 @@ public class ImmutableCollectionUtils
         }
     }
 
+    public static <K,V> ImmutableMap<K,V> mapSubset( ImmutableMap<K,V> map, Collection<K> keys )
+    {
+        Map<K,V> subset = new LinkedHashMap<>( map );
+        subset.keySet( ).retainAll( keys );
+        return ImmutableMap.copyOf( subset );
+    }
+
     public static <V> ImmutableSet<V> setPlus( ImmutableSet<V> set, V value )
     {
         if ( set.contains( value ) )

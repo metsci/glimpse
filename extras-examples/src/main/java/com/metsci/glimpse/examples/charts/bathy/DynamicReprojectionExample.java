@@ -41,7 +41,7 @@ import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.charts.bathy.BathymetryData;
+import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -94,11 +94,13 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
 
         AxisUnitConverter unitConverter = new AxisUnitConverter( )
         {
+            @Override
             public double fromAxisUnits( double value )
             {
                 return Length.fromNauticalMiles( value );
             }
 
+            @Override
             public double toAxisUnits( double value )
             {
                 return Length.toNauticalMiles( value );
@@ -151,10 +153,10 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
 
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
-        BathymetryData bathyData;
+        TopographyData bathyData;
         try
         {
-            bathyData = new BathymetryData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ), initPlane );
+            bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
         }
         catch ( IOException e )
 
@@ -162,8 +164,8 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
             e.printStackTrace( );
             throw new RuntimeException( e );
         }
-        bathyData.setAxisBounds( xyAxis );
-        final FloatTextureProjected2D texture = bathyData.getTexture( );
+        bathyData.setAxisBounds( xyAxis, initPlane );
+        final FloatTextureProjected2D texture = bathyData.getTexture( initPlane );
 
         final double startLat = bathyData.getStartLat( );
         final double startLon = bathyData.getStartLon( );
@@ -172,6 +174,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
 
         final RunnableOn<TangentPlane> reprojectHeatmap = new RunnableOn<TangentPlane>( )
         {
+            @Override
             public void run( TangentPlane plane )
             {
                 Projection projection = new LatLonProjection( plane, startLat, endLat, startLon, endLon, false );
@@ -185,6 +188,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         {
             TangentPlane currentPlane = initPlane;
 
+            @Override
             public void axisUpdated( Axis2D axis )
             {
                 double xRef = axis.getAxisX( ).getSelectionCenter( );
@@ -227,6 +231,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         {
             return new Runnable( )
             {
+                @Override
                 public void run( )
                 {
                     RunnableOn.this.run( t );
@@ -238,6 +243,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         {
             return new RunnableOn<T>( )
             {
+                @Override
                 public void run( T t )
                 {
                     runnable.run( );

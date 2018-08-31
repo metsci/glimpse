@@ -36,6 +36,7 @@ import static java.lang.Math.round;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Predicate;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -129,46 +130,6 @@ public class AnnotationPainter extends GlimpsePainterBase
 
 
         //@formatter:on
-
-        /**
-         * @deprecated
-         * @see #getStartTimeStamp()
-         */
-        @Deprecated
-        public long getStartTime( )
-        {
-            return startTime_PMILLIS;
-        }
-
-        /**
-         * @deprecated
-         * @see #setStartTime(TimeStamp)
-         */
-        @Deprecated
-        public void setStartTime( long startTime_PMILLIS )
-        {
-            this.startTime_PMILLIS = startTime_PMILLIS;
-        }
-
-        /**
-         * @deprecated
-         * @see #getEndTimeStamp()
-         */
-        @Deprecated
-        public long getEndTime( )
-        {
-            return endTime_PMILLIS;
-        }
-
-        /**
-         * @deprecated
-         * @see #setEndTime(TimeStamp)
-         */
-        @Deprecated
-        public void setEndTime( long endTime_PMILLIS )
-        {
-            this.endTime_PMILLIS = endTime_PMILLIS;
-        }
 
         public TimeStamp getStartTimeStamp( )
         {
@@ -284,9 +245,7 @@ public class AnnotationPainter extends GlimpsePainterBase
     protected static final float[] DEFAULT_COLOR = GlimpseColor.getBlack( );
 
     protected Collection<Annotation> annotations;
-
-    protected long minTime = Long.MIN_VALUE;
-    protected long maxTime = Long.MAX_VALUE;
+    protected Predicate<Annotation> displayFilter;
 
     protected TextRenderer textRenderer;
 
@@ -299,6 +258,7 @@ public class AnnotationPainter extends GlimpsePainterBase
     {
         this.annotations = new ArrayList<Annotation>( );
         this.textRenderer = textRenderer;
+        displayFilter = an -> true;
     }
 
     public TextRenderer getTextRenderer( )
@@ -365,50 +325,17 @@ public class AnnotationPainter extends GlimpsePainterBase
 
     public void displayTime( TimeStamp time )
     {
-        displayTime( time.toPosixMillis( ) );
-    }
-
-    /**
-     * @see #displayTime( TimeStamp )
-     * @deprecated
-     */
-    @Deprecated
-    public void displayTime( long time )
-    {
-        this.painterLock.lock( );
-        try
-        {
-            this.minTime = time;
-            this.maxTime = time;
-        }
-        finally
-        {
-            this.painterLock.unlock( );
-        }
+        displayTimeRange( time, time );
     }
 
     public void displayTimeRange( TimeStamp minTime, TimeStamp maxTime )
     {
-        displayTimeRange( minTime.toPosixMillis( ), maxTime.toPosixMillis( ) );
+        setDisplayFilter( a -> minTime.isBeforeOrEquals( a.getEndTimeStamp() ) && a.getStartTimeStamp().isBeforeOrEquals( maxTime ) );
     }
 
-    /**
-     * @see #displayTimeRange( TimeStamp, TimeStamp )
-     * @deprecated
-     */
-    @Deprecated
-    public void displayTimeRange( long minTime, long maxTime )
+    public void setDisplayFilter( Predicate<Annotation> filter )
     {
-        this.painterLock.lock( );
-        try
-        {
-            this.minTime = minTime;
-            this.maxTime = maxTime;
-        }
-        finally
-        {
-            this.painterLock.unlock( );
-        }
+        this.displayFilter = filter;
     }
 
     @Override
@@ -431,7 +358,7 @@ public class AnnotationPainter extends GlimpsePainterBase
             {
                 for ( Annotation annotation : annotations )
                 {
-                    if ( !inTimeRange( annotation ) )
+                    if ( !displayFilter.test( annotation ) )
                     {
                         continue;
                     }
@@ -475,11 +402,6 @@ public class AnnotationPainter extends GlimpsePainterBase
         {
             this.painterLock.unlock( );
         }
-    }
-
-    protected boolean inTimeRange( Annotation annotation )
-    {
-        return ( annotation.getStartTime( ) <= maxTime && annotation.getEndTime( ) >= minTime ) || ( minTime <= annotation.getEndTime( ) && maxTime >= annotation.getStartTime( ) );
     }
 
     @Override
