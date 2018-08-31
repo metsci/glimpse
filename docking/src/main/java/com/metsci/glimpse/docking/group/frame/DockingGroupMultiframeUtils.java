@@ -16,7 +16,6 @@ import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArr
 import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.lang.Math.round;
 
-import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -35,12 +34,10 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class DockingGroupMultiframeUtils
 {
 
-    public static <T> T placeView( DockingGroupMultiframe group, GroupArrangement planArr, String viewId, ViewPlacerMultiframe<T> viewPlacer )
+    public static <T> T placeView( GroupArrangement existingArr, GroupArrangement planArr, String viewId, ViewPlacerMultiframe<T> viewPlacer )
     {
-        Map<DockerArrangementNode,Component> componentsMap = new LinkedHashMap<>( );
-        GroupArrangement existingArr = group.existingArrangement( componentsMap );
         Map<DockerArrangementNode,Set<String>> existingSubtreeViewIds = buildSubtreeViewIdsMap( existingArr );
-        Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildSubtreeViewIdsMap( group.planArr );
+        Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildSubtreeViewIdsMap( planArr );
 
         FrameArrangement planFrame = findFrameArrContaining( planArr, viewId );
         if ( planFrame != null )

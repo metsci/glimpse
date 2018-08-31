@@ -64,6 +64,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -231,8 +232,10 @@ public class DockingGroupMultiframe extends DockingGroupBase
         Collection<ViewDestinationMultiframe> viewDestinations = new ArrayList<>( );
         for ( View view : views )
         {
-            ViewPlacerMultiframeGroup placer = new ViewPlacerMultiframeGroup( this, view );
-            ViewDestinationMultiframe destination = placeView( this, this.planArr, view.viewId, placer );
+            Map<DockerArrangementNode,Component> componentsMap = new LinkedHashMap<>( );
+            GroupArrangement existingArr = this.getExistingArr( componentsMap );
+            ViewPlacerMultiframeGroup placer = new ViewPlacerMultiframeGroup( this, componentsMap, view );
+            ViewDestinationMultiframe destination = placeView( existingArr, this.planArr, view.viewId, placer );
             viewDestinations.add( destination );
         }
 
@@ -264,17 +267,24 @@ public class DockingGroupMultiframe extends DockingGroupBase
     @Override
     public GroupArrangement captureArrangement( )
     {
-        GroupArrangement groupArr = this.existingArrangement( null );
+        GroupArrangement newPlanArr = this.getExistingArr( null );
         for ( String futureViewId : futureViewIds( this, this.planArr ) )
         {
-            ViewPlacerMultiframeArr placer = new ViewPlacerMultiframeArr( groupArr, futureViewId );
-            placeView( this, this.planArr, futureViewId, placer );
+            GroupArrangement existingArr = this.getExistingArr( null );
+            ViewPlacerMultiframeArr placer = new ViewPlacerMultiframeArr( newPlanArr, futureViewId );
+            placeView( existingArr, this.planArr, futureViewId, placer );
         }
-        return groupArr;
+        return newPlanArr;
     }
 
-    @Override
-    public GroupArrangement existingArrangement( Map<DockerArrangementNode,Component> componentsMap )
+    /**
+     * Returns a {@link GroupArrangement} that reflects only existing components,
+     * <em>not</em> the planned arrangement of potential future components.
+     * <p>
+     * If {@code componentsMap} is non-null, it will be populated with mappings
+     * from {@link DockerArrangementNode}s to corresponding {@link Component}s.
+     */
+    protected GroupArrangement getExistingArr( Map<DockerArrangementNode,Component> componentsMap )
     {
         GroupArrangement groupArr = new GroupArrangement( );
         for ( DockingFrame frame : this.frames )
