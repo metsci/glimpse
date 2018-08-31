@@ -1,5 +1,6 @@
 package com.metsci.glimpse.docking.group.frame;
 
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -19,6 +20,7 @@ import static java.lang.Math.round;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,23 +110,32 @@ public class DockingGroupMultiframeUtils
     /**
      * Restore maximized tiles in newly created frames.
      */
-    public static void restoreMaximizedTilesInNewDockers( Collection<? extends ViewDestinationMultiframe> viewDestinations )
+    public static void restoreMaximizedTilesInNewFrames( Collection<? extends ViewDestinationMultiframe> viewDestinations )
     {
-        Map<DockingFrame,Tile> maximizedTiles = new LinkedHashMap<>( );
+        Set<DockingFrame> newFrames = new LinkedHashSet<>( );
         for ( ViewDestinationMultiframe dest : viewDestinations )
         {
-            if ( dest.createdFrame != null && dest.createdTile != null && dest.planTile != null && dest.planTile.isMaximized )
+            if ( dest.createdFrame != null )
             {
-                maximizedTiles.put( dest.createdFrame, dest.createdTile );
+                newFrames.add( dest.createdFrame );
             }
         }
 
+        Set<Tile> maximizedNewTiles = new LinkedHashSet<>( );
         for ( ViewDestinationMultiframe dest : viewDestinations )
         {
-            Tile tile = maximizedTiles.get( dest.createdFrame );
-            if ( tile != null )
+            if ( dest.createdTile != null && dest.planTile != null && dest.planTile.isMaximized )
             {
-                dest.createdFrame.docker.maximizeLeaf( tile );
+                maximizedNewTiles.add( dest.createdTile );
+            }
+        }
+
+        for ( Tile tile : maximizedNewTiles )
+        {
+            DockingFrame frame = getAncestorOfClass( DockingFrame.class, tile );
+            if ( newFrames.contains( frame ) )
+            {
+                frame.docker.maximizeLeaf( tile );
             }
         }
     }

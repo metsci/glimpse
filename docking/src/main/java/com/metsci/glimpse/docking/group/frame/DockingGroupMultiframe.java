@@ -48,7 +48,7 @@ import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreSelected
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.toArrNode;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.futureViewIds;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.placeView;
-import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.restoreMaximizedTilesInNewDockers;
+import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.restoreMaximizedTilesInNewFrames;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.showNewFrames;
 import static java.awt.Frame.ICONIFIED;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
@@ -240,7 +240,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
         }
 
         restoreSelectedViewsInNewTiles( viewDestinations );
-        restoreMaximizedTilesInNewDockers( viewDestinations );
+        restoreMaximizedTilesInNewFrames( viewDestinations );
         showNewFrames( viewDestinations, this.planArr.frameArrs );
     }
 
