@@ -26,11 +26,15 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
+import static java.awt.Frame.ICONIFIED;
 import static java.lang.Math.round;
 import static java.util.Collections.reverse;
 
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +82,30 @@ public class MiscUtils
             }
         }
         return new IntAndIndex( vBest, iBest );
+    }
+
+    public static boolean containsScreenPoint( Component c, Point pOnScreen )
+    {
+        // FIXME: Might be able to replace several of these checks with c.isShowing()
+
+        if ( !c.isVisible( ) )
+        {
+            return false;
+        }
+
+        Window w = getAncestorOfClass( Window.class, c );
+        if ( w == null || !w.isVisible( ) )
+        {
+            return false;
+        }
+
+        if ( w instanceof Frame && ( ( ( Frame ) w ).getExtendedState( ) & ICONIFIED ) == 0 )
+        {
+            return false;
+        }
+
+        Point pInComponent = convertPointFromScreen( pOnScreen, c );
+        return c.contains( pInComponent );
     }
 
     public static Point convertPointFromScreen( Point pOnScreen, Component c )

@@ -31,7 +31,7 @@ import static com.metsci.glimpse.docking.DockingUtils.allViewsAreAutoCloseable;
 import static com.metsci.glimpse.docking.DockingUtils.findViews;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.LandingRegions.landingInExistingDocker;
-import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
+import static com.metsci.glimpse.docking.MiscUtils.containsScreenPoint;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.removeView;
@@ -50,7 +50,6 @@ import static com.metsci.glimpse.docking.group.ViewPlacementUtils.futureViewIds;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.placeView;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.restoreMaximizedTilesInNewFrames;
 import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.showNewFrames;
-import static java.awt.Frame.ICONIFIED;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
@@ -107,6 +106,14 @@ public class DockingGroupMultiframe extends DockingGroupBase
 
     public DockingFrame addNewFrame( )
     {
+        DockingFrame frame = this.createNewFrame( );
+        this.frames.add( 0, frame );
+        notifyAddedFrame( this.listeners, this, frame );
+        return frame;
+    }
+
+    protected DockingFrame createNewFrame( )
+    {
         MultiSplitPane docker = new MultiSplitPane( this.theme.dividerSize );
         attachMulticastDockerListener( docker, this.listeners );
 
@@ -135,8 +142,6 @@ public class DockingGroupMultiframe extends DockingGroupBase
             }
         } );
 
-        this.frames.add( 0, frame );
-        notifyAddedFrame( this.listeners, this, frame );
         return frame;
     }
 
@@ -153,51 +158,56 @@ public class DockingGroupMultiframe extends DockingGroupBase
 
     protected void onWindowCloseButton( DockingFrame frame )
     {
-        notifyUserRequestingDisposeFrame( this.listeners, this, frame );
-
-        switch ( this.frameCloseOperation )
+        if ( this.frames.contains( frame ) )
         {
-            case DO_NOTHING:
-                // Do nothing
-                break;
+            notifyUserRequestingDisposeFrame( this.listeners, this, frame );
 
-            case DISPOSE_CLOSED_FRAME:
-                Collection<View> views = findViews( frame.docker ).values( );
-                if ( allViewsAreAutoCloseable( views ) )
-                {
-                    notifyDisposingFrame( this.listeners, this, frame );
-                    notifyClosingViews( this.listeners, this, views );
-                    frame.dispose( );
-                    notifyClosedViews( this.listeners, this, views );
-                }
-                else
-                {
-                    logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
-                }
-                break;
+            switch ( this.frameCloseOperation )
+            {
+                case DO_NOTHING:
+                    // Do nothing
+                    break;
 
-            case DISPOSE_ALL_FRAMES:
-                this.dispose( );
-                break;
+                case DISPOSE_CLOSED_FRAME:
+                    Collection<View> views = this.views( ).values( );
+                    if ( allViewsAreAutoCloseable( views ) )
+                    {
+                        notifyDisposingFrame( this.listeners, this, frame );
+                        notifyClosingViews( this.listeners, this, views );
+                        frame.dispose( );
+                        notifyClosedViews( this.listeners, this, views );
+                    }
+                    else
+                    {
+                        logger.warning( "Refusing to dispose frame, because it contains at least one view that is not auto-closeable" );
+                    }
+                    break;
 
-            case EXIT_JVM:
-                this.dispose( );
-                System.exit( 0 );
-                break;
+                case DISPOSE_ALL_FRAMES:
+                    this.dispose( );
+                    break;
+
+                case EXIT_JVM:
+                    this.dispose( );
+                    System.exit( 0 );
+                    break;
+            }
         }
     }
 
     protected void onWindowClosed( DockingFrame frame )
     {
-        this.frames.remove( frame );
-        notifyDisposedFrame( this.listeners, this, frame );
-
-        if ( this.frames.isEmpty( ) )
+        if ( this.frames.remove( frame ) )
         {
-            // Dispose the landingIndicator window, so that the JVM can shut down if
-            // appropriate -- if the landingIndicator is needed again (e.g. after a
-            // new frame is added to the group), it will be automatically resurrected
-            this.landingIndicator.dispose( );
+            notifyDisposedFrame( this.listeners, this, frame );
+
+            if ( this.frames.isEmpty( ) )
+            {
+                // Dispose the landingIndicator window, so that the JVM can shut down if
+                // appropriate -- if the landingIndicator is needed again (e.g. after a
+                // new frame is added to the group), it will be automatically resurrected
+                this.landingIndicator.dispose( );
+            }
         }
     }
 
@@ -339,14 +349,9 @@ public class DockingGroupMultiframe extends DockingGroupBase
     {
         for ( DockingFrame frame : this.frames )
         {
-            MultiSplitPane docker = frame.docker;
-            if ( docker.isVisible( ) && frame.isVisible( ) && ( frame.getExtendedState( ) & ICONIFIED ) == 0 )
+            if ( containsScreenPoint( frame.docker, pOnScreen ) )
             {
-                Point pInDocker = convertPointFromScreen( pOnScreen, docker );
-                if ( docker.contains( pInDocker ) )
-                {
-                    return landingInExistingDocker( docker, fromTile, fromViewNum, pOnScreen );
-                }
+                return landingInExistingDocker( frame.docker, fromTile, fromViewNum, pOnScreen );
             }
         }
         return this.landingInNewFrame( fromTile, fromViewNum, pOnScreen );
@@ -419,6 +424,8 @@ public class DockingGroupMultiframe extends DockingGroupBase
             notifyDisposingFrame( this.listeners, this, frame );
             frame.dispose( );
         }
+
+        this.landingIndicator.dispose( );
     }
 
 }
