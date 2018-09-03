@@ -212,6 +212,11 @@ public abstract class DockingGroupBase implements DockingGroup
                         notifyClosingViews( this.listeners, this, views );
                         window.dispose( );
                         notifyClosedViews( this.listeners, this, views );
+
+                        // This would get triggered eventually by the WINDOW_CLOSED event, but not until
+                        // after previously queued events have been dispatched -- which can cause problems,
+                        // especially when there are modal dialogs involved
+                        this.onWindowClosed( window );
                     }
                     else
                     {
@@ -428,10 +433,15 @@ public abstract class DockingGroupBase implements DockingGroup
     public void dispose( )
     {
         notifyDisposingAllWindows( this.listeners, this );
-        for ( DockingWindow window : this.windows )
+        for ( DockingWindow window : new ArrayList<>( this.windows ) )
         {
             notifyDisposingWindow( this.listeners, this, window );
             window.dispose( );
+
+            // This would get triggered eventually by the WINDOW_CLOSED event, but not until
+            // after previously queued events have been dispatched -- which can cause problems,
+            // especially when there are modal dialogs involved
+            this.onWindowClosed( window );
         }
 
         this.landingIndicator.dispose( );
