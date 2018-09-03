@@ -31,12 +31,15 @@ import static com.metsci.glimpse.util.AppConfigUtils.getAppConfigPath;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
 import static java.awt.Frame.MAXIMIZED_VERT;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
+import static java.lang.Math.round;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
@@ -232,6 +235,16 @@ public class DockingUtils
     public static <T> T getAncestorOfClass( Class<? extends T> clazz, Component c )
     {
         return clazz.cast( SwingUtilities.getAncestorOfClass( clazz, c ) );
+    }
+
+    public static Rectangle fractionOfScreenBounds( float frac )
+    {
+        Rectangle screenBounds = getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
+        int width = round( frac * screenBounds.width );
+        int height = round( frac * screenBounds.height );
+        int x = screenBounds.x + ( ( screenBounds.width - width ) / 2 );
+        int y = screenBounds.y + ( ( screenBounds.height - height ) / 2 );
+        return new Rectangle( x, y, width, height );
     }
 
     public static int getFrameExtendedState( FrameArrangement frameArr )

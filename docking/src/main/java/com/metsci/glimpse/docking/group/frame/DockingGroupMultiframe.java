@@ -143,8 +143,8 @@ public class DockingGroupMultiframe extends DockingGroupBase
                 planNode = planParent;
             }
 
-            // Create a new frame, with size and position from the planned arrangement
-            return viewPlacer.addInNewFrame( planFrame, planTile );
+            // Create a new window, with size and position from the planned arrangement
+            return viewPlacer.addInNewWindow( planFrame, planTile );
         }
 
         // First fallback is in the largest tile
@@ -156,7 +156,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
         }
 
         // Final fallback is in a new window
-        return viewPlacer.addInNewFallbackFrame( );
+        return viewPlacer.addInNewFallbackWindow( );
     }
 
     @Override

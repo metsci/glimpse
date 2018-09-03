@@ -338,10 +338,10 @@ public abstract class DockingGroupBase implements DockingGroup
      * Returns a {@link GroupArrangement} that reflects only existing components,
      * <em>not</em> the planned arrangement of potential future components.
      * <p>
-     * If {@code componentsMap} is non-null, it will be populated with mappings
+     * If {@code existingComponents} is non-null, it will be populated with mappings
      * from {@link DockerArrangementNode}s to corresponding {@link Component}s.
      */
-    protected GroupArrangement getExistingArr( Map<DockerArrangementNode,Component> components )
+    protected GroupArrangement getExistingArr( Map<DockerArrangementNode,Component> existingComponents )
     {
         GroupArrangement groupArr = new GroupArrangement( );
         for ( DockingWindow window : this.windows )
@@ -357,7 +357,7 @@ public abstract class DockingGroupBase implements DockingGroup
             frameArr.isMaximizedHoriz = window.isMaximizedHorizontally( );
             frameArr.isMaximizedVert = window.isMaximizedVertically( );
 
-            frameArr.dockerArr = toArrNode( window.docker( ).snapshot( ), components );
+            frameArr.dockerArr = toArrNode( window.docker( ).snapshot( ), existingComponents );
             groupArr.frameArrs.add( frameArr );
         }
         return groupArr;

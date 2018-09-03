@@ -1,7 +1,7 @@
 package com.metsci.glimpse.docking.group.frame;
 
+import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
-import static com.metsci.glimpse.docking.group.frame.ViewPlacerMultiframeUtils.fallbackFrameBounds;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -21,43 +21,43 @@ public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements Vi
     protected final DockingGroupMultiframe group;
 
 
-    public ViewPlacerMultiframeGroup( DockingGroupMultiframe group, Map<DockerArrangementNode,Component> componentsMap, View newView )
+    public ViewPlacerMultiframeGroup( DockingGroupMultiframe group, Map<DockerArrangementNode,Component> existingComponents, View newView )
     {
-        super( group, componentsMap, newView );
+        super( group, existingComponents, newView );
         this.group = group;
     }
 
     @Override
-    public ViewDestination addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
+    public ViewDestination addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
 
-        DockingFrame newFrame = this.group.addNewFrame( );
-        newFrame.docker( ).addInitialLeaf( newTile );
+        DockingFrame newWindow = this.group.addNewFrame( );
+        newWindow.docker( ).addInitialLeaf( newTile );
 
-        newFrame.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
-        newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
-        newFrame.setExtendedState( getFrameExtendedState( planFrame.isMaximizedHoriz, planFrame.isMaximizedVert ) );
+        newWindow.setBounds( planWindow.x, planWindow.y, planWindow.width, planWindow.height );
+        newWindow.setNormalBounds( planWindow.x, planWindow.y, planWindow.width, planWindow.height );
+        newWindow.setExtendedState( getFrameExtendedState( planWindow.isMaximizedHoriz, planWindow.isMaximizedVert ) );
 
-        return new ViewDestination( newFrame, planFrame, newTile, planTile );
+        return new ViewDestination( newWindow, planWindow, newTile, planTile );
     }
 
     @Override
-    public ViewDestination addInNewFallbackFrame( )
+    public ViewDestination addInNewFallbackWindow( )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
 
-        DockingFrame newFrame = this.group.addNewFrame( );
-        newFrame.docker( ).addInitialLeaf( newTile );
+        DockingFrame newWindow = this.group.addNewFrame( );
+        newWindow.docker( ).addInitialLeaf( newTile );
 
-        Rectangle newFrameBounds = fallbackFrameBounds( );
-        newFrame.setBounds( newFrameBounds );
-        newFrame.setNormalBounds( newFrameBounds );
-        newFrame.setExtendedState( getFrameExtendedState( false, false ) );
+        Rectangle newFrameBounds = fractionOfScreenBounds( 0.85f );
+        newWindow.setBounds( newFrameBounds );
+        newWindow.setNormalBounds( newFrameBounds );
+        newWindow.setExtendedState( getFrameExtendedState( false, false ) );
 
-        return new ViewDestination( newFrame, null, newTile, null );
+        return new ViewDestination( newWindow, null, newTile, null );
     }
 
 }

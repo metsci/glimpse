@@ -1,6 +1,6 @@
 package com.metsci.glimpse.docking.group.frame;
 
-import static com.metsci.glimpse.docking.group.frame.ViewPlacerMultiframeUtils.fallbackFrameBounds;
+import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
 
 import java.awt.Rectangle;
 
@@ -18,48 +18,48 @@ public class ViewPlacerMultiframeArr extends ViewPlacerBaseArr implements ViewPl
     }
 
     @Override
-    public Void addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
+    public Void addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
         newTile.selectedViewId = newViewId;
         newTile.isMaximized = false;
 
-        FrameArrangement newFrame = new FrameArrangement( );
-        newFrame.dockerArr = newTile;
+        FrameArrangement newWindow = new FrameArrangement( );
+        newWindow.dockerArr = newTile;
 
-        newFrame.x = planFrame.x;
-        newFrame.y = planFrame.y;
-        newFrame.width = planFrame.width;
-        newFrame.height = planFrame.height;
-        newFrame.isMaximizedHoriz = planFrame.isMaximizedHoriz;
-        newFrame.isMaximizedVert = planFrame.isMaximizedVert;
+        newWindow.x = planWindow.x;
+        newWindow.y = planWindow.y;
+        newWindow.width = planWindow.width;
+        newWindow.height = planWindow.height;
+        newWindow.isMaximizedHoriz = planWindow.isMaximizedHoriz;
+        newWindow.isMaximizedVert = planWindow.isMaximizedVert;
 
-        this.groupArr.frameArrs.add( newFrame );
+        this.groupArr.frameArrs.add( newWindow );
 
         return null;
     }
 
     @Override
-    public Void addInNewFallbackFrame( )
+    public Void addInNewFallbackWindow( )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
         newTile.selectedViewId = newViewId;
         newTile.isMaximized = false;
 
-        FrameArrangement newFrame = new FrameArrangement( );
-        newFrame.dockerArr = newTile;
+        FrameArrangement newWindow = new FrameArrangement( );
+        newWindow.dockerArr = newTile;
 
-        Rectangle newFrameBounds = fallbackFrameBounds( );
-        newFrame.x = newFrameBounds.x;
-        newFrame.y = newFrameBounds.y;
-        newFrame.width = newFrameBounds.width;
-        newFrame.height = newFrameBounds.height;
-        newFrame.isMaximizedHoriz = false;
-        newFrame.isMaximizedVert = false;
+        Rectangle newFrameBounds = fractionOfScreenBounds( 0.85f );
+        newWindow.x = newFrameBounds.x;
+        newWindow.y = newFrameBounds.y;
+        newWindow.width = newFrameBounds.width;
+        newWindow.height = newFrameBounds.height;
+        newWindow.isMaximizedHoriz = false;
+        newWindow.isMaximizedVert = false;
 
-        this.groupArr.frameArrs.add( newFrame );
+        this.groupArr.frameArrs.add( newWindow );
 
         return null;
     }

@@ -94,7 +94,7 @@ public class MiscUtils
 
     public static boolean containsScreenPoint( Component c, Point pOnScreen )
     {
-        // FIXME: Might be able to replace several of these checks with c.isShowing()
+        // TODO: Might be able to replace several of these checks with c.isShowing()
 
         if ( !c.isVisible( ) )
         {
@@ -107,7 +107,7 @@ public class MiscUtils
             return false;
         }
 
-        if ( w instanceof Frame && ( ( ( Frame ) w ).getExtendedState( ) & ICONIFIED ) == 0 )
+        if ( w instanceof Frame && ( ( ( Frame ) w ).getExtendedState( ) & ICONIFIED ) != 0 )
         {
             return false;
         }

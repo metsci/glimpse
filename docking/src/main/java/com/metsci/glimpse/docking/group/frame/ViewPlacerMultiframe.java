@@ -7,8 +7,8 @@ import com.metsci.glimpse.docking.xml.FrameArrangement;
 public interface ViewPlacerMultiframe<R> extends ViewPlacer<R>
 {
 
-    R addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile );
+    R addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile );
 
-    R addInNewFallbackFrame( );
+    R addInNewFallbackWindow( );
 
 }

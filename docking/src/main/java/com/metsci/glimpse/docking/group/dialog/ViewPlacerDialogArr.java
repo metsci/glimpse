@@ -1,5 +1,9 @@
 package com.metsci.glimpse.docking.group.dialog;
 
+import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
+
+import java.awt.Rectangle;
+
 import com.metsci.glimpse.docking.group.ViewPlacerBaseArr;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
@@ -14,24 +18,62 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
     }
 
     @Override
-    public Void addInNewDialog( FrameArrangement planDialog, DockerArrangementTile planTile )
+    public Void addInInitialTile( )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
         newTile.selectedViewId = newViewId;
         newTile.isMaximized = false;
 
-        FrameArrangement newDialog = new FrameArrangement( );
-        newDialog.dockerArr = newTile;
+        FrameArrangement existingWindow = this.groupArr.frameArrs.get( 0 );
+        existingWindow.dockerArr = newTile;
 
-        newDialog.x = planDialog.x;
-        newDialog.y = planDialog.y;
-        newDialog.width = planDialog.width;
-        newDialog.height = planDialog.height;
-        newDialog.isMaximizedHoriz = false;
-        newDialog.isMaximizedVert = false;
+        return null;
+    }
 
-        this.groupArr.frameArrs.add( newDialog );
+    @Override
+    public Void addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile )
+    {
+        DockerArrangementTile newTile = new DockerArrangementTile( );
+        newTile.viewIds.add( newViewId );
+        newTile.selectedViewId = newViewId;
+        newTile.isMaximized = false;
+
+        FrameArrangement newWindow = new FrameArrangement( );
+        newWindow.dockerArr = newTile;
+
+        newWindow.x = planWindow.x;
+        newWindow.y = planWindow.y;
+        newWindow.width = planWindow.width;
+        newWindow.height = planWindow.height;
+        newWindow.isMaximizedHoriz = false;
+        newWindow.isMaximizedVert = false;
+
+        this.groupArr.frameArrs.add( newWindow );
+
+        return null;
+    }
+
+    @Override
+    public Void addInNewFallbackWindow( )
+    {
+        DockerArrangementTile newTile = new DockerArrangementTile( );
+        newTile.viewIds.add( newViewId );
+        newTile.selectedViewId = newViewId;
+        newTile.isMaximized = false;
+
+        FrameArrangement newWindow = new FrameArrangement( );
+        newWindow.dockerArr = newTile;
+
+        Rectangle newFrameBounds = fractionOfScreenBounds( 0.40f );
+        newWindow.x = newFrameBounds.x;
+        newWindow.y = newFrameBounds.y;
+        newWindow.width = newFrameBounds.width;
+        newWindow.height = newFrameBounds.height;
+        newWindow.isMaximizedHoriz = false;
+        newWindow.isMaximizedVert = false;
+
+        this.groupArr.frameArrs.add( newWindow );
 
         return null;
     }

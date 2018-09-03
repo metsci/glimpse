@@ -16,21 +16,21 @@ public class ViewPlacerBaseGroup implements ViewPlacer<ViewDestination>
 {
 
     protected final DockingGroupBase group;
-    protected final Map<DockerArrangementNode,Component> componentsMap;
+    protected final Map<DockerArrangementNode,Component> existingComponents;
     protected final View newView;
 
 
-    public ViewPlacerBaseGroup( DockingGroupBase group, Map<DockerArrangementNode,Component> componentsMap, View newView )
+    public ViewPlacerBaseGroup( DockingGroupBase group, Map<DockerArrangementNode,Component> existingComponents, View newView )
     {
         this.group = group;
-        this.componentsMap = componentsMap;
+        this.existingComponents = existingComponents;
         this.newView = newView;
     }
 
     @Override
     public ViewDestination addToTile( DockerArrangementTile existingTile, int newViewNum )
     {
-        Tile tile = ( Tile ) this.componentsMap.get( existingTile );
+        Tile tile = ( Tile ) this.existingComponents.get( existingTile );
         tile.addView( this.newView, newViewNum );
         return new ViewDestination( null, null, null, null );
     }
@@ -41,7 +41,7 @@ public class ViewPlacerBaseGroup implements ViewPlacer<ViewDestination>
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
 
-        Component neighbor = this.componentsMap.get( existingNeighbor );
+        Component neighbor = this.existingComponents.get( existingNeighbor );
 
         MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, neighbor );
         docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );

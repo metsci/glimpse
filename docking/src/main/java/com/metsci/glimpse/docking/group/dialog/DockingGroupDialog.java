@@ -38,6 +38,7 @@ import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrNodeParen
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrTileContaining;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findFrameArrContaining;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findLargestArrTile;
+import static com.metsci.glimpse.docking.group.ArrangementUtils.findTiles;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.chooseViewNum;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrNode;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrTile;
@@ -77,16 +78,19 @@ public class DockingGroupDialog extends DockingGroupBase
         super( frameCloseOperation, theme );
     }
 
-    public DockingDialog ensureDialog( )
+    public boolean hasDialog( )
     {
-        if ( !this.windows.isEmpty( ) )
-        {
-            return ( ( DockingDialog ) this.windows.get( 0 ) );
-        }
-        else
-        {
-            return this.addWindow( new DockingDialog( this.createDocker( ) ) );
-        }
+        return !this.windows.isEmpty( );
+    }
+
+    public DockingDialog initDialog( )
+    {
+        return this.addWindow( new DockingDialog( this.createDocker( ) ) );
+    }
+
+    public DockingDialog requireDialog( )
+    {
+        return ( ( DockingDialog ) this.windows.get( 0 ) );
     }
 
     @Override
@@ -166,20 +170,51 @@ public class DockingGroupDialog extends DockingGroupBase
                 planNode = planParent;
             }
 
-            // Create a new frame, with size and position from the planned arrangement
-            return viewPlacer.addInNewFrame( planFrame, planTile );
+            // If no windows exist, and exactly one window is planned, use that
+            if ( existingArr.frameArrs.isEmpty( ) && planArr.frameArrs.size( ) == 1 )
+            {
+                return viewPlacer.addInNewWindow( planFrame, planTile );
+            }
+
+            // TODO: If we can identify a sibling window, we could squash the new view into that somehow
         }
 
-        // First fallback is in the largest tile
-        DockerArrangementTile existingLargest = findLargestArrTile( existingArr );
-        if ( existingLargest != null )
+        // There's no single foolproof fallback, because the plan may have multiple
+        // windows, but only one is allowed to exist -- so the fallback conditions
+        // are a little bit complicated.
+
+        // Add at the end of the largest existing tile
+        DockerArrangementTile largestExistingTile = findLargestArrTile( existingArr );
+        if ( largestExistingTile != null )
         {
-            int viewNum = existingLargest.viewIds.size( );
-            return viewPlacer.addToTile( existingLargest, viewNum );
+            int viewNum = largestExistingTile.viewIds.size( );
+            return viewPlacer.addToTile( largestExistingTile, viewNum );
         }
 
-        // Final fallback is in a new window
-        return viewPlacer.addInNewFallbackFrame( );
+        // Add at the end of an arbitrary existing tile
+        Set<DockerArrangementTile> existingTiles = findTiles( existingArr );
+        if ( !existingTiles.isEmpty( ) )
+        {
+            DockerArrangementTile arbitraryExistingTile = existingTiles.iterator( ).next( );
+            int viewNum = arbitraryExistingTile.viewIds.size( );
+            return viewPlacer.addToTile( arbitraryExistingTile, viewNum );
+        }
+
+        // If a window exists, it must have no tiles, so add an initial tile
+        if ( !existingArr.frameArrs.isEmpty( ) )
+        {
+            return viewPlacer.addInInitialTile( );
+        }
+
+        // No windows exist, but exactly one is planned, so create it
+        if ( planArr.frameArrs.size( ) == 1 )
+        {
+            FrameArrangement onlyPlanFrame = planArr.frameArrs.get( 0 );
+            return viewPlacer.addInNewWindow( onlyPlanFrame, null );
+        }
+
+        // Create a fallback window
+        return viewPlacer.addInNewFallbackWindow( );
     }
 
     @Override

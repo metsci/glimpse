@@ -1,6 +1,9 @@
 package com.metsci.glimpse.docking.group.dialog;
 
+import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
+
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.util.Map;
 
 import com.metsci.glimpse.docking.Tile;
@@ -17,25 +20,51 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
     protected final DockingGroupDialog group;
 
 
-    public ViewPlacerDialogGroup( DockingGroupDialog group, Map<DockerArrangementNode,Component> componentsMap, View newView )
+    public ViewPlacerDialogGroup( DockingGroupDialog group, Map<DockerArrangementNode,Component> existingComponents, View newView )
     {
-        super( group, componentsMap, newView );
+        super( group, existingComponents, newView );
         this.group = group;
     }
 
     @Override
-    public ViewDestination addInNewDialog( FrameArrangement planDialog, DockerArrangementTile planTile )
+    public ViewDestination addInInitialTile( )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
 
-        // FIXME
-        DockingDialog dialog = this.group.ensureDialog( );
-        dialog.docker( ).addInitialLeaf( newTile );
+        DockingDialog newDialog = this.group.requireDialog( );
+        newDialog.docker( ).addInitialLeaf( newTile );
 
-        dialog.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
+        return new ViewDestination( newDialog, null, newTile, null );
+    }
 
-        return new ViewDestination( newFrame, planFrame, newTile, planTile );
+    @Override
+    public ViewDestination addInNewWindow( FrameArrangement planDialog, DockerArrangementTile planTile )
+    {
+        Tile newTile = this.group.createNewTile( );
+        newTile.addView( this.newView, 0 );
+
+        DockingDialog newDialog = this.group.initDialog( );
+        newDialog.docker( ).addInitialLeaf( newTile );
+
+        newDialog.setBounds( planDialog.x, planDialog.y, planDialog.width, planDialog.height );
+
+        return new ViewDestination( newDialog, planDialog, newTile, planTile );
+    }
+
+    @Override
+    public ViewDestination addInNewFallbackWindow( )
+    {
+        Tile newTile = this.group.createNewTile( );
+        newTile.addView( this.newView, 0 );
+
+        DockingDialog newDialog = this.group.initDialog( );
+        newDialog.docker( ).addInitialLeaf( newTile );
+
+        Rectangle newDialogBounds = fractionOfScreenBounds( 0.40f );
+        newDialog.setBounds( newDialogBounds );
+
+        return new ViewDestination( newDialog, null, newTile, null );
     }
 
 }
