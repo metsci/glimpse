@@ -27,18 +27,24 @@
 package com.metsci.glimpse.docking.group;
 
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
+import static com.metsci.glimpse.docking.MiscUtils.reversed;
 
 import java.awt.Component;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.metsci.glimpse.docking.DockingWindow;
 import com.metsci.glimpse.docking.MultiSplitPane;
 import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.View;
-import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
+import com.metsci.glimpse.docking.xml.FrameArrangement;
 
 public class DockingGroupUtils
 {
@@ -46,9 +52,9 @@ public class DockingGroupUtils
     /**
      * Restore selected views in newly created tiles.
      */
-    public static void restoreSelectedViewsInNewTiles( Collection<? extends ViewDestinationBase> viewDestinations )
+    public static void restoreSelectedViewsInNewTiles( Collection<? extends ViewDestination> viewDestinations )
     {
-        for ( ViewDestinationBase dest : viewDestinations )
+        for ( ViewDestination dest : viewDestinations )
         {
             if ( dest.createdTile != null && dest.planTile != null )
             {
@@ -58,25 +64,91 @@ public class DockingGroupUtils
         }
     }
 
-    public static void pruneEmpty( Tile tile, boolean disposeEmptyFrame )
+    /**
+     * Restore maximized tiles in newly created windows.
+     */
+    public static void restoreMaximizedTilesInNewWindows( Collection<? extends ViewDestination> viewDestinations )
+    {
+        Set<DockingWindow> newWindows = new LinkedHashSet<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.createdWindow != null )
+            {
+                newWindows.add( dest.createdWindow );
+            }
+        }
+
+        Set<Tile> maximizedNewTiles = new LinkedHashSet<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.createdTile != null && dest.planTile != null && dest.planTile.isMaximized )
+            {
+                maximizedNewTiles.add( dest.createdTile );
+            }
+        }
+
+        for ( Tile tile : maximizedNewTiles )
+        {
+            DockingWindow window = getAncestorOfClass( DockingWindow.class, tile );
+            if ( newWindows.contains( window ) )
+            {
+                window.docker( ).maximizeLeaf( tile );
+            }
+        }
+    }
+
+    /**
+     * Make newly created windows visible, honoring planned stacking order as much as possible.
+     */
+    public static void showNewWindows( Collection<? extends ViewDestination> viewDestinations, List<? extends FrameArrangement> orderedWindowArrs )
+    {
+        // Stack planned new windows in front of existing windows, in plan order
+        Map<FrameArrangement,DockingWindow> plannedNewWindows = new LinkedHashMap<>( );
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.createdWindow != null && dest.planWindow != null )
+            {
+                plannedNewWindows.put( dest.planWindow, dest.createdWindow );
+            }
+        }
+        for ( FrameArrangement windowArr : reversed( orderedWindowArrs ) )
+        {
+            DockingWindow window = plannedNewWindows.get( windowArr );
+            if ( window != null )
+            {
+                window.setVisible( true );
+            }
+        }
+
+        // Stack unplanned new windows in front of existing windows
+        for ( ViewDestination dest : viewDestinations )
+        {
+            if ( dest.createdWindow != null && dest.planWindow == null )
+            {
+                dest.createdWindow.setVisible( true );
+            }
+        }
+    }
+
+    public static void pruneEmptyTile( Tile tile )
     {
         if ( tile.numViews( ) == 0 )
         {
             MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
             docker.removeLeaf( tile );
 
-            if ( disposeEmptyFrame && docker.numLeaves( ) == 0 )
+            if ( docker.numLeaves( ) == 0 )
             {
-                DockingFrame frame = getAncestorOfClass( DockingFrame.class, docker );
-                if ( frame != null && frame.getContentPane( ) == docker )
+                DockingWindow window = getAncestorOfClass( DockingWindow.class, docker );
+                if ( window != null && window.getContentPane( ) == docker )
                 {
-                    frame.dispose( );
+                    window.dispose( );
                 }
             }
         }
     }
 
-    public static DockerArrangementNode toArrNode( MultiSplitPane.Node node, Map<DockerArrangementNode,Component> componentsMap )
+    public static DockerArrangementNode toArrNode( MultiSplitPane.Node node, Map<DockerArrangementNode,Component> components )
     {
         if ( node instanceof MultiSplitPane.Leaf )
         {
@@ -98,9 +170,9 @@ public class DockingGroupUtils
 
                 arrTile.isMaximized = leaf.isMaximized;
 
-                if ( componentsMap != null )
+                if ( components != null )
                 {
-                    componentsMap.put( arrTile, c );
+                    components.put( arrTile, c );
                 }
 
                 return arrTile;
@@ -116,12 +188,12 @@ public class DockingGroupUtils
             DockerArrangementSplit arrSplit = new DockerArrangementSplit( );
             arrSplit.arrangeVertically = split.arrangeVertically;
             arrSplit.splitFrac = split.splitFrac;
-            arrSplit.childA = toArrNode( split.childA, componentsMap );
-            arrSplit.childB = toArrNode( split.childB, componentsMap );
+            arrSplit.childA = toArrNode( split.childA, components );
+            arrSplit.childB = toArrNode( split.childB, components );
 
-            if ( componentsMap != null )
+            if ( components != null )
             {
-                componentsMap.put( arrSplit, split.component );
+                components.put( arrSplit, split.component );
             }
 
             return arrSplit;

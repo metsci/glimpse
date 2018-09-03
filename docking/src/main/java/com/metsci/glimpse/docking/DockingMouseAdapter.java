@@ -29,6 +29,7 @@ package com.metsci.glimpse.docking;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.pointRelativeToAncestor;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.pruneEmptyTile;
 import static java.awt.event.InputEvent.BUTTON1_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON2_DOWN_MASK;
 import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
@@ -136,7 +137,7 @@ public class DockingMouseAdapter extends MouseAdapter
             {
                 this.tile.removeView( this.draggedView );
                 region.placeView( this.draggedView, this.tileFactory );
-                this.group.pruneEmptyTile( this.tile );
+                pruneEmptyTile( this.tile );
             }
 
             this.dragging = false;

@@ -31,13 +31,13 @@ import java.util.Collection;
 
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupListener;
+import com.metsci.glimpse.docking.DockingWindow;
 import com.metsci.glimpse.docking.MultiSplitPane;
 import com.metsci.glimpse.docking.MultiSplitPaneListener;
 import com.metsci.glimpse.docking.SplitPane;
 import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.TileListener;
 import com.metsci.glimpse.docking.View;
-import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroupListenerUtils
@@ -115,43 +115,43 @@ public class DockingGroupListenerUtils
         }
     }
 
-    public static void notifyAddedFrame( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingFrame frame )
+    public static void notifyAddedWindow( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingWindow window )
     {
         for ( DockingGroupListener listener : listeners )
         {
-            listener.addedFrame( group, frame );
+            listener.addedWindow( group, window );
         }
     }
 
-    public static void notifyUserRequestingDisposeFrame( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingFrame frame )
+    public static void notifyUserRequestingDisposeWindow( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingWindow window )
     {
         for ( DockingGroupListener listener : listeners )
         {
-            listener.userRequestingDisposeFrame( group, frame );
+            listener.userRequestingDisposeWindow( group, window );
         }
     }
 
-    public static void notifyDisposingAllFrames( Collection<? extends DockingGroupListener> listeners, DockingGroup group )
+    public static void notifyDisposingAllWindows( Collection<? extends DockingGroupListener> listeners, DockingGroup group )
     {
         for ( DockingGroupListener listener : listeners )
         {
-            listener.disposingAllFrames( group );
+            listener.disposingAllWindows( group );
         }
     }
 
-    public static void notifyDisposingFrame( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingFrame frame )
+    public static void notifyDisposingWindow( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingWindow window )
     {
         for ( DockingGroupListener listener : listeners )
         {
-            listener.disposingFrame( group, frame );
+            listener.disposingWindow( group, window );
         }
     }
 
-    public static void notifyDisposedFrame( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingFrame frame )
+    public static void notifyDisposedWindow( Collection<? extends DockingGroupListener> listeners, DockingGroup group, DockingWindow window )
     {
         for ( DockingGroupListener listener : listeners )
         {
-            listener.disposedFrame( group, frame );
+            listener.disposedWindow( group, window );
         }
     }
 

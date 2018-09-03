@@ -33,104 +33,103 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 
-public class DockingFrameTitler extends DockingGroupAdapter
+public class DockingWindowTitler extends DockingGroupAdapter
 {
 
-    protected final Function<DockingFrame,String> titleFn;
+    protected final Function<DockingWindow,String> titleFn;
     protected final Map<View,Disposable> viewDisposables;
 
 
-    public DockingFrameTitler( Function<DockingFrame,String> titleFn )
+    public DockingWindowTitler( Function<DockingWindow,String> titleFn )
     {
         this.titleFn = titleFn;
         this.viewDisposables = new HashMap<>( );
     }
 
-    public void updateFrameTitle( DockingFrame frame )
+    public void updateWindowTitle( DockingWindow window )
     {
-        if ( frame != null )
+        if ( window != null )
         {
-            String title = this.titleFn.apply( frame );
-            frame.setTitle( title );
+            String title = this.titleFn.apply( window );
+            window.setTitle( title );
         }
     }
 
     @Override
     public void addedView( Tile tile, View view )
     {
-        Runnable updateFrameTitle = ( ) ->
+        Runnable updateWindowTitle = ( ) ->
         {
-            updateFrameTitle( getAncestorOfClass( DockingFrame.class, tile ) );
+            this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, tile ) );
         };
 
-        updateFrameTitle.run( );
+        updateWindowTitle.run( );
 
         DisposableGroup disposables = new DisposableGroup( );
-        disposables.add( view.component.addListener( false, updateFrameTitle ) );
-        disposables.add( view.tooltip.addListener( false, updateFrameTitle ) );
-        disposables.add( view.title.addListener( false, updateFrameTitle ) );
-        disposables.add( view.icon.addListener( false, updateFrameTitle ) );
+        disposables.add( view.component.addListener( false, updateWindowTitle ) );
+        disposables.add( view.tooltip.addListener( false, updateWindowTitle ) );
+        disposables.add( view.title.addListener( false, updateWindowTitle ) );
+        disposables.add( view.icon.addListener( false, updateWindowTitle ) );
 
-        viewDisposables.put( view, disposables );
+        this.viewDisposables.put( view, disposables );
     }
 
     @Override
     public void removedView( Tile tile, View view )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, tile ) );
-        viewDisposables.remove( view ).dispose( );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, tile ) );
+        this.viewDisposables.remove( view ).dispose( );
     }
 
     @Override
     public void selectedView( Tile tile, View view )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, tile ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, tile ) );
     }
 
     @Override
     public void addedLeaf( MultiSplitPane docker, Component leaf )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, docker ) );
     }
 
     @Override
     public void removedLeaf( MultiSplitPane docker, Component leaf )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, docker ) );
     }
 
     @Override
     public void movedDivider( MultiSplitPane docker, SplitPane splitPane )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, docker ) );
     }
 
     @Override
     public void maximizedLeaf( MultiSplitPane docker, Component leaf )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, docker ) );
     }
 
     @Override
     public void unmaximizedLeaf( MultiSplitPane docker, Component leaf )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, docker ) );
     }
 
     @Override
     public void restoredTree( MultiSplitPane docker )
     {
-        updateFrameTitle( getAncestorOfClass( DockingFrame.class, docker ) );
+        this.updateWindowTitle( getAncestorOfClass( DockingWindow.class, docker ) );
     }
 
     @Override
-    public void addedFrame( DockingGroup group, DockingFrame frame )
+    public void addedWindow( DockingGroup group, DockingWindow window )
     {
-        updateFrameTitle( frame );
+        this.updateWindowTitle( window );
     }
 
 }

@@ -35,7 +35,13 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -46,6 +52,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+
+import com.metsci.glimpse.util.var.Disposable;
 
 /**
  * These utility methods aren't specific to docking, but are used internally by
@@ -132,6 +140,62 @@ public class MiscUtils
             j += c.getY( );
         }
         return new Point( i, j );
+    }
+
+    public static Disposable onWindowStateChanged( Window w, Runnable fn )
+    {
+        return addWindowListener( w, new WindowAdapter( )
+        {
+            @Override
+            public void windowStateChanged( WindowEvent ev )
+            {
+                fn.run( );
+            }
+        } );
+    }
+
+    public static Disposable addWindowListener( Window w, WindowListener listener )
+    {
+        w.addWindowListener( listener );
+
+        return ( ) ->
+        {
+            w.removeWindowListener( listener );
+        };
+    }
+
+    public static Disposable onComponentMoved( Component c, Runnable fn )
+    {
+        return addComponentListener( c, new ComponentAdapter( )
+        {
+            @Override
+            public void componentMoved( ComponentEvent ev )
+            {
+                fn.run( );
+            }
+        } );
+    }
+
+    public static Disposable onComponentResized( Component c, Runnable fn )
+    {
+        return addComponentListener( c, new ComponentAdapter( )
+        {
+            @Override
+            public void componentResized( ComponentEvent ev )
+            {
+                fn.run( );
+            }
+        } );
+    }
+
+    public static Disposable addComponentListener( Component c, ComponentListener listener )
+    {
+        c.addComponentListener( listener );
+
+        return ( ) ->
+        {
+            c.removeComponentListener( listener );
+        };
     }
 
     public static Border createEmptyBorder( int size )

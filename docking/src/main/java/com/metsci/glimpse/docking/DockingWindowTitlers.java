@@ -26,51 +26,37 @@
  */
 package com.metsci.glimpse.docking;
 
-import java.awt.Component;
+import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 
-public interface DockingGroupListener
+public class DockingWindowTitlers
 {
 
-    void addedView( Tile tile, View view );
+    public static DockingWindowTitler createDefaultWindowTitler( String titleRoot )
+    {
+        return createDefaultWindowTitler( titleRoot, false );
+    }
 
-    void removedView( Tile tile, View view );
+    public static DockingWindowTitler createDefaultWindowTitler( String titleRoot, boolean viewTitleFirst )
+    {
+        return new DockingWindowTitler( ( window ) ->
+        {
+            return getDefaultWindowTitle( titleRoot, window, viewTitleFirst );
+        } );
+    }
 
-    void selectedView( Tile tile, View view );
-
-    void addedLeaf( MultiSplitPane docker, Component leaf );
-
-    void removedLeaf( MultiSplitPane docker, Component leaf );
-
-    void movedDivider( MultiSplitPane docker, SplitPane splitPane );
-
-    void maximizedLeaf( MultiSplitPane docker, Component leaf );
-
-    void unmaximizedLeaf( MultiSplitPane docker, Component leaf );
-
-    void restoredTree( MultiSplitPane docker );
-
-    void addedWindow( DockingGroup group, DockingWindow window );
-
-    /**
-     * Called when the user tries to close a window in the {@link DockingGroup}, e.g. by clicking the
-     * close button in the window's title bar.
-     * <p>
-     * Depending on the {@link DockingFrameCloseOperation}, this call might be followed automatically by
-     * calls to {@link #disposingAllWindows(DockingGroup)}, {@link #disposingWindow(DockingGroup, DockingWindow)},
-     * and/or {@link #disposedWindow(DockingGroup, DockingWindow)}.
-     */
-    void userRequestingDisposeWindow( DockingGroup group, DockingWindow window );
-
-    void disposingAllWindows( DockingGroup group );
-
-    void disposingWindow( DockingGroup group, DockingWindow window );
-
-    void disposedWindow( DockingGroup group, DockingWindow window );
-
-    void userRequestingCloseView( DockingGroup group, View view );
-
-    void closingView( DockingGroup group, View view );
-
-    void closedView( DockingGroup group, View view );
+    public static String getDefaultWindowTitle( String titleRoot, DockingWindow window, boolean viewTitleFirst )
+    {
+        Tile tile = findLargestTile( window.docker( ) );
+        if ( tile != null )
+        {
+            View view = tile.selectedView( );
+            if ( view != null )
+            {
+                String viewTitle = view.title.v( );
+                return ( viewTitleFirst ? viewTitle + " - " + titleRoot : titleRoot + " - " + viewTitle );
+            }
+        }
+        return titleRoot;
+    }
 
 }

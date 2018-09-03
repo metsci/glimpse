@@ -2,7 +2,6 @@ package com.metsci.glimpse.docking.group;
 
 import java.util.Set;
 
-import com.metsci.glimpse.docking.group.frame.ViewPlacerMultiframe;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public interface ViewPlacementRule
@@ -25,6 +24,6 @@ public interface ViewPlacementRule
      * </code>
      * </pre>
      */
-    Object placeView( GroupArrangement planArr, Set<String> existingViewIds, ViewPlacerMultiframe<?> placer );
+    Object placeView( GroupArrangement planArr, Set<String> existingViewIds, ViewPlacer<?> placer );
 
 }

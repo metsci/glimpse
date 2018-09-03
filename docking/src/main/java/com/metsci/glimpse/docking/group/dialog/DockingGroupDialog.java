@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking.group.frame;
+package com.metsci.glimpse.docking.group.dialog;
 
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.LandingRegions.landingInExistingDocker;
@@ -50,7 +50,6 @@ import java.util.Set;
 import com.metsci.glimpse.docking.DockingFrameCloseOperation;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.DockingWindow;
-import com.metsci.glimpse.docking.LandingRegions.InNewWindow;
 import com.metsci.glimpse.docking.LandingRegions.LandingRegion;
 import com.metsci.glimpse.docking.MultiSplitPane;
 import com.metsci.glimpse.docking.Side;
@@ -65,41 +64,65 @@ import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 
-public class DockingGroupMultiframe extends DockingGroupBase
+public class DockingGroupDialog extends DockingGroupBase
 {
 
-    public DockingGroupMultiframe( DockingFrameCloseOperation frameCloseOperation )
+    public DockingGroupDialog( DockingFrameCloseOperation frameCloseOperation )
     {
         this( frameCloseOperation, defaultDockingTheme( ) );
     }
 
-    public DockingGroupMultiframe( DockingFrameCloseOperation frameCloseOperation, DockingTheme theme )
+    public DockingGroupDialog( DockingFrameCloseOperation frameCloseOperation, DockingTheme theme )
     {
         super( frameCloseOperation, theme );
     }
 
-    public DockingFrame addNewFrame( )
+    public DockingDialog ensureDialog( )
     {
-        return this.addWindow( new DockingFrame( this.createDocker( ) ) );
+        if ( !this.windows.isEmpty( ) )
+        {
+            return ( ( DockingDialog ) this.windows.get( 0 ) );
+        }
+        else
+        {
+            return this.addWindow( new DockingDialog( this.createDocker( ) ) );
+        }
     }
 
     @Override
-    protected ViewPlacerMultiframe<ViewDestination> createViewPlacer( Map<DockerArrangementNode,Component> existingComponents, View newView )
+    protected <W extends DockingWindow> W addWindow( W window )
     {
-        return new ViewPlacerMultiframeGroup( this, existingComponents, newView );
+        if ( !( window instanceof DockingDialog ) )
+        {
+            throw new RuntimeException( "Unexpected window type: " + window.getClass( ).getName( ) );
+        }
+        else if ( !this.windows.isEmpty( ) )
+        {
+            throw new RuntimeException( "Singleton dialog already exists" );
+        }
+        else
+        {
+            return super.addWindow( window );
+        }
     }
 
     @Override
-    protected ViewPlacerMultiframe<Void> createViewPlacer( GroupArrangement groupArr, String newViewId )
+    protected ViewPlacerDialog<ViewDestination> createViewPlacer( Map<DockerArrangementNode,Component> existingComponents, View newView )
     {
-        return new ViewPlacerMultiframeArr( groupArr, newViewId );
+        return new ViewPlacerDialogGroup( this, existingComponents, newView );
+    }
+
+    @Override
+    protected ViewPlacerDialog<Void> createViewPlacer( GroupArrangement groupArr, String newViewId )
+    {
+        return new ViewPlacerDialogArr( groupArr, newViewId );
     }
 
     @Override
     protected <T> T placeView( GroupArrangement existingArr, GroupArrangement planArr, String viewId, ViewPlacer<T> viewPlacer0 )
     {
         // Cast is compatible with the return types of both createViewPlacer() methods
-        ViewPlacerMultiframe<T> viewPlacer = ( ViewPlacerMultiframe<T> ) viewPlacer0;
+        ViewPlacerDialog<T> viewPlacer = ( ViewPlacerDialog<T> ) viewPlacer0;
 
         Map<DockerArrangementNode,Set<String>> existingSubtreeViewIds = buildSubtreeViewIdsMap( existingArr );
         Map<DockerArrangementNode,Set<String>> planSubtreeViewIds = buildSubtreeViewIdsMap( planArr );
@@ -170,7 +193,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
                 return landingInExistingDocker( docker, fromTile, fromViewNum, pOnScreen );
             }
         }
-        return new InNewWindow( fromTile, fromViewNum, pOnScreen, this::addNewFrame );
+        return null;
     }
 
 }

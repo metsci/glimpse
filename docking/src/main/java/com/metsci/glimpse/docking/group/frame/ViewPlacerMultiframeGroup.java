@@ -1,89 +1,63 @@
 package com.metsci.glimpse.docking.group.frame;
 
-import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
-import static com.metsci.glimpse.docking.group.frame.DockingGroupMultiframeUtils.fallbackFrameBounds;
+import static com.metsci.glimpse.docking.group.frame.ViewPlacerMultiframeUtils.fallbackFrameBounds;
 
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.Map;
 
-import com.metsci.glimpse.docking.MultiSplitPane;
-import com.metsci.glimpse.docking.Side;
 import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.group.ViewDestination;
+import com.metsci.glimpse.docking.group.ViewPlacerBaseGroup;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 
-class ViewPlacerMultiframeGroup implements ViewPlacerMultiframe<ViewDestinationMultiframe>
+public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements ViewPlacerMultiframe<ViewDestination>
 {
 
     protected final DockingGroupMultiframe group;
-    protected final Map<DockerArrangementNode,Component> componentsMap;
-    protected final View newView;
 
 
     public ViewPlacerMultiframeGroup( DockingGroupMultiframe group, Map<DockerArrangementNode,Component> componentsMap, View newView )
     {
+        super( group, componentsMap, newView );
         this.group = group;
-        this.componentsMap = componentsMap;
-        this.newView = newView;
     }
 
     @Override
-    public ViewDestinationMultiframe addToTile( DockerArrangementTile existingTile, int newViewNum )
-    {
-        Tile tile = ( Tile ) this.componentsMap.get( existingTile );
-        tile.addView( this.newView, newViewNum );
-        return new ViewDestinationMultiframe( null, null, null, null );
-    }
-
-    @Override
-    public ViewDestinationMultiframe addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac )
-    {
-        Tile newTile = this.group.createNewTile( );
-        newTile.addView( this.newView, 0 );
-
-        Component neighbor = this.componentsMap.get( existingNeighbor );
-
-        MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, neighbor );
-        docker.addNeighborLeaf( newTile, neighbor, sideOfNeighbor, extentFrac );
-
-        return new ViewDestinationMultiframe( null, null, newTile, planTile );
-    }
-
-    @Override
-    public ViewDestinationMultiframe addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
+    public ViewDestination addInNewFrame( FrameArrangement planFrame, DockerArrangementTile planTile )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
 
         DockingFrame newFrame = this.group.addNewFrame( );
-        newFrame.docker.addInitialLeaf( newTile );
+        newFrame.docker( ).addInitialLeaf( newTile );
 
         newFrame.setBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
         newFrame.setNormalBounds( planFrame.x, planFrame.y, planFrame.width, planFrame.height );
         newFrame.setExtendedState( getFrameExtendedState( planFrame.isMaximizedHoriz, planFrame.isMaximizedVert ) );
 
-        return new ViewDestinationMultiframe( newFrame, planFrame, newTile, planTile );
+        return new ViewDestination( newFrame, planFrame, newTile, planTile );
     }
 
     @Override
-    public ViewDestinationMultiframe addInNewFallbackFrame( )
+    public ViewDestination addInNewFallbackFrame( )
     {
         Tile newTile = this.group.createNewTile( );
         newTile.addView( this.newView, 0 );
 
         DockingFrame newFrame = this.group.addNewFrame( );
-        newFrame.docker.addInitialLeaf( newTile );
+        newFrame.docker( ).addInitialLeaf( newTile );
 
         Rectangle newFrameBounds = fallbackFrameBounds( );
         newFrame.setBounds( newFrameBounds );
         newFrame.setNormalBounds( newFrameBounds );
         newFrame.setExtendedState( getFrameExtendedState( false, false ) );
 
-        return new ViewDestinationMultiframe( newFrame, null, newTile, null );
+        return new ViewDestination( newFrame, null, newTile, null );
     }
 
 }

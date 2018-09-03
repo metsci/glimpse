@@ -26,22 +26,23 @@
  */
 package com.metsci.glimpse.docking.group.frame;
 
+import static com.metsci.glimpse.docking.MiscUtils.onComponentMoved;
+import static com.metsci.glimpse.docking.MiscUtils.onComponentResized;
+import static com.metsci.glimpse.docking.MiscUtils.onWindowStateChanged;
+
 import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
+import java.awt.Window;
 
 import javax.swing.JFrame;
 
+import com.metsci.glimpse.docking.DockingWindow;
 import com.metsci.glimpse.docking.MultiSplitPane;
 
 @SuppressWarnings( "serial" )
-public class DockingFrame extends JFrame
+public class DockingFrame extends JFrame implements DockingWindow
 {
 
     public final MultiSplitPane docker;
-
     protected Rectangle normalBounds;
 
 
@@ -52,29 +53,9 @@ public class DockingFrame extends JFrame
 
         this.normalBounds = getBounds( );
 
-        this.addWindowStateListener( new WindowStateListener( )
-        {
-            @Override
-            public void windowStateChanged( WindowEvent ev )
-            {
-                updateNormalBounds( );
-            }
-        } );
-
-        this.addComponentListener( new ComponentAdapter( )
-        {
-            @Override
-            public void componentMoved( ComponentEvent ev )
-            {
-                updateNormalBounds( );
-            }
-
-            @Override
-            public void componentResized( ComponentEvent ev )
-            {
-                updateNormalBounds( );
-            }
-        } );
+        onComponentMoved( this, this::updateNormalBounds );
+        onComponentResized( this, this::updateNormalBounds );
+        onWindowStateChanged( this, this::updateNormalBounds );
     }
 
     protected void updateNormalBounds( )
@@ -85,6 +66,36 @@ public class DockingFrame extends JFrame
         }
     }
 
+    @Override
+    public Window window( )
+    {
+        return this;
+    }
+
+    @Override
+    public MultiSplitPane docker( )
+    {
+        return this.docker;
+    }
+
+    @Override
+    public boolean isMaximizedHorizontally( )
+    {
+        return ( ( this.getExtendedState( ) & MAXIMIZED_HORIZ ) != 0 );
+    }
+
+    @Override
+    public boolean isMaximizedVertically( )
+    {
+        return ( ( this.getExtendedState( ) & MAXIMIZED_VERT ) != 0 );
+    }
+
+    @Override
+    public Rectangle getNormalBounds( )
+    {
+        return new Rectangle( normalBounds );
+    }
+
     public void setNormalBounds( Rectangle bounds )
     {
         this.setNormalBounds( bounds.x, bounds.y, bounds.width, bounds.height );
@@ -93,11 +104,6 @@ public class DockingFrame extends JFrame
     public void setNormalBounds( int x, int y, int width, int height )
     {
         this.normalBounds = new Rectangle( x, y, width, height );
-    }
-
-    public Rectangle getNormalBounds( )
-    {
-        return new Rectangle( normalBounds );
     }
 
 }

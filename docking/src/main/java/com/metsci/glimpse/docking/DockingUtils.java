@@ -70,7 +70,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import com.google.common.collect.ImmutableList;
-import com.metsci.glimpse.docking.group.frame.DockingFrame;
 import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
@@ -284,7 +283,7 @@ public class DockingUtils
         dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup group )
+            public void disposingAllWindows( DockingGroup group )
             {
                 GroupArrangement saveArr = dockingGroup.captureArrangement( );
                 saveDockingArrangement( targetFile, saveArr );
@@ -427,14 +426,19 @@ public class DockingUtils
         return largestTile;
     }
 
-    public static Set<Tile> findTiles( Collection<? extends DockingFrame> frames )
+    public static Set<Tile> findTiles( Collection<? extends DockingWindow> windows )
     {
         Set<Tile> tiles = new LinkedHashSet<>( );
-        for ( DockingFrame frame : frames )
+        for ( DockingWindow window : windows )
         {
-            tiles.addAll( findTiles( frame.docker ) );
+            tiles.addAll( findTiles( window ) );
         }
         return tiles;
+    }
+
+    public static Set<Tile> findTiles( DockingWindow window )
+    {
+        return findTiles( window.docker( ) );
     }
 
     public static Set<Tile> findTiles( MultiSplitPane docker )
@@ -450,14 +454,19 @@ public class DockingUtils
         return tiles;
     }
 
-    public static Map<String,View> findViews( Collection<? extends DockingFrame> frames )
+    public static Map<String,View> findViews( Collection<? extends DockingWindow> windows )
     {
         Map<String,View> views = new LinkedHashMap<>( );
-        for ( DockingFrame frame : frames )
+        for ( DockingWindow window : windows )
         {
-            views.putAll( findViews( frame.docker ) );
+            views.putAll( findViews( window ) );
         }
         return views;
+    }
+
+    public static Map<String,View> findViews( DockingWindow window )
+    {
+        return findViews( window.docker( ) );
     }
 
     public static Map<String,View> findViews( MultiSplitPane docker )

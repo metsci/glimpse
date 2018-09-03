@@ -24,38 +24,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.group.dialog;
 
-import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
+import java.awt.Rectangle;
+import java.awt.Window;
 
-import com.metsci.glimpse.docking.group.frame.DockingFrame;
+import javax.swing.JDialog;
 
-public class DockingFrameTitlers
+import com.metsci.glimpse.docking.DockingWindow;
+import com.metsci.glimpse.docking.MultiSplitPane;
+
+@SuppressWarnings( "serial" )
+public class DockingDialog extends JDialog implements DockingWindow
 {
 
-    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot )
+    public final MultiSplitPane docker;
+
+
+    public DockingDialog( MultiSplitPane docker )
     {
-        return createDefaultFrameTitler( titleRoot, false );
+        this.docker = docker;
+        this.setContentPane( docker );
     }
 
-    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot, boolean viewTitleFirst )
+    @Override
+    public Window window( )
     {
-        return new DockingFrameTitler( ( f ) -> getDefaultFrameTitle( titleRoot, f, viewTitleFirst ) );
+        return this;
     }
 
-    public static String getDefaultFrameTitle( String titleRoot, DockingFrame frame, boolean viewTitleFirst )
+    @Override
+    public MultiSplitPane docker( )
     {
-        Tile tile = findLargestTile( frame.docker );
-        if ( tile != null )
-        {
-            View view = tile.selectedView( );
-            if ( view != null )
-            {
-                String viewTitle = view.title.v( );
-                return ( viewTitleFirst ? viewTitle + " - " + titleRoot : titleRoot + " - " + viewTitle );
-            }
-        }
-        return titleRoot;
+        return this.docker;
+    }
+
+    @Override
+    public Rectangle getNormalBounds( )
+    {
+        return this.getBounds( );
+    }
+
+    @Override
+    public boolean isMaximizedHorizontally( )
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isMaximizedVertically( )
+    {
+        return false;
     }
 
 }

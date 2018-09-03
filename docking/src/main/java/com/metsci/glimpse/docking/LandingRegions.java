@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.convertPointFromScreen;
+import static com.metsci.glimpse.docking.MiscUtils.convertPointToScreen;
 import static com.metsci.glimpse.docking.MiscUtils.minValueAndIndex;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
@@ -35,8 +37,12 @@ import static com.metsci.glimpse.docking.Side.TOP;
 import static javax.swing.SwingUtilities.convertPointToScreen;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
+import java.util.function.Supplier;
 
 import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 
@@ -318,6 +324,71 @@ public class LandingRegions
         {
             tile.addView( view, tile.numViews( ) );
             tile.selectView( view );
+        }
+    }
+
+    public static class InNewWindow implements LandingRegion
+    {
+        protected final Supplier<DockingWindow> addWindowFn;
+
+        protected final int xRegion_SCREEN;
+        protected final int yRegion_SCREEN;
+        protected final int wRegion;
+        protected final int hRegion;
+
+        protected final int wWindowInset;
+        protected final int hWindowInset;
+
+        public InNewWindow( Tile fromTile, int fromViewNum, Point pOnScreen, Supplier<DockingWindow> addWindowFn )
+        {
+            this.addWindowFn = addWindowFn;
+
+            Window window = getAncestorOfClass( Window.class, fromTile );
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, fromTile );
+            Point windowOrigin = convertPointToScreen( window, new Point( 0, 0 ) );
+            Point dockerOrigin = convertPointToScreen( docker, new Point( 0, 0 ) );
+            Insets dockerInsets = docker.getInsets( );
+            this.wWindowInset = ( dockerOrigin.x - windowOrigin.x ) + dockerInsets.left;
+            this.hWindowInset = ( dockerOrigin.y - windowOrigin.y ) + dockerInsets.top;
+
+            Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
+            Rectangle leftmostTabBounds = draggedTabBounds;
+            for ( int i = 0; i < fromTile.numViews( ); i++ )
+            {
+                if ( fromTile.hasViewTab( i ) )
+                {
+                    leftmostTabBounds = fromTile.viewTabBounds( i );
+                    break;
+                }
+            }
+
+            // TODO: Could do better by accounting for the mouse-press point
+            int xTileOffset = leftmostTabBounds.x + 7 * draggedTabBounds.width / 16;
+            int yTileOffset = leftmostTabBounds.y + 5 * draggedTabBounds.height / 8;
+            this.xRegion_SCREEN = pOnScreen.x - xTileOffset;
+            this.yRegion_SCREEN = pOnScreen.y - yTileOffset;
+            this.wRegion = fromTile.getWidth( );
+            this.hRegion = fromTile.getHeight( );
+        }
+
+        @Override
+        public Rectangle getIndicator( )
+        {
+            return new Rectangle( this.xRegion_SCREEN, this.yRegion_SCREEN, this.wRegion, this.hRegion );
+        }
+
+        @Override
+        public void placeView( View view, TileFactory tileFactory )
+        {
+            Tile tile = tileFactory.newTile( );
+            tile.addView( view, 0 );
+
+            DockingWindow window = this.addWindowFn.get( );
+            window.docker( ).addInitialLeaf( tile );
+            window.setLocation( this.xRegion_SCREEN - this.wWindowInset, this.yRegion_SCREEN - this.hWindowInset );
+            tile.setPreferredSize( new Dimension( this.wRegion, this.hRegion ) );
+            window.pack( );
+            window.setVisible( true );
         }
     }
 
