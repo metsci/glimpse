@@ -27,12 +27,12 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.SimpleDockingExample.newSolidPanel;
@@ -145,7 +145,7 @@ public class ProgrammaticDockingExample
                 //
 
                 DockingGroupMultiframe dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
-                dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
+                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
                 TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
                 Tile aTile = tileFactory.newTile( );

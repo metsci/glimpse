@@ -32,8 +32,8 @@ import static com.metsci.glimpse.dnc.facc.FaccIo.*;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.*;
 import static com.metsci.glimpse.docking.ViewCloseOption.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
@@ -317,13 +317,13 @@ public class DncExplorer
 
             String appName = "dnc-explorer";
             DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
-            dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
+            dockingGroup.addListener( createDefaultWindowTitler( "DNC Explorer" ) );
             setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( DncExplorer.class, "dnc-examples/docking-defaults.xml" ) );
 
             dockingGroup.addListener( new DockingGroupAdapter( )
             {
                 @Override
-                public void disposingAllFrames( DockingGroup group )
+                public void disposingAllWindows( DockingGroup group )
                 {
                     attrsTableModel.dispose( );
                     animator.stop( );

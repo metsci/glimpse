@@ -28,12 +28,12 @@ package com.metsci.glimpse.layers;
 
 import static com.google.common.io.Resources.getResource;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_CUSTOM_CLOSEABLE;
@@ -207,7 +207,7 @@ public class LayeredGui
         this.viewDisposables = new HashMap<>( );
 
         this.dockingGroup = new DockingGroupMultiframe( closeOperation, theme );
-        this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
+        this.dockingGroup.addListener( createDefaultWindowTitler( frameTitleRoot ) );
 
         // Don't start the animator here, since we might not ever get any views that
         // use it -- see the javadocs for {@link View#setGLAnimator(GLAnimatorControl)}
@@ -221,7 +221,7 @@ public class LayeredGui
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup dockingGroup )
+            public void disposingAllWindows( DockingGroup dockingGroup )
             {
                 if ( dockingAppName != null )
                 {
