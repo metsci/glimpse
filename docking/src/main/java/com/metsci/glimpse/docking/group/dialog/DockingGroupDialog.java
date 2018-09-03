@@ -44,7 +44,9 @@ import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArr
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrTile;
 
 import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.Point;
+import java.awt.Window;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,14 +70,20 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class DockingGroupDialog extends DockingGroupBase
 {
 
-    public DockingGroupDialog( DockingFrameCloseOperation frameCloseOperation )
+    protected final Window owner;
+    protected final ModalityType modality;
+
+
+    public DockingGroupDialog( Window owner, ModalityType modality, DockingFrameCloseOperation windowCloseOperation )
     {
-        this( frameCloseOperation, defaultDockingTheme( ) );
+        this( owner, modality, windowCloseOperation, defaultDockingTheme( ) );
     }
 
-    public DockingGroupDialog( DockingFrameCloseOperation frameCloseOperation, DockingTheme theme )
+    public DockingGroupDialog( Window owner, ModalityType modality, DockingFrameCloseOperation windowCloseOperation, DockingTheme theme )
     {
-        super( frameCloseOperation, theme );
+        super( windowCloseOperation, theme );
+        this.owner = owner;
+        this.modality = modality;
     }
 
     public boolean hasDialog( )
@@ -85,7 +93,7 @@ public class DockingGroupDialog extends DockingGroupBase
 
     public DockingDialog initDialog( )
     {
-        return this.addWindow( new DockingDialog( this.createDocker( ) ) );
+        return this.addWindow( new DockingDialog( this.owner, this.modality, this.createDocker( ) ) );
     }
 
     public DockingDialog requireDialog( )

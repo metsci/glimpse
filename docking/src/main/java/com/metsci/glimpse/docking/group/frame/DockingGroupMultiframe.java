@@ -68,14 +68,14 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class DockingGroupMultiframe extends DockingGroupBase
 {
 
-    public DockingGroupMultiframe( DockingFrameCloseOperation frameCloseOperation )
+    public DockingGroupMultiframe( DockingFrameCloseOperation windowCloseOperation )
     {
-        this( frameCloseOperation, defaultDockingTheme( ) );
+        this( windowCloseOperation, defaultDockingTheme( ) );
     }
 
-    public DockingGroupMultiframe( DockingFrameCloseOperation frameCloseOperation, DockingTheme theme )
+    public DockingGroupMultiframe( DockingFrameCloseOperation windowCloseOperation, DockingTheme theme )
     {
-        super( frameCloseOperation, theme );
+        super( windowCloseOperation, theme );
     }
 
     public DockingFrame addNewFrame( )

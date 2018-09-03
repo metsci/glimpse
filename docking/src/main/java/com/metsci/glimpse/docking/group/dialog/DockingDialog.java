@@ -41,8 +41,9 @@ public class DockingDialog extends JDialog implements DockingWindow
     public final MultiSplitPane docker;
 
 
-    public DockingDialog( MultiSplitPane docker )
+    public DockingDialog( Window owner, ModalityType modality, MultiSplitPane docker )
     {
+        super( owner, modality );
         this.docker = docker;
         this.setContentPane( docker );
     }
