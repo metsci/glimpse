@@ -136,24 +136,6 @@ public class DockingGroupUtils
         return result;
     }
 
-    public static void pruneEmptyTile( Tile tile )
-    {
-        if ( tile.numViews( ) == 0 )
-        {
-            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
-            docker.removeLeaf( tile );
-
-            if ( docker.numLeaves( ) == 0 )
-            {
-                DockingWindow window = getAncestorOfClass( DockingWindow.class, docker );
-                if ( window != null && window.getContentPane( ) == docker )
-                {
-                    window.dispose( );
-                }
-            }
-        }
-    }
-
     public static DockerArrangementNode toArrNode( MultiSplitPane.Node node, Map<DockerArrangementNode,Component> components )
     {
         if ( node instanceof MultiSplitPane.Leaf )

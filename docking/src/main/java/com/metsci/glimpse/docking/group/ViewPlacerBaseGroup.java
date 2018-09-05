@@ -38,7 +38,7 @@ public class ViewPlacerBaseGroup implements ViewPlacer<ViewDestination>
     @Override
     public ViewDestination addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac )
     {
-        Tile newTile = this.group.createNewTile( );
+        Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
 
         Component neighbor = this.existingComponents.get( existingNeighbor );

@@ -42,7 +42,6 @@ import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyD
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyDisposingWindow;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyUserRequestingDisposeWindow;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.newWindowsBackToFront;
-import static com.metsci.glimpse.docking.group.DockingGroupUtils.pruneEmptyTile;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreMaximizedTilesInNewWindows;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreSelectedViewsInNewTiles;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.toArrNode;
@@ -67,6 +66,7 @@ import java.util.logging.Logger;
 
 import com.metsci.glimpse.docking.DockingFrameCloseOperation;
 import com.metsci.glimpse.docking.DockingGroup;
+import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.DockingGroupListener;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.DockingWindow;
@@ -115,6 +115,49 @@ public abstract class DockingGroupBase implements DockingGroup
 
         this.listeners = new LinkedHashSet<>( );
         this.listenersUnmod = unmodifiableSet( this.listeners );
+
+        this.addListener( new DockingGroupAdapter( )
+        {
+            @Override
+            public void removedView( Tile tile, View view )
+            {
+                DockingGroupBase.this.pruneEmptyTile( tile );
+            }
+
+            @Override
+            public void removedLeaf( MultiSplitPane docker, Component leaf )
+            {
+                DockingGroupBase.this.pruneEmptyWindow( docker );
+            }
+        } );
+    }
+
+    protected void pruneEmptyTile( Tile tile )
+    {
+        if ( tile.numViews( ) == 0 )
+        {
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, tile );
+            docker.removeLeaf( tile );
+        }
+    }
+
+    protected void pruneEmptyWindow( MultiSplitPane docker )
+    {
+        if ( docker.numLeaves( ) == 0 )
+        {
+            DockingWindow window = getAncestorOfClass( DockingWindow.class, docker );
+            if ( window != null )
+            {
+                notifyDisposingWindow( this.listeners, this, window );
+                if ( window.getContentPane( ) == docker )
+                {
+                    window.dispose( );
+                }
+
+                // The WINDOW_CLOSED event only gets sent if the window was visible
+                this.removeWindow( window );
+            }
+        }
     }
 
     @Override
@@ -162,7 +205,7 @@ public abstract class DockingGroupBase implements DockingGroup
             {
                 // Assumes windows get raised when activated -- not always true (e.g. with
                 // a focus-follows-mouse WM), but it's as close as we can get with Swing
-                DockingGroupBase.this.onWindowRaised( window );
+                DockingGroupBase.this.recordWindowRaise( window );
             }
 
             @Override
@@ -174,7 +217,7 @@ public abstract class DockingGroupBase implements DockingGroup
             @Override
             public void windowClosed( WindowEvent ev )
             {
-                DockingGroupBase.this.onWindowClosed( window );
+                DockingGroupBase.this.removeWindow( window );
             }
         } );
 
@@ -183,7 +226,7 @@ public abstract class DockingGroupBase implements DockingGroup
         return window;
     }
 
-    protected void onWindowRaised( DockingWindow window )
+    protected void recordWindowRaise( DockingWindow window )
     {
         boolean found = this.windows.remove( window );
         if ( !found )
@@ -218,7 +261,7 @@ public abstract class DockingGroupBase implements DockingGroup
                         // This would get triggered eventually by the WINDOW_CLOSED event, but not until
                         // after previously queued events have been dispatched -- which can cause problems,
                         // especially when there are modal dialogs involved
-                        this.onWindowClosed( window );
+                        this.removeWindow( window );
                     }
                     else
                     {
@@ -238,7 +281,7 @@ public abstract class DockingGroupBase implements DockingGroup
         }
     }
 
-    protected void onWindowClosed( DockingWindow window )
+    protected void removeWindow( DockingWindow window )
     {
         if ( this.windows.remove( window ) )
         {
@@ -311,12 +354,12 @@ public abstract class DockingGroupBase implements DockingGroup
         {
             if ( this.isVisible )
             {
-                // Triggers this.onWindowRaised() automatically
+                // Triggers this.recordWindowRaise() automatically
                 window.setVisible( true );
             }
             else
             {
-                this.onWindowRaised( window );
+                this.recordWindowRaise( window );
             }
         }
     }
@@ -412,7 +455,7 @@ public abstract class DockingGroupBase implements DockingGroup
     public void onDragStarting( Tile fromTile )
     {
         DockingWindow fromWindow = getAncestorOfClass( DockingWindow.class, fromTile );
-        this.onWindowRaised( fromWindow );
+        this.recordWindowRaise( fromWindow );
 
         // When choosing a landing-region, it's important to iterate over windows
         // according to stacking order. Unfortunately, Swing does not provide a
@@ -437,9 +480,9 @@ public abstract class DockingGroupBase implements DockingGroup
         this.landingIndicator.setBounds( bounds );
     }
 
-    public Tile createNewTile( )
+    public TileFactory tileFactory( )
     {
-        return this.tileFactory.newTile( );
+        return this.tileFactory;
     }
 
     @Override
@@ -452,10 +495,7 @@ public abstract class DockingGroupBase implements DockingGroup
         }
 
         notifyClosingView( this.listeners, this, view );
-
         tile.removeView( view );
-        pruneEmptyTile( tile );
-
         notifyClosedView( this.listeners, this, view );
     }
 
@@ -471,7 +511,7 @@ public abstract class DockingGroupBase implements DockingGroup
             // This would get triggered eventually by the WINDOW_CLOSED event, but not until
             // after previously queued events have been dispatched -- which can cause problems,
             // especially when there are modal dialogs involved
-            this.onWindowClosed( window );
+            this.removeWindow( window );
         }
 
         this.landingIndicator.dispose( );

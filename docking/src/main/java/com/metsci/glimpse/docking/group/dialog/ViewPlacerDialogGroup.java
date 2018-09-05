@@ -29,7 +29,7 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
     @Override
     public ViewDestination addInInitialTile( )
     {
-        Tile newTile = this.group.createNewTile( );
+        Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
 
         DockingDialog newDialog = this.group.requireDialog( );
@@ -41,7 +41,7 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
     @Override
     public ViewDestination addInNewWindow( FrameArrangement planDialog, DockerArrangementTile planTile )
     {
-        Tile newTile = this.group.createNewTile( );
+        Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
 
         DockingDialog newDialog = this.group.initDialog( );
@@ -55,7 +55,7 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
     @Override
     public ViewDestination addInNewFallbackWindow( )
     {
-        Tile newTile = this.group.createNewTile( );
+        Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
 
         DockingDialog newDialog = this.group.initDialog( );
