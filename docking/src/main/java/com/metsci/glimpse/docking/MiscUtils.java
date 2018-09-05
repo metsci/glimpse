@@ -94,9 +94,7 @@ public class MiscUtils
 
     public static boolean containsScreenPoint( Component c, Point pOnScreen )
     {
-        // TODO: Might be able to replace several of these checks with c.isShowing()
-
-        if ( !c.isVisible( ) )
+        if ( !c.isShowing( ) )
         {
             return false;
         }

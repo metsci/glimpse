@@ -49,9 +49,9 @@ public class DockingMouseAdapter extends MouseAdapter
     protected final DockingGroupBase group;
     protected final TileFactory tileFactory;
 
-    protected boolean dragging = false;
-    protected View draggedView = null;
-    protected int draggedViewNum = -1;
+    protected boolean dragging;
+    protected View draggedView;
+    protected int draggedViewNum;
 
 
     public DockingMouseAdapter( Tile tile, DockingGroupBase group, TileFactory tileFactory )
