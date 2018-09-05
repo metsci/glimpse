@@ -297,6 +297,16 @@ public class LayeredGui
         animator.start( );
     }
 
+    public boolean isVisible( )
+    {
+        return this.dockingGroup.isVisible( );
+    }
+
+    public void setVisible( boolean visible )
+    {
+        this.dockingGroup.setVisible( visible );
+    }
+
     public void arrange( String appName, String defaultArrResource )
     {
         URL defaultArrUrl = getResource( defaultArrResource );

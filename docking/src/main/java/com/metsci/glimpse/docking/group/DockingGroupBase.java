@@ -41,10 +41,10 @@ import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyD
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyDisposingAllWindows;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyDisposingWindow;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyUserRequestingDisposeWindow;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.newWindowsBackToFront;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.pruneEmptyTile;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreMaximizedTilesInNewWindows;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreSelectedViewsInNewTiles;
-import static com.metsci.glimpse.docking.group.DockingGroupUtils.showNewWindows;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.toArrNode;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.futureViewIds;
 import static java.util.Arrays.asList;
@@ -91,6 +91,7 @@ public abstract class DockingGroupBase implements DockingGroup
     protected final DockingFrameCloseOperation windowCloseOperation;
     protected final TileFactory tileFactory;
 
+    protected boolean isVisible;
     protected final List<DockingWindow> windows;
     protected GroupArrangement planArr;
 
@@ -106,6 +107,7 @@ public abstract class DockingGroupBase implements DockingGroup
         this.windowCloseOperation = windowCloseOperation;
         this.tileFactory = new TileFactoryStandard( this );
 
+        this.isVisible = false;
         this.windows = new ArrayList<>( );
         this.planArr = new GroupArrangement( );
 
@@ -304,7 +306,19 @@ public abstract class DockingGroupBase implements DockingGroup
 
         restoreSelectedViewsInNewTiles( viewDestinations );
         restoreMaximizedTilesInNewWindows( viewDestinations );
-        showNewWindows( viewDestinations, this.planArr.frameArrs );
+
+        for ( DockingWindow window : newWindowsBackToFront( viewDestinations, this.planArr ) )
+        {
+            if ( this.isVisible )
+            {
+                // Triggers this.onWindowRaised() automatically
+                window.setVisible( true );
+            }
+            else
+            {
+                this.onWindowRaised( window );
+            }
+        }
     }
 
     @Override
@@ -378,6 +392,22 @@ public abstract class DockingGroupBase implements DockingGroup
      * the cast is compatible with the types returned by both methods.
      */
     protected abstract <T> T placeView( GroupArrangement existingArr, GroupArrangement planArr, String viewId, ViewPlacer<T> viewPlacer );
+
+    @Override
+    public void setVisible( boolean visible )
+    {
+        this.isVisible = visible;
+        for ( DockingWindow window : reversed( this.windows ) )
+        {
+            window.setVisible( this.isVisible );
+        }
+    }
+
+    @Override
+    public boolean isVisible( )
+    {
+        return this.isVisible;
+    }
 
     public void onDragStarting( Tile fromTile )
     {

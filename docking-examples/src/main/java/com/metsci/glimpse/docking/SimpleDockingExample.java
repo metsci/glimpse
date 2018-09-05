@@ -152,6 +152,7 @@ public class SimpleDockingExample
                 setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "docking/simple-arrangement-default.xml" ) );
 
                 dockingGroup.addViews( views );
+                dockingGroup.setVisible( true );
 
             }
         } );

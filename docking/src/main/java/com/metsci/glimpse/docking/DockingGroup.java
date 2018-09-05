@@ -65,6 +65,10 @@ public interface DockingGroup
 
     GroupArrangement captureArrangement( );
 
+    void setVisible( boolean visible );
+
+    boolean isVisible( );
+
     void dispose( );
 
 }

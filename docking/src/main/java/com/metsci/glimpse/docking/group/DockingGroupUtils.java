@@ -30,6 +30,7 @@ import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,6 +46,7 @@ import com.metsci.glimpse.docking.xml.DockerArrangementNode;
 import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroupUtils
 {
@@ -98,10 +100,12 @@ public class DockingGroupUtils
     }
 
     /**
-     * Make newly created windows visible, honoring planned stacking order as much as possible.
+     * Order newly created windows according to planned stacking order.
      */
-    public static void showNewWindows( Collection<? extends ViewDestination> viewDestinations, List<? extends FrameArrangement> orderedWindowArrs )
+    public static List<DockingWindow> newWindowsBackToFront( Collection<? extends ViewDestination> viewDestinations, GroupArrangement planArr )
     {
+        List<DockingWindow> result = new ArrayList<>( );
+
         // Stack planned new windows in front of existing windows, in plan order
         Map<FrameArrangement,DockingWindow> plannedNewWindows = new LinkedHashMap<>( );
         for ( ViewDestination dest : viewDestinations )
@@ -111,12 +115,12 @@ public class DockingGroupUtils
                 plannedNewWindows.put( dest.planWindow, dest.createdWindow );
             }
         }
-        for ( FrameArrangement windowArr : reversed( orderedWindowArrs ) )
+        for ( FrameArrangement windowArr : reversed( planArr.frameArrs ) )
         {
             DockingWindow window = plannedNewWindows.get( windowArr );
             if ( window != null )
             {
-                window.setVisible( true );
+                result.add( window );
             }
         }
 
@@ -125,9 +129,11 @@ public class DockingGroupUtils
         {
             if ( dest.createdWindow != null && dest.planWindow == null )
             {
-                dest.createdWindow.setVisible( true );
+                result.add( dest.createdWindow );
             }
         }
+
+        return result;
     }
 
     public static void pruneEmptyTile( Tile tile )

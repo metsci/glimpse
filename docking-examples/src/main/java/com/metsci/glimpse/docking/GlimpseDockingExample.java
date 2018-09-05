@@ -109,6 +109,7 @@ public class GlimpseDockingExample
                 } );
 
                 dockingGroup.addViews( views );
+                dockingGroup.setVisible( true );
 
             }
         } );
