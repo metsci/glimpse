@@ -380,6 +380,9 @@ public abstract class DockingGroupBase implements DockingGroup
     @Override
     public void setArrangement( GroupArrangement groupArr )
     {
+        boolean wasVisible = this.isVisible;
+        this.setVisible( false );
+
         Collection<View> views = this.views( ).values( );
         for ( View view : views )
         {
@@ -389,6 +392,8 @@ public abstract class DockingGroupBase implements DockingGroup
         this.planArr = groupArr;
 
         this.addViews( views );
+
+        this.setVisible( wasVisible );
     }
 
     @Override
