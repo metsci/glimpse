@@ -1,7 +1,7 @@
 package com.metsci.glimpse.docking.group.frame;
 
-import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -52,7 +52,7 @@ public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements Vi
         DockingFrame newWindow = this.group.addNewFrame( );
         newWindow.docker( ).addInitialLeaf( newTile );
 
-        Rectangle newFrameBounds = fractionOfScreenBounds( 0.85f );
+        Rectangle newFrameBounds = fallbackWindowBounds( );
         newWindow.setBounds( newFrameBounds );
         newWindow.setNormalBounds( newFrameBounds );
         newWindow.setExtendedState( getFrameExtendedState( false, false ) );

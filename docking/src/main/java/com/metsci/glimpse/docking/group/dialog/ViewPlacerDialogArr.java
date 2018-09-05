@@ -1,6 +1,6 @@
 package com.metsci.glimpse.docking.group.dialog;
 
-import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
 
 import java.awt.Rectangle;
 
@@ -65,7 +65,7 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
         FrameArrangement newWindow = new FrameArrangement( );
         newWindow.dockerArr = newTile;
 
-        Rectangle newFrameBounds = fractionOfScreenBounds( 0.40f );
+        Rectangle newFrameBounds = fallbackWindowBounds( );
         newWindow.x = newFrameBounds.x;
         newWindow.y = newFrameBounds.y;
         newWindow.width = newFrameBounds.width;

@@ -28,8 +28,11 @@ package com.metsci.glimpse.docking.group;
 
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
+import static java.lang.Math.round;
 
 import java.awt.Component;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -134,6 +137,21 @@ public class DockingGroupUtils
         }
 
         return result;
+    }
+
+    public static Rectangle fallbackWindowBounds( )
+    {
+        return fractionOfScreenBounds( 0.85f );
+    }
+
+    public static Rectangle fractionOfScreenBounds( float frac )
+    {
+        Rectangle screenBounds = getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
+        int width = round( frac * screenBounds.width );
+        int height = round( frac * screenBounds.height );
+        int x = screenBounds.x + ( ( screenBounds.width - width ) / 2 );
+        int y = screenBounds.y + ( ( screenBounds.height - height ) / 2 );
+        return new Rectangle( x, y, width, height );
     }
 
     public static DockerArrangementNode toArrNode( MultiSplitPane.Node node, Map<DockerArrangementNode,Component> components )

@@ -1,6 +1,6 @@
 package com.metsci.glimpse.docking.group.dialog;
 
-import static com.metsci.glimpse.docking.DockingUtils.fractionOfScreenBounds;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -61,7 +61,7 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
         DockingDialog newDialog = this.group.initDialog( );
         newDialog.docker( ).addInitialLeaf( newTile );
 
-        Rectangle newDialogBounds = fractionOfScreenBounds( 0.40f );
+        Rectangle newDialogBounds = fallbackWindowBounds( );
         newDialog.setBounds( newDialogBounds );
 
         return new ViewDestination( newDialog, null, newTile, null );
