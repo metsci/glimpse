@@ -73,6 +73,14 @@ public interface DockingWindow extends WindowConstants, Accessible, RootPaneCont
     }
 
     /**
+     * @see Window#getBounds()
+     */
+    default Rectangle getBounds( )
+    {
+        return this.window( ).getBounds( );
+    }
+
+    /**
      * @see Window#setVisible(boolean)
      */
     default void setVisible( boolean visible )

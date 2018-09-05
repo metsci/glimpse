@@ -47,6 +47,7 @@ import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreSelected
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.toArrNode;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.futureViewIds;
 import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
@@ -193,6 +194,12 @@ public abstract class DockingGroupBase implements DockingGroup
         MultiSplitPane docker = new MultiSplitPane( this.theme.dividerSize );
         attachMulticastDockerListener( docker, this.listeners );
         return docker;
+    }
+
+    @Override
+    public List<? extends DockingWindow> windows( )
+    {
+        return unmodifiableList( this.windows );
     }
 
     protected <W extends DockingWindow> W addWindow( W window )

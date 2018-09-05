@@ -27,6 +27,7 @@
 package com.metsci.glimpse.docking;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.metsci.glimpse.docking.group.DockingGroupBase;
@@ -48,6 +49,8 @@ public interface DockingGroup
     Disposable addListener( DockingGroupListener listener );
 
     void removeListener( DockingGroupListener listener );
+
+    List<? extends DockingWindow> windows( );
 
     Map<String,View> views( );
 
