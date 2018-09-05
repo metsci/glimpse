@@ -181,7 +181,7 @@ public class DockingGroupDialog extends DockingGroupBase
             // If no windows exist, and exactly one window is planned, use that
             if ( existingArr.frameArrs.isEmpty( ) && planArr.frameArrs.size( ) == 1 )
             {
-                return viewPlacer.addInNewWindow( planFrame, planTile );
+                return viewPlacer.createSoleDialog( planFrame, planTile );
             }
 
             // TODO: If we can identify a sibling window, we could squash the new view into that somehow
@@ -211,18 +211,18 @@ public class DockingGroupDialog extends DockingGroupBase
         // If a window exists, it must have no tiles, so add an initial tile
         if ( !existingArr.frameArrs.isEmpty( ) )
         {
-            return viewPlacer.addInInitialTile( );
+            return viewPlacer.createInitialTile( );
         }
 
         // No windows exist, but exactly one is planned, so create it
         if ( planArr.frameArrs.size( ) == 1 )
         {
             FrameArrangement onlyPlanFrame = planArr.frameArrs.get( 0 );
-            return viewPlacer.addInNewWindow( onlyPlanFrame, null );
+            return viewPlacer.createSoleDialog( onlyPlanFrame, null );
         }
 
         // Create a fallback window
-        return viewPlacer.addInNewFallbackWindow( );
+        return viewPlacer.createFallbackSoleDialog( );
     }
 
     @Override

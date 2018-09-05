@@ -18,7 +18,7 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
     }
 
     @Override
-    public Void addInInitialTile( )
+    public Void createInitialTile( )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
@@ -32,7 +32,7 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
     }
 
     @Override
-    public Void addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile )
+    public Void createSoleDialog( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
@@ -55,7 +55,7 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
     }
 
     @Override
-    public Void addInNewFallbackWindow( )
+    public Void createFallbackSoleDialog( )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );

@@ -144,7 +144,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
             }
 
             // Create a new window, with size and position from the planned arrangement
-            return viewPlacer.addInNewWindow( planFrame, planTile );
+            return viewPlacer.createNewFrame( planFrame, planTile );
         }
 
         // First fallback is in the largest tile
@@ -156,7 +156,7 @@ public class DockingGroupMultiframe extends DockingGroupBase
         }
 
         // Final fallback is in a new window
-        return viewPlacer.addInNewFallbackWindow( );
+        return viewPlacer.createFallbackNewFrame( );
     }
 
     @Override

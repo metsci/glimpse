@@ -28,7 +28,7 @@ public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements Vi
     }
 
     @Override
-    public ViewDestination addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile )
+    public ViewDestination createNewFrame( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
         Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
@@ -44,7 +44,7 @@ public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements Vi
     }
 
     @Override
-    public ViewDestination addInNewFallbackWindow( )
+    public ViewDestination createFallbackNewFrame( )
     {
         Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );

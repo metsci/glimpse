@@ -18,7 +18,7 @@ public class ViewPlacerMultiframeArr extends ViewPlacerBaseArr implements ViewPl
     }
 
     @Override
-    public Void addInNewWindow( FrameArrangement planWindow, DockerArrangementTile planTile )
+    public Void createNewFrame( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
@@ -41,7 +41,7 @@ public class ViewPlacerMultiframeArr extends ViewPlacerBaseArr implements ViewPl
     }
 
     @Override
-    public Void addInNewFallbackWindow( )
+    public Void createFallbackNewFrame( )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );

@@ -7,10 +7,10 @@ import com.metsci.glimpse.docking.xml.FrameArrangement;
 public interface ViewPlacerDialog<R> extends ViewPlacer<R>
 {
 
-    R addInInitialTile( );
+    R createInitialTile( );
 
-    R addInNewWindow( FrameArrangement planDialog, DockerArrangementTile planTile );
+    R createSoleDialog( FrameArrangement planDialog, DockerArrangementTile planTile );
 
-    R addInNewFallbackWindow( );
+    R createFallbackSoleDialog( );
 
 }
