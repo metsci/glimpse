@@ -193,6 +193,11 @@ public class LayeredGui
 
     public LayeredGui( String frameTitleRoot, DockingTheme theme, DockingFrameCloseOperation closeOperation, Collection<? extends GuiOption> guiOptions )
     {
+        this( frameTitleRoot, new DockingGroupMultiframe( closeOperation, theme ), guiOptions );
+    }
+
+    public LayeredGui( String frameTitleRoot, DockingGroup dockingGroup, Collection<? extends GuiOption> guiOptions )
+    {
         // Model
         //
 
@@ -206,7 +211,7 @@ public class LayeredGui
 
         this.viewDisposables = new HashMap<>( );
 
-        this.dockingGroup = new DockingGroupMultiframe( closeOperation, theme );
+        this.dockingGroup = dockingGroup;
         this.dockingGroup.addListener( createDefaultWindowTitler( frameTitleRoot ) );
 
         // Don't start the animator here, since we might not ever get any views that
