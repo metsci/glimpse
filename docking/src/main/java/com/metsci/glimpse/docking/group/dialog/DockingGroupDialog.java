@@ -38,6 +38,7 @@ import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrNodeParen
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrTileContaining;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findFrameArrContaining;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findLargestArrTile;
+import static com.metsci.glimpse.docking.group.ArrangementUtils.findLargestFrameArr;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findTiles;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.chooseViewNum;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrNode;
@@ -178,18 +179,15 @@ public class DockingGroupDialog extends DockingGroupBase
                 planNode = planParent;
             }
 
-            // If no windows exist, and exactly one window is planned, use that
-            if ( existingArr.frameArrs.isEmpty( ) && planArr.frameArrs.size( ) == 1 )
-            {
-                return viewPlacer.createSoleDialog( planFrame, planTile );
-            }
-
             // TODO: If we can identify a sibling window, we could squash the new view into that somehow
-        }
 
-        // There's no single foolproof fallback, because the plan may have multiple
-        // windows, but only one is allowed to exist -- so the fallback conditions
-        // are a little bit complicated.
+            // Use the largest planned window
+            FrameArrangement largestPlanFrame = findLargestFrameArr( planArr );
+            if ( existingArr.frameArrs.isEmpty( ) && largestPlanFrame != null )
+            {
+                return viewPlacer.createSoleDialog( largestPlanFrame, planTile );
+            }
+        }
 
         // Add at the end of the largest existing tile
         DockerArrangementTile largestExistingTile = findLargestArrTile( existingArr );
@@ -214,11 +212,11 @@ public class DockingGroupDialog extends DockingGroupBase
             return viewPlacer.createInitialTile( );
         }
 
-        // No windows exist, but exactly one is planned, so create it
-        if ( planArr.frameArrs.size( ) == 1 )
+        // No windows exist, so use the largest planned window
+        FrameArrangement largestPlanFrame = findLargestFrameArr( planArr );
+        if ( largestPlanFrame != null )
         {
-            FrameArrangement onlyPlanFrame = planArr.frameArrs.get( 0 );
-            return viewPlacer.createSoleDialog( onlyPlanFrame, null );
+            return viewPlacer.createSoleDialog( largestPlanFrame, null );
         }
 
         // Create a fallback window

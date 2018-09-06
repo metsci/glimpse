@@ -3,8 +3,10 @@ package com.metsci.glimpse.docking.group;
 import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.docking.MiscUtils.union;
 import static com.metsci.glimpse.docking.SplitPane.computeChildSizes;
+import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
 import static java.util.Collections.unmodifiableSet;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -331,94 +333,112 @@ public class ArrangementUtils
         }
     }
 
-    public static DockerArrangementTile findLargestArrTile( GroupArrangement groupArr )
+    public static FrameArrangement findLargestFrameArr( GroupArrangement groupArr )
     {
-        ArrTileWithSize best = null;
+        FrameArrangement best = null;
+        long bestArea = 0;
 
         for ( FrameArrangement frameArr : groupArr.frameArrs )
         {
-            ArrTileWithSize frameBest = findMaximizedArrTile( frameArr );
-
-            if ( frameBest == null )
+            long area = frameArea( frameArr );
+            if ( area > bestArea )
             {
-                frameBest = findLargestArrTile( frameArr );
-            }
-
-            if ( best == null || ( frameBest != null && frameBest.width*frameBest.height > best.width*best.height ) )
-            {
-                best = frameBest;
+                best = frameArr;
+                bestArea = area;
             }
         }
 
+        return best;
+    }
+
+    protected static long frameArea( FrameArrangement frameArr )
+    {
+        long w = frameWidth( frameArr );
+        long h = frameHeight( frameArr );
+        return ( w * h );
+    }
+
+    protected static int frameWidth( FrameArrangement frameArr )
+    {
+        // TODO: Use the bounds of the display for the frame's location -- see javadocs for getMaximumWindowBounds()
+        Rectangle screenBounds = getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
+        return ( frameArr.isMaximizedHoriz ? screenBounds.width : frameArr.width );
+    }
+
+    protected static int frameHeight( FrameArrangement frameArr )
+    {
+        // TODO: Use the bounds of the display for the frame's location -- see javadocs for getMaximumWindowBounds()
+        Rectangle screenBounds = getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
+        return ( frameArr.isMaximizedVert ? screenBounds.height : frameArr.height );
+    }
+
+    public static DockerArrangementTile findLargestArrTile( GroupArrangement groupArr )
+    {
+        TileAndArea best = null;
+        for ( FrameArrangement frameArr : groupArr.frameArrs )
+        {
+            TileAndArea bestInFrame = findLargestTile( frameArr );
+            if ( best == null || ( bestInFrame != null && bestInFrame.area > best.area ) )
+            {
+                best = bestInFrame;
+            }
+        }
         return ( best == null ? null : best.tile );
     }
 
-    protected static class ArrTileWithSize
+    protected static class TileAndArea
     {
         public final DockerArrangementTile tile;
-        public final int width;
-        public final int height;
+        public final long area;
 
-        public ArrTileWithSize( DockerArrangementTile tile, int width, int height )
+        public TileAndArea( DockerArrangementTile tile, long width, long height )
+        {
+            this( tile, width*height );
+        }
+
+        public TileAndArea( DockerArrangementTile tile, long area )
         {
             this.tile = tile;
-            this.width = width;
-            this.height = height;
+            this.area = area;
         }
     }
 
-    protected static ArrTileWithSize findMaximizedArrTile( FrameArrangement frameArr )
+    protected static TileAndArea findLargestTile( FrameArrangement frameArr )
     {
-        DockerArrangementTile maximizedTile = findMaximizedArrTile( frameArr.dockerArr );
-        return ( maximizedTile == null ? null : new ArrTileWithSize( maximizedTile, frameArr.width, frameArr.height ) );
-    }
-
-    protected static DockerArrangementTile findMaximizedArrTile( DockerArrangementNode root )
-    {
-        if ( root instanceof DockerArrangementTile )
+        TileAndArea maximized = findMaximizedTile( frameArr );
+        if ( maximized != null )
         {
-            DockerArrangementTile tile = ( DockerArrangementTile ) root;
-            return ( tile.isMaximized ? tile : null );
-        }
-        else if ( root instanceof DockerArrangementSplit )
-        {
-            DockerArrangementSplit split = ( DockerArrangementSplit ) root;
-
-            DockerArrangementTile resultA = findMaximizedArrTile( split.childA );
-            if ( resultA != null )
-            {
-                return resultA;
-            }
-
-            DockerArrangementTile resultB = findMaximizedArrTile( split.childB );
-            if ( resultB != null )
-            {
-                return resultB;
-            }
-
-            return null;
-        }
-        else if ( root == null )
-        {
-            return null;
+            return maximized;
         }
         else
         {
-            throw new RuntimeException( "Unrecognized subclass of " + DockerArrangementNode.class.getName( ) + ": " + root.getClass( ).getName( ) );
+            return findLargestUnmaximizedTile( frameArr );
         }
     }
 
-    protected static ArrTileWithSize findLargestArrTile( FrameArrangement frameArr )
+    protected static TileAndArea findMaximizedTile( FrameArrangement frameArr )
     {
-        return findLargestArrTile( frameArr.dockerArr, frameArr.width, frameArr.height );
+        for ( DockerArrangementTile tile : findTiles( frameArr.dockerArr ) )
+        {
+            if ( tile.isMaximized )
+            {
+                return new TileAndArea( tile, frameArea( frameArr ) );
+            }
+        }
+        return null;
     }
 
-    protected static ArrTileWithSize findLargestArrTile( DockerArrangementNode root, int rootWidth, int rootHeight )
+    protected static TileAndArea findLargestUnmaximizedTile( FrameArrangement frameArr )
+    {
+        return findLargestUnmaximizedTile( frameArr.dockerArr, frameWidth( frameArr ), frameHeight( frameArr ) );
+    }
+
+    protected static TileAndArea findLargestUnmaximizedTile( DockerArrangementNode root, int rootWidth, int rootHeight )
     {
         if ( root instanceof DockerArrangementTile )
         {
             DockerArrangementTile tile = ( DockerArrangementTile ) root;
-            return new ArrTileWithSize( tile, rootWidth, rootHeight );
+            return new TileAndArea( tile, rootWidth, rootHeight );
         }
         else if ( root instanceof DockerArrangementSplit )
         {
@@ -445,8 +465,8 @@ public class ArrangementUtils
                 heightB = rootHeight;
             }
 
-            ArrTileWithSize resultA = findLargestArrTile( split.childA, widthA, heightA );
-            ArrTileWithSize resultB = findLargestArrTile( split.childB, widthB, heightB );
+            TileAndArea resultA = findLargestUnmaximizedTile( split.childA, widthA, heightA );
+            TileAndArea resultB = findLargestUnmaximizedTile( split.childB, widthB, heightB );
 
             if ( resultA == null && resultB == null )
             {
@@ -462,7 +482,7 @@ public class ArrangementUtils
             }
             else
             {
-                return ( resultA.width*resultA.height >= resultB.width*resultB.height ? resultA : resultB );
+                return ( resultA.area >= resultB.area ? resultA : resultB );
             }
         }
         else if ( root == null )
