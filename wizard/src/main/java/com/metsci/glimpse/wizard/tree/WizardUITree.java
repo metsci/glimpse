@@ -120,8 +120,6 @@ public class WizardUITree<D> implements WizardUI<D>
 
         this.errorButton = new JLabel( );
 
-        this.errorPopup = new ErrorPopupPanel<>( this.wizard, Collections.singleton( this.errorButton ) );
-
         this.title = new JLabel( );
         this.title.setFont( this.title.getFont( ).deriveFont( 16.0f ) );
         this.title.setBorder( createEmptyBorder( 5, 5, 5, 5 ) );
@@ -134,9 +132,14 @@ public class WizardUITree<D> implements WizardUI<D>
             @Override
             public void mousePressed( MouseEvent e )
             {
-                if ( !WizardUITree.this.errorPopup.isOpen( ) )
+                if ( errorPopup == null || !errorPopup.isVisible( ) )
                 {
-                    Dimension containerSize = WizardUITree.this.pageContainer.getSize( );
+                    errorPopup = new ErrorPopupPanel<>(
+                            SwingUtilities.getWindowAncestor( wizard.getCurrentPage( ).getContainter( ) ),
+                            wizard,
+                            Collections.singletonList( errorButton ) );
+
+                    Dimension containerSize = pageContainer.getSize( );
                     int height = ( int ) Math.min( containerSize.getHeight( ), ErrorPopupHeight );
                     int width = ( int ) Math.min( containerSize.getWidth( ), ErrorPopupWidth );
                     Dimension popupSize = new Dimension( width, height );
@@ -145,11 +148,13 @@ public class WizardUITree<D> implements WizardUI<D>
                     {
                         errors = Collections.unmodifiableList( Arrays.asList( new WizardError( WizardErrorType.Good, "No Errors Detected." ) ) );
                     }
-                    WizardUITree.this.errorPopup.showErrorPopup( WizardUITree.this.errorButton, popupSize, errors );
+
+                    errorPopup.showErrorPopup( errorButton, popupSize, errors );
                 }
                 else
                 {
-                    WizardUITree.this.errorPopup.hideErrorPopup( );
+                    errorPopup.hideErrorPopup( );
+                    errorPopup = null;
                 }
             }
         } );
@@ -341,7 +346,7 @@ public class WizardUITree<D> implements WizardUI<D>
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
         this.wizard.removeErrorsUpdatedListener( this.errorsUpdatedListener );
 
-        this.errorPopup.dispose( );
+        if ( this.errorPopup != null ) this.errorPopup.hideErrorPopup( );
     }
 
     protected void updatePageTree( )
