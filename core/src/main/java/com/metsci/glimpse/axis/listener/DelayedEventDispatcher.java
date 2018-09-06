@@ -26,19 +26,24 @@
  */
 package com.metsci.glimpse.axis.listener;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 /**
- * A helper class used to rate-limit events. The DelayedEventDispatcher should
- * be notified whenever events of interest occur via {@link #eventOccurred(Object)}.
- * Then, when no events have occurred for the duration of time specified in the
- * constructor, {@link #eventDispatch(Object)} is called.
+ * A helper class used to rate-limit events.
+ * <p>
+ * The DelayedEventDispatcher should be notified whenever events of interest occur via {@link #eventOccurred(Object)}.
+ * Then, when no events have occurred for the duration of time specified in the constructor, {@link #eventDispatch(Object)} is called.
+ * <p>
+ * This class differs from {@link RateLimitedEventDispatcher} because if events are happening faster than the rate limit delay,
+ * it will avoid sending any events until events have stopped arriving for at least the rate limit delay. Then it will forward the last event received.
+ * Under the same circumstances, RateLimitedEventDispatcher will send a downsampled set of events spaced at exactly the rate limit delay.
  *
  * @author ulman
+ *
  */
 public abstract class DelayedEventDispatcher<D>
 {

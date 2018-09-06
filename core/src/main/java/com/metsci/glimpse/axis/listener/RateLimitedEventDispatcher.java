@@ -26,24 +26,31 @@
  */
 package com.metsci.glimpse.axis.listener;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 /**
- * A helper method used by RateLimitedAxisListener1D and RateLimitedAxisListener2D
- * for receiving notifications that the min/max bounds of an Axis1D or Axis2D have changed
- * while guaranteeing that notifications arrive no faster than a specified rate.
- *
- * This class is threaded in order to provide an additional guarantee that no axis
- * update will be missed. That is, if an axisUpdate( ) call is suppressed, but no
- * subsequent axis updates occur, axisUpdate( ) will be called one last time when the
- * rate allows.
+ * A helper class used to rate limit events.
+ * <p>
+ * The RateLimitedEventDispatcher should be notified whenever events of interest occur via {@link #eventOccurred(Object)}.
+ * Then, if no events have been passed via {@link #eventDispatch(Object)} recently, {@link #eventDispatch(Object)} is called immediately.
+ * If {@link #eventDispatch(Object)} has been called recently, then the event is suppressed until the rate limit delay has passed. Once
+ * the delay passes, then then most recent event passed to the dispatcher via via {@link #eventOccurred(Object)} is dispatched.
+ * <p>
+ * Subclasses specifically for rate limiting axis events are available. See {@link RateLimitedAxisListener1D} and {@link RateLimitedAxisListener2D}.
+ * <p>
+ * This class differs from {@link DelayedEventDispatcher} because if events are happening faster than the rate limit delay, it will
+ * send a downsampled set of events spaced at exactly the rate limit delay. Under the same circumstances, DelayedEventDispatcher will
+ * avoid sending any events until events have stopped arriving for at least the rate limit delay. Then it will forward the last event received.
  *
  * @author ulman
- * @see com.metsci.glimpse.axis.Axis1D
+ *
+ * @see com.metsci.glimpse.axis.listener.DelayedEventDispatcher
+ * @see com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D
+ * @see com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D
  */
 public abstract class RateLimitedEventDispatcher<D>
 {

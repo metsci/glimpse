@@ -63,17 +63,12 @@ public class ErrorPopupPanel<K> extends JDialog
         this.setUndecorated( true );
         this.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
         this.setAlwaysOnTop( true );
-        this.setModalityType( ModalityType.MODELESS );
 
         this.listener = new AWTEventListener( )
         {
             @Override
             public void eventDispatched( AWTEvent event )
             {
-                System.out.println( ignore.iterator( ).next( ).hashCode( ) );
-
-                System.out.println( event.getSource( ).getClass( ).getSimpleName( ) + " " + event.getSource( ).hashCode( ) + " " +  event.getID( ) + " " + SwingUtilities.isDescendingFrom( ( Component ) event.getSource( ), ErrorPopupPanel.this ) + " " + ignore.contains( event.getSource( ) ) );
-
                 // There are unintuitive interactions with the automatic closing of the frame
                 // and the component which is clicked to show the frame. The easiest solution
                 // (although probably not the best/cleanest) is to simply ignore events from
