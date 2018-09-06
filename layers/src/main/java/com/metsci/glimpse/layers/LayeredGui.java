@@ -196,6 +196,11 @@ public class LayeredGui
         this( frameTitleRoot, new DockingGroupMultiframe( closeOperation, theme ), guiOptions );
     }
 
+    public LayeredGui( String frameTitleRoot, DockingGroup dockingGroup, GuiOption... guiOptions )
+    {
+        this( frameTitleRoot, dockingGroup, ImmutableSet.copyOf( guiOptions ) );
+    }
+
     public LayeredGui( String frameTitleRoot, DockingGroup dockingGroup, Collection<? extends GuiOption> guiOptions )
     {
         // Model
