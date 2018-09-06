@@ -24,61 +24,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.dnc.proj;
+package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
+import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 
-public class DncEquirectProjection implements DncProjection
+public class DockingWindowTitlers
 {
 
-    public final double originLon_DEG;
-
-
-    public DncEquirectProjection( double originLon_DEG )
+    public static DockingWindowTitler createDefaultWindowTitler( String titleRoot )
     {
-        this.originLon_DEG = originLon_DEG;
+        return createDefaultWindowTitler( titleRoot, false );
     }
 
-    @Override
-    public String configString( )
+    public static DockingWindowTitler createDefaultWindowTitler( String titleRoot, boolean viewTitleFirst )
     {
-        return "Equirect[ " + this.originLon_DEG + " ]";
+        return new DockingWindowTitler( ( window ) ->
+        {
+            return getDefaultWindowTitle( titleRoot, window, viewTitleFirst );
+        } );
     }
 
-    @Override
-    public double suggestedPpvMultiplier( )
+    public static String getDefaultWindowTitle( String titleRoot, DockingWindow window, boolean viewTitleFirst )
     {
-        return 1.0;
-    }
-
-    @Override
-    public boolean canProjectLibrary( int databaseNum, String libraryName, double minLat_DEG, double maxLat_DEG, double minLon_DEG, double maxLon_DEG )
-    {
-        return true;
-    }
-
-    @Override
-    public void projectPos( double lat_DEG, double lon_DEG, float[] result, int resultOffset )
-    {
-        result[ resultOffset + 0 ] = ( float ) ( lon_DEG - this.originLon_DEG );
-        result[ resultOffset + 1 ] = ( float ) lat_DEG;
-    }
-
-    @Override
-    public double projectAzimuth_MATHRAD( double x, double y, double azimuth_MATHRAD )
-    {
-        double cos_LOCAL = cos( azimuth_MATHRAD );
-        double sin_LOCAL = sin( azimuth_MATHRAD );
-
-        double lat_DEG = this.originLon_DEG + y;
-        double cosLat = cos( degreesToRadians( lat_DEG ) );
-        double cos_PROJ = cos_LOCAL / cosLat;
-        double sin_PROJ = sin_LOCAL;
-
-        return atan2( sin_PROJ, cos_PROJ );
+        Tile tile = findLargestTile( window.docker( ) );
+        if ( tile != null )
+        {
+            View view = tile.selectedView( );
+            if ( view != null )
+            {
+                String viewTitle = view.title.v( );
+                return ( viewTitleFirst ? viewTitle + " - " + titleRoot : titleRoot + " - " + viewTitle );
+            }
+        }
+        return titleRoot;
     }
 
 }

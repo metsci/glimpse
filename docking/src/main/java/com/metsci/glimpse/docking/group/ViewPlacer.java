@@ -24,36 +24,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.group;
 
-import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
+import com.metsci.glimpse.docking.Side;
+import com.metsci.glimpse.docking.xml.DockerArrangementNode;
+import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 
-public class DockingFrameTitlers
+public interface ViewPlacer<R>
 {
 
-    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot )
-    {
-        return createDefaultFrameTitler( titleRoot, false );
-    }
+    R addToTile( DockerArrangementTile existingTile, int viewNum );
 
-    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot, boolean viewTitleFirst )
-    {
-        return new DockingFrameTitler( ( f ) -> getDefaultFrameTitle( titleRoot, f, viewTitleFirst ) );
-    }
-
-    public static String getDefaultFrameTitle( String titleRoot, DockingFrame frame, boolean viewTitleFirst )
-    {
-        Tile tile = findLargestTile( frame.docker );
-        if ( tile != null )
-        {
-            View view = tile.selectedView( );
-            if ( view != null )
-            {
-                String viewTitle = view.title.v( );
-                return ( viewTitleFirst ? viewTitle + " - " + titleRoot : titleRoot + " - " + viewTitle );
-            }
-        }
-        return titleRoot;
-    }
+    R addBesideNeighbor( DockerArrangementTile planTile, DockerArrangementNode existingNeighbor, Side sideOfNeighbor, double extentFrac );
 
 }

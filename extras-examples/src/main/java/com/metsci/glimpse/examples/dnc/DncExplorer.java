@@ -32,8 +32,8 @@ import static com.metsci.glimpse.dnc.facc.FaccIo.*;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.*;
 import static com.metsci.glimpse.docking.ViewCloseOption.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
@@ -87,6 +87,7 @@ import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -315,14 +316,14 @@ public class DncExplorer
             };
 
             String appName = "dnc-explorer";
-            DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
-            dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
+            DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
+            dockingGroup.addListener( createDefaultWindowTitler( "DNC Explorer" ) );
             setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( DncExplorer.class, "dnc-examples/docking-defaults.xml" ) );
 
             dockingGroup.addListener( new DockingGroupAdapter( )
             {
                 @Override
-                public void disposingAllFrames( DockingGroup group )
+                public void disposingAllWindows( DockingGroup group )
                 {
                     attrsTableModel.dispose( );
                     animator.stop( );

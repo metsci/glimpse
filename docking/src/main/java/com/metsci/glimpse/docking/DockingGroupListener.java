@@ -49,24 +49,23 @@ public interface DockingGroupListener
 
     void restoredTree( MultiSplitPane docker );
 
-    void addedFrame( DockingGroup group, DockingFrame frame );
+    void addedWindow( DockingGroup group, DockingWindow window );
 
     /**
-     * Called when the user tries to close a frame in the {@link DockingGroup},
-     * e.g. by clicking the close button in the frame's title bar.
+     * Called when the user tries to close a window in the {@link DockingGroup}, e.g. by clicking the
+     * close button in the window's title bar.
      * <p>
-     * Depending on the {@link DockingFrameCloseOperation}, this call might be
-     * followed automatically by calls to {@link #disposingAllFrames(DockingGroup)},
-     * {@link #disposingFrame(DockingGroup, DockingFrame)}, and/or
-     * {@link #disposedFrame(DockingGroup, DockingFrame)}.
+     * Depending on the {@link DockingFrameCloseOperation}, this call might be followed automatically by
+     * calls to {@link #disposingAllWindows(DockingGroup)}, {@link #disposingWindow(DockingGroup, DockingWindow)},
+     * and/or {@link #disposedWindow(DockingGroup, DockingWindow)}.
      */
-    void userRequestingDisposeFrame( DockingGroup group, DockingFrame frame );
+    void userRequestingDisposeWindow( DockingGroup group, DockingWindow window );
 
-    void disposingAllFrames( DockingGroup group );
+    void disposingAllWindows( DockingGroup group );
 
-    void disposingFrame( DockingGroup group, DockingFrame frame );
+    void disposingWindow( DockingGroup group, DockingWindow window );
 
-    void disposedFrame( DockingGroup group, DockingFrame frame );
+    void disposedWindow( DockingGroup group, DockingWindow window );
 
     void userRequestingCloseView( DockingGroup group, View view );
 

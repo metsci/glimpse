@@ -32,55 +32,69 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardError;
 
-public class ErrorPopupPanel<K> extends JFrame
+public class ErrorPopupPanel<K> extends JDialog
 {
     private static final long serialVersionUID = 1L;
 
     protected ErrorTablePanel<K> panel;
-    protected boolean isOpen;
-
     protected AWTEventListener listener;
-
     protected Collection<Component> ignore;
 
-    public ErrorPopupPanel( Wizard<K> controller )
+    public ErrorPopupPanel( Window parent, Wizard<K> controller, Collection<Component> ignore )
     {
-        this( controller, Collections.emptyList( ) );
-    }
+        super( parent );
 
-    public ErrorPopupPanel( Wizard<K> controller, Collection<Component> ignore )
-    {
         this.ignore = ignore;
 
         this.setUndecorated( true );
         this.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
         this.setAlwaysOnTop( true );
+        this.setModalityType( ModalityType.MODELESS );
 
         this.listener = new AWTEventListener( )
         {
+            @Override
             public void eventDispatched( AWTEvent event )
             {
+                System.out.println( ignore.iterator( ).next( ).hashCode( ) );
+
+                System.out.println( event.getSource( ).getClass( ).getSimpleName( ) + " " + event.getSource( ).hashCode( ) + " " +  event.getID( ) + " " + SwingUtilities.isDescendingFrom( ( Component ) event.getSource( ), ErrorPopupPanel.this ) + " " + ignore.contains( event.getSource( ) ) );
+
                 // There are unintuitive interactions with the automatic closing of the frame
                 // and the component which is clicked to show the frame. The easiest solution
                 // (although probably not the best/cleanest) is to simply ignore events from
                 // those control components.
-                if ( !ignore.contains( event.getSource( ) ) && ( event.getID( ) == MouseEvent.MOUSE_PRESSED || event.getID( ) == FocusEvent.FOCUS_LOST ) )
+                if ( ignore.contains( event.getSource( ) ) )
                 {
-                    ErrorPopupPanel.this.hideErrorPopup( );
+                    return;
+                }
+
+                // If focus is gained and the new focus owner is not within the ErrorPopupPanel, hide the dialog
+                if ( event.getID( ) == FocusEvent.FOCUS_GAINED &&
+                        !SwingUtilities.isDescendingFrom( ( Component ) event.getSource( ), ErrorPopupPanel.this ) )
+                {
+                    hideErrorPopup( );
+                }
+
+                // If a mouse press happens outside of the ErrorPopupPanel, hide the dialog
+                if ( event.getID( ) == MouseEvent.MOUSE_PRESSED &&
+                        !SwingUtilities.isDescendingFrom( ( Component ) event.getSource( ), ErrorPopupPanel.this ) )
+                {
+                    hideErrorPopup( );
                 }
             }
         };
@@ -104,22 +118,13 @@ public class ErrorPopupPanel<K> extends JFrame
         this.setSize( size );
         this.setVisible( true );
 
-        this.isOpen = true;
-
         Toolkit.getDefaultToolkit( ).addAWTEventListener( this.listener, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.FOCUS_EVENT_MASK );
     }
 
     public void hideErrorPopup( )
     {
         Toolkit.getDefaultToolkit( ).removeAWTEventListener( this.listener );
-
         this.setVisible( false );
-
-        this.isOpen = false;
-    }
-
-    public boolean isOpen( )
-    {
-        return this.isOpen;
+        this.dispose( );
     }
 }

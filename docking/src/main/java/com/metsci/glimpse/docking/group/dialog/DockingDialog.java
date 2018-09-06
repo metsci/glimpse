@@ -24,61 +24,58 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.dnc.proj;
+package com.metsci.glimpse.docking.group.dialog;
 
-import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
+import java.awt.Rectangle;
+import java.awt.Window;
 
-public class DncEquirectProjection implements DncProjection
+import javax.swing.JDialog;
+
+import com.metsci.glimpse.docking.DockingWindow;
+import com.metsci.glimpse.docking.MultiSplitPane;
+
+@SuppressWarnings( "serial" )
+public class DockingDialog extends JDialog implements DockingWindow
 {
 
-    public final double originLon_DEG;
+    public final MultiSplitPane docker;
 
 
-    public DncEquirectProjection( double originLon_DEG )
+    public DockingDialog( Window owner, ModalityType modality, MultiSplitPane docker )
     {
-        this.originLon_DEG = originLon_DEG;
+        super( owner, modality );
+        this.docker = docker;
+        this.setContentPane( docker );
     }
 
     @Override
-    public String configString( )
+    public Window window( )
     {
-        return "Equirect[ " + this.originLon_DEG + " ]";
+        return this;
     }
 
     @Override
-    public double suggestedPpvMultiplier( )
+    public MultiSplitPane docker( )
     {
-        return 1.0;
+        return this.docker;
     }
 
     @Override
-    public boolean canProjectLibrary( int databaseNum, String libraryName, double minLat_DEG, double maxLat_DEG, double minLon_DEG, double maxLon_DEG )
+    public Rectangle getNormalBounds( )
     {
-        return true;
+        return this.getBounds( );
     }
 
     @Override
-    public void projectPos( double lat_DEG, double lon_DEG, float[] result, int resultOffset )
+    public boolean isMaximizedHorizontally( )
     {
-        result[ resultOffset + 0 ] = ( float ) ( lon_DEG - this.originLon_DEG );
-        result[ resultOffset + 1 ] = ( float ) lat_DEG;
+        return false;
     }
 
     @Override
-    public double projectAzimuth_MATHRAD( double x, double y, double azimuth_MATHRAD )
+    public boolean isMaximizedVertically( )
     {
-        double cos_LOCAL = cos( azimuth_MATHRAD );
-        double sin_LOCAL = sin( azimuth_MATHRAD );
-
-        double lat_DEG = this.originLon_DEG + y;
-        double cosLat = cos( degreesToRadians( lat_DEG ) );
-        double cos_PROJ = cos_LOCAL / cosLat;
-        double sin_PROJ = sin_LOCAL;
-
-        return atan2( sin_PROJ, cos_PROJ );
+        return false;
     }
 
 }

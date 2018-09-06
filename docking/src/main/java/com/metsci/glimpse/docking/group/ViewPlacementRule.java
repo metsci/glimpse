@@ -24,54 +24,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.group;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
-import com.metsci.glimpse.docking.group.DockingGroupBase;
-import com.metsci.glimpse.docking.group.ViewPlacementRule;
+import com.metsci.glimpse.docking.DockingGroup;
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
+import com.metsci.glimpse.docking.group.frame.ViewPlacerMultiframe;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
-import com.metsci.glimpse.util.var.Disposable;
 
-/**
- * Docking group API for use by client code.
- * <p>
- * The internals of the docking code are written in terms of {@link DockingGroupBase},
- * which has several additional public methods.
- */
-public interface DockingGroup
+public interface ViewPlacementRule
 {
 
-    DockingTheme theme( );
-
-    Disposable addListener( DockingGroupListener listener );
-
-    void removeListener( DockingGroupListener listener );
-
-    List<? extends DockingWindow> windows( );
-
-    Map<String,View> views( );
-
-    void addViewPlacement( String viewId, ViewPlacementRule placementRule );
-
-    void addView( View view );
-
-    void addViews( View... views );
-
-    void addViews( Collection<View> views );
-
-    void closeView( View view );
-
-    void setArrangement( GroupArrangement groupArr );
-
-    GroupArrangement captureArrangement( );
-
-    void setVisible( boolean visible );
-
-    boolean isVisible( );
-
-    void dispose( );
+    /**
+     * It is fine for implementations to down-cast the {@code placer} argument, as
+     * long as it is done with care. The {@code placer} will be an instance of a
+     * predictable subclass, based on the {@link DockingGroup} from which this rule
+     * is being invoked. For example, when invoked by a {@link DockingGroupMultiframe},
+     * the rule will be given a {@link ViewPlacerMultiframe}.
+     * <p>
+     * Implementations should make exactly one call to one of the {@code placer} methods,
+     * and return the result. For example:
+     * <pre>
+     * <code>
+     * ViewPlacementRule rule = ( planArr, existingViewIds, placer ) ->
+     * {
+     *     DockerArrangementTile tile = ...;
+     *     int viewNum = ...;
+     *     return placer.addToTile( tile, viewNum );
+     * };
+     * </code>
+     * </pre>
+     * <strong>NOTE:</strong> This method could use generics to declare that the return
+     * type should match the type parameter of {@code placer}. However, Java does not allow
+     * lambda syntax when there are type parameters involved, so using generics would make
+     * this interface more cumbersome to work with.
+     */
+    Object placeView( GroupArrangement planArr, Set<String> existingViewIds, ViewPlacer<?> placer );
 
 }

@@ -48,7 +48,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -281,7 +283,7 @@ public class DockingUtils
         dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup group )
+            public void disposingAllWindows( DockingGroup group )
             {
                 GroupArrangement saveArr = dockingGroup.captureArrangement( );
                 saveDockingArrangement( targetFile, saveArr );
@@ -392,7 +394,7 @@ public class DockingUtils
         }
     }
 
-    public static <C extends Component> C findLargestComponent( Collection<C> components )
+    public static <C extends Component> C findLargestComponent( Collection<? extends C> components )
     {
         int largestArea = -1;
         C largestComponent = null;
@@ -424,14 +426,19 @@ public class DockingUtils
         return largestTile;
     }
 
-    public static Set<Tile> findTiles( Collection<? extends DockingFrame> frames )
+    public static Set<Tile> findTiles( Collection<? extends DockingWindow> windows )
     {
         Set<Tile> tiles = new LinkedHashSet<>( );
-        for ( DockingFrame frame : frames )
+        for ( DockingWindow window : windows )
         {
-            tiles.addAll( findTiles( frame.docker ) );
+            tiles.addAll( findTiles( window ) );
         }
         return tiles;
+    }
+
+    public static Set<Tile> findTiles( DockingWindow window )
+    {
+        return findTiles( window.docker( ) );
     }
 
     public static Set<Tile> findTiles( MultiSplitPane docker )
@@ -447,30 +454,36 @@ public class DockingUtils
         return tiles;
     }
 
-    public static Set<View> findViews( Collection<? extends DockingFrame> frames )
+    public static Map<String,View> findViews( Collection<? extends DockingWindow> windows )
     {
-        Set<View> views = new LinkedHashSet<>( );
-        for ( DockingFrame frame : frames )
+        Map<String,View> views = new LinkedHashMap<>( );
+        for ( DockingWindow window : windows )
         {
-            views.addAll( findViews( frame.docker ) );
+            views.putAll( findViews( window ) );
         }
         return views;
     }
 
-    public static Set<View> findViews( MultiSplitPane docker )
+    public static Map<String,View> findViews( DockingWindow window )
     {
-        Set<View> views = new LinkedHashSet<>( );
+        return findViews( window.docker( ) );
+    }
+
+    public static Map<String,View> findViews( MultiSplitPane docker )
+    {
+        Map<String,View> views = new LinkedHashMap<>( );
         for ( Tile tile : findTiles( docker ) )
         {
             for ( int i = 0; i < tile.numViews( ); i++ )
             {
-                views.add( tile.view( i ) );
+                View view = tile.view( i );
+                views.put( view.viewId, view );
             }
         }
         return views;
     }
 
-    public static boolean allViewsAreAutoCloseable( Iterable<View> views )
+    public static boolean allViewsAreAutoCloseable( Iterable<? extends View> views )
     {
         for ( View view : views )
         {
@@ -482,7 +495,7 @@ public class DockingUtils
         return true;
     }
 
-    public static void appendViewsToTile( Tile tile, Collection<View> views )
+    public static void appendViewsToTile( Tile tile, Collection<? extends View> views )
     {
         for ( View view : views )
         {
