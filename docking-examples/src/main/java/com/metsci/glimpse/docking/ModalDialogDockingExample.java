@@ -27,14 +27,12 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
-import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
+import static com.metsci.glimpse.docking.SimpleDockingExample.newSolidPanel;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
@@ -46,33 +44,26 @@ import static java.awt.Color.magenta;
 import static java.awt.Color.red;
 import static java.awt.Color.white;
 import static java.awt.Color.yellow;
+import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
 
-import java.awt.Color;
-
-import javax.swing.JButton;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
 
-import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
+import com.metsci.glimpse.docking.group.dialog.DockingGroupDialog;
 
-public class SimpleDockingExample
+public class ModalDialogDockingExample
 {
 
     public static void main( String[] args ) throws Exception
     {
-        fixPlatformQuirks( );
-        initTinyLaf( );
-        final DockingTheme dockingTheme = defaultDockingTheme( );
-
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
             @Override
             public void run( )
             {
+                fixPlatformQuirks( );
+                initTinyLaf( );
+
 
                 // Create view components
                 //
@@ -87,82 +78,35 @@ public class SimpleDockingExample
                 JPanel hPanel = newSolidPanel( white );
 
 
-                // Create view toolbars
-                //
-
-                JToolBar aToolbar = newToolbar( true );
-                aToolbar.add( new JButton( "A1" ) );
-                aToolbar.add( new JButton( "A2" ) );
-                aToolbar.add( new JButton( "A3" ) );
-
-                JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-                JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
-                aOptionsPopup.add( new JMenuItem( "Option 1" ) );
-                aToolbar.add( aOptionsButton );
-
-                JToolBar bToolbar = newToolbar( true );
-                bToolbar.add( new JButton( "B1" ) );
-
-                JToolBar cToolbar = null;
-
-                JToolBar dToolbar = newToolbar( true );
-                dToolbar.add( new JButton( "D1" ) );
-                dToolbar.add( new JButton( "D2" ) );
-                dToolbar.add( new JButton( "D3" ) );
-                dToolbar.add( new JButton( "D4" ) );
-                dToolbar.add( new JButton( "D5" ) );
-
-                JToolBar eToolbar = newToolbar( true );
-                eToolbar.add( new JButton( "E1" ) );
-                eToolbar.add( new JButton( "E2" ) );
-
-                JToolBar fToolbar = newToolbar( true );
-                fToolbar.add( new JButton( "F1" ) );
-                fToolbar.add( new JButton( "F2" ) );
-                fToolbar.add( new JButton( "F3" ) );
-
-                JToolBar gToolbar = newToolbar( true );
-
-                JToolBar hToolbar = newToolbar( true );
-                hToolbar.add( new JButton( "H1" ) );
-
-
                 // Create views
                 //
 
                 View[] views =
                 {
-                    new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-                    new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-                    new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-                    new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-                    new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-                    new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-                    new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-                    new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ), hToolbar )
+                    new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ) ),
+                    new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ) ),
+                    new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ) ),
+                    new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ) ),
+                    new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ) ),
+                    new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ) ),
+                    new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ) ),
+                    new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ) ),
                 };
 
 
                 // Create and show the docking group
                 //
 
-                final String appName = "simple-docking-example";
-                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
+                String appName = "modal-dialog-docking-example";
+                DockingGroup dockingGroup = new DockingGroupDialog( null, APPLICATION_MODAL, DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "docking/simple-arrangement-default.xml" ) );
+                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( ModalDialogDockingExample.class, "docking/simple-arrangement-default.xml" ) );
 
                 dockingGroup.addViews( views );
                 dockingGroup.setVisible( true );
 
             }
         } );
-    }
-
-    public static JPanel newSolidPanel( Color color )
-    {
-        JPanel panel = new JPanel( );
-        panel.setBackground( color );
-        return panel;
     }
 
 }

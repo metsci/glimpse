@@ -158,6 +158,8 @@ public class LayeredExample
             gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
 
+            gui.setVisible( true );
+
 
 
 //            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );

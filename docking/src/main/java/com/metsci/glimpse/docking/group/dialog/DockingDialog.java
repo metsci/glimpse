@@ -24,54 +24,58 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.docking;
+package com.metsci.glimpse.docking.group.dialog;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.awt.Rectangle;
+import java.awt.Window;
 
-import com.metsci.glimpse.docking.group.DockingGroupBase;
-import com.metsci.glimpse.docking.group.ViewPlacementRule;
-import com.metsci.glimpse.docking.xml.GroupArrangement;
-import com.metsci.glimpse.util.var.Disposable;
+import javax.swing.JDialog;
 
-/**
- * Docking group API for use by client code.
- * <p>
- * The internals of the docking code are written in terms of {@link DockingGroupBase},
- * which has several additional public methods.
- */
-public interface DockingGroup
+import com.metsci.glimpse.docking.DockingWindow;
+import com.metsci.glimpse.docking.MultiSplitPane;
+
+@SuppressWarnings( "serial" )
+public class DockingDialog extends JDialog implements DockingWindow
 {
 
-    DockingTheme theme( );
+    public final MultiSplitPane docker;
 
-    Disposable addListener( DockingGroupListener listener );
 
-    void removeListener( DockingGroupListener listener );
+    public DockingDialog( Window owner, ModalityType modality, MultiSplitPane docker )
+    {
+        super( owner, modality );
+        this.docker = docker;
+        this.setContentPane( docker );
+    }
 
-    List<? extends DockingWindow> windows( );
+    @Override
+    public Window window( )
+    {
+        return this;
+    }
 
-    Map<String,View> views( );
+    @Override
+    public MultiSplitPane docker( )
+    {
+        return this.docker;
+    }
 
-    void addViewPlacement( String viewId, ViewPlacementRule placementRule );
+    @Override
+    public Rectangle getNormalBounds( )
+    {
+        return this.getBounds( );
+    }
 
-    void addView( View view );
+    @Override
+    public boolean isMaximizedHorizontally( )
+    {
+        return false;
+    }
 
-    void addViews( View... views );
-
-    void addViews( Collection<View> views );
-
-    void closeView( View view );
-
-    void setArrangement( GroupArrangement groupArr );
-
-    GroupArrangement captureArrangement( );
-
-    void setVisible( boolean visible );
-
-    boolean isVisible( );
-
-    void dispose( );
+    @Override
+    public boolean isMaximizedVertically( )
+    {
+        return false;
+    }
 
 }

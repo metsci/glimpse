@@ -28,17 +28,17 @@ package com.metsci.glimpse.layers;
 
 import static com.google.common.io.Resources.getResource;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
-import static com.metsci.glimpse.docking.DockingGroupUtils.findArrTileContaining;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
 import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_CUSTOM_CLOSEABLE;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
+import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrTileContaining;
 import static com.metsci.glimpse.layers.FpsOption.findFps;
 import static com.metsci.glimpse.layers.StandardGuiOption.HIDE_LAYERS_PANEL;
 import static com.metsci.glimpse.layers.StandardViewOption.HIDE_CLONE_BUTTON;
@@ -88,11 +88,10 @@ import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.docking.DockingFrameCloseOperation;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
-import com.metsci.glimpse.docking.DockingGroupUtils.BesideExistingNeighbor;
-import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacement;
-import com.metsci.glimpse.docking.DockingGroupUtils.ViewPlacementRule;
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.ViewCloseOption;
+import com.metsci.glimpse.docking.group.ViewPlacementRule;
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
@@ -194,6 +193,16 @@ public class LayeredGui
 
     public LayeredGui( String frameTitleRoot, DockingTheme theme, DockingFrameCloseOperation closeOperation, Collection<? extends GuiOption> guiOptions )
     {
+        this( frameTitleRoot, new DockingGroupMultiframe( closeOperation, theme ), guiOptions );
+    }
+
+    public LayeredGui( String frameTitleRoot, DockingGroup dockingGroup, GuiOption... guiOptions )
+    {
+        this( frameTitleRoot, dockingGroup, ImmutableSet.copyOf( guiOptions ) );
+    }
+
+    public LayeredGui( String frameTitleRoot, DockingGroup dockingGroup, Collection<? extends GuiOption> guiOptions )
+    {
         // Model
         //
 
@@ -207,8 +216,8 @@ public class LayeredGui
 
         this.viewDisposables = new HashMap<>( );
 
-        this.dockingGroup = new DockingGroup( closeOperation, theme );
-        this.dockingGroup.addListener( createDefaultFrameTitler( frameTitleRoot ) );
+        this.dockingGroup = dockingGroup;
+        this.dockingGroup.addListener( createDefaultWindowTitler( frameTitleRoot ) );
 
         // Don't start the animator here, since we might not ever get any views that
         // use it -- see the javadocs for {@link View#setGLAnimator(GLAnimatorControl)}
@@ -222,7 +231,7 @@ public class LayeredGui
         this.dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup dockingGroup )
+            public void disposingAllWindows( DockingGroup dockingGroup )
             {
                 if ( dockingAppName != null )
                 {
@@ -296,6 +305,16 @@ public class LayeredGui
     public void startAnimator( )
     {
         animator.start( );
+    }
+
+    public boolean isVisible( )
+    {
+        return this.dockingGroup.isVisible( );
+    }
+
+    public void setVisible( boolean visible )
+    {
+        this.dockingGroup.setVisible( visible );
     }
 
     public void arrange( String appName, String defaultArrResource )
@@ -446,12 +465,12 @@ public class LayeredGui
         View newView = view.copy( );
         newView.setTraits( newTraits );
 
-        this.addView( newView, ( planArr, existingViewIds ) ->
+        this.addView( newView, ( planArr, existingViewIds, placer ) ->
         {
             // Split the original tile, and put the clone in the right half of the split
             String viewId = this.dockingViews.get( view ).viewId;
             DockerArrangementTile tile = findArrTileContaining( planArr, viewId );
-            return new BesideExistingNeighbor( null, null, tile, RIGHT, 0.5 );
+            return placer.addBesideNeighbor( null, tile, RIGHT, 0.5 );
         } );
     }
 

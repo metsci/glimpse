@@ -28,22 +28,25 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.findLargestTile;
 
-public class DockingFrameTitlers
+public class DockingWindowTitlers
 {
 
-    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot )
+    public static DockingWindowTitler createDefaultWindowTitler( String titleRoot )
     {
-        return createDefaultFrameTitler( titleRoot, false );
+        return createDefaultWindowTitler( titleRoot, false );
     }
 
-    public static DockingFrameTitler createDefaultFrameTitler( String titleRoot, boolean viewTitleFirst )
+    public static DockingWindowTitler createDefaultWindowTitler( String titleRoot, boolean viewTitleFirst )
     {
-        return new DockingFrameTitler( ( f ) -> getDefaultFrameTitle( titleRoot, f, viewTitleFirst ) );
+        return new DockingWindowTitler( ( window ) ->
+        {
+            return getDefaultWindowTitle( titleRoot, window, viewTitleFirst );
+        } );
     }
 
-    public static String getDefaultFrameTitle( String titleRoot, DockingFrame frame, boolean viewTitleFirst )
+    public static String getDefaultWindowTitle( String titleRoot, DockingWindow window, boolean viewTitleFirst )
     {
-        Tile tile = findLargestTile( frame.docker );
+        Tile tile = findLargestTile( window.docker( ) );
         if ( tile != null )
         {
             View view = tile.selectedView( );
