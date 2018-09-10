@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
+import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
@@ -96,7 +96,8 @@ public class SimpleDockingExample
                 aToolbar.add( new JButton( "A3" ) );
 
                 JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-                JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
+                JPopupMenu aOptionsPopup = new JPopupMenu( );
+                attachPopupMenu( aOptionsButton, aOptionsPopup );
                 aOptionsPopup.add( new JMenuItem( "Option 1" ) );
                 aToolbar.add( aOptionsButton );
 
