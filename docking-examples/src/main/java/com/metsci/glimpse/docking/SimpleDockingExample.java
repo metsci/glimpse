@@ -36,7 +36,6 @@ import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDis
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -63,7 +62,6 @@ public class SimpleDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        fixPlatformQuirks( );
         initTinyLaf( );
         final DockingTheme dockingTheme = defaultDockingTheme( );
 

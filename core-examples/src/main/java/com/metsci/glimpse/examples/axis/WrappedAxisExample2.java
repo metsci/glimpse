@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.examples.axis;
 
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorTable;
-import static com.metsci.glimpse.support.colormap.ColorGradients.inferno;
-import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
-import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static javax.media.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.support.QuickUtils.*;
+import static com.metsci.glimpse.support.colormap.ColorGradientUtils.*;
+import static com.metsci.glimpse.support.colormap.ColorGradients.*;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
+import static com.metsci.glimpse.util.GeneralUtils.*;
+import static javax.media.opengl.GLProfile.*;
 
 import javax.swing.SwingUtilities;
 
@@ -210,7 +209,7 @@ public class WrappedAxisExample2
             // Make sure the BackgroundPainter gets assigned a color -- otherwise blending turns out weird
             layout.setLookAndFeel( new DefaultLookAndFeel( ) );
 
-            quickGlimpseWindow( "WrappedAxisExample2", GL3, 0.8, layout );
+            quickGlimpseApp( "WrappedAxisExample2", GL3, 0.8, layout );
 
         } );
     }

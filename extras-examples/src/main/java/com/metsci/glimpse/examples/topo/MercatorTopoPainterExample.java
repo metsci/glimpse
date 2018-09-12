@@ -63,50 +63,43 @@ public class MercatorTopoPainterExample
 
         SwingUtilities.invokeLater( ( ) ->
         {
-            try
+            MultiAxisPlot2D plot = new MultiAxisPlot2D( )
             {
-                MultiAxisPlot2D plot = new MultiAxisPlot2D( )
+                @Override
+                protected void initializeCenterAxis( )
                 {
-                    @Override
-                    protected void initializeCenterAxis( )
-                    {
-                        this.centerAxisX = new WrappedAxis1D( -PI, +PI );
-                        this.centerAxisY = new Axis1D( );
-                    }
-                };
+                    this.centerAxisX = new WrappedAxis1D( -PI, +PI );
+                    this.centerAxisY = new Axis1D( );
+                }
+            };
 
-                plot.setShowTitle( false );
-                plot.setBorderSize( 5 );
+            plot.setShowTitle( false );
+            plot.setBorderSize( 5 );
 
-                Axis2D axis = plot.getCenterAxis( );
-                axis.lockAspectRatioXY( 1.0 );
-                axis.getAxisX( ).setUpdateMode( CenterScale );
-                axis.getAxisY( ).setUpdateMode( CenterScale );
-                axis.set( -PI, +PI, -HALF_PI, +HALF_PI );
-                axis.validate( );
+            Axis2D axis = plot.getCenterAxis( );
+            axis.lockAspectRatioXY( 1.0 );
+            axis.getAxisX( ).setUpdateMode( CenterScale );
+            axis.getAxisY( ).setUpdateMode( CenterScale );
+            axis.set( -PI, +PI, -HALF_PI, +HALF_PI );
+            axis.validate( );
 
-                BackgroundPainter backgroundPainter = new BackgroundPainter( );
-                backgroundPainter.setColor( floats( 0.7f, 0.7f, 0.7f, 1 ) );
+            BackgroundPainter backgroundPainter = new BackgroundPainter( );
+            backgroundPainter.setColor( floats( 0.7f, 0.7f, 0.7f, 1 ) );
 
-                File topoDataFile = requireTopoDataFile( );
-                TopoDataFile topoBase = readTopoLevel( topoDataFile );
-                TopoDataset topoDataset = topoCacheDataset( topoBase );
-                MercatorTopoPainter topoPainter = new MercatorTopoPainter( topoDataset, standardMercatorProj );
+            File topoDataFile = requireTopoDataFile( );
+            TopoDataFile topoBase = require( ( ) -> readTopoLevel( topoDataFile ) );
+            TopoDataset topoDataset = require( ( ) -> topoCacheDataset( topoBase ) );
+            MercatorTopoPainter topoPainter = new MercatorTopoPainter( topoDataset, standardMercatorProj );
 
-                WrappedPainter wrappedPainter = new WrappedPainter( true );
-                wrappedPainter.addPainter( backgroundPainter );
-                wrappedPainter.addPainter( topoPainter );
+            WrappedPainter wrappedPainter = new WrappedPainter( true );
+            wrappedPainter.addPainter( backgroundPainter );
+            wrappedPainter.addPainter( topoPainter );
 
-                plot.getLayoutCenter( ).addPainter( wrappedPainter );
-                plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
-                plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
+            plot.getLayoutCenter( ).addPainter( wrappedPainter );
+            plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+            plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-                quickGlimpseWindow( "MercatorTopoPainterExample", GL3, 0.8, plot );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
+            quickGlimpseApp( "MercatorTopoPainterExample", GL3, 0.8, plot );
         } );
     }
 

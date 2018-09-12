@@ -33,7 +33,6 @@ import static com.metsci.glimpse.dnc.convert.Vpf2Flat.*;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static javax.swing.JFileChooser.*;
@@ -78,7 +77,6 @@ public class Vpf2FlatConverter
     public static void main( String[] args )
     {
         initializeLogging( "dnc-examples/logging.properties" );
-        fixPlatformQuirks( );
         initTinyLaf( );
 
 
