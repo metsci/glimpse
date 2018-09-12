@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.examples;
 
+import static com.metsci.glimpse.support.QuickUtils.*;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -89,6 +91,8 @@ public class Example
 
     public static Example showWithSwing( GlimpseLayoutProvider layoutProvider, GLProfile profile ) throws Exception
     {
+        initStandardGlimpseApp( );
+
         // generate a GLContext by constructing a small offscreen framebuffer
         final GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( profile );
 
@@ -160,6 +164,8 @@ public class Example
 
     public static void showWithSwing( GlimpseLayoutProvider layoutProviderA, GlimpseLayoutProvider layoutProviderB ) throws Exception
     {
+        initStandardGlimpseApp( );
+
         // generate a GLContext by constructing a small offscreen framebuffer
         GLProfile glProfile = GLUtils.getDefaultGLProfile( );
         GLDrawableFactory factory = GLDrawableFactory.getFactory( glProfile );
