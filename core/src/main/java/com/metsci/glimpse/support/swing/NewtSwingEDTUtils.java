@@ -8,6 +8,7 @@ import static javax.swing.SwingUtilities.getWindowAncestor;
 import java.awt.Component;
 import java.awt.Window;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import javax.media.nativewindow.NativeWindow;
 
@@ -44,7 +45,7 @@ public class NewtSwingEDTUtils
                     Window w = getWindowAncestor( c );
                     if ( w != null )
                     {
-                        return getModalBlockedStatus( w );
+                        return modalBlockedStatusFn.apply( w );
                     }
                 }
             }
@@ -52,31 +53,39 @@ public class NewtSwingEDTUtils
         return UNKNOWN;
     }
 
-    /**
-     * <strong>WARNING:</strong> This method relies on implementation details of both
-     * NEWT and AWT. If for any reason it cannot determine whether the event is modal-
-     * blocked, it returns {@link ModalBlockedStatus#UNKNOWN}. Client code should be
-     * written with this possibility in mind.
-     */
-    public static ModalBlockedStatus getModalBlockedStatus( Window w )
+    protected static final Function<Window,ModalBlockedStatus> modalBlockedStatusFn = createModalBlockedStatusFn( );
+    protected static Function<Window,ModalBlockedStatus> createModalBlockedStatusFn( )
     {
         try
         {
             Method method = Window.class.getDeclaredMethod( "isModalBlocked" );
             method.setAccessible( true );
-            Object result = method.invoke( w );
-            if ( result instanceof Boolean )
+            return ( w ) ->
             {
-                return ( ( Boolean ) result ? DEFINITELY_BLOCKED : DEFINITELY_NOT_BLOCKED );
-            }
-            else
+                try
+                {
+                    Object result = method.invoke( w );
+                    if ( result instanceof Boolean )
+                    {
+                        return ( ( Boolean ) result ? DEFINITELY_BLOCKED : DEFINITELY_NOT_BLOCKED );
+                    }
+                    else
+                    {
+                        return UNKNOWN;
+                    }
+                }
+                catch ( ReflectiveOperationException | IllegalArgumentException e )
+                {
+                    return UNKNOWN;
+                }
+            };
+        }
+        catch ( ReflectiveOperationException | SecurityException e )
+        {
+            return ( w ) ->
             {
                 return UNKNOWN;
-            }
-        }
-        catch ( Exception e )
-        {
-            return UNKNOWN;
+            };
         }
     }
 
