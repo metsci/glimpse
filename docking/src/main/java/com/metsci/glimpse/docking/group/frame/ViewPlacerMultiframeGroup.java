@@ -27,7 +27,6 @@
 package com.metsci.glimpse.docking.group.frame;
 
 import static com.metsci.glimpse.docking.DockingUtils.getFrameExtendedState;
-import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
 
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -45,32 +44,34 @@ public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements Vi
 {
 
     protected final DockingGroupMultiframe group;
+    protected final Rectangle fallbackWindowBounds;
 
 
-    public ViewPlacerMultiframeGroup( DockingGroupMultiframe group, Map<DockerArrangementNode,Component> existingComponents, View newView )
+    public ViewPlacerMultiframeGroup( DockingGroupMultiframe group, Map<DockerArrangementNode,Component> existingComponents, View newView, Rectangle fallbackWindowBounds )
     {
         super( group, existingComponents, newView );
         this.group = group;
+        this.fallbackWindowBounds = new Rectangle( fallbackWindowBounds );
     }
 
     @Override
     public ViewDestination createNewFrame( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
-        Tile newTile = this.group.tileFactory( ).newTile( );
-        newTile.addView( this.newView, 0 );
+        ViewDestination d = this.createNewFrame( new Rectangle( planWindow.x, planWindow.y, planWindow.width, planWindow.height ),
+                                                 planWindow.isMaximizedHoriz,
+                                                 planWindow.isMaximizedVert );
 
-        DockingFrame newWindow = this.group.addNewFrame( );
-        newWindow.docker( ).addInitialLeaf( newTile );
-
-        newWindow.setBounds( planWindow.x, planWindow.y, planWindow.width, planWindow.height );
-        newWindow.setNormalBounds( planWindow.x, planWindow.y, planWindow.width, planWindow.height );
-        newWindow.setExtendedState( getFrameExtendedState( planWindow.isMaximizedHoriz, planWindow.isMaximizedVert ) );
-
-        return new ViewDestination( newWindow, planWindow, newTile, planTile );
+        return new ViewDestination( d.createdWindow, planWindow, d.createdTile, planTile );
     }
 
     @Override
     public ViewDestination createFallbackNewFrame( )
+    {
+        return this.createNewFrame( this.fallbackWindowBounds, false, false );
+    }
+
+    @Override
+    public ViewDestination createNewFrame( Rectangle bounds, boolean isMaximizedHoriz, boolean isMaximizedVert )
     {
         Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
@@ -78,10 +79,9 @@ public class ViewPlacerMultiframeGroup extends ViewPlacerBaseGroup implements Vi
         DockingFrame newWindow = this.group.addNewFrame( );
         newWindow.docker( ).addInitialLeaf( newTile );
 
-        Rectangle newFrameBounds = fallbackWindowBounds( );
-        newWindow.setBounds( newFrameBounds );
-        newWindow.setNormalBounds( newFrameBounds );
-        newWindow.setExtendedState( getFrameExtendedState( false, false ) );
+        newWindow.setBounds( bounds );
+        newWindow.setNormalBounds( bounds );
+        newWindow.setExtendedState( getFrameExtendedState( isMaximizedHoriz, isMaximizedVert ) );
 
         return new ViewDestination( newWindow, null, newTile, null );
     }

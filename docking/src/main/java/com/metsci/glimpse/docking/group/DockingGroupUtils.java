@@ -29,10 +29,12 @@ package com.metsci.glimpse.docking.group;
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.reversed;
 import static java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment;
+import static java.lang.Math.max;
 import static java.lang.Math.round;
 
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -139,18 +141,23 @@ public class DockingGroupUtils
         return result;
     }
 
-    public static Rectangle fallbackWindowBounds( )
+    public static Rectangle relativeWindowBounds( Window owner, double sizeFactor )
     {
-        return fractionOfScreenBounds( 0.85f );
+        Rectangle ownerBounds = ( owner == null ? defaultScreenBounds( ) : owner.getBounds( ) );
+        return scaleBounds( ownerBounds, sizeFactor );
     }
 
-    public static Rectangle fractionOfScreenBounds( float frac )
+    public static Rectangle defaultScreenBounds( )
     {
-        Rectangle screenBounds = getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
-        int width = round( frac * screenBounds.width );
-        int height = round( frac * screenBounds.height );
-        int x = screenBounds.x + ( ( screenBounds.width - width ) / 2 );
-        int y = screenBounds.y + ( ( screenBounds.height - height ) / 2 );
+        return getLocalGraphicsEnvironment( ).getMaximumWindowBounds( );
+    }
+
+    public static Rectangle scaleBounds( Rectangle r, double scale )
+    {
+        int width = ( int ) max( 0, round( scale * r.width ) );
+        int height = ( int ) max( 0, round( scale * r.height ) );
+        int x = r.x + ( ( r.width - width ) / 2 );
+        int y = r.y + ( ( r.height - height ) / 2 );
         return new Rectangle( x, y, width, height );
     }
 

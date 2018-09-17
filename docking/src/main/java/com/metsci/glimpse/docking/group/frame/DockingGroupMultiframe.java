@@ -38,12 +38,14 @@ import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrNodeParen
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findArrTileContaining;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findFrameArrContaining;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findLargestArrTile;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.relativeWindowBounds;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.chooseViewNum;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrNode;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrTile;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,13 +88,18 @@ public class DockingGroupMultiframe extends DockingGroupBase
     @Override
     protected ViewPlacerMultiframe<ViewDestination> createViewPlacer( Map<DockerArrangementNode,Component> existingComponents, View newView )
     {
-        return new ViewPlacerMultiframeGroup( this, existingComponents, newView );
+        return new ViewPlacerMultiframeGroup( this, existingComponents, newView, this.fallbackWindowBounds( ) );
     }
 
     @Override
     protected ViewPlacerMultiframe<Void> createViewPlacer( GroupArrangement groupArr, String newViewId )
     {
-        return new ViewPlacerMultiframeArr( groupArr, newViewId );
+        return new ViewPlacerMultiframeArr( groupArr, newViewId, this.fallbackWindowBounds( ) );
+    }
+
+    protected Rectangle fallbackWindowBounds( )
+    {
+        return relativeWindowBounds( null, 0.85 );
     }
 
     @Override
