@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.docking.group.dialog;
 
-import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
-
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.util.Map;
@@ -44,12 +42,14 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
 {
 
     protected final DockingGroupDialog group;
+    protected final Rectangle fallbackWindowBounds;
 
 
-    public ViewPlacerDialogGroup( DockingGroupDialog group, Map<DockerArrangementNode,Component> existingComponents, View newView )
+    public ViewPlacerDialogGroup( DockingGroupDialog group, Map<DockerArrangementNode,Component> existingComponents, View newView, Rectangle fallbackWindowBounds )
     {
         super( group, existingComponents, newView );
         this.group = group;
+        this.fallbackWindowBounds = new Rectangle( fallbackWindowBounds );
     }
 
     @Override
@@ -65,30 +65,27 @@ public class ViewPlacerDialogGroup extends ViewPlacerBaseGroup implements ViewPl
     }
 
     @Override
-    public ViewDestination createSoleDialog( FrameArrangement planDialog, DockerArrangementTile planTile )
+    public ViewDestination createSoleDialog( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
-        Tile newTile = this.group.tileFactory( ).newTile( );
-        newTile.addView( this.newView, 0 );
-
-        DockingDialog newDialog = this.group.initDialog( );
-        newDialog.docker( ).addInitialLeaf( newTile );
-
-        newDialog.setBounds( planDialog.x, planDialog.y, planDialog.width, planDialog.height );
-
-        return new ViewDestination( newDialog, planDialog, newTile, planTile );
+        ViewDestination d = this.createSoleDialog( new Rectangle( planWindow.x, planWindow.y, planWindow.width, planWindow.height ) );
+        return new ViewDestination( d.createdWindow, planWindow, d.createdTile, planTile );
     }
 
     @Override
     public ViewDestination createFallbackSoleDialog( )
     {
+        return this.createSoleDialog( this.fallbackWindowBounds );
+    }
+
+    @Override
+    public ViewDestination createSoleDialog( Rectangle bounds )
+    {
         Tile newTile = this.group.tileFactory( ).newTile( );
         newTile.addView( this.newView, 0 );
 
         DockingDialog newDialog = this.group.initDialog( );
         newDialog.docker( ).addInitialLeaf( newTile );
-
-        Rectangle newDialogBounds = fallbackWindowBounds( );
-        newDialog.setBounds( newDialogBounds );
+        newDialog.setBounds( bounds );
 
         return new ViewDestination( newDialog, null, newTile, null );
     }

@@ -37,7 +37,6 @@ import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -55,6 +54,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
@@ -75,6 +75,8 @@ import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.DisposableGroup;
 
 public class DockingUtils
 {
@@ -129,46 +131,58 @@ public class DockingUtils
         swingRun( partial( runnable1, t ) );
     }
 
-    public static JPopupMenu newButtonPopup( final JToggleButton button )
+    /**
+     * @deprecated Use {@link DockingUtils#attachPopupMenu(JToggleButton, JPopupMenu)} instead.
+     */
+    @Deprecated
+    public static JPopupMenu newButtonPopup( JToggleButton button )
     {
-        final JPopupMenu popup = new JPopupMenu( );
+        JPopupMenu popup = new JPopupMenu( );
+        attachPopupMenu( button, popup );
+        return popup;
+    }
 
-        button.addActionListener( new ActionListener( )
+    public static Disposable attachPopupMenu( JToggleButton button, JPopupMenu popup )
+    {
+        DisposableGroup disposables = new DisposableGroup( );
+
+        disposables.add( addActionListener( button, ( ) ->
         {
-            @Override
-            public void actionPerformed( ActionEvent ev )
+            if ( button.isSelected( ) )
             {
-                if ( button.isSelected( ) )
-                {
-                    popup.show( button, 0, button.getHeight( ) );
-                }
-                else
-                {
-                    popup.setVisible( false );
-                }
+                popup.show( button, 0, button.getHeight( ) );
             }
-        } );
+            else
+            {
+                popup.setVisible( false );
+            }
+        } ) );
 
-        popup.addPopupMenuListener( new PopupMenuListener( )
+        disposables.add( onPopupWillBecomeInvisible( popup, ( ) ->
+        {
+            button.setSelected( false );
+
+            // If this popup-hide was triggered by a mouse-press, then don't allow
+            // that mouse-press to begin a click of the button (which would toggle
+            // the popup back to visible again)
+            button.setEnabled( false );
+            SwingUtilities.invokeLater( ( ) ->
+            {
+                button.setEnabled( true );
+            } );
+        } ) );
+
+        return disposables;
+    }
+
+    private static Disposable onPopupWillBecomeInvisible( JPopupMenu popup, Runnable fn )
+    {
+        return addPopupListener( popup, new PopupMenuListener( )
         {
             @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent ev )
             {
-                button.setSelected( false );
-
-                // If this popup-hide was triggered by a mouse-press, then don't allow
-                // that mouse-press to begin a click of the button (which would toggle
-                // the popup back to visible again)
-                //
-                button.setEnabled( false );
-                SwingUtilities.invokeLater( new Runnable( )
-                {
-                    @Override
-                    public void run( )
-                    {
-                        button.setEnabled( true );
-                    }
-                } );
+                fn.run( );
             }
 
             @Override
@@ -179,8 +193,31 @@ public class DockingUtils
             public void popupMenuCanceled( PopupMenuEvent ev )
             { }
         } );
+    }
 
-        return popup;
+    private static Disposable addPopupListener( JPopupMenu popup, PopupMenuListener listener )
+    {
+        popup.addPopupMenuListener( listener );
+
+        return ( ) ->
+        {
+            popup.removePopupMenuListener( listener );
+        };
+    }
+
+    private static Disposable addActionListener( AbstractButton button, Runnable fn )
+    {
+        return addActionListener( button, ( ev ) -> fn.run( ) );
+    }
+
+    private static Disposable addActionListener( AbstractButton button, ActionListener listener )
+    {
+        button.addActionListener( listener );
+
+        return ( ) ->
+        {
+            button.removeActionListener( listener );
+        };
     }
 
     @SuppressWarnings( "serial" )

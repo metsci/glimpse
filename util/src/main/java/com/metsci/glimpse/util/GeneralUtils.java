@@ -70,6 +70,25 @@ public class GeneralUtils
     }
 
     /**
+     * Convenience function for tersely re-throwing a checked exception wrapped in a {@link RuntimeException}.
+     */
+    public static <T> T require( ThrowingSupplier<T> fn )
+    {
+        try
+        {
+            return fn.get( );
+        }
+        catch ( RuntimeException e )
+        {
+            throw e;
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    /**
      * Workaround for <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539">bug #6480539</a>:
      * BigDecimal.stripTrailingZeros() has no effect on zero itself ("0.0").
      */

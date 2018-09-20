@@ -61,50 +61,43 @@ public class EquirectTopoPainterExample
 
         SwingUtilities.invokeLater( ( ) ->
         {
-            try
+            MultiAxisPlot2D plot = new MultiAxisPlot2D( )
             {
-                MultiAxisPlot2D plot = new MultiAxisPlot2D( )
+                @Override
+                protected void initializeCenterAxis( )
                 {
-                    @Override
-                    protected void initializeCenterAxis( )
-                    {
-                        this.centerAxisX = new WrappedAxis1D( -180, +180 );
-                        this.centerAxisY = new Axis1D( );
-                    }
-                };
+                    this.centerAxisX = new WrappedAxis1D( -180, +180 );
+                    this.centerAxisY = new Axis1D( );
+                }
+            };
 
-                plot.setShowTitle( false );
-                plot.setBorderSize( 5 );
+            plot.setShowTitle( false );
+            plot.setBorderSize( 5 );
 
-                Axis2D axis = plot.getCenterAxis( );
-                axis.lockAspectRatioXY( 1.0 );
-                axis.getAxisX( ).setUpdateMode( CenterScale );
-                axis.getAxisY( ).setUpdateMode( CenterScale );
-                axis.set( -180, +180, -90, +90 );
-                axis.validate( );
+            Axis2D axis = plot.getCenterAxis( );
+            axis.lockAspectRatioXY( 1.0 );
+            axis.getAxisX( ).setUpdateMode( CenterScale );
+            axis.getAxisY( ).setUpdateMode( CenterScale );
+            axis.set( -180, +180, -90, +90 );
+            axis.validate( );
 
-                BackgroundPainter backgroundPainter = new BackgroundPainter( );
-                backgroundPainter.setColor( floats( 0.7f, 0.7f, 0.7f, 1 ) );
+            BackgroundPainter backgroundPainter = new BackgroundPainter( );
+            backgroundPainter.setColor( floats( 0.7f, 0.7f, 0.7f, 1 ) );
 
-                File topoDataFile = requireTopoDataFile( );
-                TopoDataFile topoBase = readTopoLevel( topoDataFile );
-                TopoDataset topoDataset = topoCacheDataset( topoBase );
-                EquirectTopoPainter topoPainter = new EquirectTopoPainter( topoDataset, plateCarreeProj_DEG );
+            File topoDataFile = requireTopoDataFile( );
+            TopoDataFile topoBase = require( ( ) -> readTopoLevel( topoDataFile ) );
+            TopoDataset topoDataset = require( ( ) -> topoCacheDataset( topoBase ) );
+            EquirectTopoPainter topoPainter = new EquirectTopoPainter( topoDataset, plateCarreeProj_DEG );
 
-                WrappedPainter wrappedPainter = new WrappedPainter( true );
-                wrappedPainter.addPainter( backgroundPainter );
-                wrappedPainter.addPainter( topoPainter );
+            WrappedPainter wrappedPainter = new WrappedPainter( true );
+            wrappedPainter.addPainter( backgroundPainter );
+            wrappedPainter.addPainter( topoPainter );
 
-                plot.getLayoutCenter( ).addPainter( wrappedPainter );
-                plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
-                plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
+            plot.getLayoutCenter( ).addPainter( wrappedPainter );
+            plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+            plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-                quickGlimpseWindow( "EquirectTopoPainterExample", GL3, 0.8, plot );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
+            quickGlimpseApp( "EquirectTopoPainterExample", GL3, 0.8, plot );
         } );
     }
 

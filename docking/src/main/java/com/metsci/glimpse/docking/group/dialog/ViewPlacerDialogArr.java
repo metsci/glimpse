@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.docking.group.dialog;
 
-import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
-
 import java.awt.Rectangle;
 
 import com.metsci.glimpse.docking.group.ViewPlacerBaseArr;
@@ -38,9 +36,13 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacerDialog<Void>
 {
 
-    public ViewPlacerDialogArr( GroupArrangement groupArr, String newViewId )
+    protected final Rectangle fallbackWindowBounds;
+
+
+    public ViewPlacerDialogArr( GroupArrangement groupArr, String newViewId, Rectangle fallbackWindowBounds )
     {
         super( groupArr, newViewId );
+        this.fallbackWindowBounds = new Rectangle( fallbackWindowBounds );
     }
 
     @Override
@@ -60,28 +62,17 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
     @Override
     public Void createSoleDialog( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
-        DockerArrangementTile newTile = new DockerArrangementTile( );
-        newTile.viewIds.add( newViewId );
-        newTile.selectedViewId = newViewId;
-        newTile.isMaximized = false;
-
-        FrameArrangement newWindow = new FrameArrangement( );
-        newWindow.dockerArr = newTile;
-
-        newWindow.x = planWindow.x;
-        newWindow.y = planWindow.y;
-        newWindow.width = planWindow.width;
-        newWindow.height = planWindow.height;
-        newWindow.isMaximizedHoriz = false;
-        newWindow.isMaximizedVert = false;
-
-        this.groupArr.frameArrs.add( newWindow );
-
-        return null;
+        return this.createSoleDialog( new Rectangle( planWindow.x, planWindow.y, planWindow.width, planWindow.height ) );
     }
 
     @Override
     public Void createFallbackSoleDialog( )
+    {
+        return this.createSoleDialog( this.fallbackWindowBounds );
+    }
+
+    @Override
+    public Void createSoleDialog( Rectangle bounds )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
@@ -91,11 +82,10 @@ public class ViewPlacerDialogArr extends ViewPlacerBaseArr implements ViewPlacer
         FrameArrangement newWindow = new FrameArrangement( );
         newWindow.dockerArr = newTile;
 
-        Rectangle newFrameBounds = fallbackWindowBounds( );
-        newWindow.x = newFrameBounds.x;
-        newWindow.y = newFrameBounds.y;
-        newWindow.width = newFrameBounds.width;
-        newWindow.height = newFrameBounds.height;
+        newWindow.x = bounds.x;
+        newWindow.y = bounds.y;
+        newWindow.width = bounds.width;
+        newWindow.height = bounds.height;
         newWindow.isMaximizedHoriz = false;
         newWindow.isMaximizedVert = false;
 

@@ -26,15 +26,19 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static com.metsci.glimpse.util.var.VarUtils.*;
-import static java.awt.BasicStroke.*;
+import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
+import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
+import static com.metsci.glimpse.util.var.VarUtils.addOldNewListener;
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_MITER;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.BorderLayout.NORTH;
-import static java.lang.Math.*;
-import static javax.swing.BorderFactory.*;
-import static javax.swing.SwingConstants.*;
+import static java.lang.Math.max;
+import static javax.swing.BorderFactory.createCompoundBorder;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.BorderFactory.createMatteBorder;
+import static javax.swing.SwingConstants.LEFT;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -268,9 +272,11 @@ public class TileImpl extends Tile
         this.tabBar = newToolbar( false );
         tabBar.setBorder( null );
 
-        this.overflowBar = newToolbar( true );
         this.overflowPopupButton = new JToggleButton( "\u00BB" );
-        this.overflowPopup = newButtonPopup( overflowPopupButton );
+        this.overflowPopup = new JPopupMenu( );
+        attachPopupMenu( this.overflowPopupButton, this.overflowPopup );
+
+        this.overflowBar = newToolbar( true );
         this.overflowBar.add( overflowPopupButton );
 
         this.cornerBar = newToolbar( true );

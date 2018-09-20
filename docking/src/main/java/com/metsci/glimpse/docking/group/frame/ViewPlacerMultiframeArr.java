@@ -26,8 +26,6 @@
  */
 package com.metsci.glimpse.docking.group.frame;
 
-import static com.metsci.glimpse.docking.group.DockingGroupUtils.fallbackWindowBounds;
-
 import java.awt.Rectangle;
 
 import com.metsci.glimpse.docking.group.ViewPlacerBaseArr;
@@ -38,36 +36,31 @@ import com.metsci.glimpse.docking.xml.GroupArrangement;
 public class ViewPlacerMultiframeArr extends ViewPlacerBaseArr implements ViewPlacerMultiframe<Void>
 {
 
-    public ViewPlacerMultiframeArr( GroupArrangement groupArr, String newViewId )
+    protected final Rectangle fallbackWindowBounds;
+
+
+    public ViewPlacerMultiframeArr( GroupArrangement groupArr, String newViewId, Rectangle fallbackWindowBounds )
     {
         super( groupArr, newViewId );
+        this.fallbackWindowBounds = new Rectangle( fallbackWindowBounds );
     }
 
     @Override
     public Void createNewFrame( FrameArrangement planWindow, DockerArrangementTile planTile )
     {
-        DockerArrangementTile newTile = new DockerArrangementTile( );
-        newTile.viewIds.add( newViewId );
-        newTile.selectedViewId = newViewId;
-        newTile.isMaximized = false;
-
-        FrameArrangement newWindow = new FrameArrangement( );
-        newWindow.dockerArr = newTile;
-
-        newWindow.x = planWindow.x;
-        newWindow.y = planWindow.y;
-        newWindow.width = planWindow.width;
-        newWindow.height = planWindow.height;
-        newWindow.isMaximizedHoriz = planWindow.isMaximizedHoriz;
-        newWindow.isMaximizedVert = planWindow.isMaximizedVert;
-
-        this.groupArr.frameArrs.add( newWindow );
-
-        return null;
+        return this.createNewFrame( new Rectangle( planWindow.x, planWindow.y, planWindow.width, planWindow.height ),
+                                    planWindow.isMaximizedHoriz,
+                                    planWindow.isMaximizedVert );
     }
 
     @Override
     public Void createFallbackNewFrame( )
+    {
+        return this.createNewFrame( this.fallbackWindowBounds, false, false );
+    }
+
+    @Override
+    public Void createNewFrame( Rectangle bounds, boolean isMaximizedHoriz, boolean isMaximizedVert )
     {
         DockerArrangementTile newTile = new DockerArrangementTile( );
         newTile.viewIds.add( newViewId );
@@ -77,13 +70,12 @@ public class ViewPlacerMultiframeArr extends ViewPlacerBaseArr implements ViewPl
         FrameArrangement newWindow = new FrameArrangement( );
         newWindow.dockerArr = newTile;
 
-        Rectangle newFrameBounds = fallbackWindowBounds( );
-        newWindow.x = newFrameBounds.x;
-        newWindow.y = newFrameBounds.y;
-        newWindow.width = newFrameBounds.width;
-        newWindow.height = newFrameBounds.height;
-        newWindow.isMaximizedHoriz = false;
-        newWindow.isMaximizedVert = false;
+        newWindow.x = bounds.x;
+        newWindow.y = bounds.y;
+        newWindow.width = bounds.width;
+        newWindow.height = bounds.height;
+        newWindow.isMaximizedHoriz = isMaximizedHoriz;
+        newWindow.isMaximizedVert = isMaximizedVert;
 
         this.groupArr.frameArrs.add( newWindow );
 

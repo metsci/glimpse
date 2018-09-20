@@ -34,7 +34,7 @@ import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.SimpleDockingExample.newSolidPanel;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -61,8 +61,8 @@ public class ModalDialogDockingExample
             @Override
             public void run( )
             {
-                fixPlatformQuirks( );
                 initTinyLaf( );
+                initStandardGlimpseApp( );
 
 
                 // Create view components

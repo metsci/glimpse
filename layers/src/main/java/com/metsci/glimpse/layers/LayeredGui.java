@@ -29,8 +29,8 @@ package com.metsci.glimpse.layers;
 import static com.google.common.io.Resources.getResource;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
+import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
 import static com.metsci.glimpse.docking.DockingUtils.loadDockingArrangement;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.saveDockingArrangement;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
@@ -560,7 +560,8 @@ public class LayeredGui
         {
             JToggleButton facetsButton = new JToggleButton( layersIcon );
             facetsButton.setToolTipText( "Show Layers" );
-            JPopupMenu facetsPopup = newButtonPopup( facetsButton );
+            JPopupMenu facetsPopup = new JPopupMenu( );
+            attachPopupMenu( facetsButton, facetsPopup );
 
             DisposableGroup facetDisposables = disposables.add( new DisposableGroup( ) );
             disposables.add( view.facets.addListener( true, ( ) ->

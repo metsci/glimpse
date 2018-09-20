@@ -34,7 +34,7 @@ import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
@@ -52,8 +52,8 @@ public class GlimpseDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        fixPlatformQuirks( );
         initTinyLaf( );
+        initStandardGlimpseApp( );
 
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )

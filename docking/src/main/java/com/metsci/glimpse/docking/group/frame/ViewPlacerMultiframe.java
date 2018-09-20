@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.docking.group.frame;
 
+import java.awt.Rectangle;
+
 import com.metsci.glimpse.docking.group.ViewPlacer;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
@@ -36,5 +38,7 @@ public interface ViewPlacerMultiframe<R> extends ViewPlacer<R>
     R createNewFrame( FrameArrangement planWindow, DockerArrangementTile planTile );
 
     R createFallbackNewFrame( );
+
+    R createNewFrame( Rectangle bounds, boolean isMaximizedHoriz, boolean isMaximizedVert );
 
 }

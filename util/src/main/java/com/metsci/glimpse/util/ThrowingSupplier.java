@@ -24,53 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.support.swing;
+package com.metsci.glimpse.util;
 
-import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.getModalBlockedStatus;
-import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_BLOCKED;
-
-import javax.swing.SwingUtilities;
-
-import com.jogamp.newt.event.KeyEvent;
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
-import com.metsci.glimpse.event.key.newt.KeyWrapperNewt;
-import com.metsci.glimpse.event.mouse.MouseWrapper;
-
-/**
- * A version of KeyWrapperNewt which fires Glimpse events on the Swing EDT
- *
- * @author hogye
- */
-public class KeyWrapperNewtSwingEDT extends KeyWrapperNewt
+public interface ThrowingSupplier<T>
 {
 
-    public KeyWrapperNewtSwingEDT( NewtGlimpseCanvas canvas, MouseWrapper<?> canvasMouseHelper )
-    {
-        super( canvas, canvasMouseHelper );
-    }
-
-    @Override
-    public void keyPressed( KeyEvent ev )
-    {
-        SwingUtilities.invokeLater( ( ) ->
-        {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.doKeyPressed( ev );
-            }
-        } );
-    }
-
-    @Override
-    public void keyReleased( KeyEvent ev )
-    {
-        SwingUtilities.invokeLater( ( ) ->
-        {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.doKeyReleased( ev );
-            }
-        } );
-    }
+    T get( ) throws Exception;
 
 }

@@ -28,7 +28,7 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
+import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
@@ -36,7 +36,6 @@ import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDis
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -63,7 +62,6 @@ public class SimpleDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        fixPlatformQuirks( );
         initTinyLaf( );
         final DockingTheme dockingTheme = defaultDockingTheme( );
 
@@ -96,7 +94,8 @@ public class SimpleDockingExample
                 aToolbar.add( new JButton( "A3" ) );
 
                 JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-                JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
+                JPopupMenu aOptionsPopup = new JPopupMenu( );
+                attachPopupMenu( aOptionsButton, aOptionsPopup );
                 aOptionsPopup.add( new JMenuItem( "Option 1" ) );
                 aToolbar.add( aOptionsButton );
 

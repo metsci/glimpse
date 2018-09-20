@@ -40,6 +40,7 @@ import static com.metsci.glimpse.docking.group.ArrangementUtils.findFrameArrCont
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findLargestArrTile;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findLargestFrameArr;
 import static com.metsci.glimpse.docking.group.ArrangementUtils.findTiles;
+import static com.metsci.glimpse.docking.group.DockingGroupUtils.relativeWindowBounds;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.chooseViewNum;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrNode;
 import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArrTile;
@@ -47,6 +48,7 @@ import static com.metsci.glimpse.docking.group.ViewPlacementUtils.findSimilarArr
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.util.Map;
 import java.util.Set;
@@ -122,13 +124,18 @@ public class DockingGroupDialog extends DockingGroupBase
     @Override
     protected ViewPlacerDialog<ViewDestination> createViewPlacer( Map<DockerArrangementNode,Component> existingComponents, View newView )
     {
-        return new ViewPlacerDialogGroup( this, existingComponents, newView );
+        return new ViewPlacerDialogGroup( this, existingComponents, newView, this.fallbackWindowBounds( ) );
     }
 
     @Override
     protected ViewPlacerDialog<Void> createViewPlacer( GroupArrangement groupArr, String newViewId )
     {
-        return new ViewPlacerDialogArr( groupArr, newViewId );
+        return new ViewPlacerDialogArr( groupArr, newViewId, this.fallbackWindowBounds( ) );
+    }
+
+    protected Rectangle fallbackWindowBounds( )
+    {
+        return relativeWindowBounds( this.owner, 0.85 );
     }
 
     @Override
