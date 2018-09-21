@@ -165,6 +165,31 @@ public class DisposableUtils
         return addActionListener( button, listener );
     }
 
+    public static Disposable addPropertyChangeListener( Component c, String propertyName, Runnable listener )
+    {
+        return addPropertyChangeListener( c, propertyName, ( ev ) -> listener.run( ) );
+    }
+
+    public static Disposable addPropertyChangeListener( Component c, PropertyChangeListener listener )
+    {
+        c.addPropertyChangeListener( listener );
+
+        return ( ) ->
+        {
+            c.removePropertyChangeListener( listener );
+        };
+    }
+
+    public static Disposable addPropertyChangeListener( Component c, String propertyName, PropertyChangeListener listener )
+    {
+        c.addPropertyChangeListener( propertyName, listener );
+
+        return ( ) ->
+        {
+            c.removePropertyChangeListener( propertyName, listener );
+        };
+    }
+
     public static Disposable addTableModelListener( TableModel model, TableModelListener listener )
     {
         model.addTableModelListener( listener );
