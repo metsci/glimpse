@@ -62,7 +62,6 @@ public class ErrorPopupPanel<K> extends JDialog
 
         this.setUndecorated( true );
         this.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-        this.setAlwaysOnTop( true );
 
         this.listener = new AWTEventListener( )
         {
