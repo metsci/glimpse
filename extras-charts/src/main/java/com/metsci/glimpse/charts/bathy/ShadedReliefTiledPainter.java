@@ -266,7 +266,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         cached.heightStep = rf.readDouble( );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.getImageWidth( ) * Float.BYTES );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.getImageHeight( ) * Float.BYTES );
         FloatBuffer fb = bbuf.asFloatBuffer( );
 
         cached.data = new float[cached.getImageWidth( )][cached.getImageHeight( )];
@@ -304,7 +304,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         rf.writeDouble( tile.getHeightStep( ) );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.getImageWidth( ) * Float.BYTES );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.getImageHeight( ) * Float.BYTES );
         FloatBuffer fb = bbuf.asFloatBuffer( );
         for ( float[] row : tile.data )
         {
