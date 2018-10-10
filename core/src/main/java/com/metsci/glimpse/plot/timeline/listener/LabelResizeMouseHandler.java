@@ -27,7 +27,7 @@
 package com.metsci.glimpse.plot.timeline.listener;
 
 import static java.awt.Cursor.E_RESIZE_CURSOR;
-import static java.awt.Cursor.N_RESIZE_CURSOR;
+import static java.awt.Cursor.S_RESIZE_CURSOR;
 import static java.awt.Cursor.getDefaultCursor;
 import static java.awt.Cursor.getPredefinedCursor;
 import static java.lang.Math.abs;
@@ -72,7 +72,7 @@ public class LabelResizeMouseHandler extends GlimpseMouseAllAdapter
         this.plot = plot;
         component = new JButton( );
         isDragging = false;
-        resizeCursor = plot.isTimeAxisHorizontal( ) ? getPredefinedCursor( E_RESIZE_CURSOR ) : getPredefinedCursor( N_RESIZE_CURSOR );
+        resizeCursor = plot.isTimeAxisHorizontal( ) ? getPredefinedCursor( E_RESIZE_CURSOR ) : getPredefinedCursor( S_RESIZE_CURSOR );
         defaultCursor = getDefaultCursor( );
     }
 
