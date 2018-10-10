@@ -41,6 +41,7 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.plot.timeline.listener.LabelResizeMouseHandler;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
@@ -80,6 +81,9 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
         // set the time zone for the timeline to local time
         plot.getDefaultTimeline( ).setTimeZone( TimeZone.getDefault( ) );
+
+        // attach a label resize handler
+        plot.getFullOverlayLayout( ).addGlimpseMouseAllListener( new LabelResizeMouseHandler( plot ) );
 
         // calculate some TimeStamps representing the selected time range and initial extents of the timeline
         Epoch epoch = plot.getEpoch( );

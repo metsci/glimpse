@@ -41,6 +41,7 @@ import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.plot.timeline.listener.LabelResizeMouseHandler;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -69,6 +70,9 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
     public StackedTimePlot2D getLayout( )
     {
         StackedTimePlot2D plot = super.getLayout( );
+
+        // attach a label resize handler
+        plot.getFullOverlayLayout( ).addGlimpseMouseAllListener( new LabelResizeMouseHandler( plot ) );
 
         // Set a tick labeler which labels timeline tick marks by the hours/days elapsed since a reference date
         final RelativeTimeAxisLabelHandler handler = new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ).add( -Time.fromHours( 100 ) ) );
