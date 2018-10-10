@@ -114,6 +114,12 @@ public class TinyProgressBarUI2 extends TinyProgressBarUI
         int w = this.progressBar.getWidth( ) - ( insets.right + insets.left );
         int h = this.progressBar.getHeight( ) - ( insets.top + insets.bottom );
 
+        if ( w <= 0 || h <= 0 )
+        {
+            // Progress bar is too small to paint
+            return;
+        }
+
         // Background
         if ( !this.progressBar.isOpaque( ) )
         {
