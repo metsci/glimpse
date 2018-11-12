@@ -28,26 +28,35 @@ package com.metsci.glimpse.charts.bathy;
 
 import java.util.Arrays;
 
+import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
+import com.metsci.glimpse.util.vector.Vector2d;
+
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
 
 /**
  * @author ulman
  */
-public class ContourData
+public class ContourData implements Render
 {
-    private RecordVertices contours;
+    protected FloatList coordsX;
+    protected FloatList coordsY;
+    protected GeoProjection projection;
 
-    public ContourData( BathymetryData bathymetryData, GeoProjection tp, double[] levels )
+    public ContourData( TopographyData bathymetryData, GeoProjection tp, double[] levels )
     {
+        this.coordsX = new FloatArrayList();
+        this.coordsY = new FloatArrayList();
+        this.projection = tp;
+
         // sort the levels array
         Arrays.sort( levels );
 
-        contours = new RecordVertices( tp );
-
         try
         {
-            Conrec contourCalculator = new Conrec( contours );
-            double[][] bathyData = bathymetryData.getData( );
+            Conrec contourCalculator = new Conrec( this );
+            float[][] bathyData = bathymetryData.getData( );
             int sizeX = bathyData.length;
             int sizeY = bathyData[0].length;
             contourCalculator.contour( bathyData, 0, sizeX - 1, 0, sizeY - 1, getLongitudes( bathymetryData ), getLatitudes( bathymetryData ), levels.length, levels );
@@ -58,17 +67,7 @@ public class ContourData
         }
     }
 
-    public float[] getCoordsX( )
-    {
-        return contours.getCoordsX( );
-    }
-
-    public float[] getCoordsY( )
-    {
-        return contours.getCoordsY( );
-    }
-
-    protected double[] getLatitudes( BathymetryData bathymetryDataSet )
+    protected double[] getLatitudes( TopographyData bathymetryDataSet )
     {
         double startLat = bathymetryDataSet.getStartLat( );
         double heightStep = bathymetryDataSet.getHeightStep( );
@@ -84,7 +83,7 @@ public class ContourData
         return latitudes;
     }
 
-    protected double[] getLongitudes( BathymetryData bathymetryDataSet )
+    protected double[] getLongitudes( TopographyData bathymetryDataSet )
     {
         double startLon = bathymetryDataSet.getStartLon( );
         double widthStep = bathymetryDataSet.getWidthStep( );
@@ -98,5 +97,28 @@ public class ContourData
         }
 
         return longitudes;
+    }
+
+    @Override
+    public void drawContour( double startX, double startY, double endX, double endY, double contourLevel )
+    {
+        Vector2d startVertex = this.projection.project( LatLonGeo.fromDeg( startY, startX ) );
+        Vector2d endVertex = this.projection.project( LatLonGeo.fromDeg( endY, endX ) );
+
+        coordsX.add( ( float ) startVertex.getX( ) );
+        coordsY.add( ( float ) startVertex.getY( ) );
+
+        coordsX.add( ( float ) endVertex.getX( ) );
+        coordsY.add( ( float ) endVertex.getY( ) );
+    }
+
+    public float[] getCoordsX( )
+    {
+        return coordsX.toFloatArray();
+    }
+
+    public float[] getCoordsY( )
+    {
+        return coordsY.toFloatArray();
     }
 }

@@ -76,6 +76,7 @@ import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoImpl;
 import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
 import com.metsci.glimpse.plot.timeline.listener.DataAxisMouseListener1D;
+import com.metsci.glimpse.plot.timeline.listener.LabelResizeMouseHandler;
 import com.metsci.glimpse.plot.timeline.listener.PlotMouseListener;
 import com.metsci.glimpse.plot.timeline.listener.TimeAxisMouseListener1D;
 import com.metsci.glimpse.plot.timeline.painter.SelectedTimeRegionPainter;
@@ -124,6 +125,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     protected EventSelectionHandler commonSelectionHandler;
 
     protected List<PlotMouseListener> plotMouseListeners;
+    protected LabelResizeMouseHandler labelResizeMouseListener;
 
     // default settings for TimelineMouseListeners of new plots
     protected volatile boolean allowPanX = true;
@@ -497,6 +499,20 @@ public class StackedTimePlot2D extends StackedPlot2D
         finally
         {
             this.lock.unlock( );
+        }
+    }
+
+    /**
+     * Sets whether to allow dragging to resize the label area.
+     */
+    public void setAllowDragResizeLabel( boolean allow )
+    {
+        // so we don't add multiple times
+        getFullOverlayLayout( ).removeGlimpseMouseAllListener( labelResizeMouseListener );
+
+        if ( allow )
+        {
+            getFullOverlayLayout( ).addGlimpseMouseAllListener( labelResizeMouseListener );
         }
     }
 
@@ -1021,6 +1037,15 @@ public class StackedTimePlot2D extends StackedPlot2D
         this.minTag = timeAxis.getTag( MIN_TIME );
         this.maxTag = timeAxis.getTag( MAX_TIME );
         this.currentTag = timeAxis.getTag( CURRENT_TIME );
+    }
+
+    @Override
+    protected void initializeOverlayLayout( )
+    {
+        super.initializeOverlayLayout( );
+
+        this.labelResizeMouseListener = new LabelResizeMouseHandler( this );
+        this.fullOverlayLayout.addGlimpseMouseAllListener( labelResizeMouseListener );
     }
 
     protected void initializeOverlayPainters( )

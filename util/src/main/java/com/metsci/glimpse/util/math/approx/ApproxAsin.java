@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.math.approx;
 
-import static java.lang.Math.PI;
 import static com.metsci.glimpse.util.math.MathConstants.*;
+import static java.lang.Math.*;
 
 /**
  * Similar to the classes in {@link com.metsci.glimpse.util.math.fast}, but uses linear interpolation
@@ -63,7 +63,7 @@ public class ApproxAsin
             this.y[ i ] = Math.asin( x );
         }
     }
-    
+
     // Helper method for taking advantage of the precalculated asin values to
     // compute acos values. Requires an additional subtraction over creating
     // an ApproxAcos class, but requires no additional storage.
@@ -77,6 +77,10 @@ public class ApproxAsin
         if ( Double.isNaN( x ) || x < -1.0 || x > +1.0 )
         {
             return Double.NaN;
+        }
+        else if ( x == +1.0 )
+        {
+            return PI_OVER_2;
         }
 
         // How many steps is x above xMin

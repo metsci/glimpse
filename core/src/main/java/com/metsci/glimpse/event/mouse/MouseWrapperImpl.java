@@ -34,9 +34,9 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 public abstract class MouseWrapperImpl<I> extends MouseWrapper<I>
 {
 
-    public MouseWrapperImpl( GlimpseCanvas canvas )
+    public MouseWrapperImpl( GlimpseCanvas canvas, FocusBehavior focusBehavior )
     {
-        super( canvas );
+        super( canvas, focusBehavior );
     }
 
     public void mouseClicked0( I event )

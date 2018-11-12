@@ -52,10 +52,17 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
     private static final long serialVersionUID = 1L;
 
     protected Wizard<?> wizard;
+    protected String indentString;
 
     public WizardPageListCellRenderer( Wizard<?> wizard )
     {
+        this( wizard, "    " );
+    }
+
+    public WizardPageListCellRenderer( Wizard<?> wizard, String indentString )
+    {
         this.wizard = wizard;
+        this.indentString = indentString;
     }
 
     protected int getLevel( WizardPage<?> page )
@@ -87,7 +94,7 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
 
         String text = page.getTitle( );
         // subtract 1 to make the children of the root node level 0
-        String buffer = StringUtils.repeat( "  ", getLevel( page ) - 1 );
+        String buffer = StringUtils.repeat( this.indentString, getLevel( page ) - 1 );
         setText( buffer + text );
 
         setPreferredSize( new Dimension( 0, 25 ) );
@@ -101,7 +108,7 @@ public class WizardPageListCellRenderer extends DefaultListCellRenderer
 
         Collection<WizardError> errors = wizard.getErrors( page );
 
-        if ( !errors.isEmpty( ) )
+        if ( !errors.isEmpty( ) && page.showErrors( ) )
         {
             WizardErrorType type = WizardErrorType.getMaxSeverity( errors );
             ImageIcon errorIcon = type.getSmallIcon( );

@@ -60,7 +60,7 @@ import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 /**
- * A Swing GlimpseCanvas implementation which draws to a {@link javax.media.opengl.awt.GLCanvas}. This
+ * A Swing GlimpseCanvas implementation which draws to a {@link com.jogamp.opengl.awt.GLCanvas}. This
  * Canvas implementation is not as well supported as the newer JOGL {@link com.jogamp.newt.awt.NewtCanvasAWT}.
  * For this reason, {@link NewtSwingGlimpseCanvas} should generally be preferred over this class.
  *

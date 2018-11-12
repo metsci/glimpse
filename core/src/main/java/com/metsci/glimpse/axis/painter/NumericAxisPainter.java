@@ -113,20 +113,43 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         int min = -1;
         int max = tickValues.length;
 
-        for ( int i = 0; i < tickValues.length; i++ )
+        // handle case where axis min/max are reversed
+        if ( axis.getMin( ) > axis.getMax( ) )
         {
-            double jTick = converter.fromAxisUnits( tickValues[i] );
-
-            // don't draw ticks off the screen
-            if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
+            for ( int i = 0; i < tickValues.length; i++ )
             {
-                max = i;
-                break;
+                double jTick = converter.fromAxisUnits( tickValues[i] );
+    
+                // don't draw ticks off the screen
+                if ( jTick < axis.getMax( ) && !showLabelsForOffscreenTicks )
+                {
+                    max = i;
+                    break;
+                }
+                else if ( jTick > axis.getMin( ) && !showLabelsForOffscreenTicks )
+                {
+                    min = i;
+                    continue;
+                }
             }
-            else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
+        }
+        else
+        {
+            for ( int i = 0; i < tickValues.length; i++ )
             {
-                min = i;
-                continue;
+                double jTick = converter.fromAxisUnits( tickValues[i] );
+    
+                // don't draw ticks off the screen
+                if ( jTick > axis.getMax( ) && !showLabelsForOffscreenTicks )
+                {
+                    max = i;
+                    break;
+                }
+                else if ( jTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
+                {
+                    min = i;
+                    continue;
+                }
             }
         }
 

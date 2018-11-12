@@ -216,6 +216,11 @@ public class GLEditableBuffer
         this.growFloats( 4 ).put( a ).put( b ).put( c ).put( d );
     }
 
+    public void grow6f( float a, float b, float c, float d, float e, float f )
+    {
+        this.growFloats( 6 ).put( a ).put( b ).put( c ).put( d ).put( e ).put( f );
+    }
+
     public void growNfv( float[] array, int offset, int length )
     {
         this.growFloats( length ).put( array, offset, length );

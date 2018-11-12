@@ -30,7 +30,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLContext;
 
 /**
- * GlimpseContext wraps a {@link javax.media.opengl.GLContext} and
+ * GlimpseContext wraps a {@link com.jogamp.opengl.GLContext} and
  * provides additional contextual information necessary to display a
  * {@link com.metsci.glimpse.painter.base.GlimpsePainter}.
  *
@@ -44,7 +44,7 @@ public interface GlimpseContext
     public GLContext getGLContext( );
 
     /**
-     * @return a convenience method shorthand for the common: {@link #getGLContext( ) getGLContext( )}.{@link javax.media.opengl.GLContext#getGL() getGL( )}
+     * @return a convenience method shorthand for the common: {@link #getGLContext( ) getGLContext( )}.{@link com.jogamp.opengl.GLContext#getGL() getGL( )}
      */
     public GL getGL( );
 

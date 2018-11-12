@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.painter.shape;
 
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
+
 import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -35,12 +37,14 @@ import com.jogamp.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.colormap.ColorMap;
 import com.metsci.glimpse.support.shader.point.PointArrayColorProgram;
 import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 import com.metsci.glimpse.util.quadtree.Xy;
 
@@ -265,6 +269,8 @@ public class PointSetPainter extends GlimpsePainterBase
     {
         GL3 gl = getGL3( context );
         Axis2D axis = requireAxis2D( context );
+        Wrapper2D wrapper = getWrapper2D( context );
+        GlimpseBounds bounds = getBounds( context );
 
         if ( dataSize == 0 ) return;
 
@@ -305,6 +311,8 @@ public class PointSetPainter extends GlimpsePainterBase
             try
             {
                 arrayProg.setAxisOrtho( gl, axis );
+                arrayProg.setWrapper( gl, wrapper );
+                arrayProg.setViewport( gl, bounds );
                 arrayProg.setPointSize( gl, pointSize );
                 arrayProg.setFeatherThickness( gl, featherSize );
 
@@ -323,6 +331,8 @@ public class PointSetPainter extends GlimpsePainterBase
             try
             {
                 flatProg.setAxisOrtho( gl, axis );
+                flatProg.setWrapper( gl, wrapper );
+                flatProg.setViewport( gl, bounds );
                 flatProg.setPointSize( gl, pointSize );
                 flatProg.setFeatherThickness( gl, featherSize );
                 flatProg.setRgba( gl, pointColor );

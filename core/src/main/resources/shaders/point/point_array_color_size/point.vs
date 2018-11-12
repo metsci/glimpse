@@ -27,43 +27,48 @@
 
 #version 150
 
-vec2 axisMin( vec4 axisRect )
+
+vec2 rectMin( vec4 rect )
 {
     // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
-    return axisRect.xz;
+    return rect.xz;
 }
 
-vec2 axisMax( vec4 axisRect )
+vec2 rectMax( vec4 rect )
 {
     // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
-    return axisRect.yw;
+    return rect.yw;
 }
 
-vec2 axisSize( vec4 axisRect )
+vec2 rectSize( vec4 rect )
 {
-    return ( axisMax( axisRect ) - axisMin( axisRect ) );
+    return ( rectMax( rect ) - rectMin( rect ) );
 }
 
-vec4 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
+vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
 {
-    vec2 xy_FRAC = ( xy_AXIS - axisMin( axisRect ) ) / axisSize( axisRect );
-    return vec4( 2 * xy_FRAC - 1, 0.0, 1.0 );
+    vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
+    return ( xy_FRAC * viewportSize_PX );
 }
 
+
+// RECT uniforms are (xMin, xMax, yMin, yMax)
 uniform vec4 AXIS_RECT;
-uniform float POINT_SIZE_PX;
+uniform vec2 VIEWPORT_SIZE_PX;
+
 
 in vec2 inXy;
 in vec4 inRgba;
 in float inSize;
 
+
 out vec4 vRgba;
-out float vSize;
+out float vSize_PX;
+
 
 void main( )
 {
-      gl_Position = axisXyToNdc( inXy, AXIS_RECT );
-      gl_PointSize = inSize;
-      vRgba = inRgba;
-      vSize = inSize;
+    gl_Position.xy = axisXyToPx( inXy, AXIS_RECT, VIEWPORT_SIZE_PX );
+    vRgba = inRgba;
+    vSize_PX = inSize;
 }

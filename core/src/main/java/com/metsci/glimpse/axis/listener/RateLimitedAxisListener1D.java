@@ -52,6 +52,21 @@ public abstract class RateLimitedAxisListener1D extends RateLimitedEventDispatch
         super( _idleTimeMillis );
     }
 
+    public RateLimitedAxisListener1D( String name )
+    {
+        super( 1000l / 60l, name );
+    }
+
+    public RateLimitedAxisListener1D( double maxFreqHz, String name )
+    {
+        super( ( long ) ( 1000 / maxFreqHz ), name );
+    }
+
+    public RateLimitedAxisListener1D( long _idleTimeMillis, String name )
+    {
+        super( _idleTimeMillis, name );
+    }
+
     public abstract void axisUpdatedRateLimited( Axis1D axis );
 
     @Override

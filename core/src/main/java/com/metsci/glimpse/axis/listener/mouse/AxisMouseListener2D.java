@@ -111,7 +111,17 @@ public class AxisMouseListener2D extends AxisMouseListener
     @Override
     public void mouseEntered( GlimpseMouseEvent event )
     {
-        // do nothing
+        // If the mouse entered while dragging, do nothing.
+        //
+        // If the mouse entered while NOT dragging, send a mouse-move so that mouse
+        // coords get updated immediately. This doesn't matter when the mouse enters
+        // by moving -- but there are cases where it does matter, including the case
+        // where the mouse was over a popup menu that just closed.
+
+        if ( !event.isAnyButtonDown( ) )
+        {
+            this.mouseMoved( event );
+        }
     }
 
     @Override

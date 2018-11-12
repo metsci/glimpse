@@ -47,13 +47,13 @@ public class FinalReviewPage<D> extends DescriptionWizardPage<D>
     {
         this( wizard, "FinalReviewPage", null, "Final Review", descriptionFile );
     }
-    
+
     public FinalReviewPage( Wizard<D> wizard, Object id, Object parentId, String title, String descriptionFile )
     {
         super( id, parentId, title, descriptionFile );
 
         this.wizard = wizard;
-        
+
         init( );
     }
 
@@ -92,5 +92,13 @@ public class FinalReviewPage<D> extends DescriptionWizardPage<D>
     public Collection<WizardError> getErrors( )
     {
         return Collections.emptySet( );
+    }
+
+    @Override
+    public boolean showErrors( )
+    {
+        // Page aggregates errors from all other wizard pages
+        // A no errors indicator for this page would conflict with errors in the table
+        return false;
     }
 }

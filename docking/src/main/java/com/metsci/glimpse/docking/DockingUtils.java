@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
 import static com.metsci.glimpse.util.AppConfigUtils.getAppConfigPath;
 import static java.awt.ComponentOrientation.RIGHT_TO_LEFT;
 import static java.awt.Frame.MAXIMIZED_HORIZ;
@@ -36,7 +37,6 @@ import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -47,11 +47,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
@@ -72,6 +75,8 @@ import com.metsci.glimpse.docking.xml.DockerArrangementSplit;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.FrameArrangement;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
+import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.DisposableGroup;
 
 public class DockingUtils
 {
@@ -126,46 +131,58 @@ public class DockingUtils
         swingRun( partial( runnable1, t ) );
     }
 
-    public static JPopupMenu newButtonPopup( final JToggleButton button )
+    /**
+     * @deprecated Use {@link DockingUtils#attachPopupMenu(JToggleButton, JPopupMenu)} instead.
+     */
+    @Deprecated
+    public static JPopupMenu newButtonPopup( JToggleButton button )
     {
-        final JPopupMenu popup = new JPopupMenu( );
+        JPopupMenu popup = new JPopupMenu( );
+        attachPopupMenu( button, popup );
+        return popup;
+    }
 
-        button.addActionListener( new ActionListener( )
+    public static Disposable attachPopupMenu( JToggleButton button, JPopupMenu popup )
+    {
+        DisposableGroup disposables = new DisposableGroup( );
+
+        disposables.add( addActionListener( button, ( ) ->
         {
-            @Override
-            public void actionPerformed( ActionEvent ev )
+            if ( button.isSelected( ) )
             {
-                if ( button.isSelected( ) )
-                {
-                    popup.show( button, 0, button.getHeight( ) );
-                }
-                else
-                {
-                    popup.setVisible( false );
-                }
+                popup.show( button, 0, button.getHeight( ) );
             }
-        } );
+            else
+            {
+                popup.setVisible( false );
+            }
+        } ) );
 
-        popup.addPopupMenuListener( new PopupMenuListener( )
+        disposables.add( onPopupWillBecomeInvisible( popup, ( ) ->
+        {
+            button.setSelected( false );
+
+            // If this popup-hide was triggered by a mouse-press, then don't allow
+            // that mouse-press to begin a click of the button (which would toggle
+            // the popup back to visible again)
+            button.setEnabled( false );
+            SwingUtilities.invokeLater( ( ) ->
+            {
+                button.setEnabled( true );
+            } );
+        } ) );
+
+        return disposables;
+    }
+
+    private static Disposable onPopupWillBecomeInvisible( JPopupMenu popup, Runnable fn )
+    {
+        return addPopupListener( popup, new PopupMenuListener( )
         {
             @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent ev )
             {
-                button.setSelected( false );
-
-                // If this popup-hide was triggered by a mouse-press, then don't allow
-                // that mouse-press to begin a click of the button (which would toggle
-                // the popup back to visible again)
-                //
-                button.setEnabled( false );
-                SwingUtilities.invokeLater( new Runnable( )
-                {
-                    @Override
-                    public void run( )
-                    {
-                        button.setEnabled( true );
-                    }
-                } );
+                fn.run( );
             }
 
             @Override
@@ -176,8 +193,31 @@ public class DockingUtils
             public void popupMenuCanceled( PopupMenuEvent ev )
             { }
         } );
+    }
 
-        return popup;
+    private static Disposable addPopupListener( JPopupMenu popup, PopupMenuListener listener )
+    {
+        popup.addPopupMenuListener( listener );
+
+        return ( ) ->
+        {
+            popup.removePopupMenuListener( listener );
+        };
+    }
+
+    private static Disposable addActionListener( AbstractButton button, Runnable fn )
+    {
+        return addActionListener( button, ( ev ) -> fn.run( ) );
+    }
+
+    private static Disposable addActionListener( AbstractButton button, ActionListener listener )
+    {
+        button.addActionListener( listener );
+
+        return ( ) ->
+        {
+            button.removeActionListener( listener );
+        };
     }
 
     @SuppressWarnings( "serial" )
@@ -280,7 +320,7 @@ public class DockingUtils
         dockingGroup.addListener( new DockingGroupAdapter( )
         {
             @Override
-            public void disposingAllFrames( DockingGroup group )
+            public void disposingAllWindows( DockingGroup group )
             {
                 GroupArrangement saveArr = dockingGroup.captureArrangement( );
                 saveDockingArrangement( targetFile, saveArr );
@@ -313,7 +353,7 @@ public class DockingUtils
         // does exist, run this block -- even if it is a dir or is unreadable, in which case
         // a warning will be logged.
         //
-        if ( file.exists( ) )
+        if ( file != null && file.exists( ) )
         {
             LOGGER.log( INFO, "Reading docking arrangement from file: file = " + file );
             try ( InputStream stream = new FileInputStream( file ) )
@@ -391,7 +431,7 @@ public class DockingUtils
         }
     }
 
-    public static <C extends Component> C findLargestComponent( Collection<C> components )
+    public static <C extends Component> C findLargestComponent( Collection<? extends C> components )
     {
         int largestArea = -1;
         C largestComponent = null;
@@ -423,14 +463,19 @@ public class DockingUtils
         return largestTile;
     }
 
-    public static Set<Tile> findTiles( Collection<? extends DockingFrame> frames )
+    public static Set<Tile> findTiles( Collection<? extends DockingWindow> windows )
     {
         Set<Tile> tiles = new LinkedHashSet<>( );
-        for ( DockingFrame frame : frames )
+        for ( DockingWindow window : windows )
         {
-            tiles.addAll( findTiles( frame.docker ) );
+            tiles.addAll( findTiles( window ) );
         }
         return tiles;
+    }
+
+    public static Set<Tile> findTiles( DockingWindow window )
+    {
+        return findTiles( window.docker( ) );
     }
 
     public static Set<Tile> findTiles( MultiSplitPane docker )
@@ -446,34 +491,40 @@ public class DockingUtils
         return tiles;
     }
 
-    public static Set<View> findViews( Collection<? extends DockingFrame> frames )
+    public static Map<String,View> findViews( Collection<? extends DockingWindow> windows )
     {
-        Set<View> views = new LinkedHashSet<>( );
-        for ( DockingFrame frame : frames )
+        Map<String,View> views = new LinkedHashMap<>( );
+        for ( DockingWindow window : windows )
         {
-            views.addAll( findViews( frame.docker ) );
+            views.putAll( findViews( window ) );
         }
         return views;
     }
 
-    public static Set<View> findViews( MultiSplitPane docker )
+    public static Map<String,View> findViews( DockingWindow window )
     {
-        Set<View> views = new LinkedHashSet<>( );
+        return findViews( window.docker( ) );
+    }
+
+    public static Map<String,View> findViews( MultiSplitPane docker )
+    {
+        Map<String,View> views = new LinkedHashMap<>( );
         for ( Tile tile : findTiles( docker ) )
         {
             for ( int i = 0; i < tile.numViews( ); i++ )
             {
-                views.add( tile.view( i ) );
+                View view = tile.view( i );
+                views.put( view.viewId, view );
             }
         }
         return views;
     }
 
-    public static boolean allViewsAreCloseable( Iterable<View> views )
+    public static boolean allViewsAreAutoCloseable( Iterable<? extends View> views )
     {
         for ( View view : views )
         {
-            if ( !view.closeable )
+            if ( view.closeOption != VIEW_AUTO_CLOSEABLE )
             {
                 return false;
             }
@@ -481,7 +532,7 @@ public class DockingUtils
         return true;
     }
 
-    public static void appendViewsToTile( Tile tile, Collection<View> views )
+    public static void appendViewsToTile( Tile tile, Collection<? extends View> views )
     {
         for ( View view : views )
         {

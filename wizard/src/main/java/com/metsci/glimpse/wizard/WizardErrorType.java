@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.wizard;
 
-
 import java.util.Collection;
 
 import javax.swing.ImageIcon;
@@ -35,46 +34,59 @@ import com.metsci.glimpse.docking.DockingUtils;
 
 public enum WizardErrorType
 {
-    Error( DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-red.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-red.png" ) ),
-    Warning( DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation.png" ) ),
-    Info( DockingUtils.requireIcon( "icons/fugue-icon/exclamation-small-white.png" ), DockingUtils.requireIcon( "icons/fugue-icon/exclamation-white.png" ) );
-    
-    private ImageIcon smallIcon;
-    private ImageIcon largeIcon;
-    
-    private WizardErrorType( ImageIcon smallIcon, ImageIcon largeIcon )
+    Good( "icons/fugue-icon/tick-small-circle.png", "icons/fugue-icon/tick-circle.png" ),
+    Info( "icons/fugue-icon/exclamation-small-white.png", "icons/fugue-icon/exclamation-white.png" ),
+    Warning( "icons/fugue-icon/exclamation-small.png", "icons/fugue-icon/exclamation.png" ),
+    Error( "icons/fugue-icon/exclamation-small-red.png", "icons/fugue-icon/exclamation-red.png" );
+
+    private final String smallIconPath;
+    private final String largeIconPath;
+
+    private volatile ImageIcon smallIcon;
+    private volatile ImageIcon largeIcon;
+
+    private WizardErrorType( String smallIconPath, String largeIconPath )
     {
-        this.smallIcon = smallIcon;
-        this.largeIcon = largeIcon;
+        this.smallIconPath = smallIconPath;
+        this.largeIconPath = largeIconPath;
     }
-    
+
     public ImageIcon getSmallIcon( )
     {
+        // lazily load icons
+        if ( this.smallIcon == null )
+        {
+            this.smallIcon = DockingUtils.requireIcon( this.smallIconPath );
+        }
+
         return this.smallIcon;
     }
-    
+
     public ImageIcon getLargeIcon( )
     {
+        // lazily load icons
+        if ( this.largeIcon == null )
+        {
+            this.largeIcon = DockingUtils.requireIcon( this.largeIconPath );
+        }
+
         return this.largeIcon;
     }
-    
+
+    public boolean isEqualOrWorse( WizardErrorType error )
+    {
+        return this.ordinal( ) >= error.ordinal( );
+    }
+
     public static WizardErrorType getMaxSeverity( Collection<WizardError> errors )
     {
-        WizardErrorType maxType = null;
+        WizardErrorType maxType = Good;
 
         for ( WizardError error : errors )
         {
-            if ( error.getType( ) == WizardErrorType.Error )
+            if ( error.getType( ).ordinal( ) > maxType.ordinal( ) )
             {
-                return WizardErrorType.Error;
-            }
-            else if ( error.getType( ) == WizardErrorType.Warning )
-            {
-                maxType = WizardErrorType.Warning;
-            }
-            else if ( maxType == null )
-            {
-                maxType = WizardErrorType.Info;
+                maxType = error.getType( );
             }
         }
 

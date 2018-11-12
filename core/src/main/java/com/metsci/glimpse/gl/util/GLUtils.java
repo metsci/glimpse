@@ -26,6 +26,15 @@
  */
 package com.metsci.glimpse.gl.util;
 
+import static com.metsci.glimpse.gl.util.GLErrorUtils.logGLError;
+import static com.metsci.glimpse.gl.util.GLErrorUtils.logGLErrors;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
+import static com.jogamp.opengl.GL.GL_NO_ERROR;
+import static com.jogamp.opengl.GL2ES1.GL_POINT_SPRITE;
+
+import java.util.logging.Logger;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLCapabilities;
@@ -44,10 +53,60 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GLUtils
 {
-    // GLES1.GL_POINT_SPRITE shouldn't be necessary (it is deprecated in GL3)
+    private static final Logger logger = getLogger( GLUtils.class );
+
+    // GL2ES1.GL_POINT_SPRITE shouldn't be necessary (it is deprecated in GL3)
     // however it appears necessary in order for setting gl_PointSize in a vertex shader
     // to have an effect on certain cards/systems/gpus
     public static final boolean DISABLE_POINT_SPRITE = getBooleanProperty( "glimpse.disablePointSprite", false );
+
+    /**
+     * If the property "glimpse.disablePointSprite" is set to true, do nothing.
+     * <p>
+     * Otherwise, equivalent to {@code glEnable(GL_POINT_SPRITE)} -- but with some extra
+     * code to clear out {@code GL_INVALID_ENUM} errors without logging them. Some drivers
+     * complain that {@code GL_POINT_SPRITE} is an invalid enumerant, while still requiring
+     * that it be used.
+     */
+    public static void enablePointSprite( GL gl )
+    {
+        if ( !DISABLE_POINT_SPRITE )
+        {
+            logGLErrors( logger, gl, "GL error before enabling GL_POINT_SPRITE" );
+
+            gl.glEnable( GL_POINT_SPRITE );
+
+            int error = gl.glGetError( );
+            if ( error != GL_NO_ERROR && error != GL_INVALID_ENUM )
+            {
+                logGLError( logger, error, "GL error while enabling GL_POINT_SPRITE" );
+            }
+        }
+    }
+
+    /**
+     * If the property "glimpse.disablePointSprite" is set to true, do nothing.
+     * <p>
+     * Otherwise, equivalent to {@code glDisable(GL_POINT_SPRITE)} -- but with some extra
+     * code to clear out {@code GL_INVALID_ENUM} errors without logging them. Some drivers
+     * complain that {@code GL_POINT_SPRITE} is an invalid enumerant, while still requiring
+     * that it be used.
+     */
+    public static void disablePointSprite( GL gl )
+    {
+        if ( !DISABLE_POINT_SPRITE )
+        {
+            logGLErrors( logger, gl, "GL error before disabling GL_POINT_SPRITE" );
+
+            gl.glDisable( GL_POINT_SPRITE );
+
+            int error = gl.glGetError( );
+            if ( error != GL_NO_ERROR && error != GL_INVALID_ENUM )
+            {
+                logGLError( logger, error, "GL error while disabling GL_POINT_SPRITE" );
+            }
+        }
+    }
 
     // - unsetValue specifies the default value if the property is not set
     // - setting the property without specifying a value ("0", "1", "true", "false") sets

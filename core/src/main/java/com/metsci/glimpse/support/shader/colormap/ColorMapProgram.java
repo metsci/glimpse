@@ -117,7 +117,7 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
 
         this.AXIS_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "AXIS_RECT", 4 ) );
-        // without setting default data, we will get "javax.media.opengl.GLException: glUniform atom only available for 1i and 1f"
+        // without setting default data, we will get "com.jogamp.opengl.GLException: glUniform atom only available for 1i and 1f"
         // if begin( ) is called before setOrtho( )
         this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { 0, 1, 0, 1 } ) );
 

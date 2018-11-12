@@ -46,7 +46,7 @@ public class LineStyle
      * Half the feather thickness (the more opaque half) lies inside the ideal bounds
      * of the line, and half (the more transparent half) lies outside.
      * <p>
-     * For feathering to work, {@link javax.media.opengl.GL#GL_BLEND} must be enabled.
+     * For feathering to work, {@link com.jogamp.opengl.GL#GL_BLEND} must be enabled.
      * <p>
      * Line rendering is likely to be faster with feather set to zero.
      */

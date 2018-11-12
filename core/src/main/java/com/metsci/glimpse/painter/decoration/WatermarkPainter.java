@@ -27,12 +27,15 @@
 package com.metsci.glimpse.painter.decoration;
 
 import static com.jogamp.opengl.util.texture.TextureIO.newTexture;
+import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.gl.util.GLUtils.enablePremultipliedAlphaBlending;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Center;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Left;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition.Bottom;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition.Top;
 import static com.metsci.glimpse.util.GeneralUtils.doubles;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.lang.Math.max;
@@ -42,6 +45,7 @@ import static java.lang.Math.sqrt;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -76,8 +80,10 @@ public class WatermarkPainter extends GlimpsePainterBase
         public final double maxPaddingPixels;
         public final VerticalPosition verticalPos;
         public final HorizontalPosition horizontalPos;
+        public final float[] rgbaFactor;
+        public final float[] rgbaFactorPremultiplied;
 
-        public WatermarkConfig( double maxWidthPixels, double maxHeightPixels, double maxAreaFraction, double maxWidthFraction, double maxHeightFraction, double maxPaddingPixels, VerticalPosition verticalPos, HorizontalPosition horizontalPos )
+        public WatermarkConfig( double maxWidthPixels, double maxHeightPixels, double maxAreaFraction, double maxWidthFraction, double maxHeightFraction, double maxPaddingPixels, VerticalPosition verticalPos, HorizontalPosition horizontalPos, float[] rgbaFactor )
         {
             this.maxWidthPixels = maxWidthPixels;
             this.maxHeightPixels = maxHeightPixels;
@@ -87,55 +93,72 @@ public class WatermarkPainter extends GlimpsePainterBase
             this.maxPaddingPixels = maxPaddingPixels;
             this.verticalPos = verticalPos;
             this.horizontalPos = horizontalPos;
+            this.rgbaFactor = Arrays.copyOf( rgbaFactor, 4 );
+
+            float r = this.rgbaFactor[ 0 ];
+            float g = this.rgbaFactor[ 1 ];
+            float b = this.rgbaFactor[ 2 ];
+            float a = this.rgbaFactor[ 3 ];
+            this.rgbaFactorPremultiplied = floats( a*r, a*g, a*b, a );
         }
 
         public WatermarkConfig withMaxWidthPixels( double maxWidthPixels )
         {
-            return new WatermarkConfig( maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+            return new WatermarkConfig( maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withMaxHeightPixels( double maxHeightPixels )
         {
-            return new WatermarkConfig( this.maxWidthPixels, maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withMaxAreaFraction( double maxAreaFraction )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withMaxWidthFraction( double maxWidthFraction )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withMaxHeightFraction( double maxHeightFraction )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withMaxPaddingPixels( double maxPaddingPixels )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, maxPaddingPixels, this.verticalPos, this.horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, maxPaddingPixels, this.verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withVerticalPos( VerticalPosition verticalPos )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, this.horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, this.horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withHorizontalPos( HorizontalPosition horizontalPos )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, horizontalPos, this.rgbaFactor );
         }
 
         public WatermarkConfig withPos( VerticalPosition verticalPos, HorizontalPosition horizontalPos )
         {
-            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, horizontalPos );
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, verticalPos, horizontalPos, this.rgbaFactor );
+        }
+
+        public WatermarkConfig withRgbaFactor( float[] rgbaFactor )
+        {
+            return new WatermarkConfig( this.maxWidthPixels, this.maxHeightPixels, this.maxAreaFraction, this.maxWidthFraction, this.maxHeightFraction, this.maxPaddingPixels, this.verticalPos, this.horizontalPos, rgbaFactor );
+        }
+
+        public WatermarkConfig withRgbaFactor( float rFactor, float gFactor, float bFactor, float aFactor )
+        {
+            return this.withRgbaFactor( floats( rFactor, gFactor, bFactor, aFactor ) );
         }
     }
 
-    public static final WatermarkConfig defaultConfig = new WatermarkConfig( 350, 350, 0.04, 0.28, 0.28, 10, Bottom, Center );
+    public static final WatermarkConfig defaultConfig = new WatermarkConfig( 350, 350, 0.04, 0.28, 0.28, 10, Bottom, Center, floats( 1f, 1f, 1f, 1f ) );
 
     public static final WatermarkConfig bottomRight = defaultConfig.withPos( Bottom, Right );
     public static final WatermarkConfig bottomLeft = defaultConfig.withPos( Bottom, Left );
@@ -338,24 +361,20 @@ public class WatermarkPainter extends GlimpsePainterBase
         texture.enable( gl );
         texture.bind( gl );
 
-        // See the "Alpha premultiplication" section in Texture's class comment
-        gl.glEnable( GL3.GL_BLEND );
-        gl.glBlendFunc( GL3.GL_ONE, GL3.GL_ONE_MINUS_SRC_ALPHA );
-        //XXX: this needs to be replaced by shader code
-        //gl.glTexEnvi( GL3.GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-
+        enablePremultipliedAlphaBlending( gl );
         prog.begin( context );
         try
         {
             prog.setPixelOrtho( context, bounds );
             prog.setTexture( context, 0 );
+            prog.setColor( context, this.config.rgbaFactorPremultiplied );
 
             prog.draw( context, texture, inXy, inS );
         }
         finally
         {
             prog.end( context );
-            gl.glDisable( GL3.GL_BLEND );
+            disableBlending( gl );
         }
     }
 

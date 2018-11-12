@@ -45,6 +45,8 @@ import javax.swing.SwingUtilities;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Window;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -108,6 +110,16 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     protected GLWindow createGLWindow( GLCapabilities glCapabilities )
     {
         Window window = NewtFactory.createWindow( glCapabilities );
+
+        // Workaround for https://jogamp.org/bugzilla/show_bug.cgi?id=1127
+        window.addWindowListener( 0, new WindowAdapter( )
+        {
+            @Override
+            public void windowGainedFocus( WindowEvent ev )
+            {
+                ev.setConsumed( true );
+            }
+        } );
 
         Display display = window.getScreen( ).getDisplay( );
         if ( !( display.getEDTUtil( ) instanceof AWTEDTUtil ) )
@@ -204,7 +216,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     public BufferedImage toBufferedImage( )
     {
         requireSwingThread( );
-        
+
         GLContext glContext = this.getGLDrawable( ).getContext( );
         glContext.makeCurrent( );
         try
@@ -218,7 +230,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
             glContext.release( );
         }
     }
-    
+
     protected static void requireSwingThread( )
     {
         if ( !SwingUtilities.isEventDispatchThread( ) )

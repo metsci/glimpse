@@ -261,6 +261,7 @@ public class XYLinePainter extends GlimpsePainterBase
                 try
                 {
                     this.pointProg.setAxisOrtho( gl, axis );
+                    this.pointProg.setViewport( gl, bounds );
                     this.pointProg.setPointSize( gl, this.pointSize );
                     this.pointProg.setFeatherThickness( gl, this.pointFeather );
 

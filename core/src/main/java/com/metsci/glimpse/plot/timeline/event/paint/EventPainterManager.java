@@ -33,8 +33,8 @@ import java.util.List;
 import com.jogamp.opengl.GL;
 
 import com.google.common.collect.Lists;
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
@@ -67,7 +67,7 @@ public class EventPainterManager extends GlimpsePainterBase
     protected volatile Font newFont = null;
     protected volatile boolean antialias = false;
 
-    protected float borderThickness = 1.0f;
+    protected float borderThickness = 1.8f;
 
     protected float[] backgroundColor = GlimpseColor.getGray( 0.2f );
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
@@ -317,6 +317,8 @@ public class EventPainterManager extends GlimpsePainterBase
     protected void doDispose( GlimpseContext context )
     {
         this.atlas.dispose( );
-        this.textRenderer.dispose( );
+
+        if ( this.textRenderer != null ) this.textRenderer.dispose( );
+        this.textRenderer = null;
     }
 }

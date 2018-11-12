@@ -32,10 +32,10 @@ import static com.metsci.glimpse.dnc.facc.FaccIo.*;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.*;
+import static com.metsci.glimpse.docking.ViewCloseOption.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
 import static com.metsci.glimpse.util.GeneralUtils.*;
@@ -56,12 +56,10 @@ import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
 
 import org.jdesktop.swingx.JXTreeTable;
 
@@ -86,6 +84,7 @@ import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -106,10 +105,8 @@ public class DncExplorer
     public static void main( String[] args ) throws IOException
     {
         initializeLogging( "dnc-examples/logging.properties" );
-        fixPlatformQuirks( );
         initTinyLaf( );
-        ToolTipManager.sharedInstance( ).setLightWeightPopupEnabled( false );
-        JPopupMenu.setDefaultLightWeightPopupEnabled( false );
+        initStandardGlimpseApp( );
 
 
         // Render config
@@ -308,20 +305,19 @@ public class DncExplorer
 
             View[] views =
             {
-                new View( "geoView", geoCanvas, "Geo", false, null, requireIcon( "icons/fugue/map.png" ) ),
-                new View( "attrsView", attrsScroller, "Features", false, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
-                new View( "prefsView", prefsPanel, "Prefs", false, null, requireIcon( "icons/fugue/equalizer.png" ) ),
+                new View( "geoView",   geoCanvas,     "Geo",      VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/fugue/map.png"        ) ),
+                new View( "attrsView", attrsScroller, "Features", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/eclipse/class_hi.gif" ) ),
+                new View( "prefsView", prefsPanel,    "Prefs",    VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/fugue/equalizer.png"  ) ),
             };
 
-            String appName = "dnc-explorer";
-            DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
-            dockingGroup.addListener( createDefaultFrameTitler( "DNC Explorer" ) );
-            setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( DncExplorer.class, "dnc-examples/docking-defaults.xml" ) );
+            DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
+            dockingGroup.addListener( createDefaultWindowTitler( "DNC Explorer" ) );
+            setArrangementAndSaveOnDispose( dockingGroup, "dnc-explorer", resourceUrl( DncExplorer.class, "dnc-examples/docking-defaults.xml" ) );
 
             dockingGroup.addListener( new DockingGroupAdapter( )
             {
                 @Override
-                public void disposingAllFrames( DockingGroup group )
+                public void disposingAllWindows( DockingGroup group )
                 {
                     attrsTableModel.dispose( );
                     animator.stop( );
@@ -330,7 +326,7 @@ public class DncExplorer
             } );
 
             dockingGroup.addViews( views );
-
+            dockingGroup.setVisible( true );
         } );
     }
 

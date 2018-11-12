@@ -53,6 +53,8 @@
     <modules>
 
         <module>util</module>
+        <module>util-examples</module>
+
         <module>text</module>
 
         <module>platform-fixes</module>
@@ -75,6 +77,7 @@
         <module>extras-swt</module>
         <module>extras-examples</module>
         <module>extras-tinylaf</module>
+        <module>extras-topo</module>
 
     </modules>
 

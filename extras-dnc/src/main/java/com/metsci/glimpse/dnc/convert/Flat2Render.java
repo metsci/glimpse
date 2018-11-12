@@ -92,10 +92,10 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.newAttrsMap;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.newThreadFactory;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.poslim;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
-import static com.metsci.glimpse.dnc.util.FileSync.lockFile;
-import static com.metsci.glimpse.dnc.util.FileSync.unlockFile;
 import static com.metsci.glimpse.util.GeneralUtils.compareInts;
 import static com.metsci.glimpse.util.GeneralUtils.compareLongs;
+import static com.metsci.glimpse.util.io.FileSync.lockFile;
+import static com.metsci.glimpse.util.io.FileSync.unlockFile;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
@@ -147,16 +147,17 @@ import java.util.logging.Logger;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncLibrary;
-import com.metsci.glimpse.dnc.DncProjections.DncProjection;
 import com.metsci.glimpse.dnc.convert.Flat.FlatChunkKey;
 import com.metsci.glimpse.dnc.convert.Render.RenderChunk;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLabelMaker;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLabelMaker.DncGeosymLabelMakerEntry;
+import com.metsci.glimpse.dnc.proj.DncProjection;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
@@ -273,7 +274,7 @@ public class Flat2Render
 
 
             String configString = renderConfigString( config );
-            String configHash = Hashing.md5( ).newHasher( ).putString( configString, US_ASCII ).hash( ).toString( );
+            String configHash = renderConfigHash( configString );
             this.renderDir = new File( renderParentDir, "dncRenderCache_" + configHash );
             renderDir.mkdirs( );
 
@@ -743,8 +744,8 @@ public class Flat2Render
                 // Write chunk data to buffer
                 //
 
-                int libraryNum = libraryNums.get( library );
-                int coverageNum = coverageNums.get( coverage );
+                int libraryNum = libraryNums.getInt( library );
+                int coverageNum = coverageNums.getInt( coverage );
 
                 chunksBuf.put( libraryNum )
                          .put( coverageNum )
@@ -894,8 +895,8 @@ public class Flat2Render
 
         public TransitionalChunk createChunk( String libraryName, String coverageName )
         {
-            int flatLibraryNum = flatLibraryNums.get( libraryName );
-            int flatCoverageNum = flatCoverageNums.get( coverageName );
+            int flatLibraryNum = flatLibraryNums.getInt( libraryName );
+            int flatCoverageNum = flatCoverageNums.getInt( coverageName );
 
             IntBuffer featuresBufMaster = featuresBufMasters.get( new FlatChunkKey( flatLibraryNum, flatCoverageNum ) );
             if ( featuresBufMaster == null )
@@ -1001,6 +1002,14 @@ public class Flat2Render
         }
 
         return configString.toString( );
+    }
+
+    public static String renderConfigHash( String configString )
+    {
+        // MD5 is stable and ubiquitous, and we don't use it for security purposes
+        @SuppressWarnings( "deprecation" )
+        HashFunction hashFn = Hashing.md5( );
+        return hashFn.newHasher( ).putString( configString, US_ASCII ).hash( ).toString( );
     }
 
     public static int writeRenderLibrariesFile( RenderCacheConfig config, File file, Int2ObjectMap<TransitionalDatabase> databases ) throws IOException

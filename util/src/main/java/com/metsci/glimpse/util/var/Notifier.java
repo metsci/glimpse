@@ -51,7 +51,7 @@ public class Notifier<T> implements Listenable<T>
     {
         if ( runImmediately )
         {
-            listener.accept( null );
+            listener.accept( this.getSyntheticEvent( ) );
         }
 
         this.listeners.add( listener );
@@ -60,6 +60,18 @@ public class Notifier<T> implements Listenable<T>
         {
             this.listeners.remove( listener );
         };
+    }
+
+    /**
+     * Returns an object that should be passed to listeners when listeners need
+     * to be fired synthetically -- for example, when calling {@link #addListener(boolean, Consumer)}
+     * with {@code runImmediately = true}.
+     * <p>
+     * Defaults to null.
+     */
+    protected T getSyntheticEvent( )
+    {
+        return null;
     }
 
     public void fire( T ev )

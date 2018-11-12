@@ -26,16 +26,12 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-
-import java.io.IOException;
-import java.util.logging.Logger;
+import java.util.function.DoubleSupplier;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
@@ -48,150 +44,156 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class HeatMapPainter extends ShadedTexturePainter
 {
-    public static final Logger logger = Logger.getLogger( HeatMapPainter.class.getName( ) );
+    protected static final int valuesTexUnit = 0;
+    protected static final int colormapTexUnit = valuesTexUnit + 1;
 
-    protected FloatTextureProjected2D heatMap;
-    protected ColorTexture1D colorScale;
 
-    protected DrawableTextureProgram program;
+    protected final HeatMapProgram program;
 
-    public HeatMapPainter( Axis1D axis )
+    protected FloatTextureProjected2D valuesTexture;
+    protected ColorTexture1D colorTable;
+
+
+    public HeatMapPainter( Axis1D colorAxis )
     {
-        try
-        {
-            this.loadDefaultPipeline( axis );
-        }
-        catch ( IOException e )
-        {
-            logWarning( logger, "Unable to load HeatMapPainter shader.", e );
-        }
+        this( colorAxis::getMin, colorAxis::getMax );
     }
 
-    protected void loadDefaultPipeline( Axis1D axis ) throws IOException
+    public HeatMapPainter( Tag colormapMinTag, Tag colormapMaxTag )
     {
-        this.program = new ColorMapProgram( axis, DEFAULT_DRAWABLE_TEXTURE_UNIT, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+        this( colormapMinTag::getValue, colormapMaxTag::getValue );
+    }
+
+    public HeatMapPainter( DoubleSupplier colormapMinFn, DoubleSupplier colormapMaxFn )
+    {
+        this( new BasicHeatMapProgram( valuesTexUnit, colormapTexUnit, colormapMinFn, colormapMaxFn ) );
+    }
+
+    public HeatMapPainter( HeatMapProgram program )
+    {
+        this.program = program;
         this.setProgram( this.program );
     }
 
-    private ColorMapProgram getProgram( )
+    public void setData( FloatTextureProjected2D texture )
     {
-        return ( ColorMapProgram ) this.program;
+        this.painterLock.lock( );
+        try
+        {
+            this.removeDrawableTexture( this.valuesTexture );
+            this.valuesTexture = texture;
+            this.addDrawableTexture( this.valuesTexture, valuesTexUnit );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
     }
 
     public void setDiscardNaN( boolean discard )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            getProgram( ).setDiscardNaN( discard );
+            this.program.setDiscardNan( discard );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
+        }
+    }
+
+    public void setDiscardBelow( boolean discard )
+    {
+        this.painterLock.lock( );
+        try
+        {
+            this.program.setDiscardBelow( discard );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
+    }
+
+    public void setDiscardAbove( boolean discard )
+    {
+        this.painterLock.lock( );
+        try
+        {
+            this.program.setDiscardAbove( discard );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
         }
     }
 
     public void setAlpha( float alpha )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            getProgram( ).setAlpha( alpha );
+            this.program.setAlpha( alpha );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
-    }
-
-    public void setData( FloatTextureProjected2D texture )
-    {
-        painterLock.lock( );
-        try
-        {
-            this.removeDrawableTexture( heatMap );
-            this.heatMap = texture;
-            this.addDrawableTexture( heatMap, DEFAULT_DRAWABLE_TEXTURE_UNIT );
-        }
-        finally
-        {
-            painterLock.unlock( );
-        }
-
     }
 
     public void setColorScale( ColorTexture1D texture )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            this.removeNonDrawableTexture( colorScale );
-            this.colorScale = texture;
-            this.addNonDrawableTexture( colorScale, DEFAULT_NONDRAWABLE_TEXTURE_UNIT );
+            this.removeNonDrawableTexture( this.colorTable );
+            this.colorTable = texture;
+            this.addNonDrawableTexture( this.colorTable, colormapTexUnit );
         }
         finally
         {
-            painterLock.unlock( );
-        }
-    }
-
-    public ColorTexture1D getColorScale( )
-    {
-        painterLock.lock( );
-        try
-        {
-            if ( heatMap != null )
-            {
-                return colorScale;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        finally
-        {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public FloatTextureProjected2D getData( )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            if ( heatMap != null )
-            {
-                return heatMap;
-            }
-            else
-            {
-                return null;
-            }
+            return this.valuesTexture;
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
 
     public Projection getProjection( )
     {
-        painterLock.lock( );
+        this.painterLock.lock( );
         try
         {
-            if ( heatMap != null )
-            {
-                return heatMap.getProjection( );
-            }
-            else
-            {
-                return null;
-            }
+            return ( this.valuesTexture == null ? null : this.valuesTexture.getProjection( ) );
         }
         finally
         {
-            painterLock.unlock( );
+            this.painterLock.unlock( );
         }
     }
+
+    public ColorTexture1D getColorScale( )
+    {
+        this.painterLock.lock( );
+        try
+        {
+            return ( this.valuesTexture == null ? null : this.colorTable );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
+    }
+
 }

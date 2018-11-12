@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.event.mouse.newt;
 
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
+
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseEvent.PointerType;
 import com.jogamp.newt.event.MouseListener;
@@ -33,6 +35,7 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
@@ -44,7 +47,12 @@ public class MouseWrapperNewt extends MouseWrapperImpl<MouseEvent> implements Mo
 
     public MouseWrapperNewt( NewtGlimpseCanvas canvas )
     {
-        super( canvas );
+        this( canvas, CLICK_FOCUS );
+    }
+
+    public MouseWrapperNewt( NewtGlimpseCanvas canvas, FocusBehavior focusBehavior )
+    {
+        super( canvas, focusBehavior );
 
         this.glWindow = canvas.getGLWindow( );
         float[] scale = canvas.getSurfaceScale( );

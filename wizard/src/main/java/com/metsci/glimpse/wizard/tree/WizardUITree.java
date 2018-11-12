@@ -26,22 +26,19 @@
  */
 package com.metsci.glimpse.wizard.tree;
 
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createEtchedBorder;
+import static javax.swing.BorderFactory.*;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -57,6 +54,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardError;
@@ -77,6 +76,7 @@ public class WizardUITree<D> implements WizardUI<D>
 
     protected JLabel title;
     protected JLabel errorButton;
+    protected boolean displayErrorButton;
 
     protected JScrollPane sidebarScroll;
     protected JList<WizardPage<D>> sidebar;
@@ -98,53 +98,19 @@ public class WizardUITree<D> implements WizardUI<D>
     protected PageEnteredListener<D> pageEnteredListener;
     protected ErrorsUpdatedListener errorsUpdatedListener;
 
-    private final AbstractAction prevAction = new AbstractAction( "Back" )
+    protected JButton prevBtn;
+    protected JButton nextBtn;
+    protected JButton finishBtn;
+    protected JButton cancelBtn;
+
+    public WizardUITree( boolean displayErrorButton )
     {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.visitPreviousPage( );
-        }
-    };
-
-    private final AbstractAction nextAction = new AbstractAction( "Next" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.visitNextPage( );
-        }
-    };
-
-    private final AbstractAction finishAction = new AbstractAction( "Finish" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.finish( );
-        }
-    };
-
-    private final AbstractAction cancelAction = new AbstractAction( "Cancel" )
-    {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed( ActionEvent e )
-        {
-            WizardUITree.this.wizard.cancel( );
-        }
-    };
+        this.displayErrorButton = displayErrorButton;
+    }
 
     public WizardUITree( )
     {
-
+        this( true );
     }
 
     @Override
@@ -153,8 +119,6 @@ public class WizardUITree<D> implements WizardUI<D>
         this.wizard = wizard;
 
         this.errorButton = new JLabel( );
-
-        this.errorPopup = new ErrorPopupPanel<>( this.wizard, Collections.singleton( this.errorButton ) );
 
         this.title = new JLabel( );
         this.title.setFont( this.title.getFont( ).deriveFont( 16.0f ) );
@@ -168,18 +132,29 @@ public class WizardUITree<D> implements WizardUI<D>
             @Override
             public void mousePressed( MouseEvent e )
             {
-                if ( !WizardUITree.this.errorPopup.isOpen( ) )
+                if ( errorPopup == null || !errorPopup.isVisible( ) )
                 {
-                    Dimension containerSize = WizardUITree.this.pageContainer.getSize( );
+                    errorPopup = new ErrorPopupPanel<>(
+                            SwingUtilities.getWindowAncestor( wizard.getCurrentPage( ).getContainter( ) ),
+                            wizard,
+                            Collections.singletonList( errorButton ) );
+
+                    Dimension containerSize = pageContainer.getSize( );
                     int height = ( int ) Math.min( containerSize.getHeight( ), ErrorPopupHeight );
                     int width = ( int ) Math.min( containerSize.getWidth( ), ErrorPopupWidth );
                     Dimension popupSize = new Dimension( width, height );
                     Collection<WizardError> errors = wizard.getErrors( wizard.getCurrentPage( ) );
-                    WizardUITree.this.errorPopup.showErrorPopup( WizardUITree.this.errorButton, popupSize, errors );
+                    if ( errors.isEmpty( ) )
+                    {
+                        errors = Collections.unmodifiableList( Arrays.asList( new WizardError( WizardErrorType.Good, "No Errors Detected." ) ) );
+                    }
+
+                    errorPopup.showErrorPopup( errorButton, popupSize, errors );
                 }
                 else
                 {
-                    WizardUITree.this.errorPopup.hideErrorPopup( );
+                    errorPopup.hideErrorPopup( );
+                    errorPopup = null;
                 }
             }
         } );
@@ -187,20 +162,23 @@ public class WizardUITree<D> implements WizardUI<D>
         this.model = new DefaultListModel<>( );
         this.sidebar = new JList<>( );
         this.sidebar.setModel( this.model );
-        this.sidebar.setCellRenderer( new WizardPageListCellRenderer( this.wizard ) );
+        this.sidebar.setCellRenderer( new WizardPageListCellRenderer( this.wizard, this.getChildIndentString( ) ) );
         this.sidebar.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
         this.sidebar.setFocusable( false );
 
-        this.sidebar.addMouseListener( new MouseAdapter( )
+        this.sidebar.addListSelectionListener( new ListSelectionListener( )
         {
             @Override
-            public void mousePressed( MouseEvent e )
+            public void valueChanged( ListSelectionEvent lsEvent )
             {
-                int index = WizardUITree.this.sidebar.locationToIndex( e.getPoint( ) );
-                if ( index >= 0 && index < WizardUITree.this.model.getSize( ) )
+                if ( !lsEvent.getValueIsAdjusting( ) )
                 {
-                    WizardPage<D> page = WizardUITree.this.model.getElementAt( index );
-                    wizard.visitPage( page );
+                    int index = WizardUITree.this.sidebar.getSelectedIndex( );
+                    if ( index >= 0 && index < WizardUITree.this.model.getSize( ) )
+                    {
+                        WizardPage<D> page = WizardUITree.this.model.getElementAt( index );
+                        wizard.visitPage( page );
+                    }
                 }
             }
         } );
@@ -242,10 +220,14 @@ public class WizardUITree<D> implements WizardUI<D>
         this.templateContainer.add( splitPane, BorderLayout.CENTER );
         this.templateContainer.add( new JSeparator( SwingConstants.HORIZONTAL ), BorderLayout.SOUTH );
 
-        final JButton prevBtn = new JButton( this.prevAction );
-        final JButton nextBtn = new JButton( this.nextAction );
-        final JButton finishBtn = new JButton( this.finishAction );
-        final JButton cancelBtn = new JButton( this.cancelAction );
+        this.prevBtn = new JButton( "Back" );
+        this.prevBtn.addActionListener( ( e ) -> this.wizard.visitPreviousPage( ) );
+        this.nextBtn = new JButton( "Next" );
+        this.nextBtn.addActionListener( ( e ) -> this.wizard.visitNextPage( ) );
+        this.finishBtn = new JButton( "Finish" );
+        this.finishBtn.addActionListener( ( e ) -> this.wizard.finish( ) );
+        this.cancelBtn = new JButton( "Cancel" );
+        this.cancelBtn.addActionListener( ( e ) -> this.wizard.cancel( ) );
 
         this.extraButtonPanel = new JPanel( );
         this.extraButtonPanel.setLayout( new BoxLayout( this.extraButtonPanel, BoxLayout.LINE_AXIS ) );
@@ -278,29 +260,23 @@ public class WizardUITree<D> implements WizardUI<D>
             @Override
             public void onPagesRemoved( Collection<WizardPage<D>> removedPages )
             {
-                SwingUtilities.invokeLater( ( ) ->
+                for ( WizardPage<D> page : removedPages )
                 {
-                    for ( WizardPage<D> page : removedPages )
-                    {
-                        pageContainer.remove( page.getContainter( ) );
-                    }
+                    pageContainer.remove( page.getContainter( ) );
+                }
 
-                    updatePageTree( );
-                } );
+                updatePageTree( );
             }
 
             @Override
             public void onPagesAdded( Collection<WizardPage<D>> addedPages )
             {
-                SwingUtilities.invokeLater( ( ) ->
+                for ( WizardPage<D> page : addedPages )
                 {
-                    for ( WizardPage<D> page : addedPages )
-                    {
-                        pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
-                    }
+                    pageContainer.add( page.getContainter( ), page.getId( ).toString( ) );
+                }
 
-                    updatePageTree( );
-                } );
+                updatePageTree( );
             }
         };
 
@@ -314,11 +290,11 @@ public class WizardUITree<D> implements WizardUI<D>
                 LinkedList<WizardPage<D>> history = wizard.getPageHistory( );
 
                 // if there is no history, disable the ability to move backward
-                prevAction.setEnabled( history.size( ) > 1 );
+                prevBtn.setEnabled( history.size( ) > 1 );
                 // if there is a valid next page, enable the next action
                 WizardPageModel<D> pageModel = wizard.getPageModel( );
                 D data = wizard.getData( );
-                nextAction.setEnabled( pageModel.getNextPage( history, data ) != null );
+                nextBtn.setEnabled( pageModel.getNextPage( history, data ) != null );
 
                 getContainer( ).revalidate( );
                 getContainer( ).repaint( );
@@ -345,7 +321,7 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public Container getContainer( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         return this.outerPanel;
     }
@@ -364,11 +340,13 @@ public class WizardUITree<D> implements WizardUI<D>
     @Override
     public void dispose( )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         this.wizard.getPageModel( ).removeListener( this.modelListener );
         this.wizard.removePageEnteredListener( this.pageEnteredListener );
         this.wizard.removeErrorsUpdatedListener( this.errorsUpdatedListener );
+
+        if ( this.errorPopup != null ) this.errorPopup.hideErrorPopup( );
     }
 
     protected void updatePageTree( )
@@ -400,16 +378,10 @@ public class WizardUITree<D> implements WizardUI<D>
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
-        WizardErrorType maxSeverity = null;
-
-        if ( page != null )
+        if ( page != null && this.displayErrorButton && page.showErrors( ) )
         {
             Collection<WizardError> errors = this.wizard.getErrors( page );
-            maxSeverity = WizardErrorType.getMaxSeverity( errors );
-        }
-
-        if ( maxSeverity != null )
-        {
+            WizardErrorType maxSeverity = WizardErrorType.getMaxSeverity( errors );
             this.errorButton.setIcon( maxSeverity.getLargeIcon( ) );
             this.errorButton.setVisible( true );
         }
@@ -421,7 +393,7 @@ public class WizardUITree<D> implements WizardUI<D>
 
     protected String getFullName( WizardPage<D> page )
     {
-        assert( SwingUtilities.isEventDispatchThread( ) );
+        assert ( SwingUtilities.isEventDispatchThread( ) );
 
         StringBuilder b = new StringBuilder( );
 
@@ -435,5 +407,11 @@ public class WizardUITree<D> implements WizardUI<D>
         }
 
         return b.toString( );
+    }
+
+    // the string to use to indent child tree elements
+    protected String getChildIndentString( )
+    {
+        return "    ";
     }
 }

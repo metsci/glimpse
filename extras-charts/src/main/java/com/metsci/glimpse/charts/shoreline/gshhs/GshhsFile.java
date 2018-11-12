@@ -41,17 +41,16 @@ import java.util.logging.Logger;
 import com.metsci.glimpse.charts.shoreline.LandBox;
 import com.metsci.glimpse.charts.shoreline.LandFile;
 import com.metsci.glimpse.charts.shoreline.LandVertex;
+import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.PolygonType;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
 import com.metsci.glimpse.util.Pair;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.io.LittleEndianDataInput;
 
 /**
- * The class can parse GSHHS version 1 files.
+ * The class can parse GSHHS version 2 files.
  *
- * The GSHHS dataset can be downloaded from ftp://ftp.soest.hawaii.edu/pwessel/gshhs/ .
- *
- * An alternate source: http://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/oldversions/
+ * The GSHHS dataset can be downloaded from http://www.ngdc.noaa.gov/mgg/shorelines/data/gshhs/latest/
  *
  * @author hogye
  */
@@ -61,41 +60,41 @@ public class GshhsFile extends LandFile
 
     public GshhsFile( File file, LatLonGeo swCorner, LatLonGeo neCorner ) throws IOException, UnrecognizedValueException
     {
-        this( file, new LandBox( swCorner, neCorner, false ) );
+        this( file, new LandBox( swCorner, neCorner, false ), PolygonType.pondInIslandInLake );
     }
 
-    public GshhsFile( File file, LandBox box ) throws IOException, UnrecognizedValueException
+    public GshhsFile( File file, LandBox box, PolygonType maxLevel ) throws IOException, UnrecognizedValueException
     {
-        super( readSegments( file, box ).first( ), box, false );
+        super( readSegments( file, maxLevel ).first( ), box, false );
     }
 
-    public GshhsFile( InputStream stream, LandBox box, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
+    public GshhsFile( InputStream stream, LandBox box, PolygonType maxLevel, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
     {
-        super( readSegments0( stream, box, isLittleEndian ).first( ), box, false );
+        super( readSegments0( stream, maxLevel, isLittleEndian ).first( ), box, false );
     }
 
     /**
      * Deprecated in favor of {@link GshhsReader#readSegments(File)}.
      */
     @Deprecated
-    public static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments( File file, LandBox box ) throws IOException, UnrecognizedValueException
+    private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments( File file, PolygonType maxLevel ) throws IOException, UnrecognizedValueException
     {
         try
         {
-            return readSegments0( file, box, false );
+            return readSegments0( file, maxLevel, false );
         }
         catch ( UnrecognizedValueException e )
         {
-            return readSegments0( file, box, true );
+            return readSegments0( file, maxLevel, true );
         }
     }
 
-    private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments0( File file, LandBox box1, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
+    private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments0( File file, PolygonType maxLevel, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
     {
-        return readSegments0( new FileInputStream( file ), box1, isLittleEndian );
+        return readSegments0( new FileInputStream( file ), maxLevel, isLittleEndian );
     }
 
-    private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments0( InputStream unbufferedInputStream, LandBox box1, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
+    private static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments0( InputStream unbufferedInputStream, PolygonType maxLevel, boolean isLittleEndian ) throws IOException, UnrecognizedValueException
     {
         DataInputStream stream = null;
         List<List<LandVertex>> segments = new ArrayList<List<LandVertex>>( );
@@ -107,11 +106,11 @@ public class GshhsFile extends LandFile
             while ( true )
             {
                 GshhsPolygonHeader header = new GshhsPolygonHeader( in );
-                //                if (!intersectsBox(header, box))
-                //                {
-                //                    in.skipBytes(header.numVertices * 8);
-                //                    continue;
-                //                }
+                if ( header.type.level > maxLevel.level )
+                {
+                    in.skipBytes(header.numVertices * 8);
+                    continue;
+                }
 
                 // If the polygon crosses Greenwich, the header lists its westernmost lon
                 // as negative, but all its vertices still have lons between 0 and 360. We

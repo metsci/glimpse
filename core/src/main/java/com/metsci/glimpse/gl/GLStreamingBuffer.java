@@ -162,7 +162,7 @@ public class GLStreamingBuffer
 
     /**
      * Returns the offset into {@link #buffer()} of the most recently sealed range -- e.g. for use
-     * with {@link javax.media.opengl.GL2ES2#glVertexAttribPointer(int, int, int, boolean, int, long)}.
+     * with {@link com.jogamp.opengl.GL2ES2#glVertexAttribPointer(int, int, int, boolean, int, long)}.
      * <p>
      * Returns -1 if {@link #seal(GL)} has not been called yet.
      */

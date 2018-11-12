@@ -68,12 +68,12 @@ public class ImageData
         return delegate.getLocationY( );
     }
 
-    public final int getCenterX( )
+    public final double getCenterX( )
     {
         return delegate.getCenterX( );
     }
 
-    public final int getCenterY( )
+    public final double getCenterY( )
     {
         return delegate.getCenterY( );
     }

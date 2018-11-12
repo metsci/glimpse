@@ -28,6 +28,7 @@ package com.metsci.glimpse.painter.shape;
 
 import static com.metsci.glimpse.painter.shape.DynamicLineSetPainter.*;
 import static com.jogamp.opengl.GL.*;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import com.jogamp.opengl.GL3;
 
 import com.google.common.collect.Sets;
 import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
@@ -51,6 +53,7 @@ import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.QuadTreeFloatBuffer;
 import com.metsci.glimpse.support.shader.point.PointArrayColorProgram;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
@@ -592,6 +595,8 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
     {
         GL3 gl = getGL3( context );
         Axis2D axis = requireAxis2D( context );
+        Wrapper2D wrapper = getWrapper2D( context );
+        GlimpseBounds bounds = getBounds( context );
 
         int size = getSize( );
 
@@ -615,6 +620,8 @@ public class DynamicPointSetPainter extends GlimpsePainterBase
         try
         {
             prog.setAxisOrtho( gl, axis );
+            prog.setWrapper( gl, wrapper );
+            prog.setViewport( gl, bounds );
             prog.setPointSize( gl, pointSize );
             prog.setFeatherThickness( gl, featherSize );
 

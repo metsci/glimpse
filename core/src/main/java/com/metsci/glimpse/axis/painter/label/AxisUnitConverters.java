@@ -78,6 +78,22 @@ public class AxisUnitConverters
         }
     };
 
+    public static final AxisUnitConverter valueShownMultipliedBy( double factor )
+    {
+        return new AxisUnitConverter( )
+        {
+            public double toAxisUnits( double value )
+            {
+                return ( factor * value );
+            }
+
+            public double fromAxisUnits( double value )
+            {
+                return ( value / factor );
+            }
+        };
+    }
+
     // Length
 
     public static final AxisUnitConverter suShownAsMeters = new AxisUnitConverter( )

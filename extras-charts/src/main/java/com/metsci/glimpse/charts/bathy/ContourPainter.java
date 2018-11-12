@@ -26,14 +26,22 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+
+import java.nio.FloatBuffer;
+
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.shader.line.LinePath;
-import com.metsci.glimpse.support.shader.line.LineProgram;
+import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
+import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram.LineProgramHandles;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
@@ -41,15 +49,14 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  */
 public class ContourPainter extends GlimpsePainterBase
 {
-    protected float[] lineColor = new float[] { 0.5f, 0.5f, 0.5f, 0.5f };
-    protected float lineWidth = 1;
-
     protected float[] coordsX;
     protected float[] coordsY;
+    protected DynamicLineSetPainterProgram program;
+    protected GLStreamingBuffer xyVbo;
+    protected GLStreamingBuffer rgbaVbo;
 
-    protected LinePath path;
     protected LineStyle style;
-    protected LineProgram program;
+    protected boolean colorDirty;
 
     public ContourPainter( ContourData data )
     {
@@ -58,20 +65,15 @@ public class ContourPainter extends GlimpsePainterBase
 
     public ContourPainter( float[] coordsX, float[] coordsY )
     {
-        this.path = new LinePath( );
-        this.style = new LineStyle( );
-        this.program = new LineProgram( );
-
         this.coordsX = coordsX;
         this.coordsY = coordsY;
 
-        int size = Math.min( coordsX.length, coordsY.length );
+        this.style = new LineStyle( );
+        this.program = new DynamicLineSetPainterProgram( );
+        this.xyVbo = new GLStreamingBuffer( GL_STATIC_DRAW, 1 );
+        this.rgbaVbo = new GLStreamingBuffer( GL_STATIC_DRAW, 1 );
 
-        for ( int i = 0; i < size - 1; i += 2 )
-        {
-            this.path.moveTo( coordsX[i], coordsY[i] );
-            this.path.lineTo( coordsX[i + 1], coordsY[i + 1] );
-        }
+        colorDirty = true;
     }
 
     @Override
@@ -81,22 +83,49 @@ public class ContourPainter extends GlimpsePainterBase
         Axis2D axis = requireAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
 
-        this.program.begin( gl );
+        if ( xyVbo.sealedOffset( ) < 0 || rgbaVbo.sealedOffset( ) < 0 || colorDirty )
+        {
+            FloatBuffer xyBuf = xyVbo.mapFloats( gl, coordsX.length * 2 );
+            FloatBuffer rgbaBuf = rgbaVbo.mapFloats( gl, coordsX.length * 4 );
+            for ( int i = 0; i < coordsX.length; i++ )
+            {
+                xyBuf.put( coordsX[i] );
+                xyBuf.put( coordsY[i] );
+                rgbaBuf.put( style.rgba );
+            }
+
+            xyVbo.seal( gl );
+            rgbaVbo.seal( gl );
+            colorDirty = false;
+        }
+
+        program.begin( gl );
         try
         {
-            this.program.setAxisOrtho( gl, axis );
-            this.program.setViewport( gl, bounds );
-            this.program.draw( gl, style, path );
+            program.setAxisOrtho( gl, axis );
+            program.setViewport( gl, bounds );
+            program.setStyle( gl, style );
+
+            LineProgramHandles handles = program.handles( gl );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
+
+            gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
+            gl.glVertexAttribPointer( handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
+
+            gl.glDrawArrays( GL.GL_LINES, 0, coordsX.length );
         }
         finally
         {
-            this.program.end( gl );
+            program.end( gl );
         }
     }
 
     public void setLineColor( float r, float g, float b, float a )
     {
         this.style.rgba = new float[] { r, g, b, a };
+        colorDirty = true;
     }
 
     public void setLineWidth( float width )
@@ -115,6 +144,7 @@ public class ContourPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
 
         this.program.dispose( gl );
-        this.path.dispose( gl );
+        this.xyVbo.dispose( gl );
+        this.rgbaVbo.dispose( gl );
     }
 }

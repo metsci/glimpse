@@ -134,8 +134,17 @@ public abstract class GlimpseCanvasView extends View
     {
         if ( this.canvas == null )
         {
-            // TODO: FAST reparenting might require a shared context on some platforms
-            this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
+            SharedContextViewOption opt = null;
+            for ( ViewOption o : this.viewOptions )
+            {
+                if ( o instanceof SharedContextViewOption )
+                    opt = ( SharedContextViewOption ) o;
+            }
+
+            if ( opt == null )
+                this.canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
+            else
+                this.canvas = new NewtSwingEDTGlimpseCanvas( opt.context );
 
             // Once canvas is ready, do view-specific setup and install facets
             onGLInit( this.canvas, ( drawable ) ->

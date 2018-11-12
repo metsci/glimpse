@@ -1,6 +1,7 @@
 PolygonPainter
 
-A version of line_flat_color which uses vec3 vertices
+A version of line_flat_color which uses vec3 vertices, and supports duplicated
+rendering for use with WrappedPainter
 
 Java Wrappers:
  * com.metsci.glimpse.painter.shape.PolygonPainter.PolygonPainterLineProgram

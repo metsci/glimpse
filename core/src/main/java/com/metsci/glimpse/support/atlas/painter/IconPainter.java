@@ -608,7 +608,7 @@ public class IconPainter extends GlimpsePainterBase
                         this.shader.useProgram( gl, false );
                     }
 
-                    GLErrorUtils.logGLError( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
+                    GLErrorUtils.logGLErrors( logger, gl, String.format( "Trouble after IconPainter.glDrawArrays( ). Group Size: %d", group.getCurrentSize( ) ) );
                 }
             }
             finally
@@ -901,8 +901,8 @@ public class IconPainter extends GlimpsePainterBase
 
                 float width = ( imageData.getWidth( ) + imageData.getBufferX( ) * 2 );
                 float height = ( imageData.getHeight( ) + imageData.getBufferY( ) * 2 );
-                float offsetX = ( imageData.getCenterX( ) + imageData.getBufferX( ) );
-                float offsetY = ( imageData.getCenterY( ) + imageData.getBufferY( ) );
+                float offsetX = ( float ) ( imageData.getCenterX( ) + imageData.getBufferX( ) );
+                float offsetY = ( float ) ( imageData.getCenterY( ) + imageData.getBufferY( ) );
 
                 for ( int i = 0; i < size; i++ )
                 {

@@ -26,13 +26,15 @@
  */
 package com.metsci.glimpse.support.shader.point;
 
+import static com.metsci.glimpse.gl.util.GLUtils.disablePointSprite;
+import static com.metsci.glimpse.gl.util.GLUtils.enablePointSprite;
+
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GLES1;
 import com.jogamp.opengl.GLUniformData;
 
 import com.jogamp.opengl.math.Matrix4;
@@ -42,7 +44,6 @@ import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
-import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -138,12 +139,12 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
         if ( on )
         {
             gl.glEnable( GL3.GL_PROGRAM_POINT_SIZE );
-            if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glEnable( GLES1.GL_POINT_SPRITE );
+            enablePointSprite( gl );
         }
         else
         {
             gl.glDisable( GL3.GL_PROGRAM_POINT_SIZE );
-            if ( !GLUtils.DISABLE_POINT_SPRITE ) gl.glDisable( GLES1.GL_POINT_SPRITE );
+            disablePointSprite( gl );
         }
     }
 
