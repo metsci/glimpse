@@ -70,7 +70,7 @@
 
         <module>wizard</module>
         <module>wizard-examples</module>
-        
+
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>
@@ -88,10 +88,41 @@
     <build>
         <plugins>
 
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.5</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
-                 <configuration>
+                <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
                 <executions>
@@ -128,10 +159,9 @@
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>10</release>
                 </configuration>
             </plugin>
 
@@ -151,7 +181,7 @@
             <plugin>
                 <groupId>com.github.koraktor</groupId>
                 <artifactId>mavanagaiata</artifactId>
-                <version>0.5.0</version>
+                <version>0.6.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -184,7 +214,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.7</version>
+                <version>3.0</version>
                 <configuration>
                     <basedir>${basedir}</basedir>
                     <header>${basedir}/LICENSE</header>
@@ -385,15 +415,15 @@
                         </executions>
                     </plugin>
                     <!-- don't javadoc for internal releases -->
-		    <plugin>
-			<artifactId>maven-javadoc-plugin</artifactId>
-                      <executions>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
                             <execution>
                                 <id>deploy</id>
                                 <phase>none</phase>
                             </execution>
                         </executions>
-		    </plugin>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
