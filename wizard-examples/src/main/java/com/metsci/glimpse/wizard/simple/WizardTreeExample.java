@@ -42,7 +42,7 @@ import com.metsci.glimpse.wizard.simple.pages.FirstPage;
 import com.metsci.glimpse.wizard.simple.pages.SecondPage;
 import com.metsci.glimpse.wizard.simple.pages.ThirdPage;
 
-public class WizardExample
+public class WizardTreeExample
 {
     public static void main( String[] args )
     {
