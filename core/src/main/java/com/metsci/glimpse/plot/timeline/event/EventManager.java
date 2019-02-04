@@ -1024,5 +1024,7 @@ public class EventManager
         }
 
         this.visibleEventsDirty = false;
+        this.prevMin = min;
+        this.prevMax = max;
     }
 }

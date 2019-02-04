@@ -30,6 +30,7 @@ import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Bottom;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Left;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Right;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Top;
+import static com.metsci.glimpse.plot.Plot2D.BACKGROUND_LAYER;
 
 import java.awt.Font;
 import java.util.ArrayList;
@@ -377,7 +378,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
         if ( this.titlePainter != null ) this.titleLayout.addPainter( this.titlePainter );
 
         this.plotBackgroundPainter = new BackgroundPainter( false );
-        this.axisLayoutXY.addPainter( this.plotBackgroundPainter );
+        this.axisLayoutXY.addPainter( this.plotBackgroundPainter, BACKGROUND_LAYER );
     }
     
     protected void initializeListeners( )

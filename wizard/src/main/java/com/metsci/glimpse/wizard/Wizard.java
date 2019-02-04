@@ -79,7 +79,7 @@ public class Wizard<D>
     protected List<WizardCancelledListener> cancelledListeners;
     protected List<WizardFinishedListener> finishedListeners;
 
-    public Wizard( D data, WizardPageModelTree<D> model, WizardUITree<D> ui )
+    public Wizard( D data, WizardPageModel<D> model, WizardUI<D> ui )
     {
         this.data = data;
 
@@ -220,6 +220,7 @@ public class Wizard<D>
 
         this.doLeavePage( this.getCurrentPage( ) );
         WizardPage<D> nextPage = this.model.getNextPage( this.getPageHistory( ), this.data );
+        this.pageHistory.add( nextPage.getId( ) );
         this.doEnterPage( nextPage );
 
         return nextPage;

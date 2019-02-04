@@ -96,10 +96,14 @@ public class GeotiffTileProvider implements TopoTileProvider
         int tilePixelsY = pxHeight / nTilesY;
 
         Collection<TileKey> keys = new ArrayList<>( );
-        keys.add( new TileKey( GLOBAL_TILE_LEVEL, -90, 0, -180, 0 ) );
-        keys.add( new TileKey( GLOBAL_TILE_LEVEL, 0, 90, -180, 0 ) );
-        keys.add( new TileKey( GLOBAL_TILE_LEVEL, -90, 0, 0, 180 ) );
-        keys.add( new TileKey( GLOBAL_TILE_LEVEL, 0, 90, 0, 180 ) );
+        for ( int lat = -90; lat < 90; lat += 30 )
+        {
+            for ( int lon = -180; lon < 180; lon += 30 )
+            {
+                keys.add( new TileKey( GLOBAL_TILE_LEVEL, lat, lat + 30, lon, lon + 30 ) );
+            }
+        }
+
         for ( int pxX = 0; pxX < pxWidth; pxX += tilePixelsX )
         {
             for ( int pxY = 0; pxY < pxHeight; pxY += tilePixelsY )

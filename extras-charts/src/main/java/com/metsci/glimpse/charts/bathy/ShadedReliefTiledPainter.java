@@ -33,6 +33,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
 import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
+import static java.lang.Float.isFinite;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
@@ -266,7 +267,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         cached.heightStep = rf.readDouble( );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.getImageWidth( ) * Float.BYTES );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.getImageHeight( ) * Float.BYTES );
         FloatBuffer fb = bbuf.asFloatBuffer( );
 
         cached.data = new float[cached.getImageWidth( )][cached.getImageHeight( )];
@@ -304,7 +305,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         rf.writeDouble( tile.getHeightStep( ) );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.getImageWidth( ) * Float.BYTES );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.getImageHeight( ) * Float.BYTES );
         FloatBuffer fb = bbuf.asFloatBuffer( );
         for ( float[] row : tile.data )
         {
@@ -352,6 +353,11 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
     protected int colorize( float hillshade, float elevation )
     {
+        if ( !isFinite( hillshade + elevation ) )
+        {
+            return 0;
+        }
+
         float h = 0;
         float s = 0;
         float b = 0;
