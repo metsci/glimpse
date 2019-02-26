@@ -41,13 +41,14 @@ import net.miginfocom.swing.MigLayout;
 
 public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
 {
-    protected String descriptionFile;
     /**
      * By default this is equal to {@link SimpleWizardPage#container container},
      * however if you set <code>scrollableContent</code> to <code>true</code> in the constructor,
      * then this is the content in the JScrollPane.
      */
     protected JPanel content;
+
+    protected JTextPane descriptionText;
 
     public DescriptionWizardPage( Object parentId, String title, String descriptionFile )
     {
@@ -63,27 +64,17 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
     {
         super( id, parentId, title );
 
-        this.descriptionFile = descriptionFile;
+        this.descriptionText = new JTextPane( );
+        this.descriptionText.setEditable( false );
+        this.descriptionText.setOpaque( false );
 
-        JTextPane descriptionArea = new JTextPane( );
-        descriptionArea.setEditable( false );
-        descriptionArea.setOpaque( false );
-
-        URL url = getDescriptionResource( descriptionFile );
-        try
-        {
-            descriptionArea.setPage( url );
-        }
-        catch ( IOException e )
-        {
-            descriptionArea.setText( String.format( "Error: Unable to load page description from: %s", descriptionFile ) );
-        }
+        this.setDescriptionFile( descriptionFile );
 
         if ( scrollableContent )
         {
             // layout constraints are setup such that when the scrollbar is invisible it will look exactly like pages that do not have scrollbars.
             this.container.setLayout( new MigLayout( "", "", "[][]0px[]0px" ) );
-            this.container.add( descriptionArea, "split, span, pushx, growx, wrap" );
+            this.container.add( this.descriptionText, "split, span, pushx, growx, wrap" );
             this.container.add( new JSeparator( SwingConstants.HORIZONTAL ), "split, span, gap 0 0 10 1, pushx, growx, wrap" );
             this.content = new JPanel( new MigLayout( "fill, insets 9 0 0 0" ) );
             JScrollPane scroll = new JScrollPane( this.content, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
@@ -93,9 +84,29 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         else
         {
             this.container.setLayout( new MigLayout( ) );
-            this.container.add( descriptionArea, "split, span, pushx, growx, wrap" );
+            this.container.add( this.descriptionText, "split, span, pushx, growx, wrap" );
             this.container.add( new JSeparator( SwingConstants.HORIZONTAL ), "split, span, gap 0 0 10 10, pushx, growx, wrap" );
             this.content = this.container;
+        }
+    }
+
+    protected void setDescriptionFile( String descriptionFile )
+    {
+        if ( descriptionFile == null )
+        {
+            this.descriptionText.setText( "" );
+        }
+        else
+        {
+            URL url = getDescriptionResource( descriptionFile );
+            try
+            {
+                this.descriptionText.setPage( url );
+            }
+            catch ( IOException e )
+            {
+                this.descriptionText.setText( String.format( "Error: Unable to load page description from: %s", descriptionFile ) );
+            }
         }
     }
 
