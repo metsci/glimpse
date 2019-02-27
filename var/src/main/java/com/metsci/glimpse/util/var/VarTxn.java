@@ -29,7 +29,7 @@ package com.metsci.glimpse.util.var;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Txn
+public class VarTxn
 {
 
     protected static class SubtreeModification
@@ -48,7 +48,7 @@ public class Txn
     protected final List<SubtreeModification> subtreeMods;
 
 
-    public Txn( )
+    public VarTxn( )
     {
         this.subtreeMods = new ArrayList<>( );
     }

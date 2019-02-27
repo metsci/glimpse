@@ -39,7 +39,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     protected static final VarEvent syntheticEvent = new VarEvent( false );
 
 
-    protected static final ThreadLocal<Txn> activeTxn = new ThreadLocal<>( );
+    protected static final ThreadLocal<VarTxn> activeTxn = new ThreadLocal<>( );
 
     public static void doTxn( Runnable task )
     {
@@ -55,7 +55,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         if ( activeTxn.get( ) == null )
         {
             T result;
-            Txn txn = new Txn( );
+            VarTxn txn = new VarTxn( );
             activeTxn.set( txn );
             try
             {
@@ -180,7 +180,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
             root.requireValidForSubtree( value );
             root.setForSubtree( ongoing, value );
 
-            Txn txn = activeTxn.get( );
+            VarTxn txn = activeTxn.get( );
             if ( txn == null )
             {
                 root.commitForSubtree( );
