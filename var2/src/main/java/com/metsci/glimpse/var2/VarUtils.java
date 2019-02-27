@@ -1,0 +1,696 @@
+package com.metsci.glimpse.var2;
+
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Objects.equal;
+import static com.google.common.collect.Sets.difference;
+import static com.google.common.collect.Sets.union;
+import static com.metsci.glimpse.var2.ListenerFlag.EMPTY_FLAGS;
+import static com.metsci.glimpse.var2.ListenerFlag.IMMEDIATE;
+import static com.metsci.glimpse.var2.ListenerFlag.ONCE;
+import static com.metsci.glimpse.var2.ListenerFlag.flags;
+import static java.util.Arrays.asList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.DisposableGroup;
+import com.metsci.glimpse.util.var.VarEvent;
+
+public class VarUtils
+{
+
+    @SafeVarargs
+    public static Listenable listenable( Listenable... listenables )
+    {
+        return new ListenableGroup( listenables );
+    }
+
+    public static Listenable listenable( Collection<? extends Listenable> listenables )
+    {
+        return new ListenableGroup( listenables );
+    }
+
+    @SafeVarargs
+    public static Listenable ongoingListenable( ListenablePair... pairs )
+    {
+        return ongoingListenable( asList( pairs ) );
+    }
+
+    public static Listenable ongoingListenable( Collection<? extends ListenablePair> pairs )
+    {
+        return new ListenableGroup( mapCollection( pairs, pair -> pair.ongoing( ) ) );
+    }
+
+    @SafeVarargs
+    public static Listenable completedListenable( ListenablePair... pairs )
+    {
+        return completedListenable( asList( pairs ) );
+    }
+
+    public static Listenable completedListenable( Collection<? extends ListenablePair> pairs )
+    {
+        return new ListenableGroup( mapCollection( pairs, pair -> pair.completed( ) ) );
+    }
+
+    @SafeVarargs
+    public static Listenable allListenable( ListenablePair... pairs )
+    {
+        return completedListenable( asList( pairs ) );
+    }
+
+    public static Listenable allListenable( Collection<? extends ListenablePair> pairs )
+    {
+        return new ListenableGroup( mapCollection( pairs, pair -> pair.all( ) ) );
+    }
+
+    @SafeVarargs
+    public static ListenablePair listenablePair( ListenablePair... pairs )
+    {
+        return listenablePair( asList( pairs ) );
+    }
+
+    public static ListenablePair listenablePair( Collection<? extends ListenablePair> pairs )
+    {
+        return new ListenablePairGroup( pairs );
+    }
+
+    public static <T,R> Collection<R> mapCollection( Collection<T> ts, Function<? super T,? extends R> fn )
+    {
+        Collection<R> rs = new ArrayList<>( ts.size( ) );
+        for ( T t : ts )
+        {
+            rs.add( fn.apply( t ) );
+        }
+        return rs;
+    }
+
+    public static <K,V,K2 extends K> Var<V> mapValueVar( Var<ImmutableMap<K,V>> mapVar, K2 key )
+    {
+        return new VarDerived<V>( mapVar )
+        {
+            @Override
+            public V v( )
+            {
+                return mapVar.v( ).get( key );
+            }
+
+            @Override
+            public boolean set( boolean ongoing, V value )
+            {
+                return putMapValue( mapVar, ongoing, key, value );
+            }
+        };
+    }
+
+    public static <K,V,K2 extends K> Var<V> mapValueVar( Var<ImmutableMap<K,V>> mapVar, ReadableVar<K2> keyVar )
+    {
+        return new VarDerived<V>( mapVar, keyVar )
+        {
+            @Override
+            public V v( )
+            {
+                return mapVar.v( ).get( keyVar.v( ) );
+            }
+
+            @Override
+            public boolean set( boolean ongoing, V value )
+            {
+                return putMapValue( mapVar, ongoing, keyVar.v( ), value );
+            }
+        };
+    }
+
+    public static <K,V,K2 extends K,V2 extends V> boolean putMapValue( Var<ImmutableMap<K,V>> mapVars, K2 key, V2 value )
+    {
+        return putMapValue( mapVars, false, key, value );
+    }
+
+    public static <K,V,K2 extends K,V2 extends V> boolean putMapValue( Var<ImmutableMap<K,V>> mapVars, boolean ongoing, K2 key, V2 value )
+    {
+        return mapVars.update( ongoing, map -> mapWith( map, key, value ) );
+    }
+
+    public static <K,V,K2 extends K> boolean updateMapValue( Var<ImmutableMap<K,V>> mapVars, K2 key, Function<? super V,? extends V> updateFn )
+    {
+        return updateMapValue( mapVars, false, key, updateFn );
+    }
+
+    public static <K,V,K2 extends K> boolean updateMapValue( Var<ImmutableMap<K,V>> mapVars, boolean ongoing, K2 key, Function<? super V,? extends V> updateFn )
+    {
+        return mapVars.update( ongoing, map -> mapWith( map, key, updateFn ) );
+    }
+
+    public static ListenablePair wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1 )
+    {
+        return new ListenablePair( )
+        {
+            protected final Listenable ongoing = wrapListenable1( listenable1, ev -> ev.ongoing );
+            protected final Listenable completed = wrapListenable1( listenable1, ev -> !ev.ongoing );
+            protected final Listenable all = wrapListenable1( listenable1, ev -> true );
+
+            @Override
+            public Listenable ongoing( )
+            {
+                return this.ongoing;
+            }
+
+            @Override
+            public Listenable completed( )
+            {
+                return this.completed;
+            }
+
+            @Override
+            public Listenable all( )
+            {
+                return this.all;
+            }
+        };
+    }
+
+    public static Listenable wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1, Predicate<VarEvent> filter )
+    {
+        return new Listenable( )
+        {
+            @Override
+            public Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
+            {
+                if ( flags.contains( IMMEDIATE ) )
+                {
+                    listener.run( );
+                    if ( flags.contains( ONCE ) )
+                    {
+                        return ( ) -> { };
+                    }
+                }
+
+                DisposableGroup disposables = new DisposableGroup( );
+                if ( flags.contains( ONCE ) )
+                {
+                    disposables.add( listenable1.addListener( false, ev ->
+                    {
+                        if ( filter.test( ev ) )
+                        {
+                            listener.run( );
+                            disposables.dispose( );
+                            disposables.clear( );
+                        }
+                    } ) );
+                }
+                else
+                {
+                    disposables.add( listenable1.addListener( false, ev ->
+                    {
+                        if ( filter.test( ev ) )
+                        {
+                            listener.run( );
+                        }
+                    } ) );
+                }
+                return disposables;
+            }
+        };
+    }
+
+    public static <V> Var<V> wrapVar1( com.metsci.glimpse.util.var.Var<V> var1 )
+    {
+        return new VarDerived<V>( wrapListenable1( var1 ) )
+        {
+            @Override
+            public V v( )
+            {
+                return var1.v( );
+            }
+
+            @Override
+            public boolean set( boolean ongoing, V value )
+            {
+                V oldValue = var1.v( );
+                var1.set( ongoing, value );
+                return ( var1.v( ) != oldValue );
+            }
+        };
+    }
+
+    public static interface OldNewListener<V>
+    {
+        void accept( V vOld, V vNew );
+    }
+
+    public static interface OldNewPairListener<V>
+    {
+        void accept( boolean ongoing, V vOld, V vNew );
+    }
+
+    public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
+                                                                  Function<? super ReadableVar<V>,Listenable> member,
+                                                                  OldNewListener<V0> listener )
+    {
+        return addOldNewListener( var, member, EMPTY_FLAGS, listener );
+    }
+
+    public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
+                                                                  Function<? super ReadableVar<V>,Listenable> member,
+                                                                  ListenerFlag flag,
+                                                                  OldNewListener<V0> listener )
+    {
+        return addOldNewListener( var, member, flags( flag ), listener );
+    }
+
+    public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
+                                                                  Function<? super ReadableVar<V>,Listenable> member,
+                                                                  Set<? extends ListenerFlag> flags,
+                                                                  OldNewListener<V0> listener )
+    {
+        return member.apply( var ).addListener( flags, new Runnable( )
+        {
+            V vPrev = null;
+
+            @Override
+            public void run( )
+            {
+                V vOld = this.vPrev;
+                V vNew = var.v( );
+
+                // Update vPrev BEFORE firing the listener, in case the listener triggers this method again
+                this.vPrev = vNew;
+
+                if ( !equal( vNew, vOld ) )
+                {
+                    listener.accept( vOld, vNew );
+                }
+            }
+        } );
+    }
+
+    public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
+                                                                  OldNewPairListener<V0> listener )
+    {
+        return addOldNewListener( var, EMPTY_FLAGS, listener );
+    }
+
+    public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
+                                                                  ListenerFlag flag,
+                                                                  OldNewPairListener<V0> listener )
+    {
+        return addOldNewListener( var, flags( flag ), listener );
+    }
+
+    public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
+                                                                  Set<? extends ListenerFlag> flags,
+                                                                  OldNewPairListener<V0> listener )
+    {
+        return var.addListener( flags, new ListenablePairListener( )
+        {
+            V vPrev = null;
+
+            @Override
+            public void run( boolean ongoing )
+            {
+                V vOld = this.vPrev;
+                V vNew = var.v( );
+
+                // Update vPrev BEFORE firing the listener, in case the listener triggers this method again
+                this.vPrev = vNew;
+
+                if ( !equal( vNew, vOld ) )
+                {
+                    listener.accept( ongoing, vOld, vNew );
+                }
+            }
+        } );
+    }
+
+    public static interface OldNewMapEntryListener<K,V>
+    {
+        void accept( K key, V vOld, V vNew );
+    }
+
+    public static interface OldNewMapEntryPairListener<K,V>
+    {
+        void accept( boolean ongoing, K key, V vOld, V vNew );
+    }
+
+    public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
+                                                                                  Function<? super ReadableVar<? extends ImmutableMap<K,V>>,Listenable> member,
+                                                                                  OldNewMapEntryListener<K0,V0> listener )
+    {
+        return onMapEntryChanged( var, member, EMPTY_FLAGS, listener );
+    }
+
+    public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
+                                                                                  Function<? super ReadableVar<? extends ImmutableMap<K,V>>,Listenable> member,
+                                                                                  ListenerFlag flag,
+                                                                                  OldNewMapEntryListener<K0,V0> listener )
+    {
+        return onMapEntryChanged( var, member, flags( flag ), listener );
+    }
+
+    public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
+                                                                                  Function<? super ReadableVar<? extends ImmutableMap<K,V>>,Listenable> member,
+                                                                                  Set<? extends ListenerFlag> flags,
+                                                                                  OldNewMapEntryListener<K0,V0> listener )
+    {
+        return addOldNewListener( var, member, flags, ( mapOld0, mapNew0 ) ->
+        {
+            Map<K,V> mapOld = firstNonNull( mapOld0, ImmutableMap.of( ) );
+            Map<K,V> mapNew = firstNonNull( mapNew0, ImmutableMap.of( ) );
+            for ( K k : union( mapOld.keySet( ), mapNew.keySet( ) ) )
+            {
+                V vOld = mapOld.get( k );
+                V vNew = mapNew.get( k );
+                if ( !equal( vNew, vOld ) )
+                {
+                    listener.accept( k, vOld, vNew );
+                }
+            }
+        } );
+    }
+
+    public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
+                                                                                  OldNewMapEntryPairListener<K0,V0> listener )
+    {
+        return onMapEntryChanged( var, EMPTY_FLAGS, listener );
+    }
+
+    public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
+                                                                                  ListenerFlag flag,
+                                                                                  OldNewMapEntryPairListener<K0,V0> listener )
+    {
+        return onMapEntryChanged( var, flags( flag ), listener );
+    }
+
+    public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
+                                                                                  Set<? extends ListenerFlag> flags,
+                                                                                  OldNewMapEntryPairListener<K0,V0> listener )
+    {
+        return addOldNewListener( var, flags, ( ongoing, mapOld0, mapNew0 ) ->
+        {
+            Map<K,V> mapOld = firstNonNull( mapOld0, ImmutableMap.of( ) );
+            Map<K,V> mapNew = firstNonNull( mapNew0, ImmutableMap.of( ) );
+            for ( K k : union( mapOld.keySet( ), mapNew.keySet( ) ) )
+            {
+                V vOld = mapOld.get( k );
+                V vNew = mapNew.get( k );
+                if ( !equal( vNew, vOld ) )
+                {
+                    listener.accept( ongoing, k, vOld, vNew );
+                }
+            }
+        } );
+    }
+
+    public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                Function<? super ReadableVar<? extends ImmutableMap<K,?>>,Listenable> member,
+                                                Consumer<? super K> listener )
+    {
+        return onMapKeyAdded( var, member, EMPTY_FLAGS, listener );
+    }
+
+    public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                Function<? super ReadableVar<? extends ImmutableMap<K,?>>,Listenable> member,
+                                                ListenerFlag flag,
+                                                Consumer<? super K> listener )
+    {
+        return onMapKeyAdded( var, member, flags( flag ), listener );
+    }
+
+    public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                Function<? super ReadableVar<? extends ImmutableMap<K,?>>,Listenable> member,
+                                                Set<? extends ListenerFlag> flags,
+                                                Consumer<? super K> listener )
+    {
+        return addOldNewListener( var, member, flags, ( mapOld0, mapNew0 ) ->
+        {
+            Map<K,?> mapOld = firstNonNull( mapOld0, ImmutableMap.of( ) );
+            Map<K,?> mapNew = firstNonNull( mapNew0, ImmutableMap.of( ) );
+            for ( K k : difference( mapNew.keySet( ), mapOld.keySet( ) ) )
+            {
+                listener.accept( k );
+            }
+        } );
+    }
+
+    public interface PairConsumer<T>
+    {
+        void accept( boolean ongoing, T t );
+    }
+
+    public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                PairConsumer<? super K> listener )
+    {
+        return onMapKeyAdded( var, EMPTY_FLAGS, listener );
+    }
+
+    public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                ListenerFlag flag,
+                                                PairConsumer<? super K> listener )
+    {
+        return onMapKeyAdded( var, flags( flag ), listener );
+    }
+
+    public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                Set<? extends ListenerFlag> flags,
+                                                PairConsumer<? super K> listener )
+    {
+        return addOldNewListener( var, flags, ( ongoing, mapOld0, mapNew0 ) ->
+        {
+            Map<K,?> mapOld = firstNonNull( mapOld0, ImmutableMap.of( ) );
+            Map<K,?> mapNew = firstNonNull( mapNew0, ImmutableMap.of( ) );
+            for ( K k : difference( mapNew.keySet( ), mapOld.keySet( ) ) )
+            {
+                listener.accept( ongoing, k );
+            }
+        } );
+    }
+
+    public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                  Function<? super ReadableVar<? extends ImmutableMap<K,?>>,Listenable> member,
+                                                  Consumer<? super K> listener )
+    {
+        return onMapKeyRemoved( var, member, EMPTY_FLAGS, listener );
+    }
+
+    public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                  Function<? super ReadableVar<? extends ImmutableMap<K,?>>,Listenable> member,
+                                                  ListenerFlag flag,
+                                                  Consumer<? super K> listener )
+    {
+        return onMapKeyRemoved( var, member, flags( flag ), listener );
+    }
+
+    public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                  Function<? super ReadableVar<? extends ImmutableMap<K,?>>,Listenable> member,
+                                                  Set<? extends ListenerFlag> flags,
+                                                  Consumer<? super K> listener )
+    {
+        return addOldNewListener( var, member, flags, ( mapOld0, mapNew0 ) ->
+        {
+            Map<K,?> mapOld = firstNonNull( mapOld0, ImmutableMap.of( ) );
+            Map<K,?> mapNew = firstNonNull( mapNew0, ImmutableMap.of( ) );
+            for ( K k : difference( mapOld.keySet( ), mapNew.keySet( ) ) )
+            {
+                listener.accept( k );
+            }
+        } );
+    }
+
+    public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                  PairConsumer<? super K> listener )
+    {
+        return onMapKeyRemoved( var, EMPTY_FLAGS, listener );
+    }
+
+    public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                  ListenerFlag flag,
+                                                  PairConsumer<? super K> listener )
+    {
+        return onMapKeyRemoved( var, flags( flag ), listener );
+    }
+
+    public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
+                                                  Set<? extends ListenerFlag> flags,
+                                                  PairConsumer<? super K> listener )
+    {
+        return addOldNewListener( var, flags, ( ongoing, mapOld0, mapNew0 ) ->
+        {
+            Map<K,?> mapOld = firstNonNull( mapOld0, ImmutableMap.of( ) );
+            Map<K,?> mapNew = firstNonNull( mapNew0, ImmutableMap.of( ) );
+            for ( K k : difference( mapOld.keySet( ), mapNew.keySet( ) ) )
+            {
+                listener.accept( ongoing, k );
+            }
+        } );
+    }
+
+    public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                 Function<? super ReadableVar<? extends ImmutableCollection<T>>,Listenable> member,
+                                                 Consumer<? super T> listener )
+    {
+        return onElementAdded( var, member, EMPTY_FLAGS, listener );
+    }
+
+    public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                 Function<? super ReadableVar<? extends ImmutableCollection<T>>,Listenable> member,
+                                                 ListenerFlag flag,
+                                                 Consumer<? super T> listener )
+    {
+        return onElementAdded( var, member, flags( flag ), listener );
+    }
+
+    public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                 Function<? super ReadableVar<? extends ImmutableCollection<T>>,Listenable> member,
+                                                 Set<? extends ListenerFlag> flags,
+                                                 Consumer<? super T> listener )
+    {
+        return addOldNewListener( var, member, flags, ( setOld0, setNew0 ) ->
+        {
+            Set<T> setOld = ImmutableSet.copyOf( firstNonNull( setOld0, ImmutableSet.of( ) ) );
+            Set<T> setNew = ImmutableSet.copyOf( firstNonNull( setNew0, ImmutableSet.of( ) ) );
+            for ( T t : difference( setNew, setOld ) )
+            {
+                listener.accept( t );
+            }
+        } );
+    }
+
+    public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                 PairConsumer<? super T> listener )
+    {
+        return onElementAdded( var, EMPTY_FLAGS, listener );
+    }
+
+    public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                 ListenerFlag flag,
+                                                 PairConsumer<? super T> listener )
+    {
+        return onElementAdded( var, flags( flag ), listener );
+    }
+
+    public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                 Set<? extends ListenerFlag> flags,
+                                                 PairConsumer<? super T> listener )
+    {
+        return addOldNewListener( var, flags, ( ongoing, setOld0, setNew0 ) ->
+        {
+            Set<T> setOld = ImmutableSet.copyOf( firstNonNull( setOld0, ImmutableSet.of( ) ) );
+            Set<T> setNew = ImmutableSet.copyOf( firstNonNull( setNew0, ImmutableSet.of( ) ) );
+            for ( T t : difference( setNew, setOld ) )
+            {
+                listener.accept( ongoing, t );
+            }
+        } );
+    }
+
+    public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                   Function<? super ReadableVar<? extends ImmutableCollection<T>>,Listenable> member,
+                                                   Consumer<? super T> listener )
+    {
+        return onElementRemoved( var, member, EMPTY_FLAGS, listener );
+    }
+
+    public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                   Function<? super ReadableVar<? extends ImmutableCollection<T>>,Listenable> member,
+                                                   ListenerFlag flag,
+                                                   Consumer<? super T> listener )
+    {
+        return onElementRemoved( var, member, flags( flag ), listener );
+    }
+
+    public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                   Function<? super ReadableVar<? extends ImmutableCollection<T>>,Listenable> member,
+                                                   Set<? extends ListenerFlag> flags,
+                                                   Consumer<? super T> listener )
+    {
+        return addOldNewListener( var, member, flags, ( setOld0, setNew0 ) ->
+        {
+            Set<T> setOld = ImmutableSet.copyOf( firstNonNull( setOld0, ImmutableSet.of( ) ) );
+            Set<T> setNew = ImmutableSet.copyOf( firstNonNull( setNew0, ImmutableSet.of( ) ) );
+            for ( T t : difference( setOld, setNew ) )
+            {
+                listener.accept( t );
+            }
+        } );
+    }
+
+    public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                   PairConsumer<? super T> listener )
+    {
+        return onElementRemoved( var, EMPTY_FLAGS, listener );
+    }
+
+    public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                   ListenerFlag flag,
+                                                   PairConsumer<? super T> listener )
+    {
+        return onElementRemoved( var, flags( flag ), listener );
+    }
+
+    public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
+                                                   Set<? extends ListenerFlag> flags,
+                                                   PairConsumer<? super T> listener )
+    {
+        return addOldNewListener( var, flags, ( ongoing, setOld0, setNew0 ) ->
+        {
+            Set<T> setOld = ImmutableSet.copyOf( firstNonNull( setOld0, ImmutableSet.of( ) ) );
+            Set<T> setNew = ImmutableSet.copyOf( firstNonNull( setNew0, ImmutableSet.of( ) ) );
+            for ( T t : difference( setOld, setNew ) )
+            {
+                listener.accept( ongoing, t );
+            }
+        } );
+    }
+
+    protected static <K,V> ImmutableMap<K,V> mapWith( ImmutableMap<K,V> map, K key, Function<? super V,? extends V> transformFn )
+    {
+        V value = transformFn.apply( map.get( key ) );
+        return mapWith( map, key, value );
+    }
+
+    protected static <K,V> ImmutableMap<K,V> mapWith( ImmutableMap<K,V> map, K key, V value )
+    {
+        if ( equal( value, map.get( key ) ) )
+        {
+            return map;
+        }
+        else
+        {
+            Map<K,V> newMap = new LinkedHashMap<>( map );
+            if ( value == null )
+            {
+                newMap.remove( key );
+            }
+            else
+            {
+                newMap.put( key, value );
+            }
+            return ImmutableMap.copyOf( newMap );
+        }
+    }
+
+    @SafeVarargs
+    protected static <V> ImmutableSet<V> setMinus( ImmutableSet<V> set, V... values )
+    {
+        Set<V> newSet = new LinkedHashSet<>( set );
+
+        boolean changed = false;
+        for ( V value : values )
+        {
+            changed |= newSet.remove( value );
+        }
+
+        return ( changed ? ImmutableSet.copyOf( newSet ) : set );
+    }
+
+}

@@ -7,31 +7,13 @@
         <version>CURRENT-SNAPSHOT</version>
     </parent>
 
-    <artifactId>glimpse-util</artifactId>
+    <artifactId>glimpse-var2</artifactId>
 
     <dependencies>
 
         <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-            <version>8.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>23.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-var</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-var2</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
