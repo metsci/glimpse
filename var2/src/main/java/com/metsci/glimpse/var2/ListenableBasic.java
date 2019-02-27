@@ -1,12 +1,12 @@
 package com.metsci.glimpse.var2;
 
-import static com.metsci.glimpse.var2.Txn.addToActiveTxn;
+import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.metsci.glimpse.util.var.Disposable;
-import com.metsci.glimpse.var2.Txn.TxnMember;
+import com.metsci.glimpse.util.var.TxnMember;
 
 public class ListenableBasic implements Listenable
 {
@@ -62,18 +62,6 @@ public class ListenableBasic implements Listenable
     {
         addToActiveTxn( new TxnMember( )
         {
-            @Override
-            public void rollback( )
-            {
-                // Do nothing
-            }
-
-            @Override
-            public void commit( )
-            {
-                // Do nothing
-            }
-
             @Override
             public void postCommit( )
             {

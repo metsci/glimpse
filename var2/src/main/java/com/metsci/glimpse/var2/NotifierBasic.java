@@ -1,13 +1,13 @@
 package com.metsci.glimpse.var2;
 
-import static com.metsci.glimpse.var2.Txn.addToActiveTxn;
+import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import com.metsci.glimpse.util.var.Disposable;
-import com.metsci.glimpse.var2.Txn.TxnMember;
+import com.metsci.glimpse.util.var.TxnMember;
 
 public class NotifierBasic<T> implements Notifier<T>
 {

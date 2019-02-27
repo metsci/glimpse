@@ -1,4 +1,4 @@
-package com.metsci.glimpse.var2;
+package com.metsci.glimpse.util.var;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -7,41 +7,21 @@ import java.util.function.Supplier;
 public class Txn
 {
 
-    public static interface TxnMember
-    {
-        /**
-         * Implementations of this method must always succeed, and must never
-         * throw exceptions.
-         */
-        void rollback( );
-
-        /**
-         * Implementations of this method must always succeed, and must never
-         * throw exceptions.
-         */
-        void commit( );
-
-        /**
-         * Implementations of this method may fail, and may throw exceptions.
-         * <p>
-         * If an impl throws an exception, the {@link Txn}'s post-commit sequence
-         * terminates immediately, without performing any post-commit operations
-         * for subsequent members.
-         */
-        void postCommit( );
-    }
-
-
     protected static final ThreadLocal<LinkedHashSet<TxnMember>> activeTxns = new ThreadLocal<>( );
 
-
-    protected static void addToActiveTxn( TxnMember member )
+    /**
+     * Generally, this method shouldn't be called directly from application
+     * code. It is public to allow new utilities to be implemented in ways
+     * that use the {@link Txn} mechanism.
+     */
+    public static void addToActiveTxn( TxnMember member )
     {
         Set<TxnMember> txn = activeTxns.get( );
         if ( txn == null )
         {
             // No active txn, so commit immediately
             member.commit( );
+            member.postCommit( );
         }
         else
         {

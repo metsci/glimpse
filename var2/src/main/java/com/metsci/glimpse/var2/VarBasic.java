@@ -1,12 +1,12 @@
 package com.metsci.glimpse.var2;
 
-import static com.metsci.glimpse.var2.Txn.addToActiveTxn;
+import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
 
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.metsci.glimpse.util.var.InvalidValueException;
-import com.metsci.glimpse.var2.Txn.TxnMember;
+import com.metsci.glimpse.util.var.TxnMember;
 
 public class VarBasic<V> extends ListenablePairBasic implements Var<V>
 {
@@ -60,7 +60,7 @@ public class VarBasic<V> extends ListenablePairBasic implements Var<V>
         {
             this.requireValid( value );
 
-            // If this will be the first change since the start of thecurrent
+            // If this will be the first change since the start of the current
             // txn, register a TxnMember to handle the possibility of rollback
             if ( !this.hasTxnMember )
             {
@@ -79,12 +79,6 @@ public class VarBasic<V> extends ListenablePairBasic implements Var<V>
                     public void commit( )
                     {
                         VarBasic.this.hasTxnMember = false;
-                    }
-
-                    @Override
-                    public void postCommit( )
-                    {
-                        // Do nothing
                     }
                 } );
             }

@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util.var;
 
+import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -39,50 +41,14 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     protected static final VarEvent syntheticEvent = new VarEvent( false );
 
 
-    protected static final ThreadLocal<VarTxn> activeTxn = new ThreadLocal<>( );
-
     public static void doTxn( Runnable task )
     {
-        doTxn( ( ) ->
-        {
-            task.run( );
-            return null;
-        } );
+        Txn.doTxn( task );
     }
 
     public static <T> T doTxn( Supplier<T> task )
     {
-        if ( activeTxn.get( ) == null )
-        {
-            T result;
-            VarTxn txn = new VarTxn( );
-            activeTxn.set( txn );
-            try
-            {
-                result = task.get( );
-            }
-            catch ( Exception e )
-            {
-                // Re-throwing the exception will pop us out of the method,
-                // so exactly one of rollback() or commit() will be called
-                txn.rollback( );
-                throw e;
-            }
-            finally
-            {
-                activeTxn.set( null );
-            }
-
-            // Guaranteed to commit the new values successfully; may then
-            // throw an exception while firing listeners, which is okay
-            txn.commit( );
-            return result;
-        }
-        else
-        {
-            // Already inside a txn
-            return task.get( );
-        }
+        return Txn.doTxn( task );
     }
 
 
@@ -91,11 +57,9 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     protected Var<V> parent;
     protected final Set<Var<V>> children;
 
-    protected V rollbackValue;
-    protected boolean rollbackOngoing;
-
     protected V value;
     protected boolean ongoing;
+    protected boolean hasTxnMember;
 
 
     public Var( V value )
@@ -110,11 +74,9 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         this.parent = null;
         this.children = new CopyOnWriteArraySet<>( );
 
-        this.rollbackValue = null;
-        this.rollbackOngoing = false;
-
         this.value = this.requireValid( value );
         this.ongoing = false;
+        this.hasTxnMember = false;
     }
 
     public boolean isValid( V value )
@@ -129,6 +91,11 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     public void setParent( Var<V> parent )
     {
+        if ( this.hasTxnMember )
+        {
+            throw new RuntimeException( "Var's parent cannot be changed while a txn is pending" );
+        }
+
         if ( this.parent != null )
         {
             this.parent.children.remove( this );
@@ -178,18 +145,41 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         {
             Var<V> root = this.root( );
             root.requireValidForSubtree( value );
+
+            if ( !root.hasTxnMember )
+            {
+                root.hasTxnMember = true;
+
+                V rollbackValue = root.value;
+                boolean rollbackOngoing = root.ongoing;
+
+                addToActiveTxn( new TxnMember( )
+                {
+                    @Override
+                    public void rollback( )
+                    {
+                        root.setForSubtree( rollbackOngoing, rollbackValue );
+                        root.hasTxnMember = false;
+                    }
+
+                    @Override
+                    public void commit( )
+                    {
+                        root.hasTxnMember = false;
+                    }
+                } );
+            }
+
             root.setForSubtree( ongoing, value );
 
-            VarTxn txn = activeTxn.get( );
-            if ( txn == null )
+            addToActiveTxn( new TxnMember( )
             {
-                root.commitForSubtree( );
-                root.fireForSubtree( new VarEvent( ongoing ) );
-            }
-            else
-            {
-                txn.recordSubtreeMod( root, new VarEvent( ongoing ) );
-            }
+                @Override
+                public void postCommit( )
+                {
+                    root.fireForSubtree( new VarEvent( ongoing ) );
+                }
+            } );
         }
         return this.value;
     }
@@ -234,9 +224,6 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     protected void setForSubtree( boolean ongoing, V value )
     {
-        this.rollbackValue = this.value;
-        this.rollbackOngoing = this.ongoing;
-
         this.value = value;
         this.ongoing = ongoing;
 
@@ -246,43 +233,6 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         }
     }
 
-    /**
-     * This method is protected to discourage access from client code, while still allowing
-     * access from {@link Txn}.
-     */
-    protected void commitForSubtree( )
-    {
-        this.rollbackValue = null;
-        this.rollbackOngoing = false;
-
-        for ( Var<V> child : this.children )
-        {
-            child.commitForSubtree( );
-        }
-    }
-
-    /**
-     * This method is protected to discourage access from client code, while still allowing
-     * access from {@link Txn}.
-     */
-    protected void rollbackForSubtree( )
-    {
-        this.value = this.rollbackValue;
-        this.ongoing = this.rollbackOngoing;
-
-        this.rollbackValue = null;
-        this.rollbackOngoing = false;
-
-        for ( Var<V> child : this.children )
-        {
-            child.rollbackForSubtree( );
-        }
-    }
-
-    /**
-     * This method is protected to discourage access from client code, while still allowing
-     * access from {@link Txn}.
-     */
     protected void fireForSubtree( VarEvent ev )
     {
         this.fire( ev );
