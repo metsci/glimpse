@@ -223,7 +223,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     {
         if ( !this.validateFn.test( value ) )
         {
-            throw new InvalidValueException( this, value );
+            throw new InvalidValueException( "Value was rejected by this Var's validate function: var = " + this + ", value = " + value );
         }
 
         for ( Var<V> child : this.children )
