@@ -26,13 +26,13 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static com.google.common.base.Objects.*;
-import static com.google.common.collect.Sets.*;
-import static com.metsci.glimpse.util.ImmutableCollectionUtils.*;
-import static java.util.Collections.*;
+import static com.google.common.base.Objects.equal;
+import static com.google.common.collect.Sets.difference;
+import static java.util.Collections.emptySet;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -301,6 +301,27 @@ public class VarUtils
         {
             return mapWith( map, key, value );
         } );
+    }
+
+    protected static <K,V> ImmutableMap<K,V> mapWith( ImmutableMap<K,V> map, K key, V value )
+    {
+        if ( equal( value, map.get( key ) ) )
+        {
+            return map;
+        }
+        else
+        {
+            Map<K,V> newMap = new LinkedHashMap<>( map );
+            if ( value == null )
+            {
+                newMap.remove( key );
+            }
+            else
+            {
+                newMap.put( key, value );
+            }
+            return ImmutableMap.copyOf( newMap );
+        }
     }
 
 }

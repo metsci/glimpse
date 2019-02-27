@@ -54,6 +54,7 @@
 
         <module>util</module>
         <module>util-examples</module>
+        <module>var</module>
 
         <module>text</module>
 
@@ -70,7 +71,7 @@
 
         <module>wizard</module>
         <module>wizard-examples</module>
-        
+
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>

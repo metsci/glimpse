@@ -26,9 +26,7 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static com.google.common.base.Objects.*;
-import static com.metsci.glimpse.util.PredicateUtils.*;
-
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
@@ -102,7 +100,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     public Var( V value )
     {
-        this( value, alwaysTrue );
+        this( value, v -> true );
     }
 
     public Var( V value, Predicate<? super V> validateFn )
@@ -140,7 +138,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         if ( parent != null )
         {
             // Make sure child state exactly matches parent state, to keep the tree consistent
-            if ( this.ongoing != parent.ongoing || !equal( this.value, parent.value ) )
+            if ( this.ongoing != parent.ongoing || !Objects.equals( this.value, parent.value ) )
             {
                 this.requireValidForSubtree( parent.value );
                 this.setForSubtree( parent.ongoing, parent.value );
@@ -176,7 +174,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     public V set( boolean ongoing, V value )
     {
         // Update if value has changed, or if changes were previously ongoing but no longer are
-        if ( ( !ongoing && this.ongoing ) || !equal( value, this.value ) )
+        if ( ( !ongoing && this.ongoing ) || !Objects.equals( value, this.value ) )
         {
             Var<V> root = this.root( );
             root.requireValidForSubtree( value );
