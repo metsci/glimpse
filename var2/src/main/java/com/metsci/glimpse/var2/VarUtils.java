@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -127,6 +128,91 @@ public class VarUtils
             public boolean set( boolean ongoing, V value )
             {
                 return putMapValue( mapVar, ongoing, keyVar.v( ), value );
+            }
+        };
+    }
+
+    /**
+     * When modifying the returned var, don't add mappings for keys that are not in {@code keysVar}.
+     * Such mappings will be ignored.
+     * <p>
+     * Currently, no attempt is made to preserve the iteration order of {@code mapVar}. This might
+     * change in the future.
+     */
+    public static <K,V,K2 extends K> Var<ImmutableMap<K,V>> mapSubsetVar( Var<ImmutableMap<K,V>> mapVar, ReadableVar<? extends Set<K2>> keysVar )
+    {
+        return new VarDerived<ImmutableMap<K,V>>( mapVar, keysVar )
+        {
+            protected Map<K,V> mapCached = null;
+            protected Set<K2> keysCached = null;
+            protected ImmutableMap<K,V> submapCached = null;
+
+            @Override
+            public ImmutableMap<K,V> v( )
+            {
+                Map<K,V> map = mapVar.v( );
+                Set<K2> keys = keysVar.v( );
+                if ( map == this.mapCached && keys == this.keysCached )
+                {
+                    return this.submapCached;
+                }
+                else
+                {
+                    Map<K,V> submap = new LinkedHashMap<>( );
+                    for ( K2 key : keys )
+                    {
+                        V value = map.get( key );
+                        if ( value != null )
+                        {
+                            submap.put( key, value );
+                        }
+                    }
+                    this.mapCached = map;
+                    this.keysCached = keys;
+                    this.submapCached = ImmutableMap.copyOf( submap );
+                    return this.submapCached;
+                }
+            }
+
+            @Override
+            public boolean set( boolean ongoing, ImmutableMap<K,V> submap )
+            {
+                return mapVar.updateIfNonNull( ongoing, oldMap ->
+                {
+                    Map<K,V> newMap = new LinkedHashMap<>( oldMap );
+                    for ( K2 key : keysVar.v( ) )
+                    {
+                        V value = submap.get( key );
+                        if ( value == null )
+                        {
+                            newMap.remove( key );
+                        }
+                        else
+                        {
+                            newMap.put( key, value );
+                        }
+                    }
+                    return ImmutableMap.copyOf( newMap );
+                } );
+            }
+        };
+    }
+
+    public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn )
+    {
+        return new VarDerived<B>( ownerVar )
+        {
+            @Override
+            public B v( )
+            {
+                A owner = ownerVar.v( );
+                return ( owner == null ? null : getFn.apply( owner ) );
+            }
+
+            @Override
+            public boolean set( boolean ongoing, B value )
+            {
+                return ownerVar.updateIfNonNull( ongoing, owner -> updateFn.apply( owner, value ) );
             }
         };
     }
