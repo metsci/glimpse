@@ -1,6 +1,5 @@
 package com.metsci.glimpse.var2;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.metsci.glimpse.var2.ListenerFlag.EMPTY_FLAGS;
 import static com.metsci.glimpse.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.var2.ListenerFlag.ONCE;
@@ -10,6 +9,7 @@ import static com.metsci.glimpse.var2.VarUtils.setMinus;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 
@@ -78,7 +78,7 @@ public interface ListenablePair
 
         DisposableGroup disposables = new DisposableGroup( );
 
-        Set<ListenerFlag> flags2 = setMinus( copyOf( flags ), IMMEDIATE, ONCE );
+        Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE, ONCE );
 
         if ( flags.contains( ONCE ) )
         {

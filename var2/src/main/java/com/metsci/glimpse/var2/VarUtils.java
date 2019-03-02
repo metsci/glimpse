@@ -372,9 +372,19 @@ public class VarUtils
                                                                   Set<? extends ListenerFlag> flags,
                                                                   OldNewListener<V0> listener )
     {
-        return member.apply( var ).addListener( flags, new Runnable( )
+        if ( flags.contains( IMMEDIATE ) )
         {
-            V vPrev = null;
+            listener.accept( null, var.v( ) );
+            if ( flags.contains( ONCE ) )
+            {
+                return ( ) -> { };
+            }
+        }
+
+        Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
+        return member.apply( var ).addListener( flags2, new Runnable( )
+        {
+            V vPrev = var.v( );
 
             @Override
             public void run( )
@@ -410,9 +420,19 @@ public class VarUtils
                                                                   Set<? extends ListenerFlag> flags,
                                                                   OldNewPairListener<V0> listener )
     {
-        return var.addListener( flags, new ListenablePairListener( )
+        if ( flags.contains( IMMEDIATE ) )
         {
-            V vPrev = null;
+            listener.accept( false, null, var.v( ) );
+            if ( flags.contains( ONCE ) )
+            {
+                return ( ) -> { };
+            }
+        }
+
+        Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
+        return var.addListener( flags2, new ListenablePairListener( )
+        {
+            V vPrev = var.v( );
 
             @Override
             public void run( boolean ongoing )
