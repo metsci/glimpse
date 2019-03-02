@@ -7,7 +7,7 @@ import static java.util.Arrays.asList;
 
 import java.util.Collection;
 
-public class ListenablePairGroup implements ListenablePair
+public class ListenablePairSet implements ListenablePair
 {
 
     protected final Listenable ongoing;
@@ -16,12 +16,12 @@ public class ListenablePairGroup implements ListenablePair
 
 
     @SafeVarargs
-    public ListenablePairGroup( ListenablePair... members )
+    public ListenablePairSet( ListenablePair... members )
     {
         this( asList( members ) );
     }
 
-    public ListenablePairGroup( Collection<? extends ListenablePair> members )
+    public ListenablePairSet( Collection<? extends ListenablePair> members )
     {
         this.ongoing = ongoingListenable( members );
         this.completed = completedListenable( members );

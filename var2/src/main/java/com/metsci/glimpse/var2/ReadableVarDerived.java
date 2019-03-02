@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 
 import java.util.Collection;
 
-public abstract class ReadableVarDerived<V> extends ListenablePairGroup implements ReadableVar<V>
+public abstract class ReadableVarDerived<V> extends ListenablePairSet implements ReadableVar<V>
 {
 
     @SafeVarargs

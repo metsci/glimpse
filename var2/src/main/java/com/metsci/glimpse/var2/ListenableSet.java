@@ -7,26 +7,49 @@ import static com.metsci.glimpse.var2.VarUtils.setMinus;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 
-public class ListenableGroup implements Listenable
+public class ListenableSet implements Listenable
 {
 
-    protected final CopyOnWriteArrayList<Listenable> members;
+    protected final ImmutableSet<Listenable> members;
 
 
-    public ListenableGroup( Listenable... members )
+    public ListenableSet( Listenable... members )
     {
         this( asList( members ) );
     }
 
-    public ListenableGroup( Collection<? extends Listenable> members )
+    public ListenableSet( Collection<? extends Listenable> members )
     {
-        this.members = new CopyOnWriteArrayList<>( members );
+        this.members = ImmutableSet.copyOf( findLeafListenables( members ) );
+    }
+
+    protected static Set<Listenable> findLeafListenables( Collection<? extends Listenable> listenables )
+    {
+        Set<Listenable> results = new LinkedHashSet<>( );
+        addLeafListenables( listenables, results );
+        return results;
+    }
+
+    protected static void addLeafListenables( Collection<? extends Listenable> listenables, Set<Listenable> results )
+    {
+        for ( Listenable listenable : listenables )
+        {
+            if ( listenable instanceof ListenableSet )
+            {
+                addLeafListenables( ( ( ListenableSet ) listenable ).members, results );
+            }
+            else
+            {
+                results.add( listenable );
+            }
+        }
     }
 
     @Override

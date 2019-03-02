@@ -34,12 +34,12 @@ public class VarUtils
     @SafeVarargs
     public static Listenable listenable( Listenable... listenables )
     {
-        return new ListenableGroup( listenables );
+        return new ListenableSet( listenables );
     }
 
     public static Listenable listenable( Collection<? extends Listenable> listenables )
     {
-        return new ListenableGroup( listenables );
+        return new ListenableSet( listenables );
     }
 
     @SafeVarargs
@@ -50,7 +50,7 @@ public class VarUtils
 
     public static Listenable ongoingListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableGroup( mapCollection( pairs, pair -> pair.ongoing( ) ) );
+        return new ListenableSet( mapCollection( pairs, pair -> pair.ongoing( ) ) );
     }
 
     @SafeVarargs
@@ -61,7 +61,7 @@ public class VarUtils
 
     public static Listenable completedListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableGroup( mapCollection( pairs, pair -> pair.completed( ) ) );
+        return new ListenableSet( mapCollection( pairs, pair -> pair.completed( ) ) );
     }
 
     @SafeVarargs
@@ -72,7 +72,7 @@ public class VarUtils
 
     public static Listenable allListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableGroup( mapCollection( pairs, pair -> pair.all( ) ) );
+        return new ListenableSet( mapCollection( pairs, pair -> pair.all( ) ) );
     }
 
     @SafeVarargs
@@ -83,7 +83,7 @@ public class VarUtils
 
     public static ListenablePair listenablePair( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenablePairGroup( pairs );
+        return new ListenablePairSet( pairs );
     }
 
     public static <T,R> Collection<R> mapCollection( Collection<T> ts, Function<? super T,? extends R> fn )
@@ -213,6 +213,19 @@ public class VarUtils
             public boolean set( boolean ongoing, B value )
             {
                 return ownerVar.updateIfNonNull( ongoing, owner -> updateFn.apply( owner, value ) );
+            }
+        };
+    }
+
+    public static <A,B> ReadableVar<B> propertyVar( ReadableVar<A> ownerVar, Function<? super A,? extends B> getFn )
+    {
+        return new ReadableVarDerived<B>( ownerVar )
+        {
+            @Override
+            public B v( )
+            {
+                A owner = ownerVar.v( );
+                return ( owner == null ? null : getFn.apply( owner ) );
             }
         };
     }
