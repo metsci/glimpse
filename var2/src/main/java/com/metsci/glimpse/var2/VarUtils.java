@@ -384,20 +384,20 @@ public class VarUtils
         Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
         return member.apply( var ).addListener( flags2, new Runnable( )
         {
-            V vPrev = var.v( );
+            V value = var.v( );
 
             @Override
             public void run( )
             {
-                V vOld = this.vPrev;
-                V vNew = var.v( );
-
-                // Update vPrev BEFORE firing the listener, in case the listener triggers this method again
-                this.vPrev = vNew;
-
-                if ( !equal( vNew, vOld ) )
+                V value = var.v( );
+                if ( !equal( value, this.value ) )
                 {
-                    listener.accept( vOld, vNew );
+                    // Update current value
+                    V oldValue = this.value;
+                    this.value = value;
+
+                    // Fire listeners
+                    listener.accept( oldValue, value );
                 }
             }
         } );
@@ -432,20 +432,26 @@ public class VarUtils
         Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
         return var.addListener( flags2, new ListenablePairListener( )
         {
-            V vPrev = var.v( );
+            V value = var.v( );
+            boolean hasOngoingChanges = false;
 
             @Override
             public void run( boolean ongoing )
             {
-                V vOld = this.vPrev;
-                V vNew = var.v( );
-
-                // Update vPrev BEFORE firing the listener, in case the listener triggers this method again
-                this.vPrev = vNew;
-
-                if ( !equal( vNew, vOld ) )
+                V value = var.v( );
+                if ( ( !ongoing && this.hasOngoingChanges ) || !equal( value, this.value ) )
                 {
-                    listener.accept( ongoing, vOld, vNew );
+                    // Update current value
+                    V oldValue = this.value;
+                    this.value = value;
+
+                    // Keep track of whether we've seen any ongoing changes since
+                    // the last completed change -- the current change is either
+                    // ongoing (set the flag), or completed (clear the flag)
+                    this.hasOngoingChanges = ongoing;
+
+                    // Fire listeners
+                    listener.accept( ongoing, oldValue, value );
                 }
             }
         } );
