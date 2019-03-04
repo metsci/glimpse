@@ -1,13 +1,11 @@
 package com.metsci.glimpse.var2;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.metsci.glimpse.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.var2.ListenerFlag.ONCE;
+import static com.metsci.glimpse.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.var2.VarUtils.setMinus;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -27,60 +25,38 @@ public class ListenableSet implements Listenable
 
     public ListenableSet( Collection<? extends Listenable> members )
     {
-        this.members = ImmutableSet.copyOf( findLeafListenables( members ) );
-    }
-
-    protected static Set<Listenable> findLeafListenables( Collection<? extends Listenable> listenables )
-    {
-        Set<Listenable> results = new LinkedHashSet<>( );
-        addLeafListenables( listenables, results );
-        return results;
-    }
-
-    protected static void addLeafListenables( Collection<? extends Listenable> listenables, Set<Listenable> results )
-    {
-        for ( Listenable listenable : listenables )
-        {
-            if ( listenable instanceof ListenableSet )
-            {
-                addLeafListenables( ( ( ListenableSet ) listenable ).members, results );
-            }
-            else
-            {
-                results.add( listenable );
-            }
-        }
+        this.members = ImmutableSet.copyOf( members );
     }
 
     @Override
     public Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
     {
-        if ( flags.contains( IMMEDIATE ) )
+        return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            listener.run( );
+            DisposableGroup disposables = new DisposableGroup( );
             if ( flags.contains( ONCE ) )
             {
-                return ( ) -> { };
+                Set<ListenerFlag> flags3 = setMinus( ImmutableSet.copyOf( flags ), ONCE );
+                Runnable listener2 = ( ) ->
+                {
+                    listener.run( );
+                    disposables.dispose( );
+                    disposables.clear( );
+                };
+                for ( Listenable member : this.members )
+                {
+                    disposables.add( member.addListener( flags3, listener2 ) );
+                }
             }
-        }
-
-        DisposableGroup disposables = new DisposableGroup( );
-
-        Set<ListenerFlag> flags2 = setMinus( copyOf( flags ), IMMEDIATE, ONCE );
-
-        Runnable listener2 = ( !flags.contains( ONCE ) ? listener : ( ) ->
-        {
-            listener.run( );
-            disposables.dispose( );
-            disposables.clear( );
+            else
+            {
+                for ( Listenable member : this.members )
+                {
+                    disposables.add( member.addListener( flags2, listener ) );
+                }
+            }
+            return disposables;
         } );
-
-        for ( Listenable member : this.members )
-        {
-            disposables.add( member.addListener( flags2, listener2 ) );
-        }
-
-        return disposables;
     }
 
 }

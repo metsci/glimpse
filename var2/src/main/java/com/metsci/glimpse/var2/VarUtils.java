@@ -22,6 +22,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
@@ -36,7 +37,7 @@ public class VarUtils
     @SafeVarargs
     public static Listenable listenable( Listenable... listenables )
     {
-        return new ListenableSet( listenables );
+        return listenable( asList( listenables ) );
     }
 
     public static Listenable listenable( Collection<? extends Listenable> listenables )
@@ -52,7 +53,7 @@ public class VarUtils
 
     public static Listenable completedListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableSet( mapCollection( pairs, COMPLETED ) );
+        return listenable( mapCollection( pairs, COMPLETED ) );
     }
 
     @SafeVarargs
@@ -63,7 +64,7 @@ public class VarUtils
 
     public static Listenable allListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableSet( mapCollection( pairs, ALL ) );
+        return listenable( mapCollection( pairs, ALL ) );
     }
 
     @SafeVarargs
@@ -267,6 +268,15 @@ public class VarUtils
             {
                 return this.all;
             }
+
+            @Override
+            public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+            {
+                return doHandleImmediateFlag( flags, listener, flags2 ->
+                {
+                    return doAddPairListener( this.ongoing, this.completed, flags2, listener );
+                } );
+            }
         };
     }
 
@@ -381,15 +391,12 @@ public class VarUtils
             @Override
             public void run( )
             {
-                V value = var.v( );
-                if ( !equal( value, this.value ) )
+                V oldValue = this.value;
+                V newValue = var.v( );
+                if ( !equal( newValue, oldValue ) )
                 {
-                    // Update current value
-                    V oldValue = this.value;
-                    this.value = value;
-
-                    // Fire listeners
-                    listener.accept( oldValue, value );
+                    this.value = newValue;
+                    listener.accept( oldValue, newValue );
                 }
             }
         } );
@@ -430,12 +437,12 @@ public class VarUtils
             @Override
             public void run( boolean ongoing )
             {
-                V value = var.v( );
-                if ( ( !ongoing && this.hasOngoingChanges ) || !equal( value, this.value ) )
+                V oldValue = this.value;
+                V newValue = var.v( );
+                if ( ( !ongoing && this.hasOngoingChanges ) || !equal( newValue, oldValue ) )
                 {
                     // Update current value
-                    V oldValue = this.value;
-                    this.value = value;
+                    this.value = newValue;
 
                     // Keep track of whether we've seen any ongoing changes since
                     // the last completed change -- the current change is either
@@ -443,10 +450,143 @@ public class VarUtils
                     this.hasOngoingChanges = ongoing;
 
                     // Fire listeners
-                    listener.accept( ongoing, oldValue, value );
+                    listener.accept( ongoing, oldValue, newValue );
                 }
             }
         } );
+    }
+
+    public static <V> Listenable filterListenable( Listenable rawListenable, Supplier<V> valueFn )
+    {
+        return new Listenable( )
+        {
+            @Override
+            public Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
+            {
+                if ( flags.contains( IMMEDIATE ) )
+                {
+                    listener.run( );
+                    if ( flags.contains( ONCE ) )
+                    {
+                        return ( ) -> { };
+                    }
+                }
+                Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
+                return rawListenable.addListener( flags2, filterListener( listener, valueFn ) );
+            }
+        };
+    }
+
+    public static <V> Runnable filterListener( Runnable rawListener, Supplier<V> valueFn )
+    {
+        return new Runnable( )
+        {
+            V value = valueFn.get( );
+
+            @Override
+            public void run( )
+            {
+                V oldValue = this.value;
+                V newValue = valueFn.get( );
+                if ( !equal( newValue, oldValue ) )
+                {
+                    this.value = newValue;
+                    rawListener.run( );
+                }
+            }
+        };
+    }
+
+    public static <V> ListenablePairListener filterListener( ListenablePairListener rawListener, Supplier<V> valueFn )
+    {
+        return new ListenablePairListener( )
+        {
+            V value = valueFn.get( );
+            boolean hasOngoingChanges = false;
+
+            @Override
+            public void run( boolean ongoing )
+            {
+                V oldValue = this.value;
+                V newValue = valueFn.get( );
+                if ( ( !ongoing && this.hasOngoingChanges ) || !equal( newValue, oldValue ) )
+                {
+                    // Update current value
+                    this.value = newValue;
+
+                    // Keep track of whether we've seen any ongoing changes since
+                    // the last completed change -- the current change is either
+                    // ongoing (set the flag), or completed (clear the flag)
+                    this.hasOngoingChanges = ongoing;
+
+                    // Fire listeners
+                    rawListener.run( ongoing );
+                }
+            }
+        };
+    }
+
+    public static Disposable doHandleImmediateFlag( Set<? extends ListenerFlag> flags,
+                                                    Runnable immediateListener,
+                                                    Function<? super Set<? extends ListenerFlag>,? extends Disposable> doAddListener )
+    {
+        if ( flags.contains( IMMEDIATE ) )
+        {
+            immediateListener.run( );
+            if ( flags.contains( ONCE ) )
+            {
+                return ( ) -> { };
+            }
+        }
+        Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
+        return doAddListener.apply( flags2 );
+    }
+
+    public static Disposable doHandleImmediateFlag( Set<? extends ListenerFlag> flags,
+                                                    ListenablePairListener listener,
+                                                    Function<? super Set<? extends ListenerFlag>,? extends Disposable> doAddListener )
+    {
+        Runnable immediateListener = ( ) -> listener.run( false );
+        return doHandleImmediateFlag( flags, immediateListener, doAddListener );
+    }
+
+    public static Disposable doAddPairListener( Listenable ongoing,
+                                                Listenable completed,
+                                                Set<? extends ListenerFlag> flags,
+                                                ListenablePairListener listener )
+    {
+        DisposableGroup disposables = new DisposableGroup( );
+        if ( flags.contains( ONCE ) )
+        {
+            Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), ONCE );
+
+            disposables.add( ongoing.addListener( flags2, ( ) ->
+            {
+                listener.run( true );
+                disposables.dispose( );
+                disposables.clear( );
+            } ) );
+
+            disposables.add( completed.addListener( flags2, ( ) ->
+            {
+                listener.run( false );
+                disposables.dispose( );
+                disposables.clear( );
+            } ) );
+        }
+        else
+        {
+            disposables.add( ongoing.addListener( flags, ( ) ->
+            {
+                listener.run( true );
+            } ) );
+
+            disposables.add( completed.addListener( flags, ( ) ->
+            {
+                listener.run( false );
+            } ) );
+        }
+        return disposables;
     }
 
     public static interface OldNewMapEntryListener<K,V>

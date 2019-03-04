@@ -1,6 +1,12 @@
 package com.metsci.glimpse.var2;
 
+import static com.metsci.glimpse.var2.VarUtils.doAddPairListener;
+import static com.metsci.glimpse.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.var2.VarUtils.listenable;
+
+import java.util.Set;
+
+import com.metsci.glimpse.util.var.Disposable;
 
 public class ListenablePairBasic implements ListenablePair
 {
@@ -8,6 +14,7 @@ public class ListenablePairBasic implements ListenablePair
     protected final ListenableBasic ongoing;
     protected final ListenableBasic completed;
     protected final Listenable all;
+
 
     public ListenablePairBasic( )
     {
@@ -38,6 +45,15 @@ public class ListenablePairBasic implements ListenablePair
     public Listenable all( )
     {
         return this.all;
+    }
+
+    @Override
+    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    {
+        return doHandleImmediateFlag( flags, listener, flags2 ->
+        {
+            return doAddPairListener( this.ongoing, this.completed, flags2, listener );
+        } );
     }
 
 }

@@ -2,14 +2,29 @@ package com.metsci.glimpse.var2;
 
 import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
+import static com.metsci.glimpse.var2.VarUtils.doAddPairListener;
+import static com.metsci.glimpse.var2.VarUtils.doHandleImmediateFlag;
+import static com.metsci.glimpse.var2.VarUtils.filterListenable;
+import static com.metsci.glimpse.var2.VarUtils.filterListener;
+import static com.metsci.glimpse.var2.VarUtils.listenable;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
+import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.InvalidValueException;
 import com.metsci.glimpse.util.var.TxnMember;
 
-public class VarBasic<V> extends ListenablePairBasic implements Var<V>
+public class VarBasic<V> implements Var<V>
 {
+
+    protected final ListenableBasic ongoingRaw;
+    protected final ListenableBasic completedRaw;
+    protected final Listenable allRaw;
+
+    protected final Listenable ongoingFiltered;
+    protected final Listenable completedFiltered;
+    protected final Listenable allFiltered;
 
     protected final Predicate<? super V> validateFn;
     protected V value;
@@ -24,6 +39,14 @@ public class VarBasic<V> extends ListenablePairBasic implements Var<V>
 
     public VarBasic( V value, Predicate<? super V> validateFn )
     {
+        this.ongoingRaw = new ListenableBasic( );
+        this.completedRaw = new ListenableBasic( );
+        this.allRaw = listenable( this.ongoingRaw, this.completedRaw );
+
+        this.completedFiltered = filterListenable( this.completedRaw, this::v );
+        this.ongoingFiltered = filterListenable( this.ongoingRaw, this::v );
+        this.allFiltered = filterListenable( this.allRaw, this::v );
+
         this.validateFn = validateFn;
         this.value = this.requireValid( value );
         this.hasOngoingChanges = false;
@@ -92,7 +115,7 @@ public class VarBasic<V> extends ListenablePairBasic implements Var<V>
             this.hasOngoingChanges = ongoing;
 
             // Fire listeners on txn commit
-            this.fire( ongoing );
+            ( ongoing ? this.ongoingRaw : this.completedRaw ).fire( );
 
             return true;
         }
@@ -100,6 +123,35 @@ public class VarBasic<V> extends ListenablePairBasic implements Var<V>
         {
             return false;
         }
+    }
+
+    @Deprecated
+    @Override
+    public Listenable ongoing( )
+    {
+        return this.ongoingFiltered;
+    }
+
+    @Override
+    public Listenable completed( )
+    {
+        return this.completedFiltered;
+    }
+
+    @Override
+    public Listenable all( )
+    {
+        return this.allFiltered;
+    }
+
+    @Override
+    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    {
+        return doHandleImmediateFlag( flags, listener, flags2 ->
+        {
+            ListenablePairListener listener2 = filterListener( listener, this::v );
+            return doAddPairListener( this.ongoingRaw, this.completedRaw, flags2, listener2 );
+        } );
     }
 
 }

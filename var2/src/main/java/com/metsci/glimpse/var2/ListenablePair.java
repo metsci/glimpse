@@ -1,17 +1,12 @@
 package com.metsci.glimpse.var2;
 
 import static com.metsci.glimpse.var2.ListenerFlag.EMPTY_FLAGS;
-import static com.metsci.glimpse.var2.ListenerFlag.IMMEDIATE;
-import static com.metsci.glimpse.var2.ListenerFlag.ONCE;
 import static com.metsci.glimpse.var2.ListenerFlag.flags;
-import static com.metsci.glimpse.var2.VarUtils.setMinus;
 
 import java.util.Set;
 import java.util.function.Function;
 
-import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
-import com.metsci.glimpse.util.var.DisposableGroup;
 
 public interface ListenablePair
 {
@@ -81,52 +76,7 @@ public interface ListenablePair
         return this.addListener( EMPTY_FLAGS, listener );
     }
 
-    default Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
-    {
-        if ( flags.contains( IMMEDIATE ) )
-        {
-            listener.run( false );
-            if ( flags.contains( ONCE ) )
-            {
-                return ( ) -> { };
-            }
-        }
-
-        DisposableGroup disposables = new DisposableGroup( );
-
-        Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE, ONCE );
-
-        if ( flags.contains( ONCE ) )
-        {
-            disposables.add( this.ongoing( ).addListener( flags2, ( ) ->
-            {
-                listener.run( true );
-                disposables.dispose( );
-                disposables.clear( );
-            } ) );
-
-            disposables.add( this.completed( ).addListener( flags2, ( ) ->
-            {
-                listener.run( false );
-                disposables.dispose( );
-                disposables.clear( );
-            } ) );
-        }
-        else
-        {
-            disposables.add( this.ongoing( ).addListener( flags2, ( ) ->
-            {
-                listener.run( true );
-            } ) );
-
-            disposables.add( this.completed( ).addListener( flags2, ( ) ->
-            {
-                listener.run( false );
-            } ) );
-        }
-
-        return disposables;
-    }
+    Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener );
 
     default Disposable addListener( ListenerFlag flag, ListenablePairListener listener )
     {
