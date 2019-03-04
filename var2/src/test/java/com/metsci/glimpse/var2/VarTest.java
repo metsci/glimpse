@@ -4,6 +4,7 @@ import static com.metsci.glimpse.var2.VarTestUtils.f;
 import static com.metsci.glimpse.var2.VarUtils.addOldNewListener;
 import static com.metsci.glimpse.var2.VarUtils.listenablePair;
 import static com.metsci.glimpse.var2.VarUtils.mapValueVar;
+import static com.metsci.glimpse.var2.VarUtils.propertyVar;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -65,8 +66,8 @@ class VarTest
     @Test
     void listenableSetShouldDedupeDeps( )
     {
-        Var<ImmutableMap<String,String>> map1 = new VarBasic<>( ImmutableMap.of( ) );
-        Var<ImmutableMap<String,String>> map2 = new VarBasic<>( ImmutableMap.of( ) );
+        Var<ImmutableMap<String,String>> map1 = new VarBasic<>( ImmutableMap.of( "A", "m1vA", "B", "m1vB" ) );
+        Var<ImmutableMap<String,String>> map2 = new VarBasic<>( ImmutableMap.of( "A", "m2vA", "B", "m2vB" ) );
         Var<String> key = new VarBasic<>( "x" );
 
         Var<String> value1 = mapValueVar( map1, key );
@@ -84,6 +85,27 @@ class VarTest
         // even though both value1 and value2 depend on key
         key.set( "A" );
 
+        assertEquals( 1, fs.size( ) );
+    }
+
+    @Test
+    void derivedVarShouldFireIffDerivedValueChanges( )
+    {
+        Var<String> a = new VarBasic<>( "AAAA" );
+        ReadableVar<Integer> b = propertyVar( a, s -> s.length( ) );
+
+        List<Object> fs = new ArrayList<>( );
+        b.addListener( ( ) ->
+        {
+            fs.add( new Object( ) );
+        } );
+
+        // String length stays the same, so listener shouldn't run
+        a.set( "BBBB" );
+        assertEquals( 0, fs.size( ) );
+
+        // String length changes, so listener should run
+        a.set( "B" );
         assertEquals( 1, fs.size( ) );
     }
 
