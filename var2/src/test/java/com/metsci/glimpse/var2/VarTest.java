@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 class VarTest
@@ -94,19 +95,51 @@ class VarTest
         Var<String> a = new VarBasic<>( "AAAA" );
         ReadableVar<Integer> b = propertyVar( a, s -> s.length( ) );
 
-        List<Object> fs = new ArrayList<>( );
+        List<String> vs = new ArrayList<>( );
         b.addListener( ( ) ->
         {
-            fs.add( new Object( ) );
+            vs.add( a.v( ) );
         } );
 
         // String length stays the same, so listener shouldn't run
         a.set( "BBBB" );
-        assertEquals( 0, fs.size( ) );
+        assertEquals( 0, vs.size( ) );
 
         // String length changes, so listener should run
         a.set( "B" );
-        assertEquals( 1, fs.size( ) );
+        assertEquals( 1, vs.size( ) );
+    }
+
+    @Test
+    void basicVarShouldFireIffValueChanges( )
+    {
+        Var<String> a = new VarBasic<>( "x" );
+
+        a.addListener( ( ) ->
+        {
+            a.set( "B" );
+        } );
+
+        List<String> vs = new ArrayList<>( );
+        a.addListener( ( ) ->
+        {
+            vs.add( a.v( ) );
+        } );
+
+        // This is a little tricky:
+        //
+        //   set( A )
+        //   ├ listener1.run( )
+        //   │ └ set( B )
+        //   │   ├ listener1.run( )
+        //   │   └ listener2.run( )
+        //   └ listener2.run( )
+        //
+        // Note that listener2 runs twice -- but the value is B
+        // both times, so the second run should get filtered
+        a.set( "A" );
+
+        assertEquals( ImmutableList.of( "B" ), vs );
     }
 
 }
