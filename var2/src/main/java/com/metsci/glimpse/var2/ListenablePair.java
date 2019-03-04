@@ -17,11 +17,6 @@ public interface ListenablePair
 {
 
     /**
-     * Statically importable alias for {@link #ongoing()}.
-     */
-    static final Function<ListenablePair,Listenable> ONGOING = ListenablePair::ongoing;
-
-    /**
      * Statically importable alias for {@link #completed()}.
      */
     static final Function<ListenablePair,Listenable> COMPLETED = ListenablePair::completed;
@@ -32,15 +27,6 @@ public interface ListenablePair
     static final Function<ListenablePair,Listenable> ALL = ListenablePair::all;
 
     /**
-     * Includes notifications for ongoing events only.
-     * <p>
-     * In most cases you should use either {@link #all()} or {@link #completed()},
-     * but {@link #ongoing()} is useful in those rare situations where you need
-     * to listen to ongoing changes only.
-     */
-    Listenable ongoing( );
-
-    /**
      * Includes notifications for completed events only.
      */
     Listenable completed( );
@@ -49,6 +35,36 @@ public interface ListenablePair
      * Includes notifications for both ongoing and completed events.
      */
     Listenable all( );
+
+    /**
+     * Includes notifications for ongoing events only.
+     * <p>
+     * <strong>WARNING:</strong> Don't use this method unless you know what you're
+     * doing. It is very hard to use without introducing subtle bugs.
+     * <p>
+     * Conceptually, ongoing events don't form a complete sequence by themselves.
+     * This breaks assumptions behind most usage of this class. For example, consider
+     * the following sequence of value updates:
+     * <ol>
+     * <li>ongoing A
+     * <li>completed B
+     * <li>ongoing A
+     * </ol>
+     * If you listen to ongoing events only, you see:
+     * <ol>
+     * <li>ongoing A
+     * <li value="3">ongoing A
+     * </ol>
+     * This makes it look like event #3 is redundant, and can be ignored. But
+     * considering the original sequence, ignoring event #3 is probably a bug.
+     * Even worse, the bug is subtle and infrequent (only happens when value #3
+     * is identical to value #1). In general, you should avoid this method, and
+     * listen to {@link #all()} instead.
+     * <p>
+     * However, this method is necessary for supporting {@link ListenablePairListener}s.
+     */
+    @Deprecated
+    Listenable ongoing( );
 
     default Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
     {

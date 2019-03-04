@@ -2,7 +2,7 @@ package com.metsci.glimpse.var2;
 
 import static com.metsci.glimpse.var2.VarUtils.completedListenable;
 import static com.metsci.glimpse.var2.VarUtils.listenable;
-import static com.metsci.glimpse.var2.VarUtils.ongoingListenable;
+import static com.metsci.glimpse.var2.VarUtils.mapCollection;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
@@ -28,6 +28,13 @@ public class ListenablePairSet implements ListenablePair
         this.all = listenable( this.ongoing, this.completed );
     }
 
+    @Deprecated
+    protected static Listenable ongoingListenable( Collection<? extends ListenablePair> pairs )
+    {
+        return new ListenableSet( mapCollection( pairs, ListenablePair::ongoing ) );
+    }
+
+    @Deprecated
     @Override
     public Listenable ongoing( )
     {

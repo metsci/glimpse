@@ -4,6 +4,8 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Objects.equal;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.union;
+import static com.metsci.glimpse.var2.ListenablePair.ALL;
+import static com.metsci.glimpse.var2.ListenablePair.COMPLETED;
 import static com.metsci.glimpse.var2.ListenerFlag.EMPTY_FLAGS;
 import static com.metsci.glimpse.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.var2.ListenerFlag.ONCE;
@@ -43,17 +45,6 @@ public class VarUtils
     }
 
     @SafeVarargs
-    public static Listenable ongoingListenable( ListenablePair... pairs )
-    {
-        return ongoingListenable( asList( pairs ) );
-    }
-
-    public static Listenable ongoingListenable( Collection<? extends ListenablePair> pairs )
-    {
-        return new ListenableSet( mapCollection( pairs, pair -> pair.ongoing( ) ) );
-    }
-
-    @SafeVarargs
     public static Listenable completedListenable( ListenablePair... pairs )
     {
         return completedListenable( asList( pairs ) );
@@ -61,7 +52,7 @@ public class VarUtils
 
     public static Listenable completedListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableSet( mapCollection( pairs, pair -> pair.completed( ) ) );
+        return new ListenableSet( mapCollection( pairs, COMPLETED ) );
     }
 
     @SafeVarargs
@@ -72,7 +63,7 @@ public class VarUtils
 
     public static Listenable allListenable( Collection<? extends ListenablePair> pairs )
     {
-        return new ListenableSet( mapCollection( pairs, pair -> pair.all( ) ) );
+        return new ListenableSet( mapCollection( pairs, ALL ) );
     }
 
     @SafeVarargs
@@ -258,6 +249,7 @@ public class VarUtils
             protected final Listenable completed = wrapListenable1( listenable1, ev -> !ev.ongoing );
             protected final Listenable all = wrapListenable1( listenable1, ev -> true );
 
+            @Deprecated
             @Override
             public Listenable ongoing( )
             {

@@ -1,8 +1,8 @@
 package com.metsci.glimpse.var2;
 
+import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
 
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.metsci.glimpse.util.var.InvalidValueException;
@@ -56,7 +56,7 @@ public class VarBasic<V> extends ListenablePairBasic implements Var<V>
     @Override
     public boolean set( boolean ongoing, V value )
     {
-        if ( ( !ongoing && this.hasOngoingChanges ) || !Objects.equals( value, this.value ) )
+        if ( ( !ongoing && this.hasOngoingChanges ) || !equal( value, this.value ) )
         {
             this.requireValid( value );
 
