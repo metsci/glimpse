@@ -24,15 +24,10 @@
         </dependency>
 
         <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-var</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-var2</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.4.0</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

@@ -54,8 +54,6 @@
 
         <module>util</module>
         <module>util-examples</module>
-        <module>var</module>
-        <module>var2</module>
 
         <module>text</module>
 
