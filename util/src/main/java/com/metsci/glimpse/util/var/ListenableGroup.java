@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;

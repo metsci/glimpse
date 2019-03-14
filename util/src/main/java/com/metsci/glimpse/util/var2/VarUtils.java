@@ -30,6 +30,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Objects.equal;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.union;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
 import static com.metsci.glimpse.util.var2.ListenablePair.ALL;
 import static com.metsci.glimpse.util.var2.ListenablePair.COMPLETED;
 import static com.metsci.glimpse.util.var2.ListenerFlag.EMPTY_FLAGS;
@@ -216,6 +217,43 @@ public class VarUtils
         };
     }
 
+    public static <K,V,K2 extends K> ReadableVar<ImmutableMap<K,V>> mapSubsetVar( ReadableVar<ImmutableMap<K,V>> mapVar, ReadableVar<? extends Set<K2>> keysVar )
+    {
+        return new ReadableVarDerived<ImmutableMap<K,V>>( mapVar, keysVar )
+        {
+            protected Map<K,V> mapCached = null;
+            protected Set<K2> keysCached = null;
+            protected ImmutableMap<K,V> submapCached = null;
+
+            @Override
+            public ImmutableMap<K,V> v( )
+            {
+                Map<K,V> map = mapVar.v( );
+                Set<K2> keys = keysVar.v( );
+                if ( map == this.mapCached && keys == this.keysCached )
+                {
+                    return this.submapCached;
+                }
+                else
+                {
+                    Map<K,V> submap = new LinkedHashMap<>( );
+                    for ( K2 key : keys )
+                    {
+                        V value = map.get( key );
+                        if ( value != null )
+                        {
+                            submap.put( key, value );
+                        }
+                    }
+                    this.mapCached = map;
+                    this.keysCached = keys;
+                    this.submapCached = ImmutableMap.copyOf( submap );
+                    return this.submapCached;
+                }
+            }
+        };
+    }
+
     public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn )
     {
         return new VarDerived<B>( ownerVar )
@@ -248,24 +286,44 @@ public class VarUtils
         };
     }
 
-    public static <K,V,K2 extends K,V2 extends V> boolean putMapValue( Var<ImmutableMap<K,V>> mapVars, K2 key, V2 value )
+    public static <T,T2 extends T> boolean addSetElement( Var<ImmutableSet<T>> setVar, T2 element )
     {
-        return putMapValue( mapVars, false, key, value );
+        return addSetElement( setVar, false, element );
     }
 
-    public static <K,V,K2 extends K,V2 extends V> boolean putMapValue( Var<ImmutableMap<K,V>> mapVars, boolean ongoing, K2 key, V2 value )
+    public static <T,T2 extends T> boolean addSetElement( Var<ImmutableSet<T>> setVar, boolean ongoing, T2 element )
     {
-        return mapVars.update( ongoing, map -> mapWith( map, key, value ) );
+        return setVar.update( ongoing, set -> setPlus( set, element ) );
     }
 
-    public static <K,V,K2 extends K> boolean updateMapValue( Var<ImmutableMap<K,V>> mapVars, K2 key, Function<? super V,? extends V> updateFn )
+    public static <T,T2 extends T> boolean removeSetElement( Var<ImmutableSet<T>> setVar, T2 element )
     {
-        return updateMapValue( mapVars, false, key, updateFn );
+        return removeSetElement( setVar, false, element );
     }
 
-    public static <K,V,K2 extends K> boolean updateMapValue( Var<ImmutableMap<K,V>> mapVars, boolean ongoing, K2 key, Function<? super V,? extends V> updateFn )
+    public static <T,T2 extends T> boolean removeSetElement( Var<ImmutableSet<T>> setVar, boolean ongoing, T2 element )
     {
-        return mapVars.update( ongoing, map -> mapWith( map, key, updateFn ) );
+        return setVar.update( ongoing, set -> setMinus( set, element ) );
+    }
+
+    public static <K,V,K2 extends K,V2 extends V> boolean putMapValue( Var<ImmutableMap<K,V>> mapVar, K2 key, V2 value )
+    {
+        return putMapValue( mapVar, false, key, value );
+    }
+
+    public static <K,V,K2 extends K,V2 extends V> boolean putMapValue( Var<ImmutableMap<K,V>> mapVar, boolean ongoing, K2 key, V2 value )
+    {
+        return mapVar.update( ongoing, map -> mapWith( map, key, value ) );
+    }
+
+    public static <K,V,K2 extends K> boolean updateMapValue( Var<ImmutableMap<K,V>> mapVar, K2 key, Function<? super V,? extends V> updateFn )
+    {
+        return updateMapValue( mapVar, false, key, updateFn );
+    }
+
+    public static <K,V,K2 extends K> boolean updateMapValue( Var<ImmutableMap<K,V>> mapVar, boolean ongoing, K2 key, Function<? super V,? extends V> updateFn )
+    {
+        return mapVar.update( ongoing, map -> mapWith( map, key, updateFn ) );
     }
 
     public static ListenablePair wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1 )
