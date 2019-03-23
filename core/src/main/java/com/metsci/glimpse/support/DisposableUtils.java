@@ -45,6 +45,7 @@ import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
+import javax.swing.JMenu;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelListener;
@@ -315,6 +316,16 @@ public class DisposableUtils
         return ( ) ->
         {
             container.remove( child );
+        };
+    }
+
+    public static Disposable addComponent( JMenu menu, Component child )
+    {
+        menu.add( child );
+
+        return ( ) ->
+        {
+            menu.remove( child );
         };
     }
 
