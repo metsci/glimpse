@@ -122,13 +122,14 @@ public class VarUtils
             @Override
             public V v( )
             {
-                return mapVar.v( ).get( key );
+                Map<K,V> map = mapVar.v( );
+                return ( map == null ? null : map.get( key ) );
             }
 
             @Override
             public boolean set( boolean ongoing, V value )
             {
-                return putMapValue( mapVar, ongoing, key, value );
+                return mapVar.updateIfNonNull( ongoing, map -> mapWith( map, key, value ) );
             }
         };
     }
@@ -140,13 +141,14 @@ public class VarUtils
             @Override
             public V v( )
             {
-                return mapVar.v( ).get( keyVar.v( ) );
+                Map<K,V> map = mapVar.v( );
+                return ( map == null ? null : map.get( keyVar.v( ) ) );
             }
 
             @Override
             public boolean set( boolean ongoing, V value )
             {
-                return putMapValue( mapVar, ongoing, keyVar.v( ), value );
+                return mapVar.updateIfNonNull( ongoing, map -> mapWith( map, keyVar.v( ), value ) );
             }
         };
     }
@@ -171,26 +173,13 @@ public class VarUtils
             {
                 Map<K,V> map = mapVar.v( );
                 Set<K2> keys = keysVar.v( );
-                if ( map == this.mapCached && keys == this.keysCached )
+                if ( map != this.mapCached || keys != this.keysCached )
                 {
-                    return this.submapCached;
-                }
-                else
-                {
-                    Map<K,V> submap = new LinkedHashMap<>( );
-                    for ( K2 key : keys )
-                    {
-                        V value = map.get( key );
-                        if ( value != null )
-                        {
-                            submap.put( key, value );
-                        }
-                    }
                     this.mapCached = map;
                     this.keysCached = keys;
-                    this.submapCached = ImmutableMap.copyOf( submap );
-                    return this.submapCached;
+                    this.submapCached = submap( map, keys );
                 }
+                return this.submapCached;
             }
 
             @Override
@@ -230,28 +219,40 @@ public class VarUtils
             {
                 Map<K,V> map = mapVar.v( );
                 Set<K2> keys = keysVar.v( );
-                if ( map == this.mapCached && keys == this.keysCached )
+                if ( map != this.mapCached || keys != this.keysCached )
                 {
-                    return this.submapCached;
-                }
-                else
-                {
-                    Map<K,V> submap = new LinkedHashMap<>( );
-                    for ( K2 key : keys )
-                    {
-                        V value = map.get( key );
-                        if ( value != null )
-                        {
-                            submap.put( key, value );
-                        }
-                    }
                     this.mapCached = map;
                     this.keysCached = keys;
-                    this.submapCached = ImmutableMap.copyOf( submap );
-                    return this.submapCached;
+                    this.submapCached = submap( map, keys );
                 }
+                return this.submapCached;
             }
         };
+    }
+
+    protected static <K,V,K2 extends K> ImmutableMap<K,V> submap( Map<K,V> map, Set<K2> keys )
+    {
+        if ( map == null )
+        {
+            return null;
+        }
+        else if ( keys == null )
+        {
+            return ImmutableMap.of( );
+        }
+        else
+        {
+            Map<K,V> submap = new LinkedHashMap<>( );
+            for ( K2 key : keys )
+            {
+                V value = map.get( key );
+                if ( value != null )
+                {
+                    submap.put( key, value );
+                }
+            }
+            return ImmutableMap.copyOf( submap );
+        }
     }
 
     public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn )
