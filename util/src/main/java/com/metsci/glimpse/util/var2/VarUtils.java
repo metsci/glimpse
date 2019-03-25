@@ -255,6 +255,31 @@ public class VarUtils
         }
     }
 
+    public static <T,T2 extends T> Var<Boolean> setContainsVar( Var<ImmutableSet<T>> setVar, T2 element )
+    {
+        return new VarDerived<Boolean>( setVar )
+        {
+            @Override
+            public Boolean v( )
+            {
+                return setVar.v( ).contains( element );
+            }
+
+            @Override
+            public boolean set( boolean ongoing, Boolean value )
+            {
+                if ( value == Boolean.TRUE )
+                {
+                    return addSetElement( setVar, ongoing, element );
+                }
+                else
+                {
+                    return removeSetElement( setVar, ongoing, element );
+                }
+            }
+        };
+    }
+
     public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn )
     {
         return new VarDerived<B>( ownerVar )
