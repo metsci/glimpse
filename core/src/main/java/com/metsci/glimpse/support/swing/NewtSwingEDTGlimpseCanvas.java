@@ -26,10 +26,13 @@
  */
 package com.metsci.glimpse.support.swing;
 
+import static com.metsci.glimpse.support.swing.NewtClickTimeoutWorkaround.attachNewtClickTimeoutWorkaround;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
@@ -86,6 +89,33 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
 
     private static final long serialVersionUID = 1L;
 
+    protected static final long clickTimeout_MILLIS = findClickTimeout_MILLIS( );
+    protected static long findClickTimeout_MILLIS( )
+    {
+        try
+        {
+            String sysPropValue = System.getProperty( "glimpse.clickTimeoutMillis" );
+            return parseLong( sysPropValue );
+        }
+        catch ( Exception e )
+        {
+            try
+            {
+                Object awtPropValue = Toolkit.getDefaultToolkit( ).getDesktopProperty( "awt.multiClickInterval" );
+                return ( ( Number ) awtPropValue ).longValue( );
+            }
+            catch ( Exception e2 )
+            {
+                return 500;
+            }
+        }
+    }
+
+    static
+    {
+        logger.fine( "Glimpse click timeout is " + clickTimeout_MILLIS + " ms" );
+    }
+
     public NewtSwingEDTGlimpseCanvas( String profile )
     {
         super( profile );
@@ -126,6 +156,8 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
         {
             display.setEDTUtil( new AWTEDTUtil( currentThread( ).getThreadGroup( ), "AWTDisplay-" + display.getFQName( ), display::dispatchMessages ) );
         }
+
+        attachNewtClickTimeoutWorkaround( window, clickTimeout_MILLIS );
 
         return GLWindow.create( window );
     }

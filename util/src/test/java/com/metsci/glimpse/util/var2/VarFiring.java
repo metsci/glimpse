@@ -24,14 +24,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+import java.util.Objects;
+
+class VarFiring<V>
 {
 
-    public InvalidValueException( String message )
+    public final boolean ongoing;
+    public final V value;
+
+
+    public VarFiring( boolean ongoing, V value )
     {
-        super( message );
+        this.ongoing = ongoing;
+        this.value = value;
+    }
+
+    @Override
+    public String toString( )
+    {
+        return ( ( this.ongoing ? "ongoing" : "completed" ) + ":" + this.value.toString( ) );
+    }
+
+    @Override
+    public int hashCode( )
+    {
+        final int prime = 16061;
+        int result = 1;
+        result = prime * result + Boolean.hashCode( this.ongoing );
+        result = prime * result + Objects.hashCode( this.value );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass( ) != this.getClass( ) ) return false;
+
+        VarFiring<?> other = ( VarFiring<?> ) o;
+        return ( other.ongoing == this.ongoing
+              && Objects.equals( other.value, this.value ) );
     }
 
 }

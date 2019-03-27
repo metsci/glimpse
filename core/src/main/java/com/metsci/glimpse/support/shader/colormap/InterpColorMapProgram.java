@@ -24,46 +24,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.support.shader.colormap;
 
-import static java.util.Arrays.asList;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+import java.io.IOException;
+import java.util.logging.Logger;
 
-public class ListenableGroup<T> implements Listenable<T>
+import javax.media.opengl.GLUniformData;
+
+import com.metsci.glimpse.axis.Axis1D;
+
+/**
+ * Does a non-linear interpolation on the GPU and then maps into the colorscale. Works better when the colormap and data have discrete steps.
+ *
+ * @author borkholder
+ */
+public class InterpColorMapProgram extends ColorMapProgram
 {
+    private static final Logger LOGGER = Logger.getLogger( InterpColorMapProgram.class.getName( ) );
 
-    protected final Collection<? extends Listenable<T>> members;
+    protected GLUniformData discardAboveBelow;
 
-
-    @SafeVarargs
-    public ListenableGroup( Listenable<T>... members )
+    public InterpColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
-        this( asList( members ) );
-    }
-
-    public ListenableGroup( Collection<? extends Listenable<T>> members )
-    {
-        this.members = new CopyOnWriteArrayList<>( members );
+        super( colorAxis, targetTexUnit, colorTexUnit );
+        super.setDiscardNaN( true );
     }
 
     @Override
-    public Disposable addListener( boolean runImmediately, Runnable runnable )
+    protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
-        return this.addListener( runImmediately, ( ev ) -> runnable.run( ) );
+        super.initialize( colorAxis, targetTexUnit, colorTexUnit );
+
+        this.discardAboveBelow = this.addUniformData( new GLUniformData( "discardAboveBelow", 0 ) );
+    }
+
+    public void setDiscardAboveBelow( boolean discard )
+    {
+        this.discardAboveBelow.setData( discard ? 1 : 0 );
     }
 
     @Override
-    public Disposable addListener( boolean runImmediately, Consumer<T> listener )
+    protected void addShaders( )
     {
-        DisposableGroup disposables = new DisposableGroup( );
-        for ( Listenable<T> member : this.members )
-        {
-            disposables.add( member.addListener( runImmediately, listener ) );
-        }
-        return disposables;
+        this.addVertexShader( "shaders/colormap/passthrough.vs" );
+        this.addFragmentShader( "shaders/colormap/interp_colorscale_shader.fs" );
     }
 
+    @Override
+    public void setDiscardNaN( boolean discard )
+    {
+        logWarning( LOGGER, "discardNaN has not effect for " + InterpColorMapProgram.class.getSimpleName( ) );
+    }
 }

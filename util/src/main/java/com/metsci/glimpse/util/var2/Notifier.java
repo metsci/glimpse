@@ -24,14 +24,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+import static com.metsci.glimpse.util.var2.ListenerFlag.EMPTY_FLAGS;
+import static com.metsci.glimpse.util.var2.ListenerFlag.flags;
+
+import java.util.Set;
+import java.util.function.Consumer;
+
+import com.metsci.glimpse.util.var.Disposable;
+
+public interface Notifier<T> extends Listenable
 {
 
-    public InvalidValueException( String message )
+    Disposable addListener( Set<? extends ListenerFlag> flags, Consumer<? super T> listener );
+
+    default Disposable addListener( ListenerFlag flag, Consumer<? super T> listener )
     {
-        super( message );
+        return this.addListener( flags( flag ), listener );
+    }
+
+    default Disposable addListener( Consumer<? super T> listener )
+    {
+        return this.addListener( EMPTY_FLAGS, listener );
+    }
+
+    @Override
+    default Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
+    {
+        return this.addListener( flags, t -> listener.run( ) );
     }
 
 }

@@ -24,46 +24,73 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.VarUtils.completedListenable;
+import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
+import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
+import static com.metsci.glimpse.util.var2.VarUtils.listenable;
+import static com.metsci.glimpse.util.var2.VarUtils.mapCollection;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+import java.util.Set;
 
-public class ListenableGroup<T> implements Listenable<T>
+import com.metsci.glimpse.util.var.Disposable;
+
+public class ListenablePairSet implements ListenablePair
 {
 
-    protected final Collection<? extends Listenable<T>> members;
+    protected final Listenable ongoing;
+    protected final Listenable completed;
+    protected final Listenable all;
 
 
     @SafeVarargs
-    public ListenableGroup( Listenable<T>... members )
+    public ListenablePairSet( ListenablePair... members )
     {
         this( asList( members ) );
     }
 
-    public ListenableGroup( Collection<? extends Listenable<T>> members )
+    public ListenablePairSet( Collection<? extends ListenablePair> members )
     {
-        this.members = new CopyOnWriteArrayList<>( members );
+        this.ongoing = ongoingListenable( members );
+        this.completed = completedListenable( members );
+        this.all = listenable( this.ongoing, this.completed );
+    }
+
+    @Deprecated
+    protected static Listenable ongoingListenable( Collection<? extends ListenablePair> pairs )
+    {
+        return listenable( mapCollection( pairs, ListenablePair::ongoing ) );
+    }
+
+    @Deprecated
+    @Override
+    public Listenable ongoing( )
+    {
+        return this.ongoing;
     }
 
     @Override
-    public Disposable addListener( boolean runImmediately, Runnable runnable )
+    public Listenable completed( )
     {
-        return this.addListener( runImmediately, ( ev ) -> runnable.run( ) );
+        return this.completed;
     }
 
     @Override
-    public Disposable addListener( boolean runImmediately, Consumer<T> listener )
+    public Listenable all( )
     {
-        DisposableGroup disposables = new DisposableGroup( );
-        for ( Listenable<T> member : this.members )
+        return this.all;
+    }
+
+    @Override
+    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    {
+        return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            disposables.add( member.addListener( runImmediately, listener ) );
-        }
-        return disposables;
+            return doAddPairListener( this.ongoing, this.completed, flags2, listener );
+        } );
     }
 
 }

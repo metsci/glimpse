@@ -24,14 +24,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+import static java.util.Arrays.asList;
+
+import java.util.Collection;
+
+public abstract class VarDerived<V> extends ReadableVarDerived<V> implements Var<V>
 {
 
-    public InvalidValueException( String message )
+    @SafeVarargs
+    public VarDerived( ListenablePair... listenables )
     {
-        super( message );
+        this( asList( listenables ) );
     }
+
+    public VarDerived( Collection<? extends ListenablePair> listenables )
+    {
+        super( listenables );
+    }
+
+    @Override
+    public abstract boolean set( boolean ongoing, V value );
 
 }

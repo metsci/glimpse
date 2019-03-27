@@ -26,12 +26,46 @@
  */
 package com.metsci.glimpse.util.var;
 
-public class InvalidValueException extends RuntimeException
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class DisposableMap<K> implements Disposable
 {
 
-    public InvalidValueException( String message )
+    protected final Map<K,DisposableGroup> groups;
+
+
+    public DisposableMap( )
     {
-        super( message );
+        this.groups = new LinkedHashMap<>( );
+    }
+
+    public DisposableGroup group( K key )
+    {
+        if ( !this.groups.containsKey( key ) )
+        {
+            this.groups.put( key, new DisposableGroup( ) );
+        }
+        return this.groups.get( key );
+    }
+
+    public void dispose( K key )
+    {
+        Disposable removed = this.groups.remove( key );
+        if ( removed != null )
+        {
+            removed.dispose( );
+        }
+    }
+
+    @Override
+    public void dispose( )
+    {
+        for ( K key : new ArrayList<>( this.groups.keySet( ) ) )
+        {
+            this.dispose( key );
+        }
     }
 
 }

@@ -24,14 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+public interface ReadableVar<V> extends ListenablePair
 {
 
-    public InvalidValueException( String message )
-    {
-        super( message );
-    }
+    V v( );
 
 }

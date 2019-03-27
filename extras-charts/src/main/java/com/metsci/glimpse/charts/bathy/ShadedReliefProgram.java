@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2016 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,107 +24,70 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.support.shader.colormap;
+package com.metsci.glimpse.charts.bathy;
 
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL3;
-import javax.media.opengl.GLContext;
 import javax.media.opengl.GLUniformData;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener1D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.support.shader.colormap.ColorMapProgram.ProgramHandles;
 
 /**
- * A shader which colors a 2D data texture using values sampled from a color
- * scaled defined by a 1D color texture.
+ * Takes two textures - the elevation data and the hillshade data - and does a nonlinear
+ * interpolation on the video card to index into the colormap.
  *
- * @author ulman
- *
+ * @author borkholder
  */
-public class ColorMapProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
+public class ShadedReliefProgram extends GlimpseShaderProgram implements DrawableTextureProgram
 {
-    protected GLUniformData dataMin;
-    protected GLUniformData dataMax;
+    public static final int MAX_COLORS = 20;
 
     protected GLUniformData alpha;
-    protected GLUniformData dataTexUnit;
-    protected GLUniformData colorTexUnit;
-    protected GLUniformData discardNaN;
+    protected GLUniformData elevationTexUnit;
+    protected GLUniformData hillshadeTexUnit;
+    protected GLUniformData colors;
+    protected GLUniformData nColors;
 
     protected GLUniformData AXIS_RECT;
 
-    protected Axis1D colorAxis;
-
     protected ProgramHandles handles;
 
-    public static class ProgramHandles
+    public ShadedReliefProgram( int elevTexUnit, int shadeTexUnit )
     {
-        // Vertex attributes
-
-        public final int inXy;
-        public final int inS;
-
-        public ProgramHandles( GL2ES2 gl, int program )
-        {
-            this.inXy = gl.glGetAttribLocation( program, "inXy" );
-            this.inS = gl.glGetAttribLocation( program, "inS" );
-        }
-    }
-
-    /**
-     * @param colorAxis color axis producing events
-     * @param targetTexUnit 2D texture unit which is the target of color-mapping
-     * @param colorTexUnit 1D texture unit containing color-map
-     * @throws IOException if the shader source file cannot be read
-     */
-    public ColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
-    {
-        this.initialize( colorAxis, targetTexUnit, colorTexUnit );
+        this.initialize( elevTexUnit, shadeTexUnit );
     }
 
     protected void addShaders( )
     {
         this.addVertexShader( "shaders/colormap/passthrough.vs" );
-        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader.fs" );
+        this.addFragmentShader( "shaders/relief/shaded_relief_shader.fs" );
     }
 
-    protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
+    protected void initialize( int elevTexUnit, int shadeTexUnit )
     {
         this.addShaders( );
 
-        this.dataMin = this.addUniformData( new GLUniformData( "dataMin", this.getMin( colorAxis ) ) );
-        this.dataMax = this.addUniformData( new GLUniformData( "dataMax", this.getMax( colorAxis ) ) );
+        this.elevationTexUnit = this.addUniformData( new GLUniformData( "elevtex", elevTexUnit ) );
+        this.hillshadeTexUnit = this.addUniformData( new GLUniformData( "shadetex", shadeTexUnit ) );
         this.alpha = this.addUniformData( new GLUniformData( "alpha", 1f ) );
-        this.discardNaN = this.addUniformData( new GLUniformData( "discardNaN", 0 ) );
-
-        this.dataTexUnit = this.addUniformData( new GLUniformData( "datatex", targetTexUnit ) );
-        this.colorTexUnit = this.addUniformData( new GLUniformData( "colortex", colorTexUnit ) );
+        this.colors = this.addUniformData( new GLUniformData( "colors", 4, FloatBuffer.allocate( 4 * MAX_COLORS ) ) );
+        this.nColors = this.addUniformData( new GLUniformData( "nColors", 0 ) );
 
         this.AXIS_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "AXIS_RECT", 4 ) );
         // without setting default data, we will get "javax.media.opengl.GLException: glUniform atom only available for 1i and 1f"
         // if begin( ) is called before setOrtho( )
         this.AXIS_RECT.setData( FloatBuffer.wrap( new float[] { 0, 1, 0, 1 } ) );
-
-        this.colorAxis = colorAxis;
-        this.colorAxis.addAxisListener( this );
-    }
-
-    public void setDiscardNaN( boolean discard )
-    {
-        this.discardNaN.setData( discard ? 1 : 0 );
     }
 
     public void setAlpha( float alpha )
@@ -132,40 +95,39 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         this.alpha.setData( alpha );
     }
 
-    @Override
-    public void axisUpdated( Axis1D axis )
+    public void setElevationTexUnit( int unit )
     {
-        this.dataMin.setData( this.getMin( axis ) );
-        this.dataMax.setData( this.getMax( axis ) );
+        this.elevationTexUnit.setData( unit );
     }
 
-    public void setTargetTexUnit( int unit )
+    public void setHillshadeTexUnit( int unit )
     {
-        this.dataTexUnit.setData( unit );
+        this.hillshadeTexUnit.setData( unit );
     }
 
-    public void setColorTexUnit( int unit )
+    /**
+     * The first dimension is the number of colors, the second is {elevation threshold, hue, saturation, brightness}.
+     */
+    public void setColors( float[][] colors )
     {
-        this.colorTexUnit.setData( unit );
-    }
+        if ( colors.length > MAX_COLORS )
+        {
+            throw new IllegalArgumentException( "Only " + MAX_COLORS + " allowed" );
+        }
 
-    protected float getMin( Axis1D axis )
-    {
-        return ( float ) axis.getMin( );
-    }
+        float[] flattened = new float[colors.length * 4];
+        for ( int i = 0, k = 0; i < colors.length; i++ )
+        {
+            float[] ci = colors[i];
+            for ( int j = 0; j < ci.length; j++ )
+            {
+                flattened[k] = ci[j];
+                k++;
+            }
+        }
 
-    protected float getMax( Axis1D axis )
-    {
-        return ( float ) axis.getMax( );
-    }
-
-    /// DrawableTextureProgram methods
-
-    @Override
-    public void dispose( GLContext context )
-    {
-        super.dispose( context );
-        this.colorAxis.removeAxisListener( this );
+        this.colors.setData( FloatBuffer.wrap( flattened ) );
+        this.nColors.setData( colors.length );
     }
 
     @Override

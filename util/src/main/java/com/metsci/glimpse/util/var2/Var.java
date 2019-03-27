@@ -24,14 +24,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+import java.util.function.Function;
+
+public interface Var<V> extends ReadableVar<V>
 {
 
-    public InvalidValueException( String message )
+    boolean set( boolean ongoing, V value );
+
+    default boolean set( V value )
     {
-        super( message );
+        return this.set( false, value );
+    }
+
+    default boolean update( boolean ongoing, Function<? super V,? extends V> updateFn )
+    {
+        return this.set( ongoing, updateFn.apply( this.v( ) ) );
+    }
+
+    default boolean update( Function<? super V,? extends V> updateFn )
+    {
+        return this.update( false, updateFn );
+    }
+
+    default boolean updateIfNonNull( boolean ongoing, Function<? super V,? extends V> updateFn )
+    {
+        V v = this.v( );
+        if ( v != null )
+        {
+            return this.set( ongoing, updateFn.apply( v ) );
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    default boolean updateIfNonNull( Function<? super V,? extends V> updateFn )
+    {
+        return this.updateIfNonNull( false, updateFn );
     }
 
 }

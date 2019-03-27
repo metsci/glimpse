@@ -29,12 +29,20 @@ package com.metsci.glimpse.support;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.ItemSelectable;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -45,6 +53,7 @@ import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.swing.AbstractButton;
+import javax.swing.JMenu;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelListener;
@@ -315,6 +324,128 @@ public class DisposableUtils
         return ( ) ->
         {
             container.remove( child );
+        };
+    }
+
+    public static Disposable addComponent( JMenu menu, Component child )
+    {
+        menu.add( child );
+
+        return ( ) ->
+        {
+            menu.remove( child );
+        };
+    }
+
+    public static Disposable addMouseListener( Component component, MouseListener listener )
+    {
+        component.addMouseListener( listener );
+
+        return ( ) ->
+        {
+            component.removeMouseListener( listener );
+        };
+    }
+
+    public static Disposable addMouseMotionListener( Component component, MouseMotionListener listener )
+    {
+        component.addMouseMotionListener( listener );
+
+        return ( ) ->
+        {
+            component.removeMouseMotionListener( listener );
+        };
+    }
+
+    public static Disposable addMouseWheelListener( Component component, MouseWheelListener listener )
+    {
+        component.addMouseWheelListener( listener );
+
+        return ( ) ->
+        {
+            component.removeMouseWheelListener( listener );
+        };
+    }
+
+    public static Disposable onMousePress( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mousePressed( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseRelease( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseReleased( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseMove( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseMotionListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseMoved( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseEnter( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseEntered( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseExit( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseExited( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseWheel( Component component, Consumer<? super MouseWheelEvent> fn )
+    {
+        return addMouseWheelListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseWheelMoved( MouseWheelEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable addToolkitListener( Toolkit toolkit, long eventMask, AWTEventListener listener )
+    {
+        toolkit.addAWTEventListener( listener, eventMask );
+
+        return ( ) ->
+        {
+            toolkit.removeAWTEventListener( listener );
         };
     }
 

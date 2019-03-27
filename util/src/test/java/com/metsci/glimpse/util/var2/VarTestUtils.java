@@ -24,14 +24,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+class VarTestUtils
 {
 
-    public InvalidValueException( String message )
+    public static <V> VarFiring<V> f( boolean ongoing, V value )
     {
-        super( message );
+        return new VarFiring<>( ongoing, value );
+    }
+
+    public static <V> OldNewPairFiring<V> f( boolean ongoing, V vOld, V vNew )
+    {
+        return new OldNewPairFiring<>( ongoing, vOld, vNew );
     }
 
 }

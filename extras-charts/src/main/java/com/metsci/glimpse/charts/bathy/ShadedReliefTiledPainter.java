@@ -27,30 +27,24 @@
 package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
-import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
 import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
-import static java.lang.Float.isFinite;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
-import static java.lang.System.currentTimeMillis;
 
 import java.awt.Color;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -61,25 +55,26 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
-import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
+import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
+ * Paints topography and bathymetry with a discrete set of colors and the Hillshade algorithm.
+ *
  * @author borkholder
  */
-public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
+public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
+
+    public static final int HILLSHADE_TEXTURE_UNIT = 0;
+    public static final int ELEVATION_TEXTURE_UNIT = 1;
 
     public static final Map<Float, float[]> BATHYMETRY_LIGHT_COLORS;
 
@@ -111,21 +106,20 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
 
     protected TopoTileProvider tileProvider;
     protected ShadedTexturePainter topoImagePainter;
-
-    /**
-     * The first dimension is the number of colors, the second is {elevation threshold, hue, saturation, brightness}.
-     */
-    protected float[][] colors;
+    protected ShadedReliefProgram shadedReliefProgram;
 
     public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
     {
         super( projection );
         this.tileProvider = tileProvider;
 
-        setColors( BATHYMETRY_LIGHT_COLORS );
-
         topoImagePainter = new ShadedTexturePainter( );
+        shadedReliefProgram = new ShadedReliefProgram( ELEVATION_TEXTURE_UNIT, HILLSHADE_TEXTURE_UNIT );
+        topoImagePainter.setProgram( shadedReliefProgram );
         addPainter( topoImagePainter );
+
+        setAlpha( 1 );
+        setColors( BATHYMETRY_LIGHT_COLORS );
 
         if ( tileProvider.getAttribution( ) != null )
         {
@@ -137,6 +131,11 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             attributionPainter.setText( tileProvider.getAttribution( ) );
             addPainter( attributionPainter );
         }
+    }
+
+    public void setAlpha( float alpha )
+    {
+        shadedReliefProgram.setAlpha( alpha );
     }
 
     /**
@@ -159,15 +158,11 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             newColors[i][0] = entries.get( i ).getKey( );
         }
 
-        colors = newColors;
-
-        // force recalculate textures
-        cacheData.clear( );
-        lastAxis = new Rectangle2D.Double( );
+        shadedReliefProgram.setColors( newColors );
     }
 
     @Override
-    protected DrawableTexture loadTileData( TileKey key )
+    protected DrawableTexture[] loadTileData( TileKey key )
     {
         String hash = Hashing.murmur3_128( ).newHasher( )
                 .putString( tileProvider.getAttribution( ), Charset.defaultCharset( ) )
@@ -214,44 +209,15 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
             }
         }
 
-        RGBATextureProjected2D texture = new RGBATextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) )
-        {
-            @Override
-            protected void prepare_setTexParameters( GL gl )
-            {
-                super.prepare_setTexParameters( gl );
+        FloatTextureProjected2D shadeTexture = new FloatTextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
+        FloatTextureProjected2D elevationTexture = new FloatTextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
+        shadeTexture.setProjection( tile.getProjection( projection ) );
+        elevationTexture.setProjection( tile.getProjection( projection ) );
 
-                GL3 gl3 = gl.getGL3( );
-                gl3.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR );
-                gl3.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST );
-            }
-        };
-        texture.setProjection( tile.getProjection( projection ) );
+        shadeTexture.setData( tile.shaded );
+        elevationTexture.setData( tile.data );
 
-        float[][] shaded = tile.shaded;
-        float[][] elev = tile.data;
-        long start = currentTimeMillis( );
-        texture.mutate( new MutatorByte2D( )
-        {
-            @Override
-            public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
-            {
-                data.order( ByteOrder.BIG_ENDIAN );
-                IntBuffer buf = data.asIntBuffer( );
-                for ( int r = 0; r < dataSizeY; r++ )
-                {
-                    for ( int c = 0; c < dataSizeX; c++ )
-                    {
-                        int rgba = colorize( shaded[c][r], elev[c][r] );
-                        buf.put( rgba );
-                    }
-                }
-            }
-        } );
-        long stop = currentTimeMillis( );
-        logFine( LOGGER, "Took %,dms to load texture", stop - start );
-
-        return texture;
+        return new DrawableTexture[] { shadeTexture, elevationTexture };
     }
 
     protected CachedTileData readCachedTile( File cacheFile ) throws IOException
@@ -351,32 +317,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
         System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
     }
 
-    protected int colorize( float hillshade, float elevation )
-    {
-        if ( !isFinite( hillshade + elevation ) )
-        {
-            return 0;
-        }
-
-        float h = 0;
-        float s = 0;
-        float b = 0;
-        for ( int i = 0; i < colors.length; i++ )
-        {
-            if ( elevation <= colors[i][0] )
-            {
-                h = colors[i][1];
-                s = colors[i][2];
-                b = colors[i][3];
-                break;
-            }
-        }
-
-        float alpha = clamp( ( hillshade - 0.4f ), 0, 0.6f ) + 0.7f;
-        b = clamp( b * alpha, 0, 1 );
-        return ( Color.HSBtoRGB( h, s, b ) << 8 ) | 0xff;
-    }
-
     /**
      * From http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
      */
@@ -429,12 +369,13 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture>
     }
 
     @Override
-    protected void replaceTileData( Collection<Entry<TileKey, DrawableTexture>> tileData )
+    protected void replaceTileData( Collection<Entry<TileKey, DrawableTexture[]>> tileData )
     {
         topoImagePainter.removeAllDrawableTextures( );
-        for ( Entry<TileKey, DrawableTexture> e : tileData )
+        for ( Entry<TileKey, DrawableTexture[]> e : tileData )
         {
-            topoImagePainter.addDrawableTexture( e.getValue( ) );
+            topoImagePainter.addDrawableTexture( e.getValue( )[0], HILLSHADE_TEXTURE_UNIT );
+            topoImagePainter.addNonDrawableTexture( e.getValue( )[0], e.getValue( )[1], ELEVATION_TEXTURE_UNIT );
         }
     }
 

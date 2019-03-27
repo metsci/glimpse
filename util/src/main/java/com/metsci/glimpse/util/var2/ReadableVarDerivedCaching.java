@@ -24,46 +24,70 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
+import static com.google.common.base.Objects.equal;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
-public class ListenableGroup<T> implements Listenable<T>
+/**
+ * A {@link ReadableVarDerived} that only recomputes its value when
+ * upstream vars (i.e. vars from which this var is derived) change.
+ */
+public abstract class ReadableVarDerivedCaching<V> extends ReadableVarDerived<V>
 {
 
-    protected final Collection<? extends Listenable<T>> members;
+    protected final Map<ReadableVar<?>,Object> upstream;
+    protected V value;
 
 
     @SafeVarargs
-    public ListenableGroup( Listenable<T>... members )
+    public ReadableVarDerivedCaching( ReadableVar<?>... upstreamVars )
     {
-        this( asList( members ) );
+        this( asList( upstreamVars ) );
     }
 
-    public ListenableGroup( Collection<? extends Listenable<T>> members )
+    public ReadableVarDerivedCaching( Collection<? extends ReadableVar<?>> upstreamVars )
     {
-        this.members = new CopyOnWriteArrayList<>( members );
-    }
+        super( upstreamVars );
 
-    @Override
-    public Disposable addListener( boolean runImmediately, Runnable runnable )
-    {
-        return this.addListener( runImmediately, ( ev ) -> runnable.run( ) );
-    }
-
-    @Override
-    public Disposable addListener( boolean runImmediately, Consumer<T> listener )
-    {
-        DisposableGroup disposables = new DisposableGroup( );
-        for ( Listenable<T> member : this.members )
+        this.upstream = new HashMap<>( );
+        for ( ReadableVar<?> upstreamVar : upstreamVars )
         {
-            disposables.add( member.addListener( runImmediately, listener ) );
+            this.upstream.put( upstreamVar, upstreamVar.v( ) );
         }
-        return disposables;
+
+        this.value = this.compute( );
     }
+
+    @Override
+    public V v( )
+    {
+        boolean anyUpstreamChanges = false;
+        for ( Entry<ReadableVar<?>,Object> en : this.upstream.entrySet( ) )
+        {
+            ReadableVar<?> upstreamVar = en.getKey( );
+            Object oldUpstreamValue = en.getValue( );
+            Object newUpstreamValue = upstreamVar.v( );
+            if ( !equal( newUpstreamValue, oldUpstreamValue ) )
+            {
+                this.upstream.put( upstreamVar, newUpstreamValue );
+                anyUpstreamChanges = true;
+            }
+        }
+
+        if ( anyUpstreamChanges )
+        {
+            this.value = this.compute( );
+        }
+
+        return this.value;
+    }
+
+    protected abstract V compute( );
 
 }

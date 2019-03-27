@@ -24,14 +24,58 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.util.var;
+package com.metsci.glimpse.util.var2;
 
-public class InvalidValueException extends RuntimeException
+import com.google.common.collect.ImmutableSet;
+
+public interface ListenerFlag
 {
 
-    public InvalidValueException( String message )
+    public static final ImmutableSet<ListenerFlag> EMPTY_FLAGS = flags( );
+
+    public static final ListenerFlag IMMEDIATE = new ListenerFlagSimple( "IMMEDIATE" );
+    public static final ListenerFlag ONCE = new ListenerFlagSimple( "ONCE" );
+
+    public static ListenerFlag ORDER( int order )
     {
-        super( message );
+        return new ListenerFlagOrder( order );
+    }
+
+    public static ImmutableSet<ListenerFlag> flags( ListenerFlag... flags )
+    {
+        return ImmutableSet.copyOf( flags );
+    }
+
+    public static class ListenerFlagSimple implements ListenerFlag
+    {
+        public final String description;
+
+        public ListenerFlagSimple( String description )
+        {
+            this.description = description;
+        }
+
+        @Override
+        public String toString( )
+        {
+            return this.description;
+        }
+    }
+
+    public static class ListenerFlagOrder implements ListenerFlag
+    {
+        public final int order;
+
+        public ListenerFlagOrder( int order )
+        {
+            this.order = order;
+        }
+
+        @Override
+        public String toString( )
+        {
+            return ( "ORDER(" + this.order + ")" );
+        }
     }
 
 }
