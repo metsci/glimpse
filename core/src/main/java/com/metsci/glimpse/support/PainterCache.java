@@ -47,7 +47,7 @@ import com.google.common.cache.CacheBuilder;
  * public class MyPainter extends GlimpsePainterBase
  * {
  *     int paintFrame;
- *     PaintingCache&lt;Integer, V> cache;
+ *     PaintingCache&lt;Integer, V&gt; cache;
  *
  *     public MyPainter( )
  *     {
