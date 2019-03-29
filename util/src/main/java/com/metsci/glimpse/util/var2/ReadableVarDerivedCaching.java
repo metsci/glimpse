@@ -75,13 +75,17 @@ public abstract class ReadableVarDerivedCaching<V> extends ReadableVarDerived<V>
             Object newUpstreamValue = upstreamVar.v( );
             if ( !equal( newUpstreamValue, oldUpstreamValue ) )
             {
-                this.upstream.put( upstreamVar, newUpstreamValue );
                 anyUpstreamChanges = true;
+                break;
             }
         }
 
         if ( anyUpstreamChanges )
         {
+            for ( ReadableVar<?> upstreamVar : this.upstream.keySet( ) )
+            {
+                this.upstream.put( upstreamVar, upstreamVar.v( ) );
+            }
             this.value = this.compute( );
         }
 
