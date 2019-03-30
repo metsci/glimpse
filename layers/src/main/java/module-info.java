@@ -8,12 +8,7 @@ module com.metsci.glimpse.layers
 	exports com.metsci.glimpse.layers.geo;
 	exports com.metsci.glimpse.layers.misc;
 
-	requires com.metsci.glimpse.core;
-	requires com.metsci.glimpse.docking;
-	requires com.metsci.glimpse.util;
-	requires guava;
-	requires miglayout.swing;
-	requires java.desktop;
-	requires java.logging;
-	requires java.base;
+	requires transitive com.metsci.glimpse.docking;
+	requires transitive com.metsci.glimpse.core;
+
 }

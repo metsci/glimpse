@@ -10,14 +10,7 @@ module com.metsci.glimpse.dnc
 	exports com.metsci.glimpse.dnc.facc;
 	exports com.metsci.glimpse.dnc.util;
 
-	requires com.metsci.glimpse.core;
-	requires com.metsci.glimpse.util;
+	requires transitive com.metsci.glimpse.core;
 	requires svg.salamander;
 	requires worldwind;
-	requires fastutil;
-	requires guava;
-	requires java.desktop;
-	requires java.logging;
-	requires java.base;
-	requires java.xml;
 }

@@ -37,10 +37,10 @@ module com.metsci.glimpse.util
 	exports com.metsci.glimpse.util.buffer;
 	exports com.metsci.glimpse.util.primitives;
 
-	requires fastutil;
-	requires guava;
-	requires java.desktop;
-	requires java.logging;
-	requires java.base;
+	requires transitive fastutil;
+	requires transitive guava;
+	requires transitive java.desktop;
+	requires transitive java.logging;
+	requires transitive java.base;
 	requires jdk.unsupported;
 }

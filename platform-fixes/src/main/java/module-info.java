@@ -5,7 +5,5 @@ module com.metsci.glimpse.platformFixes
 {
 	exports com.metsci.glimpse.platformFixes;
 
-	requires com.metsci.glimpse.util;
-	requires java.desktop;
-	requires java.base;
+	requires transitive com.metsci.glimpse.util;
 }

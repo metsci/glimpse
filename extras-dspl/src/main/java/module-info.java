@@ -15,10 +15,9 @@ module com.metsci.glimpse.dspl
 	exports com.metsci.glimpse.dspl.parser.table;
 	exports com.metsci.glimpse.dspl.parser.util;
 
-	requires com.metsci.glimpse.util;
-	requires java.logging;
-	requires java.base;
-	requires java.xml;
+	requires transitive com.metsci.glimpse.util;
+	requires transitive jaxb.core;
+	requires transitive jaxb.impl;
+	requires transitive java.xml.bind;
 	requires joda.time;
-	requires fastutil;
 }

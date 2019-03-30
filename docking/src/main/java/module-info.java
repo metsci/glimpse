@@ -9,10 +9,10 @@ module com.metsci.glimpse.docking
 	exports com.metsci.glimpse.docking.group;
 	exports com.metsci.glimpse.docking.group.frame;
 
-	requires com.metsci.glimpse.util;
-	requires guava;
-	requires tinylaf;
-	requires java.desktop;
-	requires java.logging;
-	requires java.base;
+	requires transitive com.metsci.glimpse.util;
+	requires transitive tinylaf;
+	requires jaxb.core;
+	requires jaxb.impl;
+	requires java.xml.bind;
+	
 }

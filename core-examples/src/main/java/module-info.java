@@ -15,12 +15,5 @@ module com.metsci.glimpse.core.examples
 	exports com.metsci.glimpse.examples.heatmap;
 	exports com.metsci.glimpse.examples.track;
 
-	requires com.metsci.glimpse.core;
-	requires com.metsci.glimpse.text;
-	requires com.metsci.glimpse.util;
-	requires fastutil;
-	requires guava;
-	requires java.desktop;
-	requires java.logging;
-	requires java.base;
+	requires transitive com.metsci.glimpse.core;
 }

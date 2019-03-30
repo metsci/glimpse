@@ -1,7 +1,8 @@
 /**
  * Core Glimpse data structures for plots, axes, layouts and painters.
  */
-module com.metsci.glimpse.core {
+module com.metsci.glimpse.core
+{
 	exports com.metsci.glimpse.support.texture.mutator;
 	exports com.metsci.glimpse.context;
 	exports com.metsci.glimpse.painter.base;
@@ -75,18 +76,9 @@ module com.metsci.glimpse.core {
 	exports com.metsci.glimpse.plot.timeline.painter;
 	exports com.metsci.glimpse.support.shader.point;
 
-	requires com.metsci.glimpse.platformFixes;
-	requires com.metsci.glimpse.text;
-	requires com.metsci.glimpse.util;
-	requires transitive java.desktop;
-	requires java.logging;
-	requires java.base;
+	requires transitive com.metsci.glimpse.platformFixes;
+	requires transitive com.metsci.glimpse.text;
+	requires transitive com.metsci.glimpse.util;
 	
-	requires fastutil;
-	requires guava;
-	requires miglayout.core;
-	requires jogl.all.main;
-	requires jogl.all;
-	requires gluegen.rt.main;
-	requires gluegen.rt;
+	requires transitive miglayout.core;
 }
