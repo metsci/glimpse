@@ -79,7 +79,7 @@ public class Wizard<D>
     protected List<WizardCancelledListener> cancelledListeners;
     protected List<WizardFinishedListener> finishedListeners;
 
-    public Wizard( D data, WizardPageModelTree<D> model, WizardUITree<D> ui )
+    public Wizard( D data, WizardPageModel<D> model, WizardUI<D> ui )
     {
         this.data = data;
 
@@ -154,6 +154,8 @@ public class Wizard<D>
     {
         assert ( SwingUtilities.isEventDispatchThread( ) );
 
+        this.doLeavePage( this.getCurrentPage( ) );
+        
         this.fireFinished( );
     }
 
@@ -194,7 +196,7 @@ public class Wizard<D>
             //set the fields on the page using the data object
             p.setData( this.data, false );
             //pull any default values from the page into the data object
-            p.updateData( this.data );
+            this.data = p.updateData( this.data );
             Collection<WizardError> pageErrors = p.getErrors( );
             this.pageErrors.replaceValues( p.getId( ), pageErrors );
         } );
@@ -220,6 +222,7 @@ public class Wizard<D>
 
         this.doLeavePage( this.getCurrentPage( ) );
         WizardPage<D> nextPage = this.model.getNextPage( this.getPageHistory( ), this.data );
+        this.pageHistory.add( nextPage.getId( ) );
         this.doEnterPage( nextPage );
 
         return nextPage;

@@ -78,15 +78,15 @@ public class ApproxAsin
         {
             return Double.NaN;
         }
-        else if ( x == +1.0 )
-        {
-            return PI_OVER_2;
-        }
 
         // How many steps is x above xMin
         double w = ( x - (-1.0) ) * this.oneOverXStep;
 
         int iBefore = ( int ) w;
+        if( iBefore + 1 == this.n ) {
+            // handle edge case where steps is the last edge
+            return PI_OVER_2;
+        }
         double yBefore = this.y[ iBefore ];
         double yAfter = this.y[ iBefore + 1 ];
         double xFrac = w - iBefore;

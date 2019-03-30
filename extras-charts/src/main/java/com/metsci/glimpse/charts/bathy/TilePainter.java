@@ -28,6 +28,7 @@ package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
+import static java.lang.Math.abs;
 import static java.lang.Math.hypot;
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
@@ -109,10 +110,10 @@ public abstract class TilePainter<V> extends DelegatePainter
             lengthScale = populateLengthScale( tileBounds.keySet( ) );
         }
 
-        if ( lastAxis.getMinX( ) != axis.getMinX( ) ||
-                lastAxis.getMaxX( ) != axis.getMaxX( ) ||
-                lastAxis.getMinY( ) != axis.getMinY( ) ||
-                lastAxis.getMaxY( ) != axis.getMaxY( ) )
+        if ( abs( lastAxis.getMinX( ) - axis.getMinX( ) ) > 1e-9 ||
+             abs( lastAxis.getMaxX( ) - axis.getMaxX( ) ) > 1e-9 ||
+             abs( lastAxis.getMinY( ) - axis.getMinY( ) ) > 1e-9 ||
+             abs( lastAxis.getMaxY( ) - axis.getMaxY( ) ) > 1e-9 )
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
 

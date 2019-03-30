@@ -31,7 +31,6 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.util.logging.Logger;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
@@ -57,8 +56,6 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
  */
 public class ColorMapProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
-    private static final Logger logger = Logger.getLogger( ColorMapProgram.class.getName( ) );
-
     protected GLUniformData dataMin;
     protected GLUniformData dataMax;
 

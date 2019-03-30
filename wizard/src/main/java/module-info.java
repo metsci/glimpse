@@ -9,10 +9,5 @@ module com.metsci.glimpse.wizard
 	exports com.metsci.glimpse.wizard;
 	exports com.metsci.glimpse.wizard.error;
 
-	requires com.metsci.glimpse.docking;
-	requires com.metsci.glimpse.util;
-	requires guava;
-	requires java.desktop;
-	requires java.base;
-	requires miglayout.swing;
+	requires transitive com.metsci.glimpse.docking;
 }

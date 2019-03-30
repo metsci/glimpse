@@ -37,8 +37,8 @@ module com.metsci.glimpse.util
 	exports com.metsci.glimpse.util.buffer;
 	exports com.metsci.glimpse.util.primitives;
 
-	requires transitive fastutil;
-	requires transitive guava;
+	requires transitive com.google.common;
+	requires transitive it.unimi.dsi.fastutil;
 	requires transitive java.desktop;
 	requires transitive java.logging;
 	requires transitive java.base;
