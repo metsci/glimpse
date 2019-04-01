@@ -282,13 +282,18 @@ public class VarUtils
 
     public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn )
     {
+        return propertyVar( ownerVar, getFn, updateFn, null );
+    }
+
+    public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn, B fallback )
+    {
         return new VarDerived<B>( ownerVar )
         {
             @Override
             public B v( )
             {
                 A owner = ownerVar.v( );
-                return ( owner == null ? null : getFn.apply( owner ) );
+                return ( owner == null ? fallback : getFn.apply( owner ) );
             }
 
             @Override
@@ -301,13 +306,18 @@ public class VarUtils
 
     public static <A,B> ReadableVar<B> propertyVar( ReadableVar<A> ownerVar, Function<? super A,? extends B> getFn )
     {
+        return propertyVar( ownerVar, getFn, null );
+    }
+
+    public static <A,B> ReadableVar<B> propertyVar( ReadableVar<A> ownerVar, Function<? super A,? extends B> getFn, B fallback )
+    {
         return new ReadableVarDerived<B>( ownerVar )
         {
             @Override
             public B v( )
             {
                 A owner = ownerVar.v( );
-                return ( owner == null ? null : getFn.apply( owner ) );
+                return ( owner == null ? fallback : getFn.apply( owner ) );
             }
         };
     }
