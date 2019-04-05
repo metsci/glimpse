@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.VarUtils.allListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.completedListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
 import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
@@ -56,7 +57,7 @@ public class ListenablePairSet implements ListenablePair
     {
         this.ongoing = ongoingListenable( members );
         this.completed = completedListenable( members );
-        this.all = listenable( this.ongoing, this.completed );
+        this.all = allListenable( members );
     }
 
     @Deprecated

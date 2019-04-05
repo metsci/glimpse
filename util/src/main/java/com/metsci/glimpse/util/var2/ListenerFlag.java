@@ -35,6 +35,7 @@ public interface ListenerFlag
 
     public static final ListenerFlag IMMEDIATE = new ListenerFlagSimple( "IMMEDIATE" );
     public static final ListenerFlag ONCE = new ListenerFlagSimple( "ONCE" );
+    public static final ListenerFlag UNFILTERED = new ListenerFlagSimple( "UNFILTERED" );
 
     public static ListenerFlag ORDER( int order )
     {

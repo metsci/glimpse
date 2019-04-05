@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
+import static com.metsci.glimpse.util.var2.ListenerFlag.UNFILTERED;
+import static com.metsci.glimpse.util.var2.VarUtils.allListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.completedListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
 import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
@@ -38,6 +41,7 @@ import static java.util.Arrays.asList;
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
 
 public abstract class ReadableVarDerived<V> implements ReadableVar<V>
@@ -62,10 +66,10 @@ public abstract class ReadableVarDerived<V> implements ReadableVar<V>
     {
         this.ongoingRaw = ongoingListenable( listenables );
         this.completedRaw = completedListenable( listenables );
-        this.allRaw = listenable( this.ongoingRaw, this.completedRaw );
+        this.allRaw = allListenable( listenables );
 
-        this.completedFiltered = filterListenable( this.completedRaw, this::v );
         this.ongoingFiltered = filterListenable( this.ongoingRaw, this::v );
+        this.completedFiltered = filterListenable( this.completedRaw, this::v );
         this.allFiltered = filterListenable( this.allRaw, this::v );
     }
 
@@ -102,8 +106,9 @@ public abstract class ReadableVarDerived<V> implements ReadableVar<V>
     {
         return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            ListenablePairListener listener2 = filterListener( listener, this::v );
-            return doAddPairListener( this.ongoingRaw, this.completedRaw, flags2, listener2 );
+            Set<ListenerFlag> flags3 = setPlus( ImmutableSet.copyOf( flags2 ), UNFILTERED );
+            ListenablePairListener listener2 = ( flags.contains( UNFILTERED ) ? listener : filterListener( listener, this::v ) );
+            return doAddPairListener( this.ongoingFiltered, this.completedFiltered, flags3, listener2 );
         } );
     }
 

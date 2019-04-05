@@ -75,6 +75,43 @@ class VarTest
                       fs );
     }
 
+    /**
+     * Same as {@link #derivedVarShouldFireEvenIfMembersDontChange()}, but
+     * adding a {@link Runnable} instead of a {@link ListenablePairListener}.
+     */
+    @Test
+    void derivedVarShouldFireEvenIfMembersDontChange2( )
+    {
+        Var<String> a = new VarBasic<>( "x" );
+
+        ReadableVar<String> b = new ReadableVarDerived<String>( a )
+        {
+            @Override
+            public String v( )
+            {
+                return a.v( );
+            }
+        };
+
+        List<String> fs = new ArrayList<>( );
+        b.addListener( ( ) ->
+        {
+            fs.add( b.v( ) );
+        } );
+
+        // The listener should fire 4 times
+        a.set( false, "A" );
+        a.set(  true, "B" );
+        a.set( false, "A" );
+        a.set(  true, "B" );
+
+        assertEquals( asList( "A",
+                              "B",
+                              "A",
+                              "B" ),
+                      fs );
+    }
+
     @Test
     void oldNewShouldFireCompleted( )
     {

@@ -36,6 +36,7 @@ import static com.metsci.glimpse.util.var2.ListenablePair.COMPLETED;
 import static com.metsci.glimpse.util.var2.ListenerFlag.EMPTY_FLAGS;
 import static com.metsci.glimpse.util.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.util.var2.ListenerFlag.ONCE;
+import static com.metsci.glimpse.util.var2.ListenerFlag.UNFILTERED;
 import static com.metsci.glimpse.util.var2.ListenerFlag.flags;
 import static java.util.Arrays.asList;
 
@@ -590,9 +591,16 @@ public class VarUtils
                     {
                         return ( ) -> { };
                     }
+
+                    flags = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
                 }
-                Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
-                return rawListenable.addListener( flags2, filterListener( listener, valueFn ) );
+
+                if ( !flags.contains( UNFILTERED ) )
+                {
+                    listener = filterListener( listener, valueFn );
+                }
+
+                return rawListenable.addListener( flags, listener );
             }
         };
     }
