@@ -28,6 +28,8 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Component;
 
+import com.metsci.glimpse.docking.xml.GroupArrangement;
+
 public interface DockingGroupListener
 {
 
@@ -72,5 +74,9 @@ public interface DockingGroupListener
     void closingView( DockingGroup group, View view );
 
     void closedView( DockingGroup group, View view );
+
+    void settingArrangement( DockingGroup group, GroupArrangement groupArr );
+
+    void setArrangement( DockingGroup group, GroupArrangement groupArr );
 
 }

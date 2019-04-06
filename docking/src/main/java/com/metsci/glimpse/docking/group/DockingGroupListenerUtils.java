@@ -38,6 +38,7 @@ import com.metsci.glimpse.docking.SplitPane;
 import com.metsci.glimpse.docking.Tile;
 import com.metsci.glimpse.docking.TileListener;
 import com.metsci.glimpse.docking.View;
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class DockingGroupListenerUtils
@@ -192,6 +193,22 @@ public class DockingGroupListenerUtils
         for ( DockingGroupListener listener : listeners )
         {
             listener.closedView( group, view );
+        }
+    }
+
+    public static void notifySettingArrangement( Collection<? extends DockingGroupListener> listeners, DockingGroup group, GroupArrangement groupArr )
+    {
+        for ( DockingGroupListener listener : listeners )
+        {
+            listener.settingArrangement( group, groupArr );
+        }
+    }
+
+    public static void notifySetArrangement( Collection<? extends DockingGroupListener> listeners, DockingGroup group, GroupArrangement groupArr )
+    {
+        for ( DockingGroupListener listener : listeners )
+        {
+            listener.setArrangement( group, groupArr );
         }
     }
 
