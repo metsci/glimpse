@@ -26,27 +26,19 @@
  */
 package com.metsci.glimpse.util.var2;
 
-import static com.metsci.glimpse.util.var2.ListenerFlag.ONCE;
-import static com.metsci.glimpse.util.var2.VarUtils.allListenable;
-import static com.metsci.glimpse.util.var2.VarUtils.completedListenable;
-import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListener;
-import static com.metsci.glimpse.util.var2.VarUtils.setMinus;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
-import com.metsci.glimpse.util.var.DisposableGroup;
 
 public abstract class ReadableVarDerived<V> implements ReadableVar<V>
 {
 
-    protected final ImmutableList<ListenablePair> listenables;
+    protected final ListenablePairSet listenables;
     protected final Listenable completed;
     protected final Listenable all;
 
@@ -59,13 +51,9 @@ public abstract class ReadableVarDerived<V> implements ReadableVar<V>
 
     public ReadableVarDerived( Collection<? extends ListenablePair> listenables )
     {
-        this.listenables = ImmutableList.copyOf( listenables );
-
-        Listenable completedRaw = completedListenable( listenables );
-        this.completed = filterListenable( completedRaw, this::v );
-
-        Listenable allRaw = allListenable( listenables );
-        this.all = filterListenable( allRaw, this::v );
+        this.listenables = new ListenablePairSet( listenables );
+        this.completed = filterListenable( this.listenables.completed( ), this::v );
+        this.all = filterListenable( this.listenables.all( ), this::v );
     }
 
     @Override
@@ -86,36 +74,7 @@ public abstract class ReadableVarDerived<V> implements ReadableVar<V>
     @Override
     public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
     {
-        return doHandleImmediateFlag( flags, listener, flags2 ->
-        {
-            DisposableGroup disposables = new DisposableGroup( );
-
-            ListenablePairListener listener2 = filterListener( listener, this::v );
-
-            if ( flags.contains( ONCE ) )
-            {
-                Set<ListenerFlag> flags3 = setMinus( ImmutableSet.copyOf( flags ), ONCE );
-                ListenablePairListener listener3 = ongoing ->
-                {
-                    listener2.run( ongoing );
-                    disposables.dispose( );
-                    disposables.clear( );
-                };
-                for ( ListenablePair listenable : this.listenables )
-                {
-                    disposables.add( listenable.addListener( flags3, listener3 ) );
-                }
-            }
-            else
-            {
-                for ( ListenablePair listenable : this.listenables )
-                {
-                    disposables.add( listenable.addListener( flags2, listener2 ) );
-                }
-            }
-
-            return disposables;
-        } );
+        return this.listenables.addListener( flags, filterListener( listener, this::v ) );
     }
 
 }
