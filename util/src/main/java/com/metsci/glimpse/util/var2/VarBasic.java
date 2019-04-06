@@ -27,9 +27,7 @@
 package com.metsci.glimpse.util.var2;
 
 import static com.google.common.base.Objects.equal;
-import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
 import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
-import static com.metsci.glimpse.util.var2.ListenerFlag.UNFILTERED;
 import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
 import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListenable;
@@ -39,7 +37,6 @@ import static com.metsci.glimpse.util.var2.VarUtils.listenable;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.InvalidValueException;
 import com.metsci.glimpse.util.var.TxnMember;
@@ -49,7 +46,6 @@ public class VarBasic<V> implements Var<V>
 
     protected final ListenableBasic ongoingRaw;
     protected final ListenableBasic completedRaw;
-    protected final Listenable allRaw;
 
     protected final Listenable ongoingFiltered;
     protected final Listenable completedFiltered;
@@ -70,11 +66,11 @@ public class VarBasic<V> implements Var<V>
     {
         this.ongoingRaw = new ListenableBasic( );
         this.completedRaw = new ListenableBasic( );
-        this.allRaw = listenable( this.ongoingRaw, this.completedRaw );
+        Listenable allRaw = listenable( this.ongoingRaw, this.completedRaw );
 
-        this.completedFiltered = filterListenable( this.completedRaw, this::v );
         this.ongoingFiltered = filterListenable( this.ongoingRaw, this::v );
-        this.allFiltered = filterListenable( this.allRaw, this::v );
+        this.completedFiltered = filterListenable( this.completedRaw, this::v );
+        this.allFiltered = filterListenable( allRaw, this::v );
 
         this.validateFn = validateFn;
         this.value = this.requireValid( value );
@@ -154,13 +150,6 @@ public class VarBasic<V> implements Var<V>
         }
     }
 
-    @Deprecated
-    @Override
-    public Listenable ongoing( )
-    {
-        return this.ongoingFiltered;
-    }
-
     @Override
     public Listenable completed( )
     {
@@ -178,9 +167,8 @@ public class VarBasic<V> implements Var<V>
     {
         return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            Set<ListenerFlag> flags3 = setPlus( ImmutableSet.copyOf( flags2 ), UNFILTERED );
-            ListenablePairListener listener2 = ( flags.contains( UNFILTERED ) ? listener : filterListener( listener, this::v ) );
-            return doAddPairListener( this.ongoingRaw, this.completedRaw, flags3, listener2 );
+            ListenablePairListener listener2 = filterListener( listener, this::v );
+            return doAddPairListener( this.ongoingRaw, this.completedRaw, flags2, listener2 );
         } );
     }
 

@@ -54,13 +54,6 @@ public class ListenablePairBasic implements ListenablePair
         ( ongoing ? this.ongoing : this.completed ).fire( );
     }
 
-    @Deprecated
-    @Override
-    public Listenable ongoing( )
-    {
-        return this.ongoing;
-    }
-
     @Override
     public Listenable completed( )
     {

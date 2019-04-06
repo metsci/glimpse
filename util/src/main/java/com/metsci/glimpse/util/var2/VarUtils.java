@@ -36,7 +36,6 @@ import static com.metsci.glimpse.util.var2.ListenablePair.COMPLETED;
 import static com.metsci.glimpse.util.var2.ListenerFlag.EMPTY_FLAGS;
 import static com.metsci.glimpse.util.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.util.var2.ListenerFlag.ONCE;
-import static com.metsci.glimpse.util.var2.ListenerFlag.UNFILTERED;
 import static com.metsci.glimpse.util.var2.ListenerFlag.flags;
 import static java.util.Arrays.asList;
 
@@ -363,20 +362,15 @@ public class VarUtils
         return mapVar.update( ongoing, map -> mapWith( map, key, updateFn ) );
     }
 
+    /**
+     * The returned listenable does not support {@link ListenerFlag#ORDER(int)}.
+     */
     public static ListenablePair wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1 )
     {
         return new ListenablePair( )
         {
-            protected final Listenable ongoing = wrapListenable1( listenable1, ev -> ev.ongoing );
             protected final Listenable completed = wrapListenable1( listenable1, ev -> !ev.ongoing );
             protected final Listenable all = wrapListenable1( listenable1, ev -> true );
-
-            @Deprecated
-            @Override
-            public Listenable ongoing( )
-            {
-                return this.ongoing;
-            }
 
             @Override
             public Listenable completed( )
@@ -395,12 +389,34 @@ public class VarUtils
             {
                 return doHandleImmediateFlag( flags, listener, flags2 ->
                 {
-                    return doAddPairListener( this.ongoing, this.completed, flags2, listener );
+                    DisposableGroup disposables = new DisposableGroup( );
+                    if ( flags.contains( ONCE ) )
+                    {
+                        Consumer<VarEvent> listener2 = ev ->
+                        {
+                            listener.run( ev.ongoing );
+                            disposables.dispose( );
+                            disposables.clear( );
+                        };
+                        listenable1.addListener( false, listener2 );
+                    }
+                    else
+                    {
+                        Consumer<VarEvent> listener2 = ev ->
+                        {
+                            listener.run( ev.ongoing );
+                        };
+                        listenable1.addListener( false, listener2 );
+                    }
+                    return disposables;
                 } );
             }
         };
     }
 
+    /**
+     * The returned listenable does not support {@link ListenerFlag#ORDER(int)}.
+     */
     public static Listenable wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1, Predicate<VarEvent> filter )
     {
         return new Listenable( )
@@ -445,6 +461,9 @@ public class VarUtils
         };
     }
 
+    /**
+     * The returned var does not support {@link ListenerFlag#ORDER(int)}.
+     */
     public static <V> Var<V> wrapVar1( com.metsci.glimpse.util.var.Var<V> var1 )
     {
         return new VarDerived<V>( wrapListenable1( var1 ) )
@@ -595,12 +614,7 @@ public class VarUtils
                     flags = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
                 }
 
-                if ( !flags.contains( UNFILTERED ) )
-                {
-                    listener = filterListener( listener, valueFn );
-                }
-
-                return rawListenable.addListener( flags, listener );
+                return rawListenable.addListener( flags, filterListener( listener, valueFn ) );
             }
         };
     }
