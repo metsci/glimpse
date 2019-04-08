@@ -391,6 +391,30 @@ public class DisposableUtils
         } );
     }
 
+    public static Disposable onMouseClick( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseClicked( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseDrag( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseDragged( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
     public static Disposable onMouseMove( Component component, Consumer<? super MouseEvent> fn )
     {
         return addMouseMotionListener( component, new MouseAdapter( )
