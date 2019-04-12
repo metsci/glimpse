@@ -403,11 +403,20 @@ public abstract class DockingGroupBase implements DockingGroup
     @Override
     public GroupArrangement captureArrangement( )
     {
+        return this.captureArrangement( true );
+    }
+
+    @Override
+    public GroupArrangement captureArrangement( boolean includePlanViews )
+    {
         GroupArrangement newPlanArr = this.getExistingArr( null );
-        for ( String futureViewId : futureViewIds( this, this.planArr ) )
+        if ( includePlanViews )
         {
-            ViewPlacer<Void> placer = this.createViewPlacer( newPlanArr, futureViewId );
-            this.placeView( newPlanArr, this.planArr, futureViewId, placer );
+            for ( String futureViewId : futureViewIds( this, this.planArr ) )
+            {
+                ViewPlacer<Void> placer = this.createViewPlacer( newPlanArr, futureViewId );
+                this.placeView( newPlanArr, this.planArr, futureViewId, placer );
+            }
         }
         return newPlanArr;
     }

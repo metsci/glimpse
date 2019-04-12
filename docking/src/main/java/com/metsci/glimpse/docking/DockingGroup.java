@@ -66,7 +66,18 @@ public interface DockingGroup
 
     void setArrangement( GroupArrangement groupArr );
 
+    /**
+     * Equivalent to {@link #captureArrangement(boolean)} with {@code false} for the
+     * {@code includePlanViews} arg.
+     */
     GroupArrangement captureArrangement( );
+
+    /**
+     * The {@code includePlanViews} arg indicates whether or not the returned
+     * arrangement should include the planned placements for views that don't
+     * currently exist.
+     */
+    GroupArrangement captureArrangement( boolean includePlanViews );
 
     void setVisible( boolean visible );
 
