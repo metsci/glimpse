@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,8 @@
 package com.metsci.glimpse.docking;
 
 import java.awt.Component;
+
+import com.metsci.glimpse.docking.xml.GroupArrangement;
 
 public class DockingGroupAdapter implements DockingGroupListener
 {
@@ -97,6 +99,14 @@ public class DockingGroupAdapter implements DockingGroupListener
 
     @Override
     public void closedView( DockingGroup group, View view )
+    { }
+
+    @Override
+    public void settingArrangement( DockingGroup group, GroupArrangement groupArr )
+    { }
+
+    @Override
+    public void setArrangement( DockingGroup group, GroupArrangement groupArr )
     { }
 
 }

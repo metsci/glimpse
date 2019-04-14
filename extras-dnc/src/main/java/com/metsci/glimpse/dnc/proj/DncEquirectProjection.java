@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ public class DncEquirectProjection implements DncProjection
         double cos_LOCAL = cos( azimuth_MATHRAD );
         double sin_LOCAL = sin( azimuth_MATHRAD );
 
-        double lat_DEG = this.originLon_DEG + y;
+        double lat_DEG = y;
         double cosLat = cos( degreesToRadians( lat_DEG ) );
         double cos_PROJ = cos_LOCAL / cosLat;
         double sin_PROJ = sin_LOCAL;

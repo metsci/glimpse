@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,13 +75,17 @@ public abstract class ReadableVarDerivedCaching<V> extends ReadableVarDerived<V>
             Object newUpstreamValue = upstreamVar.v( );
             if ( !equal( newUpstreamValue, oldUpstreamValue ) )
             {
-                this.upstream.put( upstreamVar, newUpstreamValue );
                 anyUpstreamChanges = true;
+                break;
             }
         }
 
         if ( anyUpstreamChanges )
         {
+            for ( ReadableVar<?> upstreamVar : this.upstream.keySet( ) )
+            {
+                this.upstream.put( upstreamVar, upstreamVar.v( ) );
+            }
             this.value = this.compute( );
         }
 

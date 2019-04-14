@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.var2;
 
-import static com.metsci.glimpse.util.var2.VarTestUtils.*;
+import static com.metsci.glimpse.util.var2.VarTestUtils.f;
 import static com.metsci.glimpse.util.var2.VarUtils.addOldNewListener;
 import static com.metsci.glimpse.util.var2.VarUtils.propertyVar;
 import static java.util.Arrays.asList;
@@ -38,12 +38,79 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.metsci.glimpse.util.var2.ReadableVar;
-import com.metsci.glimpse.util.var2.Var;
-import com.metsci.glimpse.util.var2.VarBasic;
 
 class VarTest
 {
+
+    @Test
+    void derivedVarShouldFireEvenIfMembersDontChange( )
+    {
+        Var<String> a = new VarBasic<>( "x" );
+
+        ReadableVar<String> b = new ReadableVarDerived<String>( a )
+        {
+            @Override
+            public String v( )
+            {
+                return a.v( );
+            }
+        };
+
+        List<VarFiring<String>> fs = new ArrayList<>( );
+        b.addListener( ongoing ->
+        {
+            fs.add( f( ongoing, b.v( ) ) );
+        } );
+
+        // The listener should fire 4 times
+        a.set( false, "A" );
+        a.set(  true, "B" );
+        a.set( false, "A" );
+        a.set(  true, "B" );
+
+        assertEquals( asList( f( false, "A" ),
+                              f(  true, "B" ),
+                              f( false, "A" ),
+                              f(  true, "B" ) ),
+                      fs );
+    }
+
+    /**
+     * Same as {@link #derivedVarShouldFireEvenIfMembersDontChange()}, but
+     * adding a {@link Runnable} instead of a {@link ListenablePairListener}.
+     */
+    @Test
+    void derivedVarShouldFireEvenIfMembersDontChange2( )
+    {
+        Var<String> a = new VarBasic<>( "x" );
+
+        ReadableVar<String> b = new ReadableVarDerived<String>( a )
+        {
+            @Override
+            public String v( )
+            {
+                return a.v( );
+            }
+        };
+
+        List<String> fs = new ArrayList<>( );
+        b.addListener( ( ) ->
+        {
+            fs.add( b.v( ) );
+        } );
+
+        // The listener should fire 4 times
+        a.set( false, "A" );
+        a.set(  true, "B" );
+        a.set( false, "A" );
+        a.set(  true, "B" );
+
+        assertEquals( asList( "A",
+                              "B",
+                              "A",
+                              "B" ),
+                      fs );
+    }
 
     @Test
     void oldNewShouldFireCompleted( )
@@ -67,7 +134,7 @@ class VarTest
     }
 
     @Test
-    void varShouldFireOnEvenIfOngoingHasntChanged( )
+    void varShouldFireEvenIfOngoingHasntChanged( )
     {
         Var<String> a = new VarBasic<>( "x" );
 

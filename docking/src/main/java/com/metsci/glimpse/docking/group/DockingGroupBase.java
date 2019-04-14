@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,8 @@ import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyC
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyDisposedWindow;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyDisposingAllWindows;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyDisposingWindow;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifySetArrangement;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifySettingArrangement;
 import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyUserRequestingDisposeWindow;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.newWindowsBackToFront;
 import static com.metsci.glimpse.docking.group.DockingGroupUtils.restoreMaximizedTilesInNewWindows;
@@ -382,6 +384,7 @@ public abstract class DockingGroupBase implements DockingGroup
     {
         boolean wasVisible = this.isVisible;
         this.setVisible( false );
+        notifySettingArrangement( this.listeners, this, groupArr );
 
         Collection<View> views = this.views( ).values( );
         for ( View view : views )
@@ -393,17 +396,27 @@ public abstract class DockingGroupBase implements DockingGroup
 
         this.addViews( views );
 
+        notifySetArrangement( this.listeners, this, groupArr );
         this.setVisible( wasVisible );
     }
 
     @Override
     public GroupArrangement captureArrangement( )
     {
+        return this.captureArrangement( true );
+    }
+
+    @Override
+    public GroupArrangement captureArrangement( boolean includePlanViews )
+    {
         GroupArrangement newPlanArr = this.getExistingArr( null );
-        for ( String futureViewId : futureViewIds( this, this.planArr ) )
+        if ( includePlanViews )
         {
-            ViewPlacer<Void> placer = this.createViewPlacer( newPlanArr, futureViewId );
-            this.placeView( newPlanArr, this.planArr, futureViewId, placer );
+            for ( String futureViewId : futureViewIds( this, this.planArr ) )
+            {
+                ViewPlacer<Void> placer = this.createViewPlacer( newPlanArr, futureViewId );
+                this.placeView( newPlanArr, this.planArr, futureViewId, placer );
+            }
         }
         return newPlanArr;
     }

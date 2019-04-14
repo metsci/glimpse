@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,18 +30,18 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class DisposableMap<K> implements Disposable
+public class DisposableGroupMap<K> implements Disposable
 {
 
     protected final Map<K,DisposableGroup> groups;
 
 
-    public DisposableMap( )
+    public DisposableGroupMap( )
     {
         this.groups = new LinkedHashMap<>( );
     }
 
-    public DisposableGroup group( K key )
+    public DisposableGroup get( K key )
     {
         if ( !this.groups.containsKey( key ) )
         {
