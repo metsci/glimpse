@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -385,6 +385,30 @@ public class DisposableUtils
         {
             @Override
             public void mouseReleased( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseClick( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseClicked( MouseEvent ev )
+            {
+                fn.accept( ev );
+            }
+        } );
+    }
+
+    public static Disposable onMouseDrag( Component component, Consumer<? super MouseEvent> fn )
+    {
+        return addMouseListener( component, new MouseAdapter( )
+        {
+            @Override
+            public void mouseDragged( MouseEvent ev )
             {
                 fn.accept( ev );
             }

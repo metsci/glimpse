@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,25 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.ListenerFlag.ONCE;
+import static com.metsci.glimpse.util.var2.VarUtils.allListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.completedListenable;
-import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
 import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
-import static com.metsci.glimpse.util.var2.VarUtils.listenable;
-import static com.metsci.glimpse.util.var2.VarUtils.mapCollection;
+import static com.metsci.glimpse.util.var2.VarUtils.setMinus;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
+import com.metsci.glimpse.util.var.DisposableGroup;
 
 public class ListenablePairSet implements ListenablePair
 {
 
-    protected final Listenable ongoing;
+    protected final ImmutableList<ListenablePair> members;
     protected final Listenable completed;
     protected final Listenable all;
 
@@ -54,22 +57,9 @@ public class ListenablePairSet implements ListenablePair
 
     public ListenablePairSet( Collection<? extends ListenablePair> members )
     {
-        this.ongoing = ongoingListenable( members );
+        this.members = ImmutableList.copyOf( members );
         this.completed = completedListenable( members );
-        this.all = listenable( this.ongoing, this.completed );
-    }
-
-    @Deprecated
-    protected static Listenable ongoingListenable( Collection<? extends ListenablePair> pairs )
-    {
-        return listenable( mapCollection( pairs, ListenablePair::ongoing ) );
-    }
-
-    @Deprecated
-    @Override
-    public Listenable ongoing( )
-    {
-        return this.ongoing;
+        this.all = allListenable( members );
     }
 
     @Override
@@ -89,7 +79,29 @@ public class ListenablePairSet implements ListenablePair
     {
         return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            return doAddPairListener( this.ongoing, this.completed, flags2, listener );
+            DisposableGroup disposables = new DisposableGroup( );
+            if ( flags.contains( ONCE ) )
+            {
+                Set<ListenerFlag> flags3 = setMinus( ImmutableSet.copyOf( flags ), ONCE );
+                ListenablePairListener listener2 = ongoing ->
+                {
+                    listener.run( ongoing );
+                    disposables.dispose( );
+                    disposables.clear( );
+                };
+                for ( ListenablePair member : this.members )
+                {
+                    disposables.add( member.addListener( flags3, listener2 ) );
+                }
+            }
+            else
+            {
+                for ( ListenablePair member : this.members )
+                {
+                    disposables.add( member.addListener( flags2, listener ) );
+                }
+            }
+            return disposables;
         } );
     }
 

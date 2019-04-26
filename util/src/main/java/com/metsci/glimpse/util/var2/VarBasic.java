@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ public class VarBasic<V> implements Var<V>
 
     protected final ListenableBasic ongoingRaw;
     protected final ListenableBasic completedRaw;
-    protected final Listenable allRaw;
 
     protected final Listenable ongoingFiltered;
     protected final Listenable completedFiltered;
@@ -67,11 +66,11 @@ public class VarBasic<V> implements Var<V>
     {
         this.ongoingRaw = new ListenableBasic( );
         this.completedRaw = new ListenableBasic( );
-        this.allRaw = listenable( this.ongoingRaw, this.completedRaw );
+        Listenable allRaw = listenable( this.ongoingRaw, this.completedRaw );
 
-        this.completedFiltered = filterListenable( this.completedRaw, this::v );
         this.ongoingFiltered = filterListenable( this.ongoingRaw, this::v );
-        this.allFiltered = filterListenable( this.allRaw, this::v );
+        this.completedFiltered = filterListenable( this.completedRaw, this::v );
+        this.allFiltered = filterListenable( allRaw, this::v );
 
         this.validateFn = validateFn;
         this.value = this.requireValid( value );
@@ -149,13 +148,6 @@ public class VarBasic<V> implements Var<V>
         {
             return false;
         }
-    }
-
-    @Deprecated
-    @Override
-    public Listenable ongoing( )
-    {
-        return this.ongoingFiltered;
     }
 
     @Override

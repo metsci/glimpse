@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -282,13 +282,18 @@ public class VarUtils
 
     public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn )
     {
+        return propertyVar( ownerVar, getFn, updateFn, null );
+    }
+
+    public static <A,B> Var<B> propertyVar( Var<A> ownerVar, Function<? super A,? extends B> getFn, BiFunction<? super A,B,? extends A> updateFn, B fallback )
+    {
         return new VarDerived<B>( ownerVar )
         {
             @Override
             public B v( )
             {
                 A owner = ownerVar.v( );
-                return ( owner == null ? null : getFn.apply( owner ) );
+                return ( owner == null ? fallback : getFn.apply( owner ) );
             }
 
             @Override
@@ -301,13 +306,18 @@ public class VarUtils
 
     public static <A,B> ReadableVar<B> propertyVar( ReadableVar<A> ownerVar, Function<? super A,? extends B> getFn )
     {
+        return propertyVar( ownerVar, getFn, null );
+    }
+
+    public static <A,B> ReadableVar<B> propertyVar( ReadableVar<A> ownerVar, Function<? super A,? extends B> getFn, B fallback )
+    {
         return new ReadableVarDerived<B>( ownerVar )
         {
             @Override
             public B v( )
             {
                 A owner = ownerVar.v( );
-                return ( owner == null ? null : getFn.apply( owner ) );
+                return ( owner == null ? fallback : getFn.apply( owner ) );
             }
         };
     }
@@ -352,20 +362,15 @@ public class VarUtils
         return mapVar.update( ongoing, map -> mapWith( map, key, updateFn ) );
     }
 
+    /**
+     * The returned listenable does not support {@link ListenerFlag#ORDER(int)}.
+     */
     public static ListenablePair wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1 )
     {
         return new ListenablePair( )
         {
-            protected final Listenable ongoing = wrapListenable1( listenable1, ev -> ev.ongoing );
             protected final Listenable completed = wrapListenable1( listenable1, ev -> !ev.ongoing );
             protected final Listenable all = wrapListenable1( listenable1, ev -> true );
-
-            @Deprecated
-            @Override
-            public Listenable ongoing( )
-            {
-                return this.ongoing;
-            }
 
             @Override
             public Listenable completed( )
@@ -384,12 +389,34 @@ public class VarUtils
             {
                 return doHandleImmediateFlag( flags, listener, flags2 ->
                 {
-                    return doAddPairListener( this.ongoing, this.completed, flags2, listener );
+                    DisposableGroup disposables = new DisposableGroup( );
+                    if ( flags.contains( ONCE ) )
+                    {
+                        Consumer<VarEvent> listener2 = ev ->
+                        {
+                            listener.run( ev.ongoing );
+                            disposables.dispose( );
+                            disposables.clear( );
+                        };
+                        listenable1.addListener( false, listener2 );
+                    }
+                    else
+                    {
+                        Consumer<VarEvent> listener2 = ev ->
+                        {
+                            listener.run( ev.ongoing );
+                        };
+                        listenable1.addListener( false, listener2 );
+                    }
+                    return disposables;
                 } );
             }
         };
     }
 
+    /**
+     * The returned listenable does not support {@link ListenerFlag#ORDER(int)}.
+     */
     public static Listenable wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1, Predicate<VarEvent> filter )
     {
         return new Listenable( )
@@ -434,6 +461,9 @@ public class VarUtils
         };
     }
 
+    /**
+     * The returned var does not support {@link ListenerFlag#ORDER(int)}.
+     */
     public static <V> Var<V> wrapVar1( com.metsci.glimpse.util.var.Var<V> var1 )
     {
         return new VarDerived<V>( wrapListenable1( var1 ) )
@@ -580,9 +610,11 @@ public class VarUtils
                     {
                         return ( ) -> { };
                     }
+
+                    flags = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
                 }
-                Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
-                return rawListenable.addListener( flags2, filterListener( listener, valueFn ) );
+
+                return rawListenable.addListener( flags, filterListener( listener, valueFn ) );
             }
         };
     }
