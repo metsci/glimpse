@@ -29,10 +29,12 @@ package com.metsci.glimpse.platformFixes;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 import static java.awt.Window.getOwnerlessWindows;
 
+import java.awt.Component;
 import java.awt.Window;
-import java.awt.peer.ComponentPeer;
+import java.lang.reflect.Field;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Function;
 
 import javax.swing.SwingUtilities;
 
@@ -127,10 +129,9 @@ public class WindowsFixes
         // A map would scale better as the number of windows increases ...
         // but that would require bookkeeping, and presumably there won't be
         // all that many top-level windows
-        //
         for ( Window w : getOwnerlessWindows( ) )
         {
-            Long h = getHwnd( w );
+            Long h = getHWndFn.apply( w );
             if ( h != null && h == hwnd )
             {
                 return w;
@@ -139,25 +140,29 @@ public class WindowsFixes
         return null;
     }
 
-    private static Long getHwnd( Window window )
+    private static final Function<Window,Long> getHWndFn = createGetHWndFn( );
+    private static Function<Window,Long> createGetHWndFn( )
     {
         try
         {
-            @SuppressWarnings( "deprecation" )
-            ComponentPeer peer = window.getPeer( );
-            Class<?> wcpClass = Class.forName( "sun.awt.windows.WComponentPeer" );
-            if ( wcpClass.isInstance( peer ) )
+            Field Component_peer = Component.class.getDeclaredField( "peer" );
+            Component_peer.setAccessible( true );
+            return w ->
             {
-                return ( Long ) wcpClass.getMethod( "getHWnd" ).invoke( peer );
-            }
-            else
-            {
-                return null;
-            }
+                try
+                {
+                    Object peer = Component_peer.get( w );
+                    return ( Long ) peer.getClass( ).getMethod( "getHWnd" ).invoke( peer );
+                }
+                catch ( Exception e )
+                {
+                    return null;
+                }
+            };
         }
         catch ( Exception e )
         {
-            return null;
+            return w -> null;
         }
     }
 
