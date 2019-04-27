@@ -131,6 +131,12 @@ public class FloatsArray implements FloatsModifiable
     }
 
     @Override
+    public FloatsArray copy( )
+    {
+        return new FloatsArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

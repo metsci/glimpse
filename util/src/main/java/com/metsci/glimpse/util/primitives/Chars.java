@@ -60,6 +60,8 @@ public interface Chars
 
     char[] copyOf( );
 
+    Chars copy( );
+
     String string( int i, int c );
 
     String string( );

@@ -121,4 +121,7 @@ public interface CharsModifiable extends Chars
 
     void compact( );
 
+    @Override
+    CharsModifiable copy( );
+
 }

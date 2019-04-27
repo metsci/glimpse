@@ -109,4 +109,7 @@ public interface FloatsModifiable extends Floats
 
     void compact( );
 
+    @Override
+    FloatsModifiable copy( );
+
 }

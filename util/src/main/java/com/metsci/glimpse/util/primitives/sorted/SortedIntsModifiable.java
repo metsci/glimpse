@@ -39,4 +39,7 @@ public interface SortedIntsModifiable extends SortedInts, IntsModifiable
      */
     int add( int v );
 
+    @Override
+    SortedIntsModifiable copy( );
+
 }

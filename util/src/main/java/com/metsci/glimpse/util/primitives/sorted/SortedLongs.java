@@ -125,4 +125,7 @@ public interface SortedLongs extends Longs
      */
     ContinuousIndexArray continuousIndicesOf( SortedLongs xs );
 
+    @Override
+    SortedLongs copy( );
+
 }

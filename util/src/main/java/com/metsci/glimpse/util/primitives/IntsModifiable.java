@@ -109,4 +109,7 @@ public interface IntsModifiable extends Ints
 
     void compact( );
 
+    @Override
+    IntsModifiable copy( );
+
 }

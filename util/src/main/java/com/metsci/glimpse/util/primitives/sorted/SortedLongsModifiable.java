@@ -39,4 +39,7 @@ public interface SortedLongsModifiable extends SortedLongs, LongsModifiable
      */
     int add( long v );
 
+    @Override
+    SortedLongsModifiable copy( );
+
 }

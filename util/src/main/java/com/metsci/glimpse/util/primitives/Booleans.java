@@ -56,4 +56,6 @@ public interface Booleans
 
     boolean[] copyOf( );
 
+    Booleans copy( );
+
 }

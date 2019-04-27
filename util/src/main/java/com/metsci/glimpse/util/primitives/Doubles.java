@@ -60,4 +60,6 @@ public interface Doubles
 
     double[] copyOf( );
 
+    Doubles copy( );
+
 }

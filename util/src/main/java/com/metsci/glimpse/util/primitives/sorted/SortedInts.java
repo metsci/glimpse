@@ -125,4 +125,7 @@ public interface SortedInts extends Ints
      */
     ContinuousIndexArray continuousIndicesOf( SortedInts xs );
 
+    @Override
+    SortedInts copy( );
+
 }

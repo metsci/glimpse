@@ -124,4 +124,7 @@ public interface BytesModifiable extends Bytes
 
     void compact( );
 
+    @Override
+    BytesModifiable copy( );
+
 }

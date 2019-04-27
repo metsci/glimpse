@@ -56,4 +56,6 @@ public interface Objects
 
     Object[] copyOf( );
 
+    Objects copy( );
+
 }

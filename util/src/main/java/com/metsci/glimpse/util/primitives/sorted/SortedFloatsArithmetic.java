@@ -144,6 +144,12 @@ public class SortedFloatsArithmetic implements SortedFloats
     }
 
     @Override
+    public SortedFloatsArithmetic copy( )
+    {
+        return new SortedFloatsArithmetic( v0, vStep, n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

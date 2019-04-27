@@ -40,8 +40,6 @@ import com.metsci.glimpse.util.primitives.DoublesArray;
 public class SortedDoublesArray extends DoublesArray implements SortedDoublesModifiable
 {
 
-    // Instantiation
-
     /**
      * If the values of {@code a} are not in ascending order, the behavior of
      * this instance is undefined.
@@ -84,8 +82,6 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
     {
         super( xs );
     }
-
-    // Search
 
     @Override
     public int indexOf( double x )
@@ -307,14 +303,18 @@ public class SortedDoublesArray extends DoublesArray implements SortedDoublesMod
         return hs;
     }
 
-    // Mutators
-
     @Override
     public int add( double v )
     {
         int i = indexAfter( v );
         insert( i, v );
         return i;
+    }
+
+    @Override
+    public SortedDoublesArray copy( )
+    {
+        return new SortedDoublesArray( this.a.clone( ), this.n );
     }
 
 }

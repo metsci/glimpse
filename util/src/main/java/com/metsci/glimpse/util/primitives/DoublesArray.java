@@ -131,6 +131,12 @@ public class DoublesArray implements DoublesModifiable
     }
 
     @Override
+    public DoublesArray copy( )
+    {
+        return new DoublesArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

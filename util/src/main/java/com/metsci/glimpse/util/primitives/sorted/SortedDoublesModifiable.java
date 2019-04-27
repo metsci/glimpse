@@ -39,4 +39,7 @@ public interface SortedDoublesModifiable extends SortedDoubles, DoublesModifiabl
      */
     int add( double v );
 
+    @Override
+    SortedDoublesModifiable copy( );
+
 }

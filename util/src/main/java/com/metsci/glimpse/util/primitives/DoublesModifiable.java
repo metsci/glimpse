@@ -109,4 +109,7 @@ public interface DoublesModifiable extends Doubles
 
     void compact( );
 
+    @Override
+    DoublesModifiable copy( );
+
 }

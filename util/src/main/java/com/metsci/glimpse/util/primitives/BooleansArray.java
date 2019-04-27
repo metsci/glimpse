@@ -117,6 +117,12 @@ public class BooleansArray implements BooleansModifiable
     }
 
     @Override
+    public BooleansArray copy( )
+    {
+        return new BooleansArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

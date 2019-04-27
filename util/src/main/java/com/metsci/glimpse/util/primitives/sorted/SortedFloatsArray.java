@@ -40,8 +40,6 @@ import com.metsci.glimpse.util.primitives.FloatsArray;
 public class SortedFloatsArray extends FloatsArray implements SortedFloatsModifiable
 {
 
-    // Instantiation
-
     /**
      * If the values of {@code a} are not in ascending order, the behavior of
      * this instance is undefined.
@@ -84,8 +82,6 @@ public class SortedFloatsArray extends FloatsArray implements SortedFloatsModifi
     {
         super( xs );
     }
-
-    // Search
 
     @Override
     public int indexOf( float x )
@@ -307,14 +303,18 @@ public class SortedFloatsArray extends FloatsArray implements SortedFloatsModifi
         return hs;
     }
 
-    // Mutators
-
     @Override
     public int add( float v )
     {
         int i = indexAfter( v );
         insert( i, v );
         return i;
+    }
+
+    @Override
+    public SortedFloatsArray copy( )
+    {
+        return new SortedFloatsArray( this.a.clone( ), this.n );
     }
 
 }

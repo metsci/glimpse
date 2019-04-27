@@ -40,8 +40,6 @@ import com.metsci.glimpse.util.primitives.IntsArray;
 public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
 {
 
-    // Instantiation
-
     /**
      * If the values of {@code a} are not in ascending order, the behavior of
      * this instance is undefined.
@@ -84,8 +82,6 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
     {
         super( xs );
     }
-
-    // Search
 
     @Override
     public int indexOf( int x )
@@ -307,14 +303,18 @@ public class SortedIntsArray extends IntsArray implements SortedIntsModifiable
         return hs;
     }
 
-    // Mutators
-
     @Override
     public int add( int v )
     {
         int i = indexAfter( v );
         insert( i, v );
         return i;
+    }
+
+    @Override
+    public SortedIntsArray copy( )
+    {
+        return new SortedIntsArray( this.a.clone( ), this.n );
     }
 
 }

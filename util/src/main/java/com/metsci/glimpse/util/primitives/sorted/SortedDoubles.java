@@ -125,4 +125,7 @@ public interface SortedDoubles extends Doubles
      */
     ContinuousIndexArray continuousIndicesOf( SortedDoubles xs );
 
+    @Override
+    SortedDoubles copy( );
+
 }

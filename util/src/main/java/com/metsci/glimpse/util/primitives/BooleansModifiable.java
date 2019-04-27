@@ -95,4 +95,7 @@ public interface BooleansModifiable extends Booleans
 
     void compact( );
 
+    @Override
+    BooleansModifiable copy( );
+
 }

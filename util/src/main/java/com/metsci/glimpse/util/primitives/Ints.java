@@ -60,4 +60,6 @@ public interface Ints
 
     int[] copyOf( );
 
+    Ints copy( );
+
 }
