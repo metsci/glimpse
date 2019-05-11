@@ -24,5 +24,4 @@ module com.metsci.glimpse.core.examples
 	
 	requires transitive it.unimi.dsi.fastutil;
 	requires transitive com.google.common;
-
 }

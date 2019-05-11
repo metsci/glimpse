@@ -31,4 +31,12 @@ module com.metsci.glimpse.extras.examples
 	requires transitive jogl.all;
 	requires transitive gluegen.rt.main;
 	requires transitive gluegen.rt;
+	
+	requires transitive com.sun.tools.jxc;
+	requires transitive java.xml.bind;
+	requires transitive com.sun.xml.bind;
+	
+	requires transitive miglayout.swing;
+	requires swingx.core;
+	requires jts.core;
 }

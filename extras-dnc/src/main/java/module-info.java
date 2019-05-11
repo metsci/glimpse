@@ -19,7 +19,9 @@ module com.metsci.glimpse.dnc
 	
 	requires transitive com.google.common;
 	requires transitive it.unimi.dsi.fastutil;
-	
+
+	requires transitive java.xml.bind;
+
 	requires svg.salamander;
 	requires worldwind;
 }
