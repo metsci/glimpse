@@ -11,6 +11,7 @@ module com.metsci.glimpse.text
 	requires transitive jogl.all;
 	requires transitive gluegen.rt.main;
 	requires transitive gluegen.rt;
+	
 	requires transitive java.desktop;
-	requires transitive java.base;
+	requires java.base;
 }

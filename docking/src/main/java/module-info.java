@@ -11,8 +11,9 @@ module com.metsci.glimpse.docking
 
 	requires transitive com.metsci.glimpse.util;
 	requires transitive tinylaf;
-	requires jaxb.core;
-	requires jaxb.impl;
-	requires java.xml.bind;
+	
+	requires transitive com.sun.tools.jxc;
+	requires transitive java.xml.bind;
+	requires transitive com.sun.xml.bind;
 	
 }

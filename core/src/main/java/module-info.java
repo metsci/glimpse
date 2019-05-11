@@ -80,5 +80,10 @@ module com.metsci.glimpse.core
 	requires transitive com.metsci.glimpse.text;
 	requires transitive com.metsci.glimpse.util;
 	
+	requires transitive jogl.all.main;
+	requires transitive jogl.all;
+	requires transitive gluegen.rt.main;
+	requires transitive gluegen.rt;
+	
 	requires transitive miglayout.core;
 }

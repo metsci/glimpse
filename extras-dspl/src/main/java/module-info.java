@@ -16,8 +16,10 @@ module com.metsci.glimpse.dspl
 	exports com.metsci.glimpse.dspl.parser.util;
 
 	requires transitive com.metsci.glimpse.util;
-	requires transitive jaxb.core;
-	requires transitive jaxb.impl;
+	
+	requires transitive com.sun.tools.jxc;
 	requires transitive java.xml.bind;
+	requires transitive com.sun.xml.bind;
+	
 	requires joda.time;
 }

@@ -10,4 +10,7 @@ module com.metsci.glimpse.wizard
 	exports com.metsci.glimpse.wizard.error;
 
 	requires transitive com.metsci.glimpse.docking;
+	
+	requires transitive miglayout.swing;
+	requires transitive com.google.common;
 }

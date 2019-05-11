@@ -10,5 +10,12 @@ module com.metsci.glimpse.layers
 
 	requires transitive com.metsci.glimpse.docking;
 	requires transitive com.metsci.glimpse.core;
-
+	
+	requires transitive com.sun.tools.jxc;
+	requires transitive java.xml.bind;
+	requires transitive com.sun.xml.bind;
+	
+	requires transitive com.google.common;
+	
+	requires transitive miglayout.swing;
 }

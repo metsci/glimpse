@@ -10,7 +10,6 @@ module com.metsci.glimpse.extras.examples
 	exports com.metsci.glimpse.extras.examples.charts.shoreline;
 	exports com.metsci.glimpse.extras.examples.charts.rnc;
 	exports com.metsci.glimpse.extras.examples.charts.bathy;
-	exports com.metsci.glimpse.extras.examples.swt;
 	exports com.metsci.glimpse.extras.examples.topo;
 	exports com.metsci.glimpse.extras.examples;
 	exports com.metsci.glimpse.extras.examples.charts.slippy;
@@ -23,9 +22,13 @@ module com.metsci.glimpse.extras.examples
 	requires transitive com.metsci.glimpse.dnc;
 	requires transitive com.metsci.glimpse.docking;
 	requires transitive com.metsci.glimpse.dspl;
-	requires transitive com.metsci.glimpse.swt;
 	requires transitive com.metsci.glimpse.text;
 	requires transitive com.metsci.glimpse.tinylaf;
 	requires transitive com.metsci.glimpse.topo;
 	requires transitive com.metsci.glimpse.util;
+	
+	requires transitive jogl.all.main;
+	requires transitive jogl.all;
+	requires transitive gluegen.rt.main;
+	requires transitive gluegen.rt;
 }
