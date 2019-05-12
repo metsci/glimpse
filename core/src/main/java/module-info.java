@@ -75,15 +75,12 @@ module com.metsci.glimpse.core
 	exports com.metsci.glimpse.support.shader.triangle;
 	exports com.metsci.glimpse.plot.timeline.painter;
 	exports com.metsci.glimpse.support.shader.point;
-
+	
 	requires transitive com.metsci.glimpse.platformFixes;
 	requires transitive com.metsci.glimpse.text;
 	requires transitive com.metsci.glimpse.util;
 	
-	requires transitive jogl.all.main;
-	requires transitive jogl.all;
-	requires transitive gluegen.rt.main;
-	requires transitive gluegen.rt;
+	requires transitive jogamp.fat;
 	
 	requires transitive miglayout.core;
 }

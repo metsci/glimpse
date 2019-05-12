@@ -52,7 +52,14 @@ public interface StreamOpener
         public InputStream openForRead( String location ) throws IOException
         {
             InputStream stream = getClass( ).getClassLoader( ).getResourceAsStream( location );
-            if ( stream == null ) throw new FileNotFoundException( "Resource not found: " + location );
+            if ( stream == null )
+            {
+            	stream = getClass( ).getModule( ).getResourceAsStream( location );
+            }
+            if ( stream == null )
+            {	
+            	throw new FileNotFoundException( "Resource not found: " + location );
+            }
             return stream;
         }
     };
@@ -75,7 +82,14 @@ public interface StreamOpener
             try
             {
                 InputStream stream = getClass( ).getClassLoader( ).getResourceAsStream( location );
-                if ( stream == null ) throw new FileNotFoundException( );
+                if ( stream == null )
+                {
+                	stream = getClass( ).getModule( ).getResourceAsStream( location );
+                }
+                if ( stream == null )
+                {	
+                	throw new FileNotFoundException( "Resource not found: " + location );
+                }
                 return stream;
             }
             catch ( FileNotFoundException e )
