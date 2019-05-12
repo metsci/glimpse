@@ -46,8 +46,8 @@ import com.metsci.glimpse.gl.util.GLUtils;
  */
 public class FlatColorProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/flat_color/flat_color.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/flat_color/flat_color.fs" );
+    public static final String vertShader_GLSL = requireResourceText( FlatColorProgram.class, "shaders/triangle/flat_color/flat_color.vs" );
+    public static final String fragShader_GLSL = requireResourceText( FlatColorProgram.class, "shaders/triangle/flat_color/flat_color.fs" );
 
     public static class ProgramHandles
     {

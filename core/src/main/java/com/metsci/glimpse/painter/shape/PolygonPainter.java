@@ -71,6 +71,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLErrorUtils;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
 import com.metsci.glimpse.support.interval.IntervalQuadTree;
 import com.metsci.glimpse.support.polygon.Polygon;
 import com.metsci.glimpse.support.polygon.Polygon.Interior;
@@ -2015,9 +2016,9 @@ public class PolygonPainter extends GlimpsePainterBase
 
     public static class PolygonPainterFlatColorProgram
     {
-        public static final String vertShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.vs" );
-        public static final String geomShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.gs" );
-        public static final String fragShader_GLSL = requireResourceText( "shaders/triangle/PolygonPainter/flat_color.fs" );
+        public static final String vertShader_GLSL = requireResourceText( PolygonPainterFlatColorProgram.class, "shaders/triangle/PolygonPainter/flat_color.vs" );
+        public static final String geomShader_GLSL = requireResourceText( PolygonPainterFlatColorProgram.class, "shaders/triangle/PolygonPainter/flat_color.gs" );
+        public static final String fragShader_GLSL = requireResourceText( PolygonPainterFlatColorProgram.class, "shaders/triangle/PolygonPainter/flat_color.fs" );
 
         public static class ProgramHandles
         {
@@ -2166,9 +2167,9 @@ public class PolygonPainter extends GlimpsePainterBase
 
     public static class PolygonPainterLineProgram
     {
-        public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/PolygonPainter/line.vs" );
-        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/PolygonPainter/line.gs" );
-        public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/PolygonPainter/line.fs" );
+        public static final String lineVertShader_GLSL = requireResourceText( PolygonPainterLineProgram.class, "shaders/line/PolygonPainter/line.vs" );
+        public static final String lineGeomShader_GLSL = requireResourceText( PolygonPainterLineProgram.class, "shaders/line/PolygonPainter/line.gs" );
+        public static final String lineFragShader_GLSL = requireResourceText( PolygonPainterLineProgram.class, "shaders/line/PolygonPainter/line.fs" );
 
         public static class LineProgramHandles
         {

@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * Utilities for loading default Glimpse fonts. Most applications should use the
@@ -195,7 +194,7 @@ public class FontUtils
             InputStream stream = null;
             try
             {
-                stream = StreamOpener.fileThenResource.openForRead( filename );
+                stream = FontUtils.class.getModule( ).getResourceAsStream( filename );
                 return createFont( Font.TRUETYPE_FONT, stream );
             }
             finally

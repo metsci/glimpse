@@ -55,6 +55,7 @@ import com.metsci.glimpse.gl.GLStreamingBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkColorAccumulator;
+import com.metsci.glimpse.painter.texture.MultiTagHeatMapProgram;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.util.primitives.FloatsArray;
@@ -684,9 +685,9 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     public static class DynamicLineSetPainterProgram
     {
 
-        public static final String lineVertShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.vs" );
-        public static final String lineGeomShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.gs" );
-        public static final String lineFragShader_GLSL = requireResourceText( "shaders/line/DynamicLineSetPainter/line.fs" );
+        public static final String lineVertShader_GLSL = requireResourceText( DynamicLineSetPainterProgram.class, "shaders/line/DynamicLineSetPainter/line.vs" );
+        public static final String lineGeomShader_GLSL = requireResourceText( DynamicLineSetPainterProgram.class, "shaders/line/DynamicLineSetPainter/line.gs" );
+        public static final String lineFragShader_GLSL = requireResourceText( DynamicLineSetPainterProgram.class, "shaders/line/DynamicLineSetPainter/line.fs" );
 
         public static class LineProgramHandles
         {

@@ -83,4 +83,5 @@ module com.metsci.glimpse.core
 	requires transitive jogamp.fat;
 	
 	requires transitive miglayout.core;
+	requires com.google.common;
 }

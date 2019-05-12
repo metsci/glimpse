@@ -491,7 +491,7 @@ public class ColorGradients
     {
         FloatsArray f = new FloatsArray( );
         String line = null;
-        try (BufferedReader reader = new BufferedReader( new InputStreamReader( StreamOpener.fileThenResource.openForRead( file ) ) ))
+        try (BufferedReader reader = new BufferedReader( new InputStreamReader( ColorGradients.class.getModule( ).getResourceAsStream( file ) ) ))
         {
             while ( ( line = reader.readLine( ) ) != null )
             {
