@@ -76,7 +76,8 @@
         <module>extras-dnc</module>
         <module>extras-examples</module>
         <module>extras-tinylaf</module>
-
+        <module>extras-topo</module>
+        
     </modules>
 
     <properties>
