@@ -45,7 +45,6 @@ import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
-import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * @author borkholder
@@ -62,7 +61,7 @@ public class HillShadeExample implements GlimpseLayoutProvider, TopoTileProvider
 
     public HillShadeExample( ) throws IOException
     {
-        singleTile = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
+        singleTile = new TopographyData( getClass( ).getModule( ).getResourceAsStream( "com/metsci/glimpse/extras/examples/data/Cayman.bathy" ) );
     }
 
     @Override

@@ -16,6 +16,15 @@ module com.metsci.glimpse.extras.examples
     exports com.metsci.glimpse.extras.examples.dspl;
     exports com.metsci.glimpse.extras.examples.dnc;
 
+    opens com.metsci.glimpse.extras.examples.data;
+    opens com.metsci.glimpse.extras.examples.dnc;
+    opens com.metsci.glimpse.extras.examples.dspl;
+    opens com.metsci.glimpse.extras.examples.dspl.lite;
+    opens com.metsci.glimpse.extras.examples.dspl.track;
+    opens com.metsci.glimpse.extras.examples.icons.eclipse;
+    opens com.metsci.glimpse.extras.examples.icons.fugue;
+    opens com.metsci.glimpse.extras.examples.topo;
+    
     requires transitive com.metsci.glimpse.charts;
     requires transitive com.metsci.glimpse.core;
     requires transitive com.metsci.glimpse.core.examples;

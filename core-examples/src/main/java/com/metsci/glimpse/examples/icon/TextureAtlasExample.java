@@ -231,6 +231,6 @@ public class TextureAtlasExample implements GlimpseLayoutProvider
             }
         } );
 
-        atlas.loadImage( "glimpse", ImageIO.read( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) ) );
+        atlas.loadImage( "glimpse", ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/images/GlimpseLogo.png" ) ) );
     }
 }

@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.ColorYAxisPainter;
@@ -44,9 +43,10 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.charts.bathy.ContourData;
 import com.metsci.glimpse.charts.bathy.ContourPainter;
+import com.metsci.glimpse.charts.bathy.TopographyData;
+import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.layout.GlimpseLayoutProvider;
@@ -66,7 +66,6 @@ import com.metsci.glimpse.support.texture.mutator.ColorGradientConcatenator;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
-import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
@@ -161,7 +160,7 @@ public class BathymetryExample implements GlimpseLayoutProvider
         TopographyData bathymetryData;
         try
         {
-            bathymetryData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
+            bathymetryData = new TopographyData( getClass( ).getModule( ).getResourceAsStream( "com/metsci/glimpse/extras/examples/data/Cayman.bathy" ) );
         }
         catch ( IOException e )
         {

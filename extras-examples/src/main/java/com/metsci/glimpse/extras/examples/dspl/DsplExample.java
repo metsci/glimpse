@@ -61,7 +61,7 @@ public class DsplExample
         LoggerUtils.setTerseConsoleLogger( Level.INFO );
 
         // dspl xml metadata and data files can be packaged into a single zip file or stored as separate files
-        final String datasetString = "src/main/resources/dspl/lite/person_table.csv";
+        final String datasetString = "com/metsci/glimpse/extras/examples/dspl/lite/person_table.csv";
         //final String datasetString = "src/main/resources/dspl/lite/person_lite.xml";
         //final String datasetString = "src/main/resources/dspl/dataset.zip";
         //final String datasetString = "src/main/resources/dspl/dataset.xml";
