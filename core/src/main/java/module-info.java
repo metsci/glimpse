@@ -1,7 +1,7 @@
 /**
  * Core Glimpse data structures for plots, axes, layouts and painters.
  */
-module com.metsci.glimpse.core
+open module com.metsci.glimpse.core
 {
 	exports com.metsci.glimpse.support.texture.mutator;
 	exports com.metsci.glimpse.context;

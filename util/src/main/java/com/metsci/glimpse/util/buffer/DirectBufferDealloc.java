@@ -61,7 +61,7 @@ public class DirectBufferDealloc
             getCleanerMethod = directBufferClass.getMethod( "cleaner" );
             getAttachmentMethod = directBufferClass.getMethod( "attachment" );
 
-            cleanerClass = Class.forName( "sun.misc.Cleaner" );
+            cleanerClass = Class.forName( "jdk.internal.ref.Cleaner" );
             doCleanMethod = cleanerClass.getMethod( "clean" );
         }
         catch ( ClassNotFoundException | NoSuchMethodException e )
