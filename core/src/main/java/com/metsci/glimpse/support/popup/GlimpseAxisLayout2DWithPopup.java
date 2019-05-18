@@ -50,6 +50,8 @@ public class GlimpseAxisLayout2DWithPopup extends GlimpseAxisLayout2D implements
 
         this.popupMenu = new JPopupMenu( )
         {
+            private static final long serialVersionUID = 1L;
+
             @Override
             protected void addImpl( Component c, Object constraints, int index )
             {

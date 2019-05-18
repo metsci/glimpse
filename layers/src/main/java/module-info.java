@@ -16,6 +16,5 @@ module com.metsci.glimpse.layers
 	requires transitive com.sun.xml.bind;
 	
 	requires transitive com.google.common;
-	
 	requires transitive miglayout.swing;
 }

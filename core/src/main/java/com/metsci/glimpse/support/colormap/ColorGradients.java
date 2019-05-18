@@ -36,7 +36,6 @@ import java.util.logging.Logger;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.GeneralUtils;
-import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 
 /**

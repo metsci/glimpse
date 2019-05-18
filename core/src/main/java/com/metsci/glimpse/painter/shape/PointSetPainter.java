@@ -30,12 +30,10 @@ import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrappe
 
 import java.nio.FloatBuffer;
 import java.util.Collection;
-import java.util.logging.Logger;
-
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -57,8 +55,6 @@ import com.metsci.glimpse.util.quadtree.Xy;
  */
 public class PointSetPainter extends GlimpsePainterBase
 {
-    private static final Logger logger = Logger.getLogger( PointSetPainter.class.getName( ) );
-
     public static final int QUAD_TREE_BIN_MAX = 1000;
 
     public static final long SPATIAL_SELECTION_UPDATE_RATE = 50;

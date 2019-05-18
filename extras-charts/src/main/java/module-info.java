@@ -3,18 +3,17 @@
  */
 module com.metsci.glimpse.charts
 {
-	exports com.metsci.glimpse.charts.raster;
-	exports com.metsci.glimpse.charts.shoreline.ndgc;
-	exports com.metsci.glimpse.charts.slippy;
-	exports com.metsci.glimpse.charts.shoreline;
-	exports com.metsci.glimpse.charts.shoreline.gshhs;
-	exports com.metsci.glimpse.charts.bathy;
+    exports com.metsci.glimpse.charts.raster;
+    exports com.metsci.glimpse.charts.shoreline.ndgc;
+    exports com.metsci.glimpse.charts.slippy;
+    exports com.metsci.glimpse.charts.shoreline;
+    exports com.metsci.glimpse.charts.shoreline.gshhs;
+    exports com.metsci.glimpse.charts.bathy;
 
-	requires transitive com.metsci.glimpse.core;
-	
-	requires transitive jogamp.fat;
-	
-	requires transitive com.google.common;
-	requires transitive it.unimi.dsi.fastutil;
+    requires transitive com.metsci.glimpse.core;
 
+    requires transitive com.google.common;
+    requires transitive it.unimi.dsi.fastutil;
+
+    requires transitive jogamp.fat;
 }

@@ -79,9 +79,11 @@ open module com.metsci.glimpse.core
 	requires transitive com.metsci.glimpse.platformFixes;
 	requires transitive com.metsci.glimpse.text;
 	requires transitive com.metsci.glimpse.util;
+		
+	requires transitive miglayout.core;
+	requires transitive com.google.common;
+	requires transitive java.desktop;
+	requires transitive java.logging;
 	
 	requires transitive jogamp.fat;
-	
-	requires transitive miglayout.core;
-	requires com.google.common;
 }

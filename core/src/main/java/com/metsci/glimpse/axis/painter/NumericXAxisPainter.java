@@ -29,11 +29,9 @@ package com.metsci.glimpse.axis.painter;
 import static java.lang.Math.round;
 
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
@@ -46,7 +44,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
+public class NumericXAxisPainter extends NumericAxisPainter
 {
     protected boolean packLabel = false;
 
@@ -100,7 +98,7 @@ public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
                 for ( int i = 0; i < xTicks.length; i++ )
                 {
                     double iTick = converter.fromAxisUnits( xTicks[i] );
-                    
+
                     // don't draw ticks off the screen
                     if ( iTick > axis.getMin( ) && !showLabelsForOffscreenTicks )
                     {
@@ -119,7 +117,7 @@ public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
                 for ( int i = 0; i < xTicks.length; i++ )
                 {
                     double iTick = converter.fromAxisUnits( xTicks[i] );
-                    
+
                     // don't draw ticks off the screen
                     if ( iTick < axis.getMin( ) && !showLabelsForOffscreenTicks )
                     {
@@ -133,11 +131,11 @@ public class NumericXAxisPainter extends NumericLabelHandlerAxisPainter
                     }
                 }
             }
-            
+
             for ( int i = min + 1; i < max; i++ )
             {
                 double iTick = converter.fromAxisUnits( xTicks[i] );
-            
+
                 pathLine.moveTo( ( float ) iTick, ( float ) jTick0 );
                 pathLine.lineTo( ( float ) iTick, ( float ) jTick1 );
             }

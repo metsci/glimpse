@@ -94,7 +94,7 @@ public abstract class NumericAxisPainter extends GlimpsePainterBase
         initShaders( );
     }
 
-    protected class TickInfo
+    public class TickInfo
     {
         public double[] ticks;
         public String[] labels;

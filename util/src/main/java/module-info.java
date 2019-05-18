@@ -41,6 +41,5 @@ module com.metsci.glimpse.util
 	requires transitive it.unimi.dsi.fastutil;
 	requires transitive java.desktop;
 	requires transitive java.logging;
-	requires java.base;
-	requires jdk.unsupported;
+	requires transitive jdk.unsupported;
 }

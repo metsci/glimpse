@@ -110,7 +110,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
     protected GlimpseAxisLayout2D axisLayoutXY;
     protected AxisMouseListener mouseListenerXY;
 
-    protected enum AxisOrientation
+    public enum AxisOrientation
     {
         Top, Bottom, Left, Right;
     }

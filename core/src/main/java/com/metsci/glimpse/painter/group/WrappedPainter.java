@@ -27,7 +27,6 @@
 package com.metsci.glimpse.painter.group;
 
 import static com.metsci.glimpse.util.GeneralUtils.floats;
-import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.util.Collections.sort;
 
 import java.util.Comparator;
@@ -36,14 +35,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.FBObject;
 import com.jogamp.opengl.FBObject.TextureAttachment;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
@@ -83,8 +81,7 @@ public class WrappedPainter extends GlimpsePainterBase
         }
     }
 
-    protected static final Comparator<Entry> zOrderComparator = ( a, b ) ->
-    {
+    protected static final Comparator<Entry> zOrderComparator = ( a, b ) -> {
         return Integer.compare( a.zOrder, b.zOrder );
     };
 
@@ -92,8 +89,8 @@ public class WrappedPainter extends GlimpsePainterBase
     private final boolean attachStencilBuffer;
 
     private final List<Entry> entriesSorted;
-    private final BiMap<Object,Entry> entriesByKey;
-    private final BiMap<GlimpsePainter,Entry> entriesByPainter;
+    private final BiMap<Object, Entry> entriesByKey;
+    private final BiMap<GlimpsePainter, Entry> entriesByPainter;
 
     private FBObject fbo;
     private TextureAttachment fboTextureAttachment;

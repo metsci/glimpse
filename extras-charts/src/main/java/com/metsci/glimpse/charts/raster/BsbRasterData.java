@@ -196,16 +196,18 @@ public final class BsbRasterData
         Vector<Pair<String, String>> allTokenData = extractTokenData( header, "REF" );
         for ( Pair<String, String> tokenData : allTokenData )
         {
-            Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
-
-            s.nextInt( );
-            int x = s.nextInt( );
-            int y = s.nextInt( );
-            double lat_DEG = s.nextDouble( );
-            double lon_DEG = s.nextDouble( );
-
-            refPoints.add( new Pair<IntPoint2d, LatLonGeo>( new IntPoint2d( x, y ), new LatLonGeo( lat_DEG, lon_DEG ) ) );
-            s.close( );
+            try ( Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ) )
+            {
+                s.useDelimiter( "," );
+                
+                s.nextInt( );
+                int x = s.nextInt( );
+                int y = s.nextInt( );
+                double lat_DEG = s.nextDouble( );
+                double lon_DEG = s.nextDouble( );
+    
+                refPoints.add( new Pair<IntPoint2d, LatLonGeo>( new IntPoint2d( x, y ), new LatLonGeo( lat_DEG, lon_DEG ) ) );
+            }
         }
 
         return refPoints;

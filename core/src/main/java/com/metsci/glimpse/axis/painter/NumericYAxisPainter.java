@@ -46,7 +46,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class NumericYAxisPainter extends NumericLabelHandlerAxisPainter
+public class NumericYAxisPainter extends NumericAxisPainter
 {
     protected static final float PI_2 = ( float ) ( Math.PI / 2.0f );
 
