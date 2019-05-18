@@ -67,7 +67,7 @@ public class TextExample implements GlimpseLayoutProvider
         Font loadFont = null;
         try
         {
-            loadFont = FontFactory.get( getClass( ), "fonts/bitstream/Vera.ttf", false );
+            loadFont = FontFactory.get( getClass( ), "com/metsci/glimpse/core/fonts/bitstream/Vera.ttf", false );
         }
         catch ( IOException e )
         {

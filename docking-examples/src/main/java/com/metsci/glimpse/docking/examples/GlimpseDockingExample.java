@@ -86,9 +86,10 @@ public class GlimpseDockingExample
 
                 View[] views =
                 {
-                    new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ) ),
-                    new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ) )
+                    new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ) ),
+                    new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ) )
                 };
+
 
 
                 // Create and show the docking group
@@ -97,7 +98,7 @@ public class GlimpseDockingExample
                 final String appName = "glimpse-docking-example";
                 final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( GlimpseDockingExample.class, "docking/glimpse-arrangement-default.xml" ) );
+                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( GlimpseDockingExample.class, "com/metsci/glimpse/docking/examples/docking/glimpse-arrangement-default.xml" ) );
 
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {

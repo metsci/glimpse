@@ -51,9 +51,9 @@ import com.metsci.glimpse.support.wrapped.Wrapper2D;
  */
 public class PointFlatColorProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( PointFlatColorProgram.class, "shaders/point/point_flat_color/point.vs" );
-    public static final String geomShader_GLSL = requireResourceText( PointFlatColorProgram.class, "shaders/point/point_flat_color/point.gs" );
-    public static final String fragShader_GLSL = requireResourceText( PointFlatColorProgram.class, "shaders/point/point_flat_color/point.fs" );
+    public static final String vertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/point/point_flat_color/point.vs" );
+    public static final String geomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/point/point_flat_color/point.gs" );
+    public static final String fragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/point/point_flat_color/point.fs" );
 
     public static class ProgramHandles
     {

@@ -14,6 +14,10 @@ module com.metsci.glimpse.core.examples
     exports com.metsci.glimpse.examples.layout;
     exports com.metsci.glimpse.examples.heatmap;
     exports com.metsci.glimpse.examples.track;
+    
+    opens com.metsci.glimpse.core.examples.icons.fugue;
+    opens com.metsci.glimpse.core.examples.data;
+    opens com.metsci.glimpse.core.examples.images;
 
     requires transitive com.metsci.glimpse.core;
     requires transitive com.metsci.glimpse.util;

@@ -73,13 +73,13 @@ public class DockingThemes
                                                                            darkGray,
                                                                            darkGray,
 
-                                                                           requireIcon( "icons/maximize.gif" ),
-                                                                           requireIcon( "icons/unmaximize.gif" ),
-                                                                           requireIcon( "icons/options.gif" ),
+                                                                           requireIcon( "com/metsci/glimpse/docking/icons/maximize.gif" ),
+                                                                           requireIcon( "com/metsci/glimpse/docking/icons/unmaximize.gif" ),
+                                                                           requireIcon( "com/metsci/glimpse/docking/icons/options.gif" ),
 
-                                                                           requireIcon( "icons/chromium/close.png" ),
-                                                                           requireIcon( "icons/chromium/close_h.png" ),
-                                                                           requireIcon( "icons/chromium/close_p.png" ) );
+                                                                           requireIcon( "com/metsci/glimpse/docking/icons/chromium/close.png" ),
+                                                                           requireIcon( "com/metsci/glimpse/docking/icons/chromium/close_h.png" ),
+                                                                           requireIcon( "com/metsci/glimpse/docking/icons/chromium/close_p.png" ) );
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {

@@ -37,18 +37,31 @@ import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
 import static com.metsci.glimpse.util.GeneralUtils.array;
 import static jogamp.opengl.glu.error.Error.gluErrorString;
+import static java.lang.Thread.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.metsci.glimpse.util.primitives.IntsArray;
 
 public class GLShaderUtils
 {
+    public static String requireResourceText( String resourcePath )
+    {
+        return requireResourceText( resourcePath, UTF_8 );
+    }
+
+    public static String requireResourceText( String resourcePath, Charset charset )
+    {
+        return requireResourceText( currentThread( ).getContextClassLoader( ), resourcePath, charset );
+    }
+
     public static String requireResourceText( Class<?> contextClass, String resourcePath )
     {
         return requireResourceText( contextClass, resourcePath, UTF_8 );
@@ -56,7 +69,20 @@ public class GLShaderUtils
 
     public static String requireResourceText( Class<?> contextClass, String resourcePath, Charset charset )
     {
-        return requireResourceText( contextClass.getModule( ), resourcePath, charset );
+        return requireResourceText( contextClass.getClassLoader( ), resourcePath, charset );
+    }
+
+    public static String requireResourceText( ClassLoader classLoader, String resourcePath, Charset charset )
+    {
+        try
+        {
+            URL url = classLoader.getResource( resourcePath );
+            return Resources.toString( url, charset );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     public static String requireResourceText( Module module, String resourcePath, Charset charset )

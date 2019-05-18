@@ -275,27 +275,27 @@ public class ColorGradients
     };
 
     // matplotlib colormaps: http://matplotlib.org/examples/color/colormaps_reference.html
-    public static final ColorGradient wistia = fromCSV( "colormap/matplotlib/wistia.csv" );
-    public static final ColorGradient viridis = fromCSV( "colormap/matplotlib/viridis.csv" );
-    public static final ColorGradient terrain = fromCSV( "colormap/matplotlib/terrain.csv" );
-    public static final ColorGradient summer = fromCSV( "colormap/matplotlib/summer.csv" );
-    public static final ColorGradient spring = fromCSV( "colormap/matplotlib/spring.csv" );
-    public static final ColorGradient spectral = fromCSV( "colormap/matplotlib/spectral.csv" );
-    public static final ColorGradient seismic = fromCSV( "colormap/matplotlib/seismic.csv" );
-    public static final ColorGradient rainbow = fromCSV( "colormap/matplotlib/rainbow.csv" );
-    public static final ColorGradient prism = fromCSV( "colormap/matplotlib/prism.csv" );
-    public static final ColorGradient plasma = fromCSV( "colormap/matplotlib/plasma.csv" );
-    public static final ColorGradient oranges = fromCSV( "colormap/matplotlib/oranges.csv" );
-    public static final ColorGradient ocean = fromCSV( "colormap/matplotlib/ocean.csv" );
-    public static final ColorGradient magma = fromCSV( "colormap/matplotlib/magma.csv" );
-    public static final ColorGradient inferno = fromCSV( "colormap/matplotlib/inferno.csv" );
-    public static final ColorGradient hot = fromCSV( "colormap/matplotlib/hot.csv" );
-    public static final ColorGradient flag = fromCSV( "colormap/matplotlib/flag.csv" );
-    public static final ColorGradient copper = fromCSV( "colormap/matplotlib/copper.csv" );
-    public static final ColorGradient coolwarm = fromCSV( "colormap/matplotlib/coolwarm.csv" );
-    public static final ColorGradient cool = fromCSV( "colormap/matplotlib/cool.csv" );
-    public static final ColorGradient autumn = fromCSV( "colormap/matplotlib/autumn.csv" );
-    public static final ColorGradient accent = fromCSV( "colormap/matplotlib/accent.csv" );
+    public static final ColorGradient wistia = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/wistia.csv" );
+    public static final ColorGradient viridis = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/viridis.csv" );
+    public static final ColorGradient terrain = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/terrain.csv" );
+    public static final ColorGradient summer = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/summer.csv" );
+    public static final ColorGradient spring = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/spring.csv" );
+    public static final ColorGradient spectral = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/spectral.csv" );
+    public static final ColorGradient seismic = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/seismic.csv" );
+    public static final ColorGradient rainbow = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/rainbow.csv" );
+    public static final ColorGradient prism = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/prism.csv" );
+    public static final ColorGradient plasma = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/plasma.csv" );
+    public static final ColorGradient oranges = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/oranges.csv" );
+    public static final ColorGradient ocean = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/ocean.csv" );
+    public static final ColorGradient magma = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/magma.csv" );
+    public static final ColorGradient inferno = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/inferno.csv" );
+    public static final ColorGradient hot = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/hot.csv" );
+    public static final ColorGradient flag = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/flag.csv" );
+    public static final ColorGradient copper = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/copper.csv" );
+    public static final ColorGradient coolwarm = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/coolwarm.csv" );
+    public static final ColorGradient cool = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/cool.csv" );
+    public static final ColorGradient autumn = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/autumn.csv" );
+    public static final ColorGradient accent = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/accent.csv" );
 
     public static ColorGradient twoColorFade( float[] color1, float[] color2 )
     {

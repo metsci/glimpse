@@ -49,10 +49,10 @@ import com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection;
 public class EquirectTopoProgram
 {
 
-    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect.vs" );
+    public static final String vertShader_GLSL = requireResourceText( EquirectTopoProgram.class, "shaders/TopoProgram/topo-equirect.vs" );
 
-    public static final String radiansFragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect-rad.fs" );
-    public static final String degreesFragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect-deg.fs" );
+    public static final String radiansFragShader_GLSL = requireResourceText( EquirectTopoProgram.class, "shaders/TopoProgram/topo-equirect-rad.fs" );
+    public static final String degreesFragShader_GLSL = requireResourceText( EquirectTopoProgram.class, "shaders/TopoProgram/topo-equirect-deg.fs" );
 
     public static String fragShader_GLSL( boolean xyInDegrees )
     {

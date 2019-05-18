@@ -97,8 +97,8 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
 
     protected void addShaders( )
     {
-        this.addVertexShader( "shaders/colormap/passthrough.vs" );
-        this.addFragmentShader( "shaders/colormap/sampled_colorscale_shader.fs" );
+        this.addVertexShader( "com/metsci/glimpse/core/shaders/colormap/passthrough.vs" );
+        this.addFragmentShader( "com/metsci/glimpse/core/shaders/colormap/sampled_colorscale_shader.fs" );
     }
 
     protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )

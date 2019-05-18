@@ -66,8 +66,8 @@ public class PartialTaggedPointAttributeColorSizeProgram extends TaggedPointAttr
     @Override
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "shaders/point/PartialTaggedPointGradientProgram/point.vs" );
-        this.addFragmentShader( "shaders/point/PartialTaggedPointGradientProgram/point.fs" );
+        this.addVertexShader( "com/metsci/glimpse/core/shaders/point/PartialTaggedPointGradientProgram/point.vs" );
+        this.addFragmentShader( "com/metsci/glimpse/core/shaders/point/PartialTaggedPointGradientProgram/point.fs" );
     }
 
     @Override

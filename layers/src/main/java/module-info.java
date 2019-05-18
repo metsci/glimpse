@@ -17,4 +17,5 @@ module com.metsci.glimpse.layers
 	
 	requires transitive com.google.common;
 	requires transitive miglayout.swing;
+    requires transitive java.desktop;
 }

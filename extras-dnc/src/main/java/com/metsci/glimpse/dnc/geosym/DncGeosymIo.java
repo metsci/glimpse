@@ -61,7 +61,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class DncGeosymIo
 {
-    public static final String geosymAssignmentPath = "geosym/assignments/";
+    public static final String geosymAssignmentPath = "com/metsci/glimpse/dnc/geosym/assignments/";
     public static final String geosymAttrExprsFile = "attexp.txt";
     public static final String geosymCodesFile = "code.txt";
     public static final String geosymFullAssignmentsFile = "fullsym.txt";

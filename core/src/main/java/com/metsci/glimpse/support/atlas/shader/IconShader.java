@@ -65,9 +65,9 @@ public class IconShader extends GlimpseShaderProgram
 
     public IconShader( int textureUnit, boolean enablePicking )
     {
-        this.addVertexShader( "shaders/atlas/texture_atlas_icon_shader.vs" );
-        this.addGeometryShader( "shaders/atlas/texture_atlas_icon_shader.gs" );
-        this.addFragmentShader( "shaders/atlas/texture_atlas_icon_shader.fs" );
+        this.addVertexShader( "com/metsci/glimpse/core/shaders/atlas/texture_atlas_icon_shader.vs" );
+        this.addGeometryShader( "com/metsci/glimpse/core/shaders/atlas/texture_atlas_icon_shader.gs" );
+        this.addFragmentShader( "com/metsci/glimpse/core/shaders/atlas/texture_atlas_icon_shader.fs" );
 
         // Fragment Shader
 

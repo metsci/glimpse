@@ -105,22 +105,22 @@ public class FontUtils
 
     public static Font getBitstreamVeraSansPlain( float size )
     {
-        return loadTrueTypeFont( "fonts/bitstream/Vera.ttf", size, Font.PLAIN );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/Vera.ttf", size, Font.PLAIN );
     }
 
     public static Font getBitstreamVeraSansBold( float size )
     {
-        return loadTrueTypeFont( "fonts/bitstream/VeraBd.ttf", size, Font.BOLD );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/VeraBd.ttf", size, Font.BOLD );
     }
 
     public static Font getBitstreamVeraSansItalic( float size )
     {
-        return loadTrueTypeFont( "fonts/bitstream/Veralt.ttf", size, Font.ITALIC );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/Veralt.ttf", size, Font.ITALIC );
     }
 
     public static Font getBitstreamVeraSansBoldItalic( float size )
     {
-        return loadTrueTypeFont( "fonts/bitstream/Veralt.ttf", size, Font.ITALIC | Font.BOLD );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/Veralt.ttf", size, Font.ITALIC | Font.BOLD );
     }
 
     /**
@@ -134,22 +134,22 @@ public class FontUtils
 
     public static Font getSilkscreenPlain( )
     {
-        return loadTrueTypeFont( "fonts/silkscreen/slkscr.ttf", 8, Font.PLAIN );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscr.ttf", 8, Font.PLAIN );
     }
 
     public static Font getSilkscreenBold( )
     {
-        return loadTrueTypeFont( "fonts/silkscreen/slkscrb.ttf", 8, Font.BOLD );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscrb.ttf", 8, Font.BOLD );
     }
 
     public static Font getSilkscreenItalic( )
     {
-        return loadTrueTypeFont( "fonts/silkscreen/slkscre.ttf", 8, Font.ITALIC );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscre.ttf", 8, Font.ITALIC );
     }
 
     public static Font getSilkscreenBoldItalic( )
     {
-        return loadTrueTypeFont( "fonts/silkscreen/slkscreb.ttf", 8, Font.ITALIC | Font.BOLD );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscreb.ttf", 8, Font.ITALIC | Font.BOLD );
     }
 
     public static Font getVerdanaPlain( float size )

@@ -9,6 +9,9 @@ module com.metsci.glimpse.docking
     exports com.metsci.glimpse.docking.group;
     exports com.metsci.glimpse.docking.group.frame;
 
+    opens com.metsci.glimpse.docking.icons.chromium;
+    opens com.metsci.glimpse.docking.icons;
+
     requires transitive com.metsci.glimpse.util;
 
     requires transitive com.sun.tools.jxc;

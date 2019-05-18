@@ -44,9 +44,9 @@ import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 public class MultiTagHeatMapProgram implements HeatMapProgram
 {
-    public static final String lineVertShader_GLSL = requireResourceText( MultiTagHeatMapProgram.class, "shaders/HeatMapProgram/heatmap.vs" );
-    public static final String lineGeomShader_GLSL = requireResourceText( MultiTagHeatMapProgram.class, "shaders/HeatMapProgram/heatmap.gs" );
-    public static final String lineFragShader_GLSL = requireResourceText( MultiTagHeatMapProgram.class, "shaders/HeatMapProgram/heatmap-multitag.fs" );
+    public static final String lineVertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.vs" );
+    public static final String lineGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.gs" );
+    public static final String lineFragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap-multitag.fs" );
 
 
     public static class Handles

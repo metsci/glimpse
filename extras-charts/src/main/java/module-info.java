@@ -10,6 +10,8 @@ module com.metsci.glimpse.charts
     exports com.metsci.glimpse.charts.shoreline.gshhs;
     exports com.metsci.glimpse.charts.bathy;
 
+    opens com.metsci.glimpse.charts.shaders.relief;
+    
     requires transitive com.metsci.glimpse.core;
 
     requires transitive com.google.common;

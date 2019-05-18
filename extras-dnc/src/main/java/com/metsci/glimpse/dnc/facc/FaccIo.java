@@ -42,7 +42,7 @@ import java.util.Map;
 public class FaccIo
 {
 
-    public static final String faccPath = "facc/";
+    public static final String faccPath = "com/metsci/glimpse/dnc/facc/";
     public static final String faccFeaturesFile = "facc-features.csv";
     public static final String faccAttrsFile = "facc-attrs.csv";
     public static final String faccAttrValsFile = "facc-attr-vals.csv";

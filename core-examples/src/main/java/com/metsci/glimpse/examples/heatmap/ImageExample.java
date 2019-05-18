@@ -86,7 +86,7 @@ public class ImageExample implements GlimpseLayoutProvider
         // load image data from a file
         try
         {
-            img = ImageIO.read( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) );
+            img = ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/images/GlimpseLogo.png" ) );
         }
         catch ( IOException e )
         {

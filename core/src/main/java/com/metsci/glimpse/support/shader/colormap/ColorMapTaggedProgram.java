@@ -82,8 +82,8 @@ public class ColorMapTaggedProgram extends GlimpseShaderProgram implements AxisL
 
     public ColorMapTaggedProgram( TaggedAxis1D axis, int dataTexUnit, int colorTexUnit, int vertexTexUnit, int textureTexUnit ) throws IOException
     {
-        this.addVertexShader( "shaders/colormap/passthrough.vs" );
-        this.addFragmentShader( "shaders/colormap/tagged_colorscale_shader.fs" );
+        this.addVertexShader( "com/metsci/glimpse/core/shaders/colormap/passthrough.vs" );
+        this.addFragmentShader( "com/metsci/glimpse/core/shaders/colormap/tagged_colorscale_shader.fs" );
 
         this.taggedAxis = axis;
 

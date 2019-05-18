@@ -1,7 +1,7 @@
 /**
  * Core Glimpse data structures for plots, axes, layouts and painters.
  */
-open module com.metsci.glimpse.core
+module com.metsci.glimpse.core
 {
 	exports com.metsci.glimpse.support.texture.mutator;
 	exports com.metsci.glimpse.context;
@@ -76,6 +76,29 @@ open module com.metsci.glimpse.core
 	exports com.metsci.glimpse.plot.timeline.painter;
 	exports com.metsci.glimpse.support.shader.point;
 	
+	opens com.metsci.glimpse.core.colormap.matplotlib;
+	opens com.metsci.glimpse.core.fonts.bitstream;
+    opens com.metsci.glimpse.core.fonts.silkscreen;
+    opens com.metsci.glimpse.core.icons.timeline;
+    opens com.metsci.glimpse.core.shaders.atlas;
+    opens com.metsci.glimpse.core.shaders.colormap;
+    opens com.metsci.glimpse.core.shaders.HeatMapProgram;
+    opens com.metsci.glimpse.core.shaders.line.DynamicLineSetPainter;
+    opens com.metsci.glimpse.core.shaders.line.line_flat_color;
+    opens com.metsci.glimpse.core.shaders.line.line_multi_color;
+    opens com.metsci.glimpse.core.shaders.line.PolygonPainter;
+    opens com.metsci.glimpse.core.shaders.point.PartialTaggedPointGradientProgram;
+    opens com.metsci.glimpse.core.shaders.point.point_array_color;
+    opens com.metsci.glimpse.core.shaders.point.point_array_color_size;
+    opens com.metsci.glimpse.core.shaders.point.point_attribute_color_size;
+    opens com.metsci.glimpse.core.shaders.point.point_flat_color;
+    opens com.metsci.glimpse.core.shaders.triangle.array_color;
+    opens com.metsci.glimpse.core.shaders.triangle.colortex1d;
+    opens com.metsci.glimpse.core.shaders.triangle.colortex2d;
+    opens com.metsci.glimpse.core.shaders.triangle.flat_color;
+    opens com.metsci.glimpse.core.shaders.triangle.flat_color_stipple;
+    opens com.metsci.glimpse.core.shaders.triangle.PolygonPainter;
+
 	requires transitive com.metsci.glimpse.platformFixes;
 	requires transitive com.metsci.glimpse.text;
 	requires transitive com.metsci.glimpse.util;

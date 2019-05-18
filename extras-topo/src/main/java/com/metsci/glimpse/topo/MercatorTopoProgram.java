@@ -49,8 +49,8 @@ import com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection;
 public class MercatorTopoProgram
 {
 
-    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-mercator.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-mercator.fs" );
+    public static final String vertShader_GLSL = requireResourceText( MercatorTopoProgram.class, "shaders/TopoProgram/topo-mercator.vs" );
+    public static final String fragShader_GLSL = requireResourceText( MercatorTopoProgram.class, "shaders/TopoProgram/topo-mercator.fs" );
 
 
     public static class Handles

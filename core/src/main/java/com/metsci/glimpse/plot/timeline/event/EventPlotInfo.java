@@ -127,7 +127,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
         try
         {
             defaultIconId = UUID.randomUUID( );
-            BufferedImage defaultImage = ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/timeline/dot.png" ) );
+            BufferedImage defaultImage = ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/icons/timeline/dot.png" ) );
             atlas.loadImage( defaultIconId, defaultImage );
         }
         catch ( IOException e )

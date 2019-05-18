@@ -2014,9 +2014,9 @@ public class PolygonPainter extends GlimpsePainterBase
 
     public static class PolygonPainterFlatColorProgram
     {
-        public static final String vertShader_GLSL = requireResourceText( PolygonPainterFlatColorProgram.class, "shaders/triangle/PolygonPainter/flat_color.vs" );
-        public static final String geomShader_GLSL = requireResourceText( PolygonPainterFlatColorProgram.class, "shaders/triangle/PolygonPainter/flat_color.gs" );
-        public static final String fragShader_GLSL = requireResourceText( PolygonPainterFlatColorProgram.class, "shaders/triangle/PolygonPainter/flat_color.fs" );
+        public static final String vertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/PolygonPainter/flat_color.vs" );
+        public static final String geomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/PolygonPainter/flat_color.gs" );
+        public static final String fragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/PolygonPainter/flat_color.fs" );
 
         public static class ProgramHandles
         {
@@ -2165,9 +2165,9 @@ public class PolygonPainter extends GlimpsePainterBase
 
     public static class PolygonPainterLineProgram
     {
-        public static final String lineVertShader_GLSL = requireResourceText( PolygonPainterLineProgram.class, "shaders/line/PolygonPainter/line.vs" );
-        public static final String lineGeomShader_GLSL = requireResourceText( PolygonPainterLineProgram.class, "shaders/line/PolygonPainter/line.gs" );
-        public static final String lineFragShader_GLSL = requireResourceText( PolygonPainterLineProgram.class, "shaders/line/PolygonPainter/line.fs" );
+        public static final String lineVertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/PolygonPainter/line.vs" );
+        public static final String lineGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/PolygonPainter/line.gs" );
+        public static final String lineFragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/PolygonPainter/line.fs" );
 
         public static class LineProgramHandles
         {

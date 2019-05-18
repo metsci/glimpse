@@ -146,8 +146,7 @@ public class DockingUtils
     {
         DisposableGroup disposables = new DisposableGroup( );
 
-        disposables.add( addActionListener( button, ( ) ->
-        {
+        disposables.add( addActionListener( button, ( ) -> {
             if ( button.isSelected( ) )
             {
                 popup.show( button, 0, button.getHeight( ) );
@@ -158,16 +157,14 @@ public class DockingUtils
             }
         } ) );
 
-        disposables.add( onPopupWillBecomeInvisible( popup, ( ) ->
-        {
+        disposables.add( onPopupWillBecomeInvisible( popup, ( ) -> {
             button.setSelected( false );
 
             // If this popup-hide was triggered by a mouse-press, then don't allow
             // that mouse-press to begin a click of the button (which would toggle
             // the popup back to visible again)
             button.setEnabled( false );
-            SwingUtilities.invokeLater( ( ) ->
-            {
+            SwingUtilities.invokeLater( ( ) -> {
                 button.setEnabled( true );
             } );
         } ) );
@@ -187,11 +184,13 @@ public class DockingUtils
 
             @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent ev )
-            { }
+            {
+            }
 
             @Override
             public void popupMenuCanceled( PopupMenuEvent ev )
-            { }
+            {
+            }
         } );
     }
 
@@ -199,8 +198,7 @@ public class DockingUtils
     {
         popup.addPopupMenuListener( listener );
 
-        return ( ) ->
-        {
+        return ( ) -> {
             popup.removePopupMenuListener( listener );
         };
     }
@@ -214,8 +212,7 @@ public class DockingUtils
     {
         button.addActionListener( listener );
 
-        return ( ) ->
-        {
+        return ( ) -> {
             button.removeActionListener( listener );
         };
     }
@@ -290,6 +287,30 @@ public class DockingUtils
         return ( color == null ? fallback : color );
     }
 
+    public static ImageIcon requireIcon( InputStream stream )
+    {
+        try
+        {
+            return new ImageIcon( ImageIO.read( stream ) );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    public static ImageIcon requireIcon( Module module, String resourcePath )
+    {
+        try
+        {
+            return new ImageIcon( ImageIO.read( module.getResourceAsStream( resourcePath ) ) );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
     public static ImageIcon requireIcon( String resourcePath )
     {
         try
@@ -356,7 +377,7 @@ public class DockingUtils
         if ( file != null && file.exists( ) )
         {
             LOGGER.log( INFO, "Reading docking arrangement from file: file = " + file );
-            try ( InputStream stream = new FileInputStream( file ) )
+            try (InputStream stream = new FileInputStream( file ))
             {
                 return loadDockingArrangement( stream );
             }
@@ -370,7 +391,7 @@ public class DockingUtils
         if ( fallbackUrl != null )
         {
             LOGGER.log( INFO, "Reading fallback docking arrangement from resource: resource = " + fallbackUrl );
-            try ( InputStream stream = fallbackUrl.openStream( ) )
+            try (InputStream stream = fallbackUrl.openStream( ))
             {
                 return loadDockingArrangement( stream );
             }
@@ -387,7 +408,7 @@ public class DockingUtils
     public static void saveDockingArrangement( File file, GroupArrangement groupArr )
     {
         LOGGER.log( INFO, "Writing docking arrangement to file: file = " + file );
-        try ( OutputStream stream = new BufferedOutputStream( new FileOutputStream( file ) ) )
+        try (OutputStream stream = new BufferedOutputStream( new FileOutputStream( file ) ))
         {
             saveDockingArrangement( stream, groupArr );
         }
@@ -491,9 +512,9 @@ public class DockingUtils
         return tiles;
     }
 
-    public static Map<String,View> findViews( Collection<? extends DockingWindow> windows )
+    public static Map<String, View> findViews( Collection<? extends DockingWindow> windows )
     {
-        Map<String,View> views = new LinkedHashMap<>( );
+        Map<String, View> views = new LinkedHashMap<>( );
         for ( DockingWindow window : windows )
         {
             views.putAll( findViews( window ) );
@@ -501,14 +522,14 @@ public class DockingUtils
         return views;
     }
 
-    public static Map<String,View> findViews( DockingWindow window )
+    public static Map<String, View> findViews( DockingWindow window )
     {
         return findViews( window.docker( ) );
     }
 
-    public static Map<String,View> findViews( MultiSplitPane docker )
+    public static Map<String, View> findViews( MultiSplitPane docker )
     {
-        Map<String,View> views = new LinkedHashMap<>( );
+        Map<String, View> views = new LinkedHashMap<>( );
         for ( Tile tile : findTiles( docker ) )
         {
             for ( int i = 0; i < tile.numViews( ); i++ )

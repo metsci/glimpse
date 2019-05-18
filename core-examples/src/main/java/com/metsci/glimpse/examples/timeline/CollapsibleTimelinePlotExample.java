@@ -197,10 +197,10 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
         TextureAtlas atlas = plot.getTextureAtlas( );
         try
         {
-            atlas.loadImage( "cloud", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/weather-clouds.png" ) ) );
-            atlas.loadImage( "sun", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/weather.png" ) ) );
-            atlas.loadImage( "glass", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/glass.png" ) ) );
-            atlas.loadImage( "alarm-clock", ImageIO.read( StreamOpener.fileThenResource.openForRead( "icons/fugue/alarm-clock-blue.png" ) ) );
+            atlas.loadImage( "cloud", ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/icons/fugue/weather-clouds.png" ) ) );
+            atlas.loadImage( "sun", ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/icons/fugue/weather.png" ) ) );
+            atlas.loadImage( "glass", ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/icons/fugue/glass.png" ) ) );
+            atlas.loadImage( "alarm-clock", ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/icons/fugue/alarm-clock-blue.png" ) ) );
         }
         catch ( IOException ex )
         {
