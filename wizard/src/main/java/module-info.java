@@ -13,4 +13,5 @@ module com.metsci.glimpse.wizard
 	
 	requires transitive miglayout.swing;
 	requires transitive com.google.common;
+	requires java.desktop;
 }

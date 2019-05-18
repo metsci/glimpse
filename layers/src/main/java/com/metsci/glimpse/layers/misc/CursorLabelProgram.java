@@ -45,8 +45,8 @@ import com.metsci.glimpse.gl.GLEditableBuffer;
 public class CursorLabelProgram
 {
 
-    public static final String cursorLabelVertShader_GLSL = requireResourceText( "CursorLabelProgram/cursorLabel.vs" );
-    public static final String cursorLabelFragShader_GLSL = requireResourceText( "CursorLabelProgram/cursorLabel.fs" );
+    public static final String cursorLabelVertShader_GLSL = requireResourceText( CursorLabelProgram.class, "CursorLabelProgram/cursorLabel.vs" );
+    public static final String cursorLabelFragShader_GLSL = requireResourceText( CursorLabelProgram.class, "CursorLabelProgram/cursorLabel.fs" );
 
 
     public static class CursorLabelProgramHandles

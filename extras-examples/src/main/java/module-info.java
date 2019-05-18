@@ -27,11 +27,8 @@ module com.metsci.glimpse.extras.examples
 	requires transitive com.metsci.glimpse.topo;
 	requires transitive com.metsci.glimpse.util;
 	
-	requires transitive jogl.all.main;
-	requires transitive jogl.all;
-	requires transitive gluegen.rt.main;
-	requires transitive gluegen.rt;
-	
+	requires transitive jogamp.fat;
+
 	requires transitive com.sun.tools.jxc;
 	requires transitive java.xml.bind;
 	requires transitive com.sun.xml.bind;
