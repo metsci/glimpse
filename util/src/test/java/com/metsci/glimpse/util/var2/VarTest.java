@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,39 @@ import com.google.common.collect.ImmutableList;
 
 class VarTest
 {
+
+    @Test
+    void listenerTensesShouldNotAffectFiringOrder( )
+    {
+        Var<String> a = new VarBasic<>( "x" );
+
+        List<String> expected = new ArrayList<>( );
+        List<String> actual = new ArrayList<>( );
+
+        Random random = new Random( 0 );
+        for ( int i = 0; i < 100; i++ )
+        {
+            String s = "Listener " + i;
+
+            expected.add( s );
+
+            int listenerTense = ( random.nextInt( ) & Integer.MAX_VALUE ) % 3;
+            switch ( listenerTense )
+            {
+                case 0: a.addListener( ongoing -> actual.add( s ) ); break;
+                case 1: a.all( ).addListener( ( ) -> actual.add( s ) ); break;
+                case 2: a.completed( ).addListener( ( ) -> actual.add( s ) ); break;
+                default: throw new RuntimeException( "Illegal listener tense: " + listenerTense );
+            }
+        }
+
+        // Listener firing order should be determined entirely by the sequence
+        // of addListener() calls -- regardless of whether they were added via
+        // via completed().addListener(), all().addListener(), etc.
+        a.set( false, "w" );
+
+        assertEquals( expected, actual );
+    }
 
     @Test
     void derivedVarShouldFireEvenIfMembersDontChange( )
