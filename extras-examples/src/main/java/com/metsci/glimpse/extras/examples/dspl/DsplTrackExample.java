@@ -112,7 +112,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         parser.setCacheMode( false );
 
         // load the example dataset
-        DataSet dataset = parser.loadDataset( "src/main/resources/dspl/track/metadata.xml" );
+        DataSet dataset = parser.loadDataset( "src/main/resources/com/metsci/glimpse/extras/examples/dspl/track/metadata.xml" );
 
         // define patterns which will help us look for particular Concepts in the dataset
         ConceptPattern identifierPattern = new SimpleConceptPattern( "http://www.metsci.com/dspl/track", "identifier" );

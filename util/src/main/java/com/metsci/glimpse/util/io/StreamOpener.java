@@ -41,6 +41,7 @@ public interface StreamOpener
 
     public static final StreamOpener fileOpener = new StreamOpener( )
     {
+        @Override
         public InputStream openForRead( String location ) throws IOException
         {
             return new FileInputStream( location );
@@ -49,16 +50,17 @@ public interface StreamOpener
 
     public static final StreamOpener resourceOpener = new StreamOpener( )
     {
+        @Override
         public InputStream openForRead( String location ) throws IOException
         {
             InputStream stream = getClass( ).getClassLoader( ).getResourceAsStream( location );
             if ( stream == null )
             {
-            	stream = getClass( ).getModule( ).getResourceAsStream( location );
+                stream = getClass( ).getModule( ).getResourceAsStream( location );
             }
             if ( stream == null )
-            {	
-            	throw new FileNotFoundException( "Resource not found: " + location );
+            {
+                throw new FileNotFoundException( "Resource not found: " + location );
             }
             return stream;
         }
@@ -66,6 +68,7 @@ public interface StreamOpener
 
     public static final StreamOpener fileThenResourceOpener = new StreamOpener( )
     {
+        @Override
         public InputStream openForRead( String location ) throws IOException
         {
             try
@@ -84,11 +87,11 @@ public interface StreamOpener
                 InputStream stream = getClass( ).getClassLoader( ).getResourceAsStream( location );
                 if ( stream == null )
                 {
-                	stream = getClass( ).getModule( ).getResourceAsStream( location );
+                    stream = getClass( ).getModule( ).getResourceAsStream( location );
                 }
                 if ( stream == null )
-                {	
-                	throw new FileNotFoundException( "Resource not found: " + location );
+                {
+                    throw new FileNotFoundException( "Resource not found: " + location );
                 }
                 return stream;
             }

@@ -71,10 +71,10 @@ public class DsplHelper
     public static final String defaultDsplNamespace = "http://schemas.google.com/dspl/2010";
     public static final String canonicalGoogleNamespace = "http://www.google.com/publicdata/dataset/google/";
     public static final String canonicalGoogleUrlBase = "http://dspl.googlecode.com/hg/datasets/google/canonical/";
-    public static final String canonicalGoogleLocalBase = "dspl/canonical/google/";
+    public static final String canonicalGoogleLocalBase = "com/metsci/glimpse/dspl/canonical/google/";
 
     public static final String canonicalMetronNamespace = "http://www.metsci.com/dspl/";
-    public static final String canonicalMetronLocalBase = "dspl/canonical/metron/";
+    public static final String canonicalMetronLocalBase = "com/metsci/glimpse/dspl/canonical/metron/";
 
     public static final String dsplSchema = "com.metsci.glimpse.dspl.schema";
     public static final String objectFactoryProp = "com.sun.xml.bind.ObjectFactory";

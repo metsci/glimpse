@@ -63,16 +63,14 @@ public class LayeredExample
 
     public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
-        {
+        SwingUtilities.invokeLater( ( ) -> {
 
             // Typical preamble for Swing/Glimpse
             //
 
-            initializeLogging( "LayeredExample/logging.properties" );
+            initializeLogging( "com/metsci/glimpse/examples/layers/LayeredExample/logging.properties" );
             initTinyLaf( );
             initStandardGlimpseApp( );
-
 
             // Set up default traits
             //
@@ -93,7 +91,6 @@ public class LayeredExample
 
             ExampleTrait exampleTemplate = new ExampleTrait( true );
             exampleTemplate.setZBounds( Length::fromFeet, -5, +105 );
-
 
             // Create some layers
             //
@@ -118,8 +115,8 @@ public class LayeredExample
 
                 if ( r.nextDouble( ) < 0.1 )
                 {
-                    speedA_SU = Speed.fromKnots( 4.0 + 2.0*r.nextDouble( ) );
-                    courseA_NAVDEG = normalizeAngle360( courseA_NAVDEG - 30.0 + 60.0*r.nextDouble( ) );
+                    speedA_SU = Speed.fromKnots( 4.0 + 2.0 * r.nextDouble( ) );
+                    courseA_NAVDEG = normalizeAngle360( courseA_NAVDEG - 30.0 + 60.0 * r.nextDouble( ) );
                 }
 
                 if ( r.nextDouble( ) < 0.003 )
@@ -131,15 +128,14 @@ public class LayeredExample
                 double courseA_SU = Azimuth.fromNavDeg( courseA_NAVDEG );
                 latlonA = latlonA.displacedBy( distanceA_SU, courseA_SU );
 
-                double errorDistance_SU = Length.fromNauticalMiles( 0.03*r.nextDouble( ) );
+                double errorDistance_SU = Length.fromNauticalMiles( 0.03 * r.nextDouble( ) );
                 double errorDirection_SU = Azimuth.fromNavDeg( 360.0 * r.nextDouble( ) );
                 LatLonGeo latlonB = latlonA.displacedBy( errorDistance_SU, errorDirection_SU );
-                double zB_SU = zA_SU + Length.fromFeet( -5.0 + 10.0*r.nextDouble( ) );
+                double zB_SU = zA_SU + Length.fromFeet( -5.0 + 10.0 * r.nextDouble( ) );
 
                 exampleLayerA.addPoint( new ExamplePoint( time_PMILLIS, latlonA, zA_SU ) );
                 exampleLayerB.addPoint( new ExamplePoint( time_PMILLIS, latlonB, zB_SU ) );
             }
-
 
             // Create the gui
             //
@@ -160,28 +156,23 @@ public class LayeredExample
 
             gui.setVisible( true );
 
-
-
-//            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
-//            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
-//            exec.schedule( ( ) ->
-//            {
-//                SwingUtilities.invokeLater( ( ) ->
-//                {
-//
-//                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
-//                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
-//                    geoTrait2.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
-//
-//                    GeoView geo2 = new GeoView( );
-//                    gui.addView( geo2 );
-//                    GeoTrait.setGeoTrait( geo2, geoTrait2 );
-//
-//                } );
-//            }, 5, TimeUnit.SECONDS );
-
-
-
+            //            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
+            //            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
+            //            exec.schedule( ( ) ->
+            //            {
+            //                SwingUtilities.invokeLater( ( ) ->
+            //                {
+            //
+            //                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
+            //                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
+            //                    geoTrait2.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
+            //
+            //                    GeoView geo2 = new GeoView( );
+            //                    gui.addView( geo2 );
+            //                    GeoTrait.setGeoTrait( geo2, geoTrait2 );
+            //
+            //                } );
+            //            }, 5, TimeUnit.SECONDS );
 
         } );
     }

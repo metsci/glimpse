@@ -156,7 +156,7 @@ public class DynamicReprojectionExample implements GlimpseLayoutProvider
         TopographyData bathyData;
         try
         {
-            bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
+            bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/extras/examples/data/Cayman.bathy" ) );
         }
         catch ( IOException e )
 

@@ -26,15 +26,16 @@
  */
 package com.metsci.glimpse.extras.examples.topo;
 
-import static com.metsci.glimpse.axis.UpdateMode.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.topo.io.TopoCache.*;
-import static com.metsci.glimpse.topo.io.TopoDataPaths.*;
-import static com.metsci.glimpse.topo.io.TopoReader.*;
-import static com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.jogamp.opengl.GLProfile.*;
+import static com.jogamp.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.topo.io.TopoCache.topoCacheDataset;
+import static com.metsci.glimpse.topo.io.TopoDataPaths.requireTopoDataFile;
+import static com.metsci.glimpse.topo.io.TopoReader.readTopoLevel;
+import static com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection.plateCarreeProj_DEG;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.util.GeneralUtils.require;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 
 import java.io.File;
 
@@ -57,10 +58,9 @@ public class EquirectTopoPainterExample
 
     public static void main( String[] args ) throws Exception
     {
-        initializeLogging( "topo-examples/logging.properties" );
+        initializeLogging( "com/metsci/glimpse/extras/examples/topo/logging.properties" );
 
-        SwingUtilities.invokeLater( ( ) ->
-        {
+        SwingUtilities.invokeLater( ( ) -> {
             MultiAxisPlot2D plot = new MultiAxisPlot2D( )
             {
                 @Override

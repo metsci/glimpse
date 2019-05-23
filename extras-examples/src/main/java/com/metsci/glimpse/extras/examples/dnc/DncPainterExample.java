@@ -39,10 +39,10 @@ import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.io.IOException;
 
-import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.dnc.DncPainter;
 import com.metsci.glimpse.dnc.DncPainterSettings;
 import com.metsci.glimpse.dnc.DncPainterSettingsImpl;
@@ -60,9 +60,7 @@ public class DncPainterExample
 
     public static void main( String[] args ) throws IOException
     {
-        initializeLogging( "dnc-examples/logging.properties" );
-
-
+        initializeLogging( "com/metsci/glimpse/extras/examples/dnc/logging.properties" );
 
         // Render config
         //
@@ -72,8 +70,6 @@ public class DncPainterExample
         renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
         RenderCache renderCache = new RenderCache( renderConfig, 4 );
-
-
 
         // Create plot
         //
@@ -92,13 +88,10 @@ public class DncPainterExample
         plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
         plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-
-
         // Show
         //
 
-        SwingUtilities.invokeLater( ( ) ->
-        {
+        SwingUtilities.invokeLater( ( ) -> {
             NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( );
             canvas.addLayout( plot );
             canvas.setLookAndFeel( new SwingLookAndFeel( ) );
