@@ -231,22 +231,40 @@ public class QuickUtils
 
         JFrame frame = new JFrame( );
         frame.setTitle( title );
-        frame.getContentPane( ).add( canvas );
-        frame.setSize( screenFracSize( screenFrac ) );
-        frame.setLocationRelativeTo( null );
-        frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
-        frame.setVisible( true );
 
+        // This listener must run before NewtCanvasAWT's built-in window-closing
+        // listener does -- so add it before we add the canvas to the frame
         onWindowClosing( frame, ( ev ) ->
         {
             animator.stop( );
             tearDownCanvas( canvas );
         } );
+
+        frame.getContentPane( ).add( canvas );
+        frame.setSize( screenFracSize( screenFrac ) );
+        frame.setLocationRelativeTo( null );
+        frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
+        frame.setVisible( true );
     }
 
+    /**
+     * When used in a window-closing listener, <strong>MUST</strong> run before
+     * NewtCanvasAWT's built-in window-closing listener.
+     */
     public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
     {
-        canvas.getCanvas( ).setNEWTChild( null );
+        // Canvas destruction is kludgy -- the relevant JOGL code is complicated;
+        // the relevant AWT code is platform-dependent native code; and the relevant
+        // AWT behavior is affected by window manager quirks and mysteries. Debugging
+        // problems directly would take a long time (weeks or months).
+        //
+        // The following call sequence seems to work reliably. It was arrived at by
+        // trying various sequences until one worked for the platforms and situations
+        // we care about. Other sequences either segfaulted, or prevented the JVM from
+        // exiting appropriately.
+        //
+
+        canvas.getGLWindow( ).destroy( );
 
         Container parent = canvas.getParent( );
         if ( parent != null )
@@ -254,7 +272,7 @@ public class QuickUtils
             parent.remove( canvas );
         }
 
-        canvas.destroy( );
+        canvas.getCanvas( ).destroy( );
     }
 
 }

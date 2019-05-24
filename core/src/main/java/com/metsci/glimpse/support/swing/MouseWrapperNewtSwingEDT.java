@@ -33,7 +33,6 @@ import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedSta
 
 import javax.swing.JPopupMenu;
 import javax.swing.MenuSelectionManager;
-import javax.swing.SwingUtilities;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -67,137 +66,113 @@ public class MouseWrapperNewtSwingEDT extends MouseWrapperNewt
     @Override
     public void mouseClicked( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseClicked0( ev );
-            }
-        } );
+            this.mouseClicked0( ev );
+        }
     }
 
     @Override
     public void mousePressed( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
+            MenuSelectionManager menuMan = MenuSelectionManager.defaultManager( );
+            boolean isMenuVisible = ( menuMan.getSelectedPath( ) != null && menuMan.getSelectedPath( ).length > 0 );
+            if ( isMenuVisible )
             {
-                MenuSelectionManager menuMan = MenuSelectionManager.defaultManager( );
-                boolean isMenuVisible = ( menuMan.getSelectedPath( ) != null && menuMan.getSelectedPath( ).length > 0 );
-                if ( isMenuVisible )
+                menuMan.clearSelectedPath( );
+                ev.setConsumed( true );
+            }
+            else if ( ev.getButton( ) == BUTTON3 )
+            {
+                GlimpseTargetStack stack = null;
+                GlimpsePopupMenuTarget target = null;
+                for ( GlimpseTargetStack stack0 : this.getContainingTargets( ev ) )
                 {
-                    menuMan.clearSelectedPath( );
-                    ev.setConsumed( true );
+                    GlimpseTarget target0 = stack0.getTarget( );
+                    if ( target0 instanceof GlimpsePopupMenuTarget )
+                    {
+                        stack = stack0;
+                        target = ( ( GlimpsePopupMenuTarget ) target0 );
+                        break;
+                    }
                 }
-                else if ( ev.getButton( ) == BUTTON3 )
-                {
-                    GlimpseTargetStack stack = null;
-                    GlimpsePopupMenuTarget target = null;
-                    for ( GlimpseTargetStack stack0 : this.getContainingTargets( ev ) )
-                    {
-                        GlimpseTarget target0 = stack0.getTarget( );
-                        if ( target0 instanceof GlimpsePopupMenuTarget )
-                        {
-                            stack = stack0;
-                            target = ( ( GlimpsePopupMenuTarget ) target0 );
-                            break;
-                        }
-                    }
 
-                    if ( target != null )
+                if ( target != null )
+                {
+                    JPopupMenu menu = target.getPopupMenu( );
+                    if ( menu != null )
                     {
-                        JPopupMenu menu = target.getPopupMenu( );
-                        if ( menu != null )
-                        {
-                            GlimpseMouseEvent ev2 = this.toGlimpseEvent( ev, stack );
-                            target.getPopupMenuNotifier( ).fire( ev2 );
-                            menu.show( this.swingCanvas, ev.getX( ), ev.getY( ) );
-                        }
-                        ev.setConsumed( true );
+                        GlimpseMouseEvent ev2 = this.toGlimpseEvent( ev, stack );
+                        target.getPopupMenuNotifier( ).fire( ev2 );
+                        menu.show( this.swingCanvas, ev.getX( ), ev.getY( ) );
                     }
-                    else
-                    {
-                        this.mousePressed0( ev );
-                    }
+                    ev.setConsumed( true );
                 }
                 else
                 {
                     this.mousePressed0( ev );
                 }
             }
-        } );
+            else
+            {
+                this.mousePressed0( ev );
+            }
+        }
     }
 
     @Override
     public void mouseReleased( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseReleased0( ev );
-            }
-        } );
+            this.mouseReleased0( ev );
+        }
     }
 
     @Override
     public void mouseEntered( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseEntered0( ev );
-            }
-        } );
+            this.mouseEntered0( ev );
+        }
     }
 
     @Override
     public void mouseExited( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseExited0( ev );
-            }
-        } );
+            this.mouseExited0( ev );
+        }
     }
 
     @Override
     public void mouseDragged( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseDragged0( ev );
-            }
-        } );
+            this.mouseDragged0( ev );
+        }
     }
 
     @Override
     public void mouseMoved( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseMoved0( ev );
-            }
-        } );
+            this.mouseMoved0( ev );
+        }
     }
 
     @Override
     public void mouseWheelMoved( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.mouseWheelMoved0( ev );
-            }
-        } );
+            this.mouseWheelMoved0( ev );
+        }
     }
 }

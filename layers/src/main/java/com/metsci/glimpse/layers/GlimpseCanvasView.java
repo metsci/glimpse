@@ -52,6 +52,7 @@ import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
 
 import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.support.QuickUtils;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 public abstract class GlimpseCanvasView extends View
@@ -203,10 +204,7 @@ public abstract class GlimpseCanvasView extends View
         if ( this.canvas != null )
         {
             this.animator.remove( this.canvas.getGLDrawable( ) );
-
-            this.canvas.getCanvas( ).setNEWTChild( null );
-            this.canvasParent.remove( this.canvas );
-            this.canvas.destroy( );
+            QuickUtils.tearDownCanvas( this.canvas );
             this.canvas = null;
         }
     }
