@@ -250,6 +250,8 @@ public class QuickUtils
     /**
      * When used in a window-closing listener, this method <strong>MUST</strong> run
      * before NewtCanvasAWT's built-in window-closing listener.
+     *
+     * <p>It is safe to remove canvas from its parent after calling this method.
      */
     public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
     {

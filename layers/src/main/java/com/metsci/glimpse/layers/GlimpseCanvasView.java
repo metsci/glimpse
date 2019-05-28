@@ -205,6 +205,7 @@ public abstract class GlimpseCanvasView extends View
         {
             this.animator.remove( this.canvas.getGLDrawable( ) );
             QuickUtils.tearDownCanvas( this.canvas );
+            this.canvasParent.remove( this.canvas );
             this.canvas = null;
         }
     }
