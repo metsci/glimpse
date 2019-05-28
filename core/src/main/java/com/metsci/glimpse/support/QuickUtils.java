@@ -36,7 +36,6 @@ import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
-import java.awt.Container;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GLAnimatorControl;
@@ -51,6 +50,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
+import com.jogamp.newt.Screen;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -248,31 +248,61 @@ public class QuickUtils
     }
 
     /**
-     * When used in a window-closing listener, <strong>MUST</strong> run before
-     * NewtCanvasAWT's built-in window-closing listener.
+     * When used in a window-closing listener, this method <strong>MUST</strong> run
+     * before NewtCanvasAWT's built-in window-closing listener.
      */
     public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
     {
-        // Canvas destruction is kludgy -- the relevant JOGL code is complicated;
-        // the relevant AWT code is platform-dependent native code; and the relevant
-        // AWT behavior is affected by window manager quirks and mysteries. Debugging
-        // problems directly would take a long time (weeks or months).
-        //
-        // The following call sequence seems to work reliably. It was arrived at by
-        // trying various sequences until one worked for the platforms and situations
-        // we care about. Other sequences either segfaulted, or prevented the JVM from
-        // exiting appropriately.
-        //
-
-        canvas.getGLWindow( ).destroy( );
-
-        Container parent = canvas.getParent( );
-        if ( parent != null )
+        // Hold a reference to the screen so that JOGL's auto-cleanup doesn't destroy
+        // and then recreate resources (like the NEDT thread) while we're still working
+        Screen screen = canvas.getGLWindow( ).getScreen( );
+        screen.addReference( );
+        try
         {
-            parent.remove( canvas );
+            // Canvas destruction is kludgy -- the relevant JOGL code is complicated,
+            // the relevant AWT code is platform-dependent native code, and the relevant
+            // AWT behavior is affected by quirks and mysteries of the window manager
+            // and/or OS. Debugging problems directly would take a long time (weeks or
+            // months).
+            //
+            // The following call sequence seems to work reliably. It was arrived at by
+            // trying various sequences until one worked for the platforms and situations
+            // we care about.
+            //
+            // Notes:
+            //
+            //  * Without setVisible(false), the screen area formerly occupied by the
+            //    canvas ends up unusable -- it appears blank or continues to show the
+            //    canvas's final frame, and it does not respond to resize events.
+            //
+            //  * On Windows 10, without the explicit getGLWindow().destroy(), the AWT
+            //    thread begins receiving WM_TIMER events, and continues to receive them
+            //    indefinitely. This prevents the AWT thread from exiting, which in turn
+            //    can prevent the JVM from exiting. This is particularly strange because
+            //    getCanvas().destroy() makes it own call to getGLWindow().destroy(). Not
+            //    sure whether the difference is in the timing (due to a race), or simply
+            //    in the ordering of the calls.
+            //
+            //  * In the past, the getCanvas().destroy() call has sometimes resulted in
+            //    segfaults. However, without that call, we get the WM_TIMER issue. Not
+            //    sure what to do about this, except hope that the timing and threading
+            //    have been perturbed enough over the years that segfaults are no longer
+            //    an issue in practice. FIXME: Test thoroughly, on many machines.
+            //
+            //  * If we call setNEWTChild(null) instead of setVisible(false), we get the
+            //    WM_TIMER issue.
+            //
+            //  * If we call parent.remove(canvas) instead of setVisible(false), we get
+            //    the WM_TIMER issue.
+            //
+            canvas.setVisible( false );
+            canvas.getGLWindow( ).destroy( );
+            canvas.getCanvas( ).destroy( );
         }
-
-        canvas.getCanvas( ).destroy( );
+        finally
+        {
+            screen.removeReference( );
+        }
     }
 
 }
