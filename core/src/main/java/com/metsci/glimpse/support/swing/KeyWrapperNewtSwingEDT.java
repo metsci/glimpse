@@ -29,8 +29,6 @@ package com.metsci.glimpse.support.swing;
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.getModalBlockedStatus;
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_BLOCKED;
 
-import javax.swing.SwingUtilities;
-
 import com.jogamp.newt.event.KeyEvent;
 import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
 import com.metsci.glimpse.event.key.newt.KeyWrapperNewt;
@@ -52,25 +50,19 @@ public class KeyWrapperNewtSwingEDT extends KeyWrapperNewt
     @Override
     public void keyPressed( KeyEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.doKeyPressed( ev );
-            }
-        } );
+            this.doKeyPressed( ev );
+        }
     }
 
     @Override
     public void keyReleased( KeyEvent ev )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
         {
-            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
-            {
-                this.doKeyReleased( ev );
-            }
-        } );
+            this.doKeyReleased( ev );
+        }
     }
 
 }
