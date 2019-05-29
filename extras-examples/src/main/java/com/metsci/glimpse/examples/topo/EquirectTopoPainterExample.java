@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.topo;
 
 import static com.metsci.glimpse.axis.UpdateMode.*;
+import static com.metsci.glimpse.support.FrameUtils.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.topo.io.TopoCache.*;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.*;
@@ -97,7 +98,7 @@ public class EquirectTopoPainterExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
             plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "EquirectTopoPainterExample", GL3, 0.8, plot );
+            quickGlimpseApp( "EquirectTopoPainterExample", GL3, screenFracSize( 0.8 ), plot );
         } );
     }
 

@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.axis;
 
 import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.support.FrameUtils.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.support.colormap.ColorGradientUtils.*;
 import static com.metsci.glimpse.support.colormap.ColorGradients.*;
@@ -209,7 +210,7 @@ public class WrappedAxisExample2
             // Make sure the BackgroundPainter gets assigned a color -- otherwise blending turns out weird
             layout.setLookAndFeel( new DefaultLookAndFeel( ) );
 
-            quickGlimpseApp( "WrappedAxisExample2", GL3, 0.8, layout );
+            quickGlimpseApp( "WrappedAxisExample2", GL3, screenFracSize( 0.8 ), layout );
 
         } );
     }

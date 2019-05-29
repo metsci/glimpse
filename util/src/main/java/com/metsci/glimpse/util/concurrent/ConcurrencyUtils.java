@@ -64,4 +64,12 @@ public class ConcurrencyUtils
                                           .build( );
     }
 
+    public static Thread startThread( String name, boolean daemon, Runnable runnable )
+    {
+        Thread thread = new Thread( runnable, name );
+        thread.setDaemon( daemon );
+        thread.start( );
+        return thread;
+    }
+
 }

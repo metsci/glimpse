@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.topo;
 
 import static com.metsci.glimpse.axis.UpdateMode.*;
+import static com.metsci.glimpse.support.FrameUtils.*;
 import static com.metsci.glimpse.support.QuickUtils.*;
 import static com.metsci.glimpse.topo.io.TopoCache.*;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.*;
@@ -99,7 +100,7 @@ public class MercatorTopoPainterExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
             plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "MercatorTopoPainterExample", GL3, 0.8, plot );
+            quickGlimpseApp( "MercatorTopoPainterExample", GL3, screenFracSize( 0.8 ), plot );
         } );
     }
 
