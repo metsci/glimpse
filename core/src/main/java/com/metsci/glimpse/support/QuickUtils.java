@@ -153,6 +153,20 @@ public class QuickUtils
         return shouldRunAnyway.get( );
     }
 
+    /**
+     * Creates a {@link MultiAxisPlot2D} layout with contents that are desirable for most
+     * XY plots:
+     * <ul>
+     * <li>X and Y axes
+     * <li>GridPainter
+     * <li>CrosshairPainter (with selection box disabled)
+     * <li>BorderPainter.
+     * </ul>
+     * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     */
     public static MultiAxisPlot2D quickXyPlot( GlimpsePainter... painters )
     {
         MultiAxisPlot2D plot = new MultiAxisPlot2D( );
@@ -186,6 +200,10 @@ public class QuickUtils
      * by calling {@link #initStandardGlimpseApp()}, and warns the user if the named
      * {@link GLProfile} is not available.
      * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     * <p>
      * <strong>NOTE:</strong> If the named {@link GLProfile} is not available, and the
      * user chooses to quit rather than continue, this method calls {@link System#exit(int)}!
      */
@@ -205,6 +223,10 @@ public class QuickUtils
     /**
      * See {@link #quickGlimpseWindow(String, GLProfile, double, GlimpseLayout)}.
      * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     * <p>
      * <strong>NOTE:</strong> Throws a runtime exception if the named {@link GLProfile}
      * is not available.
      */
@@ -215,6 +237,10 @@ public class QuickUtils
 
     /**
      * Creates and shows a new window displaying the specified {@code layout}.
+     * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
      * <p>
      * <strong>NOTE:</strong> Must be called on the Swing EDT.
      */
@@ -250,8 +276,8 @@ public class QuickUtils
     /**
      * When used in a window-closing listener, this method <strong>MUST</strong> run
      * before NewtCanvasAWT's built-in window-closing listener.
-     *
-     * <p>It is safe to remove canvas from its parent after calling this method.
+     * <p>
+     * It is safe to remove canvas from its parent after calling this method.
      */
     public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
     {
@@ -277,13 +303,13 @@ public class QuickUtils
             //    canvas ends up unusable -- it appears blank or continues to show the
             //    canvas's final frame, and it does not respond to resize events.
             //
-            //  * On Windows 10, without the explicit getGLWindow().destroy(), the AWT
+            //  * On Windows 10, without the explicit getGLWindow().destroy(), the NEDT
             //    thread begins receiving WM_TIMER events, and continues to receive them
             //    indefinitely. This prevents the AWT thread from exiting, which in turn
             //    can prevent the JVM from exiting. This is particularly strange because
-            //    getCanvas().destroy() makes it own call to getGLWindow().destroy(). Not
-            //    sure whether the difference is in the timing (due to a race), or simply
-            //    in the ordering of the calls.
+            //    getCanvas().destroy() calls getGLWindow().destroy() internally. The
+            //    difference could be in the timing (due to a race), or simply in the
+            //    ordering of the various calls.
             //
             //  * In the past, the getCanvas().destroy() call has sometimes resulted in
             //    segfaults. However, without that call, we get the WM_TIMER issue. Not
