@@ -26,17 +26,17 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.abs;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
+import static com.metsci.glimpse.support.QuickUtils.*;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.*;
+import static java.lang.Math.*;
+import static javax.media.opengl.GLProfile.*;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import com.metsci.glimpse.examples.Example;
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
@@ -53,87 +53,80 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D
  *
  * @author ulman
  */
-public class AnimatedTextureExample implements GlimpseLayoutProvider
+public class AnimatedTextureExample
 {
     public static void main( String args[] ) throws Exception
     {
-        Example.showWithSwing( new AnimatedTextureExample( ) );
-    }
-
-    @Override
-    public ColorAxisPlot2D getLayout( )
-    {
-        // create a premade heat map window
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
-
-        plot.setPlotBackgroundColor( GlimpseColor.getBlack( ) );
-        plot.setBackgroundColor( GlimpseColor.getBlack( ) );
-        plot.setAxisColor( GlimpseColor.getWhite( ) );
-        plot.getGridPainter( ).setLineColor( GlimpseColor.getWhite( 0.5f ) );
-
-        plot.setAxisLabelX( "x axis" );
-        plot.setAxisLabelY( "y axis" );
-        plot.setAxisLabelZ( "z axis" );
-        plot.setTitle( "Animated Texture" );
-        plot.setTitleColor( GlimpseColor.getWhite( ) );
-        plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
-        
-        plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
-        plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );
-        plot.getCrosshairPainter( ).setShadeSelectionBox( true );
-        plot.getCrosshairPainter( ).setLineWidth( 1 );
-
-        plot.setMinX( -1.2 );
-        plot.setMaxX( 1.2 );
-        plot.setMinY( -1.2 );
-        plot.setMaxY( 1.2 );
-        plot.setMinZ( 0 );
-        plot.setMaxZ( 1000 );
-
-        plot.lockAspectRatioXY( 1 );
-
-        // add a painter that will use a shader for color-mapping
-        final ShadedTexturePainter painter = new ShadedTexturePainter( );
-        plot.addPainter( painter );
-
-        // setup the color map for the painter
-        ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
-
-        // The data texture and color map texture need to be placed in "texture units"
-        // on the graphics card where the shader can find them.
-        // To facilitate this, these integer constants are passed both to the painter
-        // and do the shader.
-        // **Note** If you aren't writing your own shaders, HeatMapPainter takes care
-        // of these details for you. See HeatMapExample for a simpler example.
-        final int dataTextureUnit = 0;
-        final int colorScaleTextureUnit = 1;
-
-        // the colors texture won't be drawn (it's simply used as source data by the texture
-        // to choose colors for the heat map data) so we add it as a non-drawable texture.
-        // we set the same texture unit which will be supplied to the shader so that the
-        // shader knows how to reference this texture.
-        painter.addNonDrawableTexture( colors, colorScaleTextureUnit );
-
-        // create a shader which samples from a 1D color texture to
-        // color map a 2D data texture
-        ColorMapProgram shader;
-        try
+        SwingUtilities.invokeLater( ( ) ->
         {
-            shader = new ColorMapProgram( plot.getAxisZ( ), dataTextureUnit, colorScaleTextureUnit );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
-        painter.setProgram( shader );
+            // create a premade heat map window
+            ColorAxisPlot2D plot = new ColorAxisPlot2D( );
 
-        // setup a thread that will mutate the target texture at regular intervals
-        new Thread( new Runnable( )
-        {
-            @Override
-            public void run( )
+            plot.setPlotBackgroundColor( GlimpseColor.getBlack( ) );
+            plot.setBackgroundColor( GlimpseColor.getBlack( ) );
+            plot.setAxisColor( GlimpseColor.getWhite( ) );
+            plot.getGridPainter( ).setLineColor( GlimpseColor.getWhite( 0.5f ) );
+
+            plot.setAxisLabelX( "x axis" );
+            plot.setAxisLabelY( "y axis" );
+            plot.setAxisLabelZ( "z axis" );
+            plot.setTitle( "Animated Texture" );
+            plot.setTitleColor( GlimpseColor.getWhite( ) );
+            plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
+
+            plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
+            plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );
+            plot.getCrosshairPainter( ).setShadeSelectionBox( true );
+            plot.getCrosshairPainter( ).setLineWidth( 1 );
+
+            plot.setMinX( -1.2 );
+            plot.setMaxX( 1.2 );
+            plot.setMinY( -1.2 );
+            plot.setMaxY( 1.2 );
+            plot.setMinZ( 0 );
+            plot.setMaxZ( 1000 );
+
+            plot.lockAspectRatioXY( 1 );
+
+            // add a painter that will use a shader for color-mapping
+            final ShadedTexturePainter painter = new ShadedTexturePainter( );
+            plot.addPainter( painter );
+
+            // setup the color map for the painter
+            ColorTexture1D colors = new ColorTexture1D( 1024 );
+            colors.setColorGradient( ColorGradients.jet );
+
+            // The data texture and color map texture need to be placed in "texture units"
+            // on the graphics card where the shader can find them.
+            // To facilitate this, these integer constants are passed both to the painter
+            // and do the shader.
+            // **Note** If you aren't writing your own shaders, HeatMapPainter takes care
+            // of these details for you. See HeatMapExample for a simpler example.
+            final int dataTextureUnit = 0;
+            final int colorScaleTextureUnit = 1;
+
+            // the colors texture won't be drawn (it's simply used as source data by the texture
+            // to choose colors for the heat map data) so we add it as a non-drawable texture.
+            // we set the same texture unit which will be supplied to the shader so that the
+            // shader knows how to reference this texture.
+            painter.addNonDrawableTexture( colors, colorScaleTextureUnit );
+
+            // create a shader which samples from a 1D color texture to
+            // color map a 2D data texture
+            ColorMapProgram shader;
+            try
+            {
+                shader = new ColorMapProgram( plot.getAxisZ( ), dataTextureUnit, colorScaleTextureUnit );
+            }
+            catch ( IOException e )
+            {
+                e.printStackTrace( );
+                throw new RuntimeException( e );
+            }
+            painter.setProgram( shader );
+
+            // setup a thread that will mutate the target texture at regular intervals
+            startThread( "Texture Updater", true, ( ) ->
             {
                 // allocate a texture
                 FloatTextureProjected2D data = setupTexture( );
@@ -158,19 +151,20 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
                     {
                     }
                 }
-            }
-        } ).start( );
+            } );
 
-        // load the color map into the plot (so the color scale is displayed on the z axis)
-        plot.setColorScale( colors );
+            // load the color map into the plot (so the color scale is displayed on the z axis)
+            plot.setColorScale( colors );
 
-        // paints a border around the plot area
-        plot.addPainter( new BorderPainter( ) );
+            // paints a border around the plot area
+            plot.addPainter( new BorderPainter( ) );
 
-        // paints an estimate of how many times per second the display is being updated
-        plot.addPainter( new FpsPainter( ) );
+            // paints an estimate of how many times per second the display is being updated
+            plot.addPainter( new FpsPainter( ) );
 
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Animated Texture Example", GL3bc, 800, 800, plot );
+        } );
     }
 
     static FloatTextureProjected2D setupTexture( )

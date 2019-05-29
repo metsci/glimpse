@@ -26,9 +26,12 @@
  */
 package com.metsci.glimpse.examples.plot;
 
-import com.metsci.glimpse.examples.Example;
+import static com.metsci.glimpse.support.QuickUtils.*;
+import static javax.media.opengl.GLProfile.*;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -47,40 +50,38 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class EmptyPlotExample implements GlimpseLayoutProvider
+public class EmptyPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new EmptyPlotExample( ) );
-    }
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            Plot2D plot = new Plot2D( "plot" );
 
-    @Override
-    public GlimpseLayout getLayout( )
-    {
-        Plot2D plot = new Plot2D( "plot" );
+            GlimpseLayout plotLayout = plot.getLayoutCenter( );
 
-        GlimpseLayout plotLayout = plot.getLayoutCenter( );
+            // add a painter to paint a solid dark background on the plot
+            plotLayout.addPainter( new BackgroundPainter( false ) );
 
-        // add a painter to paint a solid dark background on the plot
-        plotLayout.addPainter( new BackgroundPainter( false ) );
+            // add a painter to display grid lines
+            GridPainter gridPainter = new GridPainter( plot.getLabelHandlerX( ), plot.getLabelHandlerY( ) );
+            plotLayout.addPainter( gridPainter );
 
-        // add a painter to display grid lines
-        GridPainter gridPainter = new GridPainter( plot.getLabelHandlerX( ), plot.getLabelHandlerY( ) );
-        plotLayout.addPainter( gridPainter );
+            // add a painter to display mouse selection crosshairs
+            CrosshairPainter crosshairPainter = new CrosshairPainter( );
+            crosshairPainter.setCursorColor( GlimpseColor.getBlack( ) );
+            plotLayout.addPainter( crosshairPainter );
 
-        // add a painter to display mouse selection crosshairs
-        CrosshairPainter crosshairPainter = new CrosshairPainter( );
-        crosshairPainter.setCursorColor( GlimpseColor.getBlack( ) );
-        plotLayout.addPainter( crosshairPainter );
+            // add a painter to paint a simple line border on the plot
+            plotLayout.addPainter( new BorderPainter( ).setColor( GlimpseColor.getBlack( ) ) );
 
-        // add a painter to paint a simple line border on the plot
-        plotLayout.addPainter( new BorderPainter( ).setColor( GlimpseColor.getBlack( ) ) );
+            // add axis and plot labels
+            plot.setAxisLabelX( "Axis X" );
+            plot.setAxisLabelY( "Axis Y" );
+            plot.setTitle( "Plot Title" );
 
-        // add axis and plot labels
-        plot.setAxisLabelX( "Axis X" );
-        plot.setAxisLabelY( "Axis Y" );
-        plot.setTitle( "Plot Title" );
-
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Empty Plot Example", GL3bc, 800, 800, plot );
+        } );
     }
 }
