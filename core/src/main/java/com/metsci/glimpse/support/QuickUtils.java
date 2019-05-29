@@ -39,6 +39,7 @@ import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.opengl.GLAnimatorControl;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.swing.JDialog;
@@ -221,22 +222,39 @@ public class QuickUtils
     }
 
     /**
-     * See {@link #quickGlimpseWindow(String, GLProfile, double, GlimpseLayout)}.
+     * Creates and shows a new window displaying the specified {@code layout}.
      * <p>
-     * This method is for convenience only. It is perfectly acceptable for an application
-     * to perform some or all of these init operations piecemeal, instead of calling this
-     * method.
-     * <p>
-     * <strong>NOTE:</strong> Throws a runtime exception if the named {@link GLProfile}
-     * is not available.
+     * @throws GLException if the named {@link GLProfile} is not available.
      */
-    public static void quickGlimpseWindow( String title, String glProfileName, double screenFrac, GlimpseLayout layout )
+    public static void quickGlimpseWindow( String title, String glProfileName, double screenFrac, GlimpseLayout layout ) throws GLException
     {
         quickGlimpseWindow( title, GLProfile.get( glProfileName ), screenFrac, layout );
     }
 
     /**
      * Creates and shows a new window displaying the specified {@code layout}.
+     */
+    public static void quickGlimpseWindow( String title, GLProfile glProfile, double screenFrac, GlimpseLayout layout )
+    {
+        quickGlimpseWindow( title, new NewtSwingEDTGlimpseCanvas( glProfile ), screenFrac, layout );
+    }
+
+    /**
+     * Creates and shows a new window displaying the specified {@code layout}.
+     */
+    public static void quickGlimpseWindow( String title, GLContext glContext, double screenFrac, GlimpseLayout layout )
+    {
+        quickGlimpseWindow( title, new NewtSwingEDTGlimpseCanvas( glContext ), screenFrac, layout );
+    }
+
+    /**
+     * In most cases it is more natural to call one of the other {@code quickGlimpseWindow}
+     * methods:
+     * <ul>
+     * <li>{@link #quickGlimpseWindow(String, String, double, GlimpseLayout)}
+     * <li>{@link #quickGlimpseWindow(String, GLProfile, double, GlimpseLayout)}
+     * <li>{@link #quickGlimpseWindow(String, GLContext, double, GlimpseLayout)}
+     * </ul>
      * <p>
      * This method is for convenience only. It is perfectly acceptable for an application
      * to perform some or all of these init operations piecemeal, instead of calling this
@@ -244,11 +262,10 @@ public class QuickUtils
      * <p>
      * <strong>NOTE:</strong> Must be called on the Swing EDT.
      */
-    public static void quickGlimpseWindow( String title, GLProfile glProfile, double screenFrac, GlimpseLayout layout )
+    public static void quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas, double screenFrac, GlimpseLayout layout )
     {
         requireSwingThread( );
 
-        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
         canvas.addLayout( layout );
 
         GLAnimatorControl animator = new SwingEDTAnimator( 60 );
