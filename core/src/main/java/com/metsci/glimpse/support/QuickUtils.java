@@ -199,9 +199,9 @@ public class QuickUtils
     /**
      * @see #quickGlimpseApp(String, String, Dimension, GlimpseLayout)
      */
-    public static void quickGlimpseApp( String appName, String glProfileName, int width, int height, GlimpseLayout layout )
+    public static QuickGlimpseApp quickGlimpseApp( String appName, String glProfileName, int width, int height, GlimpseLayout layout )
     {
-        quickGlimpseApp( appName, glProfileName, new Dimension( width, height ), layout );
+        return quickGlimpseApp( appName, glProfileName, new Dimension( width, height ), layout );
     }
 
     /**
@@ -217,7 +217,7 @@ public class QuickUtils
      * <strong>NOTE:</strong> If the named {@link GLProfile} is not available, and the
      * user chooses to quit rather than continue, this method calls {@link System#exit(int)}!
      */
-    public static void quickGlimpseApp( String appName, String glProfileName, Dimension size, GlimpseLayout layout )
+    public static QuickGlimpseApp quickGlimpseApp( String appName, String glProfileName, Dimension size, GlimpseLayout layout )
     {
         initStandardGlimpseApp( );
 
@@ -227,7 +227,7 @@ public class QuickUtils
             System.exit( 1 );
         }
 
-        quickGlimpseWindow( appName, glProfile, size, layout );
+        return quickGlimpseWindow( appName, glProfile, size, layout );
     }
 
     /**
@@ -235,9 +235,9 @@ public class QuickUtils
      * <p>
      * @throws GLException if the named {@link GLProfile} is not available.
      */
-    public static void quickGlimpseWindow( String title, String glProfileName, int width, int height, GlimpseLayout layout ) throws GLException
+    public static QuickGlimpseApp quickGlimpseWindow( String title, String glProfileName, int width, int height, GlimpseLayout layout ) throws GLException
     {
-        quickGlimpseWindow( title, glProfileName, new Dimension( width, height ), layout );
+        return quickGlimpseWindow( title, glProfileName, new Dimension( width, height ), layout );
     }
 
     /**
@@ -245,40 +245,40 @@ public class QuickUtils
      * <p>
      * @throws GLException if the named {@link GLProfile} is not available.
      */
-    public static void quickGlimpseWindow( String title, String glProfileName, Dimension size, GlimpseLayout layout ) throws GLException
+    public static QuickGlimpseApp quickGlimpseWindow( String title, String glProfileName, Dimension size, GlimpseLayout layout ) throws GLException
     {
-        quickGlimpseWindow( title, GLProfile.get( glProfileName ), size, layout );
+        return quickGlimpseWindow( title, GLProfile.get( glProfileName ), size, layout );
     }
 
     /**
      * Creates and shows a new window displaying the specified {@code layout}.
      */
-    public static void quickGlimpseWindow( String title, GLProfile glProfile, Dimension size, GlimpseLayout layout )
+    public static QuickGlimpseApp quickGlimpseWindow( String title, GLProfile glProfile, Dimension size, GlimpseLayout layout )
     {
-        quickGlimpseWindow( title,
-                            new NewtSwingEDTGlimpseCanvas( glProfile ),
-                            new SwingEDTAnimator( 60 ),
-                            new SwingLookAndFeel( ),
-                            size,
-                            layout );
+        return quickGlimpseWindow( title,
+                new NewtSwingEDTGlimpseCanvas( glProfile ),
+                new SwingEDTAnimator( 60 ),
+                new SwingLookAndFeel( ),
+                size,
+                layout );
     }
 
     /**
      * Creates and shows a new window displaying the specified {@code layout}.
      */
-    public static void quickGlimpseWindow( String title,
-                                           GLContext glContext,
-                                           GLAnimatorControl animator,
-                                           LookAndFeel laf,
-                                           Dimension size,
-                                           GlimpseLayout layout )
+    public static QuickGlimpseApp quickGlimpseWindow( String title,
+            GLContext glContext,
+            GLAnimatorControl animator,
+            LookAndFeel laf,
+            Dimension size,
+            GlimpseLayout layout )
     {
-        quickGlimpseWindow( title,
-                            new NewtSwingEDTGlimpseCanvas( glContext ),
-                            animator,
-                            laf,
-                            size,
-                            layout );
+        return quickGlimpseWindow( title,
+                new NewtSwingEDTGlimpseCanvas( glContext ),
+                animator,
+                laf,
+                size,
+                layout );
     }
 
     /**
@@ -291,12 +291,12 @@ public class QuickUtils
      * <p>
      * <strong>NOTE:</strong> Must be called on the Swing EDT.
      */
-    public static void quickGlimpseWindow( String title,
-                                           NewtSwingEDTGlimpseCanvas canvas,
-                                           GLAnimatorControl animator,
-                                           LookAndFeel laf,
-                                           Dimension size,
-                                           GlimpseLayout layout )
+    public static QuickGlimpseApp quickGlimpseWindow( String title,
+            NewtSwingEDTGlimpseCanvas canvas,
+            GLAnimatorControl animator,
+            LookAndFeel laf,
+            Dimension size,
+            GlimpseLayout layout )
     {
         requireSwingThread( );
 
@@ -325,6 +325,8 @@ public class QuickUtils
         frame.setLocationRelativeTo( null );
         frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         frame.setVisible( true );
+
+        return new QuickGlimpseApp( canvas, animator, frame );
     }
 
     /**
@@ -387,4 +389,32 @@ public class QuickUtils
         }
     }
 
+    public static class QuickGlimpseApp
+    {
+        protected NewtSwingEDTGlimpseCanvas canvas;
+        protected GLAnimatorControl animator;
+        protected JFrame frame;
+
+        public QuickGlimpseApp( NewtSwingEDTGlimpseCanvas canvas, GLAnimatorControl animator, JFrame frame )
+        {
+            this.canvas = canvas;
+            this.animator = animator;
+            this.frame = frame;
+        }
+
+        public NewtSwingEDTGlimpseCanvas getCanvas( )
+        {
+            return canvas;
+        }
+
+        public GLAnimatorControl getAnimator( )
+        {
+            return animator;
+        }
+
+        public JFrame getFrame( )
+        {
+            return frame;
+        }
+    }
 }

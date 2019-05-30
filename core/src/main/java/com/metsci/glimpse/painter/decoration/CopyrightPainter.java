@@ -59,7 +59,7 @@ public class CopyrightPainter extends GlimpsePainterBase
 
     public CopyrightPainter( )
     {
-        this( "Metron", 2012 );
+        this( "Metron", 2019 );
     }
 
     @Override

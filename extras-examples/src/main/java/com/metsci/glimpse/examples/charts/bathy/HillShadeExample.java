@@ -26,20 +26,22 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
-import static com.metsci.glimpse.examples.Example.showWithSwing;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.plot.MapPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
@@ -50,14 +52,26 @@ import com.metsci.glimpse.util.io.StreamOpener;
 /**
  * @author borkholder
  */
-public class HillShadeExample implements GlimpseLayoutProvider, TopoTileProvider
+public class HillShadeExample implements TopoTileProvider
 {
     private TopographyData singleTile;
 
     public static void main( String[] args ) throws Exception
     {
         setTerseConsoleLogger( Level.FINE );
-        showWithSwing( new HillShadeExample( ) );
+
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            try
+            {
+                // create a window and show the plot
+                quickGlimpseApp( "Hill Shade Example", GL3bc, 800, 800, new HillShadeExample( ).getLayout( ) );
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        } );
     }
 
     public HillShadeExample( ) throws IOException
@@ -86,7 +100,6 @@ public class HillShadeExample implements GlimpseLayoutProvider, TopoTileProvider
         return singleTile;
     }
 
-    @Override
     public GlimpseLayout getLayout( )
     {
         GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );

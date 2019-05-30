@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.examples.misc;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,12 +36,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.ZipInputStream;
 
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.UpdateMode;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.treemap.NestedTreeMap;
@@ -53,71 +55,76 @@ import com.metsci.glimpse.util.io.StreamOpener;
  * @author borkholder
  * @see com.metsci.glimpse.painter.treemap.SimpleTreeMapPainter
  */
-public class TreeMapExample implements GlimpseLayoutProvider
+public class TreeMapExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new TreeMapExample( ) );
-    }
-
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
-        Plot2D plot = new Plot2D( "treemap" );
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
-        plot.setAxisSizeZ( 0 );
-        plot.setTitle( "TreeMap of States" );
-
-        final NestedTreeMap tree = createLargeGeoTree( );
-
-        SimpleTreeMapPainter painter = new SimpleTreeMapPainter( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            ColorGradient scale = ColorGradients.jet;
-
-            @Override
-            protected float[] getTitleBackgroundColor( int nodeId, boolean selected )
+            try
             {
-                int level = tree.getLevel( nodeId );
-                float[] color = new float[4];
-                scale.toColor( level / 5f, color );
+                Plot2D plot = new Plot2D( "treemap" );
+                plot.setAxisSizeX( 0 );
+                plot.setAxisSizeY( 0 );
+                plot.setAxisSizeZ( 0 );
+                plot.setTitle( "TreeMap of States" );
 
-                if ( selected )
+                final NestedTreeMap tree = createLargeGeoTree( );
+
+                SimpleTreeMapPainter painter = new SimpleTreeMapPainter( )
                 {
-                    color[0] *= 0.4f;
-                    color[1] *= 0.4f;
-                    color[2] *= 0.4f;
-                }
+                    ColorGradient scale = ColorGradients.jet;
 
-                return color;
+                    @Override
+                    protected float[] getTitleBackgroundColor( int nodeId, boolean selected )
+                    {
+                        int level = tree.getLevel( nodeId );
+                        float[] color = new float[4];
+                        scale.toColor( level / 5f, color );
+
+                        if ( selected )
+                        {
+                            color[0] *= 0.4f;
+                            color[1] *= 0.4f;
+                            color[2] *= 0.4f;
+                        }
+
+                        return color;
+                    }
+                };
+
+                painter.setTreeMapData( tree );
+                plot.getLayoutCenter( ).addPainter( painter, Plot2D.DATA_LAYER );
+                plot.getLayoutCenter( ).addPainter( new TreeMapHoverPainter( painter ), Plot2D.FOREGROUND_LAYER );
+
+                plot.setAbsoluteMinX( 0 );
+                plot.setAbsoluteMaxX( 100 );
+                plot.setAbsoluteMinY( 0 );
+                plot.setAbsoluteMaxY( 100 );
+
+                plot.getAxisX( ).setUpdateMode( UpdateMode.FixedPixel );
+                plot.getAxisY( ).setUpdateMode( UpdateMode.FixedPixel );
+
+                plot.setMinX( plot.getAxisX( ).getAbsoluteMin( ) );
+                plot.setMaxX( plot.getAxisX( ).getAbsoluteMax( ) );
+                plot.setMinY( plot.getAxisY( ).getAbsoluteMin( ) );
+                plot.setMaxY( plot.getAxisY( ).getAbsoluteMax( ) );
+
+                painter.setLayout( new SquarifiedLayout( ) );
+
+                plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+
+                // create a window and show the plot
+                quickGlimpseApp( "Tree Map Example", GL3bc, 800, 800, plot );
             }
-        };
-
-        painter.setTreeMapData( tree );
-        plot.getLayoutCenter( ).addPainter( painter, Plot2D.DATA_LAYER );
-        plot.getLayoutCenter( ).addPainter( new TreeMapHoverPainter( painter ), Plot2D.FOREGROUND_LAYER );
-
-        plot.setAbsoluteMinX( 0 );
-        plot.setAbsoluteMaxX( 100 );
-        plot.setAbsoluteMinY( 0 );
-        plot.setAbsoluteMaxY( 100 );
-
-        plot.getAxisX( ).setUpdateMode( UpdateMode.FixedPixel );
-        plot.getAxisY( ).setUpdateMode( UpdateMode.FixedPixel );
-
-        plot.setMinX( plot.getAxisX( ).getAbsoluteMin( ) );
-        plot.setMaxX( plot.getAxisX( ).getAbsoluteMax( ) );
-        plot.setMinY( plot.getAxisY( ).getAbsoluteMin( ) );
-        plot.setMaxY( plot.getAxisY( ).getAbsoluteMax( ) );
-
-        painter.setLayout( new SquarifiedLayout( ) );
-
-        plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
-
-        return plot;
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        } );
     }
 
-    static NestedTreeMap createLargeGeoTree( ) throws Exception
+    public static NestedTreeMap createLargeGeoTree( ) throws Exception
     {
         NestedTreeMap tree = new NestedTreeMap( );
         tree.setRoot( 0 );
@@ -180,7 +187,7 @@ public class TreeMapExample implements GlimpseLayoutProvider
         return tree;
     }
 
-    class TreeMapHoverPainter extends CursorTextPainter
+    public static class TreeMapHoverPainter extends CursorTextPainter
     {
         SimpleTreeMapPainter painter;
 

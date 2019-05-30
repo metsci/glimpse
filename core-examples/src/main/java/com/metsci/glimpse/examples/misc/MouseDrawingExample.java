@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.examples.misc;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -33,9 +38,6 @@ import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
@@ -50,22 +52,26 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-public class MouseDrawingExample implements GlimpseLayoutProvider
+public class MouseDrawingExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new MouseDrawingExample( ) );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            // create a window and show the plot
+            quickGlimpseApp( "Mouse Drawing Example", GL3bc, 800, 800, new MouseDrawingExample( ).getPlot( ) );
+        } );
     }
 
     protected TrackPainter painter;
+    protected SimplePlot2D plot;
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
+    public MouseDrawingExample( )
     {
         // create a standard pre-made SimplePlot2D, but override the
         // constructor method which it uses to create the listener
         // that handles mouse events inside the central plot area
-        SimplePlot2D plot = new SimplePlot2D( )
+        plot = new SimplePlot2D( )
         {
             @Override
             protected AxisMouseListener createAxisMouseListenerXY( )
@@ -107,8 +113,11 @@ public class MouseDrawingExample implements GlimpseLayoutProvider
         text.setVerticalPosition( VerticalPosition.Top );
         text.setFont( FontUtils.getDefaultBold( 16 ) );
         plot.addPainter( text );
+    }
 
-        return plot;
+    public SimplePlot2D getPlot( )
+    {
+        return this.plot;
     }
 
     // create a custom subclass of the standard AxisMouseListener2D

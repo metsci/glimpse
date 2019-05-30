@@ -26,11 +26,13 @@
  */
 package com.metsci.glimpse.examples.projection;
 
-import com.metsci.glimpse.examples.Example;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
@@ -45,81 +47,80 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  *
  * @author ulman
  */
-public class PolarProjectionExample implements GlimpseLayoutProvider
+public class PolarProjectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new PolarProjectionExample( ) );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            // create a premade heat map window
+            ColorAxisPlot2D plot = new ColorAxisPlot2D( );
+
+            // set the pixel sizes of the axes
+            plot.setBorderSize( 10 );
+            plot.setAxisSizeY( 50 );
+            plot.setAxisSizeX( 50 );
+            plot.setTitleHeight( 20 );
+
+            // set text labels for the axes
+            plot.setAxisLabelX( "x axis" );
+            plot.setAxisLabelY( "y axis" );
+            plot.setAxisLabelZ( "z axis" );
+
+            // set minimum and maximum values for the axes
+            plot.setMinX( -1000 );
+            plot.setMaxX( 1000 );
+            plot.setMinY( -1000 );
+            plot.setMaxY( 1000 );
+            plot.setMinZ( 0 );
+            plot.setMaxZ( 1000 );
+
+            // lock the aspect ratio of the x and y axes
+            plot.lockAspectRatioXY( 1 );
+
+            // add a painter that will use our new shader for color-mapping
+            final HeatMapPainter painter = new HeatMapPainter( plot.getAxisZ( ) );
+            plot.addPainter( painter );
+
+            // setup the color-map for the painter
+            ColorTexture1D colors = new ColorTexture1D( 1024 );
+            colors.setColorGradient( ColorGradients.jet );
+
+            // create a projection which will display the data as an annulus with
+            // inner radius 300 and outer radius 1000
+            Projection projection = new PolarProjection( 300, 1000, 0, 360 );
+
+            // allocate a 1000 by 1000 pixel texture
+            final FloatTextureProjected2D texture = new FloatTextureProjected2D( 4000, 1000 );
+
+            // generate dummy data for the texture
+            double[][] data = HeatMapExample.generateData( 4000, 1000 );
+
+            // set the projection and data for the texture
+            texture.setProjection( projection );
+            texture.setData( data );
+
+            // add the texture and color scale to the painter
+            painter.setColorScale( colors );
+            painter.setData( texture );
+
+            // create a painter which displays the cursor position and data value under the cursor
+            CursorTextZPainter cursorPainter = new CursorTextZPainter( );
+            plot.addPainter( cursorPainter );
+
+            // tell the cursor painter what texture to report data values from
+            cursorPainter.setTexture( texture );
+
+            // also add the color scale to the plot, which will
+            // use it to display the color scale on the Z axis
+            plot.setColorScale( colors );
+
+            // paints an estimate of how many times per second the display is being updated
+            plot.addPainter( new FpsPainter( ) );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Polar Projection Example", GL3bc, 800, 800, plot );
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
-        // create a premade heat map window
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
-
-        // set the pixel sizes of the axes
-        plot.setBorderSize( 10 );
-        plot.setAxisSizeY( 50 );
-        plot.setAxisSizeX( 50 );
-        plot.setTitleHeight( 20 );
-
-        // set text labels for the axes
-        plot.setAxisLabelX( "x axis" );
-        plot.setAxisLabelY( "y axis" );
-        plot.setAxisLabelZ( "z axis" );
-
-        // set minimum and maximum values for the axes
-        plot.setMinX( -1000 );
-        plot.setMaxX( 1000 );
-        plot.setMinY( -1000 );
-        plot.setMaxY( 1000 );
-        plot.setMinZ( 0 );
-        plot.setMaxZ( 1000 );
-
-        // lock the aspect ratio of the x and y axes
-        plot.lockAspectRatioXY( 1 );
-
-        // add a painter that will use our new shader for color-mapping
-        final HeatMapPainter painter = new HeatMapPainter( plot.getAxisZ( ) );
-        plot.addPainter( painter );
-
-        // setup the color-map for the painter
-        ColorTexture1D colors = new ColorTexture1D( 1024 );
-        colors.setColorGradient( ColorGradients.jet );
-
-        // create a projection which will display the data as an annulus with
-        // inner radius 300 and outer radius 1000
-        Projection projection = new PolarProjection( 300, 1000, 0, 360 );
-
-        // allocate a 1000 by 1000 pixel texture
-        final FloatTextureProjected2D texture = new FloatTextureProjected2D( 4000, 1000 );
-
-        // generate dummy data for the texture
-        double[][] data = HeatMapExample.generateData( 4000, 1000 );
-
-        // set the projection and data for the texture
-        texture.setProjection( projection );
-        texture.setData( data );
-
-        // add the texture and color scale to the painter
-        painter.setColorScale( colors );
-        painter.setData( texture );
-
-        // create a painter which displays the cursor position and data value under the cursor
-        CursorTextZPainter cursorPainter = new CursorTextZPainter( );
-        plot.addPainter( cursorPainter );
-
-        // tell the cursor painter what texture to report data values from
-        cursorPainter.setTexture( texture );
-
-        // also add the color scale to the plot, which will
-        // use it to display the color scale on the Z axis
-        plot.setColorScale( colors );
-
-        // paints an estimate of how many times per second the display is being updated
-        plot.addPainter( new FpsPainter( ) );
-
-        return plot;
-    }
 }

@@ -26,55 +26,61 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.HdrAxisLabelHandler;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.SimplePlot2D;
 
-public class HdrAxisExample implements GlimpseLayoutProvider
+/**
+ * Use a high dynamic range axis label handler. The tick labels are always a fixed
+ * width (modulo the negative sign) so zooming will never obfuscate the values.
+ *
+ * @author borkholder
+ */
+public class HdrAxisExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new HdrAxisExample( ) );
-    }
-
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
-        SimplePlot2D plot = new SimplePlot2D( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            protected GridAxisLabelHandler createLabelHandlerX( )
+            SimplePlot2D plot = new SimplePlot2D( )
             {
-                return new HdrAxisLabelHandler( );
-            }
+                @Override
+                protected GridAxisLabelHandler createLabelHandlerX( )
+                {
+                    return new HdrAxisLabelHandler( );
+                }
 
-            @Override
-            protected GridAxisLabelHandler createLabelHandlerY( )
-            {
-                return new HdrAxisLabelHandler( );
-            }
+                @Override
+                protected GridAxisLabelHandler createLabelHandlerY( )
+                {
+                    return new HdrAxisLabelHandler( );
+                }
 
-            @Override
-            protected GridAxisLabelHandler createLabelHandlerZ( )
-            {
-                return new HdrAxisLabelHandler( );
-            }
-        };
-        plot.setAxisSizeZ( 80 );
-        plot.getAxisPainterX().setAxisLabelBufferSize(2);
+                @Override
+                protected GridAxisLabelHandler createLabelHandlerZ( )
+                {
+                    return new HdrAxisLabelHandler( );
+                }
+            };
+            plot.setAxisSizeZ( 80 );
+            plot.getAxisPainterX( ).setAxisLabelBufferSize( 2 );
 
-        plot.setTitle( "HDR Axis Example" );
+            plot.setTitle( "HDR Axis Example" );
 
-        plot.getAxis( ).getAxisX( ).setMin( 0 );
-        plot.getAxis( ).getAxisX( ).setMax( 1e5 );
-        plot.getAxis( ).getAxisY( ).setMin( 100 );
-        plot.getAxis( ).getAxisY( ).setMax( 100 + 1e-5 );
-        plot.getAxisZ( ).setMin( 0 );
-        plot.getAxisZ( ).setMax( 1.1 );
+            plot.getAxis( ).getAxisX( ).setMin( 0 );
+            plot.getAxis( ).getAxisX( ).setMax( 1e5 );
+            plot.getAxis( ).getAxisY( ).setMin( 100 );
+            plot.getAxis( ).getAxisY( ).setMax( 100 + 1e-5 );
+            plot.getAxisZ( ).setMin( 0 );
+            plot.getAxisZ( ).setMax( 1.1 );
 
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "HDR Axis Example", GL3bc, 800, 800, plot );
+        } );
     }
 }

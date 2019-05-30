@@ -36,7 +36,8 @@ import javax.media.opengl.GLUniformData;
 import com.metsci.glimpse.axis.Axis1D;
 
 /**
- * Does a non-linear interpolation on the GPU and then maps into the colorscale. Works better when the colormap and data have discrete steps.
+ * Does a non-linear interpolation on the GPU and then maps into the colorscale.
+ * Works better when the colormap and data have discrete steps.
  *
  * @author borkholder
  */

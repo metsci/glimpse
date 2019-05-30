@@ -26,11 +26,14 @@
  */
 package com.metsci.glimpse.examples.layout;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.UpdateMode;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 
@@ -38,89 +41,70 @@ import com.metsci.glimpse.plot.SimplePlot2D;
  * @author ulman
  * @see CustomLayoutExample
  */
-public class SimpleLayoutExample implements GlimpseLayoutProvider
+public class SimpleLayoutExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new SimpleLayoutExample( ) );
-    }
-    
-    protected SimplePlot2D rightPlot;
-    protected SimplePlot2D leftPlot;
-    protected GlimpseLayout layoutParent;
-    
-    public SimpleLayoutExample( )
-    {
-        // create a delegate painter which lays out its child painters based on a mig layout
-        this.layoutParent = new GlimpseLayout( );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            // create a delegate painter which lays out its child painters based on a mig layout
+            GlimpseLayout layoutParent = new GlimpseLayout( );
 
-        // create a layout manager
-        GlimpseLayoutManagerMig layout = new GlimpseLayoutManagerMig( );
+            // create a layout manager
+            GlimpseLayoutManagerMig layout = new GlimpseLayoutManagerMig( );
 
-        // attach the mig layout to the layout painter
-        layoutParent.setLayoutManager( layout );
+            // attach the mig layout to the layout painter
+            layoutParent.setLayoutManager( layout );
 
-        // create GlimpseLayouts for for each mig layout cell and assign a mig layout string to each painter
-        layout.setLayoutConstraints( String.format( "bottomtotop, gapx 10, gapy 10, insets 0 15 15 40" ) );
+            // create GlimpseLayouts for for each mig layout cell and assign a mig layout string to each painter
+            layout.setLayoutConstraints( String.format( "bottomtotop, gapx 10, gapy 10, insets 0 15 15 40" ) );
 
-        // add a painter to the canvas which will paint a solid background color over the entire plot
-        layoutParent.addPainter( new BackgroundPainter( true ) );
+            // add a painter to the canvas which will paint a solid background color over the entire plot
+            layoutParent.addPainter( new BackgroundPainter( true ) );
 
-        GlimpseLayout rightPlotLayout = new GlimpseLayout( layoutParent );
-        rightPlotLayout.setLayoutData( String.format( "cell 1 0 1 1, push, grow" ) );
+            GlimpseLayout rightPlotLayout = new GlimpseLayout( layoutParent );
+            rightPlotLayout.setLayoutData( String.format( "cell 1 0 1 1, push, grow" ) );
 
-        GlimpseLayout leftPlotLayout = new GlimpseLayout( layoutParent );
-        leftPlotLayout.setLayoutData( String.format( "cell 0 0 1 1, push, grow" ) );
+            GlimpseLayout leftPlotLayout = new GlimpseLayout( layoutParent );
+            leftPlotLayout.setLayoutData( String.format( "cell 0 0 1 1, push, grow" ) );
 
-        // create two pre-configured plots
-        this.rightPlot = new SimplePlot2D( );
-        rightPlot.setTitle( "Right Plot" );
-        rightPlot.setAxisLabelX( "Right Axis X" );
-        rightPlot.setAxisLabelY( "Right Axis Y" );
-        rightPlot.setAxisSizeY( 50 );
-        rightPlot.setTitleHeight( 40 );
-        rightPlot.setBorderSize( 0 );
-        rightPlot.setTickSpacingX( 40 );
-        rightPlot.setTickSpacingY( 40 );
-        rightPlot.getAxisX( ).setUpdateMode( UpdateMode.MinScale );
-        rightPlot.getAxisY( ).setUpdateMode( UpdateMode.MinScale );
-        rightPlot.setMinX( 0.0 );
-        rightPlot.setMinY( 0.0 );
-        rightPlot.lockAspectRatioXY( 1.0 );
+            // create two pre-configured plots
+            SimplePlot2D rightPlot = new SimplePlot2D( );
+            rightPlot.setTitle( "Right Plot" );
+            rightPlot.setAxisLabelX( "Right Axis X" );
+            rightPlot.setAxisLabelY( "Right Axis Y" );
+            rightPlot.setAxisSizeY( 50 );
+            rightPlot.setTitleHeight( 40 );
+            rightPlot.setBorderSize( 0 );
+            rightPlot.setTickSpacingX( 40 );
+            rightPlot.setTickSpacingY( 40 );
+            rightPlot.getAxisX( ).setUpdateMode( UpdateMode.MinScale );
+            rightPlot.getAxisY( ).setUpdateMode( UpdateMode.MinScale );
+            rightPlot.setMinX( 0.0 );
+            rightPlot.setMinY( 0.0 );
+            rightPlot.lockAspectRatioXY( 1.0 );
 
-        this.leftPlot = new SimplePlot2D( );
-        leftPlot.setTitle( "Left Plot" );
-        leftPlot.setAxisLabelX( "Left Axis X" );
-        leftPlot.setAxisLabelY( "Left Axis Y" );
-        leftPlot.setAxisSizeY( 50 );
-        leftPlot.setTitleHeight( 40 );
-        leftPlot.setBorderSize( 0 );
-        leftPlot.setTickSpacingX( 40 );
-        leftPlot.setTickSpacingY( 40 );
-        leftPlot.getAxisX( ).setUpdateMode( UpdateMode.MinScale );
-        leftPlot.getAxisY( ).setUpdateMode( UpdateMode.MinScale );
-        leftPlot.setMinX( 0.0 );
-        leftPlot.setMinY( 0.0 );
-        leftPlot.lockAspectRatioXY( 1.0 );
+            SimplePlot2D leftPlot = new SimplePlot2D( );
+            leftPlot.setTitle( "Left Plot" );
+            leftPlot.setAxisLabelX( "Left Axis X" );
+            leftPlot.setAxisLabelY( "Left Axis Y" );
+            leftPlot.setAxisSizeY( 50 );
+            leftPlot.setTitleHeight( 40 );
+            leftPlot.setBorderSize( 0 );
+            leftPlot.setTickSpacingX( 40 );
+            leftPlot.setTickSpacingY( 40 );
+            leftPlot.getAxisX( ).setUpdateMode( UpdateMode.MinScale );
+            leftPlot.getAxisY( ).setUpdateMode( UpdateMode.MinScale );
+            leftPlot.setMinX( 0.0 );
+            leftPlot.setMinY( 0.0 );
+            leftPlot.lockAspectRatioXY( 1.0 );
 
-        // add the plots to their respective layouts
-        rightPlotLayout.addLayout( rightPlot );
-        leftPlotLayout.addLayout( leftPlot );
-    }
-    
-    @Override
-    public GlimpseLayout getLayout( )
-    {
-        return layoutParent;
-    }
+            // add the plots to their respective layouts
+            rightPlotLayout.addLayout( rightPlot );
+            leftPlotLayout.addLayout( leftPlot );
 
-    public SimplePlot2D getRightPlot( )
-    {
-        return rightPlot;
-    }
+            quickGlimpseApp( "Simple Layout Example", GL3bc, 800, 800, layoutParent );
 
-    public SimplePlot2D getLeftPlot( )
-    {
-        return leftPlot;
+        } );
     }
 }

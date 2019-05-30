@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.examples.misc;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import javax.swing.SwingUtilities;
 
@@ -41,6 +41,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.plot.Plot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -55,10 +56,7 @@ public class ButtonExample
         SwingUtilities.invokeLater( ( ) ->
         {
             // use the HeatMapExample as a base, then add a button to it
-            HeatMapExample heatMapExample = new HeatMapExample( );
-            ColorAxisPlot2D plot = heatMapExample.getLayout( );
-            plot.getCrosshairPainter( ).setVisible( false );
-            heatMapExample.getCursorPainter( ).setVisible( false );
+            ColorAxisPlot2D plot = HeatMapExample.newEmptyPlot( );
 
             // create a new GlimpseLayout (which will be our button)
             GlimpseLayout button = new GlimpseLayout( );
@@ -97,7 +95,8 @@ public class ButtonExample
             } );
 
             // add the GlimpseLayout button to the main plotting area of the HeatMap plot
-            plot.getLayoutCenter( ).addLayout( button );
+            // give the button a high z-order to place it in front of the cursor crosshairs 
+            plot.getLayoutCenter( ).addLayout( button, Plot2D.FOREGROUND_LAYER );
 
             // create a window and show the plot
             quickGlimpseApp( "Button Example", GL3bc, 800, 800, plot );

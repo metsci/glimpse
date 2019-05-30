@@ -27,11 +27,14 @@
 package com.metsci.glimpse.examples.screenshot;
 
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
@@ -42,11 +45,9 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.font.FontUtils;
 
 /**
@@ -55,27 +56,28 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-public class ScreenCaptureExample implements GlimpseLayoutProvider
+public class ScreenCaptureExample
 {
     public static void main( String[] args ) throws Exception
     {
-        // create a normal onscreen GlimpseCanvas
-        Example example = Example.showWithSwing( new ScreenCaptureExample( ) );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            // create a normal onscreen plot
+            ColorAxisPlot2D plot = HeatMapExample.newHeatMapPlot( );
 
-        setupScreenCapture( example );
+            // create a window and show the plot
+            QuickGlimpseApp app = quickGlimpseApp( "Screen Capture Example", GL3bc, 800, 800, plot );
+
+            // set up a mouse listener to take a screen capture on mouse click
+            setupScreenCapture( app, plot );
+
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
+    public static void setupScreenCapture( QuickGlimpseApp app, ColorAxisPlot2D plot )
     {
-        return new HeatMapExample( ).getLayout( );
-    }
+        GlimpseCanvas canvas = app.getCanvas( );
 
-    public static void setupScreenCapture( Example example )
-    {
-        GlimpseCanvas canvas = example.getCanvas( );
-
-        ColorAxisPlot2D plot = ( ColorAxisPlot2D ) example.getLayout( );
         plot.setTitleFont( FontUtils.getDefaultBold( 18 ) );
         plot.setTitle( "Click Center Mouse Button To Take Screenshot" );
 
@@ -84,7 +86,7 @@ public class ScreenCaptureExample implements GlimpseLayoutProvider
 
         // add the GlimpseLayout from the onscreen canvas to the offscreen canvas as well
         // (GlimpseLayouts can have multiple parents)
-        offscreenCanvas.addLayout( example.getLayout( ) );
+        offscreenCanvas.addLayout( plot );
 
         // if we want the axes used for the screenshot to behave differently than the axes
         // used to render the plot on the screen we must create an AxisFactory which

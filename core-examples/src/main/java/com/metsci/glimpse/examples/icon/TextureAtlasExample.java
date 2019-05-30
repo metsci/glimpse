@@ -26,22 +26,24 @@
  */
 package com.metsci.glimpse.examples.icon;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
@@ -49,37 +51,42 @@ import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-public class TextureAtlasExample implements GlimpseLayoutProvider
+public class TextureAtlasExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new TextureAtlasExample( ) );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            try
+            {
+                // create a texture atlas
+                TextureAtlas atlas = new TextureAtlas( 512, 512 );
+
+                // load an images into the atlas
+                loadTextureAtlas( atlas );
+
+                // create a simple GlimpseLayout
+                GlimpseLayout layout = new GlimpseAxisLayout2D( new Axis2D( ) );
+
+                // add an AxisMouseListener2D so we can pan/zoom around the layout with the mouse
+                layout.addGlimpseMouseAllListener( new AxisMouseListener2D( ) );
+
+                // add a simple painter which uses the TexureAtlas to draw some icons
+                layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getWhite( ) ) );
+                layout.addPainter( new NumericXYAxisPainter( ) );
+                layout.addPainter( new SimpleIconPainter( atlas ) );
+
+                // create a window and show the plot
+                quickGlimpseApp( "Texture Atlas Example", GL3bc, 800, 800, layout );
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
-    {
-        // create a texture atlas
-        TextureAtlas atlas = new TextureAtlas( 512, 512 );
-
-        // load an images into the atlas
-        loadTextureAtlas( atlas );
-
-        // create a simple GlimpseLayout
-        GlimpseLayout layout = new GlimpseAxisLayout2D( new Axis2D( ) );
-
-        // add an AxisMouseListener2D so we can pan/zoom around the layout with the mouse
-        layout.addGlimpseMouseAllListener( new AxisMouseListener2D( ) );
-
-        // add a simple painter which uses the TexureAtlas to draw some icons
-        layout.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getWhite( ) ) );
-        layout.addPainter( new NumericXYAxisPainter( ) );
-        layout.addPainter( new SimpleIconPainter( atlas ) );
-
-        return layout;
-    }
-
-    public class SimpleIconPainter extends GlimpsePainterBase
+    public static class SimpleIconPainter extends GlimpsePainterBase
     {
         protected TextureAtlas atlas;
 

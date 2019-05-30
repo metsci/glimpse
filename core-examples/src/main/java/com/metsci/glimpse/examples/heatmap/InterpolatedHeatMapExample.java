@@ -27,13 +27,15 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.metsci.glimpse.examples.heatmap.HeatMapExample.generateData;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.IOException;
 
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.colormap.ColorGradient;
@@ -49,68 +51,34 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  *
  * @author borkholder
  */
-public class InterpolatedHeatMapExample implements GlimpseLayoutProvider
+public class InterpolatedHeatMapExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new InterpolatedHeatMapExample( ) );
-    }
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            try
+            {
+                // create a plot to display the heat map
+                ColorAxisPlot2D plot = HeatMapExample.newEmptyPlot( );
 
-    protected HeatMapPainter heatmapPainter;
+                // create a heat map painter
+                HeatMapPainter heatmapPainter = newHeatMapPainter( plot.getAxisZ( ) );
 
-    @Override
-    public ColorAxisPlot2D getLayout( ) throws IOException
-    {
-        // create a premade heat map window
-        ColorAxisPlot2D plot = newPlot( );
+                // add the painter to the plot
+                plot.addPainter( heatmapPainter );
 
-        // set axis labels and chart title
-        plot.setTitle( "Heat Map Example" );
-        plot.setAxisLabelX( "x axis" );
-        plot.setAxisLabelY( "y axis" );
-
-        // set border and offset sizes in pixels
-        plot.setBorderSize( 30 );
-        plot.setAxisSizeX( 40 );
-        plot.setAxisSizeY( 60 );
-
-        // set the x, y, and z initial axis bounds
-        plot.setMinX( 0.0f );
-        plot.setMaxX( 1000.0f );
-
-        plot.setMinY( 0.0f );
-        plot.setMaxY( 1000.0f );
-
-        plot.setMinZ( 0.0f );
-        plot.setMaxZ( 1000.0f );
-
-        // set the size of the selection box to 100.0 units
-        plot.setSelectionSize( 100.0f );
-
-        // show minor tick marks on all the plot axes
-        plot.setShowMinorTicks( true );
-        plot.setMinorTickCount( 9 );
-
-        // create a heat map painter
-        heatmapPainter = newHeatMapPainter( plot.getAxisZ( ) );
-
-        // add the painter to the plot
-        plot.addPainter( heatmapPainter );
-
-        // load the color map into the plot (so the color scale is displayed on the z axis)
-        plot.setColorScale( heatmapPainter.getColorScale( ) );
-
-        return plot;
-    }
-
-    protected ColorAxisPlot2D newPlot( )
-    {
-        return new ColorAxisPlot2D( );
-    }
-
-    public HeatMapPainter getPainter( )
-    {
-        return heatmapPainter;
+                // load the color map into the plot (so the color scale is displayed on the z axis)
+                plot.setColorScale( heatmapPainter.getColorScale( ) );
+                
+                // create a window and show the plot
+                quickGlimpseApp( "Interpolated Heat Map Example", GL3bc, 800, 800, plot );
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        } );
     }
 
     public static ColorTexture1D newContainmentColorTexture( )

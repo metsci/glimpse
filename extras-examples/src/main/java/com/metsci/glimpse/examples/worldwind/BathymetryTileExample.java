@@ -101,8 +101,8 @@ public class BathymetryTileExample
         TangentPlane projection = new TangentPlane( LatLonGeo.fromDeg( -30.637005, 65.476074 ) );
         //TangentPlane projection = new TangentPlane( LatLonGeo.fromDeg( 24, -76 ) );
 
-        BathymetryExample example = new BathymetryExample( );
-        MapPlot2D plot = example.getLayout( projection );
+        BathymetryExample example = new BathymetryExample( projection );
+        MapPlot2D plot = example.getPlot( );
         Axis2D axis = plot.getAxis( );
 
         GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( wwaxis );

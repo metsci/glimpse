@@ -26,10 +26,13 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
@@ -45,22 +48,50 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  *
  * @author ulman
  */
-public class HeatMapExample implements GlimpseLayoutProvider
+public class HeatMapExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new HeatMapExample( ) );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            // create a window and show the plot
+            quickGlimpseApp( "Heat Map Example", GL3bc, 800, 800, newHeatMapPlot( ) );
+        } );
     }
 
-    protected HeatMapPainter heatmapPainter;
-    protected CursorTextZPainter cursorPainter;
-
-    @Override
-    public ColorAxisPlot2D getLayout( )
+    public static ColorAxisPlot2D newHeatMapPlot( )
     {
-        // create a premade heat map window
-        ColorAxisPlot2D plot = newPlot( );
+        // create a plot to display the heat map
+        ColorAxisPlot2D plot = newEmptyPlot( );
 
+        // create a heat map painter
+        HeatMapPainter heatmapPainter = newPainter( plot.getAxisZ( ) );
+
+        // add the painter to the plot
+        plot.addPainter( heatmapPainter );
+
+        // load the color map into the plot (so the color scale is displayed on the z axis)
+        plot.setColorScale( heatmapPainter.getColorScale( ) );
+
+        // create a painter which displays the cursor position and data value under the cursor
+        // add it to the foreground layer so that it draws on top of the plot data
+        // this is equivalent to: plot.addPainter( cursorPainter, Plot2D.FOREGROUND_LAYER )
+        CursorTextZPainter cursorPainter = new CursorTextZPainter( );
+        plot.addPainterForeground( cursorPainter );
+
+        // tell the cursor painter what texture to report data values from
+        cursorPainter.setTexture( heatmapPainter.getData( ) );
+
+        return plot;
+    }
+
+    public static ColorAxisPlot2D newEmptyPlot( )
+    {
+        return customizePlot( new ColorAxisPlot2D( ) );
+    }
+
+    public static ColorAxisPlot2D customizePlot( ColorAxisPlot2D plot )
+    {
         // set axis labels and chart title
         plot.setTitle( "Heat Map Example" );
         plot.setAxisLabelX( "x axis" );
@@ -88,40 +119,7 @@ public class HeatMapExample implements GlimpseLayoutProvider
         plot.setShowMinorTicks( true );
         plot.setMinorTickCount( 9 );
 
-        // create a heat map painter
-        heatmapPainter = newHeatMapPainter( plot.getAxisZ( ) );
-
-        // add the painter to the plot
-        plot.addPainter( heatmapPainter );
-
-        // load the color map into the plot (so the color scale is displayed on the z axis)
-        plot.setColorScale( heatmapPainter.getColorScale( ) );
-
-        // create a painter which displays the cursor position and data value under the cursor
-        // add it to the foreground layer so that it draws on top of the plot data
-        // this is equivalent to: plot.addPainter( cursorPainter, Plot2D.FOREGROUND_LAYER )
-        cursorPainter = new CursorTextZPainter( );
-        plot.addPainterForeground( cursorPainter );
-
-        // tell the cursor painter what texture to report data values from
-        cursorPainter.setTexture( heatmapPainter.getData( ) );
-
         return plot;
-    }
-
-    protected ColorAxisPlot2D newPlot( )
-    {
-        return new ColorAxisPlot2D( );
-    }
-
-    public CursorTextZPainter getCursorPainter( )
-    {
-        return cursorPainter;
-    }
-
-    public HeatMapPainter getPainter( )
-    {
-        return heatmapPainter;
     }
 
     public static double[][] generateData( int sizeX, int sizeY )
@@ -148,12 +146,12 @@ public class HeatMapExample implements GlimpseLayoutProvider
         return colors;
     }
 
-    public static HeatMapPainter newHeatMapPainter( Axis1D axis )
+    public static HeatMapPainter newPainter( Axis1D axis )
     {
-        return newHeatMapPainter( newColorTexture( ), axis );
+        return newPainter( newColorTexture( ), axis );
     }
 
-    public static HeatMapPainter newHeatMapPainter( ColorTexture1D colorScale, Axis1D axis )
+    public static HeatMapPainter newPainter( ColorTexture1D colorScale, Axis1D axis )
     {
         // generate some data to display
         double[][] data = generateData( 1000, 1000 );

@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.examples.swt;
 
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GLCapabilities;
@@ -43,7 +44,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.swt.canvas.NewtSwtGlimpseCanvas;
 import com.metsci.glimpse.swt.misc.SwtLookAndFeel;
 
@@ -54,7 +55,7 @@ public abstract class SwtExample
 {
     protected static final Logger logger = Logger.getLogger( SwtExample.class.getName( ) );
 
-    public static void showWithSwt( GlimpseLayoutProvider layoutProvider ) throws Exception
+    public static void showWithSwt( Supplier<GlimpseLayout> layoutSupplier ) throws Exception
     {
         // generate a GLContext by constructing a small offscreen framebuffer
         GLProfile glProfile = GLUtils.getDefaultGLProfile( );
@@ -72,7 +73,7 @@ public abstract class SwtExample
         shell.setLayout( new FillLayout( ) );
 
         final NewtSwtGlimpseCanvas canvas = new NewtSwtGlimpseCanvas( shell, context, SWT.NO_BACKGROUND );
-        canvas.addLayout( layoutProvider.getLayout( ) );
+        canvas.addLayout( layoutSupplier.get( ) );
         canvas.setLookAndFeel( new SwtLookAndFeel( ) );
 
         // attach a repaint manager which repaints the canvas in a loop

@@ -26,171 +26,164 @@
  */
 package com.metsci.glimpse.examples.scatterplot;
 
-import static java.lang.Math.*;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static java.lang.Math.sqrt;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
 
-import com.metsci.glimpse.examples.Example;
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.gl.GLCapabilityEventListener;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D.ColorGradientBuilder;
 import com.metsci.glimpse.gl.texture.FloatTexture1D;
 import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.ShadedPointPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 
 /**
  * @author osborn
  */
-public class PointShaderExample implements GlimpseLayoutProvider
+public class PointShaderExample
 {
     static final int NPOINTS = 100 * 1000;
 
     public static void main( String[] args ) throws Exception
     {
-        Example example = Example.showWithSwing( new PointShaderExample( ) );
-        // add a GLEventListener to the GlimpseCanvas which will print some information
-        // about GLCapabilities upon initialization
-        example.getCanvas( ).getGLDrawable( ).addGLEventListener( new GLCapabilityEventListener( ) );
-    }
-
-    @Override
-    public GlimpseAxisLayout2D getLayout( )
-    {
-        // random number generator
-        final Random r = new Random( );
-
-        // create a premade heat map window
-        ColorAxisPlot2D plot = new ColorAxisPlot2D( );
-
-        plot.setPlotBackgroundColor( GlimpseColor.getBlack( ) );
-        plot.setBackgroundColor( GlimpseColor.getBlack( ) );
-        plot.setAxisColor( GlimpseColor.getWhite( ) );
-        plot.setTitleColor( GlimpseColor.getWhite( ) );
-        plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
-
-        plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
-        plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );
-        plot.getCrosshairPainter( ).setShadeSelectionBox( true );
-        plot.getCrosshairPainter( ).setLineWidth( 1 );
-
-        plot.setAxisLabelX( "x axis" );
-        plot.setAxisLabelY( "y axis" );
-        plot.setAxisLabelZ( "z axis" );
-        plot.setTitle( "An Impatient Universe" );
-
-        plot.setMinX( -3 );
-        plot.setMaxX( 3 );
-        plot.setMinY( -3 );
-        plot.setMaxY( 3 );
-        plot.setMinZ( 0 );
-        plot.setMaxZ( 10 );
-
-        plot.lockAspectRatioXY( 1 );
-
-        // add a painter that will use our new shader for color-mapping
-        final ShadedPointPainter dp;
-        try
+        SwingUtilities.invokeLater( ( ) ->
         {
-            dp = new ShadedPointPainter( plot.getAxisZ( ), plot.getAxisZ( ) );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
-        plot.addPainter( dp );
+            // random number generator
+            final Random r = new Random( );
 
-        // setup the color-map for the painter
-        ColorTexture1D colors = new ColorTexture1D( 256 );
+            // create a premade heat map window
+            ColorAxisPlot2D plot = new ColorAxisPlot2D( );
 
-        // we want to customize how the ColorTexture1D samples from the jet ColorGradient,
-        // so we create a custom ColorGradientBuilder and apply it to the ColorTexture1D
-        // using ColorTexture1D.mutate( )
-        ColorGradientBuilder builder = new ColorGradientBuilder( ColorGradients.jet )
-        {
-            @Override
-            public void getColor( int index, int size, float[] rgba )
+            plot.setPlotBackgroundColor( GlimpseColor.getBlack( ) );
+            plot.setBackgroundColor( GlimpseColor.getBlack( ) );
+            plot.setAxisColor( GlimpseColor.getWhite( ) );
+            plot.setTitleColor( GlimpseColor.getWhite( ) );
+            plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
+
+            plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
+            plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );
+            plot.getCrosshairPainter( ).setShadeSelectionBox( true );
+            plot.getCrosshairPainter( ).setLineWidth( 1 );
+
+            plot.setAxisLabelX( "x axis" );
+            plot.setAxisLabelY( "y axis" );
+            plot.setAxisLabelZ( "z axis" );
+            plot.setTitle( "An Impatient Universe" );
+
+            plot.setMinX( -3 );
+            plot.setMaxX( 3 );
+            plot.setMinY( -3 );
+            plot.setMaxY( 3 );
+            plot.setMinZ( 0 );
+            plot.setMaxZ( 10 );
+
+            plot.lockAspectRatioXY( 1 );
+
+            // add a painter that will use our new shader for color-mapping
+            final ShadedPointPainter dp;
+            try
             {
-                super.getColor( index, size, rgba );
-                rgba[3] = 0.2f + 0.5f * ( ( float ) index ) / ( size - 1 );
+                dp = new ShadedPointPainter( plot.getAxisZ( ), plot.getAxisZ( ) );
             }
-        };
-        colors.mutate( builder );
-
-        dp.useColorScale( colors );
-
-        plot.setColorScale( colors );
-
-        // setup the size-map for the painter
-        FloatTexture1D sizes = new FloatTexture1D( 256 );
-        final MutatorFloat1D sizeMutator = new MutatorFloat1D( )
-        {
-            @Override
-            public void mutate( FloatBuffer data, int n0 )
+            catch ( IOException e )
             {
-                float minSize = 1f;
-                float maxSize = 12f;
-                float dSize = maxSize - minSize;
+                e.printStackTrace( );
+                throw new RuntimeException( e );
+            }
+            plot.addPainter( dp );
 
-                data.clear( );
-                for ( int i = 0; i < data.capacity( ); i++ )
+            // setup the color-map for the painter
+            ColorTexture1D colors = new ColorTexture1D( 256 );
+
+            // we want to customize how the ColorTexture1D samples from the jet ColorGradient,
+            // so we create a custom ColorGradientBuilder and apply it to the ColorTexture1D
+            // using ColorTexture1D.mutate( )
+            ColorGradientBuilder builder = new ColorGradientBuilder( ColorGradients.jet )
+            {
+                @Override
+                public void getColor( int index, int size, float[] rgba )
                 {
-                    if ( i == data.capacity( ) - 1 )
+                    super.getColor( index, size, rgba );
+                    rgba[3] = 0.2f + 0.5f * ( ( float ) index ) / ( size - 1 );
+                }
+            };
+            colors.mutate( builder );
+
+            dp.useColorScale( colors );
+
+            plot.setColorScale( colors );
+
+            // setup the size-map for the painter
+            FloatTexture1D sizes = new FloatTexture1D( 256 );
+            final MutatorFloat1D sizeMutator = new MutatorFloat1D( )
+            {
+                @Override
+                public void mutate( FloatBuffer data, int n0 )
+                {
+                    float minSize = 1f;
+                    float maxSize = 12f;
+                    float dSize = maxSize - minSize;
+
+                    data.clear( );
+                    for ( int i = 0; i < data.capacity( ); i++ )
                     {
-                        data.put( maxSize * 2 );
-                    }
-                    else
-                    {
-                        data.put( ( float ) ( minSize + dSize * sqrt( i / ( n0 - 1f ) ) ) );
+                        if ( i == data.capacity( ) - 1 )
+                        {
+                            data.put( maxSize * 2 );
+                        }
+                        else
+                        {
+                            data.put( ( float ) ( minSize + dSize * sqrt( i / ( n0 - 1f ) ) ) );
+                        }
                     }
                 }
-            }
-        };
-        sizes.mutate( sizeMutator );
+            };
+            sizes.mutate( sizeMutator );
 
-        dp.useSizeScale( sizes );
+            dp.useSizeScale( sizes );
 
-        // setup the position data for the points
-        final FloatBuffer positions = FloatBuffer.allocate( NPOINTS * 2 );
-        for ( int i = 0; i < NPOINTS; i++ )
-        {
-            positions.put( ( float ) r.nextGaussian( ) ); // x
-            positions.put( ( float ) r.nextGaussian( ) ); // y
-        }
-        positions.rewind( );
-        dp.useVertexPositionData( positions );
-
-        // setup the color value data for the points
-        final FloatBuffer colorValues = FloatBuffer.allocate( NPOINTS );
-        updateColors( colorValues, r );
-        colorValues.rewind( );
-        dp.useColorAttribData( colorValues );
-
-        // setup the size value data for the points
-        final FloatBuffer sizeValues = FloatBuffer.allocate( NPOINTS );
-        updateSizes( sizeValues, r );
-        sizeValues.rewind( );
-        dp.useSizeAttribData( sizeValues );
-
-        // setup a thread that will mutate the points at regular intervals
-        new Thread( new Runnable( )
-        {
-            @Override
-            public void run( )
+            // setup the position data for the points
+            final FloatBuffer positions = FloatBuffer.allocate( NPOINTS * 2 );
+            for ( int i = 0; i < NPOINTS; i++ )
             {
-                while ( true )
+                positions.put( ( float ) r.nextGaussian( ) ); // x
+                positions.put( ( float ) r.nextGaussian( ) ); // y
+            }
+            positions.rewind( );
+            dp.useVertexPositionData( positions );
+
+            // setup the color value data for the points
+            final FloatBuffer colorValues = FloatBuffer.allocate( NPOINTS );
+            updateColors( colorValues, r );
+            colorValues.rewind( );
+            dp.useColorAttribData( colorValues );
+
+            // setup the size value data for the points
+            final FloatBuffer sizeValues = FloatBuffer.allocate( NPOINTS );
+            updateSizes( sizeValues, r );
+            sizeValues.rewind( );
+            dp.useSizeAttribData( sizeValues );
+
+            // setup a thread that will mutate the points at regular intervals
+            Thread t = new Thread( new Runnable( )
+            {
+                @Override
+                public void run( )
                 {
-//                    try
-//                    {
+                    while ( true )
+                    {
                         updatePositions( positions, r );
                         positions.rewind( );
                         dp.useVertexPositionData( positions );
@@ -202,26 +195,28 @@ public class PointShaderExample implements GlimpseLayoutProvider
                         updateSizes( sizeValues, r );
                         sizeValues.rewind( );
                         dp.useSizeAttribData( sizeValues );
-
-                        //Thread.sleep( 10 );
-//                    }
-//                    catch ( InterruptedException e )
-//                    {
-//                    }
+                    }
                 }
-            }
-        } ).start( );
+            } );
+            t.setDaemon( true );
+            t.start( );
 
-        // paints a border around the plot area
-        plot.addPainter( new BorderPainter( ) );
+            // paints a border around the plot area
+            plot.addPainter( new BorderPainter( ) );
 
-        // paints an estimate of how many times per second the display is being updated
-        plot.addPainter( new FpsPainter( ) );
+            // paints an estimate of how many times per second the display is being updated
+            plot.addPainter( new FpsPainter( ) );
 
-        return plot;
+            // create a window and show the plot
+            QuickGlimpseApp app = quickGlimpseApp( "Point Shader Example", GL3bc, 800, 800, plot );
+
+            // add a GLEventListener to the GlimpseCanvas which will print some information
+            // about GLCapabilities upon initialization
+            app.getCanvas( ).getGLDrawable( ).addGLEventListener( new GLCapabilityEventListener( ) );
+        } );
     }
 
-    protected void updatePositions( FloatBuffer data, Random r )
+    protected static void updatePositions( FloatBuffer data, Random r )
     {
         data.clear( );
         for ( int i = 0; i < NPOINTS; i++ )
@@ -231,7 +226,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         }
     }
 
-    protected void updateColors( FloatBuffer data, Random r )
+    protected static void updateColors( FloatBuffer data, Random r )
     {
         data.clear( );
         for ( int i = 0; i < NPOINTS; i++ )
@@ -247,7 +242,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         }
     }
 
-    protected void updateSizes( FloatBuffer data, Random r )
+    protected static void updateSizes( FloatBuffer data, Random r )
     {
         data.clear( );
         for ( int i = 0; i < NPOINTS; i++ )

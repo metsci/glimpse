@@ -68,10 +68,10 @@ public class GlimpseDockingExample
                 GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
                 NewtSwingEDTGlimpseCanvas aCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
-                aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
+                aCanvas.addLayout( TaggedHeatMapExample.newPlot( greenBone ) );
 
                 NewtSwingEDTGlimpseCanvas bCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
-                bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
+                bCanvas.addLayout( TaggedHeatMapExample.newPlot( jet ) );
 
                 final SwingEDTAnimator glAnimator = new SwingEDTAnimator( 30 );
                 glAnimator.add( aCanvas.getGLDrawable( ) );

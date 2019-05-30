@@ -26,6 +26,11 @@
  */
 package com.metsci.glimpse.examples.layout;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.swing.SwingUtilities;
+
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
@@ -35,10 +40,8 @@ import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -53,11 +56,17 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-public class FloatingLayoutExample implements GlimpseLayoutProvider
+public class FloatingLayoutExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example.showWithSwing( new FloatingLayoutExample( ) );
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            FloatingLayoutExample example = new FloatingLayoutExample( );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Floating Layout Example", GL3bc, 800, 800, example.getPlot( ) );
+        } );
     }
 
     protected int plotHeight = 200;
@@ -69,8 +78,7 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
     protected SimplePlot2D plot;
     protected GlimpseLayout floatingLayout;
 
-    @Override
-    public GlimpseLayout getLayout( )
+    public FloatingLayoutExample( )
     {
         // create the main plot
         plot = new SimplePlot2D( );
@@ -144,11 +152,11 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
         colorAxis.setMax( 1000.0 );
 
         // add a heat map painter to the floating plot
-        floatingPlot.addPainter( HeatMapExample.newHeatMapPainter( colorAxis ) );
+        floatingPlot.addPainter( HeatMapExample.newPainter( colorAxis ) );
         floatingPlot.getAxis( ).set( 0, 1000, 0, 1000 );
 
         // add a heat map painter to the outer plot
-        plot.addPainter( HeatMapExample.newHeatMapPainter( colorAxis ) );
+        plot.addPainter( HeatMapExample.newPainter( colorAxis ) );
         plot.getAxis( ).set( 0, 1000, 0, 1000 );
 
         // add the floating plot to the main plot
@@ -174,7 +182,10 @@ public class FloatingLayoutExample implements GlimpseLayoutProvider
                 plot.invalidateLayout( );
             }
         } );
+    }
 
-        return plot;
+    public SimplePlot2D getPlot( )
+    {
+        return this.plot;
     }
 }

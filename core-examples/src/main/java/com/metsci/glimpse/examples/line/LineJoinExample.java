@@ -26,19 +26,20 @@
  */
 package com.metsci.glimpse.examples.line;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
-import static com.metsci.glimpse.support.shader.line.LineUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GLProfile.*;
-import static javax.swing.WindowConstants.*;
+import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.max;
+import static java.lang.Math.sin;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
-import javax.media.opengl.GLAnimatorControl;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
@@ -47,42 +48,25 @@ import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStyle;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LineJoinExample
 {
 
     public static void main( String[] args )
     {
-        final EmptyPlot2D plot = new EmptyPlot2D( );
-        plot.getAxis( ).lockAspectRatioXY( 1.0 );
-        plot.getAxis( ).set( -3, 88, -43, 5 );
-
-        plot.addPainter( new BackgroundPainter( ) );
-        plot.addPainter( new CustomLinesPainter( ) );
-
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            public void run( )
-            {
-                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GL3 );
-                canvas.addLayout( plot );
-                canvas.setLookAndFeel( new SwingLookAndFeel( ) );
+            EmptyPlot2D plot = new EmptyPlot2D( );
+            plot.getAxis( ).lockAspectRatioXY( 1.0 );
+            plot.getAxis( ).set( -3, 88, -43, 5 );
 
-                GLAnimatorControl animator = new SwingEDTAnimator( 30 );
-                animator.add( canvas.getGLDrawable( ) );
-                animator.start( );
+            plot.addPainter( new BackgroundPainter( ) );
+            plot.addPainter( new CustomLinesPainter( ) );
 
-                JFrame frame = newFrame( "LineJoinExample", canvas, DISPOSE_ON_CLOSE );
-                stopOnWindowClosing( frame, animator );
-                disposeOnWindowClosing( frame, canvas );
-                showFrameCentered( frame );
-            }
+            quickGlimpseApp( "LineJoinExample", GL3bc, 800, 800, plot );
         } );
     }
 
@@ -101,7 +85,7 @@ public class LineJoinExample
             float yNext = 0f;
             for ( int i = 0; i < ni; i++ )
             {
-                double angle_CCWRAD = 0.5*PI - ( 2*PI * i ) / ni;
+                double angle_CCWRAD = 0.5 * PI - ( 2 * PI * i ) / ni;
                 double dx = cos( angle_CCWRAD );
                 double dy = sin( angle_CCWRAD );
 

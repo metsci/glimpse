@@ -34,10 +34,10 @@ import com.metsci.glimpse.examples.heatmap.HeatMapExample;
  *
  * @author ulman
  */
-public class SwtHeatMapExample extends HeatMapExample
+public class SwtHeatMapExample
 {
     public static void main( String[] args ) throws Exception
     {
-        SwtExample.showWithSwt( new SwtHeatMapExample( ) );
+        SwtExample.showWithSwt( HeatMapExample::newHeatMapPlot );
     }
 }

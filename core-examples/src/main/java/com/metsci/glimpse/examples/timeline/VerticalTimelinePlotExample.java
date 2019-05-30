@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -34,13 +37,12 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -56,58 +58,55 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception
     {
-        Example example = Example.showWithSwing( new VerticalTimelinePlotExample( ) );
-
-        // set a blue color scheme look and feel for the plot
-        example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
-
-        // allow the user to rearrange plots by dragging on their labels
-        DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ) );
-    }
-
-    @Override
-    public StackedTimePlot2D getLayout( )
-    {
-        StackedTimePlot2D plot = super.getLayout( );
-
-        // Set a tick labeler which labels timeline tick marks by the hours/days elapsed since a reference date
-        final RelativeTimeAxisLabelHandler handler = new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ).add( -Time.fromHours( 100 ) ) );
-        handler.setFuturePositive( false );
-
-        plot.setTimeAxisLabelHandler( handler );
-
-        // Update the reference time in a loop to animate the time labels
-        new Thread( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            StackedTimePlot2D plot = new VerticalTimelinePlotExample( ).getPlot( );
+
+            // Set a tick labeler which labels timeline tick marks by the hours/days elapsed since a reference date
+            final RelativeTimeAxisLabelHandler handler = new RelativeTimeAxisLabelHandler( plot.getEpoch( ).getTimeStamp( ).add( -Time.fromHours( 100 ) ) );
+            handler.setFuturePositive( false );
+
+            plot.setTimeAxisLabelHandler( handler );
+
+            // Update the reference time in a loop to animate the time labels
+            Thread t = new Thread( )
             {
-                while ( true )
+                @Override
+                public void run( )
                 {
-                    SwingUtilities.invokeLater( ( ) -> handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) ) );
-                    try
+                    while ( true )
                     {
-                        Thread.sleep( 10 );
-                    }
-                    catch ( InterruptedException e )
-                    {
-                        e.printStackTrace( );
+                        SwingUtilities.invokeLater( ( ) -> handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) ) );
+                        try
+                        {
+                            Thread.sleep( 10 );
+                        }
+                        catch ( InterruptedException e )
+                        {
+                            e.printStackTrace( );
+                        }
                     }
                 }
+            };
+            t.setDaemon( true );
+            t.start( );
+
+            plot.setPlotSpacing( 20 );
+
+            plot.getDefaultTimeline( ).setSize( 75 );
+
+            // display horizontal labels
+            for ( TimePlotInfo info : plot.getAllTimePlots( ) )
+            {
+                info.getLabelPainter( ).setHorizontalLabels( true );
             }
-        }.start( );
 
-        plot.setPlotSpacing( 20 );
+            // create a window and show the plot
+            QuickGlimpseApp app = quickGlimpseApp( "Vertical Timeline Plot Example", GL3bc, 800, 800, plot );
 
-        plot.getDefaultTimeline( ).setSize( 75 );
-
-        // display horizontal labels
-        for ( TimePlotInfo info : plot.getAllTimePlots( ) )
-        {
-            info.getLabelPainter( ).setHorizontalLabels( true );
-        }
-
-        return plot;
+            // use the ocean look and feel
+            app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+        } );
     }
 
     @Override
