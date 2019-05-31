@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.UpdateMode;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -50,9 +49,9 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class LinkedHeatMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create two heat map plots
             ColorAxisPlot2D leftPlot = newPlot( ColorGradients.reverseBone );

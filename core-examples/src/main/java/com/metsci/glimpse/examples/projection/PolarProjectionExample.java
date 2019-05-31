@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.projection;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -49,9 +48,9 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class PolarProjectionExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a premade heat map window
             ColorAxisPlot2D plot = new ColorAxisPlot2D( );

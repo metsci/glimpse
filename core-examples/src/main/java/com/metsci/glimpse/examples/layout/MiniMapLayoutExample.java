@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.painter.info.MinimapLayout;
@@ -45,9 +44,9 @@ import com.metsci.glimpse.plot.ColorAxisPlot2D;
  */
 public class MiniMapLayoutExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             ColorAxisPlot2D plot = TaggedHeatMapExample.newPlot( );
 

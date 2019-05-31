@@ -26,16 +26,14 @@
  */
 package com.metsci.glimpse.examples.charts.bathy;
 
-import static com.metsci.glimpse.axis.UpdateMode.*;
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Consumer;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
@@ -79,7 +77,7 @@ public class DynamicReprojectionExample
 {
     public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             MultiAxisPlot2D plot = new MultiAxisPlot2D( );
             plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
@@ -152,17 +150,7 @@ public class DynamicReprojectionExample
 
             // load a bathemetry data set from a data file obtained from
             // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
-            TopographyData bathyData;
-            try
-            {
-                bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
-            }
-            catch ( IOException e )
-
-            {
-                e.printStackTrace( );
-                throw new RuntimeException( e );
-            }
+            TopographyData bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
             bathyData.setAxisBounds( xyAxis, initPlane );
             final FloatTextureProjected2D texture = bathyData.getTexture( initPlane );
 

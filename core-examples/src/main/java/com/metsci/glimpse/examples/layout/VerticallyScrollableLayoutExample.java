@@ -28,6 +28,7 @@ package com.metsci.glimpse.examples.layout;
 
 import static com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.BorderLayout;
@@ -45,9 +46,9 @@ import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 
 public class VerticallyScrollableLayoutExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // Don't attempt to shrink content to any smaller than this height -- if canvas height is
             // less than this, make it scrollable instead of shrinking it further

@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.plot;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
@@ -53,9 +52,9 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  */
 public class LinePlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a plot frame
             SimplePlot2D plot = new SimplePlot2D( )

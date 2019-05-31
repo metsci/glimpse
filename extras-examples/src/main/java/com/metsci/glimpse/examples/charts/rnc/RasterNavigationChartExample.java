@@ -27,11 +27,8 @@
 package com.metsci.glimpse.examples.charts.rnc;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import java.io.IOException;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
@@ -60,9 +57,9 @@ import com.metsci.glimpse.util.io.StreamOpener;
  */
 public class RasterNavigationChartExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             ColorAxisPlot2D plot = new ColorAxisPlot2D( );
 
@@ -82,21 +79,11 @@ public class RasterNavigationChartExample
             plot.setAxisSizeY( 0 );
             plot.setAxisSizeZ( 0 );
 
-            BsbRasterData data;
-            MercatorProjection mercatorProjection;
-            try
-            {
-                ColorMapIntegerProgram fragShader = new ColorMapIntegerProgram( plot.getAxisZ( ), 0, 1 );
-                painter.setProgram( fragShader );
+            ColorMapIntegerProgram fragShader = new ColorMapIntegerProgram( plot.getAxisZ( ), 0, 1 );
+            painter.setProgram( fragShader );
 
-                data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "data/ENCSample.bsb" ) );
-                mercatorProjection = new MercatorProjection( );
-            }
-            catch ( IOException e )
-            {
-                e.printStackTrace( );
-                throw new RuntimeException( e );
-            }
+            BsbRasterData data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "data/ENCSample.bsb" ) );
+            MercatorProjection mercatorProjection = new MercatorProjection( );
 
             ByteTextureProjected2D dataTexture = data.getDataTexture( );
             Projection textureProjection = data.getProjection( mercatorProjection );

@@ -28,13 +28,12 @@ package com.metsci.glimpse.examples.charts.bathy;
 
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
@@ -79,9 +78,9 @@ import com.metsci.glimpse.util.vector.Vector2d;
  */
 public class BathymetryExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a window and show the plot
             quickGlimpseApp( "Bathymetry Example", GL3bc, 800, 800, new BathymetryExample( ).getPlot( ) );

@@ -28,13 +28,13 @@ package com.metsci.glimpse.examples.screenshot;
 
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
@@ -58,9 +58,9 @@ import com.metsci.glimpse.support.font.FontUtils;
  */
 public class ScreenCaptureExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a normal onscreen plot
             ColorAxisPlot2D plot = HeatMapExample.newHeatMapPlot( );
@@ -70,7 +70,6 @@ public class ScreenCaptureExample
 
             // set up a mouse listener to take a screen capture on mouse click
             setupScreenCapture( app, plot );
-
         } );
     }
 

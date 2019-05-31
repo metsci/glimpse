@@ -28,9 +28,8 @@ package com.metsci.glimpse.examples.axis;
 
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -60,9 +59,9 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
  */
 public class MultiAxisPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             MultiAxisPlot2D plot = new MultiAxisPlot2D( );
 

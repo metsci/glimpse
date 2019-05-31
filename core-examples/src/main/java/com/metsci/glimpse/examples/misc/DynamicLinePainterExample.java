@@ -26,11 +26,10 @@
  */
 package com.metsci.glimpse.examples.misc;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.*;
-import static javax.media.opengl.GLProfile.*;
-
-import javax.swing.SwingUtilities;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
@@ -45,7 +44,7 @@ public class DynamicLinePainterExample
 {
     public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a simple pre-built Glimpse plot
             EmptyPlot2D plot = new EmptyPlot2D( );

@@ -27,11 +27,10 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.TimeZone;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
@@ -39,9 +38,9 @@ import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
 
 public class MultipleTimelineExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
 

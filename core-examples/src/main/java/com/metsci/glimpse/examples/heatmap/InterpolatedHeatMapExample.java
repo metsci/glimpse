@@ -28,11 +28,10 @@ package com.metsci.glimpse.examples.heatmap;
 
 import static com.metsci.glimpse.examples.heatmap.HeatMapExample.generateData;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.IOException;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -53,31 +52,24 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class InterpolatedHeatMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
-            try
-            {
-                // create a plot to display the heat map
-                ColorAxisPlot2D plot = HeatMapExample.newEmptyPlot( );
+            // create a plot to display the heat map
+            ColorAxisPlot2D plot = HeatMapExample.newEmptyPlot( );
 
-                // create a heat map painter
-                HeatMapPainter heatmapPainter = newHeatMapPainter( plot.getAxisZ( ) );
+            // create a heat map painter
+            HeatMapPainter heatmapPainter = newHeatMapPainter( plot.getAxisZ( ) );
 
-                // add the painter to the plot
-                plot.addPainter( heatmapPainter );
+            // add the painter to the plot
+            plot.addPainter( heatmapPainter );
 
-                // load the color map into the plot (so the color scale is displayed on the z axis)
-                plot.setColorScale( heatmapPainter.getColorScale( ) );
-                
-                // create a window and show the plot
-                quickGlimpseApp( "Interpolated Heat Map Example", GL3bc, 800, 800, plot );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
+            // load the color map into the plot (so the color scale is displayed on the z axis)
+            plot.setColorScale( heatmapPainter.getColorScale( ) );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Interpolated Heat Map Example", GL3bc, 800, 800, plot );
         } );
     }
 

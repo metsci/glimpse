@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.plot;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
@@ -52,9 +51,9 @@ import com.metsci.glimpse.util.math.fast.FastGaussian;
  */
 public class FunctionPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // add a layout painter which will act as the parent of all the other plot painters
             GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( );

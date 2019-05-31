@@ -26,16 +26,15 @@
  */
 package com.metsci.glimpse.examples.dspl;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -79,20 +78,13 @@ public class DsplTrackExample
 
     public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
-            try
-            {
-                // create the plot
-                GlimpseLayout plot = createLayout( );
+            // create the plot
+            GlimpseLayout plot = createLayout( );
 
-                // create a window and show the plot
-                quickGlimpseApp( "DSPL Track Example", GL3bc, 800, 800, plot );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
+            // create a window and show the plot
+            quickGlimpseApp( "DSPL Track Example", GL3bc, 800, 800, plot );
         } );
     }
 

@@ -27,10 +27,10 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
-import javax.swing.SwingUtilities;
-
+import com.google.common.util.concurrent.AtomicDouble;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
@@ -58,134 +58,121 @@ import com.metsci.glimpse.support.font.FontUtils;
  */
 public class FloatingLayoutExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
-            FloatingLayoutExample example = new FloatingLayoutExample( );
+            int plotHeight = 200;
+            int plotWidth = 200;
+
+            AtomicDouble plotMinX = new AtomicDouble( 0.0 );
+            AtomicDouble plotMinY = new AtomicDouble( 0.0 );
+
+            // create the main plot
+            SimplePlot2D plot = new SimplePlot2D( );
+
+            // create a GlimpseLayout to contain the floating plot
+            GlimpseLayout floatingLayout = new GlimpseLayout( );
+
+            // create a new plot for the floating layout area
+            // it uses a vertical text orientation for its y axis painter to save space
+            final SimplePlot2D floatingPlot = new SimplePlot2D( )
+            {
+                @Override
+                protected NumericAxisPainter createAxisPainterY( AxisLabelHandler tickHandler )
+                {
+                    return new NumericRotatedYAxisPainter( tickHandler );
+                }
+            };
+
+            // add a mouse listener which listens for middle mouse button (mouse wheel) clicks
+            // and moves the floating plot in response
+            plot.getLayoutCenter( ).addGlimpseMouseListener( new GlimpseMouseListener( )
+            {
+                @Override
+                public void mousePressed( GlimpseMouseEvent event )
+                {
+                    if ( event.isButtonDown( MouseButton.Button2 ) )
+                    {
+                        plotMinX.set( event.getAxisCoordinatesX( ) );
+                        plotMinY.set( event.getAxisCoordinatesY( ) );
+                    }
+                }
+
+                @Override
+                public void mouseEntered( GlimpseMouseEvent event )
+                {
+                }
+
+                @Override
+                public void mouseExited( GlimpseMouseEvent event )
+                {
+                }
+
+                @Override
+                public void mouseReleased( GlimpseMouseEvent event )
+                {
+                }
+            } );
+
+            // the floating plot is quite small, so use a smaller font, tighter tick spacing, and smaller bounds for the axes
+            floatingPlot.setAxisFont( FontUtils.getSilkscreen( ), false );
+            floatingPlot.setAxisSizeX( 25 );
+            floatingPlot.setAxisSizeY( 25 );
+            floatingPlot.setTickSpacingX( 35 );
+            floatingPlot.setTickSpacingY( 35 );
+            floatingPlot.setBorderSize( 4 );
+
+            // don't show crosshairs in the floating plot or the main plot
+            floatingPlot.getCrosshairPainter( ).setVisible( false );
+            plot.getCrosshairPainter( ).setVisible( false );
+
+            // don't provide any space for a title in the floating plot
+            floatingPlot.setTitleHeight( 0 );
+
+            // add a border to the outside of the floating plot, setting its zOrder
+            // to ensure it appears above other plot features
+            floatingLayout.addPainter( new BorderPainter( ).setLineWidth( 2 ), Integer.MAX_VALUE );
+
+            // create a color scale axis for the heat maps created below
+            Axis1D colorAxis = new Axis1D( );
+            colorAxis.setMin( 0.0 );
+            colorAxis.setMax( 1000.0 );
+
+            // add a heat map painter to the floating plot
+            floatingPlot.addPainter( HeatMapExample.newPainter( colorAxis ) );
+            floatingPlot.getAxis( ).set( 0, 1000, 0, 1000 );
+
+            // add a heat map painter to the outer plot
+            plot.addPainter( HeatMapExample.newPainter( colorAxis ) );
+            plot.getAxis( ).set( 0, 1000, 0, 1000 );
+
+            // add the floating plot to the main plot
+            floatingLayout.addLayout( floatingPlot );
+            plot.getLayoutCenter( ).addLayout( floatingLayout );
+            plot.getLayoutCenter( ).invalidateLayout( );
+
+            plot.setAxisSizeY( 45 );
+            plot.setAxisSizeX( 30 );
+            plot.setTitleHeight( 0 );
+
+            // add an axis listener which adjusts the position of the floating layout painter as the axis changes
+            // (the layout painter is tied to a fixed axis value)
+            plot.addAxisListener( new AxisListener2D( )
+            {
+                @Override
+                public void axisUpdated( Axis2D axis )
+                {
+                    int minX = plot.getAxisX( ).valueToScreenPixel( plotMinX.get( ) );
+                    int minY = plot.getAxisY( ).valueToScreenPixel( plotMinY.get( ) );
+
+                    floatingLayout.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
+                    plot.invalidateLayout( );
+                }
+            } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Floating Layout Example", GL3bc, 800, 800, example.getPlot( ) );
+            quickGlimpseApp( "Floating Layout Example", GL3bc, 800, 800, plot );
         } );
-    }
-
-    protected int plotHeight = 200;
-    protected int plotWidth = 200;
-
-    protected double plotMinX = 0.0;
-    protected double plotMinY = 0.0;
-
-    protected SimplePlot2D plot;
-    protected GlimpseLayout floatingLayout;
-
-    public FloatingLayoutExample( )
-    {
-        // create the main plot
-        plot = new SimplePlot2D( );
-
-        // create a GlimpseLayout to contain the floating plot
-        floatingLayout = new GlimpseLayout( );
-
-        // create a new plot for the floating layout area
-        // it uses a vertical text orientation for its y axis painter to save space
-        final SimplePlot2D floatingPlot = new SimplePlot2D( )
-        {
-            @Override
-            protected NumericAxisPainter createAxisPainterY( AxisLabelHandler tickHandler )
-            {
-                return new NumericRotatedYAxisPainter( tickHandler );
-            }
-        };
-
-        // add a mouse listener which listens for middle mouse button (mouse wheel) clicks
-        // and moves the floating plot in response
-        plot.getLayoutCenter( ).addGlimpseMouseListener( new GlimpseMouseListener( )
-        {
-            @Override
-            public void mousePressed( GlimpseMouseEvent event )
-            {
-                if ( event.isButtonDown( MouseButton.Button2 ) )
-                {
-                    plotMinX = event.getAxisCoordinatesX( );
-                    plotMinY = event.getAxisCoordinatesY( );
-                }
-            }
-
-            @Override
-            public void mouseEntered( GlimpseMouseEvent event )
-            {
-            }
-
-            @Override
-            public void mouseExited( GlimpseMouseEvent event )
-            {
-            }
-
-            @Override
-            public void mouseReleased( GlimpseMouseEvent event )
-            {
-            }
-        } );
-
-        // the floating plot is quite small, so use a smaller font, tighter tick spacing, and smaller bounds for the axes
-        floatingPlot.setAxisFont( FontUtils.getSilkscreen( ), false );
-        floatingPlot.setAxisSizeX( 25 );
-        floatingPlot.setAxisSizeY( 25 );
-        floatingPlot.setTickSpacingX( 35 );
-        floatingPlot.setTickSpacingY( 35 );
-        floatingPlot.setBorderSize( 4 );
-
-        // don't show crosshairs in the floating plot or the main plot
-        floatingPlot.getCrosshairPainter( ).setVisible( false );
-        plot.getCrosshairPainter( ).setVisible( false );
-
-        // don't provide any space for a title in the floating plot
-        floatingPlot.setTitleHeight( 0 );
-
-        // add a border to the outside of the floating plot, setting its zOrder
-        // to ensure it appears above other plot features
-        floatingLayout.addPainter( new BorderPainter( ).setLineWidth( 2 ), Integer.MAX_VALUE );
-
-        // create a color scale axis for the heat maps created below
-        Axis1D colorAxis = new Axis1D( );
-        colorAxis.setMin( 0.0 );
-        colorAxis.setMax( 1000.0 );
-
-        // add a heat map painter to the floating plot
-        floatingPlot.addPainter( HeatMapExample.newPainter( colorAxis ) );
-        floatingPlot.getAxis( ).set( 0, 1000, 0, 1000 );
-
-        // add a heat map painter to the outer plot
-        plot.addPainter( HeatMapExample.newPainter( colorAxis ) );
-        plot.getAxis( ).set( 0, 1000, 0, 1000 );
-
-        // add the floating plot to the main plot
-        floatingLayout.addLayout( floatingPlot );
-        plot.getLayoutCenter( ).addLayout( floatingLayout );
-        plot.getLayoutCenter( ).invalidateLayout( );
-
-        plot.setAxisSizeY( 45 );
-        plot.setAxisSizeX( 30 );
-        plot.setTitleHeight( 0 );
-
-        // add an axis listener which adjusts the position of the floating layout painter as the axis changes
-        // (the layout painter is tied to a fixed axis value)
-        plot.addAxisListener( new AxisListener2D( )
-        {
-            @Override
-            public void axisUpdated( Axis2D axis )
-            {
-                int minX = plot.getAxisX( ).valueToScreenPixel( plotMinX );
-                int minY = plot.getAxisY( ).valueToScreenPixel( plotMinY );
-
-                floatingLayout.setLayoutData( String.format( "pos %d %d %d %d", minX, minY, minX + plotWidth, minY + plotHeight ) );
-                plot.invalidateLayout( );
-            }
-        } );
-    }
-
-    public SimplePlot2D getPlot( )
-    {
-        return this.plot;
     }
 }

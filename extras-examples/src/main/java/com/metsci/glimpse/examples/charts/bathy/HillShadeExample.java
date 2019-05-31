@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.charts.bathy;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 import static javax.media.opengl.GLProfile.GL3bc;
 
@@ -34,8 +35,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
 import com.metsci.glimpse.charts.bathy.TileKey;
@@ -56,21 +55,14 @@ public class HillShadeExample implements TopoTileProvider
 {
     private TopographyData singleTile;
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
         setTerseConsoleLogger( Level.FINE );
 
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
-            try
-            {
-                // create a window and show the plot
-                quickGlimpseApp( "Hill Shade Example", GL3bc, 800, 800, new HillShadeExample( ).getLayout( ) );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
+            // create a window and show the plot
+            quickGlimpseApp( "Hill Shade Example", GL3bc, 800, 800, new HillShadeExample( ).getLayout( ) );
         } );
     }
 

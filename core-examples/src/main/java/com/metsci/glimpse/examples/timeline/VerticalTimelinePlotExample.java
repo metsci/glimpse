@@ -26,10 +26,12 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
+import static com.metsci.glimpse.support.DisposableUtils.onWindowClosing;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
-import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
@@ -56,9 +58,9 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  */
 public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             StackedTimePlot2D plot = new VerticalTimelinePlotExample( ).getPlot( );
 
@@ -69,27 +71,15 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
             plot.setTimeAxisLabelHandler( handler );
 
             // Update the reference time in a loop to animate the time labels
-            Thread t = new Thread( )
+            long start_PMILLIS = System.currentTimeMillis( );
+            TimeStamp origRefTime = handler.getReferenceTime( );
+            Timer timer = new Timer( 10, ev ->
             {
-                @Override
-                public void run( )
-                {
-                    while ( true )
-                    {
-                        SwingUtilities.invokeLater( ( ) -> handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) ) );
-                        try
-                        {
-                            Thread.sleep( 10 );
-                        }
-                        catch ( InterruptedException e )
-                        {
-                            e.printStackTrace( );
-                        }
-                    }
-                }
-            };
-            t.setDaemon( true );
-            t.start( );
+                // This is a javax.swing.Timer, so the listener runs in the Swing thread
+                double elapsed = Time.fromMilliseconds( System.currentTimeMillis( ) - start_PMILLIS );
+                handler.setReferenceTime( origRefTime.add( 1e3 * elapsed ) );
+            } );
+            timer.start( );
 
             plot.setPlotSpacing( 20 );
 
@@ -106,6 +96,12 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 
             // use the ocean look and feel
             app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+
+            // Stop the timer when the window closes
+            onWindowClosing( app.getFrame( ), ev ->
+            {
+                timer.stop( );
+            } );
         } );
     }
 

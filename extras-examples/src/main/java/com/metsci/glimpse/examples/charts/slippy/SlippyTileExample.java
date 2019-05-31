@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.charts.slippy;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.event.ActionEvent;
@@ -35,7 +36,6 @@ import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButton;
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
@@ -53,9 +53,9 @@ import com.metsci.glimpse.util.units.Length;
 
 public class SlippyTileExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             GeoProjection geoProj = new TangentPlane( LatLonGeo.fromDeg( 38.958374, -77.358548 ) );
 

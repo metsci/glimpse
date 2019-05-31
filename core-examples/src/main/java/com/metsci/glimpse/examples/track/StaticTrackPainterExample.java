@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.track;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -43,9 +42,9 @@ public class StaticTrackPainterExample
     public static final int ParticleCount = 2000;
     public static final int TimeCount = 1000;
 
-    public static void main( String args[] ) throws Exception
+    public static void main( String args[] )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             SimplePlot2D plot = new SimplePlot2D( );
 

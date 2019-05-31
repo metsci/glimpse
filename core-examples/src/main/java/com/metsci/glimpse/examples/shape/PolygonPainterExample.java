@@ -27,11 +27,11 @@
 package com.metsci.glimpse.examples.shape;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.Random;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
@@ -52,9 +52,9 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  */
 public class PolygonPainterExample
 {
-    public static void main( String args[] ) throws Exception
+    public static void main( String args[] )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a premade geoplot
             final SimplePlot2D polyplot = new SimplePlot2D( );
@@ -125,7 +125,7 @@ public class PolygonPainterExample
             polygonPainter.setShowLines( 4, false );
             polygonPainter.setShowLines( 5, false );
 
-            ( new Thread( )
+            startThread( "Polygon Updater 1", true, new Runnable( )
             {
                 @Override
                 public void run( )
@@ -151,9 +151,9 @@ public class PolygonPainterExample
                         }
                     }
                 }
-            } ).start( );
+            } );
 
-            ( new Thread( )
+            startThread( "Polygon Updater 2", true, new Runnable( )
             {
                 int i = 5;
                 ColorGradient c = ColorGradients.jet;
@@ -213,7 +213,7 @@ public class PolygonPainterExample
                         }
                     }
                 }
-            } ).start( );
+            } );
 
             polyplot.getAxisZ( ).addAxisListener( new RateLimitedAxisListener1D( )
             {

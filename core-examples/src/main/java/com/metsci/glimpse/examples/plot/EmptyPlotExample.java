@@ -26,10 +26,9 @@
  */
 package com.metsci.glimpse.examples.plot;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static javax.media.opengl.GLProfile.*;
-
-import javax.swing.SwingUtilities;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -54,7 +53,7 @@ public class EmptyPlotExample
 {
     public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             Plot2D plot = new Plot2D( "plot" );
 

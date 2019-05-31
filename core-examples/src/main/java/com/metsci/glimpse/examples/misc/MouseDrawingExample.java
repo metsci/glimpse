@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -54,82 +53,76 @@ import com.metsci.glimpse.support.font.FontUtils;
  */
 public class MouseDrawingExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
-            // create a window and show the plot
-            quickGlimpseApp( "Mouse Drawing Example", GL3bc, 800, 800, new MouseDrawingExample( ).getPlot( ) );
-        } );
-    }
+            // create a painter to draw lines and dots
+            TrackPainter painter = new TrackPainter( );
 
-    protected TrackPainter painter;
-    protected SimplePlot2D plot;
+            // setup "track" 1, a track is simply a logical set of vertices which are
+            // displayed in a common fashion (in this case: size 10 red dots with
+            // no connecting lines)
+            painter.setPointColor( 1, GlimpseColor.getRed( ) );
+            painter.setPointSize( 1, 10.0f );
+            painter.setShowLines( 1, false );
 
-    public MouseDrawingExample( )
-    {
-        // create a standard pre-made SimplePlot2D, but override the
-        // constructor method which it uses to create the listener
-        // that handles mouse events inside the central plot area
-        plot = new SimplePlot2D( )
-        {
-            @Override
-            protected AxisMouseListener createAxisMouseListenerXY( )
+            // setup "track" 2 (connected green width 2.5 lines with no points at the vertices)
+            painter.setShowPoints( 2, false );
+            painter.setShowLines( 2, true );
+            painter.setDotted( 2, false );
+            painter.setLineColor( 2, GlimpseColor.getGreen( ) );
+            painter.setLineWidth( 2, 2.5f );
+
+            // add a painter to display text instructions on the screen
+            SimpleTextPainter text = new SimpleTextPainter( );
+            text.setText( "Hold Shift to draw. Right Click to add dot." );
+            text.setHorizontalPosition( HorizontalPosition.Center );
+            text.setVerticalPosition( VerticalPosition.Top );
+            text.setFont( FontUtils.getDefaultBold( 16 ) );
+
+            // create a standard pre-made SimplePlot2D, but override the
+            // constructor method which it uses to create the listener
+            // that handles mouse events inside the central plot area
+            SimplePlot2D plot = new SimplePlot2D( )
             {
-                return new CustomMouseListener2D( );
-            }
-        };
+                @Override
+                protected AxisMouseListener createAxisMouseListenerXY( )
+                {
+                    return new CustomMouseListener2D( painter );
+                }
+            };
 
-        // hide the title and labeled axis elements of the plot
-        plot.setTitleHeight( 0 );
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
+            // hide the title and labeled axis elements of the plot
+            plot.setTitleHeight( 0 );
+            plot.setAxisSizeX( 0 );
+            plot.setAxisSizeY( 0 );
 
-        // hide the crosshair painter
-        plot.getCrosshairPainter( ).setVisible( false );
+            // hide the crosshair painter
+            plot.getCrosshairPainter( ).setVisible( false );
 
-        // create a painter to draw lines and dots
-        painter = new TrackPainter( );
-        plot.addPainter( painter );
+            // add track and text painters
+            plot.addPainter( painter );
+            plot.addPainter( text );
 
-        // setup "track" 1, a track is simply a logical set of vertices which are
-        // displayed in a common fashion (in this case: size 10 red dots with
-        // no connecting lines)
-        painter.setPointColor( 1, GlimpseColor.getRed( ) );
-        painter.setPointSize( 1, 10.0f );
-        painter.setShowLines( 1, false );
-
-        // setup "track" 2 (connected green width 2.5 lines with no points at the vertices)
-        painter.setShowPoints( 2, false );
-        painter.setShowLines( 2, true );
-        painter.setDotted( 2, false );
-        painter.setLineColor( 2, GlimpseColor.getGreen( ) );
-        painter.setLineWidth( 2, 2.5f );
-
-        // add a painter to display text instructions on the screen
-        SimpleTextPainter text = new SimpleTextPainter( );
-        text.setText( "Hold Shift to draw. Right Click to add dot." );
-        text.setHorizontalPosition( HorizontalPosition.Center );
-        text.setVerticalPosition( VerticalPosition.Top );
-        text.setFont( FontUtils.getDefaultBold( 16 ) );
-        plot.addPainter( text );
-    }
-
-    public SimplePlot2D getPlot( )
-    {
-        return this.plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Mouse Drawing Example", GL3bc, 800, 800, plot );
+        } );
     }
 
     // create a custom subclass of the standard AxisMouseListener2D
     // and add some custom functionality
-    public class CustomMouseListener2D extends AxisMouseListener2D
+    public static class CustomMouseListener2D extends AxisMouseListener2D
     {
+        TrackPainter painter;
+
         int id1 = 0;
         int id2 = 0;
 
-        public CustomMouseListener2D( )
+        public CustomMouseListener2D( TrackPainter painter )
         {
             super( );
+            this.painter = painter;
         }
 
         @Override
@@ -143,7 +136,7 @@ public class MouseDrawingExample
                 double x = event.getAxisCoordinatesX( );
                 double y = event.getAxisCoordinatesY( );
 
-                painter.addPoint( 2, id1++, x, y, 0 );
+                this.painter.addPoint( 2, id1++, x, y, 0 );
             }
             else
             {
@@ -167,7 +160,7 @@ public class MouseDrawingExample
                 double x = axisX.screenPixelToValue( event.getX( ) );
                 double y = axisY.screenPixelToValue( axisY.getSizePixels( ) - event.getY( ) );
 
-                painter.addPoint( 1, id2++, x, y, 0 );
+                this.painter.addPoint( 1, id2++, x, y, 0 );
             }
 
             super.mousePressed( event );

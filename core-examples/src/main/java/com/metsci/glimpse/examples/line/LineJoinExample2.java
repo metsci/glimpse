@@ -29,6 +29,7 @@ package com.metsci.glimpse.examples.line;
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
 import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
@@ -39,7 +40,6 @@ import static javax.media.opengl.GLProfile.GL3bc;
 
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2ES3;
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandlerSimpleUnits;
@@ -63,7 +63,7 @@ public class LineJoinExample2
 {
     public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             MultiAxisPlot2D plot = new MultiAxisPlot2D( );
             plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );

@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
@@ -38,9 +37,9 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 
 public class NestedTimelinePlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             CollapsibleTimePlot2D plot = new CollapsibleTimePlot2D( );
 

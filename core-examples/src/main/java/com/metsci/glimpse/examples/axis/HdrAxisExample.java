@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.axis;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.HdrAxisLabelHandler;
@@ -43,9 +42,9 @@ import com.metsci.glimpse.plot.SimplePlot2D;
  */
 public class HdrAxisExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             SimplePlot2D plot = new SimplePlot2D( )
             {

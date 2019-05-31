@@ -29,11 +29,10 @@ package com.metsci.glimpse.examples.heatmap;
 import static com.metsci.glimpse.axis.tagged.Tag.TAG_COLOR_ATTR;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.Arrays;
-
-import javax.swing.SwingUtilities;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
@@ -58,9 +57,9 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class TaggedHeatMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a plot
             ColorAxisPlot2D plot = newPlot( );
@@ -69,7 +68,7 @@ public class TaggedHeatMapExample
             quickGlimpseApp( "Tagged Heat Map Example", GL3bc, 800, 800, plot );
         } );
     }
-    
+
     public static final String PainterKey = "HeatMap";
 
     public static ColorAxisPlot2D newPlot( ColorGradient colorGradient )

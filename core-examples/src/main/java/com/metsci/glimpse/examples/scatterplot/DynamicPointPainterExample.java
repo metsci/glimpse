@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.examples.scatterplot;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.Collection;
 import java.util.logging.Logger;

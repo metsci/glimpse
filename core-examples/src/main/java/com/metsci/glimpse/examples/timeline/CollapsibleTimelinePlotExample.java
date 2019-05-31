@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static javax.media.opengl.GLProfile.GL3bc;
@@ -36,7 +37,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
@@ -68,9 +68,9 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
 {
     private static final Logger logger = Logger.getLogger( CollapsibleTimelinePlotExample.class.getName( ) );
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
 
@@ -85,7 +85,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
     public CollapsibleTimelinePlotExample( )
     {
         CollapsibleTimePlot2D collapsiblePlot = ( CollapsibleTimePlot2D ) plot;
-        
+
         // provide extra space for left hand side row labels
         collapsiblePlot.setLabelSize( 120 );
 
@@ -302,7 +302,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             }
         } );
     }
-    
+
 
     @Override
     protected StackedTimePlot2D createPlot( )

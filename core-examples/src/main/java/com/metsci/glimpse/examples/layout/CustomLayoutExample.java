@@ -26,10 +26,9 @@
  */
 package com.metsci.glimpse.examples.layout;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static javax.media.opengl.GLProfile.*;
-
-import javax.swing.SwingUtilities;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -63,9 +62,9 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
  */
 public class CustomLayoutExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a delegate painter which lays out its child painters based on a mig layout
             GlimpseLayout layoutParent = new GlimpseLayout( );

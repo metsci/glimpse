@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.track;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.Collection;
@@ -36,8 +37,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -66,9 +65,9 @@ public class TrackPainterExample
 {
     public static final int NUMBER_OF_TRACKS = 2000;
 
-    public static void main( String args[] ) throws Exception
+    public static void main( String args[] )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a premade geoplot
             final SimplePlot2D plot = new SimplePlot2D( );

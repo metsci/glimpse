@@ -26,16 +26,16 @@
  */
 package com.metsci.glimpse.examples.axis;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.*;
-import static com.metsci.glimpse.support.colormap.ColorGradients.*;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static javax.media.opengl.GLProfile.*;
-
-import javax.swing.SwingUtilities;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorTable;
+import static com.metsci.glimpse.support.colormap.ColorGradients.inferno;
+import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static javax.media.opengl.GLProfile.GL3;
 
 import com.metsci.glimpse.axis.WrappedAxis1D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
@@ -69,9 +69,9 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 public class WrappedAxisExample2
 {
 
-    public static void main( String args[] ) throws Exception
+    public static void main( String args[] )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
 
             // PolygonPainter

@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
@@ -44,9 +43,9 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 public class StackedPlotExample
 {
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a plot which arranges its sub-plots in a horizontal line
             StackedPlot2D plot = new StackedPlot2D( Orientation.HORIZONTAL );

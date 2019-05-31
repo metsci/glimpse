@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.event.ActionEvent;
@@ -56,9 +57,9 @@ public class PopupMenuExample
 {
     private static final Logger logger = Logger.getLogger( PopupMenuExample.class.getName( ) );
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a simple plot but disable right click selection locking
             // on the axis listeners, as we will be using right clicking to bring up popup menu

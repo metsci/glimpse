@@ -27,9 +27,8 @@
 package com.metsci.glimpse.examples.plot;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -50,9 +49,9 @@ import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
  */
 public class HistogramPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             float[] data1 = generateData1( new float[NUM_POINTS], NUM_POINTS );
             float[] data2 = generateData2( new float[NUM_POINTS], NUM_POINTS );

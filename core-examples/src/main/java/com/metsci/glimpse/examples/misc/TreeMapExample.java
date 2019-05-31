@@ -27,6 +27,7 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.BufferedReader;
@@ -35,8 +36,6 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.ZipInputStream;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.UpdateMode;
@@ -57,70 +56,63 @@ import com.metsci.glimpse.util.io.StreamOpener;
  */
 public class TreeMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
-            try
+            Plot2D plot = new Plot2D( "treemap" );
+            plot.setAxisSizeX( 0 );
+            plot.setAxisSizeY( 0 );
+            plot.setAxisSizeZ( 0 );
+            plot.setTitle( "TreeMap of States" );
+
+            final NestedTreeMap tree = createLargeGeoTree( );
+
+            SimpleTreeMapPainter painter = new SimpleTreeMapPainter( )
             {
-                Plot2D plot = new Plot2D( "treemap" );
-                plot.setAxisSizeX( 0 );
-                plot.setAxisSizeY( 0 );
-                plot.setAxisSizeZ( 0 );
-                plot.setTitle( "TreeMap of States" );
+                ColorGradient scale = ColorGradients.jet;
 
-                final NestedTreeMap tree = createLargeGeoTree( );
-
-                SimpleTreeMapPainter painter = new SimpleTreeMapPainter( )
+                @Override
+                protected float[] getTitleBackgroundColor( int nodeId, boolean selected )
                 {
-                    ColorGradient scale = ColorGradients.jet;
+                    int level = tree.getLevel( nodeId );
+                    float[] color = new float[4];
+                    scale.toColor( level / 5f, color );
 
-                    @Override
-                    protected float[] getTitleBackgroundColor( int nodeId, boolean selected )
+                    if ( selected )
                     {
-                        int level = tree.getLevel( nodeId );
-                        float[] color = new float[4];
-                        scale.toColor( level / 5f, color );
-
-                        if ( selected )
-                        {
-                            color[0] *= 0.4f;
-                            color[1] *= 0.4f;
-                            color[2] *= 0.4f;
-                        }
-
-                        return color;
+                        color[0] *= 0.4f;
+                        color[1] *= 0.4f;
+                        color[2] *= 0.4f;
                     }
-                };
 
-                painter.setTreeMapData( tree );
-                plot.getLayoutCenter( ).addPainter( painter, Plot2D.DATA_LAYER );
-                plot.getLayoutCenter( ).addPainter( new TreeMapHoverPainter( painter ), Plot2D.FOREGROUND_LAYER );
+                    return color;
+                }
+            };
 
-                plot.setAbsoluteMinX( 0 );
-                plot.setAbsoluteMaxX( 100 );
-                plot.setAbsoluteMinY( 0 );
-                plot.setAbsoluteMaxY( 100 );
+            painter.setTreeMapData( tree );
+            plot.getLayoutCenter( ).addPainter( painter, Plot2D.DATA_LAYER );
+            plot.getLayoutCenter( ).addPainter( new TreeMapHoverPainter( painter ), Plot2D.FOREGROUND_LAYER );
 
-                plot.getAxisX( ).setUpdateMode( UpdateMode.FixedPixel );
-                plot.getAxisY( ).setUpdateMode( UpdateMode.FixedPixel );
+            plot.setAbsoluteMinX( 0 );
+            plot.setAbsoluteMaxX( 100 );
+            plot.setAbsoluteMinY( 0 );
+            plot.setAbsoluteMaxY( 100 );
 
-                plot.setMinX( plot.getAxisX( ).getAbsoluteMin( ) );
-                plot.setMaxX( plot.getAxisX( ).getAbsoluteMax( ) );
-                plot.setMinY( plot.getAxisY( ).getAbsoluteMin( ) );
-                plot.setMaxY( plot.getAxisY( ).getAbsoluteMax( ) );
+            plot.getAxisX( ).setUpdateMode( UpdateMode.FixedPixel );
+            plot.getAxisY( ).setUpdateMode( UpdateMode.FixedPixel );
 
-                painter.setLayout( new SquarifiedLayout( ) );
+            plot.setMinX( plot.getAxisX( ).getAbsoluteMin( ) );
+            plot.setMaxX( plot.getAxisX( ).getAbsoluteMax( ) );
+            plot.setMinY( plot.getAxisY( ).getAbsoluteMin( ) );
+            plot.setMaxY( plot.getAxisY( ).getAbsoluteMax( ) );
 
-                plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+            painter.setLayout( new SquarifiedLayout( ) );
 
-                // create a window and show the plot
-                quickGlimpseApp( "Tree Map Example", GL3bc, 800, 800, plot );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
+            plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Tree Map Example", GL3bc, 800, 800, plot );
         } );
     }
 

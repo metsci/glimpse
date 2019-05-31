@@ -26,15 +26,17 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.*;
-import static java.lang.Math.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
@@ -55,9 +57,9 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D
  */
 public class AnimatedTextureExample
 {
-    public static void main( String args[] ) throws Exception
+    public static void main( String args[] )
     {
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             // create a premade heat map window
             ColorAxisPlot2D plot = new ColorAxisPlot2D( );
