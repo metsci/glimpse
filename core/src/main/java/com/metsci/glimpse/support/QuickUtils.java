@@ -293,29 +293,29 @@ public class QuickUtils
     public static QuickGlimpseApp quickGlimpseWindow( String title, GLProfile glProfile, Dimension size, GlimpseLayout layout )
     {
         return quickGlimpseWindow( title,
-                new NewtSwingEDTGlimpseCanvas( glProfile ),
-                new SwingEDTAnimator( 60 ),
-                new SwingLookAndFeel( ),
-                size,
-                layout );
+                                   new NewtSwingEDTGlimpseCanvas( glProfile ),
+                                   new SwingEDTAnimator( 60 ),
+                                   new SwingLookAndFeel( ),
+                                   size,
+                                   layout );
     }
 
     /**
      * Creates and shows a new window displaying the specified {@code layout}.
      */
     public static QuickGlimpseApp quickGlimpseWindow( String title,
-            GLContext glContext,
-            GLAnimatorControl animator,
-            LookAndFeel laf,
-            Dimension size,
-            GlimpseLayout layout )
+                                                      GLContext glContext,
+                                                      GLAnimatorControl animator,
+                                                      LookAndFeel laf,
+                                                      Dimension size,
+                                                      GlimpseLayout layout )
     {
         return quickGlimpseWindow( title,
-                new NewtSwingEDTGlimpseCanvas( glContext ),
-                animator,
-                laf,
-                size,
-                layout );
+                                   new NewtSwingEDTGlimpseCanvas( glContext ),
+                                   animator,
+                                   laf,
+                                   size,
+                                   layout );
     }
 
     /**
@@ -329,11 +329,11 @@ public class QuickUtils
      * <strong>NOTE:</strong> Must be called on the Swing EDT.
      */
     public static QuickGlimpseApp quickGlimpseWindow( String title,
-            NewtSwingEDTGlimpseCanvas canvas,
-            GLAnimatorControl animator,
-            LookAndFeel laf,
-            Dimension size,
-            GlimpseLayout layout )
+                                                      NewtSwingEDTGlimpseCanvas canvas,
+                                                      GLAnimatorControl animator,
+                                                      LookAndFeel laf,
+                                                      Dimension size,
+                                                      GlimpseLayout layout )
     {
         requireSwingThread( );
 
