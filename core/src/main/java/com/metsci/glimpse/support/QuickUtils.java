@@ -67,6 +67,7 @@ import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.util.ThrowingRunnable;
 
 /**
  * A collection of functions for quickly creating plots and showing them in windows.
@@ -115,6 +116,42 @@ public class QuickUtils
         {
             throw new RuntimeException( "This operation is only allowed on the Swing/AWT event-dispatch thread" );
         }
+    }
+
+    /**
+     * Like {@link SwingUtilities#invokeLater(Runnable)}, but allows the runnable to
+     * throw checked exceptions. If a checked exception is thrown, it will be caught
+     * and wrapped in a new {@link RuntimeException}, which will then be thrown.
+     */
+    public static void swingInvokeLater( ThrowingRunnable runnable )
+    {
+        // We could make this more like ExecutorService.submit() by returning a Future.
+        // That would allow the caller to (1) block, (2) retrieve the value returned by
+        // the callable, and (3) handle exceptions thrown by the callable. However, the
+        // caller would ALWAYS have to call Future.get(), or else exceptions would be
+        // silently swallowed.
+        //
+        // In practice, we usually want Swing EDT calls to behave like Executor.execute()
+        // or SwingUtilities.invokeLater(). The caller can't retrieve the value or handle
+        // exceptions, but also isn't REQUIRED to handle exceptions. This matches the way
+        // SwingUtilities.invokeLater() already deals with RuntimeExceptions; we're just
+        // expanding it to do the same with all Exceptions.
+        //
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            try
+            {
+                runnable.run( );
+            }
+            catch ( RuntimeException e )
+            {
+                throw e;
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        } );
     }
 
     public static GLProfile glProfileOrNull( String glProfileName )
