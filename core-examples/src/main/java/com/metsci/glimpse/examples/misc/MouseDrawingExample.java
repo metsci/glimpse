@@ -106,7 +106,7 @@ public class MouseDrawingExample
             plot.addPainter( text );
 
             // create a window and show the plot
-            quickGlimpseApp( "Mouse Drawing Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Mouse Drawing Example", GL3bc, plot );
         } );
     }
 

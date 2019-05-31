@@ -84,7 +84,7 @@ public class DsplTrackExample
             GlimpseLayout plot = createLayout( );
 
             // create a window and show the plot
-            quickGlimpseApp( "DSPL Track Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "DSPL Track Example", GL3bc, plot );
         } );
     }
 

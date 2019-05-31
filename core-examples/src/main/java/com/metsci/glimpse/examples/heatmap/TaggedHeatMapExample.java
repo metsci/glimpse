@@ -65,7 +65,7 @@ public class TaggedHeatMapExample
             ColorAxisPlot2D plot = newPlot( );
 
             // create a window and show the plot
-            quickGlimpseApp( "Tagged Heat Map Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Tagged Heat Map Example", GL3bc, plot );
         } );
     }
 

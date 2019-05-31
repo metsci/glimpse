@@ -27,12 +27,14 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;
 
@@ -41,8 +43,8 @@ import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.examples.timeline.CollapsibleTimelinePlotExample;
 import com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 public class VerticallyScrollableLayoutExample
 {
@@ -62,7 +64,8 @@ public class VerticallyScrollableLayoutExample
             // Swing scrollbar, for interactively controlling the scroller's vertical offset
             final JScrollBar scrollbar = new JScrollBar( );
 
-            QuickGlimpseApp app = quickGlimpseApp( "LinePathExample", GL3bc, 800, 600, scroller );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( GL3bc, scroller, new OceanLookAndFeel( ) );
+            JFrame frame = quickGlimpseWindow( "Vertically Scrollable Example", canvas, 800, 600 );
 
             // perform some additional setup of the scroll bar
             SwingUtilities.invokeLater( ( ) ->
@@ -72,17 +75,15 @@ public class VerticallyScrollableLayoutExample
                 // Really the scrollbar is attached not to the layout, but to a particular (layout,stack)
                 // tuple -- so the stack must be specified as well
                 //
-                GlimpseTargetStack scrollerStack = TargetStackUtil.newTargetStack( app.getCanvas( ) );
+                GlimpseTargetStack scrollerStack = TargetStackUtil.newTargetStack( canvas );
                 attachScrollableToScrollbar( scroller, scrollerStack, scrollbar );
 
                 // Add the scrollbar to the frame on the right
-                app.getFrame( ).setLayout( new BorderLayout( ) );
-                app.getFrame( ).add( scrollbar, BorderLayout.EAST );
+                frame.setLayout( new BorderLayout( ) );
+                frame.add( scrollbar, BorderLayout.EAST );
                 // Re-add the canvas to the center of the border layout
-                app.getFrame( ).add( app.getCanvas( ), BorderLayout.CENTER );
-                app.getFrame( ).revalidate( );
-
-                app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+                frame.add( canvas, BorderLayout.CENTER );
+                frame.revalidate( );
             } );
         } );
     }

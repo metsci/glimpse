@@ -82,7 +82,7 @@ public class HistogramPlotExample
             layout.invalidateLayout( );
 
             // create a window and show the plot
-            quickGlimpseApp( "Histogram Plot Example", GL3bc, 800, 800, layout );
+            quickGlimpseApp( "Histogram Plot Example", GL3bc, layout );
         } );
     }
 

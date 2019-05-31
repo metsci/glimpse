@@ -55,7 +55,6 @@ import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
 import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionListener;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
@@ -75,10 +74,7 @@ public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExampl
             StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Collapsible Timeline Plot Example", GL3bc, 800, 800, plot );
-
-            // use the ocean look and feel
-            app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Collapsible Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
         } );
     }
 

@@ -31,6 +31,7 @@ import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
+import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -44,7 +45,6 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
@@ -92,13 +92,10 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
             }
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Vertical Timeline Plot Example", GL3bc, 800, 800, plot );
-
-            // use the ocean look and feel
-            app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+            JFrame frame = quickGlimpseApp( "Vertical Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
 
             // Stop the timer when the window closes
-            onWindowClosing( app.getFrame( ), ev ->
+            onWindowClosing( frame, ev ->
             {
                 timer.stop( );
             } );

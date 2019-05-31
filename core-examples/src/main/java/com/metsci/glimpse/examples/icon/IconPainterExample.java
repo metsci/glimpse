@@ -155,7 +155,7 @@ public class IconPainterExample
             layout.addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Icon Painter Example", GL3bc, 800, 800, layout );
+            quickGlimpseApp( "Icon Painter Example", GL3bc, layout );
         } );
     }
 }

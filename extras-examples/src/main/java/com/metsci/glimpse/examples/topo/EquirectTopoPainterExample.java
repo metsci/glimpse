@@ -98,7 +98,7 @@ public class EquirectTopoPainterExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
             plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "EquirectTopoPainterExample", GL3, screenFracSize( 0.8 ), plot );
+            quickGlimpseApp( "EquirectTopoPainterExample", GL3, plot, screenFracSize( 0.8 ) );
         } );
     }
 

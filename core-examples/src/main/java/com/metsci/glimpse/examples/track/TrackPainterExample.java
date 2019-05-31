@@ -50,7 +50,6 @@ import com.metsci.glimpse.painter.track.Point;
 import com.metsci.glimpse.painter.track.Pulsator;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
@@ -116,6 +115,7 @@ public class TrackPainterExample
 
             // add a custom manager class to keep track of the tracks
             TrackManager trackManager = new TrackManager( trackPainter, NUMBER_OF_TRACKS );
+            trackManager.setDaemon( true );
 
             // add a custom listener to the z axis which changes the selected time range for
             // all GeoPlot tracks based on the min and max values of the z axis
@@ -174,10 +174,7 @@ public class TrackPainterExample
             plot.addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Track Painter Example", GL3bc, 800, 800, plot );
-
-            // use the ocean look and feel
-            app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Slippy Tile Example", GL3bc, plot, new OceanLookAndFeel( ) );
         } );
     }
 

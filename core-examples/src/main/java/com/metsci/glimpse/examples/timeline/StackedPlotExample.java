@@ -62,7 +62,7 @@ public class StackedPlotExample
             info2.setSize( 250 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Stacked Plot Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Stacked Plot Example", GL3bc, plot );
         } );
     }
 

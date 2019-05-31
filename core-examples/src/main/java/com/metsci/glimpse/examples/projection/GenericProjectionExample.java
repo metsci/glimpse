@@ -140,7 +140,7 @@ public class GenericProjectionExample
             cursorPainter.setTexture( texture );
 
             // create a window and show the plot
-            quickGlimpseApp( "Generic Projection Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Generic Projection Example", GL3bc, plot );
         } );
     }
 }

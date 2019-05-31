@@ -27,7 +27,9 @@
 package com.metsci.glimpse.examples.screenshot;
 
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
@@ -35,20 +37,21 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GLContext;
+import javax.media.opengl.GLProfile;
 
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * Demonstrates the ability to render Glimpse plots to an off-screen buffer
@@ -66,22 +69,23 @@ public class ScreenCaptureExample
             ColorAxisPlot2D plot = HeatMapExample.newHeatMapPlot( );
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Screen Capture Example", GL3bc, 800, 800, plot );
+            String appName = "Screen Capture Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
+            quickGlimpseWindow( appName, canvas );
 
             // set up a mouse listener to take a screen capture on mouse click
-            setupScreenCapture( app, plot );
+            setupScreenCapture( canvas.getGLContext( ), plot );
         } );
     }
 
-    public static void setupScreenCapture( QuickGlimpseApp app, ColorAxisPlot2D plot )
+    public static void setupScreenCapture( GLContext glContext, ColorAxisPlot2D plot )
     {
-        GlimpseCanvas canvas = app.getCanvas( );
-
         plot.setTitleFont( FontUtils.getDefaultBold( 18 ) );
         plot.setTitle( "Click Center Mouse Button To Take Screenshot" );
 
         // create an offscreen GlimpseCanvas
-        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( canvas.getGLContext( ), 1000, 1000 );
+        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( glContext, 1000, 1000 );
 
         // add the GlimpseLayout from the onscreen canvas to the offscreen canvas as well
         // (GlimpseLayouts can have multiple parents)

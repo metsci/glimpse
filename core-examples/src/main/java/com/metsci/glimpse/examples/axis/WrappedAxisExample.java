@@ -112,7 +112,7 @@ public class WrappedAxisExample
             wrappedPainter.addPainter( new DotPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Wrapped Axis Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Wrapped Axis Example", GL3bc, plot );
         } );
     }
 

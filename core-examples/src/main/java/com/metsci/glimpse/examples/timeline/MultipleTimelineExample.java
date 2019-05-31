@@ -61,7 +61,7 @@ public class MultipleTimelineExample
             estTimeline.setSize( 35 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot );
         } );
     }
 }

@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.examples.scatterplot;
 
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
 import static java.lang.Math.sqrt;
 import static javax.media.opengl.GLProfile.GL3bc;
 
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Random;
 
+import javax.media.opengl.GLProfile;
 import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.gl.GLCapabilityEventListener;
@@ -45,9 +48,9 @@ import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.shape.ShadedPointPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * @author osborn
@@ -208,11 +211,14 @@ public class PointShaderExample
             plot.addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Point Shader Example", GL3bc, 800, 800, plot );
+            String appName = "Point Shader Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
+            quickGlimpseWindow( appName, canvas );
 
             // add a GLEventListener to the GlimpseCanvas which will print some information
             // about GLCapabilities upon initialization
-            app.getCanvas( ).getGLDrawable( ).addGLEventListener( new GLCapabilityEventListener( ) );
+            canvas.getGLDrawable( ).addGLEventListener( new GLCapabilityEventListener( ) );
         } );
     }
 

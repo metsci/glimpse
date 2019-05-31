@@ -112,7 +112,7 @@ public class TreeMapExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Tree Map Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Tree Map Example", GL3bc, plot );
         } );
     }
 

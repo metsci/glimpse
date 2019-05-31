@@ -138,7 +138,7 @@ public class ImageExample
             plot.addPainter( imagePainter );
 
             // create a window and show the plot
-            quickGlimpseApp( "Image Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Image Example", GL3bc, plot );
         } );
     }
 }

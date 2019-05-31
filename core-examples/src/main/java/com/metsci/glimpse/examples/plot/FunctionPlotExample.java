@@ -118,7 +118,7 @@ public class FunctionPlotExample
             layout.addPainter( functionPainter2 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Function Plot Example", GL3bc, 800, 800, layout );
+            quickGlimpseApp( "Function Plot Example", GL3bc, layout );
         } );
     }
 

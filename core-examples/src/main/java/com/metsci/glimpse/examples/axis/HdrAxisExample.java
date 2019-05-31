@@ -79,7 +79,7 @@ public class HdrAxisExample
             plot.getAxisZ( ).setMax( 1.1 );
 
             // create a window and show the plot
-            quickGlimpseApp( "HDR Axis Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "HDR Axis Example", GL3bc, plot );
         } );
     }
 }

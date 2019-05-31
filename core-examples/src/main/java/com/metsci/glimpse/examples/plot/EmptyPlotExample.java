@@ -80,7 +80,7 @@ public class EmptyPlotExample
             plot.setTitle( "Plot Title" );
 
             // create a window and show the plot
-            quickGlimpseApp( "Empty Plot Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Empty Plot Example", GL3bc, plot );
         } );
     }
 }

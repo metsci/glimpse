@@ -100,7 +100,7 @@ public class MercatorTopoPainterExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
             plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "MercatorTopoPainterExample", GL3, screenFracSize( 0.8 ), plot );
+            quickGlimpseApp( "MercatorTopoPainterExample", GL3, plot, screenFracSize( 0.8 ) );
         } );
     }
 

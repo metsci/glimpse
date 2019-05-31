@@ -63,6 +63,7 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.platformFixes.PlatformFixes;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
@@ -233,12 +234,44 @@ public class QuickUtils
         return plot;
     }
 
-    /**
-     * @see #quickGlimpseApp(String, String, Dimension, GlimpseLayout)
-     */
-    public static QuickGlimpseApp quickGlimpseApp( String appName, String glProfileName, int width, int height, GlimpseLayout layout )
+    public static AbstractLookAndFeel quickDefaultLaf( )
     {
-        return quickGlimpseApp( appName, glProfileName, new Dimension( width, height ), layout );
+        return new SwingLookAndFeel( );
+    }
+
+    public static SwingEDTAnimator quickDefaultAnimator( )
+    {
+        return new SwingEDTAnimator( 60 );
+    }
+
+    public static Dimension quickDefaultSize( )
+    {
+        return new Dimension( 800, 800 );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, quickDefaultSize( ) );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, LookAndFeel laf )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, quickDefaultSize( ), laf );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, int width, int height )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, width, height, quickDefaultLaf( ) );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, int width, int height, LookAndFeel laf )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, new Dimension( width, height ) );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, Dimension size )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, size, quickDefaultLaf( ) );
     }
 
     /**
@@ -254,7 +287,23 @@ public class QuickUtils
      * <strong>NOTE:</strong> If the named {@link GLProfile} is not available, and the
      * user chooses to quit rather than continue, this method calls {@link System#exit(int)}!
      */
-    public static QuickGlimpseApp quickGlimpseApp( String appName, String glProfileName, Dimension size, GlimpseLayout layout )
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, Dimension size, LookAndFeel laf )
+    {
+        GLProfile glProfile = initGlimpseOrExitJvm( appName, glProfileName );
+        NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, layout, laf );
+        return quickGlimpseWindow( appName, canvas, size );
+    }
+
+    /**
+     * Does several things that are typically done at application startup:
+     * <ol>
+     * <li>Calls {@link #initStandardGlimpseApp()}
+     * <li>Warns the user if the named {@link GLProfile} is not available
+     * <li>If the user chooses to continue anyway, returns null
+     * <li><strong>If the user chooses NOT to continue, calls {@link System#exit(int)}</strong>
+     * </ol>
+     */
+    public static GLProfile initGlimpseOrExitJvm( String appName, String glProfileName )
     {
         initStandardGlimpseApp( );
 
@@ -264,76 +313,54 @@ public class QuickUtils
             System.exit( 1 );
         }
 
-        return quickGlimpseWindow( appName, glProfile, size, layout );
+        return glProfile;
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     * <p>
-     * @throws GLException if the named {@link GLProfile} is not available.
-     */
-    public static QuickGlimpseApp quickGlimpseWindow( String title, String glProfileName, int width, int height, GlimpseLayout layout ) throws GLException
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( String glProfileName, GlimpseLayout layout )
     {
-        return quickGlimpseWindow( title, glProfileName, new Dimension( width, height ), layout );
+        return quickGlimpseCanvas( GLProfile.get( glProfileName ), layout );
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     * <p>
-     * @throws GLException if the named {@link GLProfile} is not available.
-     */
-    public static QuickGlimpseApp quickGlimpseWindow( String title, String glProfileName, Dimension size, GlimpseLayout layout ) throws GLException
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( String glProfileName, GlimpseLayout layout, LookAndFeel laf )
     {
-        return quickGlimpseWindow( title, GLProfile.get( glProfileName ), size, layout );
+        return quickGlimpseCanvas( GLProfile.get( glProfileName ), layout, laf );
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     */
-    public static QuickGlimpseApp quickGlimpseWindow( String title, GLProfile glProfile, Dimension size, GlimpseLayout layout )
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLProfile glProfile, GlimpseLayout layout )
     {
-        return quickGlimpseWindow( title,
-                                   new NewtSwingEDTGlimpseCanvas( glProfile ),
-                                   new SwingEDTAnimator( 60 ),
-                                   new SwingLookAndFeel( ),
-                                   size,
-                                   layout );
+        return quickGlimpseCanvas( glProfile, layout, quickDefaultLaf( ) );
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     */
-    public static QuickGlimpseApp quickGlimpseWindow( String title,
-                                                      GLContext glContext,
-                                                      GLAnimatorControl animator,
-                                                      LookAndFeel laf,
-                                                      Dimension size,
-                                                      GlimpseLayout layout )
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLProfile glProfile, GlimpseLayout layout, LookAndFeel laf )
     {
-        return quickGlimpseWindow( title,
-                                   new NewtSwingEDTGlimpseCanvas( glContext ),
-                                   animator,
-                                   laf,
-                                   size,
-                                   layout );
+        return quickGlimpseCanvas( glProfile, layout, laf, quickDefaultAnimator( ) );
     }
 
-    /**
-     * In most cases it is more natural to call one of the other {@code quickGlimpseWindow}
-     * methods (e.g. {@link #quickGlimpseWindow(String, String, int, int, GlimpseLayout)}).
-     * <p>
-     * This method is for convenience only. It is perfectly acceptable for an application
-     * to perform some or all of these init operations piecemeal, instead of calling this
-     * method.
-     * <p>
-     * <strong>NOTE:</strong> Must be called on the Swing EDT.
-     */
-    public static QuickGlimpseApp quickGlimpseWindow( String title,
-                                                      NewtSwingEDTGlimpseCanvas canvas,
-                                                      GLAnimatorControl animator,
-                                                      LookAndFeel laf,
-                                                      Dimension size,
-                                                      GlimpseLayout layout )
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLContext glContext, GlimpseLayout layout )
+    {
+        return quickGlimpseCanvas( glContext, layout, quickDefaultLaf( ) );
+    }
+
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLContext glContext, GlimpseLayout layout, LookAndFeel laf )
+    {
+        return quickGlimpseCanvas( glContext, layout, laf, quickDefaultAnimator( ) );
+    }
+
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLProfile glProfile, GlimpseLayout layout, LookAndFeel laf, GLAnimatorControl animator )
+    {
+        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
+        initGlimpseCanvas( canvas, layout, laf, animator );
+        return canvas;
+    }
+
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLContext glContext, GlimpseLayout layout, LookAndFeel laf, GLAnimatorControl animator )
+    {
+        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glContext );
+        initGlimpseCanvas( canvas, layout, laf, animator );
+        return canvas;
+    }
+
+    public static void initGlimpseCanvas( NewtSwingEDTGlimpseCanvas canvas, GlimpseLayout layout, LookAndFeel laf, GLAnimatorControl animator )
     {
         requireSwingThread( );
 
@@ -342,9 +369,23 @@ public class QuickUtils
         // setLaf() only affects existing contents, so call it AFTER adding everything
         canvas.setLookAndFeel( laf );
 
-        GLAutoDrawable drawable = canvas.getGLDrawable( );
-        animator.add( drawable );
+        animator.add( canvas.getGLDrawable( ) );
         animator.start( );
+    }
+
+    public static JFrame quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas )
+    {
+        return quickGlimpseWindow( title, canvas, quickDefaultSize( ) );
+    }
+
+    public static JFrame quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas, int width, int height )
+    {
+        return quickGlimpseWindow( title, canvas, new Dimension( width, height ) );
+    }
+
+    public static JFrame quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas, Dimension size )
+    {
+        requireSwingThread( );
 
         JFrame frame = new JFrame( );
         frame.setTitle( title );
@@ -353,7 +394,6 @@ public class QuickUtils
         // listener does -- so add it before we add the canvas to the frame
         onWindowClosing( frame, ( ev ) ->
         {
-            animator.remove( drawable );
             tearDownCanvas( canvas );
         } );
 
@@ -363,7 +403,7 @@ public class QuickUtils
         frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         frame.setVisible( true );
 
-        return new QuickGlimpseApp( canvas, animator, frame );
+        return frame;
     }
 
     /**
@@ -374,6 +414,15 @@ public class QuickUtils
      */
     public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
     {
+        // Remove the canvas from its animator -- which will pause the animator if it
+        // doesn't have any other drawables
+        GLAutoDrawable drawable = canvas.getGLDrawable( );
+        GLAnimatorControl animator = drawable.getAnimator( );
+        if ( animator != null )
+        {
+            animator.remove( drawable );
+        }
+
         // Hold a reference to the screen so that JOGL's auto-cleanup doesn't destroy
         // and then recreate resources (like the NEDT thread) while we're still working
         Screen screen = canvas.getGLWindow( ).getScreen( );
@@ -426,32 +475,4 @@ public class QuickUtils
         }
     }
 
-    public static class QuickGlimpseApp
-    {
-        protected NewtSwingEDTGlimpseCanvas canvas;
-        protected GLAnimatorControl animator;
-        protected JFrame frame;
-
-        public QuickGlimpseApp( NewtSwingEDTGlimpseCanvas canvas, GLAnimatorControl animator, JFrame frame )
-        {
-            this.canvas = canvas;
-            this.animator = animator;
-            this.frame = frame;
-        }
-
-        public NewtSwingEDTGlimpseCanvas getCanvas( )
-        {
-            return canvas;
-        }
-
-        public GLAnimatorControl getAnimator( )
-        {
-            return animator;
-        }
-
-        public JFrame getFrame( )
-        {
-            return frame;
-        }
-    }
 }

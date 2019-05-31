@@ -62,7 +62,7 @@ public class HillShadeExample implements TopoTileProvider
         swingInvokeLater( ( ) ->
         {
             // create a window and show the plot
-            quickGlimpseApp( "Hill Shade Example", GL3bc, 800, 800, new HillShadeExample( ).getLayout( ) );
+            quickGlimpseApp( "Hill Shade Example", GL3bc, new HillShadeExample( ).getLayout( ) );
         } );
     }
 

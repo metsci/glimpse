@@ -26,14 +26,18 @@
  */
 package com.metsci.glimpse.examples.charts.slippy;
 
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.media.opengl.GLProfile;
 import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButton;
 
@@ -45,7 +49,7 @@ import com.metsci.glimpse.charts.slippy.SlippyMapPainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
 import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -128,10 +132,13 @@ public class SlippyTileExample
             cartoDarkcheckBox.addActionListener( l );
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Slippy Tile Example", GL3bc, 800, 800, mapPlot );
+            String appName = "Slippy Tile Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, mapPlot );
+            JFrame frame = quickGlimpseWindow( appName, canvas );
 
-            app.getFrame( ).setJMenuBar( mapToolBar );
-            app.getFrame( ).validate( );
+            frame.setJMenuBar( mapToolBar );
+            frame.validate( );
 
         } );
     }

@@ -116,7 +116,7 @@ public class RasterNavigationChartExample
             plot.setMaxY( Math.max( xy00[1], xy11[1] ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Raster Navigation Chart Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Raster Navigation Chart Example", GL3bc, plot );
         } );
     }
 }

@@ -66,7 +66,7 @@ public class LineJoinExample
             plot.addPainter( new BackgroundPainter( ) );
             plot.addPainter( new CustomLinesPainter( ) );
 
-            quickGlimpseApp( "LineJoinExample", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "LineJoinExample", GL3bc, plot );
         } );
     }
 

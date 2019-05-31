@@ -237,7 +237,7 @@ public class PolygonPainterExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Polygon Painter Example", GL3bc, 800, 800, polyplot );
+            quickGlimpseApp( "Polygon Painter Example", GL3bc, polyplot );
 
         } );
     }

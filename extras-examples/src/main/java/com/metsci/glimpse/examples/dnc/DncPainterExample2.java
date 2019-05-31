@@ -109,7 +109,7 @@ public class DncPainterExample2
             // Show
             //
 
-            quickGlimpseApp( "DNC Example", GL3bc, screenFracSize( 0.8 ), plot );
+            quickGlimpseApp( "DNC Example", GL3bc, plot, screenFracSize( 0.8 ) );
         } );
     }
 

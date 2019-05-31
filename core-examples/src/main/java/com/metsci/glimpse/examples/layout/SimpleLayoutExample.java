@@ -102,7 +102,7 @@ public class SimpleLayoutExample
             rightPlotLayout.addLayout( rightPlot );
             leftPlotLayout.addLayout( leftPlot );
 
-            quickGlimpseApp( "Simple Layout Example", GL3bc, 800, 800, layoutParent );
+            quickGlimpseApp( "Simple Layout Example", GL3bc, layoutParent );
 
         } );
     }

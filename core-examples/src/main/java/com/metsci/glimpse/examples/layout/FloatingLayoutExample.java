@@ -172,7 +172,7 @@ public class FloatingLayoutExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Floating Layout Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Floating Layout Example", GL3bc, plot );
         } );
     }
 }

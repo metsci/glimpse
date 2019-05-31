@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.examples.misc;
 
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
@@ -34,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
+import javax.media.opengl.GLProfile;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingUtilities;
@@ -46,7 +49,7 @@ import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
 import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
@@ -95,7 +98,10 @@ public class PopupMenuExample
             };
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Popup Menu Example", GL3bc, 800, 800, plot );
+            String appName = "Popup Menu Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
+            quickGlimpseWindow( appName, canvas );
 
             // add a popup menu to the plot
             SwingUtilities.invokeLater( ( ) ->
@@ -109,8 +115,8 @@ public class PopupMenuExample
                     {
                         if ( event.isButtonDown( MouseButton.Button3 ) )
                         {
-                            event = TargetStackUtil.translateCoordinates( event, app.getCanvas( ) );
-                            popupMenu.show( app.getCanvas( ), event.getX( ), event.getY( ) );
+                            event = TargetStackUtil.translateCoordinates( event, canvas );
+                            popupMenu.show( canvas, event.getX( ), event.getY( ) );
                         }
                     }
                 } );

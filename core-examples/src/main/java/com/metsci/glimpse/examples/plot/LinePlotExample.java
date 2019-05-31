@@ -129,7 +129,7 @@ public class LinePlotExample
             // add the legend painter to the top of the center GlimpseLayout
             plot.addPainter( legend );
 
-            quickGlimpseApp( "LinePlotExample", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "LinePlotExample", GL3bc, plot );
         } );
     }
 

@@ -192,7 +192,7 @@ public class MultiAxisPlotExample
             plot.addPainter( new BorderPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Multi Axis Plot Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Multi Axis Plot Example", GL3bc, plot );
         } );
     }
 }

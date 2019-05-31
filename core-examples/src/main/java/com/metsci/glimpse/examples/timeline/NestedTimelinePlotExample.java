@@ -104,7 +104,7 @@ public class NestedTimelinePlotExample
             midGroup4.addChildPlot( plot6 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Collapsible Timeline Plot Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Collapsible Timeline Plot Example", GL3bc, plot );
         } );
     }
 

@@ -98,7 +98,7 @@ public class ButtonExample
             plot.getLayoutCenter( ).addLayout( button, Plot2D.FOREGROUND_LAYER );
 
             // create a window and show the plot
-            quickGlimpseApp( "Button Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Button Example", GL3bc, plot );
         } );
     }
 }

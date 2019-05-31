@@ -62,7 +62,7 @@ public class LinePathExample
             plot.addPainter( new BackgroundPainter( ) );
             plot.addPainter( new CustomLinesPainter( ) );
 
-            quickGlimpseApp( "LinePathExample", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "LinePathExample", GL3bc, plot );
         } );
     }
 

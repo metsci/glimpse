@@ -101,7 +101,7 @@ public class LineJoinExample2
             plot.addPainter( new CustomLinesPainter( leftAngleTag, rightAngleTag, thicknessTag, featherTag ) );
             plot.addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "LineJoinExample2", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "LineJoinExample2", GL3bc, plot );
         } );
     }
 

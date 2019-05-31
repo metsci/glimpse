@@ -232,7 +232,7 @@ public class GlobalDynamicReprojectionExample
             plot.addPainter( new BorderPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Global Dynamic Reprojection Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Global Dynamic Reprojection Example", GL3bc, plot );
         } );
     }
 

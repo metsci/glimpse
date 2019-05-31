@@ -204,7 +204,7 @@ public class DynamicReprojectionExample
             plot.addPainter( new BorderPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Dynamic Reprojection Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Dynamic Reprojection Example", GL3bc, plot );
         } );
     }
 

@@ -26,14 +26,15 @@
  */
 package com.metsci.glimpse.examples.dnc;
 
-import static com.metsci.glimpse.dnc.DncDataPaths.*;
-import static com.metsci.glimpse.dnc.DncProjections.*;
-import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.util.GlimpseDataPaths.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
+import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
+import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import com.metsci.glimpse.dnc.DncPainter;
 import com.metsci.glimpse.dnc.DncPainterSettings;
@@ -86,7 +87,7 @@ public class DncPainterExample
             // Show
             //
 
-            quickGlimpseApp( "DNC Example", GL3bc, screenFracSize( 0.8 ), plot );
+            quickGlimpseApp( "DNC Example", GL3bc, plot, screenFracSize( 0.8 ) );
         } );
     }
 

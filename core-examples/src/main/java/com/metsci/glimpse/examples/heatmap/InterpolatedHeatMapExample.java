@@ -69,7 +69,7 @@ public class InterpolatedHeatMapExample
             plot.setColorScale( heatmapPainter.getColorScale( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Interpolated Heat Map Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Interpolated Heat Map Example", GL3bc, plot );
         } );
     }
 

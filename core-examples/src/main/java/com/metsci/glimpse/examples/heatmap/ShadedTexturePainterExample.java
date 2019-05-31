@@ -124,7 +124,7 @@ public class ShadedTexturePainterExample
             plot.setSelectionSize( 100.0f );
 
             // create a window and show the plot
-            quickGlimpseApp( "Shaded Texture Painter Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Shaded Texture Painter Example", GL3bc, plot );
         } );
     }
 }

@@ -83,7 +83,7 @@ public class BathymetryExample
         swingInvokeLater( ( ) ->
         {
             // create a window and show the plot
-            quickGlimpseApp( "Bathymetry Example", GL3bc, 800, 800, new BathymetryExample( ).getPlot( ) );
+            quickGlimpseApp( "Bathymetry Example", GL3bc, new BathymetryExample( ).getPlot( ) );
         } );
     }
 

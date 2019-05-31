@@ -75,7 +75,7 @@ public class TextureAtlasExample
             layout.addPainter( new SimpleIconPainter( atlas ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Texture Atlas Example", GL3bc, 800, 800, layout );
+            quickGlimpseApp( "Texture Atlas Example", GL3bc, layout );
         } );
     }
 

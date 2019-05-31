@@ -54,7 +54,7 @@ public class HeatMapExample
         swingInvokeLater( ( ) ->
         {
             // create a window and show the plot
-            quickGlimpseApp( "Heat Map Example", GL3bc, 800, 800, newHeatMapPlot( ) );
+            quickGlimpseApp( "Heat Map Example", GL3bc, newHeatMapPlot( ) );
         } );
     }
 

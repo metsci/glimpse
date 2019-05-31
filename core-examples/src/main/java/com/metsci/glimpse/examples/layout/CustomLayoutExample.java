@@ -151,7 +151,7 @@ public class CustomLayoutExample
             leftPlotLayout.addPainter( new GridPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Custom Layout Example", GL3bc, 800, 800, layoutParent );
+            quickGlimpseApp( "Custom Layout Example", GL3bc, layoutParent );
         } );
     }
 }

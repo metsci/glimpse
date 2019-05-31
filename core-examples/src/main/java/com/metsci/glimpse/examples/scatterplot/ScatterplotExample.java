@@ -273,7 +273,7 @@ public class ScatterplotExample
                 painter.setDiscardBelowColor( true );
 
                 // create a window and show the plot
-                quickGlimpseApp( "Scatterplot Example", GL3bc, 800, 800, plot );
+                quickGlimpseApp( "Scatterplot Example", GL3bc, plot );
             }
             catch ( Exception e )
             {

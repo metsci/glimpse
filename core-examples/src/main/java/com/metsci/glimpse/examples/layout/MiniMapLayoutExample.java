@@ -74,7 +74,7 @@ public class MiniMapLayoutExample
             mini.addPainter( plot.getPainterByKey( TaggedHeatMapExample.PainterKey ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Mini Map Layout Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Mini Map Layout Example", GL3bc, plot );
         } );
     }
 }

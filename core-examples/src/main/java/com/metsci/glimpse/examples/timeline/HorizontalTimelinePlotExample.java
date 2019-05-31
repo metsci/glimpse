@@ -42,7 +42,6 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
@@ -70,10 +69,7 @@ public class HorizontalTimelinePlotExample
             StackedTimePlot2D plot = new HorizontalTimelinePlotExample( ).getPlot( );
 
             // create a window and show the plot
-            QuickGlimpseApp app = quickGlimpseApp( "Horizontal Timeline Example", GL3bc, 800, 800, plot );
-
-            // set a blue color scheme look and feel for the plot
-            app.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Horizontal Timeline Example", GL3bc, plot, new OceanLookAndFeel( ) );
         } );
     }
 

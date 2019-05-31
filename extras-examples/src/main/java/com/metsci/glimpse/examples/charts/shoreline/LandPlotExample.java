@@ -104,7 +104,7 @@ public class LandPlotExample
             plot.getCrosshairPainter( ).setVisible( false );
 
             // create a window and show the plot
-            quickGlimpseApp( "Land Plot Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Land Plot Example", GL3bc, plot );
         } );
     }
 }

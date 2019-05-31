@@ -26,13 +26,17 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static javax.media.opengl.GLProfile.GL3bc;
 
+import javax.media.opengl.GLProfile;
+import javax.swing.JFrame;
+
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.QuickUtils.QuickGlimpseApp;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 
 /**
@@ -62,14 +66,15 @@ public class LinkedTaggedHeatMapExample
             // link x and y axes of the two plots
             leftPlot.getAxis( ).setParent( rightPlot.getAxis( ) );
 
-            // create a window and show the left plot
-            QuickGlimpseApp leftApp = quickGlimpseApp( "Linked Heat Map Example", GL3bc, 800, 800, leftPlot );
-            // create a window and show the right plot
-            QuickGlimpseApp rightApp = quickGlimpseApp( "Linked Heat Map Example", GL3bc, 800, 800, rightPlot );
+            // create windows and show the plots
+            String appName = "Linked Heat Map Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            JFrame leftFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, leftPlot ) );
+            JFrame rightFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, rightPlot ) );
 
             // place the windows side by side
-            rightApp.getFrame( ).setLocation( 800, 0 );
-            leftApp.getFrame( ).setLocation( 0, 0 );
+            rightFrame.setLocation( 800, 0 );
+            leftFrame.setLocation( 0, 0 );
         } );
     }
 }

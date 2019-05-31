@@ -210,7 +210,7 @@ public class WrappedAxisExample2
             // Make sure the BackgroundPainter gets assigned a color -- otherwise blending turns out weird
             layout.setLookAndFeel( new DefaultLookAndFeel( ) );
 
-            quickGlimpseApp( "WrappedAxisExample2", GL3, screenFracSize( 0.8 ), layout );
+            quickGlimpseApp( "WrappedAxisExample2", GL3, layout, screenFracSize( 0.8 ) );
 
         } );
     }

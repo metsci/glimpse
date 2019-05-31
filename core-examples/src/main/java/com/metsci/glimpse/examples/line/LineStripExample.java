@@ -62,7 +62,7 @@ public class LineStripExample
             plot.addPainter( new BackgroundPainter( ) );
             plot.addPainter( new LineStripExamplePainter( ) );
 
-            quickGlimpseApp( "LineStripExample", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "LineStripExample", GL3bc, plot );
         } );
     }
 

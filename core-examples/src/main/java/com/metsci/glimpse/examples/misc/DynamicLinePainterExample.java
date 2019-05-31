@@ -100,7 +100,7 @@ public class DynamicLinePainterExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Dynamic Line Painter Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Dynamic Line Painter Example", GL3bc, plot );
         } );
     }
 }

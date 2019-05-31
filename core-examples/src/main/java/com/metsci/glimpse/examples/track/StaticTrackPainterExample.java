@@ -100,7 +100,7 @@ public class StaticTrackPainterExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Static Track Painter Example", GL3bc, 800, 800, plot );
+            quickGlimpseApp( "Static Track Painter Example", GL3bc, plot );
         } );
     }
 }
