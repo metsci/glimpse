@@ -68,7 +68,7 @@ public class LayeredExample
             // Typical preamble for Swing/Glimpse
             //
 
-            initializeLogging( "com/metsci/glimpse/examples/layers/LayeredExample/logging.properties" );
+            initializeLogging( "com/metsci/glimpse/examples/layers/config/logging.properties" );
             initTinyLaf( );
             initStandardGlimpseApp( );
 
@@ -141,7 +141,7 @@ public class LayeredExample
             //
 
             LayeredGui gui = new LayeredGui( "Layered Example", FPS( 30 ) );
-            gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
+            gui.arrange( "LayeredExample", "com/metsci/glimpse/examples/layers/config/docking-defaults.xml" );
 
             addGeoLinkage( gui, "Geo Defaults", geoTemplate );
             addTimeLinkage( gui, "Time Defaults", timeTemplate );

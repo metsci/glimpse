@@ -156,8 +156,8 @@ import com.metsci.glimpse.util.var.Var;
  */
 public class LayeredGui
 {
-    public static final Icon cloneIcon = requireIcon( "fugue-icons/cards.png" );
-    public static final Icon layersIcon = requireIcon( "fugue-icons/category.png" );
+    public static final Icon cloneIcon = requireIcon( "com/metsci/glimpse/layers/icons/fugue/cards.png" );
+    public static final Icon layersIcon = requireIcon( "com/metsci/glimpse/layers/icons/fugue/category.png" );
     public static final String layerCardsViewId = "com.metsci.glimpse.layers.geo.LayeredGui.layerCardsView";
 
 

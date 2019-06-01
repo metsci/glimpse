@@ -43,9 +43,9 @@ import com.metsci.glimpse.gl.GLEditableBuffer;
 public class ExampleProgram
 {
 
-    public static final String exampleVertShader_GLSL = requireResourceText( ExampleProgram.class, "ExampleProgram/example.vs" );
-    public static final String exampleGeomShader_GLSL = requireResourceText( ExampleProgram.class,  "ExampleProgram/example.gs" );
-    public static final String exampleFragShader_GLSL = requireResourceText( ExampleProgram.class,  "ExampleProgram/example.fs" );
+    public static final String exampleVertShader_GLSL = requireResourceText( "com/metsci/glimpse/examples/layers/shader/example.vs" );
+    public static final String exampleGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/examples/layers/shader/example.gs" );
+    public static final String exampleFragShader_GLSL = requireResourceText( "com/metsci/glimpse/examples/layers/shader/example.fs" );
 
 
     public static class ExampleProgramHandles

@@ -86,7 +86,7 @@ public class TimelineView extends GlimpseCanvasView
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "open-icons/time.png" );
+        return requireIcon( "com/metsci/glimpse/layers/icons/openicon/time.png" );
     }
 
     @Override

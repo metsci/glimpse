@@ -88,7 +88,7 @@ public class GeoView extends GlimpseCanvasView
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "fugue-icons/map.png" );
+        return requireIcon( "com/metsci/glimpse/layers/icons/fugue/map.png" );
     }
 
     @Override

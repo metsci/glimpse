@@ -18,4 +18,8 @@ module com.metsci.glimpse.layers
 	requires transitive com.google.common;
 	requires transitive miglayout.swing;
     requires transitive java.desktop;
+    
+    opens com.metsci.glimpse.layers.icons.fugue;
+    opens com.metsci.glimpse.layers.icons.openicon;
+    opens com.metsci.glimpse.layers.shader;
 }
