@@ -44,7 +44,6 @@ import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.newLabel;
 import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
-import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
@@ -327,8 +326,7 @@ public class DncExplorer
                 public void disposingAllWindows( DockingGroup group )
                 {
                     attrsTableModel.dispose( );
-                    animator.stop( );
-                    tearDownCanvas( geoCanvas );
+                    geoCanvas.destroy( );
                 }
             } );
 
