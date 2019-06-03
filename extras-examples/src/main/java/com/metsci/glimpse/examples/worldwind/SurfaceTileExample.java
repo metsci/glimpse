@@ -74,7 +74,7 @@ public class SurfaceTileExample
         panel.add( wwc, BorderLayout.CENTER );
 
         // put any GlimpseLayout here!
-        ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
+        ColorAxisPlot2D layout = HeatMapExample.newHeatMapPlot( );
 
         GlimpseStaticSurfaceTile glimpseLayer = new GlimpseStaticSurfaceTile( layout, 1000, 1000, CORNERS );
         ApplicationTemplate.insertBeforePlacenames( wwc, glimpseLayer );

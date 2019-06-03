@@ -26,11 +26,17 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.media.opengl.GLProfile;
+import javax.swing.JFrame;
+
 import com.metsci.glimpse.axis.UpdateMode;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.colormap.ColorGradient;
@@ -47,62 +53,32 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  */
 public class LinkedHeatMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        final LinkedHeatMapExample example = new LinkedHeatMapExample( );
-
-        Example.showWithSwing( new GlimpseLayoutProvider( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public GlimpseLayout getLayout( )
-            {
-                return example.getLayoutLeft( );
-            }
+            // create two heat map plots
+            ColorAxisPlot2D leftPlot = newPlot( ColorGradients.reverseBone );
+            ColorAxisPlot2D rightPlot = newPlot( ColorGradients.jet );
 
-        }, new GlimpseLayoutProvider( )
-        {
-            @Override
-            public GlimpseLayout getLayout( )
-            {
-                return example.getLayoutRight( );
-            }
+            // link the x, y, and z axis of the two heat maps by creating a parent/child
+            // relationship between them. Any changes to the parent or child will propagate
+            // to all ancestors and siblings
+            rightPlot.getAxis( ).setParent( leftPlot.getAxis( ) );
+
+            // create windows and show the plots
+            String appName = "Linked Heat Map Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            JFrame leftFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, leftPlot ) );
+            JFrame rightFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, rightPlot ) );
+
+            // place the windows side by side
+            rightFrame.setLocation( 800, 0 );
+            leftFrame.setLocation( 0, 0 );
         } );
     }
 
-    ////////////
-    ////////////
-    ////////////
-
-    protected ColorAxisPlot2D leftPlot;
-    protected ColorAxisPlot2D rightPlot;
-    protected FloatTextureProjected2D texture;
-
-    public ColorAxisPlot2D getLayoutLeft( )
-    {
-        if ( leftPlot == null ) buildLayouts( );
-
-        return leftPlot;
-    }
-
-    public ColorAxisPlot2D getLayoutRight( )
-    {
-        if ( rightPlot == null ) buildLayouts( );
-
-        return rightPlot;
-    }
-
-    protected void buildLayouts( )
-    {
-        this.leftPlot = createPlot2D( ColorGradients.reverseBone );
-        this.rightPlot = createPlot2D( ColorGradients.jet );
-
-        // link the x, y, and z axis of the two heat maps by creating a parent/child
-        // relationship between them. Any changes to the parent or child will propagate
-        // to all ancestors and siblings
-        rightPlot.getAxis( ).setParent( leftPlot.getAxis( ) );
-    }
-
-    public ColorAxisPlot2D createPlot2D( ColorGradient gradient )
+    public static ColorAxisPlot2D newPlot( ColorGradient gradient )
     {
         // create a premade lineplot
         ColorAxisPlot2D plot = new ColorAxisPlot2D( );
@@ -139,7 +115,7 @@ public class LinkedHeatMapExample
 
         // load the color-map and texture into the painter
         painter.setColorScale( colorScale );
-        if ( texture == null ) texture = createTextureData( );
+        FloatTextureProjected2D texture = createTextureData( );
         painter.setData( texture );
 
         // set the color scale on the plot z axis

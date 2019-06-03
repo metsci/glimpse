@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -118,7 +118,7 @@ public class IconPainter extends GlimpsePainterBase
     protected GlimpseMouseEvent pickMouseEvent;
     protected Collection<PickResult> pickResults;
     protected List<SpatialSelectionListener<PickResult>> pickListeners;
-    protected Executor pickNotificationThread;
+    protected ExecutorService pickNotificationThread;
 
     //@formatter:off
     public IconPainter( int initialGroupSize, boolean enablePicking )
@@ -132,7 +132,12 @@ public class IconPainter extends GlimpsePainterBase
         this.pickSupportEnabled = enablePicking;
         this.pickResultBuffer = Buffers.newDirectByteBuffer( Buffers.SIZEOF_BYTE * COMPONENTS_PER_COLOR * ( WIDTH_BUFFER * 2 + 1 ) * ( HEIGHT_BUFFER * 2 + 1 ) );
         this.pickListeners = new CopyOnWriteArrayList<SpatialSelectionListener<PickResult>>( );
-        this.pickNotificationThread = Executors.newSingleThreadExecutor( );
+        this.pickNotificationThread = Executors.newSingleThreadExecutor( ( runnable )->
+        {
+            Thread thread = new Thread( runnable );  
+            thread.setDaemon( true );
+            return thread;
+        });
 
         this.initialGroupSize = initialGroupSize;
     }
@@ -771,12 +776,14 @@ public class IconPainter extends GlimpsePainterBase
         //XXX who should dispose of the texture atlas?
         //XXX us if we created it, someone else if it was passed in...?
 
-        for ( IconGroup group : iconGroupMap.values( ) )
+        for ( IconGroup group : this.iconGroupMap.values( ) )
         {
             group.dispose( );
         }
 
-        if ( pickFrameBuffer != null ) pickFrameBuffer.dispose( context.getGLContext( ) );
+        if ( this.pickFrameBuffer != null ) this.pickFrameBuffer.dispose( context.getGLContext( ) );
+
+        this.pickNotificationThread.shutdown( );
     }
 
     public class PickResult

@@ -26,19 +26,21 @@
  */
 package com.metsci.glimpse.examples.misc;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.plot.SimplePlot2D;
+import com.metsci.glimpse.plot.Plot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
 /**
@@ -46,61 +48,57 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-public class ButtonExample implements GlimpseLayoutProvider
+public class ButtonExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new ButtonExample( ) );
-    }
-
-    @Override
-    public SimplePlot2D getLayout( )
-    {
-        // use the HeatMapExample as a base, then add a button to it
-        HeatMapExample heatMapExample = new HeatMapExample( );
-        ColorAxisPlot2D plot = heatMapExample.getLayout( );
-        plot.getCrosshairPainter( ).setVisible( false );
-        heatMapExample.getCursorPainter( ).setVisible( false );
-
-        // create a new GlimpseLayout (which will be our button)
-        GlimpseLayout button = new GlimpseLayout( );
-
-        // create a BackgroundPainter to draw a solid color background on the button and add it to the GlimpseLayout
-        final BackgroundPainter background = new BackgroundPainter( ).setColor( GlimpseColor.fromColorRgb( 0.4f, 0.4f, 0.4f ) );
-        button.addPainter( background );
-
-        // create a SimpleTextPainter to paint a simple centered text string and add it to the GlimpseLayout
-        button.addPainter( new SimpleTextPainter( ).setText( "Button" ).setHorizontalPosition( HorizontalPosition.Center ).setVerticalPosition( VerticalPosition.Center ) );
-
-        // create a BorderPainter to draw a solid color border around the GlimpseLayout
-        button.addPainter( new BorderPainter( ).setColor( GlimpseColor.fromColorRgb( 0.2f, 0.2f, 0.2f ) ).setLineWidth( 3.0f ) );
-
-        // set the MIG Layout constraints for the GlimpseLayout (see http://migcalendar.com/miglayout/cheatsheet.html for
-        // a great MIG Layout guide). These constraints will position the GlimpseLayout button floating in the upper
-        // right hand corder of the plot.
-        button.setLayoutData( "pos (container.w-60) (container.h-30) (container.w-5) (container.h-5)" );
-
-        // add a mouse listener to the button which will print a message and change the background color when pressed
-        button.addGlimpseMouseListener( new GlimpseMouseAdapter( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public void mousePressed( GlimpseMouseEvent event )
-            {
-                System.out.println( "Pressed!" );
-                background.setColor( GlimpseColor.fromColorRgb( 0.8f, 0.8f, 0.8f ) );
-            }
+            // use the HeatMapExample as a base, then add a button to it
+            ColorAxisPlot2D plot = HeatMapExample.newEmptyPlot( );
 
-            @Override
-            public void mouseReleased( GlimpseMouseEvent event )
+            // create a new GlimpseLayout (which will be our button)
+            GlimpseLayout button = new GlimpseLayout( );
+
+            // create a BackgroundPainter to draw a solid color background on the button and add it to the GlimpseLayout
+            final BackgroundPainter background = new BackgroundPainter( ).setColor( GlimpseColor.fromColorRgb( 0.4f, 0.4f, 0.4f ) );
+            button.addPainter( background );
+
+            // create a SimpleTextPainter to paint a simple centered text string and add it to the GlimpseLayout
+            button.addPainter( new SimpleTextPainter( ).setText( "Button" ).setHorizontalPosition( HorizontalPosition.Center ).setVerticalPosition( VerticalPosition.Center ) );
+
+            // create a BorderPainter to draw a solid color border around the GlimpseLayout
+            button.addPainter( new BorderPainter( ).setColor( GlimpseColor.fromColorRgb( 0.2f, 0.2f, 0.2f ) ).setLineWidth( 3.0f ) );
+
+            // set the MIG Layout constraints for the GlimpseLayout (see http://migcalendar.com/miglayout/cheatsheet.html for
+            // a great MIG Layout guide). These constraints will position the GlimpseLayout button floating in the upper
+            // right hand corder of the plot.
+            button.setLayoutData( "pos (container.w-60) (container.h-30) (container.w-5) (container.h-5)" );
+
+            // add a mouse listener to the button which will print a message and change the background color when pressed
+            button.addGlimpseMouseListener( new GlimpseMouseAdapter( )
             {
-                System.out.println( "Released!" );
-                background.setColor( GlimpseColor.fromColorRgb( 0.4f, 0.4f, 0.4f ) );
-            }
+                @Override
+                public void mousePressed( GlimpseMouseEvent event )
+                {
+                    System.out.println( "Pressed!" );
+                    background.setColor( GlimpseColor.fromColorRgb( 0.8f, 0.8f, 0.8f ) );
+                }
+
+                @Override
+                public void mouseReleased( GlimpseMouseEvent event )
+                {
+                    System.out.println( "Released!" );
+                    background.setColor( GlimpseColor.fromColorRgb( 0.4f, 0.4f, 0.4f ) );
+                }
+            } );
+
+            // add the GlimpseLayout button to the main plotting area of the HeatMap plot
+            // give the button a high z-order to place it in front of the cursor crosshairs
+            plot.getLayoutCenter( ).addLayout( button, Plot2D.FOREGROUND_LAYER );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Button Example", GL3bc, plot );
         } );
-
-        // add the GlimpseLayout button to the main plotting area of the HeatMap plot
-        plot.getLayoutCenter( ).addLayout( button );
-
-        return plot;
     }
 }

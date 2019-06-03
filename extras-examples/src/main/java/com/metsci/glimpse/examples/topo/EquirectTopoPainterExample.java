@@ -26,20 +26,20 @@
  */
 package com.metsci.glimpse.examples.topo;
 
-import static com.metsci.glimpse.axis.UpdateMode.*;
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.topo.io.TopoCache.*;
-import static com.metsci.glimpse.topo.io.TopoDataPaths.*;
-import static com.metsci.glimpse.topo.io.TopoReader.*;
-import static com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.media.opengl.GLProfile.*;
+import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.topo.io.TopoCache.topoCacheDataset;
+import static com.metsci.glimpse.topo.io.TopoDataPaths.requireTopoDataFile;
+import static com.metsci.glimpse.topo.io.TopoReader.readTopoLevel;
+import static com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection.plateCarreeProj_DEG;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.util.GeneralUtils.require;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static javax.media.opengl.GLProfile.GL3;
 
 import java.io.File;
-
-import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -56,11 +56,11 @@ import com.metsci.glimpse.topo.io.TopoDataset;
 public class EquirectTopoPainterExample
 {
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
         initializeLogging( "topo-examples/logging.properties" );
 
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             MultiAxisPlot2D plot = new MultiAxisPlot2D( )
             {
@@ -98,7 +98,7 @@ public class EquirectTopoPainterExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
             plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "EquirectTopoPainterExample", GL3, screenFracSize( 0.8 ), plot );
+            quickGlimpseApp( "EquirectTopoPainterExample", GL3, plot, screenFracSize( 0.8 ) );
         } );
     }
 

@@ -26,11 +26,13 @@
  */
 package com.metsci.glimpse.examples.plot;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.plot.HistogramPainter;
 import com.metsci.glimpse.painter.plot.StackedHistogramPainter;
@@ -45,50 +47,48 @@ import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
  *
  * @author ulman
  */
-public class HistogramPlotExample implements GlimpseLayoutProvider
+public class HistogramPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new HistogramPlotExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            float[] data1 = generateData1( new float[NUM_POINTS], NUM_POINTS );
+            float[] data2 = generateData2( new float[NUM_POINTS], NUM_POINTS );
+            float[] data3 = generateData3( new float[NUM_POINTS], NUM_POINTS );
+
+            Axis1D xAxis = new Axis1D( );
+            xAxis.setMin( -10 );
+            xAxis.setMax( 15 );
+            xAxis.setAbsoluteMin( -10 );
+            xAxis.setAbsoluteMax( 15 );
+
+            GlimpseLayout histogramPlot1 = createDualHistograms( xAxis, data1, data2, data3 );
+            GlimpseLayout histogramPlot2 = createStackedHistograms( xAxis, data1, data2, data3 );
+            GlimpseLayout histogramPlot3 = createStackedScaledHistograms( xAxis, data1, data2, data3 );
+
+            GlimpseLayout layout = new GlimpseLayout( );
+            layout.addPainter( new BackgroundPainter( true ) );
+            ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setLayoutConstraints( "bottomtotop, gapx 0, gapy 0, insets 5 5 5 5" );
+            ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setRowConstraints( "[grow|grow|grow]" );
+            ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setColumnConstraints( "[grow]" );
+
+            layout.addLayout( histogramPlot1 );
+            histogramPlot1.setLayoutData( "grow, wrap" );
+            layout.addLayout( histogramPlot2 );
+            histogramPlot2.setLayoutData( "grow, wrap" );
+            layout.addLayout( histogramPlot3 );
+            histogramPlot3.setLayoutData( "grow" );
+            layout.invalidateLayout( );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Histogram Plot Example", GL3bc, layout );
+        } );
     }
 
     public static int NUM_POINTS = 100000;
 
-    @Override
-    public GlimpseLayout getLayout( )
-    {
-        float[] data1 = generateData1( new float[NUM_POINTS], NUM_POINTS );
-        float[] data2 = generateData2( new float[NUM_POINTS], NUM_POINTS );
-        float[] data3 = generateData3( new float[NUM_POINTS], NUM_POINTS );
-
-        Axis1D xAxis = new Axis1D( );
-        xAxis.setMin( -10 );
-        xAxis.setMax( 15 );
-        xAxis.setAbsoluteMin( -10 );
-        xAxis.setAbsoluteMax( 15 );
-
-        GlimpseLayout histogramPlot1 = createDualHistograms( xAxis, data1, data2, data3 );
-        GlimpseLayout histogramPlot2 = createStackedHistograms( xAxis, data1, data2, data3 );
-        GlimpseLayout histogramPlot3 = createStackedScaledHistograms( xAxis, data1, data2, data3 );
-
-        GlimpseLayout layout = new GlimpseLayout( );
-        layout.addPainter( new BackgroundPainter( true ) );
-        ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setLayoutConstraints( "bottomtotop, gapx 0, gapy 0, insets 5 5 5 5" );
-        ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setRowConstraints( "[grow|grow|grow]" );
-        ( ( GlimpseLayoutManagerMig ) layout.getLayoutManager( ) ).setColumnConstraints( "[grow]" );
-
-        layout.addLayout( histogramPlot1 );
-        histogramPlot1.setLayoutData( "grow, wrap" );
-        layout.addLayout( histogramPlot2 );
-        histogramPlot2.setLayoutData( "grow, wrap" );
-        layout.addLayout( histogramPlot3 );
-        histogramPlot3.setLayoutData( "grow" );
-        layout.invalidateLayout( );
-
-        return layout;
-    }
-
-    GlimpseLayout createDualHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
+    public static GlimpseLayout createDualHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
     {
         // create a premade histogram plot
         SimplePlot2D histogramplot = new SimplePlot2D( );
@@ -144,7 +144,7 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
         return histogramplot;
     }
 
-    GlimpseLayout createStackedHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
+    public static GlimpseLayout createStackedHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
     {
         SimplePlot2D histogramplot = new SimplePlot2D( );
 
@@ -176,7 +176,7 @@ public class HistogramPlotExample implements GlimpseLayoutProvider
         return histogramplot;
     }
 
-    GlimpseLayout createStackedScaledHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
+    public static GlimpseLayout createStackedScaledHistograms( Axis1D xAxis, float[] data1, float[] data2, float[] data3 )
     {
         SimplePlot2D histogramplot = new SimplePlot2D( );
 

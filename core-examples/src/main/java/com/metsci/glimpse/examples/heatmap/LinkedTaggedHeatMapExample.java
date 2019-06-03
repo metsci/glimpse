@@ -26,10 +26,16 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
+import javax.media.opengl.GLProfile;
+import javax.swing.JFrame;
+
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.colormap.ColorGradients;
 
@@ -41,39 +47,34 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
  */
 public class LinkedTaggedHeatMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        final TaggedHeatMapExample example = new TaggedHeatMapExample( );
-
-        final ColorAxisPlot2D layout1 = example.getLayout( ColorGradients.greenBone );
-        final ColorAxisPlot2D layout2 = example.getLayout( ColorGradients.jet );
-
-        // create a parent TaggedAxis1D and set it not to link the tags of its children
-        TaggedAxis1D parent = new TaggedAxis1D( );
-        parent.setLinkTags( false );
-
-        // link the z (color) axis of the two plots
-        layout1.getAxisZ( ).setParent( parent, true );
-        layout2.getAxisZ( ).setParent( parent, true );
-
-        // link x and y axes of the two plots
-        layout1.getAxis( ).setParent( layout2.getAxis( ) );
-
-        Example.showWithSwing( new GlimpseLayoutProvider( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public GlimpseLayout getLayout( )
-            {
-                return layout1;
-            }
+            // create two heat map plots
+            ColorAxisPlot2D leftPlot = TaggedHeatMapExample.newPlot( ColorGradients.reverseBone );
+            ColorAxisPlot2D rightPlot = TaggedHeatMapExample.newPlot( ColorGradients.jet );
 
-        }, new GlimpseLayoutProvider( )
-        {
-            @Override
-            public GlimpseLayout getLayout( )
-            {
-                return layout2;
-            }
+            // create a parent TaggedAxis1D and set it not to link the tags of its children
+            TaggedAxis1D parent = new TaggedAxis1D( );
+            parent.setLinkTags( false );
+
+            // link the z (color) axis of the two plots
+            leftPlot.getAxisZ( ).setParent( parent, true );
+            rightPlot.getAxisZ( ).setParent( parent, true );
+
+            // link x and y axes of the two plots
+            leftPlot.getAxis( ).setParent( rightPlot.getAxis( ) );
+
+            // create windows and show the plots
+            String appName = "Linked Heat Map Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            JFrame leftFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, leftPlot ) );
+            JFrame rightFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, rightPlot ) );
+
+            // place the windows side by side
+            rightFrame.setLocation( 800, 0 );
+            leftFrame.setLocation( 0, 0 );
         } );
     }
 }

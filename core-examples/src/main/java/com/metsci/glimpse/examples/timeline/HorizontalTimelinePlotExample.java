@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import java.util.TimeZone;
 
 import com.metsci.glimpse.axis.Axis1D;
@@ -33,12 +37,9 @@ import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.data.Epoch;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
@@ -59,24 +60,24 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  *
  * @author ulman
  */
-public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
+public class HorizontalTimelinePlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example example = Example.showWithSwing( new HorizontalTimelinePlotExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            StackedTimePlot2D plot = new HorizontalTimelinePlotExample( ).getPlot( );
 
-        // set a blue color scheme look and feel for the plot
-        example.getCanvas( ).setLookAndFeel( new OceanLookAndFeel( ) );
-
-        // allow the user to rearrange plots by dragging on their labels
-        DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ) );
+            // create a window and show the plot
+            quickGlimpseApp( "Horizontal Timeline Example", GL3bc, plot, new OceanLookAndFeel( ) );
+        } );
     }
 
-    @Override
-    public StackedTimePlot2D getLayout( )
+    protected StackedTimePlot2D plot;
+
+    public HorizontalTimelinePlotExample( )
     {
-        // create a timeline with plot areas arranged in a vertical line
-        StackedTimePlot2D plot = createPlot( );
+        plot = createPlot( );
 
         // set the time zone for the timeline to local time
         plot.getDefaultTimeline( ).setTimeZone( TimeZone.getDefault( ) );
@@ -122,8 +123,18 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
         // add mouse listeners to the GlimpseLayouts of the plots
         addMouseListener( epoch, plot1 );
         addMouseListener( epoch, plot2 );
+    }
 
+    public StackedTimePlot2D getPlot( )
+    {
         return plot;
+    }
+
+    protected StackedTimePlot2D createPlot( )
+    {
+        // set the epoch and orientation for the timeline
+        // time values will be stored relative to the epoch
+        return new StackedTimePlot2D( Orientation.VERTICAL, new Epoch( TimeStamp.currentTime( ) ) );
     }
 
     protected void addMouseListener( final Epoch epoch, final TimePlotInfo plot1 )
@@ -225,13 +236,6 @@ public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 
         // adjust the axis bounds to fit the data
         setBounds( chart );
-    }
-
-    protected StackedTimePlot2D createPlot( )
-    {
-        // set the epoch and orientation for the timeline
-        // time values will be stored relative to the epoch
-        return new StackedTimePlot2D( Orientation.VERTICAL, new Epoch( TimeStamp.currentTime( ) ) );
     }
 
     protected void addData( TrackPainter painter, Epoch epoch, double data, TimeStamp time )

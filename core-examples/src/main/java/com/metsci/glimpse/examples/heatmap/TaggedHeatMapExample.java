@@ -28,16 +28,16 @@ package com.metsci.glimpse.examples.heatmap;
 
 import static com.metsci.glimpse.axis.tagged.Tag.TAG_COLOR_ATTR;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import java.util.Arrays;
 
 import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.tagged.OrderedConstraint;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
@@ -55,16 +55,23 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  * @author ulman
  * @see HeatMapExample
  */
-public class TaggedHeatMapExample implements GlimpseLayoutProvider
+public class TaggedHeatMapExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new TaggedHeatMapExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            // create a plot
+            ColorAxisPlot2D plot = newPlot( );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Tagged Heat Map Example", GL3bc, plot );
+        } );
     }
 
-    TaggedHeatMapPainter heatmap;
+    public static final String PainterKey = "HeatMap";
 
-    public ColorAxisPlot2D getLayout( ColorGradient colorGradient )
+    public static ColorAxisPlot2D newPlot( ColorGradient colorGradient )
     {
         // create a heat map plot with three custom modifications:
         // 1) Use a TaggedAxis1D for the z axis, allowing the addition of custom, draggable tag points
@@ -129,7 +136,7 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
 
         // create a painter to display the heatmap data
         // this heatmap painter knows about axis tags
-        heatmap = new TaggedHeatMapPainter( axisZ );
+        TaggedHeatMapPainter heatmap = new TaggedHeatMapPainter( axisZ );
         heatmap.setDiscardAbove( true );
         heatmap.setDiscardBelow( true );
 
@@ -137,14 +144,11 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         heatmap.setData( texture );
         heatmap.setColorScale( colors );
 
-        // add the painter to the plot
-        plot.addPainter( heatmap );
+        // add the painter to the plot, providing it a String key so it can be retrieved later
+        plot.addPainter( PainterKey, heatmap, 0 );
 
         // load the color map into the plot (so the color scale is displayed on the z axis)
         plot.setColorScale( colors );
-
-        // add the painter to the plot
-        plot.addPainter( heatmap );
 
         // create a painter which displays the cursor position and data value under the cursor
         CursorTextZPainter cursorPainter = new CursorTextZPainter( );
@@ -159,17 +163,13 @@ public class TaggedHeatMapExample implements GlimpseLayoutProvider
         return plot;
     }
 
-    @Override
-    public ColorAxisPlot2D getLayout( )
+    public static ColorAxisPlot2D newPlot( )
     {
-        // demonstrates three possible color maps, see ColorGradients for others
-        return getLayout( ColorGradients.customMap( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ), GlimpseColor.getMagenta( ) ) ) );
-        //return getLayout( ColorGradients.lighten( ColorGradients.winter, .25 ) );
-        //return getLayout( ColorGradients.nColorFade( Lists.newArrayList( GlimpseColor.getBlue( ), GlimpseColor.getGreen( ), GlimpseColor.getCyan( ) ) ) );
-    }
-
-    public GlimpsePainter getPainter( )
-    {
-        return heatmap;
+        return newPlot( ColorGradients.customMap(
+                Lists.newArrayList(
+                        GlimpseColor.getBlue( ),
+                        GlimpseColor.getGreen( ),
+                        GlimpseColor.getCyan( ),
+                        GlimpseColor.getMagenta( ) ) ) );
     }
 }

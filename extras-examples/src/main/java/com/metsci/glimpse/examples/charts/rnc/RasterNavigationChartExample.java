@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.examples.charts.rnc;
 
-import java.io.IOException;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
@@ -56,86 +55,68 @@ import com.metsci.glimpse.util.io.StreamOpener;
  * @author ulman
  * @see com.metsci.glimpse.charts.raster.BsbRasterData
  */
-public class RasterNavigationChartExample implements GlimpseLayoutProvider
+public class RasterNavigationChartExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new RasterNavigationChartExample( ), GLUtils.getDefaultGLProfile( ) );
-    }
-
-    protected int plotHeight = 200;
-    protected int plotWidth = 200;
-
-    protected double plotMinX = 0.0;
-    protected double plotMinY = 0.0;
-
-    @Override
-    public ColorAxisPlot2D getLayout( )
-    {
-        final ColorAxisPlot2D plot = new ColorAxisPlot2D( );
-
-        // create a color scale axis for the heat maps created below
-        Axis1D colorAxis = new Axis1D( );
-        colorAxis.setMin( 0.0 );
-        colorAxis.setMax( 1000.0 );
-
-        plot.getCrosshairPainter( ).showSelectionCrosshairs( false );
-
-        ShadedTexturePainter painter = new ShadedTexturePainter( );
-        plot.addPainter( painter );
-
-        // hide axes
-        plot.setTitleHeight( 0 );
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
-        plot.setAxisSizeZ( 0 );
-
-        BsbRasterData data;
-        MercatorProjection mercatorProjection;
-        try
+        swingInvokeLater( ( ) ->
         {
+            ColorAxisPlot2D plot = new ColorAxisPlot2D( );
+
+            // create a color scale axis for the heat maps created below
+            Axis1D colorAxis = new Axis1D( );
+            colorAxis.setMin( 0.0 );
+            colorAxis.setMax( 1000.0 );
+
+            plot.getCrosshairPainter( ).showSelectionCrosshairs( false );
+
+            ShadedTexturePainter painter = new ShadedTexturePainter( );
+            plot.addPainter( painter );
+
+            // hide axes
+            plot.setTitleHeight( 0 );
+            plot.setAxisSizeX( 0 );
+            plot.setAxisSizeY( 0 );
+            plot.setAxisSizeZ( 0 );
+
             ColorMapIntegerProgram fragShader = new ColorMapIntegerProgram( plot.getAxisZ( ), 0, 1 );
             painter.setProgram( fragShader );
 
-            data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "data/ENCSample.bsb" ) );
-            mercatorProjection = new MercatorProjection( );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
+            BsbRasterData data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "data/ENCSample.bsb" ) );
+            MercatorProjection mercatorProjection = new MercatorProjection( );
 
-        ByteTextureProjected2D dataTexture = data.getDataTexture( );
-        Projection textureProjection = data.getProjection( mercatorProjection );
-        dataTexture.setProjection( textureProjection );
+            ByteTextureProjected2D dataTexture = data.getDataTexture( );
+            Projection textureProjection = data.getProjection( mercatorProjection );
+            dataTexture.setProjection( textureProjection );
 
-        ColorTexture1D colorTexture = data.getColorTexture( );
-        plot.setColorScale( colorTexture );
+            ColorTexture1D colorTexture = data.getColorTexture( );
+            plot.setColorScale( colorTexture );
 
-        painter.addDrawableTexture( dataTexture, 0 );
-        painter.addNonDrawableTexture( colorTexture, 1 );
+            painter.addDrawableTexture( dataTexture, 0 );
+            painter.addNonDrawableTexture( colorTexture, 1 );
 
-        plot.lockAspectRatioXY( 1.0 );
+            plot.lockAspectRatioXY( 1.0 );
 
-        plot.setMinZ( 0.0 );
-        plot.setMaxZ( colorTexture.getDimensionSize( 0 ) );
+            plot.setMinZ( 0.0 );
+            plot.setMaxZ( colorTexture.getDimensionSize( 0 ) );
 
-        CursorTextZPainter z = new CursorTextZPainter( );
-        z.setOffsetBySelectionSize( false );
-        z.setTexture( dataTexture );
-        plot.addPainter( z );
+            CursorTextZPainter z = new CursorTextZPainter( );
+            z.setOffsetBySelectionSize( false );
+            z.setTexture( dataTexture );
+            plot.addPainter( z );
 
-        float[] xy00 = new float[2];
-        float[] xy11 = new float[2];
-        textureProjection.getVertexXY( 0, 0, xy00 );
-        textureProjection.getVertexXY( 1, 1, xy11 );
+            float[] xy00 = new float[2];
+            float[] xy11 = new float[2];
+            textureProjection.getVertexXY( 0, 0, xy00 );
+            textureProjection.getVertexXY( 1, 1, xy11 );
 
-        plot.setMinX( Math.min( xy00[0], xy11[0] ) );
-        plot.setMaxX( Math.max( xy00[0], xy11[0] ) );
-        plot.setMinY( Math.min( xy00[1], xy11[1] ) );
-        plot.setMaxY( Math.max( xy00[1], xy11[1] ) );
+            plot.setMinX( Math.min( xy00[0], xy11[0] ) );
+            plot.setMaxX( Math.max( xy00[0], xy11[0] ) );
+            plot.setMinY( Math.min( xy00[1], xy11[1] ) );
+            plot.setMaxY( Math.max( xy00[1], xy11[1] ) );
 
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Raster Navigation Chart Example", GL3bc, plot );
+        } );
     }
 }

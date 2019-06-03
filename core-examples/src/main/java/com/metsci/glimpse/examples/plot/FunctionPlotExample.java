@@ -26,14 +26,15 @@
  */
 package com.metsci.glimpse.examples.plot;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
 import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.shape.LineSetPainter;
@@ -48,79 +49,77 @@ import com.metsci.glimpse.util.math.fast.FastGaussian;
  *
  * @author ulman
  */
-public class FunctionPlotExample implements GlimpseLayoutProvider
+public class FunctionPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new FunctionPlotExample( ) );
-    }
-
-    @Override
-    public GlimpseLayout getLayout( )
-    {
-        // add a layout painter which will act as the parent of all the other plot painters
-        GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( );
-
-        // use the Glimpse AxisFactory to create a pair of horizontal and vertical axis
-        // and attach them to canvas mouse event handlers in one step
-        final Axis2D axis = AxisUtil.createAxis2D( layout );
-
-        // set axis bounds and lock the x-y axis aspect ratio
-        axis.getAxisX( ).setMin( -2.0 );
-        axis.getAxisX( ).setMax( 8.0 );
-
-        axis.getAxisY( ).setMin( -2.0 );
-        axis.getAxisY( ).setMax( 8.0 );
-
-        axis.lockAspectRatioXY( 1.0 );
-
-        // create a painter to fill in a blank background
-        BackgroundPainter backgroundPainter = new BackgroundPainter( false );
-        layout.addPainter( backgroundPainter );
-
-        // create a painter to draw horizontal and vertical grid lines
-        GridPainter gridPainter = new GridPainter( );
-        layout.addPainter( gridPainter );
-
-        // create a painter to draw axes at the origin and tick marks and labels
-        NumericXYAxisPainter axisPainter = new NumericXYAxisPainter( );
-        layout.addPainter( axisPainter );
-
-        // define a 1D function (the pdf of the normal distribution)
-        final Function1D f1 = new Function1D( )
+        swingInvokeLater( ( ) ->
         {
-            final FastGaussian f = new FastGaussian( 1000000 );
+            // add a layout painter which will act as the parent of all the other plot painters
+            GlimpseAxisLayout2D layout = new GlimpseAxisLayout2D( );
 
-            public double f( double x )
+            // use the Glimpse AxisFactory to create a pair of horizontal and vertical axis
+            // and attach them to canvas mouse event handlers in one step
+            final Axis2D axis = AxisUtil.createAxis2D( layout );
+
+            // set axis bounds and lock the x-y axis aspect ratio
+            axis.getAxisX( ).setMin( -2.0 );
+            axis.getAxisX( ).setMax( 8.0 );
+
+            axis.getAxisY( ).setMin( -2.0 );
+            axis.getAxisY( ).setMax( 8.0 );
+
+            axis.lockAspectRatioXY( 1.0 );
+
+            // create a painter to fill in a blank background
+            BackgroundPainter backgroundPainter = new BackgroundPainter( false );
+            layout.addPainter( backgroundPainter );
+
+            // create a painter to draw horizontal and vertical grid lines
+            GridPainter gridPainter = new GridPainter( );
+            layout.addPainter( gridPainter );
+
+            // create a painter to draw axes at the origin and tick marks and labels
+            NumericXYAxisPainter axisPainter = new NumericXYAxisPainter( );
+            layout.addPainter( axisPainter );
+
+            // define a 1D function (the pdf of the normal distribution)
+            final Function1D f1 = new Function1D( )
             {
-                return f.evaluate( x ) * 5;
-            }
-        };
+                final FastGaussian f = new FastGaussian( 1000000 );
 
-        // define another 1D function (the sin function)
-        final Function1D f2 = new Function1D( )
-        {
-            public double f( double x )
+                public double f( double x )
+                {
+                    return f.evaluate( x ) * 5;
+                }
+            };
+
+            // define another 1D function (the sin function)
+            final Function1D f2 = new Function1D( )
             {
-                return Math.sin( x );
-            }
-        };
+                public double f( double x )
+                {
+                    return Math.sin( x );
+                }
+            };
 
-        // create a painter to display the first function
-        // the painter will automatically take care of creating enough
-        // sample points to make the curve smooth as it is panned/zoomed
-        final Function1DPainter functionPainter1 = new Function1DPainter( axis, f1 );
-        functionPainter1.setLineColor( GlimpseColor.getBlue( ) );
-        functionPainter1.setLineWidth( 2.5f );
-        layout.addPainter( functionPainter1 );
+            // create a painter to display the first function
+            // the painter will automatically take care of creating enough
+            // sample points to make the curve smooth as it is panned/zoomed
+            final Function1DPainter functionPainter1 = new Function1DPainter( axis, f1 );
+            functionPainter1.setLineColor( GlimpseColor.getBlue( ) );
+            functionPainter1.setLineWidth( 2.5f );
+            layout.addPainter( functionPainter1 );
 
-        // create a painter to display the second function
-        final Function1DPainter functionPainter2 = new Function1DPainter( axis, f2 );
-        functionPainter2.setLineColor( GlimpseColor.getRed( ) );
-        functionPainter2.setLineWidth( 2.5f );
-        layout.addPainter( functionPainter2 );
+            // create a painter to display the second function
+            final Function1DPainter functionPainter2 = new Function1DPainter( axis, f2 );
+            functionPainter2.setLineColor( GlimpseColor.getRed( ) );
+            functionPainter2.setLineWidth( 2.5f );
+            layout.addPainter( functionPainter2 );
 
-        return layout;
+            // create a window and show the plot
+            quickGlimpseApp( "Function Plot Example", GL3bc, layout );
+        } );
     }
 
     public static class Function1DPainter extends LineSetPainter

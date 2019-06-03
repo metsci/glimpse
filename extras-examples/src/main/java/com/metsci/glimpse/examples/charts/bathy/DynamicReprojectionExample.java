@@ -28,9 +28,12 @@ package com.metsci.glimpse.examples.charts.bathy;
 
 import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener2D;
@@ -42,9 +45,7 @@ import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
 import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
 import com.metsci.glimpse.charts.bathy.TopographyData;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
@@ -68,187 +69,143 @@ import com.metsci.glimpse.util.units.Length;
  * Data displayed was downloaded from the NOAA/NGDC Bathymetry
  * tool at http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html</p>
  *
- * XXX: Numerical instability issue causing chart to march across the plot as you move the cursor around.
+ * TODO: Numerical instability issue causes chart to march across the plot as you move the cursor around
  *
  * @author hogye
  */
-public class DynamicReprojectionExample implements GlimpseLayoutProvider
+public class DynamicReprojectionExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new DynamicReprojectionExample( ) );
-    }
-
-    @Override
-    public MultiAxisPlot2D getLayout( )
-    {
-        MultiAxisPlot2D plot = new MultiAxisPlot2D( );
-        plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
-        plot.getCenterAxis( ).getAxisX( ).setUpdateMode( CenterScale );
-        plot.getCenterAxis( ).getAxisX( ).setUpdateMode( CenterScale );
-
-        plot.setBorderSize( 2 );
-        plot.setShowTitle( false );
-
-        Axis2D xyAxis = plot.getCenterAxis( );
-
-        AxisUnitConverter unitConverter = new AxisUnitConverter( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public double fromAxisUnits( double value )
+            MultiAxisPlot2D plot = new MultiAxisPlot2D( );
+            plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
+            plot.getCenterAxis( ).getAxisX( ).setUpdateMode( CenterScale );
+            plot.getCenterAxis( ).getAxisX( ).setUpdateMode( CenterScale );
+
+            plot.setBorderSize( 2 );
+            plot.setShowTitle( false );
+
+            Axis2D xyAxis = plot.getCenterAxis( );
+
+            AxisUnitConverter unitConverter = new AxisUnitConverter( )
             {
-                return Length.fromNauticalMiles( value );
-            }
+                @Override
+                public double fromAxisUnits( double value )
+                {
+                    return Length.fromNauticalMiles( value );
+                }
 
-            @Override
-            public double toAxisUnits( double value )
-            {
-                return Length.toNauticalMiles( value );
-            }
-        };
+                @Override
+                public double toAxisUnits( double value )
+                {
+                    return Length.toNauticalMiles( value );
+                }
+            };
 
-        GridAxisLabelHandler xTicks = new GridAxisLabelHandler( );
-        GridAxisLabelHandler yTicks = new GridAxisLabelHandler( );
-        xTicks.setAxisUnitConverter( unitConverter );
-        yTicks.setAxisUnitConverter( unitConverter );
+            GridAxisLabelHandler xTicks = new GridAxisLabelHandler( );
+            GridAxisLabelHandler yTicks = new GridAxisLabelHandler( );
+            xTicks.setAxisUnitConverter( unitConverter );
+            yTicks.setAxisUnitConverter( unitConverter );
 
-        // color axis
-        TaggedAxis1D colorAxis = new TaggedAxis1D( );
-        AxisMouseListener colorMouseListener = new TaggedAxisMouseListener1D( );
-        final AxisInfo colorAxisInfo = plot.createAxisRight( "color_axis", colorAxis, colorMouseListener );
+            // color axis
+            TaggedAxis1D colorAxis = new TaggedAxis1D( );
+            AxisMouseListener colorMouseListener = new TaggedAxisMouseListener1D( );
+            final AxisInfo colorAxisInfo = plot.createAxisRight( "color_axis", colorAxis, colorMouseListener );
 
-        final GridAxisLabelHandler colorTickHandler = new GridAxisLabelHandler( );
-        final TaggedPartialColorYAxisPainter colorTagPainter = new TaggedPartialColorYAxisPainter( colorTickHandler );
-        colorAxisInfo.setAxisPainter( colorTagPainter );
+            final GridAxisLabelHandler colorTickHandler = new GridAxisLabelHandler( );
+            final TaggedPartialColorYAxisPainter colorTagPainter = new TaggedPartialColorYAxisPainter( colorTickHandler );
+            colorAxisInfo.setAxisPainter( colorTagPainter );
 
-        ColorTexture1D colorMapTexture = new ColorTexture1D( 1024 );
-        colorMapTexture.mutate( new ColorGradientConcatenator( ColorGradients.bathymetry, ColorGradients.topography ) );
-        colorTagPainter.setColorScale( colorMapTexture );
+            ColorTexture1D colorMapTexture = new ColorTexture1D( 1024 );
+            colorMapTexture.mutate( new ColorGradientConcatenator( ColorGradients.bathymetry, ColorGradients.topography ) );
+            colorTagPainter.setColorScale( colorMapTexture );
 
-        colorAxis.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
-        colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
-        colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
+            colorAxis.addTag( "Max", 10000.0 ).setAttribute( TEX_COORD_ATTR, 1.0f );
+            colorAxis.addTag( "Sea Level", 0.0 ).setAttribute( TEX_COORD_ATTR, 0.5f );
+            colorAxis.addTag( "Min", -8000.0 ).setAttribute( TEX_COORD_ATTR, 0.0f );
 
-        // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
-        colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
+            // set a constraint which enforces the ordering of the tags (and keeps them spaced by 200 units)
+            colorAxis.addConstraint( new OrderedConstraint( "OrderingConstraint", 200, Arrays.asList( "Min", "Sea Level", "Max" ) ) );
 
-        colorAxis.setMin( -10000 );
-        colorAxis.setMax( 12000 );
+            colorAxis.setMin( -10000 );
+            colorAxis.setMax( 12000 );
 
-        // miscellaneous painters
-        plot.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getBlack( ) ) );
+            // miscellaneous painters
+            plot.addPainter( new BackgroundPainter( ).setColor( GlimpseColor.getBlack( ) ) );
 
-        GridPainter grid = new GridPainter( xTicks, yTicks );
-        grid.setLineColor( GlimpseColor.getGray( 0.2f ) );
-        grid.setMinorLineColor( GlimpseColor.getGray( 0.1f ) );
-        plot.addPainter( grid );
+            GridPainter grid = new GridPainter( xTicks, yTicks );
+            grid.setLineColor( GlimpseColor.getGray( 0.2f ) );
+            grid.setMinorLineColor( GlimpseColor.getGray( 0.1f ) );
+            plot.addPainter( grid );
 
-        // heatmap painter
+            // heatmap painter
 
-        final TaggedHeatMapPainter heatmap = new TaggedHeatMapPainter( colorAxis );
-        heatmap.setColorScale( colorMapTexture );
-        plot.addPainter( heatmap );
+            final TaggedHeatMapPainter heatmap = new TaggedHeatMapPainter( colorAxis );
+            heatmap.setColorScale( colorMapTexture );
+            plot.addPainter( heatmap );
 
-        final TangentPlane initPlane = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
+            final TangentPlane initPlane = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
 
-        // load a bathemetry data set from a data file obtained from
-        // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
-        TopographyData bathyData;
-        try
-        {
-            bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
-        }
-        catch ( IOException e )
+            // load a bathemetry data set from a data file obtained from
+            // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
+            TopographyData bathyData = new TopographyData( StreamOpener.fileThenResource.openForRead( "data/Cayman.bathy" ) );
+            bathyData.setAxisBounds( xyAxis, initPlane );
+            final FloatTextureProjected2D texture = bathyData.getTexture( initPlane );
 
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
-        bathyData.setAxisBounds( xyAxis, initPlane );
-        final FloatTextureProjected2D texture = bathyData.getTexture( initPlane );
+            final double startLat = bathyData.getStartLat( );
+            final double startLon = bathyData.getStartLon( );
+            final double endLat = startLat + bathyData.getHeightStep( ) * bathyData.getImageHeight( );
+            final double endLon = startLon + bathyData.getWidthStep( ) * bathyData.getImageWidth( );
 
-        final double startLat = bathyData.getStartLat( );
-        final double startLon = bathyData.getStartLon( );
-        final double endLat = startLat + bathyData.getHeightStep( ) * bathyData.getImageHeight( );
-        final double endLon = startLon + bathyData.getWidthStep( ) * bathyData.getImageWidth( );
-
-        final RunnableOn<TangentPlane> reprojectHeatmap = new RunnableOn<TangentPlane>( )
-        {
-            @Override
-            public void run( TangentPlane plane )
+            Consumer<TangentPlane> reprojectHeatmap = plane ->
             {
                 Projection projection = new LatLonProjection( plane, startLat, endLat, startLon, endLon, false );
                 texture.setProjection( projection );
                 heatmap.setData( texture );
-            }
-        };
-        reprojectHeatmap.run( initPlane );
+            };
+            reprojectHeatmap.accept( initPlane );
 
-        xyAxis.addAxisListener( new AxisListener2D( )
-        {
-            TangentPlane currentPlane = initPlane;
-
-            @Override
-            public void axisUpdated( Axis2D axis )
+            xyAxis.addAxisListener( new AxisListener2D( )
             {
-                double xRef = axis.getAxisX( ).getSelectionCenter( );
-                double yRef = axis.getAxisY( ).getSelectionCenter( );
-                LatLonGeo ref = currentPlane.unproject( xRef, yRef );
+                TangentPlane currentPlane = initPlane;
 
-                currentPlane = new TangentPlane( ref, xRef, yRef );
-                reprojectHeatmap.run( currentPlane );
-            }
+                @Override
+                public void axisUpdated( Axis2D axis )
+                {
+                    double xRef = axis.getAxisX( ).getSelectionCenter( );
+                    double yRef = axis.getAxisY( ).getSelectionCenter( );
+                    LatLonGeo ref = currentPlane.unproject( xRef, yRef );
+
+                    currentPlane = new TangentPlane( ref, xRef, yRef );
+                    reprojectHeatmap.accept( currentPlane );
+                }
+            } );
+
+            // more miscellaneous painters
+
+            CrosshairPainter crosshairs = new CrosshairPainter( );
+            crosshairs.showSelectionBox( false );
+            crosshairs.setLineWidth( 1.0f );
+            crosshairs.setCursorColor( GlimpseColor.getGreen( 0.3f ) );
+            plot.addPainter( crosshairs );
+
+            ScalePainter scale = new ScalePainter( );
+            scale.setUnitConverter( unitConverter );
+            scale.setPixelBufferX( 5 );
+            scale.setPixelBufferY( 5 );
+            scale.setPrimaryColor( GlimpseColor.getGray( 0.75f ) );
+            scale.setSecondaryColor( GlimpseColor.getGray( 0.5f ) );
+            scale.setBorderColor( GlimpseColor.getWhite( ) );
+            scale.setTextColor( GlimpseColor.getWhite( ) );
+            plot.addPainter( scale );
+
+            plot.addPainter( new BorderPainter( ) );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Dynamic Reprojection Example", GL3bc, plot );
         } );
-
-        // more miscellaneous painters
-
-        CrosshairPainter crosshairs = new CrosshairPainter( );
-        crosshairs.showSelectionBox( false );
-        crosshairs.setLineWidth( 1.0f );
-        crosshairs.setCursorColor( GlimpseColor.getGreen( 0.3f ) );
-        plot.addPainter( crosshairs );
-
-        ScalePainter scale = new ScalePainter( );
-        scale.setUnitConverter( unitConverter );
-        scale.setPixelBufferX( 5 );
-        scale.setPixelBufferY( 5 );
-        scale.setPrimaryColor( GlimpseColor.getGray( 0.75f ) );
-        scale.setSecondaryColor( GlimpseColor.getGray( 0.5f ) );
-        scale.setBorderColor( GlimpseColor.getWhite( ) );
-        scale.setTextColor( GlimpseColor.getWhite( ) );
-        plot.addPainter( scale );
-
-        plot.addPainter( new BorderPainter( ) );
-
-        return plot;
     }
 
-    static abstract class RunnableOn<T>
-    {
-        public abstract void run( T t );
-
-        public Runnable runnable( final T t )
-        {
-            return new Runnable( )
-            {
-                @Override
-                public void run( )
-                {
-                    RunnableOn.this.run( t );
-                }
-            };
-        }
-
-        public static <T> RunnableOn<T> runnable1( final Runnable runnable )
-        {
-            return new RunnableOn<T>( )
-            {
-                @Override
-                public void run( T t )
-                {
-                    runnable.run( );
-                }
-            };
-        }
-    }
 }

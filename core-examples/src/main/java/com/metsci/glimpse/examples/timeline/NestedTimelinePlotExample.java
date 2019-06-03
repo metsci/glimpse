@@ -26,90 +26,86 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.animate.DragManager;
 import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
-public class NestedTimelinePlotExample implements GlimpseLayoutProvider
+public class NestedTimelinePlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example example = Example.showWithSwing( new NestedTimelinePlotExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            CollapsibleTimePlot2D plot = new CollapsibleTimePlot2D( );
 
-        // allow the user to rearrange plots by dragging on their labels
-        DragManager.attach( ( StackedTimePlot2D ) example.getLayout( ) );
+            plot.getDefaultTimeline( ).setAxisColor( GlimpseColor.getBlack( ) );
+
+            plot.setShowLabels( true );
+            plot.setLabelSize( 30 );
+
+            plot.setIndentSubplots( true );
+            plot.setIndentSize( 30 );
+
+            GroupInfo topGroup1 = plot.createGroup( );
+            topGroup1.setLabelText( "Top Group 1" );
+            topGroup1.setShowDivider( false );
+
+            GroupInfo topGroup2 = plot.createGroup( );
+            topGroup2.setLabelText( "Top Group 1" );
+            topGroup2.setShowDivider( false );
+
+            GroupInfo midGroup1 = plot.createGroup( );
+            midGroup1.setLabelText( "Mid Group 1" );
+            midGroup1.setShowDivider( false );
+            topGroup1.addChildPlot( midGroup1 );
+
+            TimePlotInfo plot1 = plot.createTimePlot( );
+            plot1.setLabelText( "Bottom Plot 1" );
+            midGroup1.addChildPlot( plot1 );
+
+            TimePlotInfo plot2 = plot.createTimePlot( );
+            plot2.setLabelText( "Bottom Plot 2" );
+            midGroup1.addChildPlot( plot2 );
+
+            GroupInfo midGroup2 = plot.createGroup( );
+            midGroup2.setLabelText( "Mid Group 2" );
+            midGroup2.setShowDivider( false );
+            topGroup1.addChildPlot( midGroup2 );
+
+            TimePlotInfo plot3 = plot.createTimePlot( );
+            plot3.setLabelText( "Bottom Plot 3" );
+            midGroup2.addChildPlot( plot3 );
+
+            GroupInfo midGroup3 = plot.createGroup( );
+            midGroup3.setLabelText( "Mid Group 3" );
+            midGroup3.setShowDivider( false );
+            topGroup1.addChildPlot( midGroup3 );
+
+            TimePlotInfo plot4 = plot.createTimePlot( );
+            plot4.setLabelText( "Bottom Plot 4" );
+            midGroup3.addChildPlot( plot4 );
+
+            TimePlotInfo plot5 = plot.createTimePlot( );
+            plot5.setLabelText( "Bottom Plot 5" );
+            midGroup3.addChildPlot( plot5 );
+
+            GroupInfo midGroup4 = plot.createGroup( );
+            midGroup4.setLabelText( "Mid Group 4" );
+            midGroup4.setShowDivider( false );
+            topGroup2.addChildPlot( midGroup4 );
+
+            TimePlotInfo plot6 = plot.createTimePlot( );
+            plot6.setLabelText( "Bottom Plot 6" );
+            midGroup4.addChildPlot( plot6 );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Nested Timeline Plot Example", GL3bc, plot );
+        } );
     }
 
-    @Override
-    public StackedTimePlot2D getLayout( )
-    {
-        final CollapsibleTimePlot2D plot = new CollapsibleTimePlot2D( );
-
-        plot.getDefaultTimeline( ).setAxisColor( GlimpseColor.getBlack( ) );
-
-        plot.setShowLabels( true );
-        plot.setLabelSize( 30 );
-
-        plot.setIndentSubplots( true );
-        plot.setIndentSize( 30 );
-
-        GroupInfo topGroup1 = plot.createGroup( );
-        topGroup1.setLabelText( "Top Group 1" );
-        topGroup1.setShowDivider( false );
-
-        GroupInfo topGroup2 = plot.createGroup( );
-        topGroup2.setLabelText( "Top Group 1" );
-        topGroup2.setShowDivider( false );
-
-        GroupInfo midGroup1 = plot.createGroup( );
-        midGroup1.setLabelText( "Mid Group 1" );
-        midGroup1.setShowDivider( false );
-        topGroup1.addChildPlot( midGroup1 );
-
-        TimePlotInfo plot1 = plot.createTimePlot( );
-        plot1.setLabelText( "Bottom Plot 1" );
-        midGroup1.addChildPlot( plot1 );
-
-        TimePlotInfo plot2 = plot.createTimePlot( );
-        plot2.setLabelText( "Bottom Plot 2" );
-        midGroup1.addChildPlot( plot2 );
-
-        GroupInfo midGroup2 = plot.createGroup( );
-        midGroup2.setLabelText( "Mid Group 2" );
-        midGroup2.setShowDivider( false );
-        topGroup1.addChildPlot( midGroup2 );
-
-        TimePlotInfo plot3 = plot.createTimePlot( );
-        plot3.setLabelText( "Bottom Plot 3" );
-        midGroup2.addChildPlot( plot3 );
-
-        GroupInfo midGroup3 = plot.createGroup( );
-        midGroup3.setLabelText( "Mid Group 3" );
-        midGroup3.setShowDivider( false );
-        topGroup1.addChildPlot( midGroup3 );
-
-        TimePlotInfo plot4 = plot.createTimePlot( );
-        plot4.setLabelText( "Bottom Plot 4" );
-        midGroup3.addChildPlot( plot4 );
-
-        TimePlotInfo plot5 = plot.createTimePlot( );
-        plot5.setLabelText( "Bottom Plot 5" );
-        midGroup3.addChildPlot( plot5 );
-
-        GroupInfo midGroup4 = plot.createGroup( );
-        midGroup4.setLabelText( "Mid Group 4" );
-        midGroup4.setShowDivider( false );
-        topGroup2.addChildPlot( midGroup4 );
-
-        TimePlotInfo plot6 = plot.createTimePlot( );
-        plot6.setLabelText( "Bottom Plot 6" );
-        midGroup4.addChildPlot( plot6 );
-
-        return plot;
-    }
 }

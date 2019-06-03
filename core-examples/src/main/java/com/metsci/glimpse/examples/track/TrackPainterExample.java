@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.examples.track;
 
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,9 +44,6 @@ import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.CursorTextPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.painter.track.Point;
@@ -51,6 +52,7 @@ import com.metsci.glimpse.painter.track.TrackPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.selection.SpatialSelectionListener;
+import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 
 /**
@@ -58,123 +60,122 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  *
  * @author ulman
  */
-public class TrackPainterExample implements GlimpseLayoutProvider
+public class TrackPainterExample
 {
-    public static void main( String args[] ) throws Exception
-    {
-        Example.showWithSwing( new TrackPainterExample( ) );
-    }
-
     public static final int NUMBER_OF_TRACKS = 2000;
 
-    @Override
-    public GlimpseLayout getLayout( )
+    public static void main( String args[] )
     {
-        // create a premade geoplot
-        final SimplePlot2D plot = new SimplePlot2D( );
-
-        // show the z axis and set its width to 50 pixels
-        plot.setAxisSizeZ( 50 );
-
-        // hide the x and y axes and the plot title
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
-        plot.setTitleHeight( 0 );
-
-        // set axis labels
-        plot.setAxisLabelZ( "time", "hours", false );
-
-        // set the x, y, and z initial axis bounds
-        plot.setMinX( -20.0 );
-        plot.setMaxX( 20.0 );
-
-        plot.setMinY( -20.0 );
-        plot.setMaxY( 20.0 );
-
-        plot.setMinZ( 0.0 );
-        plot.setMaxZ( 1000.0 );
-        plot.setAxisSizeZ( 65 );
-        plot.getAxisZ( ).setSelectionCenter( 1000.0 );
-
-        plot.getAxisX( ).setSelectionCenter( 10 );
-        plot.getAxisY( ).setSelectionCenter( 10 );
-
-        // lock the aspect ratio of the x and y axis to 1 to 1
-        plot.lockAspectRatioXY( 1.0 );
-
-        // set the size of the selection box to 50000.0 units
-        plot.setSelectionSize( 5.0 );
-
-        // show minor tick marks on all the plot axes
-        plot.setShowMinorTicksX( true );
-        plot.setShowMinorTicksY( true );
-        plot.setShowMinorTicksZ( true );
-
-        // add a painter to manage and draw track data
-        //final LineStripPainter trackPainter = new LineStripPainter( true );
-        final TrackPainter trackPainter = new TrackPainter( true );
-        plot.addPainter( trackPainter );
-
-        // add a custom manager class to keep track of the tracks
-        TrackManager trackManager = new TrackManager( trackPainter, NUMBER_OF_TRACKS );
-
-        // add a custom listener to the z axis which changes the selected time range for
-        // all GeoPlot tracks based on the min and max values of the z axis
-        plot.getAxisZ( ).addAxisListener( new TimeAxisListener( trackPainter ) );
-        plot.getAxisPainterZ( ).setShowMarker( true );
-
-        // start a thread which manages the animation, continually adding new points to the tracks
-        trackManager.start( );
-
-        // add a custom listener which is notified when the track points inside the plot's selection box change
-        trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
-
-        // create a new TrackPainter which will be used to highlight the point closest to the cursor
-        final TrackPainter selectionDotPainter = new TrackPainter( false );
-        plot.addPainter( selectionDotPainter );
-        selectionDotPainter.setShowPoints( 0, true );
-        selectionDotPainter.setPointSize( 0, 10f );
-        selectionDotPainter.setPointColor( 0, GlimpseColor.getYellow( ) );
-
-        // create a painter to display information about the selected point
-        final CustomCursorTextPainter cursorText = new CustomCursorTextPainter( );
-        plot.addPainter( cursorText );
-
-        // create a pulsator, a threaded convenience class which pulses
-        // the point size of a given set of track ids in a TrackPainter
-        final Pulsator pulsator = new Pulsator( selectionDotPainter );
-        pulsator.addId( 0 );
-        pulsator.start( );
-
-        // add a mouse listener which selects the point closest to the cursor
-        plot.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public void mouseMoved( GlimpseMouseEvent e )
+            // create a premade geoplot
+            final SimplePlot2D plot = new SimplePlot2D( );
+
+            // show the z axis and set its width to 50 pixels
+            plot.setAxisSizeZ( 50 );
+
+            // hide the x and y axes and the plot title
+            plot.setAxisSizeX( 0 );
+            plot.setAxisSizeY( 0 );
+            plot.setTitleHeight( 0 );
+
+            // set axis labels
+            plot.setAxisLabelZ( "time", "hours", false );
+
+            // set the x, y, and z initial axis bounds
+            plot.setMinX( -20.0 );
+            plot.setMaxX( 20.0 );
+
+            plot.setMinY( -20.0 );
+            plot.setMaxY( 20.0 );
+
+            plot.setMinZ( 0.0 );
+            plot.setMaxZ( 1000.0 );
+            plot.setAxisSizeZ( 65 );
+            plot.getAxisZ( ).setSelectionCenter( 1000.0 );
+
+            plot.getAxisX( ).setSelectionCenter( 10 );
+            plot.getAxisY( ).setSelectionCenter( 10 );
+
+            // lock the aspect ratio of the x and y axis to 1 to 1
+            plot.lockAspectRatioXY( 1.0 );
+
+            // set the size of the selection box to 50000.0 units
+            plot.setSelectionSize( 5.0 );
+
+            // show minor tick marks on all the plot axes
+            plot.setShowMinorTicksX( true );
+            plot.setShowMinorTicksY( true );
+            plot.setShowMinorTicksZ( true );
+
+            // add a painter to manage and draw track data
+            //final LineStripPainter trackPainter = new LineStripPainter( true );
+            final TrackPainter trackPainter = new TrackPainter( true );
+            plot.addPainter( trackPainter );
+
+            // add a custom manager class to keep track of the tracks
+            TrackManager trackManager = new TrackManager( trackPainter, NUMBER_OF_TRACKS );
+            trackManager.setDaemon( true );
+
+            // add a custom listener to the z axis which changes the selected time range for
+            // all GeoPlot tracks based on the min and max values of the z axis
+            plot.getAxisZ( ).addAxisListener( new TimeAxisListener( trackPainter ) );
+            plot.getAxisPainterZ( ).setShowMarker( true );
+
+            // start a thread which manages the animation, continually adding new points to the tracks
+            trackManager.start( );
+
+            // add a custom listener which is notified when the track points inside the plot's selection box change
+            trackPainter.addSpatialSelectionListener( plot.getAxis( ), new TrackSelectionListener( trackManager, trackPainter ) );
+
+            // create a new TrackPainter which will be used to highlight the point closest to the cursor
+            final TrackPainter selectionDotPainter = new TrackPainter( false );
+            plot.addPainter( selectionDotPainter );
+            selectionDotPainter.setShowPoints( 0, true );
+            selectionDotPainter.setPointSize( 0, 10f );
+            selectionDotPainter.setPointColor( 0, GlimpseColor.getYellow( ) );
+
+            // create a painter to display information about the selected point
+            final CustomCursorTextPainter cursorText = new CustomCursorTextPainter( );
+            plot.addPainter( cursorText );
+
+            // create a pulsator, a threaded convenience class which pulses
+            // the point size of a given set of track ids in a TrackPainter
+            final Pulsator pulsator = new Pulsator( selectionDotPainter );
+            pulsator.addId( 0 );
+            pulsator.start( );
+
+            // add a mouse listener which selects the point closest to the cursor
+            plot.addGlimpseMouseMotionListener( new GlimpseMouseMotionListener( )
             {
-                // find the closest track point to the mouse event which
-                // is within 20 pixels of the cursor
-                Point point = trackPainter.getNearestPoint( e, 20 );
-
-                // update the cursor text painter for the newly selected point
-                cursorText.setPoint( point );
-
-                // use track id 0 to draw a large dot on the selected point
-                selectionDotPainter.clearTrack( 0 );
-                pulsator.resetSize( );
-
-                if ( point != null )
+                @Override
+                public void mouseMoved( GlimpseMouseEvent e )
                 {
-                    selectionDotPainter.addPoint( 0, 0, point.getX( ), point.getY( ), point.getTime( ) );
+                    // find the closest track point to the mouse event which
+                    // is within 20 pixels of the cursor
+                    Point point = trackPainter.getNearestPoint( e, 20 );
+
+                    // update the cursor text painter for the newly selected point
+                    cursorText.setPoint( point );
+
+                    // use track id 0 to draw a large dot on the selected point
+                    selectionDotPainter.clearTrack( 0 );
+                    pulsator.resetSize( );
+
+                    if ( point != null )
+                    {
+                        selectionDotPainter.addPoint( 0, 0, point.getX( ), point.getY( ), point.getTime( ) );
+                    }
                 }
-            }
+            } );
+
+            plot.addPainter( new NumericXYAxisPainter( ) );
+
+            plot.addPainter( new FpsPainter( ) );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Slippy Tile Example", GL3bc, plot, new OceanLookAndFeel( ) );
         } );
-
-        plot.addPainter( new NumericXYAxisPainter( ) );
-
-        plot.addPainter( new FpsPainter( ) );
-
-        return plot;
     }
 
     private static class CustomCursorTextPainter extends CursorTextPainter

@@ -26,25 +26,30 @@
  */
 package com.metsci.glimpse.examples.misc;
 
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static javax.media.opengl.GLProfile.GL3bc;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
+import javax.media.opengl.GLProfile;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.SwingUtilities;
 
-import com.jogamp.opengl.util.FPSAnimator;
-import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
+import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.examples.layout.SimpleLayoutExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
+import com.metsci.glimpse.plot.SimplePlot2D;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
@@ -55,60 +60,71 @@ public class PopupMenuExample
 {
     private static final Logger logger = Logger.getLogger( PopupMenuExample.class.getName( ) );
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( );
-        GlimpseLayout plot = buildPlot( canvas );
-        canvas.addLayout( plot );
-        canvas.setLookAndFeel( new SwingLookAndFeel( ) );
-
-        // attach a repaint manager which repaints the canvas in a loop
-        new FPSAnimator( canvas.getGLDrawable( ), 120 ).start( );
-
-        final JFrame frame = new JFrame( "Glimpse Example (Swing)" );
-
-        frame.addWindowListener( new WindowAdapter( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public void windowClosing( WindowEvent e )
+            // create a simple plot but disable right click selection locking
+            // on the axis listeners, as we will be using right clicking to bring up popup menu
+            SimplePlot2D plot = new SimplePlot2D( )
             {
-                canvas.disposeAttached( );
-            }
-        } );
-
-        frame.add( canvas );
-
-        frame.pack( );
-        frame.setSize( 800, 800 );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.setVisible( true );
-
-        return;
-    }
-
-    protected static GlimpseLayout buildPlot( final NewtSwingGlimpseCanvas canvas ) throws Exception
-    {
-        SimpleLayoutExample layout = new SimpleLayoutExample( );
-
-        final JPopupMenu _popupMenu = createPopupMenu( );
-
-        layout.getLeftPlot( ).getLayoutCenter( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
-        {
-            @Override
-            public void mousePressed( GlimpseMouseEvent event )
-            {
-                if ( event.isButtonDown( MouseButton.Button3 ) )
+                protected AxisMouseListener createAxisMouseListenerX( )
                 {
-                    event = TargetStackUtil.translateCoordinates( event, canvas );
-                    _popupMenu.show( canvas, event.getX( ), event.getY( ) );
+                    AxisMouseListener1D l = new AxisMouseListener1D( );
+                    l.setAllowSelectionLock( false );
+                    return l;
                 }
-            }
-        } );
 
-        return layout.getLayout( );
+                protected AxisMouseListener createAxisMouseListenerY( )
+                {
+                    AxisMouseListener1D l = new AxisMouseListener1D( );
+                    l.setAllowSelectionLock( false );
+                    return l;
+                }
+
+                protected AxisMouseListener createAxisMouseListenerZ( )
+                {
+                    AxisMouseListener1D l = new AxisMouseListener1D( );
+                    l.setAllowSelectionLock( false );
+                    return l;
+                }
+
+                protected AxisMouseListener createAxisMouseListenerXY( )
+                {
+                    AxisMouseListener2D l = new AxisMouseListener2D( );
+                    l.setAllowSelectionLock( false );
+                    return l;
+                }
+            };
+
+            // create a window and show the plot
+            String appName = "Popup Menu Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
+            quickGlimpseWindow( appName, canvas );
+
+            // add a popup menu to the plot
+            SwingUtilities.invokeLater( ( ) ->
+            {
+                final JPopupMenu popupMenu = createPopupMenu( );
+
+                plot.getLayoutCenter( ).addGlimpseMouseListener( new GlimpseMouseAdapter( )
+                {
+                    @Override
+                    public void mousePressed( GlimpseMouseEvent event )
+                    {
+                        if ( event.isButtonDown( MouseButton.Button3 ) )
+                        {
+                            event = TargetStackUtil.translateCoordinates( event, canvas );
+                            popupMenu.show( canvas, event.getX( ), event.getY( ) );
+                        }
+                    }
+                } );
+            } );
+        } );
     }
 
-    private static JPopupMenu createPopupMenu( )
+    public static JPopupMenu createPopupMenu( )
     {
         JPopupMenu popupMenu = new JPopupMenu( );
 
@@ -137,5 +153,4 @@ public class PopupMenuExample
 
         return popupMenu;
     }
-
 }
