@@ -98,7 +98,7 @@ public class ShadedTexturePainterExample
             plot.addPainter( painter );
 
             // set axis labels and chart title
-            plot.setTitle( "Heat Map Example" );
+            plot.setTitle( "Shaded Texture Painter Example" );
             plot.setAxisLabelX( "x axis" );
             plot.setAxisLabelY( "y axis" );
 

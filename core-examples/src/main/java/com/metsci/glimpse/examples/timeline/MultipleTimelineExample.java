@@ -35,6 +35,7 @@ import java.util.TimeZone;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
+import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 
 public class MultipleTimelineExample
 {
@@ -61,7 +62,7 @@ public class MultipleTimelineExample
             estTimeline.setSize( 35 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot );
+            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
         } );
     }
 }
