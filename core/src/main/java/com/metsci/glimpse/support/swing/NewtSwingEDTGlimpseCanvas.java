@@ -263,19 +263,17 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     {
         if ( !this.isDestroyed )
         {
-            if ( this.getCanvas( ).getNEWTChild( ) == null )
+            if ( this.glCanvas.getNEWTChild( ) == null )
             {
                 logger.warning( "Canvas's NEWT child was already null before canvas.destroy() -- this may mean that JOGL's built-in window-closing listener is running first, which can cause problems on Windows" );
             }
 
-            // TODO: Does glCanvas.destroy() already do this?
             // Remove the canvas from its animator -- which will pause the animator if it
             // doesn't have any other drawables
-            GLAutoDrawable drawable = this.getGLDrawable( );
-            GLAnimatorControl animator = drawable.getAnimator( );
+            GLAnimatorControl animator = this.glWindow.getAnimator( );
             if ( animator != null )
             {
-                animator.remove( drawable );
+                animator.remove( this.glWindow );
             }
 
             // On Windows, we have to make sure the NEWT native-event-loop thread doesn't
@@ -285,9 +283,12 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
             // from exiting when it should, which can prevent the JVM from exiting.
             //
             // It's not clear where the WM_TIMER messages are coming from, or why they
-            // get sent to the AWT native-event-loop. Maybe they should be going to the
+            // get sent to the AWT native-event-loop. Maybe they are intended for the
             // NEWT native-event-loop, but since that thread has already exited, they
-            // bubble up to the parent window?
+            // bubble up to the parent window? ... Having parent and child windows with
+            // different event-loop threads is not officially supported by win32 (even
+            // though it mostly works in practice), so it's not a huge surprise that
+            // there are issues.
             //
             // We keep NEWT from shutting down its native-event-loop thread by holding a
             // reference to the Screen. There's no obvious way to wait until the message
@@ -298,8 +299,6 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
             Screen screen = this.glWindow.getScreen( );
             screen.addReference( );
 
-            // TODO: Do we still need setVisible(false)? Would setNEWTChild(null) be better?
-            this.setVisible( false );
             this.glCanvas.destroy( );
             this.isDestroyed = true;
 
