@@ -29,11 +29,11 @@ package com.metsci.glimpse.examples.projection;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.JFrame;
+
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
-import javax.swing.JFrame;
-
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.AxisUtil;
@@ -62,6 +62,7 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception

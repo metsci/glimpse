@@ -42,19 +42,20 @@ import com.metsci.glimpse.wizard.simple.pages.FirstPage;
 import com.metsci.glimpse.wizard.simple.pages.SecondPage;
 import com.metsci.glimpse.wizard.simple.pages.ThirdPage;
 
+// FIXME Wizard cannot find description text files
 public class WizardTreeExample
 {
     public static void main( String[] args )
     {
         Wizard<Map<String, Object>> wizard = new Wizard<Map<String, Object>>( );
-        
+
         // add some pages to the model
         WizardPageModel<Map<String, Object>> model = wizard.getPageModel( );
         model.addPage( new FirstPage( ) );
         model.addPage( new SecondPage( ) );
         model.addPage( new ThirdPage( ) );
         model.addPage( new ChildFirstPage( ) );
-        
+
         // visit the first page
         wizard.visitNextPage( );
 
@@ -64,21 +65,19 @@ public class WizardTreeExample
         dialog.setSize( 800, 700 );
         dialog.setLocationRelativeTo( null );
         dialog.add( wizard.getUI( ).getContainer( ) );
-        
+
         // add listeners to close the dialog when the user hits cancel or finish
-        wizard.addCancelledListener( ( )->
-        {
-           dialog.dispose( );
-        });
-        
-        wizard.addFinishedListener( ( )->
-        {
-           dialog.dispose( );
-        });
-        
+        wizard.addCancelledListener( ( ) -> {
+            dialog.dispose( );
+        } );
+
+        wizard.addFinishedListener( ( ) -> {
+            dialog.dispose( );
+        } );
+
         // show the dialog
         dialog.setVisible( true );
-        
+
         // dispose the wizard when the dialog closes
         dialog.addWindowListener( new WindowAdapter( )
         {
@@ -87,6 +86,6 @@ public class WizardTreeExample
             {
                 wizard.dispose( );
             }
-        });
+        } );
     }
 }

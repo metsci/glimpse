@@ -46,6 +46,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class ButtonExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

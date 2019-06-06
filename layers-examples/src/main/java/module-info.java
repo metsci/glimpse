@@ -19,7 +19,7 @@ module com.metsci.glimpse.layers.examples
     requires transitive java.activation;
     requires transitive org.jvnet.staxex;
     requires transitive relaxngDatatype;
-    
+
     opens com.metsci.glimpse.examples.layers.config;
     opens com.metsci.glimpse.examples.layers.shader;
 }

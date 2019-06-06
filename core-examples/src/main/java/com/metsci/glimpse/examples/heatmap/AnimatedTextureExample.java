@@ -53,6 +53,7 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class AnimatedTextureExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception
@@ -77,7 +78,7 @@ public class AnimatedTextureExample implements GlimpseLayoutProvider
         plot.setTitle( "Animated Texture" );
         plot.setTitleColor( GlimpseColor.getWhite( ) );
         plot.getBorderPainter( ).setColor( GlimpseColor.getWhite( ) );
-        
+
         plot.getCrosshairPainter( ).setCursorColor( GlimpseColor.getGreen( 0.2f ) );
         plot.getCrosshairPainter( ).setShadeColor( GlimpseColor.getGreen( 0.05f ) );
         plot.getCrosshairPainter( ).setShadeSelectionBox( true );

@@ -26,23 +26,27 @@
  */
 package com.metsci.glimpse.examples.line;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
-import static com.metsci.glimpse.support.shader.line.LineUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static java.lang.System.*;
-import static com.jogamp.opengl.GLProfile.*;
-import static javax.swing.WindowConstants.*;
+import static com.jogamp.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
+import static com.metsci.glimpse.support.FrameUtils.newFrame;
+import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
+import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static java.lang.System.currentTimeMillis;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.util.Random;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GLAnimatorControl;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -56,6 +60,7 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
+// FIXME NewSwingEDTUTils
 public class LineStripExample
 {
 
@@ -67,6 +72,7 @@ public class LineStripExample
 
         SwingUtilities.invokeLater( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GL3 );
@@ -120,13 +126,13 @@ public class LineStripExample
             {
                 // Append a vertex
                 float x = strip.logicalSize( );
-                float y = x + 10*( random.nextFloat( ) - 0.5f );
+                float y = x + 10 * ( random.nextFloat( ) - 0.5f );
                 strip.grow1( x, y );
 
                 // Move an existing vertex
                 int iPerturb = strip.logicalSize( ) / 4;
                 float xPerturb = iPerturb;
-                float yPerturb = xPerturb + 10*( random.nextFloat( ) - 0.5f );
+                float yPerturb = xPerturb + 10 * ( random.nextFloat( ) - 0.5f );
                 strip.edit( iPerturb, 1 ).put( xPerturb ).put( yPerturb );
 
                 this.recentChange_PMILLIS = time_PMILLIS;

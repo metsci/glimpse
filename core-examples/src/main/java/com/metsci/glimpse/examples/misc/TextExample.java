@@ -28,10 +28,6 @@ package com.metsci.glimpse.examples.misc;
 
 import java.io.IOException;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
-
 import com.jogamp.graph.curve.Region;
 import com.jogamp.graph.curve.opengl.RegionRenderer;
 import com.jogamp.graph.curve.opengl.RenderState;
@@ -39,6 +35,9 @@ import com.jogamp.graph.curve.opengl.TextRegionUtil;
 import com.jogamp.graph.font.Font;
 import com.jogamp.graph.font.FontFactory;
 import com.jogamp.graph.geom.SVertex;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.util.PMVMatrix;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -52,6 +51,7 @@ import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
+// FIXME AppContextInfo
 public class TextExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

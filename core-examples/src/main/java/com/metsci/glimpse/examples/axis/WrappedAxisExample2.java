@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.examples.axis;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.*;
-import static com.metsci.glimpse.support.colormap.ColorGradients.*;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.jogamp.opengl.GLProfile.*;
+import static com.jogamp.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorTable;
+import static com.metsci.glimpse.support.colormap.ColorGradients.inferno;
+import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
 
 import javax.swing.SwingUtilities;
 
@@ -65,13 +66,13 @@ import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
+// FIXME Example not working NewtSwingEDTUtils
 public class WrappedAxisExample2
 {
 
     public static void main( String args[] ) throws Exception
     {
-        SwingUtilities.invokeLater( ( ) ->
-        {
+        SwingUtilities.invokeLater( ( ) -> {
 
             // PolygonPainter
             //
@@ -79,10 +80,10 @@ public class WrappedAxisExample2
             PolygonPainter polygonPainter = new PolygonPainter( );
             {
                 polygonPainter.addPolygon( "PolygonGroupA",
-                                           "Polygon1",
-                                           floats(  8.5f, 11.0f, 13.0f, 9.5f, 8.0f ),
-                                           floats(  2.5f, -1.0f,  4.0f, 5.0f, 4.0f ),
-                                           0 );
+                        "Polygon1",
+                        floats( 8.5f, 11.0f, 13.0f, 9.5f, 8.0f ),
+                        floats( 2.5f, -1.0f, 4.0f, 5.0f, 4.0f ),
+                        0 );
 
                 polygonPainter.setShowLines( "PolygonGroupA", true );
 
@@ -96,25 +97,23 @@ public class WrappedAxisExample2
                 polygonPainter.setFillColor( "PolygonGroupA", GlimpseColor.getWhite( 0.4f ) );
             }
 
-
             // AnnotationPainter
             //
 
-            AnnotationPainter annotationPainter = new AnnotationPainter(  new TextRenderer( FontUtils.getDefaultPlain( 28 ), true, true ) );
+            AnnotationPainter annotationPainter = new AnnotationPainter( new TextRenderer( FontUtils.getDefaultPlain( 28 ), true, true ) );
             annotationPainter.addAnnotation( "Fairly loooooong string", 8.5f, 2.5f, 0, 7, HorizontalPosition.Center, VerticalPosition.Center, GlimpseColor.getRed( ) );
-
 
             // HeatMapPainter
             //
 
             int heatmapWidth = 100;
             int heatmapHeight = 100;
-            double[][] heatmapValues = new double[ heatmapWidth ][ heatmapHeight ];
+            double[][] heatmapValues = new double[heatmapWidth][heatmapHeight];
             for ( int i = 0; i < heatmapWidth; i++ )
             {
                 for ( int j = 0; j < heatmapHeight; j++ )
                 {
-                    heatmapValues[ i ][ j ] = 0.8*( i * j )/( heatmapWidth * heatmapHeight ) + 0.2*Math.random( );
+                    heatmapValues[i][j] = 0.8 * ( i * j ) / ( heatmapWidth * heatmapHeight ) + 0.2 * Math.random( );
                 }
             }
 
@@ -137,14 +136,13 @@ public class WrappedAxisExample2
             heatmapPainter.setDiscardBelow( true );
             heatmapPainter.setData( heatmapData );
 
-
             // LineSetPainter
             //
 
             LineSetPainter linesPainter = new LineSetPainter( );
             {
-                linesPainter.setData( floats(  11.0f, 12.0f, 9.5f, 10.6f ),
-                                      floats(   4.0f,  2.2f, 1.5f,  4.0f ) );
+                linesPainter.setData( floats( 11.0f, 12.0f, 9.5f, 10.6f ),
+                        floats( 4.0f, 2.2f, 1.5f, 4.0f ) );
 
                 LineStyle lineStyle = new LineStyle( );
                 lineStyle.rgba = GlimpseColor.getBlack( );
@@ -153,22 +151,20 @@ public class WrappedAxisExample2
                 linesPainter.setLineStyle( lineStyle );
             }
 
-
             // PointSetPainter
             //
 
             PointSetPainter pointsPainter = new PointSetPainter( false );
             {
-                pointsPainter.setData( floats(  8.5f, 11.0f, 13.0f, 9.5f, 8.0f ),
-                                       floats(  2.5f, -1.0f,  4.0f, 5.0f, 4.0f ) );
+                pointsPainter.setData( floats( 8.5f, 11.0f, 13.0f, 9.5f, 8.0f ),
+                        floats( 2.5f, -1.0f, 4.0f, 5.0f, 4.0f ) );
 
                 pointsPainter.setColor( floats( 1.0f, 0.25f, 0.5f, 0.75f, 0.0f ),
-                                        new ColorMapLinear( 0, 1, inferno ) );
+                        new ColorMapLinear( 0, 1, inferno ) );
 
                 pointsPainter.setPointSize( 40 );
                 pointsPainter.setFeatherSize( 3 );
             }
-
 
             // WrappedPainter
             //
@@ -182,7 +178,6 @@ public class WrappedAxisExample2
             wrappedPainter.addPainter( linesPainter );
             wrappedPainter.addPainter( pointsPainter );
             wrappedPainter.addPainter( annotationPainter );
-
 
             // Show
             //

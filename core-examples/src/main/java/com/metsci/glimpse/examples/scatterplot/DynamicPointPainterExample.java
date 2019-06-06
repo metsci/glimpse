@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.scatterplot;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -52,6 +52,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
+// FIXME AppContextInfo
 public class DynamicPointPainterExample implements GlimpseLayoutProvider
 {
     private static final Logger logger = Logger.getLogger( DynamicPointPainterExample.class.getName( ) );

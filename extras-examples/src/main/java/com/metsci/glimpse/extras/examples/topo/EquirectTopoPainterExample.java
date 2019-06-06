@@ -53,6 +53,7 @@ import com.metsci.glimpse.topo.EquirectTopoPainter;
 import com.metsci.glimpse.topo.io.TopoDataFile;
 import com.metsci.glimpse.topo.io.TopoDataset;
 
+// FIXME Get Topo data to test
 public class EquirectTopoPainterExample
 {
 

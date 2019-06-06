@@ -35,6 +35,7 @@ import com.metsci.glimpse.plot.timeline.group.GroupInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
+// FIXME DirectBuffer
 public class NestedTimelinePlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

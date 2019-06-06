@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.IOException;
 import java.util.Set;
@@ -61,6 +62,7 @@ import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
+// FIXME DirectBuffer
 public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     private static final Logger logger = Logger.getLogger( CollapsibleTimelinePlotExample.class.getName( ) );

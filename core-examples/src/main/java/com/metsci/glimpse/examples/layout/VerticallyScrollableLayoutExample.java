@@ -33,13 +33,13 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import com.jogamp.opengl.GLAnimatorControl;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;
 
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.examples.timeline.CollapsibleTimelinePlotExample;
@@ -50,6 +50,7 @@ import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
+// FIXME DirectBuffer
 public class VerticallyScrollableLayoutExample
 {
 

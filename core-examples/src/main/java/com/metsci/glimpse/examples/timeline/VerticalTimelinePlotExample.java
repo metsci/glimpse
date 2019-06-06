@@ -52,6 +52,7 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * @author ulman
  * @see com.metsci.glimpse.examples.timeline.HorizontalTimelinePlotExample
  */
+// FIXME DirectBuffer
 public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception

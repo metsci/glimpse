@@ -32,6 +32,7 @@ import java.nio.MappedByteBuffer;
 
 import com.metsci.glimpse.util.io.MappedFile;
 
+// FIXME DirectBuffer
 public class MappedFileExample
 {
 
@@ -41,9 +42,9 @@ public class MappedFileExample
 
         File file = new File( "test.dat" );
         System.err.println( file.getAbsolutePath( ) );
-        MappedFile mapped = new MappedFile( file, ByteOrder.nativeOrder( ), 5*GB );
+        MappedFile mapped = new MappedFile( file, ByteOrder.nativeOrder( ), 5 * GB );
 
-        MappedByteBuffer slice = mapped.slice( 3*GB, 1 );
+        MappedByteBuffer slice = mapped.slice( 3 * GB, 1 );
 
         byte r0 = slice.get( 0 );
         System.err.println( "Read: " + r0 );

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.scatterplot;
 
-import static com.metsci.glimpse.axis.tagged.Tag.*;
+import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -61,6 +61,7 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class ScatterplotExample implements GlimpseLayoutProvider
 {
     public static int NUM_POINTS = 1000000;

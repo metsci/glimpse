@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.scatterplot;
 
-import static java.lang.Math.*;
+import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -50,6 +50,7 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
 /**
  * @author osborn
  */
+// FIXME DirectBuffer
 public class PointShaderExample implements GlimpseLayoutProvider
 {
     static final int NPOINTS = 100 * 1000;
@@ -121,7 +122,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
             public void getColor( int index, int size, float[] rgba )
             {
                 super.getColor( index, size, rgba );
-                rgba[3] = 0.2f + 0.5f * ( ( float ) index ) / ( size - 1 );
+                rgba[3] = 0.2f + 0.5f * ( index ) / ( size - 1 );
             }
         };
         colors.mutate( builder );
@@ -189,25 +190,25 @@ public class PointShaderExample implements GlimpseLayoutProvider
             {
                 while ( true )
                 {
-//                    try
-//                    {
-                        updatePositions( positions, r );
-                        positions.rewind( );
-                        dp.useVertexPositionData( positions );
+                    //                    try
+                    //                    {
+                    updatePositions( positions, r );
+                    positions.rewind( );
+                    dp.useVertexPositionData( positions );
 
-                        updateColors( colorValues, r );
-                        colorValues.rewind( );
-                        dp.useColorAttribData( colorValues );
+                    updateColors( colorValues, r );
+                    colorValues.rewind( );
+                    dp.useColorAttribData( colorValues );
 
-                        updateSizes( sizeValues, r );
-                        sizeValues.rewind( );
-                        dp.useSizeAttribData( sizeValues );
+                    updateSizes( sizeValues, r );
+                    sizeValues.rewind( );
+                    dp.useSizeAttribData( sizeValues );
 
-                        //Thread.sleep( 10 );
-//                    }
-//                    catch ( InterruptedException e )
-//                    {
-//                    }
+                    //Thread.sleep( 10 );
+                    //                    }
+                    //                    catch ( InterruptedException e )
+                    //                    {
+                    //                    }
                 }
             }
         } ).start( );
@@ -238,7 +239,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         {
             if ( r.nextDouble( ) > 0.999 )
             {
-                data.put( ( float ) ( 10 * r.nextFloat( ) ) );
+                data.put( 10 * r.nextFloat( ) );
             }
             else
             {
@@ -254,7 +255,7 @@ public class PointShaderExample implements GlimpseLayoutProvider
         {
             if ( r.nextDouble( ) > 0.999 )
             {
-                data.put( ( float ) 10 * r.nextFloat( ) );
+                data.put( 10 * r.nextFloat( ) );
             }
             else
             {

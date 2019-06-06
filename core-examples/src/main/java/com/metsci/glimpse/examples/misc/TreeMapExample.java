@@ -53,6 +53,7 @@ import com.metsci.glimpse.util.io.StreamOpener;
  * @author borkholder
  * @see com.metsci.glimpse.painter.treemap.SimpleTreeMapPainter
  */
+// FIXME AppContextInfo
 public class TreeMapExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

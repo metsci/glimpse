@@ -48,6 +48,7 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class LinePlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
@@ -126,7 +127,7 @@ public class LinePlotExample implements GlimpseLayoutProvider
         legend.setOffsetX( 100 );
         legend.addItem( "Series 1", GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 0.8f ) );
         legend.addItem( "Series 2", GlimpseColor.fromColorRgba( 0.0f, 0.0f, 1.0f, 0.8f ) );
-//        legend.setLineStipple( "Series 2", 1, ( short ) 0x00FF );
+        //        legend.setLineStipple( "Series 2", 1, ( short ) 0x00FF );
 
         //make the lines in the legend slightly longer
         legend.setLegendItemWidth( 60 );
@@ -146,11 +147,11 @@ public class LinePlotExample implements GlimpseLayoutProvider
         XYLinePainter series1 = new XYLinePainter( );
         generateData1( dataX, dataY, NUM_POINTS );
         series1.setData( dataX, dataY, GlimpseColor.fromColorRgba( 1.0f, 0.0f, 0.0f, 1.0f ) );
-        
+
         LineStyle style = new LineStyle( );
         style.thickness_PX = 3.5f;
         style.joinType = LineJoinType.JOIN_BEVEL;
-        
+
         series1.setLineStyle( style );
         series1.showPoints( true );
         series1.setPointSize( 8f );
@@ -173,7 +174,7 @@ public class LinePlotExample implements GlimpseLayoutProvider
         series2.setLineThickness( 1.5f );
         series2.showPoints( false );
         series2.setLineStipple( true );
-        series2.setLineStipple( 1, (short) 0xFF00 );
+        series2.setLineStipple( 1, ( short ) 0xFF00 );
 
         return series2;
     }

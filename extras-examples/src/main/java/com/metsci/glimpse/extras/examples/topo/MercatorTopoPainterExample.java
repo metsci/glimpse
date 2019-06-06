@@ -55,6 +55,7 @@ import com.metsci.glimpse.topo.MercatorTopoPainter;
 import com.metsci.glimpse.topo.io.TopoDataFile;
 import com.metsci.glimpse.topo.io.TopoDataset;
 
+// FIXME DirectBuffer
 public class MercatorTopoPainterExample
 {
 

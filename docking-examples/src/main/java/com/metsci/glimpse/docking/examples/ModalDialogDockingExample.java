@@ -66,7 +66,6 @@ public class ModalDialogDockingExample
                 initTinyLaf( );
                 initStandardGlimpseApp( );
 
-
                 // Create view components
                 //
 
@@ -79,22 +78,20 @@ public class ModalDialogDockingExample
                 JPanel gPanel = newSolidPanel( gray );
                 JPanel hPanel = newSolidPanel( white );
 
-
                 // Create views
                 //
 
                 View[] views =
-                {
-                    new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ) ),
-                    new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ) ),
-                    new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ) ),
-                    new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ) ),
-                    new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ) ),
-                    new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ) ),
-                    new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ) ),
-                    new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ) ),
-                };
-
+                        {
+                                new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ) ),
+                                new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ) ),
+                                new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewC.png" ) ),
+                                new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewD.png" ) ),
+                                new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewE.png" ) ),
+                                new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewF.png" ) ),
+                                new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewG.png" ) ),
+                                new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewH.png" ) ),
+                        };
 
                 // Create and show the docking group
                 //
@@ -102,7 +99,7 @@ public class ModalDialogDockingExample
                 String appName = "modal-dialog-docking-example";
                 DockingGroup dockingGroup = new DockingGroupDialog( null, APPLICATION_MODAL, DISPOSE_ALL_FRAMES );
                 dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( ModalDialogDockingExample.class, "docking/simple-arrangement-default.xml" ) );
+                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( ModalDialogDockingExample.class, "com/metsci/glimpse/docking/examples/docking/simple-arrangement-default.xml" ) );
 
                 dockingGroup.addViews( views );
                 dockingGroup.setVisible( true );

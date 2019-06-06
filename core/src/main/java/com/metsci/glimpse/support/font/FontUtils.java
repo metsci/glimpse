@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-
 /**
  * Utilities for loading default Glimpse fonts. Most applications should use the
  * {@code getDefaultXXXX( )} methods in order to maintain a consistent look and feel.
@@ -115,7 +114,7 @@ public class FontUtils
 
     public static Font getBitstreamVeraSansItalic( float size )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/Veralt.ttf", size, Font.ITALIC );
+        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/VeraIt.ttf", size, Font.ITALIC );
     }
 
     public static Font getBitstreamVeraSansBoldItalic( float size )

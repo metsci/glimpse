@@ -87,7 +87,6 @@ public class SimpleDockingExample
                 JPanel gPanel = newSolidPanel( gray );
                 JPanel hPanel = newSolidPanel( white );
 
-
                 // Create view toolbars
                 //
 
@@ -128,22 +127,20 @@ public class SimpleDockingExample
                 JToolBar hToolbar = newToolbar( true );
                 hToolbar.add( new JButton( "H1" ) );
 
-
                 // Create views
                 //
 
                 View[] views =
-                {
-                    new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-                    new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-                    new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-                    new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-                    new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-                    new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-                    new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-                    new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ), hToolbar )
-                };
-
+                        {
+                                new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ), aToolbar ),
+                                new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ), bToolbar ),
+                                new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewC.png" ), cToolbar ),
+                                new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewD.png" ), dToolbar ),
+                                new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewE.png" ), eToolbar ),
+                                new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewF.png" ), fToolbar ),
+                                new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewG.png" ), gToolbar ),
+                                new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewH.png" ), hToolbar )
+                        };
 
                 // Create and show the docking group
                 //
@@ -151,7 +148,7 @@ public class SimpleDockingExample
                 final String appName = "simple-docking-example";
                 final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
                 dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "docking/simple-arrangement-default.xml" ) );
+                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "com/metsci/glimpse/docking/examples/docking/simple-arrangement-default.xml" ) );
 
                 dockingGroup.addViews( views );
                 dockingGroup.setVisible( true );

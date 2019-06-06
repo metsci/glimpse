@@ -31,8 +31,8 @@ import java.awt.Graphics2D;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import com.jogamp.opengl.GL;
 
+import com.jogamp.opengl.GL;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
 import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
@@ -49,6 +49,7 @@ import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.io.StreamOpener;
 
+// FIXME DirectBuffer
 public class TextureAtlasExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

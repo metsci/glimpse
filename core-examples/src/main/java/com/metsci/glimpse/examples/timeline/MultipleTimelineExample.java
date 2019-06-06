@@ -33,6 +33,7 @@ import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
 
+// DirectBuffer
 public class MultipleTimelineExample extends CollapsibleTimelinePlotExample
 {
     public static void main( String[] args ) throws Exception

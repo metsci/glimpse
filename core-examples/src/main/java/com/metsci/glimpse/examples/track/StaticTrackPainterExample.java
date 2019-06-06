@@ -36,6 +36,7 @@ import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
 
+// FIXME DirectBuffer
 public class StaticTrackPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception

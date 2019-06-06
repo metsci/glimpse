@@ -47,6 +47,7 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class GenericProjectionExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

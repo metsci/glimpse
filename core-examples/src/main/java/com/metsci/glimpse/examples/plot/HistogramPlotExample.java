@@ -45,6 +45,7 @@ import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class HistogramPlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

@@ -30,15 +30,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
-
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
 import com.metsci.glimpse.examples.axis.WrappedAxisExample;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
+// FIXME DirectBuffer
 public class OffscreenRenderingExample
 {
     public static void main( String[] args ) throws Exception

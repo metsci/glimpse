@@ -48,6 +48,7 @@ import com.metsci.glimpse.util.math.fast.FastGaussian;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class FunctionPlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
@@ -91,6 +92,7 @@ public class FunctionPlotExample implements GlimpseLayoutProvider
         {
             final FastGaussian f = new FastGaussian( 1000000 );
 
+            @Override
             public double f( double x )
             {
                 return f.evaluate( x ) * 5;
@@ -100,6 +102,7 @@ public class FunctionPlotExample implements GlimpseLayoutProvider
         // define another 1D function (the sin function)
         final Function1D f2 = new Function1D( )
         {
+            @Override
             public double f( double x )
             {
                 return Math.sin( x );

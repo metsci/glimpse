@@ -38,17 +38,18 @@ import com.metsci.glimpse.plot.SimplePlot2D;
  * @author ulman
  * @see CustomLayoutExample
  */
+// FIME DirectBuffer
 public class SimpleLayoutExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
     {
         Example.showWithSwing( new SimpleLayoutExample( ) );
     }
-    
+
     protected SimplePlot2D rightPlot;
     protected SimplePlot2D leftPlot;
     protected GlimpseLayout layoutParent;
-    
+
     public SimpleLayoutExample( )
     {
         // create a delegate painter which lays out its child painters based on a mig layout
@@ -107,7 +108,7 @@ public class SimpleLayoutExample implements GlimpseLayoutProvider
         rightPlotLayout.addLayout( rightPlot );
         leftPlotLayout.addLayout( leftPlot );
     }
-    
+
     @Override
     public GlimpseLayout getLayout( )
     {

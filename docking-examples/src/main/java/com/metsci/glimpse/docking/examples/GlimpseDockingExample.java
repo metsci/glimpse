@@ -49,6 +49,7 @@ import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
+// FIXME NewSwingEDTUtils
 public class GlimpseDockingExample
 {
 
@@ -80,17 +81,14 @@ public class GlimpseDockingExample
                 glAnimator.add( bCanvas.getGLDrawable( ) );
                 glAnimator.start( );
 
-
                 // Create views
                 //
 
                 View[] views =
-                {
-                    new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ) ),
-                    new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ) )
-                };
-
-
+                        {
+                                new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ) ),
+                                new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ) )
+                        };
 
                 // Create and show the docking group
                 //

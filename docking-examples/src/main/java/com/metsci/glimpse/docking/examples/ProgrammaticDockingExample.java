@@ -76,6 +76,7 @@ public class ProgrammaticDockingExample
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
         {
+            @Override
             public void run( )
             {
 
@@ -90,7 +91,6 @@ public class ProgrammaticDockingExample
                 JPanel fPanel = newSolidPanel( yellow );
                 JPanel gPanel = newSolidPanel( gray );
                 JPanel hPanel = newSolidPanel( white );
-
 
                 // Create view toolbars
                 //
@@ -132,19 +132,17 @@ public class ProgrammaticDockingExample
                 JToolBar hToolbar = newToolbar( true );
                 hToolbar.add( new JButton( "H1" ) );
 
-
                 // Create views
                 //
 
-                View aView = new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ), aToolbar );
-                View bView = new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ), bToolbar );
-                View cView = new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ), cToolbar );
-                View dView = new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ), dToolbar );
-                View eView = new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ), eToolbar );
-                View fView = new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ), fToolbar );
-                View gView = new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ), gToolbar );
-                View hView = new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ), hToolbar );
-
+                View aView = new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ), aToolbar );
+                View bView = new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ), bToolbar );
+                View cView = new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewC.png" ), cToolbar );
+                View dView = new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewD.png" ), dToolbar );
+                View eView = new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewE.png" ), eToolbar );
+                View fView = new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewF.png" ), fToolbar );
+                View gView = new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewG.png" ), gToolbar );
+                View hView = new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewH.png" ), hToolbar );
 
                 // Create and show the docking group
                 //

@@ -26,20 +26,26 @@
  */
 package com.metsci.glimpse.examples.line;
 
-import static com.metsci.glimpse.gl.util.GLUtils.*;
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.*;
-import static com.metsci.glimpse.support.shader.line.LineUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static java.lang.Math.*;
-import static javax.swing.WindowConstants.*;
+import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
+import static com.metsci.glimpse.support.FrameUtils.newFrame;
+import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
+import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.toRadians;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GLAnimatorControl;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandlerSimpleUnits;
 import com.metsci.glimpse.axis.tagged.Tag;
@@ -61,6 +67,7 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
+// FIXME DirectBuffer
 public class LineJoinExample2
 {
 
@@ -104,6 +111,7 @@ public class LineJoinExample2
 
         SwingUtilities.invokeLater( new Runnable( )
         {
+            @Override
             public void run( )
             {
                 NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( );
@@ -173,14 +181,14 @@ public class LineJoinExample2
             double angleB_CCWRAD = toRadians( -this.angleTagB_CWDEG.getValue( ) );
             double cosAngleB = cos( angleB_CCWRAD );
             double sinAngleB = sin( angleB_CCWRAD );
-            double xA = xB + dxCB*cosAngleB - dyCB*sinAngleB;
-            double yA = yB + dxCB*sinAngleB + dyCB*cosAngleB;
+            double xA = xB + dxCB * cosAngleB - dyCB * sinAngleB;
+            double yA = yB + dxCB * sinAngleB + dyCB * cosAngleB;
 
             double angleC_CCWRAD = -toRadians( -this.angleTagC_CWDEG.getValue( ) );
             double cosAngleC = cos( angleC_CCWRAD );
             double sinAngleC = sin( angleC_CCWRAD );
-            double xD = xC + dxBC*cosAngleC - dyBC*sinAngleC;
-            double yD = yC + dxBC*sinAngleC + dyBC*cosAngleC;
+            double xD = xC + dxBC * cosAngleC - dyBC * sinAngleC;
+            double yD = yC + dxBC * sinAngleC + dyBC * cosAngleC;
 
             // Populate the strip
             this.strip.clear( );

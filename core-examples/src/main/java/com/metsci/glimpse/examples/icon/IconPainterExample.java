@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.examples.icon;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -63,6 +63,7 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
  *
  * @author ulman
  */
+// FIXME DirectBuffer
 public class IconPainterExample implements GlimpseLayoutProvider
 {
     private static final Logger logger = Logger.getLogger( IconPainterExample.class.getName( ) );

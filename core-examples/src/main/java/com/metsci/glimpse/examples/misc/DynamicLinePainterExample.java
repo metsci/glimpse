@@ -37,6 +37,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  * @author ulman
  * @see com.metsci.glimpse.examples.scatterplot.DynamicPointPainterExample
  */
+// FIXME AppContextInfo
 public class DynamicLinePainterExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception
@@ -65,6 +66,7 @@ public class DynamicLinePainterExample implements GlimpseLayoutProvider
         {
             int count = 0;
 
+            @Override
             public void run( )
             {
                 try
