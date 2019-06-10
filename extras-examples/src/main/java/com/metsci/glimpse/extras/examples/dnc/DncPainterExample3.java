@@ -62,7 +62,6 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-// FIXME DirectBuffer
 public class DncPainterExample3
 {
 

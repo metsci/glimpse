@@ -46,7 +46,6 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
  *
  * @author borkholder
  */
-// FIXME DirectBuffer
 public class SwingMoveCanvasTest
 {
     public static void main( String[] args ) throws Exception

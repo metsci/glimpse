@@ -55,7 +55,7 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
+// FIXME NPE
 public class ScreenCaptureExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

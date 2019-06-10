@@ -49,7 +49,6 @@ import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.io.StreamOpener;
 
-// FIXME DirectBuffer
 public class TextureAtlasExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

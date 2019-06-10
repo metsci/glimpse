@@ -41,7 +41,6 @@ import com.metsci.glimpse.plot.ColorAxisPlot2D;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class MiniMapLayoutExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

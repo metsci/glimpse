@@ -51,7 +51,6 @@ import com.metsci.glimpse.support.settings.SwingLookAndFeel;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class PopupMenuExample
 {
     private static final Logger logger = Logger.getLogger( PopupMenuExample.class.getName( ) );

@@ -53,7 +53,6 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class FloatingLayoutExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

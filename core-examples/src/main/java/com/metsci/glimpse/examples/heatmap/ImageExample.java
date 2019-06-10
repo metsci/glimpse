@@ -47,7 +47,6 @@ import com.metsci.glimpse.util.io.StreamOpener;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class ImageExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

@@ -62,7 +62,6 @@ import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
-// FIXME DirectBuffer
 public class CollapsibleTimelinePlotExample extends HorizontalTimelinePlotExample
 {
     private static final Logger logger = Logger.getLogger( CollapsibleTimelinePlotExample.class.getName( ) );

@@ -39,7 +39,6 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 /**
  * @author ulman
  */
-// FIXME DirectBuffer
 public class StackedPlotExample implements GlimpseLayoutProvider
 {
 

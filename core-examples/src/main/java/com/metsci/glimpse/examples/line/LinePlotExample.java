@@ -48,7 +48,6 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class LinePlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

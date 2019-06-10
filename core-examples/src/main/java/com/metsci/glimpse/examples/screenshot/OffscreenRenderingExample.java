@@ -39,7 +39,6 @@ import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
-// FIXME DirectBuffer
 public class OffscreenRenderingExample
 {
     public static void main( String[] args ) throws Exception

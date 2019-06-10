@@ -48,7 +48,6 @@ import com.metsci.glimpse.util.math.fast.FastGaussian;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class FunctionPlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

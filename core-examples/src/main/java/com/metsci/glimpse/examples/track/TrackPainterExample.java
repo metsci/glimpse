@@ -58,7 +58,6 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class TrackPainterExample implements GlimpseLayoutProvider
 {
     public static void main( String args[] ) throws Exception

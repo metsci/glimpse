@@ -58,7 +58,6 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
  * @author ulman
  * @see SimpleLayoutExample
  */
-// FIXME DirectBuffer
 public class CustomLayoutExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

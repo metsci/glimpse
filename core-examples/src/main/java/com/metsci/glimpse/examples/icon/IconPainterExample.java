@@ -63,7 +63,6 @@ import com.metsci.glimpse.support.selection.SpatialSelectionListener;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class IconPainterExample implements GlimpseLayoutProvider
 {
     private static final Logger logger = Logger.getLogger( IconPainterExample.class.getName( ) );

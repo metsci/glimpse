@@ -55,7 +55,6 @@ import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
  * @author ulman
  * @see HeatMapExample
  */
-// FIXME DirectBuffer
 public class TaggedHeatMapExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

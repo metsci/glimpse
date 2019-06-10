@@ -50,7 +50,6 @@ import com.metsci.glimpse.support.font.FontUtils;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class MouseDrawingExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

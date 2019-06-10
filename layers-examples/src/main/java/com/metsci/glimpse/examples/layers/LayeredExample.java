@@ -58,7 +58,6 @@ import com.metsci.glimpse.util.units.Speed;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
-// FIXME DirectBuffer
 public class LayeredExample
 {
 

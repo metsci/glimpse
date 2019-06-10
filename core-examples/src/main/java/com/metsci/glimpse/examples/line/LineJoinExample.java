@@ -61,7 +61,6 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-// FIXME DirectBuffer
 public class LineJoinExample
 {
 

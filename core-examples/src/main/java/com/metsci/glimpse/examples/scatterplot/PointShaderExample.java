@@ -50,7 +50,6 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
 /**
  * @author osborn
  */
-// FIXME DirectBuffer
 public class PointShaderExample implements GlimpseLayoutProvider
 {
     static final int NPOINTS = 100 * 1000;

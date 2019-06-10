@@ -50,7 +50,6 @@ import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-// FIXME DirectBuffer
 public class VerticallyScrollableLayoutExample
 {
 

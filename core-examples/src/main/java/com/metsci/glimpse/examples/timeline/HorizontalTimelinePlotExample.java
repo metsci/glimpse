@@ -59,7 +59,6 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class HorizontalTimelinePlotExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

@@ -61,7 +61,6 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class ScatterplotExample implements GlimpseLayoutProvider
 {
     public static int NUM_POINTS = 1000000;

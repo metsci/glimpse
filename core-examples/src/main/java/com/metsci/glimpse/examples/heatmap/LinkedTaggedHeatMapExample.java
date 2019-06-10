@@ -39,7 +39,6 @@ import com.metsci.glimpse.support.colormap.ColorGradients;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class LinkedTaggedHeatMapExample
 {
     public static void main( String[] args ) throws Exception

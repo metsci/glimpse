@@ -62,7 +62,6 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
  *
  * @author ulman
  */
-// FIXME DirectBuffer
 public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
