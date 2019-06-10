@@ -49,7 +49,6 @@ import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
-// FIXME NewSwingEDTUtils
 public class GlimpseDockingExample
 {
 

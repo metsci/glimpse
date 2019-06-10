@@ -34,10 +34,9 @@ import com.jogamp.opengl.GL2ES2;
 public class DncIconProgram
 {
 
-    public static final String dncIconVertShader_GLSL = requireResourceText( DncIconProgram.class, "shaders/DncPainter/icon.vs" );
-    public static final String dncIconGeomShader_GLSL = requireResourceText( DncIconProgram.class, "shaders/DncPainter/icon.gs" );
-    public static final String dncIconFragShader_GLSL = requireResourceText( DncIconProgram.class, "shaders/DncPainter/icon.fs" );
-
+    public static final String dncIconVertShader_GLSL = requireResourceText( DncIconProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/icon.vs" );
+    public static final String dncIconGeomShader_GLSL = requireResourceText( DncIconProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/icon.gs" );
+    public static final String dncIconFragShader_GLSL = requireResourceText( DncIconProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/icon.fs" );
 
     public static class DncIconProgramHandles
     {
@@ -75,9 +74,7 @@ public class DncIconProgram
         }
     }
 
-
     protected DncIconProgramHandles handles;
-
 
     public DncIconProgram( )
     {

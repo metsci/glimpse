@@ -34,10 +34,9 @@ import com.jogamp.opengl.GL2ES2;
 public class DncLineProgram
 {
 
-    public static final String dncLineVertShader_GLSL = requireResourceText( DncLineProgram.class, "shaders/DncPainter/line.vs" );
-    public static final String dncLineGeomShader_GLSL = requireResourceText( DncLineProgram.class, "shaders/DncPainter/line.gs" );
-    public static final String dncLineFragShader_GLSL = requireResourceText( DncLineProgram.class, "shaders/DncPainter/line.fs" );
-
+    public static final String dncLineVertShader_GLSL = requireResourceText( DncLineProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/line.vs" );
+    public static final String dncLineGeomShader_GLSL = requireResourceText( DncLineProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/line.gs" );
+    public static final String dncLineFragShader_GLSL = requireResourceText( DncLineProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/line.fs" );
 
     public static class DncLineProgramHandles
     {
@@ -79,9 +78,7 @@ public class DncLineProgram
         }
     }
 
-
     protected DncLineProgramHandles handles;
-
 
     public DncLineProgram( )
     {

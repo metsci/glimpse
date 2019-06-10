@@ -26,13 +26,15 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
-import static java.lang.String.*;
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.ref.Cleaner;
+import java.lang.ref.Cleaner.Cleanable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -42,9 +44,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
-
-import java.lang.ref.Cleaner;
-import java.lang.ref.Cleaner.Cleanable;
 
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
@@ -73,7 +72,7 @@ public class MappedFile
      * In Java 9, the Cleaner class is reportedly moving out of the sun.misc package and into
      * a java.lang package.
      */
-	protected static final Cleaner cleaner;
+    protected static final Cleaner cleaner;
     protected static final FileMapper mapper;
     static
     {
@@ -85,10 +84,9 @@ public class MappedFile
         {
             mapper = new FileMapperStandard( );
         }
-        
+
         cleaner = Cleaner.create( );
     }
-
 
     protected final File file;
     protected final boolean writable;
@@ -99,7 +97,6 @@ public class MappedFile
     protected final long size;
 
     protected final Cleanable cleanable;
-
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
     {
@@ -123,7 +120,7 @@ public class MappedFile
         this.byteOrder = byteOrder;
 
         String rafMode = ( this.writable ? "rw" : "r" );
-        try ( RandomAccessFile raf = new RandomAccessFile( file, rafMode ) )
+        try (RandomAccessFile raf = new RandomAccessFile( file, rafMode ))
         {
             if ( setSize >= 0 )
             {
@@ -247,9 +244,8 @@ public class MappedFile
      */
     public void dispose( )
     {
-    	this.cleanable.clean( );
+        this.cleanable.clean( );
     }
-
 
     // Lots of verbose code to get access to various JVM-internal functionality
 

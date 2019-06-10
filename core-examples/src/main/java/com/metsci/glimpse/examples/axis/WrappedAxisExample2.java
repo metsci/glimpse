@@ -66,7 +66,6 @@ import com.metsci.glimpse.support.settings.DefaultLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
-// FIXME Example not working NewtSwingEDTUtils
 public class WrappedAxisExample2
 {
 

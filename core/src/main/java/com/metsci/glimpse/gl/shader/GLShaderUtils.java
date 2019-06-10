@@ -36,8 +36,8 @@ import static com.jogamp.opengl.GL2ES2.GL_LINK_STATUS;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
 import static com.metsci.glimpse.util.GeneralUtils.array;
+import static java.lang.Thread.currentThread;
 import static jogamp.opengl.glu.error.Error.gluErrorString;
-import static java.lang.Thread.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -83,6 +83,11 @@ public class GLShaderUtils
         {
             throw new RuntimeException( e );
         }
+    }
+
+    public static String requireResourceText( Module module, String resourcePath )
+    {
+        return requireResourceText( module, resourcePath, UTF_8 );
     }
 
     public static String requireResourceText( Module module, String resourcePath, Charset charset )

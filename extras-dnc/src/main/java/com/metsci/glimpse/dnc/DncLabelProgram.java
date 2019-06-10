@@ -34,10 +34,9 @@ import com.jogamp.opengl.GL2ES2;
 public class DncLabelProgram
 {
 
-    public static final String dncLabelVertShader_GLSL = requireResourceText( DncLabelProgram.class, "shaders/DncPainter/label.vs" );
-    public static final String dncLabelGeomShader_GLSL = requireResourceText( DncLabelProgram.class, "shaders/DncPainter/label.gs" );
-    public static final String dncLabelFragShader_GLSL = requireResourceText( DncLabelProgram.class, "shaders/DncPainter/label.fs" );
-
+    public static final String dncLabelVertShader_GLSL = requireResourceText( DncLabelProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/label.vs" );
+    public static final String dncLabelGeomShader_GLSL = requireResourceText( DncLabelProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/label.gs" );
+    public static final String dncLabelFragShader_GLSL = requireResourceText( DncLabelProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/label.fs" );
 
     public static class DncLabelProgramHandles
     {
@@ -75,9 +74,7 @@ public class DncLabelProgram
         }
     }
 
-
     protected DncLabelProgramHandles handles;
-
 
     public DncLabelProgram( )
     {

@@ -34,9 +34,8 @@ import com.jogamp.opengl.GL2ES2;
 public class DncAreaProgram
 {
 
-    public static final String dncAreaVertShader_GLSL = requireResourceText( "com/metsci/glimpse/dnc/shaders/DncPainter/area.vs" );
-    public static final String dncAreaFragShader_GLSL = requireResourceText( "com/metsci/glimpse/dnc/shaders/DncPainter/area.fs" );
-
+    public static final String dncAreaVertShader_GLSL = requireResourceText( DncAreaProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/area.vs" );
+    public static final String dncAreaFragShader_GLSL = requireResourceText( DncAreaProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/area.fs" );
 
     public static class DncAreaProgramHandles
     {
@@ -62,9 +61,7 @@ public class DncAreaProgram
         }
     }
 
-
     protected DncAreaProgramHandles handles;
-
 
     public DncAreaProgram( )
     {
