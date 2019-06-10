@@ -39,8 +39,8 @@ public class ChildFirstPage extends DescriptionWizardPage<Map<String, Object>>
 {
     public ChildFirstPage( )
     {
-        super( "first-page-id", "First Page Child", "descriptions/Example1.html" );
-        
+        super( "first-page-id", "First Page Child", ChildFirstPage.class.getModule( ), "com/metsci/glimpse/wizard/simple/pages/descriptions/Example1.html" );
+
         this.container.add( new JLabel( "Child Label" ) );
     }
 

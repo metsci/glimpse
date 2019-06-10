@@ -51,7 +51,6 @@ import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.plot.EmptyPlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 
-// FIXME AppContextInfo
 public class TextExample implements GlimpseLayoutProvider
 {
     public static void main( String[] args ) throws Exception

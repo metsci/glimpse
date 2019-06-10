@@ -39,8 +39,8 @@ public class FirstPage extends DescriptionWizardPage<Map<String, Object>>
 {
     public FirstPage( )
     {
-        super( "first-page-id", null, "First Page", "descriptions/Example1.html" );
-        
+        super( "first-page-id", null, "First Page", FirstPage.class.getModule( ), "com/metsci/glimpse/wizard/simple/pages/descriptions/Example1.html" );
+
         this.container.add( new JLabel( "Label" ) );
     }
 

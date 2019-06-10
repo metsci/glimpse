@@ -37,12 +37,12 @@ import javax.swing.JFrame;
 
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardPageModel;
+import com.metsci.glimpse.wizard.page.FinalReviewPage;
 import com.metsci.glimpse.wizard.simple.pages.ChildFirstPage;
 import com.metsci.glimpse.wizard.simple.pages.FirstPage;
 import com.metsci.glimpse.wizard.simple.pages.SecondPage;
 import com.metsci.glimpse.wizard.simple.pages.ThirdPage;
 
-// FIXME Wizard cannot find description text files
 public class WizardTreeExample
 {
     public static void main( String[] args )
@@ -55,6 +55,7 @@ public class WizardTreeExample
         model.addPage( new SecondPage( ) );
         model.addPage( new ThirdPage( ) );
         model.addPage( new ChildFirstPage( ) );
+        model.addPage( new FinalReviewPage<>( wizard ) );
 
         // visit the first page
         wizard.visitNextPage( );

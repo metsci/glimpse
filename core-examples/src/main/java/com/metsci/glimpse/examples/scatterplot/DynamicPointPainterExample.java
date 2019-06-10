@@ -52,7 +52,6 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  *
  * @author ulman
  */
-// FIXME AppContextInfo
 public class DynamicPointPainterExample implements GlimpseLayoutProvider
 {
     private static final Logger logger = Logger.getLogger( DynamicPointPainterExample.class.getName( ) );

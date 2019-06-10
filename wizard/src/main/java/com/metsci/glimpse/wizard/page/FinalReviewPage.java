@@ -40,17 +40,17 @@ public class FinalReviewPage<D> extends DescriptionWizardPage<D>
 
     public FinalReviewPage( Wizard<D> wizard )
     {
-        this( wizard, "description/FinalReviewPage-description.html" );
+        this( wizard, FinalReviewPage.class.getModule( ), "description/FinalReviewPage-description.html" );
     }
 
-    public FinalReviewPage( Wizard<D> wizard, String descriptionFile )
+    public FinalReviewPage( Wizard<D> wizard, Module module, String descriptionFile )
     {
-        this( wizard, "FinalReviewPage", null, "Final Review", descriptionFile );
+        this( wizard, "FinalReviewPage", null, "Final Review", module, descriptionFile );
     }
 
-    public FinalReviewPage( Wizard<D> wizard, Object id, Object parentId, String title, String descriptionFile )
+    public FinalReviewPage( Wizard<D> wizard, Object id, Object parentId, String title, Module module, String descriptionFile )
     {
-        super( id, parentId, title, descriptionFile );
+        super( id, parentId, title, module, descriptionFile );
 
         this.wizard = wizard;
 
@@ -59,12 +59,12 @@ public class FinalReviewPage<D> extends DescriptionWizardPage<D>
 
     public void init( )
     {
+        // FIXME this negates the fact that this extends Description wizard page???
         this.container.removeAll( );
         this.table = new ErrorTablePanel<D>( wizard );
         this.container.add( this.table, "push, grow" );
 
-        this.wizard.addErrorsUpdatedListener( ( ) ->
-        {
+        this.wizard.addErrorsUpdatedListener( ( ) -> {
             table.setErrors( wizard.getErrors( ) );
         } );
     }

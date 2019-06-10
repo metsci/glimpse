@@ -39,8 +39,8 @@ public class ThirdPage extends DescriptionWizardPage<Map<String, Object>>
 {
     public ThirdPage( )
     {
-        super( null, "Third Page", "descriptions/Example1.html" );
-        
+        super( null, "Third Page", ThirdPage.class.getModule( ), "com/metsci/glimpse/wizard/simple/pages/descriptions/Example1.html" );
+
         this.container.add( new JLabel( "Label" ) );
     }
 

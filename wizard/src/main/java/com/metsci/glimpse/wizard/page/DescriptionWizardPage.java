@@ -36,6 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.text.html.HTMLEditorKit;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -50,25 +51,26 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
 
     protected JTextPane descriptionText;
 
-    public DescriptionWizardPage( Object parentId, String title, String descriptionFile )
+    public DescriptionWizardPage( Object parentId, String title, Module module, String descriptionFile )
     {
-        this( UUID.randomUUID( ), parentId, title, descriptionFile );
+        this( UUID.randomUUID( ), parentId, title, module, descriptionFile );
     }
 
-    public DescriptionWizardPage( Object id, Object parentId, String title, String descriptionFile )
+    public DescriptionWizardPage( Object id, Object parentId, String title, Module module, String descriptionFile )
     {
-        this( id, parentId, title, descriptionFile, false );
+        this( id, parentId, title, module, descriptionFile, false );
     }
 
-    public DescriptionWizardPage( Object id, Object parentId, String title, String descriptionFile, boolean scrollableContent )
+    public DescriptionWizardPage( Object id, Object parentId, String title, Module module, String descriptionFile, boolean scrollableContent )
     {
         super( id, parentId, title );
 
         this.descriptionText = new JTextPane( );
+        this.descriptionText.setContentType( "text/html" );
         this.descriptionText.setEditable( false );
         this.descriptionText.setOpaque( false );
 
-        this.setDescriptionFile( descriptionFile );
+        this.setDescriptionFile( module, descriptionFile );
 
         if ( scrollableContent )
         {
@@ -90,7 +92,7 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         }
     }
 
-    protected void setDescriptionFile( String descriptionFile )
+    protected void setDescriptionFile( Module module, String descriptionFile )
     {
         if ( descriptionFile == null )
         {
@@ -98,12 +100,11 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         }
         else
         {
-            URL url = getDescriptionResource( descriptionFile );
             try
             {
-                this.descriptionText.setPage( url );
+                this.descriptionText.read( module.getResourceAsStream( descriptionFile ), new HTMLEditorKit( ) );
             }
-            catch ( IOException e )
+            catch ( IOException e1 )
             {
                 this.descriptionText.setText( String.format( "Error: Unable to load page description from: %s", descriptionFile ) );
             }

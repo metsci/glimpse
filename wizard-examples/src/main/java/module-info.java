@@ -5,6 +5,8 @@ module com.metsci.glimpse.wizard.examples
 {
     exports com.metsci.glimpse.wizard.simple;
 
+    opens com.metsci.glimpse.wizard.simple.pages.descriptions;
+
     requires transitive com.metsci.glimpse.util;
     requires transitive com.metsci.glimpse.wizard;
 

@@ -44,7 +44,6 @@ import com.metsci.glimpse.wizard.simple.pages.FirstPage;
 import com.metsci.glimpse.wizard.simple.pages.SecondPage;
 import com.metsci.glimpse.wizard.simple.pages.ThirdPage;
 
-// FIXME Wizard cannot find description files
 public class WizardSimpleExample
 {
     public static void main( String[] args )

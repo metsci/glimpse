@@ -39,8 +39,8 @@ public class SecondPage extends DescriptionWizardPage<Map<String, Object>>
 {
     public SecondPage( )
     {
-        super( null, "Second Page", "descriptions/Example1.html" );
-        
+        super( null, "Second Page", SecondPage.class.getModule( ), "com/metsci/glimpse/wizard/simple/pages/descriptions/Example1.html" );
+
         this.container.add( new JLabel( "Another Label" ) );
     }
 
