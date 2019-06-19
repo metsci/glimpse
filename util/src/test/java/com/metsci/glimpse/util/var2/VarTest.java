@@ -111,7 +111,7 @@ class VarTest
 
     /**
      * Same as {@link #derivedVarShouldFireEvenIfMembersDontChange()}, but
-     * adding a {@link Runnable} instead of a {@link ListenablePairListener}.
+     * adding a {@link Runnable} instead of a {@link ActivityListener}.
      */
     @Test
     void derivedVarShouldFireEvenIfMembersDontChange2( )
@@ -151,7 +151,7 @@ class VarTest
     {
         Var<String> a = new VarBasic<>( "x" );
 
-        List<OldNewPairFiring<String>> fs = new ArrayList<>( );
+        List<OldNewFiring<String>> fs = new ArrayList<>( );
         addOldNewListener( a, ( ongoing, vOld, vNew ) ->
         {
             fs.add( f( ongoing, vOld, vNew ) );

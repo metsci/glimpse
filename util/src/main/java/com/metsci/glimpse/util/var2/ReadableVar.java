@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.var2;
 
-public interface ReadableVar<V> extends ListenablePair
+public interface ReadableVar<V> extends ActivityListenable
 {
 
     V v( );

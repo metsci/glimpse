@@ -26,40 +26,32 @@
  */
 package com.metsci.glimpse.util.var2;
 
-import static com.metsci.glimpse.util.var2.ListenerFlag.ONCE;
-import static com.metsci.glimpse.util.var2.VarUtils.allListenable;
-import static com.metsci.glimpse.util.var2.VarUtils.completedListenable;
+import static com.metsci.glimpse.util.var2.VarUtils.doAddActivityListener;
 import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
-import static com.metsci.glimpse.util.var2.VarUtils.setMinus;
-import static java.util.Arrays.asList;
+import static com.metsci.glimpse.util.var2.VarUtils.listenable;
 
-import java.util.Collection;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.util.var.Disposable;
-import com.metsci.glimpse.util.var.DisposableGroup;
 
-public class ListenablePairSet implements ListenablePair
+public class ActivityListenableBasic implements ActivityListenable
 {
 
-    protected final ImmutableList<ListenablePair> members;
-    protected final Listenable completed;
+    protected final ListenableBasic ongoing;
+    protected final ListenableBasic completed;
     protected final Listenable all;
 
 
-    @SafeVarargs
-    public ListenablePairSet( ListenablePair... members )
+    public ActivityListenableBasic( )
     {
-        this( asList( members ) );
+        this.ongoing = new ListenableBasic( );
+        this.completed = new ListenableBasic( );
+        this.all = listenable( this.ongoing, this.completed );
     }
 
-    public ListenablePairSet( Collection<? extends ListenablePair> members )
+    public void fire( boolean ongoing )
     {
-        this.members = ImmutableList.copyOf( members );
-        this.completed = completedListenable( members );
-        this.all = allListenable( members );
+        ( ongoing ? this.ongoing : this.completed ).fire( );
     }
 
     @Override
@@ -75,33 +67,11 @@ public class ListenablePairSet implements ListenablePair
     }
 
     @Override
-    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    public Disposable addListener( Set<? extends ListenerFlag> flags, ActivityListener listener )
     {
         return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            DisposableGroup disposables = new DisposableGroup( );
-            if ( flags.contains( ONCE ) )
-            {
-                Set<ListenerFlag> flags3 = setMinus( ImmutableSet.copyOf( flags ), ONCE );
-                ListenablePairListener listener2 = ongoing ->
-                {
-                    listener.run( ongoing );
-                    disposables.dispose( );
-                    disposables.clear( );
-                };
-                for ( ListenablePair member : this.members )
-                {
-                    disposables.add( member.addListener( flags3, listener2 ) );
-                }
-            }
-            else
-            {
-                for ( ListenablePair member : this.members )
-                {
-                    disposables.add( member.addListener( flags2, listener ) );
-                }
-            }
-            return disposables;
+            return doAddActivityListener( this.ongoing, this.completed, flags2, listener );
         } );
     }
 

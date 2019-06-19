@@ -34,12 +34,12 @@ public abstract class VarDerived<V> extends ReadableVarDerived<V> implements Var
 {
 
     @SafeVarargs
-    public VarDerived( ListenablePair... listenables )
+    public VarDerived( ActivityListenable... listenables )
     {
         this( asList( listenables ) );
     }
 
-    public VarDerived( Collection<? extends ListenablePair> listenables )
+    public VarDerived( Collection<? extends ActivityListenable> listenables )
     {
         super( listenables );
     }

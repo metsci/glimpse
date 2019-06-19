@@ -31,8 +31,8 @@ import static com.google.common.base.Objects.equal;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.union;
 import static com.metsci.glimpse.util.ImmutableCollectionUtils.setPlus;
-import static com.metsci.glimpse.util.var2.ListenablePair.ALL;
-import static com.metsci.glimpse.util.var2.ListenablePair.COMPLETED;
+import static com.metsci.glimpse.util.var2.ActivityListenable.ALL;
+import static com.metsci.glimpse.util.var2.ActivityListenable.COMPLETED;
 import static com.metsci.glimpse.util.var2.ListenerFlag.EMPTY_FLAGS;
 import static com.metsci.glimpse.util.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.util.var2.ListenerFlag.ONCE;
@@ -73,36 +73,36 @@ public class VarUtils
     }
 
     @SafeVarargs
-    public static Listenable completedListenable( ListenablePair... pairs )
+    public static Listenable completedListenable( ActivityListenable... listenables )
     {
-        return completedListenable( asList( pairs ) );
+        return completedListenable( asList( listenables ) );
     }
 
-    public static Listenable completedListenable( Collection<? extends ListenablePair> pairs )
+    public static Listenable completedListenable( Collection<? extends ActivityListenable> listenables )
     {
-        return listenable( mapCollection( pairs, COMPLETED ) );
-    }
-
-    @SafeVarargs
-    public static Listenable allListenable( ListenablePair... pairs )
-    {
-        return completedListenable( asList( pairs ) );
-    }
-
-    public static Listenable allListenable( Collection<? extends ListenablePair> pairs )
-    {
-        return listenable( mapCollection( pairs, ALL ) );
+        return listenable( mapCollection( listenables, COMPLETED ) );
     }
 
     @SafeVarargs
-    public static ListenablePair listenablePair( ListenablePair... pairs )
+    public static Listenable allListenable( ActivityListenable... listenables )
     {
-        return listenablePair( asList( pairs ) );
+        return completedListenable( asList( listenables ) );
     }
 
-    public static ListenablePair listenablePair( Collection<? extends ListenablePair> pairs )
+    public static Listenable allListenable( Collection<? extends ActivityListenable> listenables )
     {
-        return new ListenablePairSet( pairs );
+        return listenable( mapCollection( listenables, ALL ) );
+    }
+
+    @SafeVarargs
+    public static ActivityListenable activityListenable( ActivityListenable... listenables )
+    {
+        return activityListenable( asList( listenables ) );
+    }
+
+    public static ActivityListenable activityListenable( Collection<? extends ActivityListenable> listenables )
+    {
+        return new ActivityListenableSet( listenables );
     }
 
     public static <T,R> Collection<R> mapCollection( Collection<T> ts, Function<? super T,? extends R> fn )
@@ -419,9 +419,9 @@ public class VarUtils
     /**
      * The returned listenable does not support {@link ListenerFlag#ORDER(int)}.
      */
-    public static ListenablePair wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1 )
+    public static ActivityListenable wrapListenable1( com.metsci.glimpse.util.var.Listenable<VarEvent> listenable1 )
     {
-        return new ListenablePair( )
+        return new ActivityListenable( )
         {
             protected final Listenable completed = wrapListenable1( listenable1, ev -> !ev.ongoing );
             protected final Listenable all = wrapListenable1( listenable1, ev -> true );
@@ -439,7 +439,7 @@ public class VarUtils
             }
 
             @Override
-            public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+            public Disposable addListener( Set<? extends ListenerFlag> flags, ActivityListener listener )
             {
                 return doHandleImmediateFlag( flags, listener, flags2 ->
                 {
@@ -543,7 +543,7 @@ public class VarUtils
         void accept( V vOld, V vNew );
     }
 
-    public static interface OldNewPairListener<V>
+    public static interface OldNewActivityListener<V>
     {
         void accept( boolean ongoing, V vOld, V vNew );
     }
@@ -597,21 +597,21 @@ public class VarUtils
     }
 
     public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
-                                                                  OldNewPairListener<V0> listener )
+                                                                  OldNewActivityListener<V0> listener )
     {
         return addOldNewListener( var, EMPTY_FLAGS, listener );
     }
 
     public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
                                                                   ListenerFlag flag,
-                                                                  OldNewPairListener<V0> listener )
+                                                                  OldNewActivityListener<V0> listener )
     {
         return addOldNewListener( var, flags( flag ), listener );
     }
 
     public static <V0,V extends V0> Disposable addOldNewListener( ReadableVar<V> var,
                                                                   Set<? extends ListenerFlag> flags,
-                                                                  OldNewPairListener<V0> listener )
+                                                                  OldNewActivityListener<V0> listener )
     {
         if ( flags.contains( IMMEDIATE ) )
         {
@@ -623,7 +623,7 @@ public class VarUtils
         }
 
         Set<ListenerFlag> flags2 = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
-        return var.addListener( flags2, new ListenablePairListener( )
+        return var.addListener( flags2, new ActivityListener( )
         {
             V value = var.v( );
             boolean hasOngoingChanges = false;
@@ -693,9 +693,9 @@ public class VarUtils
         };
     }
 
-    public static <V> ListenablePairListener filterListener( ListenablePairListener rawListener, Supplier<V> valueFn )
+    public static <V> ActivityListener filterListener( ActivityListener rawListener, Supplier<V> valueFn )
     {
-        return new ListenablePairListener( )
+        return new ActivityListener( )
         {
             V value = valueFn.get( );
             boolean hasOngoingChanges = false;
@@ -739,17 +739,17 @@ public class VarUtils
     }
 
     public static Disposable doHandleImmediateFlag( Set<? extends ListenerFlag> flags,
-                                                    ListenablePairListener listener,
+                                                    ActivityListener listener,
                                                     Function<? super Set<? extends ListenerFlag>,? extends Disposable> doAddListener )
     {
         Runnable immediateListener = ( ) -> listener.run( false );
         return doHandleImmediateFlag( flags, immediateListener, doAddListener );
     }
 
-    public static Disposable doAddPairListener( Listenable ongoing,
-                                                Listenable completed,
-                                                Set<? extends ListenerFlag> flags,
-                                                ListenablePairListener listener )
+    public static Disposable doAddActivityListener( Listenable ongoing,
+                                                    Listenable completed,
+                                                    Set<? extends ListenerFlag> flags,
+                                                    ActivityListener listener )
     {
         DisposableGroup disposables = new DisposableGroup( );
         if ( flags.contains( ONCE ) )
@@ -790,7 +790,7 @@ public class VarUtils
         void accept( K key, V vOld, V vNew );
     }
 
-    public static interface OldNewMapEntryPairListener<K,V>
+    public static interface OldNewMapEntryActivityListener<K,V>
     {
         void accept( boolean ongoing, K key, V vOld, V vNew );
     }
@@ -832,21 +832,21 @@ public class VarUtils
     }
 
     public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
-                                                                                  OldNewMapEntryPairListener<K0,V0> listener )
+                                                                                  OldNewMapEntryActivityListener<K0,V0> listener )
     {
         return onMapEntryChanged( var, EMPTY_FLAGS, listener );
     }
 
     public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
                                                                                   ListenerFlag flag,
-                                                                                  OldNewMapEntryPairListener<K0,V0> listener )
+                                                                                  OldNewMapEntryActivityListener<K0,V0> listener )
     {
         return onMapEntryChanged( var, flags( flag ), listener );
     }
 
     public static <K0,V0,K extends K0,V extends V0> Disposable onMapEntryChanged( ReadableVar<? extends ImmutableMap<K,V>> var,
                                                                                   Set<? extends ListenerFlag> flags,
-                                                                                  OldNewMapEntryPairListener<K0,V0> listener )
+                                                                                  OldNewMapEntryActivityListener<K0,V0> listener )
     {
         return addOldNewListener( var, flags, ( ongoing, mapOld0, mapNew0 ) ->
         {
@@ -895,27 +895,27 @@ public class VarUtils
         } );
     }
 
-    public interface PairConsumer<T>
+    public interface ActivityConsumer<T>
     {
         void accept( boolean ongoing, T t );
     }
 
     public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
-                                                PairConsumer<? super K> listener )
+                                                ActivityConsumer<? super K> listener )
     {
         return onMapKeyAdded( var, EMPTY_FLAGS, listener );
     }
 
     public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
                                                 ListenerFlag flag,
-                                                PairConsumer<? super K> listener )
+                                                ActivityConsumer<? super K> listener )
     {
         return onMapKeyAdded( var, flags( flag ), listener );
     }
 
     public static <K> Disposable onMapKeyAdded( ReadableVar<? extends ImmutableMap<K,?>> var,
                                                 Set<? extends ListenerFlag> flags,
-                                                PairConsumer<? super K> listener )
+                                                ActivityConsumer<? super K> listener )
     {
         return addOldNewListener( var, flags, ( ongoing, mapOld0, mapNew0 ) ->
         {
@@ -960,21 +960,21 @@ public class VarUtils
     }
 
     public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
-                                                  PairConsumer<? super K> listener )
+                                                  ActivityConsumer<? super K> listener )
     {
         return onMapKeyRemoved( var, EMPTY_FLAGS, listener );
     }
 
     public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
                                                   ListenerFlag flag,
-                                                  PairConsumer<? super K> listener )
+                                                  ActivityConsumer<? super K> listener )
     {
         return onMapKeyRemoved( var, flags( flag ), listener );
     }
 
     public static <K> Disposable onMapKeyRemoved( ReadableVar<? extends ImmutableMap<K,?>> var,
                                                   Set<? extends ListenerFlag> flags,
-                                                  PairConsumer<? super K> listener )
+                                                  ActivityConsumer<? super K> listener )
     {
         return addOldNewListener( var, flags, ( ongoing, mapOld0, mapNew0 ) ->
         {
@@ -1019,21 +1019,21 @@ public class VarUtils
     }
 
     public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
-                                                 PairConsumer<? super T> listener )
+                                                 ActivityConsumer<? super T> listener )
     {
         return onElementAdded( var, EMPTY_FLAGS, listener );
     }
 
     public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
                                                  ListenerFlag flag,
-                                                 PairConsumer<? super T> listener )
+                                                 ActivityConsumer<? super T> listener )
     {
         return onElementAdded( var, flags( flag ), listener );
     }
 
     public static <T> Disposable onElementAdded( ReadableVar<? extends ImmutableCollection<T>> var,
                                                  Set<? extends ListenerFlag> flags,
-                                                 PairConsumer<? super T> listener )
+                                                 ActivityConsumer<? super T> listener )
     {
         return addOldNewListener( var, flags, ( ongoing, setOld0, setNew0 ) ->
         {
@@ -1078,21 +1078,21 @@ public class VarUtils
     }
 
     public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
-                                                   PairConsumer<? super T> listener )
+                                                   ActivityConsumer<? super T> listener )
     {
         return onElementRemoved( var, EMPTY_FLAGS, listener );
     }
 
     public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
                                                    ListenerFlag flag,
-                                                   PairConsumer<? super T> listener )
+                                                   ActivityConsumer<? super T> listener )
     {
         return onElementRemoved( var, flags( flag ), listener );
     }
 
     public static <T> Disposable onElementRemoved( ReadableVar<? extends ImmutableCollection<T>> var,
                                                    Set<? extends ListenerFlag> flags,
-                                                   PairConsumer<? super T> listener )
+                                                   ActivityConsumer<? super T> listener )
     {
         return addOldNewListener( var, flags, ( ongoing, setOld0, setNew0 ) ->
         {
