@@ -33,6 +33,7 @@ import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_BLEND;
 import static javax.media.opengl.GL.GL_FLOAT;
+import static javax.media.opengl.GL.GL_LINES;
 import static javax.media.opengl.GL.GL_LINE_STRIP;
 import static javax.media.opengl.GL2ES2.GL_STREAM_DRAW;
 
@@ -95,6 +96,8 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     protected LineStyle style;
     protected DynamicLineSetPainterProgram prog;
 
+    protected boolean drawConnectedLines;
+
     public DynamicLineSetPainter( )
     {
         this( DEFAULT_INITIAL_SIZE );
@@ -103,6 +106,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     public DynamicLineSetPainter( int initialSize )
     {
         this.initialSize = initialSize;
+        this.drawConnectedLines = true;
 
         this.idMap = new LinkedHashMap<Object, Integer>( );
         this.indexMap = new LinkedHashMap<Integer, Object>( );
@@ -122,6 +126,19 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         this.style.stipplePattern = ( short ) 0x00FF;
 
         this.prog = new DynamicLineSetPainterProgram( );
+    }
+
+    public void setConnectLines( boolean connect )
+    {
+        this.painterLock.lock( );
+        try
+        {
+            this.drawConnectedLines = connect;
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
     }
 
     public void setDotted( boolean dotted )
@@ -321,7 +338,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
                 this.prog.setAxisOrtho( gl, axis );
                 this.prog.setStyle( gl, style );
 
-                this.prog.draw( gl, xyStreamingBuffer, rgbaStreamingBuffer, 0, lineCount * 2 );
+                this.prog.draw( gl, drawConnectedLines ? GL_LINE_STRIP : GL_LINES, xyStreamingBuffer, rgbaStreamingBuffer, 0, lineCount * 2 );
             }
             finally
             {
@@ -804,7 +821,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             gl.glUniform1f( this.handles.FEATHER_THICKNESS_PX, style.feather_PX );
         }
 
-        public void draw( GL2ES2 gl, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
+        public void draw( GL2ES2 gl, int mode, GLStreamingBuffer xyVbo, GLStreamingBuffer rgbaVbo, int first, int count )
         {
             gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, xyVbo.sealedOffset( ) );
@@ -812,7 +829,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             gl.glBindBuffer( GL_ARRAY_BUFFER, rgbaVbo.buffer( gl ) );
             gl.glVertexAttribPointer( this.handles.inRgba, 4, GL_FLOAT, false, 0, rgbaVbo.sealedOffset( ) );
 
-            gl.glDrawArrays( GL_LINE_STRIP, first, count );
+            gl.glDrawArrays( mode, first, count );
         }
 
         public void end( GL2ES2 gl )
