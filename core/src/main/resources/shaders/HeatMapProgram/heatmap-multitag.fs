@@ -35,6 +35,7 @@ uniform sampler1D TAG_FRACTIONS_TEXUNIT;
 uniform sampler1D TAG_VALUES_TEXUNIT;
 
 uniform float ALPHA;
+uniform bool USE_COLORMAP_ALPHA;
 uniform bool DISCARD_NAN;
 uniform bool DISCARD_ABOVE;
 uniform bool DISCARD_BELOW;
@@ -85,6 +86,13 @@ void main( )
     float value_SEGMENTFRAC = ( value - tagValueBelow ) / ( tagValueAbove - tagValueBelow );
     float value_FRAC = tagFractionBelow + value_SEGMENTFRAC*( tagFractionAbove - tagFractionBelow );
 
-    outRgba.rgb = texture( COLORMAP_TEXUNIT, clamp( value_FRAC, 0.0, 1.0 ) ).rgb;
-    outRgba.a = ALPHA;
+	if( USE_COLORMAP_ALPHA )
+	{
+    	outRgba.rgba = texture( COLORMAP_TEXUNIT, clamp( value_FRAC, 0.0, 1.0 ) ).rgba;
+    }
+    else
+    {
+    	outRgba.rgb = texture( COLORMAP_TEXUNIT, clamp( value_FRAC, 0.0, 1.0 ) ).rgb;
+    	outRgba.a = ALPHA;
+   	}
 }

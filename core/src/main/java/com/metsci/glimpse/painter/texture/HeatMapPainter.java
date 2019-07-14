@@ -90,6 +90,19 @@ public class HeatMapPainter extends ShadedTexturePainter
         }
     }
 
+    public void setUseColormapAlpha( boolean useColormapAlpha )
+    {
+        this.painterLock.lock( );
+        try
+        {
+            this.program.setUseColormapAlpha( useColormapAlpha );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
+    }
+    
     public void setDiscardNaN( boolean discard )
     {
         this.painterLock.lock( );

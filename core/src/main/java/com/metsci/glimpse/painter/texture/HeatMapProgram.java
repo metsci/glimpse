@@ -32,6 +32,8 @@ public interface HeatMapProgram extends DrawableTextureProgram
 {
 
     void setAlpha( float alpha );
+    
+    void setUseColormapAlpha(boolean useColormapAlpha);
 
     void setDiscardNan( boolean discardNan );
 
