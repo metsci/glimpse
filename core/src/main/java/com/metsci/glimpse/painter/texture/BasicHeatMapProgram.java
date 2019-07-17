@@ -64,6 +64,7 @@ public class BasicHeatMapProgram implements HeatMapProgram
         public final int COLORMAP_MAX;
 
         public final int ALPHA;
+        public final int USE_COLORMAP_ALPHA;
         public final int DISCARD_NAN;
         public final int DISCARD_BELOW;
         public final int DISCARD_ABOVE;
@@ -84,6 +85,7 @@ public class BasicHeatMapProgram implements HeatMapProgram
             this.COLORMAP_MAX = gl.glGetUniformLocation( program, "COLORMAP_MAX" );
 
             this.ALPHA = gl.glGetUniformLocation( program, "ALPHA" );
+            this.USE_COLORMAP_ALPHA = gl.glGetUniformLocation( program, "USE_COLORMAP_ALPHA" );
             this.DISCARD_NAN = gl.glGetUniformLocation( program, "DISCARD_NAN" );
             this.DISCARD_BELOW = gl.glGetUniformLocation( program, "DISCARD_BELOW" );
             this.DISCARD_ABOVE = gl.glGetUniformLocation( program, "DISCARD_ABOVE" );
@@ -100,6 +102,7 @@ public class BasicHeatMapProgram implements HeatMapProgram
     protected final DoubleSupplier colormapMaxFn;
 
     protected float alpha;
+    protected boolean useColormapAlpha;
     protected boolean discardNan;
     protected boolean discardBelow;
     protected boolean discardAbove;
@@ -115,6 +118,7 @@ public class BasicHeatMapProgram implements HeatMapProgram
         this.colormapMaxFn = colormapMaxFn;
 
         this.alpha = 1f;
+        this.useColormapAlpha = false;
         this.discardNan = false;
         this.discardBelow = false;
         this.discardAbove = false;
@@ -128,6 +132,13 @@ public class BasicHeatMapProgram implements HeatMapProgram
         this.alpha = alpha;
     }
 
+
+    @Override
+    public void setUseColormapAlpha(boolean useColormapAlpha) 
+    {
+        this.useColormapAlpha = useColormapAlpha;
+    }
+    
     @Override
     public void setDiscardNan( boolean discardNan )
     {
@@ -185,6 +196,7 @@ public class BasicHeatMapProgram implements HeatMapProgram
         gl.glUniform1f( this.handles.COLORMAP_MAX, ( float ) this.colormapMaxFn.getAsDouble( ) );
 
         gl.glUniform1f( this.handles.ALPHA, this.alpha );
+        gl.glUniform1i( this.handles.USE_COLORMAP_ALPHA, ( this.useColormapAlpha ? 1 : 0 ) );
         gl.glUniform1i( this.handles.DISCARD_NAN, ( this.discardNan ? 1 : 0 ) );
         gl.glUniform1i( this.handles.DISCARD_BELOW, ( this.discardBelow ? 1 : 0 ) );
         gl.glUniform1i( this.handles.DISCARD_ABOVE, ( this.discardAbove ? 1 : 0 ) );

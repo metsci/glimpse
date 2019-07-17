@@ -46,6 +46,7 @@ public class InterpColorMapProgram extends ColorMapProgram
     private static final Logger LOGGER = Logger.getLogger( InterpColorMapProgram.class.getName( ) );
 
     protected GLUniformData discardAboveBelow;
+    protected GLUniformData overrideAlpha;
 
     public InterpColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
     {
@@ -59,11 +60,17 @@ public class InterpColorMapProgram extends ColorMapProgram
         super.initialize( colorAxis, targetTexUnit, colorTexUnit );
 
         this.discardAboveBelow = this.addUniformData( new GLUniformData( "discardAboveBelow", 0 ) );
+        this.overrideAlpha = this.addUniformData( new GLUniformData( "overrideAlpha", 0 ) );
     }
 
     public void setDiscardAboveBelow( boolean discard )
     {
         this.discardAboveBelow.setData( discard ? 1 : 0 );
+    }
+
+    public void setOverrideAlpha( boolean override )
+    {
+        this.overrideAlpha.setData( override ? 1 : 0 );
     }
 
     @Override

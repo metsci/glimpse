@@ -35,6 +35,7 @@ uniform float dataMax;
 
 uniform float alpha;
 
+uniform bool overrideAlpha;
 uniform bool discardNaN;
 
 // skips fragments outside our color range
@@ -105,6 +106,7 @@ void main()
 
     vec4 color = texture( colortex, normalizedVal );
     fRgba = color;
-    fRgba.a = alpha;
+    if ( overrideAlpha )
+        fRgba.a = alpha;
 }
 

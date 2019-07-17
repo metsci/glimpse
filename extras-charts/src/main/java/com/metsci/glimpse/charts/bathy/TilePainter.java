@@ -27,13 +27,11 @@
 package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
+import static com.metsci.glimpse.support.PainterCache.SHARED_EXEC;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
-import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
 import static java.lang.Math.abs;
 import static java.lang.Math.hypot;
 import static java.lang.Math.max;
-import static java.lang.Runtime.getRuntime;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
@@ -45,9 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,7 +65,6 @@ import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
 public abstract class TilePainter<V> extends DelegatePainter
 {
     protected static final double ANTIMERIDIAN_EPSILON = 1e-5;
-    protected static Executor SHARED_EXEC;
 
     protected GeoProjection projection;
     protected SortedDoubles lengthScale;
@@ -80,19 +74,9 @@ public abstract class TilePainter<V> extends DelegatePainter
     protected Rectangle2D.Double lastAxis;
 
     public TilePainter( GeoProjection projection )
-
     {
         this.projection = projection;
         lastAxis = new Rectangle2D.Double( );
-
-        synchronized ( TilePainter.class )
-        {
-            if ( SHARED_EXEC == null )
-            {
-                ThreadFactory threadFactory = newDaemonThreadFactory( Executors.defaultThreadFactory( ) );
-                SHARED_EXEC = newFixedThreadPool( max( getRuntime( ).availableProcessors( ) - 2, 1 ), threadFactory );
-            }
-        }
 
         cacheData = new PainterCache<>( this::loadTileData, SHARED_EXEC );
     }

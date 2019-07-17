@@ -26,53 +26,62 @@
  */
 package com.metsci.glimpse.util.var2;
 
-import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
-import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
-import static com.metsci.glimpse.util.var2.VarUtils.listenable;
+import static com.metsci.glimpse.util.var2.ListenerFlag.EMPTY_FLAGS;
+import static com.metsci.glimpse.util.var2.ListenerFlag.flags;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import com.metsci.glimpse.util.var.Disposable;
 
-public class ListenablePairBasic implements ListenablePair
+public interface ActivityListenable
 {
 
-    protected final ListenableBasic ongoing;
-    protected final ListenableBasic completed;
-    protected final Listenable all;
+    /**
+     * Statically importable alias for {@link #completed()}.
+     */
+    static final Function<ActivityListenable,Listenable> COMPLETED = ActivityListenable::completed;
 
+    /**
+     * Statically importable alias for {@link #all()}.
+     */
+    static final Function<ActivityListenable,Listenable> ALL = ActivityListenable::all;
 
-    public ListenablePairBasic( )
+    /**
+     * Includes notifications for completed events only.
+     */
+    Listenable completed( );
+
+    /**
+     * Includes notifications for both ongoing and completed events.
+     */
+    Listenable all( );
+
+    default Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
     {
-        this.ongoing = new ListenableBasic( );
-        this.completed = new ListenableBasic( );
-        this.all = listenable( this.ongoing, this.completed );
+        return this.all( ).addListener( flags, listener );
     }
 
-    public void fire( boolean ongoing )
+    default Disposable addListener( ListenerFlag flag, Runnable listener )
     {
-        ( ongoing ? this.ongoing : this.completed ).fire( );
+        return this.addListener( flags( flag ), listener );
     }
 
-    @Override
-    public Listenable completed( )
+    default Disposable addListener( Runnable listener )
     {
-        return this.completed;
+        return this.addListener( EMPTY_FLAGS, listener );
     }
 
-    @Override
-    public Listenable all( )
+    Disposable addListener( Set<? extends ListenerFlag> flags, ActivityListener listener );
+
+    default Disposable addListener( ListenerFlag flag, ActivityListener listener )
     {
-        return this.all;
+        return this.addListener( flags( flag ), listener );
     }
 
-    @Override
-    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    default Disposable addListener( ActivityListener listener )
     {
-        return doHandleImmediateFlag( flags, listener, flags2 ->
-        {
-            return doAddPairListener( this.ongoing, this.completed, flags2, listener );
-        } );
+        return this.addListener( EMPTY_FLAGS, listener );
     }
 
 }

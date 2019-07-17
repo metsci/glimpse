@@ -26,12 +26,17 @@
  */
 package com.metsci.glimpse.support;
 
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Math.max;
+import static java.lang.Runtime.getRuntime;
+import static java.util.concurrent.Executors.defaultThreadFactory;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -55,6 +60,7 @@ import com.google.common.cache.CacheBuilder;
  *         cache = new PaintingCache<>( this::computeForFrame );
  *     }
  *
+ *     @Override
  *     public void doPaintTo( GlimpseContext context )
  *     {
  *         int selectedFrame = // ...
@@ -88,6 +94,14 @@ public class PainterCache<K, V>
 {
     private static final Logger LOGGER = Logger.getLogger( PainterCache.class.getName( ) );
 
+    public static Executor SHARED_EXEC;
+
+    static
+    {
+        ThreadFactory threadFactory = newDaemonThreadFactory( defaultThreadFactory( ) );
+        SHARED_EXEC = newFixedThreadPool( max( getRuntime( ).availableProcessors( ) - 2, 1 ), threadFactory );
+    }
+
     protected final Function<K, V> computeF;
     protected final Cache<K, V> cache;
     protected final Map<K, Object> locks;
@@ -95,7 +109,7 @@ public class PainterCache<K, V>
 
     public PainterCache( Function<K, V> computeF )
     {
-        this( computeF, ForkJoinPool.commonPool( ) );
+        this( computeF, SHARED_EXEC );
     }
 
     public PainterCache( Function<K, V> computeF, Executor executor )
@@ -116,7 +130,7 @@ public class PainterCache<K, V>
 
         Object lock = getLock( key );
         executor.execute( ( ) -> wrapForException( lock, key ) );
-        return null;
+        return cache.getIfPresent( key );
     }
 
     /**

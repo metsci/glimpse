@@ -69,9 +69,9 @@ public class GeotiffTileProvider implements TopoTileProvider
     public static final String GEBCO2014_URL = "https://www.gebco.net/data_and_products/gridded_bathymetry_data/gebco_30_second_grid/";
     public static final String GEBCO2014_CACHE_FILE = "GEBCO_2014_2D.tif";
     public static final String GEBCO2014_ATTRIBUTION = "The GEBCO_2014 Grid, version 20150318, www.gebco.net";
-    private static final int DEF_NUM_TILES_X = 30;
-    private static final int DEF_NUM_TILES_Y = 15;
-    private static final double GLOBAL_TILE_LEVEL = fromKilometers( 2_000 );
+    public static final int DEF_NUM_TILES_X = 30;
+    public static final int DEF_NUM_TILES_Y = 15;
+    public static final double GLOBAL_TILE_LEVEL = fromKilometers( 2_000 );
 
     private final RenderedImage topoData;
     private final Collection<TileKey> tileKeys;
@@ -148,6 +148,12 @@ public class GeotiffTileProvider implements TopoTileProvider
     public String getAttribution( )
     {
         return attribution;
+    }
+
+    public static GeotiffTileProvider getGlobalGeoTiff( File file, String attribution ) throws IOException
+    {
+        RenderedImage grid = readGeotiff( file );
+        return new GeotiffTileProvider( grid, attribution, DEF_NUM_TILES_X, DEF_NUM_TILES_Y );
     }
 
     /**
