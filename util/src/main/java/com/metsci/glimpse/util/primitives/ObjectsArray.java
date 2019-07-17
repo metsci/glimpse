@@ -117,6 +117,12 @@ public class ObjectsArray implements ObjectsModifiable
     }
 
     @Override
+    public ObjectsArray copy( )
+    {
+        return new ObjectsArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

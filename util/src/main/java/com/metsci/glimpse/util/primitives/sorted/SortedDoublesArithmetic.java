@@ -144,6 +144,12 @@ public class SortedDoublesArithmetic implements SortedDoubles
     }
 
     @Override
+    public SortedDoublesArithmetic copy( )
+    {
+        return new SortedDoublesArithmetic( v0, vStep, n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

@@ -131,6 +131,12 @@ public class LongsArray implements LongsModifiable
     }
 
     @Override
+    public LongsArray copy( )
+    {
+        return new LongsArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

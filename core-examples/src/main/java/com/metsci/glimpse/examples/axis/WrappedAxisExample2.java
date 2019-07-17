@@ -28,6 +28,7 @@ package com.metsci.glimpse.examples.axis;
 
 import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorTable;
 import static com.metsci.glimpse.support.colormap.ColorGradients.inferno;
@@ -203,7 +204,7 @@ public class WrappedAxisExample2
             // Make sure the BackgroundPainter gets assigned a color -- otherwise blending turns out weird
             layout.setLookAndFeel( new DefaultLookAndFeel( ) );
 
-            quickGlimpseApp( "WrappedAxisExample2", GL3, 0.8, layout );
+            quickGlimpseApp( "WrappedAxisExample2", GL3, screenFracSize( 0.8 ), layout );
 
         } );
     }

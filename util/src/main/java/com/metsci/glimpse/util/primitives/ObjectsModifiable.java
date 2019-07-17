@@ -95,4 +95,7 @@ public interface ObjectsModifiable extends Objects
 
     void compact( );
 
+    @Override
+    ObjectsModifiable copy( );
+
 }

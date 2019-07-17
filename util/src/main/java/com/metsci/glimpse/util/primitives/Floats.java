@@ -60,4 +60,6 @@ public interface Floats
 
     float[] copyOf( );
 
+    Floats copy( );
+
 }

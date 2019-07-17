@@ -29,29 +29,29 @@ package com.metsci.glimpse.support;
 import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.DisposableUtils.onWindowClosing;
-import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.util.GeneralUtils.array;
-import static com.jogamp.opengl.GLProfile.GL3bc;
 import static javax.swing.JOptionPane.VALUE_PROPERTY;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
-import java.awt.Container;
+import java.awt.Dimension;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.jogamp.opengl.GLAnimatorControl;
-import com.jogamp.opengl.GLException;
-import com.jogamp.opengl.GLProfile;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
+import com.jogamp.newt.Screen;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -63,6 +63,8 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.platformFixes.PlatformFixes;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
@@ -95,8 +97,7 @@ public class QuickUtils
      * method.
      * <p>
      * <strong>NOTE:</strong> This method should be called near the beginning of main,
-     * after the Swing {@link LookAndFeel} has been set, but before any UI components get
-     * created.
+     * after the Swing LookAndFeel has been set, but before any UI components get created.
      */
     public static void initStandardGlimpseApp( )
     {
@@ -154,6 +155,20 @@ public class QuickUtils
         return shouldRunAnyway.get( );
     }
 
+    /**
+     * Creates a {@link MultiAxisPlot2D} layout with contents that are desirable for most
+     * XY plots:
+     * <ul>
+     * <li>X and Y axes
+     * <li>GridPainter
+     * <li>CrosshairPainter (with selection box disabled)
+     * <li>BorderPainter.
+     * </ul>
+     * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     */
     public static MultiAxisPlot2D quickXyPlot( GlimpsePainter... painters )
     {
         MultiAxisPlot2D plot = new MultiAxisPlot2D( );
@@ -182,15 +197,27 @@ public class QuickUtils
     }
 
     /**
+     * @see #quickGlimpseApp(String, String, Dimension, GlimpseLayout)
+     */
+    public static void quickGlimpseApp( String appName, String glProfileName, int width, int height, GlimpseLayout layout )
+    {
+        quickGlimpseApp( appName, glProfileName, new Dimension( width, height ), layout );
+    }
+
+    /**
      * Similar to {@link #quickGlimpseWindow(String, String, double, GlimpseLayout)},
      * but with behavior suitable for a single-window application. In particular, starts
      * by calling {@link #initStandardGlimpseApp()}, and warns the user if the named
      * {@link GLProfile} is not available.
      * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     * <p>
      * <strong>NOTE:</strong> If the named {@link GLProfile} is not available, and the
      * user chooses to quit rather than continue, this method calls {@link System#exit(int)}!
      */
-    public static void quickGlimpseApp( String appName, String glProfileName, double screenFrac, GlimpseLayout layout )
+    public static void quickGlimpseApp( String appName, String glProfileName, Dimension size, GlimpseLayout layout )
     {
         initStandardGlimpseApp( );
 
@@ -200,62 +227,164 @@ public class QuickUtils
             System.exit( 1 );
         }
 
-        quickGlimpseWindow( appName, glProfile, screenFrac, layout );
-    }
-
-    /**
-     * See {@link #quickGlimpseWindow(String, GLProfile, double, GlimpseLayout)}.
-     * <p>
-     * <strong>NOTE:</strong> Throws a runtime exception if the named {@link GLProfile}
-     * is not available.
-     */
-    public static void quickGlimpseWindow( String title, String glProfileName, double screenFrac, GlimpseLayout layout )
-    {
-        quickGlimpseWindow( title, GLProfile.get( glProfileName ), screenFrac, layout );
+        quickGlimpseWindow( appName, glProfile, size, layout );
     }
 
     /**
      * Creates and shows a new window displaying the specified {@code layout}.
      * <p>
+     * @throws GLException if the named {@link GLProfile} is not available.
+     */
+    public static void quickGlimpseWindow( String title, String glProfileName, int width, int height, GlimpseLayout layout ) throws GLException
+    {
+        quickGlimpseWindow( title, glProfileName, new Dimension( width, height ), layout );
+    }
+
+    /**
+     * Creates and shows a new window displaying the specified {@code layout}.
+     * <p>
+     * @throws GLException if the named {@link GLProfile} is not available.
+     */
+    public static void quickGlimpseWindow( String title, String glProfileName, Dimension size, GlimpseLayout layout ) throws GLException
+    {
+        quickGlimpseWindow( title, GLProfile.get( glProfileName ), size, layout );
+    }
+
+    /**
+     * Creates and shows a new window displaying the specified {@code layout}.
+     */
+    public static void quickGlimpseWindow( String title, GLProfile glProfile, Dimension size, GlimpseLayout layout )
+    {
+        quickGlimpseWindow( title,
+                            new NewtSwingEDTGlimpseCanvas( glProfile ),
+                            new SwingEDTAnimator( 60 ),
+                            new SwingLookAndFeel( ),
+                            size,
+                            layout );
+    }
+
+    /**
+     * Creates and shows a new window displaying the specified {@code layout}.
+     */
+    public static void quickGlimpseWindow( String title,
+                                           GLContext glContext,
+                                           GLAnimatorControl animator,
+                                           LookAndFeel laf,
+                                           Dimension size,
+                                           GlimpseLayout layout )
+    {
+        quickGlimpseWindow( title,
+                            new NewtSwingEDTGlimpseCanvas( glContext ),
+                            animator,
+                            laf,
+                            size,
+                            layout );
+    }
+
+    /**
+     * In most cases it is more natural to call one of the other {@code quickGlimpseWindow}
+     * methods (e.g. {@link #quickGlimpseWindow(String, String, int, int, GlimpseLayout)}).
+     * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     * <p>
      * <strong>NOTE:</strong> Must be called on the Swing EDT.
      */
-    public static void quickGlimpseWindow( String title, GLProfile glProfile, double screenFrac, GlimpseLayout layout )
+    public static void quickGlimpseWindow( String title,
+                                           NewtSwingEDTGlimpseCanvas canvas,
+                                           GLAnimatorControl animator,
+                                           LookAndFeel laf,
+                                           Dimension size,
+                                           GlimpseLayout layout )
     {
         requireSwingThread( );
 
-        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
         canvas.addLayout( layout );
 
-        GLAnimatorControl animator = new SwingEDTAnimator( 60 );
-        animator.add( canvas.getGLDrawable( ) );
+        // setLaf() only affects existing contents, so call it AFTER adding everything
+        canvas.setLookAndFeel( laf );
+
+        GLAutoDrawable drawable = canvas.getGLDrawable( );
+        animator.add( drawable );
         animator.start( );
 
         JFrame frame = new JFrame( );
         frame.setTitle( title );
+
+        // This listener must run before NewtCanvasAWT's built-in window-closing
+        // listener does -- so add it before we add the canvas to the frame
+        onWindowClosing( frame, ( ev ) ->
+        {
+            animator.remove( drawable );
+            tearDownCanvas( canvas );
+        } );
+
         frame.getContentPane( ).add( canvas );
-        frame.setSize( screenFracSize( screenFrac ) );
+        frame.setSize( size );
         frame.setLocationRelativeTo( null );
         frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         frame.setVisible( true );
-
-        onWindowClosing( frame, ( ev ) ->
-        {
-            animator.stop( );
-            tearDownCanvas( canvas );
-        } );
     }
 
+    /**
+     * When used in a window-closing listener, this method <strong>MUST</strong> run
+     * before NewtCanvasAWT's built-in window-closing listener.
+     * <p>
+     * It is safe to remove canvas from its parent after calling this method.
+     */
     public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
     {
-        canvas.getCanvas( ).setNEWTChild( null );
-
-        Container parent = canvas.getParent( );
-        if ( parent != null )
+        // Hold a reference to the screen so that JOGL's auto-cleanup doesn't destroy
+        // and then recreate resources (like the NEDT thread) while we're still working
+        Screen screen = canvas.getGLWindow( ).getScreen( );
+        screen.addReference( );
+        try
         {
-            parent.remove( canvas );
+            // Canvas destruction is kludgy -- the relevant JOGL code is complicated,
+            // the relevant AWT code is platform-dependent native code, and the relevant
+            // AWT behavior is affected by quirks and mysteries of the window manager
+            // and/or OS. Debugging problems directly would take a long time (weeks or
+            // months).
+            //
+            // The following call sequence seems to work reliably. It was arrived at by
+            // trying various sequences until one worked for the platforms and situations
+            // we care about.
+            //
+            // Notes:
+            //
+            //  * Without setVisible(false), the screen area formerly occupied by the
+            //    canvas ends up unusable -- it appears blank or continues to show the
+            //    canvas's final frame, and it does not respond to resize events.
+            //
+            //  * On Windows 10, without the explicit getGLWindow().destroy(), the NEDT
+            //    thread begins receiving WM_TIMER events, and continues to receive them
+            //    indefinitely. This prevents the AWT thread from exiting, which in turn
+            //    can prevent the JVM from exiting. This is particularly strange because
+            //    getCanvas().destroy() calls getGLWindow().destroy() internally. The
+            //    difference could be in the timing (due to a race), or simply in the
+            //    ordering of the various calls.
+            //
+            //  * In the past, the getCanvas().destroy() call has sometimes resulted in
+            //    segfaults. However, without that call, we get the WM_TIMER issue. Not
+            //    sure what to do about this, except hope that the timing and threading
+            //    have been perturbed enough over the years that segfaults are no longer
+            //    an issue in practice. FIXME: Test thoroughly, on many machines.
+            //
+            //  * If we call setNEWTChild(null) instead of setVisible(false), we get the
+            //    WM_TIMER issue.
+            //
+            //  * If we call parent.remove(canvas) instead of setVisible(false), we get
+            //    the WM_TIMER issue.
+            //
+            canvas.setVisible( false );
+            canvas.getGLWindow( ).destroy( );
+            canvas.getCanvas( ).destroy( );
         }
-
-        canvas.destroy( );
+        finally
+        {
+            screen.removeReference( );
+        }
     }
 
 }

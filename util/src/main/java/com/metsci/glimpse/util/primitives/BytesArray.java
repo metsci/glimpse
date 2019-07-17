@@ -145,6 +145,12 @@ public class BytesArray implements BytesModifiable
     }
 
     @Override
+    public BytesArray copy( )
+    {
+        return new BytesArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public String string( )
     {
         return new String( a, 0, n, utf8 );

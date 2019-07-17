@@ -66,6 +66,8 @@ public interface Bytes
 
     byte[] copyOf( );
 
+    Bytes copy( );
+
     /**
      * Strings are encoded and decoded using the UTF-8 charset (multi-byte
      * charsets just aren't worth the increased complication in indexing).

@@ -109,4 +109,7 @@ public interface LongsModifiable extends Longs
 
     void compact( );
 
+    @Override
+    LongsModifiable copy( );
+
 }

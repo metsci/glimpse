@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.support.swing;
 
+import static com.metsci.glimpse.support.QuickUtils.requireSwingThread;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.PrintStream;
@@ -81,6 +82,8 @@ public class SwingEDTAnimator implements GLAnimatorControl
 
     protected synchronized void start0( )
     {
+        requireSwingThread( );
+
         // do nothing if the animator is already running
         if ( this.future != null ) return;
 
@@ -95,9 +98,9 @@ public class SwingEDTAnimator implements GLAnimatorControl
             }
         } );
 
-        ScheduledExecutorService exectuor = Executors.newSingleThreadScheduledExecutor( threadFactory );
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor( threadFactory );
 
-        this.future = exectuor.scheduleAtFixedRate( new Runnable( )
+        this.future = executor.scheduleAtFixedRate( new Runnable( )
         {
             @Override
             public void run( )
@@ -125,7 +128,7 @@ public class SwingEDTAnimator implements GLAnimatorControl
                 }
                 catch ( InvocationTargetException | InterruptedException e )
                 {
-                    logWarning( logger, "SwingAnimator Error.", e );
+                    logWarning( logger, "SwingEDTAnimator Error", e );
                 }
             }
 
@@ -144,24 +147,29 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public boolean isStarted( )
     {
+        requireSwingThread( );
         return this.future != null;
     }
 
     @Override
     public boolean isAnimating( )
     {
+        requireSwingThread( );
         return this.future != null;
     }
 
     @Override
     public boolean isPaused( )
     {
+        requireSwingThread( );
         return this.future != null;
     }
 
     @Override
     public synchronized boolean start( )
     {
+        requireSwingThread( );
+
         if ( isStarted( ) ) return false;
 
         start0( );
@@ -172,6 +180,8 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public synchronized boolean stop( )
     {
+        requireSwingThread( );
+
         if ( !isStarted( ) ) return false;
 
         boolean success = this.future.cancel( false );
@@ -190,18 +200,21 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public boolean pause( )
     {
+        requireSwingThread( );
         return stop( );
     }
 
     @Override
     public boolean resume( )
     {
+        requireSwingThread( );
         return start( );
     }
 
     @Override
     public void add( GLAutoDrawable drawable )
     {
+        requireSwingThread( );
         if ( !this.targets.contains( drawable ) )
         {
             this.targets.add( drawable );
@@ -211,18 +224,28 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public void remove( GLAutoDrawable drawable )
     {
-        this.targets.remove( drawable );
+        requireSwingThread( );
+        if ( this.targets.contains( drawable ) )
+        {
+            this.targets.remove( drawable );
+            if ( this.targets.isEmpty( ) )
+            {
+                this.pause( );
+            }
+        }
     }
 
     @Override
     public UncaughtExceptionHandler getUncaughtExceptionHandler( )
     {
+        requireSwingThread( );
         return this.handler;
     }
 
     @Override
     public void setUncaughtExceptionHandler( UncaughtExceptionHandler handler )
     {
+        requireSwingThread( );
         this.handler = handler;
     }
 

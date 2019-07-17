@@ -60,4 +60,6 @@ public interface Longs
 
     long[] copyOf( );
 
+    Longs copy( );
+
 }

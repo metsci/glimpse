@@ -125,4 +125,7 @@ public interface SortedFloats extends Floats
      */
     ContinuousIndexArray continuousIndicesOf( SortedFloats xs );
 
+    @Override
+    SortedFloats copy( );
+
 }

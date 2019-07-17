@@ -137,6 +137,12 @@ public class SortedIntsArithmetic implements SortedInts
     }
 
     @Override
+    public SortedIntsArithmetic copy( )
+    {
+        return new SortedIntsArithmetic( v0, vStep, n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

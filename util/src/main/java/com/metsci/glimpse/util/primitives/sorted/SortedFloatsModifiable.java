@@ -39,4 +39,7 @@ public interface SortedFloatsModifiable extends SortedFloats, FloatsModifiable
      */
     int add( float v );
 
+    @Override
+    SortedFloatsModifiable copy( );
+
 }

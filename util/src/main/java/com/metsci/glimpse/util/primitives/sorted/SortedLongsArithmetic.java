@@ -142,6 +142,12 @@ public class SortedLongsArithmetic implements SortedLongs
     }
 
     @Override
+    public SortedLongsArithmetic copy( )
+    {
+        return new SortedLongsArithmetic( v0, vStep, n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );

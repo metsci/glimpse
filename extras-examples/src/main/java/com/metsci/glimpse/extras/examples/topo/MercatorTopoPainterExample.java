@@ -28,6 +28,7 @@ package com.metsci.glimpse.extras.examples.topo;
 
 import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.topo.io.TopoCache.topoCacheDataset;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.requireTopoDataFile;
@@ -100,7 +101,7 @@ public class MercatorTopoPainterExample
             plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
             plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-            quickGlimpseApp( "MercatorTopoPainterExample", GL3, 0.8, plot );
+            quickGlimpseApp( "MercatorTopoPainterExample", GL3, screenFracSize( 0.8 ), plot );
         } );
     }
 

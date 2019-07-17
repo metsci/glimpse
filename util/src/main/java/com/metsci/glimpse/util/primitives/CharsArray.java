@@ -138,6 +138,12 @@ public class CharsArray implements CharsModifiable
     }
 
     @Override
+    public CharsArray copy( )
+    {
+        return new CharsArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public String string( )
     {
         return new String( a, 0, n );

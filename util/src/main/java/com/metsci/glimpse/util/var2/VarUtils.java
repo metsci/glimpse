@@ -322,6 +322,60 @@ public class VarUtils
         };
     }
 
+    public static <A,B extends A> Var<B> subclassVar( Var<A> superclassVar, Class<B> subclass )
+    {
+        return new VarDerived<B>( superclassVar )
+        {
+            @Override
+            public B v( )
+            {
+                A value = superclassVar.v( );
+                return ( subclass.isInstance( value ) ? subclass.cast( value ) : null );
+            }
+
+            @Override
+            public boolean set( boolean ongoing, B value )
+            {
+                return superclassVar.set( ongoing, value );
+            }
+        };
+    }
+
+    public static <A,B extends A> ReadableVar<B> subclassVar( ReadableVar<A> superclassVar, Class<B> subclass )
+    {
+        return new ReadableVarDerived<B>( superclassVar )
+        {
+            @Override
+            public B v( )
+            {
+                A value = superclassVar.v( );
+                return ( subclass.isInstance( value ) ? subclass.cast( value ) : null );
+            }
+        };
+    }
+
+    public static <A,B extends A,C> Var<C> subclassPropertyVar( Var<A> superclassVar, Class<B> subclass, Function<? super B,? extends C> getFn, BiFunction<? super B,C,? extends B> updateFn )
+    {
+        return subclassPropertyVar( superclassVar, subclass, getFn, updateFn, null );
+    }
+
+    public static <A,B extends A,C> Var<C> subclassPropertyVar( Var<A> superclassVar, Class<B> subclass, Function<? super B,? extends C> getFn, BiFunction<? super B,C,? extends B> updateFn, C fallback )
+    {
+        Var<B> subclassVar = subclassVar( superclassVar, subclass );
+        return propertyVar( subclassVar, getFn, updateFn, fallback );
+    }
+
+    public static <A,B extends A,C> ReadableVar<C> subclassPropertyVar( ReadableVar<A> superclassVar, Class<B> subclass, Function<? super B,? extends C> getFn )
+    {
+        return subclassPropertyVar( superclassVar, subclass, getFn, null );
+    }
+
+    public static <A,B extends A,C> ReadableVar<C> subclassPropertyVar( ReadableVar<A> superclassVar, Class<B> subclass, Function<? super B,? extends C> getFn, C fallback )
+    {
+        ReadableVar<B> subclassVar = subclassVar( superclassVar, subclass );
+        return propertyVar( subclassVar, getFn, fallback );
+    }
+
     public static <T,T2 extends T> boolean addSetElement( Var<ImmutableSet<T>> setVar, T2 element )
     {
         return addSetElement( setVar, false, element );

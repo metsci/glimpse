@@ -131,6 +131,12 @@ public class IntsArray implements IntsModifiable
     }
 
     @Override
+    public IntsArray copy( )
+    {
+        return new IntsArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public boolean isEmpty( )
     {
         return ( n == 0 );
