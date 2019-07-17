@@ -34,7 +34,7 @@ import javax.imageio.ImageIO;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.examples.axis.WrappedAxisExample;
+import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
@@ -56,7 +56,7 @@ public class OffscreenRenderingExample
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 
         // use one of the previous examples to build a simple plot to draw
-        GlimpseLayout layout = new WrappedAxisExample( ).getLayout( );
+        GlimpseLayout layout = HeatMapExample.newHeatMapPlot( );
 
         // add the layout to the offscreen canvas
         canvas.addLayout( layout );

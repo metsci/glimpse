@@ -26,26 +26,20 @@
  */
 package com.metsci.glimpse.examples.line;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
-import static com.metsci.glimpse.support.FrameUtils.newFrame;
-import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
-import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
 import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
-import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandlerSimpleUnits;
 import com.metsci.glimpse.axis.tagged.Tag;
@@ -60,72 +54,53 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStrip;
 import com.metsci.glimpse.support.shader.line.LineStyle;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LineJoinExample2
 {
-
     public static void main( String[] args )
     {
-        final MultiAxisPlot2D plot = new MultiAxisPlot2D( );
-        plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
-        plot.getCenterAxis( ).set( -3, +3, -3, +3 );
-
-        TaggedAxis1D leftAngleAxis = new TaggedAxis1D( );
-        AxisInfo leftAngleAxisInfo = plot.createAxisLeft( "leftAngleAxis", leftAngleAxis, new TaggedAxisMouseListener1D( ) );
-        leftAngleAxisInfo.setAxisPainter( new TaggedPartialColorYAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
-        Tag leftAngleTag = leftAngleAxis.addTag( "leftAngle", +90 );
-        leftAngleAxis.setMin( -360 );
-        leftAngleAxis.setMax( +360 );
-
-        TaggedAxis1D rightAngleAxis = new TaggedAxis1D( leftAngleAxis );
-        AxisInfo rightAngleAxisInfo = plot.createAxisRight( "rightAngleAxis", rightAngleAxis, new TaggedAxisMouseListener1D( ) );
-        rightAngleAxisInfo.setAxisPainter( new TaggedPartialColorYAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
-        Tag rightAngleTag = rightAngleAxis.addTag( "rightAngle", -90 );
-        rightAngleAxis.setMin( -360 );
-        rightAngleAxis.setMax( +360 );
-
-        TaggedAxis1D thicknessAxis = new TaggedAxis1D( );
-        AxisInfo thicknessAxisInfo = plot.createAxisBottom( "thicknessAxis", thicknessAxis, new TaggedAxisMouseListener1D( ) );
-        thicknessAxisInfo.setAxisPainter( new TaggedPartialColorXAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
-        Tag thicknessTag = thicknessAxis.addTag( "thickness", 10 );
-        thicknessAxis.setMin( 0 );
-        thicknessAxis.setMax( 100 );
-
-        TaggedAxis1D featherAxis = new TaggedAxis1D( thicknessAxis );
-        AxisInfo featherAxisInfo = plot.createAxisBottom( "featherAxis", featherAxis, new TaggedAxisMouseListener1D( ) );
-        featherAxisInfo.setAxisPainter( new TaggedPartialColorXAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
-        Tag featherTag = featherAxis.addTag( "feather", 0.9f );
-        featherAxis.setMin( 0 );
-        featherAxis.setMax( 100 );
-
-        plot.addPainter( new BackgroundPainter( ) );
-        plot.addPainter( new CustomLinesPainter( leftAngleTag, rightAngleTag, thicknessTag, featherTag ) );
-        plot.addPainter( new BorderPainter( ) );
-
-        SwingUtilities.invokeLater( new Runnable( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public void run( )
-            {
-                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( );
-                canvas.addLayout( plot );
-                canvas.setLookAndFeel( new SwingLookAndFeel( ) );
+            MultiAxisPlot2D plot = new MultiAxisPlot2D( );
+            plot.getCenterAxis( ).lockAspectRatioXY( 1.0 );
+            plot.getCenterAxis( ).set( -3, +3, -3, +3 );
 
-                GLAnimatorControl animator = new SwingEDTAnimator( 30 );
-                animator.add( canvas.getGLDrawable( ) );
-                animator.start( );
+            TaggedAxis1D leftAngleAxis = new TaggedAxis1D( );
+            AxisInfo leftAngleAxisInfo = plot.createAxisLeft( "leftAngleAxis", leftAngleAxis, new TaggedAxisMouseListener1D( ) );
+            leftAngleAxisInfo.setAxisPainter( new TaggedPartialColorYAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
+            Tag leftAngleTag = leftAngleAxis.addTag( "leftAngle", +90 );
+            leftAngleAxis.setMin( -360 );
+            leftAngleAxis.setMax( +360 );
 
-                JFrame frame = newFrame( "LinePathExample", canvas, DISPOSE_ON_CLOSE );
-                stopOnWindowClosing( frame, animator );
-                disposeOnWindowClosing( frame, canvas );
-                showFrameCentered( frame );
-            }
+            TaggedAxis1D rightAngleAxis = new TaggedAxis1D( leftAngleAxis );
+            AxisInfo rightAngleAxisInfo = plot.createAxisRight( "rightAngleAxis", rightAngleAxis, new TaggedAxisMouseListener1D( ) );
+            rightAngleAxisInfo.setAxisPainter( new TaggedPartialColorYAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
+            Tag rightAngleTag = rightAngleAxis.addTag( "rightAngle", -90 );
+            rightAngleAxis.setMin( -360 );
+            rightAngleAxis.setMax( +360 );
+
+            TaggedAxis1D thicknessAxis = new TaggedAxis1D( );
+            AxisInfo thicknessAxisInfo = plot.createAxisBottom( "thicknessAxis", thicknessAxis, new TaggedAxisMouseListener1D( ) );
+            thicknessAxisInfo.setAxisPainter( new TaggedPartialColorXAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
+            Tag thicknessTag = thicknessAxis.addTag( "thickness", 10 );
+            thicknessAxis.setMin( 0 );
+            thicknessAxis.setMax( 100 );
+
+            TaggedAxis1D featherAxis = new TaggedAxis1D( thicknessAxis );
+            AxisInfo featherAxisInfo = plot.createAxisBottom( "featherAxis", featherAxis, new TaggedAxisMouseListener1D( ) );
+            featherAxisInfo.setAxisPainter( new TaggedPartialColorXAxisPainter( new GridAxisLabelHandlerSimpleUnits( ) ) );
+            Tag featherTag = featherAxis.addTag( "feather", 0.9f );
+            featherAxis.setMin( 0 );
+            featherAxis.setMax( 100 );
+
+            plot.addPainter( new BackgroundPainter( ) );
+            plot.addPainter( new CustomLinesPainter( leftAngleTag, rightAngleTag, thicknessTag, featherTag ) );
+            plot.addPainter( new BorderPainter( ) );
+
+            quickGlimpseApp( "LineJoinExample2", GL3bc, plot );
         } );
     }
 

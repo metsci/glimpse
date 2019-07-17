@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.support.swing;
 
-import static com.metsci.glimpse.support.QuickUtils.requireSwingThread;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
@@ -45,7 +44,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.util.FPSAnimator;
-import com.metsci.glimpse.util.concurrent.ConcurrencyUtils;
+
+import jogamp.opengl.FPSCounterImpl;
 
 /**
  * An FPSAnimator-like class which performs rendering on the Swing EDT.
@@ -57,14 +57,29 @@ public class SwingEDTAnimator implements GLAnimatorControl
 {
     private static final Logger logger = Logger.getLogger( SwingEDTAnimator.class.getName( ) );
 
-    protected List<GLAutoDrawable> targets;
-    protected UncaughtExceptionHandler handler;
-    protected ScheduledExecutorService executor;
+    protected final ScheduledExecutorService executor;
+    protected final CopyOnWriteArrayList<GLAutoDrawable> targets;
+    protected volatile UncaughtExceptionHandler handler;
     protected volatile ScheduledFuture<?> future;
-    protected double fps;
+    protected final double fps;
+    protected final FPSCounterImpl fpsCounter;
+
 
     public SwingEDTAnimator( double fps )
     {
+        // TODO: Might be cleaner to use a javax.swing.Timer
+        // TODO: Call executor.shutdown() somewhere
+        this.executor = newSingleThreadScheduledExecutor( newDaemonThreadFactory( new ThreadFactory( )
+        {
+            @Override
+            public Thread newThread( Runnable r )
+            {
+                Thread thread = new Thread( r );
+                thread.setName( SwingEDTAnimator.class.getSimpleName( ) );
+                return thread;
+            }
+        } ) );
+
         this.fps = fps;
 
         this.targets = new CopyOnWriteArrayList<>( );
@@ -78,58 +93,48 @@ public class SwingEDTAnimator implements GLAnimatorControl
                 logWarning( logger, "Exception in: %s. Drawable: %s", cause, animator, drawable );
             }
         };
+
+        this.fpsCounter = new FPSCounterImpl( );
     }
 
     protected synchronized void start0( )
     {
-        requireSwingThread( );
-
-        // do nothing if the animator is already running
-        if ( this.future != null ) return;
-
-        ThreadFactory threadFactory = ConcurrencyUtils.newDaemonThreadFactory( new ThreadFactory( )
+        // Volatile read (note that method is synchronized)
+        if ( this.future != null )
         {
-            @Override
-            public Thread newThread( Runnable r )
-            {
-                Thread thread = new Thread( r );
-                thread.setName( SwingEDTAnimator.class.getSimpleName( ) );
-                return thread;
-            }
-        } );
+            return;
+        }
 
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor( threadFactory );
-
-        this.future = executor.scheduleAtFixedRate( new Runnable( )
+        // Volatile write (note that method is synchronized)
+        this.future = this.executor.scheduleAtFixedRate( ( ) ->
         {
-            @Override
-            public void run( )
+            try
             {
-                try
+                SwingUtilities.invokeAndWait( ( ) ->
                 {
-                    SwingUtilities.invokeAndWait( new Runnable( )
+                    for ( GLAutoDrawable target : this.targets )
                     {
-                        @Override
-                        public void run( )
+                        try
                         {
-                            for ( GLAutoDrawable target : targets )
+                            target.display( );
+                        }
+                        catch ( Exception e )
+                        {
+                            // Volatile read
+                            UncaughtExceptionHandler handler = this.handler;
+
+                            if ( handler != null )
                             {
-                                try
-                                {
-                                    target.display( );
-                                }
-                                catch ( Throwable t )
-                                {
-                                    if ( handler != null ) handler.uncaughtException( SwingEDTAnimator.this, target, t );
-                                }
+                                handler.uncaughtException( this, target, e );
                             }
                         }
-                    } );
-                }
-                catch ( InvocationTargetException | InterruptedException e )
-                {
-                    logWarning( logger, "SwingEDTAnimator Error", e );
-                }
+                    }
+                    this.fpsCounter.tickFPS( );
+                } );
+            }
+            catch ( InvocationTargetException | InterruptedException e )
+            {
+                logWarning( logger, "SwingEDTAnimator Error", e );
             }
 
         }, 0, ( int ) ( 1000.0 / fps ), TimeUnit.MILLISECONDS );
@@ -138,93 +143,113 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public synchronized Thread getThread( )
     {
-        //TODO Swing doesn't appear to provide a public way to get a reference to the EDT
-        //Toolkit.getDefaultToolkit( ).getSystemEventQueue( ).getDispatchThread( );
-
-        return null;
+        // Swing doesn't provide a public way to get a reference to the EDT.
+        //
+        // JOGL usually just compares the thread returned by this method against
+        // Thread.currentThread(), to check whether the current thread is the
+        // animator thread. We handle that case by returning the current thread
+        // directly, iff we are the Swing EDT.
+        //
+        // JOGL also has a shutdown hook that calls Thread.stop() on the animator
+        // thread, if the animator thread is non-null. Calling stop() on the Swing
+        // EDT is probably a bad idea anyway, so just return null if the current
+        // thread is not the Swing EDT.
+        //
+        if ( SwingUtilities.isEventDispatchThread( ) )
+        {
+            return Thread.currentThread( );
+        }
+        else
+        {
+            return null;
+        }
     }
 
     @Override
     public boolean isStarted( )
     {
-        requireSwingThread( );
-        return this.future != null;
+        // Volatile read
+        return ( this.future != null );
     }
 
     @Override
     public boolean isAnimating( )
     {
-        requireSwingThread( );
-        return this.future != null;
+        // Volatile read
+        return ( this.future != null );
     }
 
     @Override
     public boolean isPaused( )
     {
-        requireSwingThread( );
-        return this.future != null;
+        // Volatile read
+        return ( this.future == null );
     }
 
     @Override
     public synchronized boolean start( )
     {
-        requireSwingThread( );
-
-        if ( isStarted( ) ) return false;
-
-        start0( );
-
-        return true;
+        if ( this.isStarted( ) )
+        {
+            return false;
+        }
+        else
+        {
+            this.start0( );
+            return true;
+        }
     }
 
     @Override
     public synchronized boolean stop( )
     {
-        requireSwingThread( );
-
-        if ( !isStarted( ) ) return false;
-
-        boolean success = this.future.cancel( false );
-
-        if ( success )
+        if ( !this.isStarted( ) )
         {
-            this.future = null;
-            return true;
+            return false;
         }
         else
         {
-            return false;
+            // Volatile read (note that method is synchronized)
+            boolean success = this.future.cancel( false );
+
+            if ( success )
+            {
+                // Volatile write (note that method is synchronized)
+                this.future = null;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
     @Override
     public boolean pause( )
     {
-        requireSwingThread( );
-        return stop( );
+        return this.stop( );
     }
 
     @Override
     public boolean resume( )
     {
-        requireSwingThread( );
-        return start( );
+        return this.start( );
     }
 
     @Override
-    public void add( GLAutoDrawable drawable )
+    public synchronized void add( GLAutoDrawable drawable )
     {
-        requireSwingThread( );
         if ( !this.targets.contains( drawable ) )
         {
             this.targets.add( drawable );
+            drawable.setAnimator( this );
         }
     }
 
     @Override
-    public void remove( GLAutoDrawable drawable )
+    public synchronized void remove( GLAutoDrawable drawable )
     {
-        requireSwingThread( );
         if ( this.targets.contains( drawable ) )
         {
             this.targets.remove( drawable );
@@ -238,74 +263,74 @@ public class SwingEDTAnimator implements GLAnimatorControl
     @Override
     public UncaughtExceptionHandler getUncaughtExceptionHandler( )
     {
-        requireSwingThread( );
+        // Volatile read
         return this.handler;
     }
 
     @Override
     public void setUncaughtExceptionHandler( UncaughtExceptionHandler handler )
     {
-        requireSwingThread( );
+        // Volatile write
         this.handler = handler;
     }
 
     @Override
     public void setUpdateFPSFrames( int frames, PrintStream out )
     {
-        throw new UnsupportedOperationException( );
+        this.fpsCounter.setUpdateFPSFrames( frames, out );
     }
 
     @Override
     public void resetFPSCounter( )
     {
-        throw new UnsupportedOperationException( );
+        this.fpsCounter.resetFPSCounter( );
     }
 
     @Override
     public int getUpdateFPSFrames( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getUpdateFPSFrames( );
     }
 
     @Override
     public long getFPSStartTime( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getFPSStartTime( );
     }
 
     @Override
     public long getLastFPSUpdateTime( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getLastFPSUpdateTime( );
     }
 
     @Override
     public long getLastFPSPeriod( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getLastFPSPeriod( );
     }
 
     @Override
     public float getLastFPS( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getLastFPS( );
     }
 
     @Override
     public int getTotalFPSFrames( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getTotalFPSFrames( );
     }
 
     @Override
     public long getTotalFPSDuration( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getTotalFPSDuration( );
     }
 
     @Override
     public float getTotalFPS( )
     {
-        throw new UnsupportedOperationException( );
+        return this.fpsCounter.getTotalFPS( );
     }
 }

@@ -26,14 +26,16 @@
  */
 package com.metsci.glimpse.examples.heatmap;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.projection.FlatProjection;
@@ -47,98 +49,96 @@ import com.metsci.glimpse.util.io.StreamOpener;
  *
  * @author ulman
  */
-public class ImageExample implements GlimpseLayoutProvider
+public class ImageExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new ImageExample( ) );
-    }
-
-    @Override
-    public SimplePlot2D getLayout( )
-    {
-        // create a premade heat map window
-        SimplePlot2D plot = new SimplePlot2D( );
-
-        // don't show the crosshair painter
-        plot.getCrosshairPainter( ).setVisible( false );
-
-        // hide the x and y axes and title
-        plot.setBorderSize( 10 );
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
-        plot.setTitleHeight( 0 );
-
-        // set the x, y, and z initial axis bounds
-        plot.setMinX( -10.0f );
-        plot.setMaxX( 300.0f );
-
-        plot.setMinY( -50.0f );
-        plot.setMaxY( 250.0f );
-
-        // lock the aspect ratio of the x and y axis to 1 to 1
-        plot.lockAspectRatioXY( 1.0f );
-
-        // set the size of the selection box to 100.0 units
-        plot.setSelectionSize( 100.0f );
-
-        BufferedImage img = null;
-        // load image data from a file
-        try
+        swingInvokeLater( ( ) ->
         {
-            img = ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/images/GlimpseLogo.png" ) );
-        }
-        catch ( IOException e )
-        {
-            e.printStackTrace( );
-            throw new RuntimeException( e );
-        }
+            // create a premade heat map window
+            SimplePlot2D plot = new SimplePlot2D( );
 
-        // create an OpenGL texture wrapper object
-        final RGBATextureProjected2D texture1 = new RGBATextureProjected2D( img );
+            // don't show the crosshair painter
+            plot.getCrosshairPainter( ).setVisible( false );
 
-        // set a projection to display the data without distortion
-        texture1.setProjection( new FlatProjection( 0, texture1.getDimensionSize( 0 ), 0, texture1.getDimensionSize( 1 ) ) );
+            // hide the x and y axes and title
+            plot.setBorderSize( 10 );
+            plot.setAxisSizeX( 0 );
+            plot.setAxisSizeY( 0 );
+            plot.setTitleHeight( 0 );
 
-        // create another an OpenGL texture wrapper object
-        RGBATextureProjected2D texture2 = new RGBATextureProjected2D( 400, 400 );
+            // set the x, y, and z initial axis bounds
+            plot.setMinX( -10.0f );
+            plot.setMaxX( 300.0f );
 
-        // add data to the texture directly
-        texture2.mutate( new MutatorByte2D( )
-        {
+            plot.setMinY( -50.0f );
+            plot.setMaxY( 250.0f );
 
-            @Override
-            public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
+            // lock the aspect ratio of the x and y axis to 1 to 1
+            plot.lockAspectRatioXY( 1.0f );
+
+            // set the size of the selection box to 100.0 units
+            plot.setSelectionSize( 100.0f );
+
+            BufferedImage img = null;
+            // load image data from a file
+            try
+            {
+                img = ImageIO.read( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) );
+            }
+            catch ( IOException e )
+            {
+                e.printStackTrace( );
+                throw new RuntimeException( e );
+            }
+
+            // create an OpenGL texture wrapper object
+            final RGBATextureProjected2D texture1 = new RGBATextureProjected2D( img );
+
+            // set a projection to display the data without distortion
+            texture1.setProjection( new FlatProjection( 0, texture1.getDimensionSize( 0 ), 0, texture1.getDimensionSize( 1 ) ) );
+
+            // create another an OpenGL texture wrapper object
+            RGBATextureProjected2D texture2 = new RGBATextureProjected2D( 400, 400 );
+
+            // add data to the texture directly
+            texture2.mutate( new MutatorByte2D( )
             {
 
-                for ( int y = 0; y < dataSizeY; y++ )
+                @Override
+                public void mutate( ByteBuffer data, int dataSizeX, int dataSizeY )
                 {
-                    for ( int x = 0; x < dataSizeX; x++ )
+
+                    for ( int y = 0; y < dataSizeY; y++ )
                     {
-                        data.put( ( byte ) ( 255 * ( Math.random( ) * 100 + ( x * y ) ) / ( 420 * 420 ) ) );
-                        data.put( ( byte ) 50 );
-                        data.put( ( byte ) ( 255 * ( 0.3 + ( y / ( float ) dataSizeY ) * 0.3f ) ) );
-                        data.put( ( byte ) 127 );
+                        for ( int x = 0; x < dataSizeX; x++ )
+                        {
+                            data.put( ( byte ) ( 255 * ( Math.random( ) * 100 + ( x * y ) ) / ( 420 * 420 ) ) );
+                            data.put( ( byte ) 50 );
+                            data.put( ( byte ) ( 255 * ( 0.3 + ( y / ( float ) dataSizeY ) * 0.3f ) ) );
+                            data.put( ( byte ) 127 );
+                        }
                     }
                 }
-            }
+            } );
+
+            // set a projection to position the texture
+            texture2.setProjection( new FlatProjection( -50, 350, -100, 300 ) );
+
+            // create a painter to display the texture in the plot
+            ShadedTexturePainter imagePainter = new ShadedTexturePainter( );
+
+            imagePainter.setProgram( new ColorTexture2DProgram( ) );
+
+            // load the textures into the painter
+            imagePainter.addDrawableTexture( texture1 );
+            imagePainter.addDrawableTexture( texture2 );
+
+            // add the painter to the plot
+            plot.addPainter( imagePainter );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Image Example", GL3bc, plot );
         } );
-
-        // set a projection to position the texture
-        texture2.setProjection( new FlatProjection( -50, 350, -100, 300 ) );
-
-        // create a painter to display the texture in the plot
-        ShadedTexturePainter imagePainter = new ShadedTexturePainter( );
-
-        imagePainter.setProgram( new ColorTexture2DProgram( ) );
-
-        // load the textures into the painter
-        imagePainter.addDrawableTexture( texture1 );
-        imagePainter.addDrawableTexture( texture2 );
-
-        // add the painter to the plot
-        plot.addPainter( imagePainter );
-
-        return plot;
     }
 }

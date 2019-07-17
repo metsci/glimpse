@@ -28,6 +28,7 @@ package com.metsci.glimpse.charts.bathy;
 
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
 import static java.lang.Math.abs;
 import static java.lang.Math.hypot;
 import static java.lang.Math.max;
@@ -45,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,7 +89,8 @@ public abstract class TilePainter<V> extends DelegatePainter
         {
             if ( SHARED_EXEC == null )
             {
-                SHARED_EXEC = newFixedThreadPool( max( getRuntime( ).availableProcessors( ) - 2, 1 ) );
+                ThreadFactory threadFactory = newDaemonThreadFactory( Executors.defaultThreadFactory( ) );
+                SHARED_EXEC = newFixedThreadPool( max( getRuntime( ).availableProcessors( ) - 2, 1 ), threadFactory );
             }
         }
 

@@ -26,19 +26,20 @@
  */
 package com.metsci.glimpse.extras.examples.charts.shoreline;
 
-import java.io.IOException;
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
 import java.io.InputStream;
-import java.text.ParseException;
 
 import com.metsci.glimpse.charts.shoreline.LandShapePainter;
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.CopyrightPainter;
 import com.metsci.glimpse.painter.info.MeasurementPainter;
 import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
+import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * Displays shoreline data available from the NOAA/NGDC Coastline Extractor
@@ -52,61 +53,58 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
  *
  * @author ulman
  */
-public class LandPlotExample implements GlimpseLayoutProvider
+public class LandPlotExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new LandPlotExample( ) );
-    }
+        swingInvokeLater( ( ) ->
+        {
+            // land coordinates are specified as lat lons and must be converted
+            // into flat rectangular coordinates to be displayed by glimpse
+            TangentPlane tangentPlane = new TangentPlane( LatLonGeo.fromDeg( 20, -155 ) );
 
-    @Override
-    public SimplePlot2D getLayout( ) throws ParseException, IOException
-    {
-        // create a tangent plane
-        // land coordinates are specified as lat lons and must be converted
-        // into flat rectangular coordinates to be displayed by glimpse
-        final TangentPlane tangentPlane = new TangentPlane( LatLonGeo.fromDeg( 20, -155 ) );
+            // create a plot, which automatically provides axes, mouse interation, and
+            // plot decorations like grid lines and mouse crosshairs
+            SimplePlot2D plot = new SimplePlot2D( );
 
-        // create a plot, which automatically provides axes, mouse interation, and
-        // plot decorations like grid lines and mouse crosshairs
-        final SimplePlot2D plot = new SimplePlot2D( );
+            // don't show crosshairs
+            plot.getCrosshairPainter( ).setVisible( false );
 
-        // don't show crosshairs
-        plot.getCrosshairPainter( ).setVisible( false );
+            // hide the plot title and the x and y axes
+            plot.showTitle( false );
+            plot.setTitleHeight( 0 );
+            plot.setAxisSizeX( 0 );
+            plot.setAxisSizeY( 0 );
 
-        // hide the plot title and the x and y axes
-        plot.showTitle( false );
-        plot.setTitleHeight( 0 );
-        plot.setAxisSizeX( 0 );
-        plot.setAxisSizeY( 0 );
+            // set a 10 pixel border around the edge of the plot
+            plot.setBorderSize( 10 );
 
-        // set a 10 pixel border around the edge of the plot
-        plot.setBorderSize( 10 );
+            // create a custom layer to display land and load data into it
+            // the data file used was created using the NOAA/NGDC Coastline Extractor
+            // tool at http://www.ngdc.noaa.gov/mgg_coastline/
+            LandShapePainter landLayer = new LandShapePainter( );
+            InputStream in = StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/extras/examples/data/Okinawa.land" );
+            landLayer.loadNgdcLandFileAndCenterAxis( in, tangentPlane, plot.getAxis( ) );
 
-        // create a custom layer to display land and load data into it
-        // the data file used was created using the NOAA/NGDC Coastline Extractor
-        // tool at http://www.ngdc.noaa.gov/mgg_coastline/
-        LandShapePainter landLayer = new LandShapePainter( );
-        InputStream in = getClass( ).getModule( ).getResourceAsStream( "com/metsci/glimpse/extras/examples/data/Okinawa.land" );
-        landLayer.loadNgdcLandFileAndCenterAxis( in, tangentPlane, plot.getAxis( ) );
+            // customize the background color of the plot
+            plot.setPlotBackgroundColor( GlimpseColor.fromColorHex( "#bbc2c7" ) );
 
-        // customize the background color of the plot
-        plot.setPlotBackgroundColor( GlimpseColor.fromColorHex( "#bbc2c7" ) );
+            // add a Metron copywrite notice to the plot
+            plot.addPainter( new CopyrightPainter( ) );
 
-        // add a Metron copywrite notice to the plot
-        plot.addPainter( new CopyrightPainter( ) );
+            // add the land layer created above to the plot
+            plot.addPainter( landLayer );
 
-        // add the land layer created above to the plot
-        plot.addPainter( landLayer );
+            // add a painter which displays angles and distances between points (activated by right clicking)
+            plot.addPainter( new MeasurementPainter( "m" ) );
 
-        // add a painter which displays angles and distances between points (activated by right clicking)
-        plot.addPainter( new MeasurementPainter( "m" ) );
+            // lock the plot to a 1 to 1 aspect ratio
+            plot.lockAspectRatioXY( 1.0f );
+            // don't show horizontal/vertical bars marking the cursor position
+            plot.getCrosshairPainter( ).setVisible( false );
 
-        // lock the plot to a 1 to 1 aspect ratio
-        plot.lockAspectRatioXY( 1.0f );
-        // don't show horizontal/vertical bars marking the cursor position
-        plot.getCrosshairPainter( ).setVisible( false );
-
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Land Plot Example", GL3bc, plot );
+        } );
     }
 }

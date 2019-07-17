@@ -26,103 +26,65 @@
  */
 package com.metsci.glimpse.examples.layout;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;
 
-import com.jogamp.opengl.GLAnimatorControl;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.context.TargetStackUtil;
 import com.metsci.glimpse.examples.timeline.CollapsibleTimelinePlotExample;
-import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class VerticallyScrollableLayoutExample
 {
-
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-
-        // Much of the standard glimpse-canvas setup code here is copied from
-        // com.metsci.glimpse.examples.Example, with modifications that allow
-        // the canvas and the scrollbar to live in the same JFrame
-
-        // Don't attempt to shrink content to any smaller than this height -- if canvas height is
-        // less than this, make it scrollable instead of shrinking it further
-        final int minContentHeight = 800;
-
-        // Make a scroller and add some content to it
-        final GlimpseVerticallyScrollableLayout scroller = new GlimpseVerticallyScrollableLayout( minContentHeight );
-        scroller.addPainter( new BackgroundPainter( ) );
-        scroller.addLayout( ( new CollapsibleTimelinePlotExample( ) ).getLayout( ) );
-
-        // Add the scroller to a glimpse canvas (see com.metsci.glimpse.examples.Example for explanatory comments)
-        GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( GLUtils.getDefaultGLProfile( ) );
-        GLContext context = glDrawable.getContext( );
-        final NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( context );
-        canvas.setPreferredSize( new Dimension( 800, 600 ) );
-        canvas.addLayout( scroller );
-        canvas.setLookAndFeel( new OceanLookAndFeel( ) );
-
-        // Swing scrollbar, for interactively controlling the scroller's vertical offset
-        final JScrollBar scrollbar = new JScrollBar( );
-
-        // Attach the scrollable-layout and the scrollbar
-        //
-        // Really the scrollbar is attached not to the layout, but to a particular (layout,stack)
-        // tuple -- so the stack must be specified as well
-        //
-        GlimpseTargetStack scrollerStack = TargetStackUtil.newTargetStack( canvas );
-        attachScrollableToScrollbar( scroller, scrollerStack, scrollbar );
-
-        // Create a frame to house the canvas and the scrollbar (see com.metsci.glimpse.examples.Example for explanatory comments)
-        final JFrame frame = new JFrame( "Glimpse Example" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-
-        frame.addWindowListener( new WindowAdapter( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public void windowClosing( WindowEvent e )
-            {
-                canvas.disposeAttached( );
-                canvas.destroy( );
-            }
-        } );
+            // Don't attempt to shrink content to any smaller than this height -- if canvas height is
+            // less than this, make it scrollable instead of shrinking it further
+            final int minContentHeight = 800;
 
-        // Make the frame visible (see com.metsci.glimpse.examples.Example for explanatory comments)
-        SwingUtilities.invokeAndWait( new Runnable( )
-        {
-            @Override
-            public void run( )
+            // Make a scroller and add some content to it
+            final GlimpseVerticallyScrollableLayout scroller = new GlimpseVerticallyScrollableLayout( minContentHeight );
+            scroller.addPainter( new BackgroundPainter( ) );
+            scroller.addLayout( new CollapsibleTimelinePlotExample( ).getPlot( ) );
+
+            // Swing scrollbar, for interactively controlling the scroller's vertical offset
+            final JScrollBar scrollbar = new JScrollBar( );
+
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( GL3bc, scroller, new OceanLookAndFeel( ) );
+            JFrame frame = quickGlimpseWindow( "Vertically Scrollable Example", canvas, 800, 600 );
+
+            // perform some additional setup of the scroll bar
+            SwingUtilities.invokeLater( ( ) ->
             {
-                // Add canvas and scrollbar to the frame
+                // Attach the scrollable-layout and the scrollbar
+                //
+                // Really the scrollbar is attached not to the layout, but to a particular (layout,stack)
+                // tuple -- so the stack must be specified as well
+                //
+                GlimpseTargetStack scrollerStack = TargetStackUtil.newTargetStack( canvas );
+                attachScrollableToScrollbar( scroller, scrollerStack, scrollbar );
+
+                // Add the scrollbar to the frame on the right
                 frame.setLayout( new BorderLayout( ) );
-                frame.add( canvas, BorderLayout.CENTER );
                 frame.add( scrollbar, BorderLayout.EAST );
-
-                frame.pack( );
-                frame.setLocationRelativeTo( null );
-                frame.setVisible( true );
-
-                GLAnimatorControl animator = new SwingEDTAnimator( 60 );
-                animator.add( canvas.getGLDrawable( ) );
-                animator.start( );
-            }
+                // Re-add the canvas to the center of the border layout
+                frame.add( canvas, BorderLayout.CENTER );
+                frame.revalidate( );
+            } );
         } );
-
     }
-
 }

@@ -26,10 +26,11 @@
  */
 package com.metsci.glimpse.examples.layout;
 
-import com.metsci.glimpse.examples.Example;
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.info.MinimapLayout;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 
@@ -41,43 +42,39 @@ import com.metsci.glimpse.plot.ColorAxisPlot2D;
  *
  * @author ulman
  */
-public class MiniMapLayoutExample implements GlimpseLayoutProvider
+public class MiniMapLayoutExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new MiniMapLayoutExample( ) );
-    }
+        swingInvokeLater( ( ) ->
+        {
+            ColorAxisPlot2D plot = TaggedHeatMapExample.newPlot( );
 
-    @Override
-    public GlimpseLayout getLayout( )
-    {
-        // create a plot using the HeatMapExample
-        TaggedHeatMapExample example = new TaggedHeatMapExample( );
-        ColorAxisPlot2D plot = example.getLayout( );
+            // turn off the selection painter
+            plot.getCrosshairPainter( ).showSelectionBox( false );
 
-        // turn off the selection painter
-        plot.getCrosshairPainter( ).showSelectionBox( false );
+            // create a MinimapLayout
+            MinimapLayout mini = new MinimapLayout( );
 
-        // create a MinimapLayout
-        MinimapLayout mini = new MinimapLayout( );
+            // add the MinimapLayout to the center Layout of the ColorAxisPlot2D
+            plot.getLayoutCenter( ).addLayout( mini );
 
-        // add the MinimapLayout to the center Layout of the ColorAxisPlot2D
-        plot.getLayoutCenter( ).addLayout( mini );
+            // set the axis bounds of the Minimap
+            // (the Minimap will always be fixed at 0 to 1000 regardless of how
+            //  the main plot is zoomed)
+            mini.setBounds( 0, 1000, 0, 1000 );
 
-        // set the axis bounds of the Minimap
-        // (the Minimap will always be fixed at 0 to 1000 regardless of how
-        //  the main plot is zoomed)
-        mini.setBounds( 0, 1000, 0, 1000 );
+            // set the position and size of the Minimap in pixels
+            // within the ColorAxisPlot2D
+            mini.setPosition( 10, 10, 100, 100 );
 
-        // set the position and size of the Minimap in pixels
-        // within the ColorAxisPlot2D
-        mini.setPosition( 10, 10, 100, 100 );
+            // add the painter to display in the Minimap
+            // in this case we reuse the painter displaying the heat map
+            // in the main ColorAxisPlot2D
+            mini.addPainter( plot.getPainterByKey( TaggedHeatMapExample.PainterKey ) );
 
-        // add the painter to display in the Minimap
-        // in this case we reuse the painter displaying the heat map
-        // in the main ColorAxisPlot2D
-        mini.addPainter( example.getPainter( ) );
-
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Mini Map Layout Example", GL3bc, plot );
+        } );
     }
 }

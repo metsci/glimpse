@@ -26,8 +26,11 @@
  */
 package com.metsci.glimpse.examples.misc;
 
-import com.metsci.glimpse.examples.Example;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
+
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
 import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
 import com.metsci.glimpse.plot.EmptyPlot2D;
@@ -37,70 +40,67 @@ import com.metsci.glimpse.support.color.GlimpseColor;
  * @author ulman
  * @see com.metsci.glimpse.examples.scatterplot.DynamicPointPainterExample
  */
-public class DynamicLinePainterExample implements GlimpseLayoutProvider
+public class DynamicLinePainterExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new DynamicLinePainterExample( ) );
-    }
-
-    @Override
-    public EmptyPlot2D getLayout( )
-    {
-        // create a simple pre-built Glimpse plot
-        EmptyPlot2D plot = new EmptyPlot2D( );
-
-        // set the x and y axis bounds
-        plot.getAxis( ).set( -1, 2, -1, 2 );
-
-        // create a painter to display dynamically colored lines
-        final DynamicLineSetPainter painter = new DynamicLineSetPainter( );
-
-        // tell the painter to display dotted lines with the provided stipple pattern
-        painter.setDotted( 2, ( short ) 0xAAAA );
-
-        plot.addPainter( painter );
-
-        ( new Thread( )
+        swingInvokeLater( ( ) ->
         {
-            int count = 0;
+            // create a simple pre-built Glimpse plot
+            EmptyPlot2D plot = new EmptyPlot2D( );
 
-            @Override
-            public void run( )
+            // set the x and y axis bounds
+            plot.getAxis( ).set( -1, 2, -1, 2 );
+
+            // create a painter to display dynamically colored lines
+            final DynamicLineSetPainter painter = new DynamicLineSetPainter( );
+
+            // tell the painter to display dotted lines with the provided stipple pattern
+            painter.setDotted( 2, ( short ) 0xAAAA );
+
+            plot.addPainter( painter );
+
+            startThread( "Data Updater", true, new Runnable( )
             {
-                try
-                {
+                int count = 0;
 
-                    while ( true )
+                public void run( )
+                {
+                    try
                     {
-                        BulkLineAccumulator accum = new BulkLineAccumulator( );
 
-                        float[] color = GlimpseColor.fromColorRgba( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) );
-
-                        for ( int i = 0; i < 20; i++ )
+                        while ( true )
                         {
-                            accum.add( count++, ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), color );
+                            BulkLineAccumulator accum = new BulkLineAccumulator( );
+
+                            float[] color = GlimpseColor.fromColorRgba( ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ) );
+
+                            for ( int i = 0; i < 20; i++ )
+                            {
+                                accum.add( count++, ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), ( float ) Math.random( ), color );
+                            }
+
+                            painter.putLines( accum );
+
+                            try
+                            {
+                                Thread.sleep( 20 );
+                            }
+                            catch ( InterruptedException e )
+                            {
+                            }
                         }
 
-                        painter.putLines( accum );
-
-                        try
-                        {
-                            Thread.sleep( 20 );
-                        }
-                        catch ( InterruptedException e )
-                        {
-                        }
                     }
-
+                    catch ( Exception e )
+                    {
+                        e.printStackTrace( );
+                    }
                 }
-                catch ( Exception e )
-                {
-                    e.printStackTrace( );
-                }
-            }
-        } ).start( );
+            } );
 
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Dynamic Line Painter Example", GL3bc, plot );
+        } );
     }
 }

@@ -26,22 +26,17 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
-import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
-import static com.metsci.glimpse.support.FrameUtils.newFrame;
-import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
-import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.io.IOException;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
-import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.WrappedAxis1D;
@@ -56,75 +51,66 @@ import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.group.WrappedPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
+/**
+ * DNC charts with a Equirectangular projection and wraparound horizontal axis.
+ */
 public class DncPainterExample2
 {
 
     public static void main( String[] args ) throws IOException
     {
         initializeLogging( "com/metsci/glimpse/extras/examples/dnc/logging.properties" );
-
-        // Render config
-        //
-
-        RenderCacheConfig renderConfig = new RenderCacheConfig( );
-        renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
-        renderConfig.proj = new DncEquirectProjection( 0 );
-
-        RenderCache renderCache = new RenderCache( renderConfig, 4 );
-
-        // Create plot
-        //
-
-        MultiAxisPlot2D plot = new MultiAxisPlot2D( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            protected void initializeCenterAxis( )
+            // Render config
+            //
+
+            RenderCacheConfig renderConfig = new RenderCacheConfig( );
+            renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
+            renderConfig.proj = new DncEquirectProjection( 0 );
+
+            RenderCache renderCache = new RenderCache( renderConfig, 4 );
+
+
+            // Create plot
+            //
+
+            MultiAxisPlot2D plot = new MultiAxisPlot2D( )
             {
-                this.centerAxisX = new WrappedAxis1D( -180, 180 );
-                this.centerAxisY = new Axis1D( );
-            }
-        };
-        plot.setShowTitle( false );
-        plot.setBorderSize( 5 );
+                @Override
+                protected void initializeCenterAxis( )
+                {
+                    this.centerAxisX = new WrappedAxis1D( -180, 180 );
+                    this.centerAxisY = new Axis1D( );
+                }
+            };
+            plot.setShowTitle( false );
+            plot.setBorderSize( 5 );
 
-        Axis2D axis = plot.getLayoutCenter( ).getAxis( );
-        axis.lockAspectRatioXY( 1.0 );
-        axis.set( -180, 180, -90, 90 );
-        axis.validate( );
+            Axis2D axis = plot.getLayoutCenter( ).getAxis( );
+            axis.lockAspectRatioXY( 1.0 );
+            axis.set( -180, 180, -90, 90 );
+            axis.validate( );
 
-        DncPainterSettings dncPainterSettings = new DncPainterSettingsImpl( renderConfig.proj );
-        DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings, DNC_THEME_STANDARD );
-        dncPainter.activateCoverages( renderCache.coverages );
-        dncPainter.addAxis( axis );
+            DncPainterSettings dncPainterSettings = new DncPainterSettingsImpl( renderConfig.proj );
+            DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings, DNC_THEME_STANDARD );
+            dncPainter.activateCoverages( renderCache.coverages );
+            dncPainter.addAxis( axis );
 
-        WrappedPainter wrappedPainter = new WrappedPainter( true );
-        wrappedPainter.addPainter( new BackgroundPainter( ) );
-        wrappedPainter.addPainter( dncPainter );
+            WrappedPainter wrappedPainter = new WrappedPainter( true );
+            wrappedPainter.addPainter( new BackgroundPainter( ) );
+            wrappedPainter.addPainter( dncPainter );
 
-        plot.getLayoutCenter( ).addPainter( wrappedPainter );
-        plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
-        plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
+            plot.getLayoutCenter( ).addPainter( wrappedPainter );
+            plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+            plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-        // Show
-        //
 
-        SwingUtilities.invokeLater( ( ) -> {
-            NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( );
-            canvas.addLayout( plot );
-            canvas.setLookAndFeel( new SwingLookAndFeel( ) );
+            // Show
+            //
 
-            GLAnimatorControl animator = new SwingEDTAnimator( 30 );
-            animator.add( canvas.getGLDrawable( ) );
-            animator.start( );
-
-            JFrame frame = newFrame( "DNC Example", canvas, DISPOSE_ON_CLOSE );
-            stopOnWindowClosing( frame, animator );
-            disposeOnWindowClosing( frame, canvas );
-            showFrameCentered( frame );
+            quickGlimpseApp( "DNC Example", GL3bc, plot, screenFracSize( 0.8 ) );
         } );
     }
 

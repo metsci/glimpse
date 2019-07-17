@@ -35,7 +35,6 @@ import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindo
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
 import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
@@ -70,10 +69,10 @@ public class GlimpseDockingExample
                 GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
 
                 NewtSwingEDTGlimpseCanvas aCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
-                aCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( greenBone ) );
+                aCanvas.addLayout( TaggedHeatMapExample.newPlot( greenBone ) );
 
                 NewtSwingEDTGlimpseCanvas bCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
-                bCanvas.addLayout( new TaggedHeatMapExample( ).getLayout( jet ) );
+                bCanvas.addLayout( TaggedHeatMapExample.newPlot( jet ) );
 
                 final SwingEDTAnimator glAnimator = new SwingEDTAnimator( 30 );
                 glAnimator.add( aCanvas.getGLDrawable( ) );
@@ -102,9 +101,8 @@ public class GlimpseDockingExample
                     @Override
                     public void disposingAllWindows( DockingGroup group )
                     {
-                        glAnimator.stop( );
-                        tearDownCanvas( aCanvas );
-                        tearDownCanvas( bCanvas );
+                        aCanvas.destroy( );
+                        bCanvas.destroy( );
                     }
                 } );
 

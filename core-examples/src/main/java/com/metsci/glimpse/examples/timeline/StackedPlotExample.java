@@ -26,11 +26,12 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
 import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.plot.stacked.PlotInfo;
 import com.metsci.glimpse.plot.stacked.StackedPlot2D;
@@ -39,35 +40,33 @@ import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 /**
  * @author ulman
  */
-public class StackedPlotExample implements GlimpseLayoutProvider
+public class StackedPlotExample
 {
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new StackedPlotExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            // create a plot which arranges its sub-plots in a horizontal line
+            StackedPlot2D plot = new StackedPlot2D( Orientation.HORIZONTAL );
+
+            // use the HeatMapExample to create a ColorAxisPlot2D
+            ColorAxisPlot2D plot1 = HeatMapExample.newHeatMapPlot( );
+            createPlotArea( plot, plot1, "heat map 1" );
+
+            // create another ColorAxisPlot2D
+            ColorAxisPlot2D plot2 = HeatMapExample.newHeatMapPlot( );
+            PlotInfo info2 = createPlotArea( plot, plot2, "heat map 2" );
+
+            // set the size of the second layout area to be fixed at 300 pixels
+            info2.setSize( 250 );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Stacked Plot Example", GL3bc, plot );
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( )
-    {
-        // create a plot which arranges its sub-plots in a horizontal line
-        StackedPlot2D plot = new StackedPlot2D( Orientation.HORIZONTAL );
-
-        // use the HeatMapExample to create a ColorAxisPlot2D
-        ColorAxisPlot2D plot1 = new HeatMapExample( ).getLayout( );
-        createPlotArea( plot, plot1, "heat map 1" );
-
-        // create another ColorAxisPlot2D
-        ColorAxisPlot2D plot2 = new HeatMapExample( ).getLayout( );
-        PlotInfo info2 = createPlotArea( plot, plot2, "heat map 2" );
-
-        // set the size of the second layout area to be fixed at 300 pixels
-        info2.setSize( 250 );
-
-        return plot;
-    }
-
-    public PlotInfo createPlotArea( StackedPlot2D stacked_plot, ColorAxisPlot2D inner_plot, String name )
+    public static PlotInfo createPlotArea( StackedPlot2D stacked_plot, ColorAxisPlot2D inner_plot, String name )
     {
         // customize the appearance of the inner plot
         // (remove the title and x axis, shrink the y axis to 30 pixels

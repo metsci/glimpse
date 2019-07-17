@@ -26,28 +26,32 @@
  */
 package com.metsci.glimpse.examples.screenshot;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
 
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.axis.factory.AxisFactory2D;
 import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
 import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
 import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseTargetStack;
 import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * Demonstrates the ability to render Glimpse plots to an off-screen buffer
@@ -56,36 +60,37 @@ import com.metsci.glimpse.support.font.FontUtils;
  * @author ulman
  */
 // FIXME NPE
-public class ScreenCaptureExample implements GlimpseLayoutProvider
+public class ScreenCaptureExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        // create a normal onscreen GlimpseCanvas
-        Example example = Example.showWithSwing( new ScreenCaptureExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            // create a normal onscreen plot
+            ColorAxisPlot2D plot = HeatMapExample.newHeatMapPlot( );
 
-        setupScreenCapture( example );
+            // create a window and show the plot
+            String appName = "Screen Capture Example";
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
+            quickGlimpseWindow( appName, canvas );
+
+            // set up a mouse listener to take a screen capture on mouse click
+            setupScreenCapture( canvas.getGLContext( ), plot );
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
+    public static void setupScreenCapture( GLContext glContext, ColorAxisPlot2D plot )
     {
-        return new HeatMapExample( ).getLayout( );
-    }
-
-    public static void setupScreenCapture( Example example )
-    {
-        GlimpseCanvas canvas = example.getCanvas( );
-
-        ColorAxisPlot2D plot = ( ColorAxisPlot2D ) example.getLayout( );
         plot.setTitleFont( FontUtils.getDefaultBold( 18 ) );
         plot.setTitle( "Click Center Mouse Button To Take Screenshot" );
 
         // create an offscreen GlimpseCanvas
-        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( canvas.getGLContext( ), 1000, 1000 );
+        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( glContext, 1000, 1000 );
 
         // add the GlimpseLayout from the onscreen canvas to the offscreen canvas as well
         // (GlimpseLayouts can have multiple parents)
-        offscreenCanvas.addLayout( example.getLayout( ) );
+        offscreenCanvas.addLayout( plot );
 
         // if we want the axes used for the screenshot to behave differently than the axes
         // used to render the plot on the screen we must create an AxisFactory which

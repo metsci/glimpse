@@ -26,23 +26,16 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
-import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
-import static com.metsci.glimpse.support.FrameUtils.newFrame;
-import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
-import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
-import java.io.IOException;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
-import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.dnc.DncPainter;
 import com.metsci.glimpse.dnc.DncPainterSettings;
 import com.metsci.glimpse.dnc.DncPainterSettingsImpl;
@@ -51,59 +44,50 @@ import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.info.FpsPainter;
 import com.metsci.glimpse.plot.Plot2D;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
+/**
+ * DNC charts with a Tangent Plane projection.
+ */
 public class DncPainterExample
 {
 
-    public static void main( String[] args ) throws IOException
+    public static void main( String[] args )
     {
         initializeLogging( "com/metsci/glimpse/extras/examples/dnc/logging.properties" );
+        swingInvokeLater( ( ) ->
+        {
+            // Render config
+            //
 
-        // Render config
-        //
+            RenderCacheConfig renderConfig = new RenderCacheConfig( );
+            renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
+            renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
 
-        RenderCacheConfig renderConfig = new RenderCacheConfig( );
-        renderConfig.flatParentDir = requireExistingDir( glimpseDncFlatDir );
-        renderConfig.proj = dncTangentPlane( 40.6892, -74.0444 ); // New York
+            RenderCache renderCache = new RenderCache( renderConfig, 4 );
 
-        RenderCache renderCache = new RenderCache( renderConfig, 4 );
 
-        // Create plot
-        //
+            // Create plot
+            //
 
-        Plot2D plot = new Plot2D( "" );
-        plot.lockAspectRatioXY( 1 );
-        plot.setShowMinorTicksX( true );
-        plot.setShowMinorTicksY( true );
+            Plot2D plot = new Plot2D( "" );
+            plot.lockAspectRatioXY( 1 );
+            plot.setShowMinorTicksX( true );
+            plot.setShowMinorTicksY( true );
 
-        DncPainterSettings dncPainterSettings = new DncPainterSettingsImpl( renderConfig.proj );
-        DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings, DNC_THEME_STANDARD );
-        dncPainter.activateCoverages( renderCache.coverages );
-        dncPainter.addAxis( plot.getAxis( ) );
+            DncPainterSettings dncPainterSettings = new DncPainterSettingsImpl( renderConfig.proj );
+            DncPainter dncPainter = new DncPainter( renderCache, dncPainterSettings, DNC_THEME_STANDARD );
+            dncPainter.activateCoverages( renderCache.coverages );
+            dncPainter.addAxis( plot.getAxis( ) );
 
-        plot.getLayoutCenter( ).addPainter( dncPainter );
-        plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
-        plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
+            plot.getLayoutCenter( ).addPainter( dncPainter );
+            plot.getLayoutCenter( ).addPainter( new FpsPainter( ) );
+            plot.getLayoutCenter( ).addPainter( new BorderPainter( ) );
 
-        // Show
-        //
 
-        SwingUtilities.invokeLater( ( ) -> {
-            NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( );
-            canvas.addLayout( plot );
-            canvas.setLookAndFeel( new SwingLookAndFeel( ) );
+            // Show
+            //
 
-            GLAnimatorControl animator = new SwingEDTAnimator( 30 );
-            animator.add( canvas.getGLDrawable( ) );
-            animator.start( );
-
-            JFrame frame = newFrame( "DNC Example", canvas, DISPOSE_ON_CLOSE );
-            stopOnWindowClosing( frame, animator );
-            disposeOnWindowClosing( frame, canvas );
-            showFrameCentered( frame );
+            quickGlimpseApp( "DNC Example", GL3bc, plot, screenFracSize( 0.8 ) );
         } );
     }
 

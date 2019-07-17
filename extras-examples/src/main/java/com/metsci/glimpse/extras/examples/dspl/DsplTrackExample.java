@@ -26,6 +26,10 @@
  */
 package com.metsci.glimpse.extras.examples.dspl;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,10 +53,8 @@ import com.metsci.glimpse.dspl.util.DsplSliceUtils.SimpleConceptPattern;
 import com.metsci.glimpse.dspl.util.DsplSliceUtils.SimpleSlicePattern;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.painter.geo.ScalePainter;
@@ -70,17 +72,23 @@ import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-public class DsplTrackExample implements GlimpseLayoutProvider
+public class DsplTrackExample
 {
     public static final Logger logger = Logger.getLogger( DsplExample.class.getName( ) );
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new DsplTrackExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            // create the plot
+            GlimpseLayout plot = createLayout( );
+
+            // create a window and show the plot
+            quickGlimpseApp( "DSPL Track Example", GL3bc, plot );
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
+    protected static GlimpseLayout createLayout( ) throws Exception
     {
         // create a painter for displaying track data
         final TrackPainter trackPainter = new TrackPainter( );
@@ -398,7 +406,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         return parentLayout;
     }
 
-    protected void initializePlot( String name, TimePlotInfo plot )
+    protected static void initializePlot( String name, TimePlotInfo plot )
     {
         plot.setLabelText( name );
         plot.setAxisColor( GlimpseColor.getWhite( ) );
@@ -406,7 +414,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
     }
 
     // setup the visual characteristics (color, thickness, etc...) of the track
-    protected void initializeGeoTrack( TrackPainter trackPainter, int trackId )
+    protected static void initializeGeoTrack( TrackPainter trackPainter, int trackId )
     {
         trackPainter.setLineColor( trackId, GlimpseColor.getBlue( ) );
         trackPainter.setLineWidth( trackId, 2.0f );
@@ -415,7 +423,7 @@ public class DsplTrackExample implements GlimpseLayoutProvider
         trackPainter.setShowHeadPoint( trackId, false );
     }
 
-    protected void initializeTimelinePlot( TrackPainter trackPainter, int trackId )
+    protected static void initializeTimelinePlot( TrackPainter trackPainter, int trackId )
     {
         trackPainter.setLineColor( trackId, GlimpseColor.getRed( ) );
         trackPainter.setLineWidth( trackId, 2.0f );

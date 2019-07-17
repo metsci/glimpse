@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.extras.examples.charts.bathy;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -47,9 +50,7 @@ import com.metsci.glimpse.charts.bathy.ContourData;
 import com.metsci.glimpse.charts.bathy.ContourPainter;
 import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.geo.LatLonTrackPainter;
 import com.metsci.glimpse.painter.geo.ScalePainter;
 import com.metsci.glimpse.painter.info.AnnotationPainter;
@@ -74,16 +75,21 @@ import com.metsci.glimpse.util.vector.Vector2d;
  *
  * @author ulman
  */
-public class BathymetryExample implements GlimpseLayoutProvider
+public class BathymetryExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new BathymetryExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            // create a window and show the plot
+            quickGlimpseApp( "Bathymetry Example", GL3bc, new BathymetryExample( ).getPlot( ) );
+        } );
     }
 
-    TaggedHeatMapPainter bathymetryPainter;
-    ContourPainter contourPainter;
-    AnnotationPainter annotationPainter;
+    protected MapPlot2D plot;
+    protected TaggedHeatMapPainter bathymetryPainter;
+    protected ContourPainter contourPainter;
+    protected AnnotationPainter annotationPainter;
 
     public TaggedHeatMapPainter getBathymetryPainter( )
     {
@@ -100,16 +106,20 @@ public class BathymetryExample implements GlimpseLayoutProvider
         return this.annotationPainter;
     }
 
-    @Override
-    public MapPlot2D getLayout( )
+    public MapPlot2D getPlot( )
     {
-        return getLayout( new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) ) );
+        return this.plot;
     }
 
-    public MapPlot2D getLayout( GeoProjection projection )
+    public BathymetryExample( )
+    {
+        this( new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) ) );
+    }
+
+    public BathymetryExample( GeoProjection projection )
     {
         // create a premade heat map window
-        MapPlot2D plot = new MapPlot2D( projection )
+        this.plot = new MapPlot2D( projection )
         {
             @Override
             protected Axis1D createAxisZ( )
@@ -255,7 +265,5 @@ public class BathymetryExample implements GlimpseLayoutProvider
         scale.setPixelBufferX( 8 );
         scale.setPixelBufferY( 8 );
         plot.addPainter( scale );
-
-        return plot;
     }
 }

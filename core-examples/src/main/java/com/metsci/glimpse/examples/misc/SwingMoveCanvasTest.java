@@ -52,7 +52,7 @@ public class SwingMoveCanvasTest
     {
         // create a canvas and a plot
         final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( );
-        GlimpseLayout plot = new HeatMapExample( ).getLayout( );
+        GlimpseLayout plot = HeatMapExample.newHeatMapPlot( );
         canvas.addLayout( plot );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 

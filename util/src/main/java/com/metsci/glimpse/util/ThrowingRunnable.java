@@ -24,12 +24,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.layout;
+package com.metsci.glimpse.util;
 
-/**
- * @author osborn
- */
-public interface GlimpseLayoutProvider
+public interface ThrowingRunnable
 {
-    public GlimpseLayout getLayout( ) throws Exception;
+
+    void run( ) throws Exception;
+
 }

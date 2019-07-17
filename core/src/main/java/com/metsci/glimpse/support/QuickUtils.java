@@ -46,15 +46,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
-import com.jogamp.newt.Screen;
 import com.jogamp.opengl.GLAnimatorControl;
-import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
-import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
@@ -63,10 +60,12 @@ import com.metsci.glimpse.painter.decoration.GridPainter;
 import com.metsci.glimpse.platformFixes.PlatformFixes;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.util.ThrowingRunnable;
 
 /**
  * A collection of functions for quickly creating plots and showing them in windows.
@@ -115,6 +114,42 @@ public class QuickUtils
         {
             throw new RuntimeException( "This operation is only allowed on the Swing/AWT event-dispatch thread" );
         }
+    }
+
+    /**
+     * Like {@link SwingUtilities#invokeLater(Runnable)}, but allows the runnable to
+     * throw checked exceptions. If a checked exception is thrown, it will be caught
+     * and wrapped in a new {@link RuntimeException}, which will then be thrown.
+     */
+    public static void swingInvokeLater( ThrowingRunnable runnable )
+    {
+        // We could make this more like ExecutorService.submit() by returning a Future.
+        // That would allow the caller to (1) block, (2) retrieve the value returned by
+        // the callable, and (3) handle exceptions thrown by the callable. However, the
+        // caller would ALWAYS have to call Future.get(), or else exceptions would be
+        // silently swallowed.
+        //
+        // In practice, we usually want Swing EDT calls to behave like Executor.execute()
+        // or SwingUtilities.invokeLater(). The caller can't retrieve the value or handle
+        // exceptions, but also isn't REQUIRED to handle exceptions. This matches the way
+        // SwingUtilities.invokeLater() already deals with RuntimeExceptions; we're just
+        // expanding it to do the same with all Exceptions.
+        //
+        SwingUtilities.invokeLater( ( ) ->
+        {
+            try
+            {
+                runnable.run( );
+            }
+            catch ( RuntimeException e )
+            {
+                throw e;
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        } );
     }
 
     public static GLProfile glProfileOrNull( String glProfileName )
@@ -196,12 +231,44 @@ public class QuickUtils
         return plot;
     }
 
-    /**
-     * @see #quickGlimpseApp(String, String, Dimension, GlimpseLayout)
-     */
-    public static void quickGlimpseApp( String appName, String glProfileName, int width, int height, GlimpseLayout layout )
+    public static AbstractLookAndFeel quickDefaultLaf( )
     {
-        quickGlimpseApp( appName, glProfileName, new Dimension( width, height ), layout );
+        return new SwingLookAndFeel( );
+    }
+
+    public static SwingEDTAnimator quickDefaultAnimator( )
+    {
+        return new SwingEDTAnimator( 60 );
+    }
+
+    public static Dimension quickDefaultSize( )
+    {
+        return new Dimension( 800, 800 );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, quickDefaultSize( ) );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, LookAndFeel laf )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, quickDefaultSize( ), laf );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, int width, int height )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, width, height, quickDefaultLaf( ) );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, int width, int height, LookAndFeel laf )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, new Dimension( width, height ) );
+    }
+
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, Dimension size )
+    {
+        return quickGlimpseApp( appName, glProfileName, layout, size, quickDefaultLaf( ) );
     }
 
     /**
@@ -217,7 +284,23 @@ public class QuickUtils
      * <strong>NOTE:</strong> If the named {@link GLProfile} is not available, and the
      * user chooses to quit rather than continue, this method calls {@link System#exit(int)}!
      */
-    public static void quickGlimpseApp( String appName, String glProfileName, Dimension size, GlimpseLayout layout )
+    public static JFrame quickGlimpseApp( String appName, String glProfileName, GlimpseLayout layout, Dimension size, LookAndFeel laf )
+    {
+        GLProfile glProfile = initGlimpseOrExitJvm( appName, glProfileName );
+        NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, layout, laf );
+        return quickGlimpseWindow( appName, canvas, size );
+    }
+
+    /**
+     * Does several things that are typically done at application startup:
+     * <ol>
+     * <li>Calls {@link #initStandardGlimpseApp()}
+     * <li>Warns the user if the named {@link GLProfile} is not available
+     * <li>If the user chooses to continue anyway, returns null
+     * <li><strong>If the user chooses NOT to continue, calls {@link System#exit(int)}</strong>
+     * </ol>
+     */
+    public static GLProfile initGlimpseOrExitJvm( String appName, String glProfileName )
     {
         initStandardGlimpseApp( );
 
@@ -227,76 +310,54 @@ public class QuickUtils
             System.exit( 1 );
         }
 
-        quickGlimpseWindow( appName, glProfile, size, layout );
+        return glProfile;
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     * <p>
-     * @throws GLException if the named {@link GLProfile} is not available.
-     */
-    public static void quickGlimpseWindow( String title, String glProfileName, int width, int height, GlimpseLayout layout ) throws GLException
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( String glProfileName, GlimpseLayout layout )
     {
-        quickGlimpseWindow( title, glProfileName, new Dimension( width, height ), layout );
+        return quickGlimpseCanvas( GLProfile.get( glProfileName ), layout );
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     * <p>
-     * @throws GLException if the named {@link GLProfile} is not available.
-     */
-    public static void quickGlimpseWindow( String title, String glProfileName, Dimension size, GlimpseLayout layout ) throws GLException
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( String glProfileName, GlimpseLayout layout, LookAndFeel laf )
     {
-        quickGlimpseWindow( title, GLProfile.get( glProfileName ), size, layout );
+        return quickGlimpseCanvas( GLProfile.get( glProfileName ), layout, laf );
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     */
-    public static void quickGlimpseWindow( String title, GLProfile glProfile, Dimension size, GlimpseLayout layout )
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLProfile glProfile, GlimpseLayout layout )
     {
-        quickGlimpseWindow( title,
-                            new NewtSwingEDTGlimpseCanvas( glProfile ),
-                            new SwingEDTAnimator( 60 ),
-                            new SwingLookAndFeel( ),
-                            size,
-                            layout );
+        return quickGlimpseCanvas( glProfile, layout, quickDefaultLaf( ) );
     }
 
-    /**
-     * Creates and shows a new window displaying the specified {@code layout}.
-     */
-    public static void quickGlimpseWindow( String title,
-                                           GLContext glContext,
-                                           GLAnimatorControl animator,
-                                           LookAndFeel laf,
-                                           Dimension size,
-                                           GlimpseLayout layout )
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLProfile glProfile, GlimpseLayout layout, LookAndFeel laf )
     {
-        quickGlimpseWindow( title,
-                            new NewtSwingEDTGlimpseCanvas( glContext ),
-                            animator,
-                            laf,
-                            size,
-                            layout );
+        return quickGlimpseCanvas( glProfile, layout, laf, quickDefaultAnimator( ) );
     }
 
-    /**
-     * In most cases it is more natural to call one of the other {@code quickGlimpseWindow}
-     * methods (e.g. {@link #quickGlimpseWindow(String, String, int, int, GlimpseLayout)}).
-     * <p>
-     * This method is for convenience only. It is perfectly acceptable for an application
-     * to perform some or all of these init operations piecemeal, instead of calling this
-     * method.
-     * <p>
-     * <strong>NOTE:</strong> Must be called on the Swing EDT.
-     */
-    public static void quickGlimpseWindow( String title,
-                                           NewtSwingEDTGlimpseCanvas canvas,
-                                           GLAnimatorControl animator,
-                                           LookAndFeel laf,
-                                           Dimension size,
-                                           GlimpseLayout layout )
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLContext glContext, GlimpseLayout layout )
+    {
+        return quickGlimpseCanvas( glContext, layout, quickDefaultLaf( ) );
+    }
+
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLContext glContext, GlimpseLayout layout, LookAndFeel laf )
+    {
+        return quickGlimpseCanvas( glContext, layout, laf, quickDefaultAnimator( ) );
+    }
+
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLProfile glProfile, GlimpseLayout layout, LookAndFeel laf, GLAnimatorControl animator )
+    {
+        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
+        initGlimpseCanvas( canvas, layout, laf, animator );
+        return canvas;
+    }
+
+    public static NewtSwingEDTGlimpseCanvas quickGlimpseCanvas( GLContext glContext, GlimpseLayout layout, LookAndFeel laf, GLAnimatorControl animator )
+    {
+        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glContext );
+        initGlimpseCanvas( canvas, layout, laf, animator );
+        return canvas;
+    }
+
+    public static void initGlimpseCanvas( NewtSwingEDTGlimpseCanvas canvas, GlimpseLayout layout, LookAndFeel laf, GLAnimatorControl animator )
     {
         requireSwingThread( );
 
@@ -305,19 +366,33 @@ public class QuickUtils
         // setLaf() only affects existing contents, so call it AFTER adding everything
         canvas.setLookAndFeel( laf );
 
-        GLAutoDrawable drawable = canvas.getGLDrawable( );
-        animator.add( drawable );
+        animator.add( canvas.getGLDrawable( ) );
         animator.start( );
+    }
+
+    public static JFrame quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas )
+    {
+        return quickGlimpseWindow( title, canvas, quickDefaultSize( ) );
+    }
+
+    public static JFrame quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas, int width, int height )
+    {
+        return quickGlimpseWindow( title, canvas, new Dimension( width, height ) );
+    }
+
+    public static JFrame quickGlimpseWindow( String title, NewtSwingEDTGlimpseCanvas canvas, Dimension size )
+    {
+        requireSwingThread( );
 
         JFrame frame = new JFrame( );
         frame.setTitle( title );
 
         // This listener must run before NewtCanvasAWT's built-in window-closing
         // listener does -- so add it before we add the canvas to the frame
-        onWindowClosing( frame, ( ev ) ->
+        onWindowClosing( frame, ev ->
         {
-            animator.remove( drawable );
-            tearDownCanvas( canvas );
+            // FIXME: Should we call canvas.disposeAttached() here?
+            canvas.destroy( );
         } );
 
         frame.getContentPane( ).add( canvas );
@@ -325,66 +400,8 @@ public class QuickUtils
         frame.setLocationRelativeTo( null );
         frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         frame.setVisible( true );
-    }
 
-    /**
-     * When used in a window-closing listener, this method <strong>MUST</strong> run
-     * before NewtCanvasAWT's built-in window-closing listener.
-     * <p>
-     * It is safe to remove canvas from its parent after calling this method.
-     */
-    public static void tearDownCanvas( NewtSwingGlimpseCanvas canvas )
-    {
-        // Hold a reference to the screen so that JOGL's auto-cleanup doesn't destroy
-        // and then recreate resources (like the NEDT thread) while we're still working
-        Screen screen = canvas.getGLWindow( ).getScreen( );
-        screen.addReference( );
-        try
-        {
-            // Canvas destruction is kludgy -- the relevant JOGL code is complicated,
-            // the relevant AWT code is platform-dependent native code, and the relevant
-            // AWT behavior is affected by quirks and mysteries of the window manager
-            // and/or OS. Debugging problems directly would take a long time (weeks or
-            // months).
-            //
-            // The following call sequence seems to work reliably. It was arrived at by
-            // trying various sequences until one worked for the platforms and situations
-            // we care about.
-            //
-            // Notes:
-            //
-            //  * Without setVisible(false), the screen area formerly occupied by the
-            //    canvas ends up unusable -- it appears blank or continues to show the
-            //    canvas's final frame, and it does not respond to resize events.
-            //
-            //  * On Windows 10, without the explicit getGLWindow().destroy(), the NEDT
-            //    thread begins receiving WM_TIMER events, and continues to receive them
-            //    indefinitely. This prevents the AWT thread from exiting, which in turn
-            //    can prevent the JVM from exiting. This is particularly strange because
-            //    getCanvas().destroy() calls getGLWindow().destroy() internally. The
-            //    difference could be in the timing (due to a race), or simply in the
-            //    ordering of the various calls.
-            //
-            //  * In the past, the getCanvas().destroy() call has sometimes resulted in
-            //    segfaults. However, without that call, we get the WM_TIMER issue. Not
-            //    sure what to do about this, except hope that the timing and threading
-            //    have been perturbed enough over the years that segfaults are no longer
-            //    an issue in practice. FIXME: Test thoroughly, on many machines.
-            //
-            //  * If we call setNEWTChild(null) instead of setVisible(false), we get the
-            //    WM_TIMER issue.
-            //
-            //  * If we call parent.remove(canvas) instead of setVisible(false), we get
-            //    the WM_TIMER issue.
-            //
-            canvas.setVisible( false );
-            canvas.getGLWindow( ).destroy( );
-            canvas.getCanvas( ).destroy( );
-        }
-        finally
-        {
-            screen.removeReference( );
-        }
+        return frame;
     }
 
 }

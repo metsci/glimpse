@@ -36,21 +36,23 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
+import javax.swing.SwingUtilities;
+
+import com.jogamp.newt.Display;
+import com.jogamp.newt.NewtFactory;
+import com.jogamp.newt.Screen;
+import com.jogamp.newt.Window;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GLAnimatorControl;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.GLRunnable;
-import javax.swing.SwingUtilities;
-
-import com.jogamp.newt.Display;
-import com.jogamp.newt.NewtFactory;
-import com.jogamp.newt.Window;
-import com.jogamp.newt.event.WindowAdapter;
-import com.jogamp.newt.event.WindowEvent;
-import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.event.key.newt.KeyWrapperNewt;
@@ -243,6 +245,93 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 }
             }
         };
+    }
+
+    /**
+     * When used in a window-closing listener, this method <strong>MUST</strong> run
+     * before NewtCanvasAWT's built-in window-closing listener. This can be accomplished
+     * by adding a window-closing listener (that will call this method) BEFORE adding
+     * this canvas to the frame. It also works to remove all existing WindowListeners,
+     * add a window-closing listener that will call this method, then re-adding the old
+     * WindowListeners.
+     * <p>
+     * It is safe to remove this canvas from its parent after calling this method.
+     */
+    @Override
+    public void destroy( )
+    {
+        if ( !this.isDestroyed )
+        {
+            if ( this.getCanvas( ).getNEWTChild( ) == null )
+            {
+                logger.warning( "Canvas's NEWT child was already null before canvas.destroy() -- this may mean that JOGL's built-in window-closing listener is running first, which can cause problems on Windows" );
+            }
+
+            // Remove the canvas from its animator -- which will pause the animator if it
+            // doesn't have any other drawables
+            GLAutoDrawable drawable = this.getGLDrawable( );
+            GLAnimatorControl animator = drawable.getAnimator( );
+            if ( animator != null )
+            {
+                animator.remove( drawable );
+            }
+
+            // Hold a reference to the screen so that JOGL's auto-cleanup doesn't destroy
+            // and then recreate resources (like the NEDT thread) while we're still working
+            Screen screen = this.getGLWindow( ).getScreen( );
+            screen.addReference( );
+            try
+            {
+                // Canvas destruction is finicky -- the relevant JOGL code is complicated,
+                // the relevant AWT code is platform-dependent native code, and the relevant
+                // AWT behavior is affected by quirks and mysteries of the window manager
+                // and/or OS. Debugging problems directly would take a long time (weeks or
+                // months).
+                //
+                // The following call sequence seems to work reliably. It was arrived at by
+                // trying various sequences until one worked for the platforms and situations
+                // we care about.
+                //
+                // This sequence has only been tested with NewtSwingEDTGlimpseCanvas.
+                //
+                // Notes:
+                //
+                //  * Without setVisible(false), the screen area formerly occupied by the
+                //    canvas ends up unusable -- it appears blank or continues to show the
+                //    canvas's final frame, and it does not respond to resize events.
+                //
+                //  * On Windows 10, without the explicit getGLWindow().destroy(), the NEDT
+                //    thread begins receiving WM_TIMER events, and continues to receive them
+                //    indefinitely. This prevents the AWT thread from exiting, which in turn
+                //    can prevent the JVM from exiting. This is particularly strange because
+                //    getCanvas().destroy() calls getGLWindow().destroy() internally. The
+                //    difference could be in the timing (due to a race), or simply in the
+                //    ordering of the various calls.
+                //
+                //  * If we call setNEWTChild(null) instead of setVisible(false), we get the
+                //    WM_TIMER issue.
+                //
+                //  * If we call parent.remove(canvas) instead of setVisible(false), we get
+                //    the WM_TIMER issue.
+                //
+                //  * If we don't call getCanvas().destroy(), we get the WM_TIMER issue. This
+                //    is a little dicey, because getCanvas().destroy() has caused segfaults
+                //    in the past -- however, we haven't seen such segfaults since switching
+                //    to AWTEDTUtil, so hopefully that's no longer an issue. (Of course, it's
+                //    also possible that we've simply perturbed the timing of a race condition,
+                //    and that the segfaults could reappear someday.)
+                //
+                this.setVisible( false );
+                this.getGLWindow( ).destroy( );
+                this.getCanvas( ).destroy( );
+            }
+            finally
+            {
+                screen.removeReference( );
+            }
+
+            this.isDestroyed = true;
+        }
     }
 
     public BufferedImage toBufferedImage( )

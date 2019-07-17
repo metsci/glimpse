@@ -72,7 +72,7 @@ public class ReprojectionExample
         GLContext glContext = glDrawable.getContext( );
 
         final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( glContext );
-        ColorAxisPlot2D layout = new HeatMapExample( ).getLayout( );
+        ColorAxisPlot2D layout = HeatMapExample.newHeatMapPlot( );
         canvas.addLayout( layout );
         canvas.setLookAndFeel( new SwingLookAndFeel( ) );
 

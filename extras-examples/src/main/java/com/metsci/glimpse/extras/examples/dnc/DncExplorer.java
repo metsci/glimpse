@@ -26,22 +26,29 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
-import static com.metsci.glimpse.dnc.DncDataPaths.*;
-import static com.metsci.glimpse.dnc.DncProjections.*;
-import static com.metsci.glimpse.dnc.facc.FaccIo.*;
-import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.*;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
-import static com.metsci.glimpse.docking.DockingFrameCloseOperation.*;
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static com.metsci.glimpse.docking.DockingWindowTitlers.*;
-import static com.metsci.glimpse.docking.ViewCloseOption.*;
-import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.*;
-import static com.metsci.glimpse.support.QuickUtils.*;
-import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
-import static com.metsci.glimpse.util.GeneralUtils.*;
-import static com.metsci.glimpse.util.GlimpseDataPaths.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.awt.Font.*;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
+import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
+import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
+import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccFeatures;
+import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_NIGHT;
+import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
+import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
+import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
+import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.newLabel;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
+import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static java.awt.Font.BOLD;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -52,17 +59,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.jogamp.opengl.GLAnimatorControl;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXTreeTable;
 
+import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncCoverage;
@@ -293,7 +299,7 @@ public class DncExplorer
         // Show
         //
 
-        SwingUtilities.invokeLater( ( ) ->
+        swingInvokeLater( ( ) ->
         {
             NewtSwingEDTGlimpseCanvas geoCanvas = new NewtSwingEDTGlimpseCanvas( );
             geoCanvas.addLayout( plot );
@@ -320,8 +326,7 @@ public class DncExplorer
                 public void disposingAllWindows( DockingGroup group )
                 {
                     attrsTableModel.dispose( );
-                    animator.stop( );
-                    tearDownCanvas( geoCanvas );
+                    geoCanvas.destroy( );
                 }
             } );
 

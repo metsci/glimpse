@@ -26,67 +26,42 @@
  */
 package com.metsci.glimpse.examples.line;
 
-import static com.jogamp.opengl.GLProfile.GL3;
+import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
-import static com.metsci.glimpse.support.FrameUtils.newFrame;
-import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
-import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
 import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static java.lang.System.currentTimeMillis;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.util.Random;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
-import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.plot.EmptyPlot2D;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStyle;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class LinePathExample
 {
 
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        final EmptyPlot2D plot = new EmptyPlot2D( );
-        plot.addPainter( new BackgroundPainter( ) );
-        plot.addPainter( new CustomLinesPainter( ) );
-
-        SwingUtilities.invokeLater( new Runnable( )
+        swingInvokeLater( ( ) ->
         {
-            @Override
-            public void run( )
-            {
-                NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( GL3 );
-                canvas.addLayout( plot );
-                canvas.setLookAndFeel( new SwingLookAndFeel( ) );
+            EmptyPlot2D plot = new EmptyPlot2D( );
+            plot.addPainter( new BackgroundPainter( ) );
+            plot.addPainter( new CustomLinesPainter( ) );
 
-                GLAnimatorControl animator = new SwingEDTAnimator( 30 );
-                animator.add( canvas.getGLDrawable( ) );
-                animator.start( );
-
-                JFrame frame = newFrame( "LinePathExample", canvas, DISPOSE_ON_CLOSE );
-                stopOnWindowClosing( frame, animator );
-                disposeOnWindowClosing( frame, canvas );
-                showFrameCentered( frame );
-            }
+            quickGlimpseApp( "LinePathExample", GL3bc, plot );
         } );
     }
 

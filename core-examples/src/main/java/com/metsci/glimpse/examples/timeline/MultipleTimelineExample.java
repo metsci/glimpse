@@ -26,42 +26,44 @@
  */
 package com.metsci.glimpse.examples.timeline;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
 import java.util.TimeZone;
 
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
+import com.metsci.glimpse.support.settings.OceanLookAndFeel;
 
 // DirectBuffer
-public class MultipleTimelineExample extends CollapsibleTimelinePlotExample
+public class MultipleTimelineExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new MultipleTimelineExample( ) );
-    }
+        swingInvokeLater( ( ) ->
+        {
+            StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
 
-    @Override
-    public StackedTimePlot2D getLayout( )
-    {
-        StackedTimePlot2D plot = super.getLayout( );
+            // set up two timelines, one showing EST and one showing GMT time
+            TimelineInfo gmtTimeline = plot.getDefaultTimeline( );
+            gmtTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
+            gmtTimeline.getTimeZonePainter( ).setSizeText( "EST" );
+            // don't show the date labels for the GMT timeline
+            gmtTimeline.getAxisPainter( ).setShowDateLabels( false );
+            gmtTimeline.setSize( 25 );
 
-        // set up two timelines, one showing EST and one showing GMT time
-        TimelineInfo gmtTimeline = plot.getDefaultTimeline( );
-        gmtTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
-        gmtTimeline.getTimeZonePainter( ).setSizeText( "EST" );
-        // don't show the date labels for the GMT timeline
-        gmtTimeline.getAxisPainter( ).setShowDateLabels( false );
-        gmtTimeline.setSize( 25 );
+            // set up the additional timeline showing EST
+            TimelineInfo estTimeline = plot.createTimeline( );
+            estTimeline.setTimeZone( TimeZone.getTimeZone( "GMT-4:00" ) );
+            estTimeline.getTimeZonePainter( ).setText( "EST" );
+            estTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
+            estTimeline.getTimeZonePainter( ).setSizeText( "EST" );
+            estTimeline.setSize( 35 );
 
-        // set up the additional timeline showing EST
-        TimelineInfo estTimeline = plot.createTimeline( );
-        estTimeline.setTimeZone( TimeZone.getTimeZone( "GMT-4:00" ) );
-        estTimeline.getTimeZonePainter( ).setText( "EST" );
-        estTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
-        estTimeline.getTimeZonePainter( ).setSizeText( "EST" );
-        estTimeline.setSize( 35 );
-
-        return plot;
+            // create a window and show the plot
+            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
+        } );
     }
 }

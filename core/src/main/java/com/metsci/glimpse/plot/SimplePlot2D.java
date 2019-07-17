@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.plot;
 
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.painter.decoration.BackgroundPainter;
@@ -128,6 +129,30 @@ public class SimplePlot2D extends Plot2D
     public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
         axisLayoutXY.addPainter( painter, callback, zOrder );
+    }
+    
+    @Override
+    public void addPainter( Object key, GlimpsePainter painter, int zOrder )
+    {
+        axisLayoutXY.addPainter( key, painter, zOrder );
+    }
+    
+    @Override
+    public void addPainter( Object key, GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    {
+        axisLayoutXY.addPainter( key, painter, callback, zOrder );
+    }
+    
+    @Override
+    public GlimpseLayout getLayoutByKey( Object key )
+    {
+        return axisLayoutXY.getLayoutByKey( key );
+    }
+    
+    @Override
+    public GlimpsePainter getPainterByKey( Object key )
+    {
+        return axisLayoutXY.getPainterByKey( key );
     }
 
     @Override

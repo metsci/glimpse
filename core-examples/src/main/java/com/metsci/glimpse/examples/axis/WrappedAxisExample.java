@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.examples.axis;
 
+import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import com.jogamp.opengl.GL;
@@ -37,12 +40,9 @@ import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.examples.Example;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutProvider;
 import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.group.WrappedPainter;
 import com.metsci.glimpse.painter.texture.HeatMapPainter;
@@ -51,126 +51,123 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
 import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
-public class WrappedAxisExample implements GlimpseLayoutProvider
+public class WrappedAxisExample
 {
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
-        Example.showWithSwing( new WrappedAxisExample( ) );
+        swingInvokeLater( ( ) ->
+        {
+            // create a ColorAxisPlot, but with wrapped axes and modified painters
+            ColorAxisPlot2D plot = new ColorAxisPlot2D( )
+            {
+                @Override
+                protected GridAxisLabelHandler createLabelHandlerX( )
+                {
+                    return new WrappedLabelHandler( );
+                }
+
+                @Override
+                protected GridAxisLabelHandler createLabelHandlerY( )
+                {
+                    return new WrappedLabelHandler( );
+                }
+
+                @Override
+                protected Axis1D createAxisX( )
+                {
+                    return new WrappedAxis1D( 0, 1000 );
+                }
+
+                @Override
+                protected Axis1D createAxisY( )
+                {
+                    return new WrappedAxis1D( 0, 1000 );
+                }
+            };
+
+            // apply the same axis customizations as HeatMapExample to our plot
+            HeatMapExample.customizePlot( plot );
+
+            plot.setTitle( "Wrapped Axis Example" );
+
+            // don't let the user zoom out too far (especially important with wrapped axes
+            // since this will cause the scene to be painted many times)
+            plot.getAxis( ).getAxisX( ).setMaxSpan( 3000 );
+            plot.getAxis( ).getAxisY( ).setMaxSpan( 3000 );
+
+            // create a heat map painter
+            HeatMapPainter heatmapPainter = HeatMapExample.newPainter( plot.getAxisZ( ) );
+
+            // add the HeatMapPainter to a WrappedPainter then add the WrappedPainter to the plot
+            WrappedPainter wrappedPainter = new WrappedPainter( );
+            wrappedPainter.addPainter( heatmapPainter );
+            plot.addPainter( wrappedPainter );
+
+            // load the color map into the plot (so the color scale is displayed on the z axis)
+            plot.setColorScale( heatmapPainter.getColorScale( ) );
+
+            // add a painter that paints things in pixel-space (round dots should stay round
+            // regardless of zooming, wrapping, and canvas-resizing)
+            wrappedPainter.addPainter( new DotPainter( ) );
+
+            // create a window and show the plot
+            quickGlimpseApp( "Wrapped Axis Example", GL3bc, plot );
+        } );
     }
 
-    @Override
-    public GlimpseLayout getLayout( ) throws Exception
+    public static class DotPainter extends GlimpsePainterBase
     {
-        // create a plot from the heat map example, but with wrapped axes and modified painters
-        HeatMapExample example = new HeatMapExample( )
+        protected PointFlatColorProgram prog;
+        protected GLEditableBuffer buffer;
+
+        public DotPainter( )
         {
-            @Override
-            protected ColorAxisPlot2D newPlot( )
+            prog = new PointFlatColorProgram( );
+            buffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+
+            for ( int x = 0; x < 5; x++ )
             {
-                return new ColorAxisPlot2D( )
+                for ( int y = 0; y < 5; y++ )
                 {
-                    @Override
-                    protected GridAxisLabelHandler createLabelHandlerX( )
-                    {
-                        return new WrappedLabelHandler( );
-                    }
-
-                    @Override
-                    protected GridAxisLabelHandler createLabelHandlerY( )
-                    {
-                        return new WrappedLabelHandler( );
-                    }
-
-                    @Override
-                    protected Axis1D createAxisX( )
-                    {
-                        return new WrappedAxis1D( 0, 1000 );
-                    }
-
-                    @Override
-                    protected Axis1D createAxisY( )
-                    {
-                        return new WrappedAxis1D( 0, 1000 );
-                    }
-                };
+                    buffer.grow2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
+                }
             }
-        };
+        }
 
-        ColorAxisPlot2D plot = example.getLayout( );
-
-        plot.setTitle( "Wrapped Axis Example" );
-
-        // don't let the user zoom out too far (especially important with wrapped axes
-        // since this will cause the scene to be painted many times)
-        plot.getAxis( ).getAxisX( ).setMaxSpan( 3000 );
-        plot.getAxis( ).getAxisY( ).setMaxSpan( 3000 );
-
-        // remove the heat map painter from the plot and instead add it to a WrappedPainter
-        // which is then added to the plot
-        HeatMapPainter heatMapPainter = example.getPainter( );
-        plot.removePainter( heatMapPainter );
-        WrappedPainter wrappedPainter = new WrappedPainter( );
-        wrappedPainter.addPainter( heatMapPainter );
-
-        // add a painter that paints things in pixel-space (round dots should stay round
-        // regardless of zooming, wrapping, and canvas-resizing)
-        wrappedPainter.addPainter( new GlimpsePainterBase( )
+        @Override
+        public void doPaintTo( GlimpseContext context )
         {
-            protected PointFlatColorProgram prog;
-            protected GLEditableBuffer buffer;
+            GL3 gl = context.getGL( ).getGL3( );
+            Axis2D axis = requireAxis2D( context );
+            Wrapper2D wrapper = getWrapper2D( context );
+            GlimpseBounds bounds = getBounds( context );
 
+            GLUtils.enableStandardBlending( gl );
+            prog.begin( gl );
+            try
             {
-                prog = new PointFlatColorProgram( );
-                buffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
+                prog.setAxisOrtho( gl, axis );
+                prog.setWrapper( gl, wrapper );
+                prog.setViewport( gl, bounds );
+                prog.setRgba( gl, GlimpseColor.getWhite( ) );
+                prog.setPointSize( gl, 20.0f );
 
-                for ( int x = 0; x < 5; x++ )
-                {
-                    for ( int y = 0; y < 5; y++ )
-                    {
-                        buffer.grow2f( 200 * ( x + 0.5f ), 200 * ( y + 0.5f ) );
-                    }
-                }
+                prog.draw( gl, buffer );
             }
-
-            @Override
-            public void doPaintTo( GlimpseContext context )
+            finally
             {
-                GL3 gl = context.getGL( ).getGL3( );
-                Axis2D axis = requireAxis2D( context );
-                Wrapper2D wrapper = getWrapper2D( context );
-                GlimpseBounds bounds = getBounds( context );
-
-                GLUtils.enableStandardBlending( gl );
-                prog.begin( gl );
-                try
-                {
-                    prog.setAxisOrtho( gl, axis );
-                    prog.setWrapper( gl, wrapper );
-                    prog.setViewport( gl, bounds );
-                    prog.setRgba( gl, GlimpseColor.getWhite( ) );
-                    prog.setPointSize( gl, 20.0f );
-
-                    prog.draw( gl, buffer );
-                }
-                finally
-                {
-                    prog.end( gl );
-                    GLUtils.disableBlending( gl );
-                }
+                prog.end( gl );
+                GLUtils.disableBlending( gl );
             }
+        }
 
-            @Override
-            protected void doDispose( GlimpseContext context )
-            {
-                GL3 gl = context.getGL( ).getGL3( );
+        @Override
+        protected void doDispose( GlimpseContext context )
+        {
+            GL3 gl = context.getGL( ).getGL3( );
 
-                prog.dispose( gl );
-                buffer.dispose( gl );
-            }
-        } );
-
-        plot.addPainter( wrappedPainter );
-
-        return plot;
+            prog.dispose( gl );
+            buffer.dispose( gl );
+        }
     }
 }
