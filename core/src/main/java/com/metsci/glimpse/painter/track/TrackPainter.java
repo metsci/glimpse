@@ -179,6 +179,11 @@ public class TrackPainter extends GlimpsePainterBase
         this.labelLinePath = new ColorLinePath( );
         this.labelLineStyle = new LineStyle( );
     }
+    
+    public boolean isSpatialIndexed( )
+    {
+        return this.spatialIndex != null;
+    }
 
     public void addTemporalSelectionListener( TemporalSelectionListener<Point> listener )
     {
@@ -764,7 +769,7 @@ public class TrackPainter extends GlimpsePainterBase
         }
         else
         {
-            return Collections.emptyList( );
+            throw new UnsupportedOperationException( "TrackPainter constructed with enableSpatialIndex=false constructor argument" );
         }
     }
 
@@ -906,7 +911,7 @@ public class TrackPainter extends GlimpsePainterBase
         }
         else
         {
-            return Collections.emptyList( );
+            throw new UnsupportedOperationException( "TrackPainter constructed with enableSpatialIndex=false constructor argument" );
         }
     }
 
@@ -930,7 +935,7 @@ public class TrackPainter extends GlimpsePainterBase
         }
         else
         {
-            return Collections.emptyList( );
+            throw new UnsupportedOperationException( "TrackPainter constructed with enableSpatialIndex=false constructor argument" );
         }
     }
 
@@ -1793,7 +1798,9 @@ public class TrackPainter extends GlimpsePainterBase
             if ( spatialIndex != null )
             {
                 for ( Point point : _points )
+                {
                     spatialIndex.add( point );
+                }
             }
 
             // determine if the new point resides inside the selected time range
@@ -1809,7 +1816,10 @@ public class TrackPainter extends GlimpsePainterBase
             // add the point to the temporal and spatial indexes
             int index = firstIndexAfterTime( point );
             points.add( index, point );
-            if ( spatialIndex != null ) spatialIndex.add( point );
+            if ( spatialIndex != null )
+            {
+                spatialIndex.add( point );
+            }
 
             // determine if the new point resides inside the selected time range
             checkTimeRange( );
