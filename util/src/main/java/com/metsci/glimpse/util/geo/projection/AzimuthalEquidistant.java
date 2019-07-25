@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.coamm.ui.util;
+package com.metsci.glimpse.util.geo.projection;
 
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
