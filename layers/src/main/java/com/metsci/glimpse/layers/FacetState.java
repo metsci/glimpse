@@ -26,26 +26,32 @@
  */
 package com.metsci.glimpse.layers;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Represents the state of a {@link Facet} in a form that can be stored (e.g. while
  * the {@link Facet} gets disposed and a replacement {@link Facet} gets created), and
  * re-applied later to a new {@link Facet}.
  * <p>
- * TODO: Make this class XML-serializable
- * TODO: Can we require subclasses to be XML-serializable?
+ * Has XML bindings that allow for storage of {@link FacetState} information on disk
+ * for re-use on application startups.
  * <p>
  * @see Facet#state()
  * @see Facet#applyState(FacetState)
  */
-public class FacetState
+public @XmlRootElement class FacetState
 {
-
+    @XmlElement
     public final boolean isVisible;
 
+    public FacetState( )
+    {
+        this( false );
+    }
 
     public FacetState( boolean isVisible )
     {
         this.isVisible = isVisible;
     }
-
 }
