@@ -31,6 +31,7 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.logging.Logger;
 
@@ -55,22 +56,37 @@ public class DirectBufferDealloc
 
     protected static interface Impl
     {
-        void deallocate( Object directBuffer ) throws Exception;
+        void deallocate( Buffer buffer ) throws Exception;
     }
 
 
-    protected static class ImplForOracleJvmsUpTo8 implements Impl
+    protected static class Impl0 implements Impl
     {
-        private final Class<?> directBufferClass;
+        @Override
+        public void deallocate( Buffer buffer ) throws Exception
+        {
+            logger.warning( "Ignoring request to deallocate a DirectBuffer" );
+        }
+
+        @Override
+        public String toString( )
+        {
+            return "DirectBufferDealloc impl NOOP stub for unsupported JVMs";
+        }
+    }
+
+
+    protected static class Impl1 implements Impl
+    {
         private final Method getCleanerMethod;
         private final Method getAttachmentMethod;
 
         private final Class<?> cleanerClass;
         private final Method doCleanMethod;
 
-        public ImplForOracleJvmsUpTo8( ) throws Exception
+        public Impl1( ) throws Exception
         {
-            this.directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
+            Class<?> directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
             this.getCleanerMethod = directBufferClass.getMethod( "cleaner" );
             this.getAttachmentMethod = directBufferClass.getMethod( "attachment" );
 
@@ -79,29 +95,39 @@ public class DirectBufferDealloc
         }
 
         @Override
-        public void deallocate( Object directBuffer ) throws Exception
+        public void deallocate( Buffer buffer ) throws Exception
         {
-            if ( this.directBufferClass.isInstance( directBuffer ) )
+            if ( buffer.isDirect( ) )
             {
-                Object cleaner = this.getCleanerMethod.invoke( directBuffer );
+                Object cleaner = this.getCleanerMethod.invoke( buffer );
+                Object attachment = this.getAttachmentMethod.invoke( buffer );
+
                 if ( this.cleanerClass.isInstance( cleaner ) )
                 {
                     this.doCleanMethod.invoke( cleaner );
                 }
 
-                Object attachment = this.getAttachmentMethod.invoke( directBuffer );
-                this.deallocate( attachment );
+                if ( attachment instanceof Buffer )
+                {
+                    this.deallocate( ( Buffer ) attachment );
+                }
             }
+        }
+
+        @Override
+        public String toString( )
+        {
+            return "DirectBufferDealloc impl for Java 8 JVMs from Oracle and OpenJDK";
         }
     }
 
 
-    protected static final Impl impl = requireWorkingImpl( ImplForOracleJvmsUpTo8::new );
+    protected static final Impl impl = chooseImpl( Impl1::new );
 
     @SafeVarargs
-    protected static Impl requireWorkingImpl( ThrowingSupplier<? extends Impl>... suppliers )
+    protected static Impl chooseImpl( ThrowingSupplier<? extends Impl>... suppliers )
     {
-        Buffer testBuffer = ByteBuffer.allocateDirect( 8 );
+        FloatBuffer testBuffer = ByteBuffer.allocateDirect( 8 ).asFloatBuffer( );
         for ( ThrowingSupplier<? extends Impl> supplier : suppliers )
         {
             try
@@ -114,9 +140,8 @@ public class DirectBufferDealloc
             { }
         }
 
-        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- attempts will be silently ignored" );
-        Impl noopImpl = directBuffer -> { };
-        return noopImpl;
+        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be logged by otherwise ignored" );
+        return new Impl0( );
     }
 
 

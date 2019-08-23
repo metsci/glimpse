@@ -1,6 +1,7 @@
 package com.metsci.glimpse.util.buffer;
 
 import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffer;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.nio.ByteBuffer;
 
@@ -10,9 +11,15 @@ public class DirectBufferDeallocTest
 {
 
     @Test
-    void directBufferDeallocShouldBasicallyWork( )
+    void directBufferDeallocShouldNotBeANoop( )
     {
-        var buffer = ByteBuffer.allocateDirect( 12345 );
+        assertFalse( DirectBufferDealloc.impl instanceof DirectBufferDealloc.Impl0, "DirectBufferDealloc impl is a NOOP" );
+    }
+
+    @Test
+    void directBufferDeallocShouldNotThrow( )
+    {
+        var buffer = ByteBuffer.allocateDirect( 100 * Float.SIZE ).asFloatBuffer( );
         deallocateDirectBuffer( buffer );
     }
 
