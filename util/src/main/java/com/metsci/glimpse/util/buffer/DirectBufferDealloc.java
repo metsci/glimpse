@@ -26,10 +26,15 @@
  */
 package com.metsci.glimpse.util.buffer;
 
-import java.lang.reflect.InvocationTargetException;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+
 import java.lang.reflect.Method;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.logging.Logger;
+
+import com.metsci.glimpse.util.ThrowingSupplier;
 
 /**
  * Uses non-public APIs (e.g. via reflection) to free the off-heap memory that
@@ -45,39 +50,85 @@ import java.util.Collection;
  */
 public class DirectBufferDealloc
 {
+    private static final Logger logger = getLogger( DirectBufferDealloc.class );
 
-    protected static final Class<?> directBufferClass;
-    protected static final Method getCleanerMethod;
-    protected static final Method getAttachmentMethod;
 
-    protected static final Class<?> cleanerClass;
-    protected static final Method doCleanMethod;
-
-    static
+    protected static interface Impl
     {
-        try
-        {
-            directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
-            getCleanerMethod = directBufferClass.getMethod( "cleaner" );
-            getAttachmentMethod = directBufferClass.getMethod( "attachment" );
+        void deallocate( Object directBuffer ) throws Exception;
+    }
 
-            cleanerClass = Class.forName( "jdk.internal.ref.Cleaner" );
-            doCleanMethod = cleanerClass.getMethod( "clean" );
-        }
-        catch ( ClassNotFoundException | NoSuchMethodException e )
+
+    protected static class ImplForOracleJvmsUpTo8 implements Impl
+    {
+        private final Class<?> directBufferClass;
+        private final Method getCleanerMethod;
+        private final Method getAttachmentMethod;
+
+        private final Class<?> cleanerClass;
+        private final Method doCleanMethod;
+
+        public ImplForOracleJvmsUpTo8( ) throws Exception
         {
-            throw new RuntimeException( e );
+            this.directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
+            this.getCleanerMethod = directBufferClass.getMethod( "cleaner" );
+            this.getAttachmentMethod = directBufferClass.getMethod( "attachment" );
+
+            this.cleanerClass = Class.forName( "jdk.internal.ref.Cleaner" );
+            this.doCleanMethod = cleanerClass.getMethod( "clean" );
+        }
+
+        @Override
+        public void deallocate( Object directBuffer ) throws Exception
+        {
+            if ( this.directBufferClass.isInstance( directBuffer ) )
+            {
+                Object cleaner = this.getCleanerMethod.invoke( directBuffer );
+                if ( this.cleanerClass.isInstance( cleaner ) )
+                {
+                    this.doCleanMethod.invoke( cleaner );
+                }
+
+                Object attachment = this.getAttachmentMethod.invoke( directBuffer );
+                this.deallocate( attachment );
+            }
         }
     }
 
-    public static void deallocateDirectBuffers( Collection<? extends Buffer> directBuffers )
+
+    protected static final Impl impl = requireWorkingImpl( ImplForOracleJvmsUpTo8::new );
+
+    @SafeVarargs
+    protected static Impl requireWorkingImpl( ThrowingSupplier<? extends Impl>... suppliers )
     {
-        if ( directBuffers != null )
+        Buffer testBuffer = ByteBuffer.allocateDirect( 8 );
+        for ( ThrowingSupplier<? extends Impl> supplier : suppliers )
         {
-            for ( Buffer b : directBuffers )
+            try
             {
-                deallocateDirectBuffer0( b );
+                Impl impl = supplier.get( );
+                impl.deallocate( testBuffer );
+                return impl;
             }
+            catch ( Exception e )
+            { }
+        }
+
+        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- attempts will be silently ignored" );
+        Impl noopImpl = directBuffer -> { };
+        return noopImpl;
+    }
+
+
+    public static void deallocateDirectBuffer( Buffer directBuffer )
+    {
+        try
+        {
+            impl.deallocate( directBuffer );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
         }
     }
 
@@ -87,34 +138,18 @@ public class DirectBufferDealloc
         {
             for ( Buffer b : directBuffers )
             {
-                deallocateDirectBuffer0( b );
+                deallocateDirectBuffer( b );
             }
         }
     }
 
-    public static void deallocateDirectBuffer( Buffer directBuffer )
+    public static void deallocateDirectBuffers( Collection<? extends Buffer> directBuffers )
     {
-        deallocateDirectBuffer0( directBuffer );
-    }
-
-    public static void deallocateDirectBuffer0( Object directBuffer )
-    {
-        if ( directBufferClass.isInstance( directBuffer ) )
+        if ( directBuffers != null )
         {
-            try
+            for ( Buffer b : directBuffers )
             {
-                Object cleaner = getCleanerMethod.invoke( directBuffer );
-                if ( cleanerClass.isInstance( cleaner ) )
-                {
-                    doCleanMethod.invoke( cleaner );
-                }
-
-                Object attachment = getAttachmentMethod.invoke( directBuffer );
-                deallocateDirectBuffer0( attachment );
-            }
-            catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
-            {
-                throw new RuntimeException( e );
+                deallocateDirectBuffer( b );
             }
         }
     }
