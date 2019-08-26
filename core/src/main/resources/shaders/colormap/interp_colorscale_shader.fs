@@ -39,7 +39,8 @@ uniform bool overrideAlpha;
 uniform bool discardNaN;
 
 // skips fragments outside our color range
-uniform bool discardAboveBelow;
+uniform bool discardAbove;
+uniform bool discardBelow;
 
 in vec2 vS;
 
@@ -98,7 +99,9 @@ void main()
     if( ! ( dataVal < 0.0 || 0.0 < dataVal || dataVal == 0.0 ) )
         discard;
 
-    if( discardAboveBelow && ( dataVal < dataMin || dataVal > dataMax ) )
+    if( discardAbove && dataVal > dataMax )
+        discard;
+    if( discardBelow && dataVal < dataMin )
         discard;
 
     float normalizedVal = ( dataVal - dataMin ) / ( dataMax - dataMin );

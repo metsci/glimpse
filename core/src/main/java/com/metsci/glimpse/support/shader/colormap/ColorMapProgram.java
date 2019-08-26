@@ -29,7 +29,6 @@ package com.metsci.glimpse.support.shader.colormap;
 import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
 import static javax.media.opengl.GL.GL_FLOAT;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
@@ -88,9 +87,8 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
      * @param colorAxis color axis producing events
      * @param targetTexUnit 2D texture unit which is the target of color-mapping
      * @param colorTexUnit 1D texture unit containing color-map
-     * @throws IOException if the shader source file cannot be read
      */
-    public ColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
+    public ColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
         this.initialize( colorAxis, targetTexUnit, colorTexUnit );
     }

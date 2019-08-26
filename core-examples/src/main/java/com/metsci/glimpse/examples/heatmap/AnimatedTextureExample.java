@@ -35,7 +35,6 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static javax.media.opengl.GLProfile.GL3bc;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -115,16 +114,7 @@ public class AnimatedTextureExample
 
             // create a shader which samples from a 1D color texture to
             // color map a 2D data texture
-            ColorMapProgram shader;
-            try
-            {
-                shader = new ColorMapProgram( plot.getAxisZ( ), dataTextureUnit, colorScaleTextureUnit );
-            }
-            catch ( IOException e )
-            {
-                e.printStackTrace( );
-                throw new RuntimeException( e );
-            }
+            ColorMapProgram shader = new ColorMapProgram( plot.getAxisZ( ), dataTextureUnit, colorScaleTextureUnit );
             painter.setProgram( shader );
 
             // setup a thread that will mutate the target texture at regular intervals
