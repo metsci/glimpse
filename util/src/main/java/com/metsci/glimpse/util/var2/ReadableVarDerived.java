@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListener;
 import static java.util.Arrays.asList;
@@ -74,7 +75,10 @@ public abstract class ReadableVarDerived<V> implements ReadableVar<V>
     @Override
     public Disposable addListener( Set<? extends ListenerFlag> flags, ActivityListener listener )
     {
-        return this.listenables.addListener( flags, filterListener( listener, this::v ) );
+        return doHandleImmediateFlag( flags, listener, flags2 ->
+        {
+            return this.listenables.addListener( flags2, filterListener( listener, this::v ) );
+        } );
     }
 
 }

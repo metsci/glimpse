@@ -657,18 +657,10 @@ public class VarUtils
             @Override
             public Disposable addListener( Set<? extends ListenerFlag> flags, Runnable listener )
             {
-                if ( flags.contains( IMMEDIATE ) )
+                return doHandleImmediateFlag( flags, listener, flags2 ->
                 {
-                    listener.run( );
-                    if ( flags.contains( ONCE ) )
-                    {
-                        return ( ) -> { };
-                    }
-
-                    flags = setMinus( ImmutableSet.copyOf( flags ), IMMEDIATE );
-                }
-
-                return rawListenable.addListener( flags, filterListener( listener, valueFn ) );
+                    return rawListenable.addListener( flags2, filterListener( listener, valueFn ) );
+                } );
             }
         };
     }
