@@ -743,6 +743,9 @@ public class EventManager
         // flip rowIndex (due to GlimpseMouseEvent coordinate system)
         rowIndex = info.getRowCount( ) - 1 - rowIndex;
 
+        // use the accessor method so that this method's behavior is consistent
+        // with painter behavior -- even if getRows() reorders the rows
+        List<Row> rows = this.getRows( );
         if ( rowIndex >= 0 && rowIndex < rows.size( ) )
         {
             return rows.get( rowIndex );
