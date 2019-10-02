@@ -46,7 +46,7 @@ import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
  *
  * @author borkholder
  */
-public class TrianglesPainter extends GlimpsePainterBase
+public class TriangleSetPainter extends GlimpsePainterBase
 {
     protected FlatColorProgram prog;
     protected float[] rgba;
@@ -54,7 +54,7 @@ public class TrianglesPainter extends GlimpsePainterBase
 
     protected GLEditableBuffer buffer;
 
-    public TrianglesPainter( )
+    public TriangleSetPainter( )
     {
         this.prog = new FlatColorProgram( );
         this.buffer = new GLEditableBuffer( GL_STATIC_DRAW, 0 );
