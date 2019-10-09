@@ -259,7 +259,7 @@ public abstract class DockingGroupBase implements DockingGroup
                     break;
 
                 case DISPOSE_CLOSED_FRAME:
-                    Collection<View> views = this.views( ).values( );
+                    Collection<View> views = findViews( window ).values( );
                     if ( allViewsAreAutoCloseable( views ) )
                     {
                         notifyDisposingWindow( this.listeners, this, window );
