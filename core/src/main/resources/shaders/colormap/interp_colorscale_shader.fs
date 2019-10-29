@@ -82,10 +82,13 @@ void main()
     float texelSizeX = 1.0 / texSize.x;
     float texelSizeY = 1.0 / texSize.y;
 
-    float a = fract( vS.x * texSize.x );
-    float b = fract( vS.y * texSize.y );
+    // otherwise the interpolated pixels are shifted down and left
+    vec2 vSS = vS - vec2( 0.5 * texelSizeX, 0.5 * texelSizeY );
 
-    float exactVal = texture2D( datatex, vS ).r;
+    float a = fract( vSS.x * texSize.x );
+    float b = fract( vSS.y * texSize.y );
+
+    float exactVal = texture2D( datatex, vSS ).r;
     if( checkNaN( exactVal ) )
         discard;
 
@@ -95,7 +98,7 @@ void main()
     {
         for ( int n = -1; n <= 2; n++ )
         {
-            float data = texture2D( datatex, vS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
+            float data = texture2D( datatex, vSS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
             if( checkNaN( data ) )
             {
                 continue;
