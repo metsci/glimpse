@@ -49,23 +49,29 @@ out vec4 fRgba;
 // This is a bicubic b-spline kernel from https://www.codeproject.com/Articles/236394/Bi-Cubic-and-Bi-Linear-Interpolation-with-GLSL#BSpline
 float kernel( float f )
 {
-	if( f < 0.0 )
-	{
-		f = -f;
-	}
+    if( f < 0.0 )
+    {
+        f = -f;
+    }
 
-	if( f >= 0.0 && f <= 1.0 )
-	{
-		return ( 2.0 / 3.0 ) + ( 0.5 ) * ( f * f * f ) - ( f * f );
-	}
-	else if( f > 1.0 && f <= 2.0 )
-	{
-		return 1.0 / 6.0 * pow( ( 2.0 - f ), 3.0 );
-	}
+    if( f >= 0.0 && f <= 1.0 )
+    {
+        return ( 2.0 / 3.0 ) + ( 0.5 ) * ( f * f * f ) - ( f * f );
+    }
+    else if( f > 1.0 && f <= 2.0 )
+    {
+        return 1.0 / 6.0 * pow( ( 2.0 - f ), 3.0 );
+    }
     else
     {
-	    return 1.0;
+        return 1.0;
     }
+}
+
+// The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
+bool checkNaN( float f )
+{
+    return ! ( f < 0.0 || 0.0 < f || f == 0.0 );
 }
 
 void main()
@@ -75,18 +81,28 @@ void main()
     // get texel size
     float texelSizeX = 1.0 / texSize.x;
     float texelSizeY = 1.0 / texSize.y;
+
     float a = fract( vS.x * texSize.x );
     float b = fract( vS.y * texSize.y );
 
+    float exactVal = texture2D( datatex, vS ).r;
+    if( checkNaN( exactVal ) )
+        discard;
+
     float sum = 0;
     float denom = 0;
-    for ( int m = -1; m <=2; m++ )
+    for ( int m = -1; m <= 2; m++ )
     {
-        for ( int n =-1; n<= 2; n++ )
+        for ( int n = -1; n <= 2; n++ )
         {
-			float data = texture2D( datatex, vS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
-			float f1  = kernel( float( m ) - a );
-			float f2 = kernel( -float( n ) + b );
+            float data = texture2D( datatex, vS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
+            if( checkNaN( data ) )
+            {
+                continue;
+            }
+
+            float f1 = kernel( a - float( m ) );
+            float f2 = kernel( b - float( n ) );
 
             sum = sum + ( data * f1 * f2  );
             denom = denom + ( f1 * f2 );
@@ -94,10 +110,6 @@ void main()
     }
 
     float dataVal = sum / denom;
-
-    // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
-    if( ! ( dataVal < 0.0 || 0.0 < dataVal || dataVal == 0.0 ) )
-        discard;
 
     if( discardAbove && dataVal > dataMax )
         discard;
