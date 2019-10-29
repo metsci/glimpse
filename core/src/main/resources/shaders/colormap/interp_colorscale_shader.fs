@@ -89,7 +89,7 @@ void main()
     float b = fract( vSS.y * texSize.y );
 
     float exactVal = texture2D( datatex, vSS ).r;
-    if( checkNaN( exactVal ) )
+    if( checkNaN( exactVal ) && discardNaN )
         discard;
 
     float sum = 0;
