@@ -28,6 +28,7 @@ package com.metsci.glimpse.util.logging;
 
 import static com.metsci.glimpse.util.io.StreamOpener.fileThenResourceOpener;
 import static java.lang.String.format;
+import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.CONFIG;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.FINER;
@@ -43,6 +44,7 @@ import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -51,6 +53,7 @@ import java.util.logging.Logger;
 
 import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.logging.format.Formatter;
+import com.metsci.glimpse.util.logging.format.TerseLogFormatter;
 import com.metsci.glimpse.util.logging.format.TimestampingMethodNameLogFormatter;
 
 /**
@@ -58,6 +61,13 @@ import com.metsci.glimpse.util.logging.format.TimestampingMethodNameLogFormatter
  */
 public class LoggerUtils
 {
+    private static final Logger logger = getLogger( LoggerUtils.class );
+
+    /**
+     * Log statements with this level are always loggable -- even for loggers
+     * set to OFF.
+     */
+    public static final Level FORCE = new Level( "FORCE", Integer.MAX_VALUE ) { };
 
     /**
      * Convenience wrapper around {@link Logger#getLogger(String)}. Uses
@@ -179,34 +189,78 @@ public class LoggerUtils
     }
 
     /**
+     * This method tries to configure logging by loading a configuration from
+     * each of the specified URLs, in order, until an attempt succeeds. After
+     * the first successful attempt, the method returns true. If there are no
+     * successful attempts, the method returns false.
+     */
+    public static boolean initLogging( URL... urls )
+    {
+        setConsoleLogger( new TerseLogFormatter( ), ALL );
+        for ( URL url : urls )
+        {
+            logger.log( FORCE, "Logger config attempt: url = " + url );
+            if ( doInitLogging( url ) )
+            {
+                logger.log( FORCE, "Logger config SUCCESS: url = " + url );
+                return true;
+            }
+            else
+            {
+                logger.log( FORCE, "Logger config FAILURE: url = " + url );
+            }
+        }
+        return false;
+    }
+
+    protected static boolean doInitLogging( URL url )
+    {
+        try ( InputStream stream = url.openStream( ) )
+        {
+            getLogManager( ).readConfiguration( stream );
+            return true;
+        }
+        catch ( Exception e )
+        {
+            return false;
+        }
+    }
+
+    /**
      * In cases where a logging.properties file is too cumbersome, sets terse
      * formatter for console handler.
      *
      * @param level maximum logging level; set on root logger
      */
-    public static final void setTerseConsoleLogger( Level level )
+    public static void setTerseConsoleLogger( Level level )
     {
-        java.util.logging.Logger logger = Logger.getLogger( "" );
+        setConsoleLogger( new TimestampingMethodNameLogFormatter( ), level );
+    }
 
-        if ( logger == null ) return;
-
-        Handler[] handlers = logger.getHandlers( );
-        for ( Handler h : handlers )
-            if ( h instanceof ConsoleHandler ) logger.removeHandler( h );
-
-        ConsoleHandler handler = new ConsoleHandler( )
+    public static void setConsoleLogger( Formatter formatter, Level level )
+    {
+        Logger rootLogger = Logger.getLogger( "" );
+        if ( rootLogger != null )
         {
-            Formatter formatter = new TimestampingMethodNameLogFormatter( );
-
-            @Override
-            public Formatter getFormatter( )
+            for ( Handler h : rootLogger.getHandlers( ) )
             {
-                return formatter;
+                if ( h instanceof ConsoleHandler )
+                {
+                    rootLogger.removeHandler( h );
+                }
             }
-        };
 
-        handler.setLevel( level );
-        logger.addHandler( handler );
+            ConsoleHandler handler = new ConsoleHandler( )
+            {
+                @Override
+                public Formatter getFormatter( )
+                {
+                    return formatter;
+                }
+            };
+            handler.setLevel( level );
+            rootLogger.addHandler( handler );
+        }
     }
 
     /**
