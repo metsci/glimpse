@@ -116,6 +116,7 @@ public class TileFactoryStandard implements TileFactory
                             icon.paintIcon( this, g, 0, y );
                         }
                     };
+                    closeButton.setFocusable( false );
                     closeButton.setOpaque( false );
                     closeButton.setBorder( null );
 
