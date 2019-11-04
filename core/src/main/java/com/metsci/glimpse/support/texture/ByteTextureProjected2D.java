@@ -27,6 +27,7 @@
 package com.metsci.glimpse.support.texture;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static java.lang.Math.multiplyExact;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -88,7 +89,7 @@ public class ByteTextureProjected2D extends TextureProjected2D
     @Override
     protected int getRequiredCapacityBytes( )
     {
-        return dataSizeX * dataSizeY;
+        return multiplyExact( dataSizeX, dataSizeY );
     }
 
     @Override

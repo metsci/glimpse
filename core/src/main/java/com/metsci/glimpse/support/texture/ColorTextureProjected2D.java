@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.support.texture;
 
+import static com.metsci.glimpse.util.GeneralUtils.multiplyInts;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
@@ -69,7 +71,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
     @Override
     protected int getRequiredCapacityBytes( )
     {
-        return dataSizeX * dataSizeY * FLOATS_PER_PIXEL * BYTES_PER_FLOAT;
+        return multiplyInts( dataSizeX, dataSizeY, FLOATS_PER_PIXEL, BYTES_PER_FLOAT );
     }
 
     @Override

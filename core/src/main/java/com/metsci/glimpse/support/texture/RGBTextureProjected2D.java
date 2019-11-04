@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.support.texture;
 
+import static com.metsci.glimpse.util.GeneralUtils.multiplyInts;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +100,7 @@ public class RGBTextureProjected2D extends TextureProjected2D
     @Override
     protected int getRequiredCapacityBytes( )
     {
-        return BYTES_PER_PIXEL * dataSizeX * dataSizeY;
+        return multiplyInts( BYTES_PER_PIXEL, dataSizeX, dataSizeY );
     }
 
     @Override
