@@ -511,6 +511,18 @@ public abstract class DockingGroupBase implements DockingGroup
     }
 
     @Override
+    public void selectView( View view )
+    {
+        Tile tile = getAncestorOfClass( Tile.class, view.component.v( ) );
+        if ( tile == null )
+        {
+            throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
+        }
+
+        tile.selectView( view );
+    }
+
+    @Override
     public void closeView( View view )
     {
         Tile tile = getAncestorOfClass( Tile.class, view.component.v( ) );

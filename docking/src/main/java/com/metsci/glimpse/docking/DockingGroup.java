@@ -62,6 +62,8 @@ public interface DockingGroup
 
     void addViews( Collection<View> views );
 
+    void selectView( View view );
+
     void closeView( View view );
 
     void setArrangement( GroupArrangement groupArr );
