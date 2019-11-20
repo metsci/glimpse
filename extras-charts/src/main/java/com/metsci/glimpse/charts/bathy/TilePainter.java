@@ -60,6 +60,10 @@ import it.unimi.dsi.fastutil.doubles.DoubleAVLTreeSet;
 import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
 
 /**
+ * Paints a geo with tiled data. The subclass must implement the actual painting of the tiles themselves.
+ * This class takes care of identifying the visible tiles (and tiles that are appropriate to paint in
+ * the current projection) and providing those to the subclass to paint.
+ *
  * @author borkholder
  */
 public abstract class TilePainter<V> extends DelegatePainter
@@ -130,12 +134,12 @@ public abstract class TilePainter<V> extends DelegatePainter
         }
     }
 
-    protected double clampAntiMeridian( double lon_DEG )
+    protected static double clampAntiMeridian( double lon_DEG )
     {
         return clamp( lon_DEG, -180 + ANTIMERIDIAN_EPSILON, 180 - ANTIMERIDIAN_EPSILON );
     }
 
-    protected double clampNorthSouth( double lat_DEG )
+    protected static double clampNorthSouth( double lat_DEG )
     {
         return clamp( lat_DEG, -90 + ANTIMERIDIAN_EPSILON, 90 - ANTIMERIDIAN_EPSILON );
     }
@@ -229,7 +233,7 @@ public abstract class TilePainter<V> extends DelegatePainter
         Rectangle2D b = new Rectangle2D.Double( bounds.getMinX( ) - padX, bounds.getMinY( ) - padY, bounds.getWidth( ) + 2 * padX, bounds.getHeight( ) + 2 * padY );
         double scale = getLengthScale( bounds, axis );
 
-        return keys.filter( e -> ( e.getKey( ) ).lengthScale == scale )
+        return keys.filter( e -> e.getKey( ).lengthScale == scale )
                 .filter( e -> e.getValue( ).intersects( b ) )
                 .map( Entry::getKey )
                 .collect( Collectors.toList( ) );
