@@ -41,6 +41,8 @@ import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.settings.AbstractLookAndFeel;
+import com.metsci.glimpse.support.settings.LookAndFeel;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
 import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineStyle;
@@ -64,9 +66,15 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
     private short radialStipplePattern = 0;
     private int circleStippleFactor = 1;
     private short circleStipplePattern = 0;
+    
+    private float[] radialLineColor;
+    private float[] circleLineColor;
     private float[] insideTextColor = null;
     private float[] outsideTextColor = null;
 
+    protected boolean tickRadialColorSet = false;
+    protected boolean tickCircleColorSet = false;
+    
     protected LinePath pathRadial;
     protected LinePath pathCircle;
 
@@ -82,13 +90,14 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
 
         this.styleRadial = new LineStyle( );
         this.styleRadial.thickness_PX = lineWidth;
-        this.styleRadial.rgba = GlimpseColor.getBlack( );
-
+        
         this.styleCircle = new LineStyle( );
         this.styleCircle.thickness_PX = lineWidth;
         this.styleCircle.joinType = LineJoinType.JOIN_NONE;
-        this.styleCircle.rgba = GlimpseColor.getBlack( );
 
+        this.circleLineColor = GlimpseColor.getBlack( );
+        this.radialLineColor = GlimpseColor.getBlack( );
+        
         this.transformMatrix = new Matrix4( );
     }
 
@@ -240,6 +249,8 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
 
             if ( showHorizontal )
             {
+            	this.styleRadial.rgba = radialLineColor;
+            	
                 if ( radialStipplePattern > 0 )
                 {
                     styleRadial.stippleEnable = true;
@@ -259,20 +270,23 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
                     pathRadial.lineTo( ( float ) ( Math.cos( positionsY[ii] ) * maxDist ), ( float ) ( Math.sin( positionsY[ii] ) * maxDist ) );
                 }
 
-                prog.draw( gl, style, pathRadial );
+                prog.draw( gl, styleRadial, pathRadial );
             }
+
 
             if ( showVertical )
             {
-                if ( radialStipplePattern > 0 )
+            	this.styleCircle.rgba = circleLineColor;
+            	
+                if ( circleStipplePattern > 0 )
                 {
-                    styleRadial.stippleEnable = true;
-                    styleRadial.stipplePattern = radialStipplePattern;
-                    styleRadial.stippleScale = radialStippleFactor;
+                	styleCircle.stippleEnable = true;
+                    styleCircle.stipplePattern = circleStipplePattern;
+                    styleCircle.stippleScale = circleStippleFactor;
                 }
                 else
                 {
-                    styleRadial.stippleEnable = false;
+                	styleCircle.stippleEnable = false;
                 }
 
                 pathCircle.clear( );
@@ -291,71 +305,95 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
             gl.glDisable( GL.GL_BLEND );
         }
 
-        textRenderer.begin3DRendering( );
-        try
+        //If either the x or y axis are visable, render the range labels on the axis
+        if ( xCross || yCross)
         {
-            // Draw Labels
-            GlimpseColor.setColor( textRenderer, insideTextColor == null ? textColor : insideTextColor );
+        	textRenderer.beginRendering(width, height);
+	        try
+	        {
+				GlimpseColor.setColor(textRenderer, insideTextColor == null ? textColor : insideTextColor);
 
-            /* first - label range rings:
-             * If x-axis is visible, label all intersections with that axis
-             * otherwise, if y-axis is visible, label all intersections with that axis
-             * otherwise, label on the middle radial
-             */
-            for ( int ii = 1; ii < positionsX.length; ++ii )
-            {
-                String label = String.format( "%.3g", convX.fromAxisUnits( positionsX[ii] ) );
-                Rectangle2D textBounds = textRenderer.getBounds( label );
-                if ( xCross ) // x-axis visible
-                {
-                    boolean labelAbove = yMax + yMin > 0;
-                    int labelX = axisX.valueToScreenPixel( -positionsX[ii] );
-                    int labelY = axisY.valueToScreenPixel( 0 ) + ( labelAbove ? 2 : ( int ) -textBounds.getHeight( ) );
-                    textRenderer.draw( label, labelX, labelY );
-                    labelX = axisX.valueToScreenPixel( positionsX[ii] ) - ( int ) textBounds.getWidth( ) - 1;
-                    label = String.format( "%.3g", convX.fromAxisUnits( positionsX[ii] ) );
-                    textRenderer.draw( label, labelX, labelY );
-                }
-                else if ( yCross ) // y-axis visible
-                {
-                    boolean labelRight = xMax + xMin > 0;
-                    int labelX = axisX.valueToScreenPixel( 0 ) + ( labelRight ? 2 : ( int ) -textBounds.getWidth( ) );
-                    int labelY = axisY.valueToScreenPixel( -positionsX[ii] );
-                    textRenderer.draw( label, labelX, labelY );
-                    labelY = axisY.valueToScreenPixel( positionsX[ii] ) - ( int ) textBounds.getHeight( );
-                    textRenderer.draw( label, labelX, labelY );
-                }
-                else
-                {
-                    double theta = positionsY[positionsY.length / 2];
-                    double r = positionsX[ii];
-                    double xCoord = Math.cos( theta ) * r;
-                    double yCoord = Math.sin( theta ) * r;
-                    int labelX = axisX.valueToScreenPixel( xCoord );
-                    int labelY = axisY.valueToScreenPixel( yCoord );
-                    int xOffset = ( int ) -textBounds.getWidth( ) - textPadding;
-                    int yOffset = textPadding;
+				// Draw Labels
+				for (int ii = 1; ii < positionsX.length; ++ii) 
+				{
+					String label = String.format("%.3g", convX.fromAxisUnits(positionsX[ii]));
+					Rectangle2D textBounds = textRenderer.getBounds(label);
+					
+	                if(xCross) // x-axis visible
+	                {
+						boolean labelAbove = yMax + yMin > 0;
+						int labelX = axisX.valueToScreenPixel( -positionsX[ii] );
+						int labelY = axisY.valueToScreenPixel( 0 ) + ( labelAbove ? 2 : (int) -textBounds.getHeight( ) );
+						textRenderer.draw( label, labelX, labelY );
+						labelX = axisX.valueToScreenPixel( positionsX[ii] ) - (int) textBounds.getWidth( ) - 1;
+						label = String.format( "%.3g", convX.fromAxisUnits( positionsX[ii] ) );
+						textRenderer.draw( label, labelX, labelY );
+	                }
+	                else 	// y-axis visible
+	                {
+						boolean labelRight = xMax + xMin > 0;
+						int labelX = axisX.valueToScreenPixel( 0 ) + ( labelRight ? 2 : (int) -textBounds.getWidth( ) );
+						int labelY = axisY.valueToScreenPixel( -positionsX[ii] );
+						textRenderer.draw( label, labelX, labelY );
+						labelY = axisY.valueToScreenPixel( positionsX[ii] ) - (int) textBounds.getHeight( );
+						textRenderer.draw( label, labelX, labelY );
+	                }
+				}
 
-                    if ( Math.cos( theta ) < 0 )
-                    {
-                        theta += Math.PI;
-                        yOffset = ( int ) -textBounds.getHeight( ) - textPadding + 2;
-                        xOffset = textPadding;
-                    }
-
-                    transformMatrix.loadIdentity( );
-                    transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
-                    transformMatrix.translate( labelX, labelY, 0 );
-                    transformMatrix.rotate( ( float ) theta, 0, 0, 1.0f );
-                    textRenderer.setTransform( transformMatrix.getMatrix( ) );
-
-                    textRenderer.draw3D( label, xOffset, yOffset, 0.0f, 1.0f );
-                }
-            }
+			}
+	        finally
+	        {
+	        	textRenderer.endRendering();
+	        }
         }
-        finally
+        else 
         {
-            textRenderer.end3DRendering( );
+            //If neither the x or y axis are visable, then render the range labels based on the middle radial
+	        textRenderer.begin3DRendering( );
+	        try
+	        {
+	            // Draw Labels
+	            GlimpseColor.setColor( textRenderer, insideTextColor == null ? textColor : insideTextColor );
+	
+	            /* first - label range rings:
+	             * If x-axis is visible, label all intersections with that axis
+	             * otherwise, if y-axis is visible, label all intersections with that axis
+	             * otherwise, label on the middle radial
+	             */
+	            for ( int ii = 1; ii < positionsX.length; ++ii )
+	            {
+	            	String label = String.format( "%.3g", convX.fromAxisUnits( positionsX[ii] ) );
+	                Rectangle2D textBounds = textRenderer.getBounds( label );
+	
+	                double theta = positionsY[positionsY.length / 2];
+	                double r = positionsX[ii];
+	                double xCoord = Math.cos( theta ) * r;
+	                double yCoord = Math.sin( theta ) * r;
+	                int labelX = axisX.valueToScreenPixel( xCoord );
+	                int labelY = axisY.valueToScreenPixel( yCoord );
+	                int xOffset = ( int ) -textBounds.getWidth( ) - textPadding;
+	                int yOffset = textPadding;
+	
+	                if ( Math.cos( theta ) < 0 )
+	                {
+	                    theta += Math.PI;
+	                    yOffset = ( int ) -textBounds.getHeight( ) - textPadding + 2;
+	                    xOffset = textPadding;
+	                }
+	
+	                transformMatrix.loadIdentity( );
+	                transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+	                transformMatrix.translate( labelX, labelY, 0 );
+	                transformMatrix.rotate( ( float ) theta, 0, 0, 1.0f );
+	                textRenderer.setTransform( transformMatrix.getMatrix( ) );
+	
+	                textRenderer.draw3D( label, xOffset, yOffset, 0.0f, 1.0f );
+	            }
+	        }
+	        finally
+	        {
+	            textRenderer.end3DRendering( );
+	        }
         }
 
         /*
@@ -566,5 +604,75 @@ public class NumericPolarAxisPainter extends NumericXYAxisPainter
     public void setOutsideTextColor( float[] outsideTextColor )
     {
         this.outsideTextColor = outsideTextColor;
+    }
+    
+    @Override
+    public NumericXYAxisPainter setLineColor( float r, float g, float b, float a )
+    {
+    	this.setCircleLineColor( r, g, b, a );
+    	this.setRadialLineColor( r, g, b, a );
+    	super.setLineColor( r, g, b, a );
+    	return this;
+    }
+    
+    public NumericXYAxisPainter setCircleLineColor( float[] rgba )
+    {
+        this.circleLineColor = rgba;
+        this.tickCircleColorSet = true;
+        return this;
+    }
+    
+    public NumericXYAxisPainter setCircleLineColor( float r, float g, float b, float a )
+    {
+    	System.out.println("setCircleLineColor "+r+", "+g+", "+b+", "+a);
+    	new NullPointerException().printStackTrace();
+        this.circleLineColor[0] = r;
+        this.circleLineColor[1] = g;
+        this.circleLineColor[2] = b;
+        this.circleLineColor[3] = a;
+
+        this.tickCircleColorSet = true;
+
+        return this;
+    }
+    
+    public NumericXYAxisPainter setRadialLineColor( float[] rgba )
+    {
+        this.radialLineColor = rgba;
+        this.tickRadialColorSet = true;
+        return this;
+    }
+    
+    public NumericXYAxisPainter setRadialLineColor( float r, float g, float b, float a )
+    {
+    	System.out.println("setRadialLineColor "+r+", "+g+", "+b+", "+a);
+    	new NullPointerException().printStackTrace();
+        this.radialLineColor[0] = r;
+        this.radialLineColor[1] = g;
+        this.radialLineColor[2] = b;
+        this.radialLineColor[3] = a;
+
+        this.tickRadialColorSet = true;
+
+        return this;
+    }
+    
+    @Override
+    public void setLookAndFeel( LookAndFeel laf )
+    {
+        // ignore the look and feel if a font has been manually set
+        if ( !tickCircleColorSet )
+        {
+        	setCircleLineColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );
+        	tickCircleColorSet = false;
+        }
+        
+        if ( !tickRadialColorSet )
+        {
+        	setRadialLineColor( laf.getColor( AbstractLookAndFeel.AXIS_TICK_COLOR ) );
+        	tickRadialColorSet = false;
+        }
+        
+        super.setLookAndFeel(laf);
     }
 }
