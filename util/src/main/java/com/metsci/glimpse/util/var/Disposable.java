@@ -26,8 +26,28 @@
  */
 package com.metsci.glimpse.util.var;
 
+import java.util.function.Consumer;
+
+import com.metsci.glimpse.util.ThrowingRunnable;
+
 public interface Disposable
 {
+
+    public static Disposable disposableFromThrower( ThrowingRunnable thrower, Consumer<? super Exception> exceptionHandler )
+    {
+        return ( ) ->
+        {
+            try
+            {
+                thrower.run( );
+            }
+            catch ( Exception e )
+            {
+                exceptionHandler.accept( e );
+            }
+        };
+    }
+
 
     void dispose( );
 
