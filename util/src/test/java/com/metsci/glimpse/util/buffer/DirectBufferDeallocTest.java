@@ -4,6 +4,7 @@ import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirec
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ public class DirectBufferDeallocTest
     @Test
     void directBufferDeallocShouldNotThrow( )
     {
-        var buffer = ByteBuffer.allocateDirect( 100 * Float.SIZE ).asFloatBuffer( );
+        FloatBuffer buffer = ByteBuffer.allocateDirect( 100 * Float.SIZE ).asFloatBuffer( );
         deallocateDirectBuffer( buffer );
     }
 
