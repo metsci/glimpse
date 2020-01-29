@@ -36,9 +36,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import sun.nio.ch.FileChannelImpl;
-
-@SuppressWarnings( "restriction" )
 public class FileMapperStandard implements FileMapper
 {
 
@@ -50,12 +47,13 @@ public class FileMapperStandard implements FileMapper
     {
         try
         {
-            FileChannelImpl_map0 = FileChannelImpl.class.getDeclaredMethod( "map0", int.class, long.class, long.class );
+            Class<?> clazz = Class.forName( "sun.nio.ch.FileChannelImpl" );
+            FileChannelImpl_map0 = clazz.getDeclaredMethod( "map0", int.class, long.class, long.class );
             FileChannelImpl_map0.setAccessible( true );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access " + FileChannelImpl.class.getName( ) + ".map0()", e );
+            throw new RuntimeException( "Cannot access sun.nio.ch.FileChannelImpl.map0()", e );
         }
     }
 

@@ -45,7 +45,7 @@ public class FileMapperWindows64 implements FileMapper
     {
         try
         {
-            URL resourceUrl = MappedFile.class.getClassLoader( ).getResource( "MappedFile/FileMapperWindows64.dll" );
+            URL resourceUrl = MappedFile.class.getResource( "FileMapperWindows64.dll" );
 
             File tempDir = FileUtils.createTempDir( "MappedFile" );
             File tempFile = new File( tempDir, "FileMapperWindows64.dll" );

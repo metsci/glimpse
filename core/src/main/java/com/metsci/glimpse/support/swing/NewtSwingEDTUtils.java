@@ -59,9 +59,9 @@ public class NewtSwingEDTUtils
      * blocked, it returns {@link ModalBlockedStatus#UNKNOWN}. Client code should be
      * written with this possibility in mind.
      * <p>
-     * Works for Oracle/OpenJDK 8.
+     * Works on Oracle/OpenJDK 8 JVMs.
      * <p>
-     * Works for OpenJDK 9+, but requires the following JVM arg:
+     * Works on OpenJDK 9+ JVMs, but requires the following JVM arg:
      * <pre>
      * --add-opens java.desktop/java.awt=com.metsci.glimpse.core
      * </pre>

@@ -43,9 +43,9 @@ import com.metsci.glimpse.util.ThrowingSupplier;
  * the garbage collector finalizes the direct buffer. This delay causes problems
  * when a lot of off-heap memory is used, but garbage collections are infrequent.
  * <p>
- * Works for Oracle/OpenJDK 8.
+ * Works on Oracle/OpenJDK 8 JVMs.
  * <p>
- * Works for OpenJDK 9+, but requires the following JVM args:
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
  * <pre>
  * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
  * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
@@ -95,6 +95,7 @@ public class DirectBufferDealloc
             this.getCleanerMethod = directBufferClass.getMethod( "cleaner" );
             this.getAttachmentMethod = directBufferClass.getMethod( "attachment" );
 
+            // FIXME: Does this work on Oracle/OpenJDK 8?
             this.cleanerClass = Class.forName( "jdk.internal.ref.Cleaner" );
             this.doCleanMethod = cleanerClass.getMethod( "clean" );
         }

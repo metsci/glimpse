@@ -33,8 +33,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.ref.Cleaner;
-import java.lang.ref.Cleaner.Cleanable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -46,7 +44,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
 import sun.misc.Unsafe;
-import sun.nio.ch.DirectBuffer;
 
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
@@ -55,10 +52,19 @@ import sun.nio.ch.DirectBuffer;
  * file through a single Buffer. Instead, this class does a single memory-map call for the whole
  * file, and then creates Buffer objects, as needed, for slices of the memory block. Buffer
  * object creation is cheap.
+ * <p>
+ * Works on Oracle/OpenJDK 8 JVMs.
+ * <p>
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM arg:
+ * <pre>
+ * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+ * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
+ * --add-opens java.base/java.nio=com.metsci.glimpse.util
+ * </pre>
  */
-@SuppressWarnings( "restriction" )
 public class MappedFile
 {
+
     /**
      * Cleaners serve the same purpose as finalize() methods, with 2 subtle differences:
      * <ol>
@@ -69,10 +75,74 @@ public class MappedFile
      * When the enclosing Object is ready to be GC-ed, the Cleaner gets magically triggered
      * via the JVM's PhantomReference mechanism.
      * <p>
-     * In Java 9, the Cleaner class is reportedly moving out of the sun.misc package and into
-     * a java.lang package.
+     * In Oracle/OpenJDK 8, the class of interest was {@code sun.misc.Cleaner}. In OpenJDK 9+,
+     * that class is now at {@code jdk.internal.ref.Cleaner}. OpenJDK 9+ also has a public
+     * Cleaner class at {@code java.lang.ref.Cleaner} ... but that one has a different usage
+     * pattern than the Oracle/OpenJDK 8 class. The easiest way to support as many JVMs
+     * as possible is to ignore the public Cleaner class, and use the private one, because it
+     * has an equivalent in Oracle/OpenJDK 8.
      */
-    protected static final Cleaner cleaner;
+    protected static class CleanerWrapper
+    {
+        protected static final Class<?> upstreamClass;
+        protected static final Method upstreamCreateMethod;
+        protected static final Method upstreamCleanMethod;
+        static
+        {
+            try
+            {
+                upstreamClass = firstClassFound( "sun.misc.Cleaner", "jdk.internal.ref.Cleaner" );
+                upstreamCreateMethod = upstreamClass.getDeclaredMethod( "create", Object.class, Runnable.class );
+                upstreamCleanMethod = upstreamClass.getDeclaredMethod( "clean" );
+            }
+            catch ( ReflectiveOperationException e )
+            {
+                throw new RuntimeException( e );
+            }
+        }
+
+        protected static Class<?> firstClassFound( String... classnames ) throws ClassNotFoundException
+        {
+            for ( String classname : classnames )
+            {
+                try
+                {
+                    return Class.forName( classname );
+                }
+                catch ( ClassNotFoundException e )
+                { }
+            }
+            throw new ClassNotFoundException( );
+        }
+
+        protected final Object upstreamCleaner;
+
+        public CleanerWrapper( Object referent, Runnable thunk )
+        {
+            try
+            {
+                this.upstreamCleaner = upstreamCreateMethod.invoke( null, referent, thunk );
+            }
+            catch ( ReflectiveOperationException e )
+            {
+                throw new RuntimeException( e );
+            }
+        }
+
+        public void clean( )
+        {
+            try
+            {
+                upstreamCleanMethod.invoke( this.upstreamCleaner );
+            }
+            catch ( InvocationTargetException | IllegalAccessException e )
+            {
+                throw new RuntimeException( e );
+            }
+        }
+    }
+
+
     protected static final FileMapper mapper;
     static
     {
@@ -84,9 +154,8 @@ public class MappedFile
         {
             mapper = new FileMapperStandard( );
         }
-
-        cleaner = Cleaner.create( );
     }
+
 
     protected final File file;
     protected final boolean writable;
@@ -96,7 +165,8 @@ public class MappedFile
     protected final long address;
     protected final long size;
 
-    protected final Cleanable cleanable;
+    protected final CleanerWrapper cleaner;
+
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
     {
@@ -141,7 +211,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleanable = cleaner.register( this, unmapper );
+            this.cleaner = new CleanerWrapper( this, unmapper );
         }
     }
 
@@ -167,7 +237,7 @@ public class MappedFile
 
     public void copyTo( long position, int size, ByteBuffer dest )
     {
-        if ( dest.isDirect( ) && dest instanceof DirectBuffer )
+        if ( dest.isDirect( ) && isDirectBuffer( dest ) )
         {
             // This block does all the same steps as the block below,
             // but without creating a temporary slice buffer
@@ -193,7 +263,7 @@ public class MappedFile
             }
 
             long sAddr = this.address + position;
-            long dAddr = ( ( DirectBuffer ) dest ).address( ) + dest.position( );
+            long dAddr = getDirectBufferAddress( dest ) + dest.position( );
             unsafe.copyMemory( sAddr, dAddr, size );
             dest.position( dest.position( ) + size );
         }
@@ -229,22 +299,12 @@ public class MappedFile
     }
 
     /**
-     * <strong>IMPORTANT:</strong> The clean() method of the returned Cleaner must not be called while
-     * slices of this MappedFile are still in use. If a slice is used after clean() is called, behavior
-     * is undefined.
-     */
-    public Cleanable cleanable( )
-    {
-        return this.cleanable;
-    }
-
-    /**
      * <strong>IMPORTANT:</strong> This method must not be called while slices of this MappedFile are
      * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
      */
     public void dispose( )
     {
-        this.cleanable.clean( );
+        this.cleaner.clean( );
     }
 
     // Lots of verbose code to get access to various JVM-internal functionality
@@ -270,6 +330,39 @@ public class MappedFile
         catch ( Exception e )
         {
             throw new RuntimeException( "Cannot access " + Unsafe.class.getName( ), e );
+        }
+    }
+
+    protected static final Class<?> DirectBuffer_class;
+    protected static final Method DirectBuffer_address;
+    static
+    {
+        try
+        {
+            DirectBuffer_class = Class.forName( "sun.nio.ch.DirectBuffer" );
+            DirectBuffer_address = DirectBuffer_class.getDeclaredMethod( "address" );
+            DirectBuffer_address.setAccessible( true );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Cannot access sun.nio.ch.DirectBuffer.address()", e );
+        }
+    }
+
+    public static boolean isDirectBuffer( Object obj )
+    {
+        return DirectBuffer_class.isInstance( obj );
+    }
+
+    public static long getDirectBufferAddress( Object directBuffer )
+    {
+        try
+        {
+            return ( Long ) DirectBuffer_address.invoke( directBuffer );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
         }
     }
 
