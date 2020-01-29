@@ -140,7 +140,7 @@ public class DirectBufferDealloc
             { }
         }
 
-        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be logged by otherwise ignored" );
+        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be logged but otherwise ignored" );
         return new Impl0( );
     }
 
