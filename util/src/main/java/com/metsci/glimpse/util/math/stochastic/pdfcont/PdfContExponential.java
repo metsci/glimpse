@@ -45,7 +45,8 @@ public class PdfContExponential implements PdfCont
     @Override
     public double draw( Generator g )
     {
-        return -Math.log( g.nextDouble( ) ) * _invLambda;
+        // Do "1.0 - g.nextDouble( )" because the arg to log needs to be in (0,1] rather than [0,1)
+        return -Math.log( 1.0 - g.nextDouble( ) ) * _invLambda;
     }
 
     @Override

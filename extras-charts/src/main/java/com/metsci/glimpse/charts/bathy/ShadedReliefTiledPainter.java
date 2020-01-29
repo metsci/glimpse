@@ -61,6 +61,7 @@ import com.metsci.glimpse.gl.texture.DrawableTexture;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.support.projection.LatLonProjection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
@@ -365,6 +366,15 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         protected void read( InputStream in ) throws IOException
         {
             // nop
+        }
+
+        @Override
+        public LatLonProjection getProjection( GeoProjection projection )
+        {
+            double endLat = startLat + heightStep * imageHeight;
+            double endLon = startLon + widthStep * imageWidth;
+
+            return new LatLonProjection( projection, clampNorthSouth( startLat ), clampNorthSouth( endLat ), clampAntiMeridian( startLon ), clampAntiMeridian( endLon ), false );
         }
     }
 

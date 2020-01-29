@@ -31,6 +31,7 @@ import java.util.function.DoubleSupplier;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.Tag;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
 import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
@@ -48,7 +49,7 @@ public class HeatMapPainter extends ShadedTexturePainter
     protected static final int colormapTexUnit = valuesTexUnit + 1;
 
 
-    protected final HeatMapProgram program;
+    protected HeatMapProgram program;
 
     protected FloatTextureProjected2D valuesTexture;
     protected ColorTexture1D colorTable;
@@ -73,6 +74,18 @@ public class HeatMapPainter extends ShadedTexturePainter
     {
         this.program = program;
         this.setProgram( this.program );
+    }
+
+    @Override
+    public void setProgram( DrawableTextureProgram program )
+    {
+        if ( ! ( program instanceof HeatMapProgram ) )
+        {
+            throw new IllegalArgumentException( "program must be a HeatMapProgram" );
+        }
+
+        this.program = ( HeatMapProgram ) program;
+        super.setProgram( program );
     }
 
     public void setData( FloatTextureProjected2D texture )
@@ -102,7 +115,7 @@ public class HeatMapPainter extends ShadedTexturePainter
             this.painterLock.unlock( );
         }
     }
-    
+
     public void setDiscardNaN( boolean discard )
     {
         this.painterLock.lock( );

@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.collect.Lists;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -77,6 +78,7 @@ public class EventManager
 
     protected boolean shouldStack = true;
     protected boolean isHorizontal = true;
+    protected boolean reverseStackingDirection = false;
 
     protected boolean visibleEventsDirty = true;
     protected double prevMin;
@@ -296,7 +298,7 @@ public class EventManager
 
     public List<Row> getRows( )
     {
-        return Collections.unmodifiableList( rows );
+        return Collections.unmodifiableList( this.reverseStackingDirection ? Lists.reverse( this.rows ) : this.rows );
     }
 
     /**
@@ -316,6 +318,23 @@ public class EventManager
     {
         this.shouldStack = stack;
         this.validate( );
+    }
+
+    /**
+     * @see #setReverseStackingDirection(boolean)
+     */
+    public boolean getReverseStackingDirection( )
+    {
+        return this.reverseStackingDirection;
+    }
+
+    /**
+     * If true, events will start at the top (or right) edge and stack downward
+     * (or leftward) -- the reverse of default behavior.
+     */
+    public void setReverseStackingDirection( boolean reverse )
+    {
+        this.reverseStackingDirection = reverse;
     }
 
     /**
@@ -743,6 +762,9 @@ public class EventManager
         // flip rowIndex (due to GlimpseMouseEvent coordinate system)
         rowIndex = info.getRowCount( ) - 1 - rowIndex;
 
+        // use the accessor method so that this method's behavior is consistent
+        // with painter behavior -- even if getRows() reorders the rows
+        List<Row> rows = this.getRows( );
         if ( rowIndex >= 0 && rowIndex < rows.size( ) )
         {
             return rows.get( rowIndex );

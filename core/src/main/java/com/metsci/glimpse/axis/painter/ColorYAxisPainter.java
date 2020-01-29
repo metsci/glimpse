@@ -140,6 +140,8 @@ public class ColorYAxisPainter extends NumericYAxisPainter
 
             float inset_PX = 0.5f * style.thickness_PX;
 
+            style.rgba = this.tickColor;
+
             pathOutline.clear( );
             pathOutline.addRectangle( x1 + inset_PX, inset_PX, x2 - inset_PX, height - inset_PX );
 

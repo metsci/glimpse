@@ -30,7 +30,6 @@ import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThrea
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
-import static java.util.concurrent.Executors.defaultThreadFactory;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 import java.util.Map;
@@ -98,7 +97,7 @@ public class PainterCache<K, V>
 
     static
     {
-        ThreadFactory threadFactory = newDaemonThreadFactory( defaultThreadFactory( ) );
+        ThreadFactory threadFactory = newDaemonThreadFactory( "glimpse-painter-cache-%d" );
         SHARED_EXEC = newFixedThreadPool( max( getRuntime( ).availableProcessors( ) - 2, 1 ), threadFactory );
     }
 

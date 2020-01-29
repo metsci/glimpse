@@ -26,8 +26,10 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.util.var2.VarTestUtils.f;
 import static com.metsci.glimpse.util.var2.VarUtils.addOldNewListener;
+import static com.metsci.glimpse.util.var2.VarUtils.mapValueVar;
 import static com.metsci.glimpse.util.var2.VarUtils.propertyVar;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,9 +41,26 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 class VarTest
 {
+
+    @Test
+    void mapValueVarShouldHonorImmediateFlag( )
+    {
+        Var<ImmutableMap<String,String>> mapVar = new VarBasic<>( ImmutableMap.of( "theKey", "theValue" ) );
+        Var<String> valueVar = mapValueVar( mapVar, "theKey" );
+
+        List<VarFiring<String>> fs = new ArrayList<>( );
+        valueVar.addListener( IMMEDIATE, ongoing ->
+        {
+            fs.add( f( ongoing, valueVar.v( ) ) );
+        } );
+
+        assertEquals( asList( f( false, "theValue" ) ),
+                      fs );
+    }
 
     @Test
     void listenerTensesShouldNotAffectFiringOrder( )

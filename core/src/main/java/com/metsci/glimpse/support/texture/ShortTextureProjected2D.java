@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.support.texture;
 
+import static com.metsci.glimpse.util.GeneralUtils.multiplyInts;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 
 import java.nio.Buffer;
@@ -89,7 +90,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
     @Override
     protected int getRequiredCapacityBytes( )
     {
-        return dataSizeX * dataSizeY * BYTES_PER_SHORT;
+        return multiplyInts( dataSizeX, dataSizeY, BYTES_PER_SHORT );
     }
 
     @Override

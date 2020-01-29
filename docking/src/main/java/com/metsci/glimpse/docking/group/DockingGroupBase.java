@@ -259,7 +259,7 @@ public abstract class DockingGroupBase implements DockingGroup
                     break;
 
                 case DISPOSE_CLOSED_FRAME:
-                    Collection<View> views = this.views( ).values( );
+                    Collection<View> views = findViews( window ).values( );
                     if ( allViewsAreAutoCloseable( views ) )
                     {
                         notifyDisposingWindow( this.listeners, this, window );
@@ -508,6 +508,18 @@ public abstract class DockingGroupBase implements DockingGroup
     public TileFactory tileFactory( )
     {
         return this.tileFactory;
+    }
+
+    @Override
+    public void selectView( View view )
+    {
+        Tile tile = getAncestorOfClass( Tile.class, view.component.v( ) );
+        if ( tile == null )
+        {
+            throw new RuntimeException( "View does not belong to this docking-group: view-id = " + view.viewId );
+        }
+
+        tile.selectView( view );
     }
 
     @Override

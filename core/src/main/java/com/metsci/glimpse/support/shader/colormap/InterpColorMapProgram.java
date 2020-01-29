@@ -28,12 +28,12 @@ package com.metsci.glimpse.support.shader.colormap;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 import com.jogamp.opengl.GLUniformData;
 
 import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.painter.texture.HeatMapProgram;
 
 /**
  * Does a non-linear interpolation on the GPU and then maps into the colorscale.
@@ -41,14 +41,15 @@ import com.metsci.glimpse.axis.Axis1D;
  *
  * @author borkholder
  */
-public class InterpColorMapProgram extends ColorMapProgram
+public class InterpColorMapProgram extends ColorMapProgram implements HeatMapProgram
 {
     private static final Logger LOGGER = Logger.getLogger( InterpColorMapProgram.class.getName( ) );
 
-    protected GLUniformData discardAboveBelow;
+    protected GLUniformData discardAbove;
+    protected GLUniformData discardBelow;
     protected GLUniformData overrideAlpha;
 
-    public InterpColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit ) throws IOException
+    public InterpColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
         super( colorAxis, targetTexUnit, colorTexUnit );
         super.setDiscardNaN( true );
@@ -59,13 +60,9 @@ public class InterpColorMapProgram extends ColorMapProgram
     {
         super.initialize( colorAxis, targetTexUnit, colorTexUnit );
 
-        this.discardAboveBelow = this.addUniformData( new GLUniformData( "discardAboveBelow", 0 ) );
+        this.discardAbove = this.addUniformData( new GLUniformData( "discardAbove", 0 ) );
+        this.discardBelow = this.addUniformData( new GLUniformData( "discardBelow", 0 ) );
         this.overrideAlpha = this.addUniformData( new GLUniformData( "overrideAlpha", 0 ) );
-    }
-
-    public void setDiscardAboveBelow( boolean discard )
-    {
-        this.discardAboveBelow.setData( discard ? 1 : 0 );
     }
 
     public void setOverrideAlpha( boolean override )
@@ -84,5 +81,29 @@ public class InterpColorMapProgram extends ColorMapProgram
     public void setDiscardNaN( boolean discard )
     {
         logWarning( LOGGER, "discardNaN has not effect for " + InterpColorMapProgram.class.getSimpleName( ) );
+    }
+
+    @Override
+    public void setUseColormapAlpha( boolean useColormapAlpha )
+    {
+        this.overrideAlpha.setData( useColormapAlpha ? 0 : 1 );
+    }
+
+    @Override
+    public void setDiscardNan( boolean discardNan )
+    {
+        super.setDiscardNaN( discardNan );
+    }
+
+    @Override
+    public void setDiscardBelow( boolean discardBelow )
+    {
+        this.discardBelow.setData( discardBelow ? 1 : 0 );
+    }
+
+    @Override
+    public void setDiscardAbove( boolean discardAbove )
+    {
+        this.discardAbove.setData( discardAbove ? 1 : 0 );
     }
 }
