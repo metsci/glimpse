@@ -43,8 +43,13 @@ import com.metsci.glimpse.util.ThrowingSupplier;
  * the garbage collector finalizes the direct buffer. This delay causes problems
  * when a lot of off-heap memory is used, but garbage collections are infrequent.
  * <p>
- * Currently only works for Oracle and OpenJDK, but could probably be extended to
- * others.
+ * Works for Oracle/OpenJDK 8.
+ * <p>
+ * Works for OpenJDK 9+, but requires the following JVM args:
+ * <pre>
+ * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+ * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
+ * </pre>
  * <p>
  * <strong><em>Use with caution.</em></strong> Deallocating a buffer inappropriately
  * can crash the JVM, or worse.
@@ -117,7 +122,7 @@ public class DirectBufferDealloc
         @Override
         public String toString( )
         {
-            return "DirectBufferDealloc impl for Java 8 JVMs from Oracle and OpenJDK";
+            return "DirectBufferDealloc impl for Oracle/OpenJDK 8 JVMs, and OpenJDK 9+ JVMs (JVM args required -- see javadocs)";
         }
     }
 

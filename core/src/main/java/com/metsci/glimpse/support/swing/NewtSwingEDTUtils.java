@@ -58,6 +58,13 @@ public class NewtSwingEDTUtils
      * NEWT and AWT. If for any reason it cannot determine whether the event is modal-
      * blocked, it returns {@link ModalBlockedStatus#UNKNOWN}. Client code should be
      * written with this possibility in mind.
+     * <p>
+     * Works for Oracle/OpenJDK 8.
+     * <p>
+     * Works for OpenJDK 9+, but requires the following JVM arg:
+     * <pre>
+     * --add-opens java.desktop/java.awt=com.metsci.glimpse.core
+     * </pre>
      */
     public static ModalBlockedStatus getModalBlockedStatus( InputEvent ev )
     {
