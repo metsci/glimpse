@@ -29,20 +29,24 @@ package com.metsci.glimpse.support.swing;
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_BLOCKED;
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_NOT_BLOCKED;
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.UNKNOWN;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import com.jogamp.nativewindow.NativeWindow;
-
 import com.jogamp.nativewindow.awt.JAWTWindow;
 import com.jogamp.newt.event.InputEvent;
 
 public class NewtSwingEDTUtils
 {
+    private static final Logger logger = getLogger( NewtSwingEDTUtils.class );
+
 
     public static enum ModalBlockedStatus
     {
@@ -106,8 +110,9 @@ public class NewtSwingEDTUtils
                 }
             };
         }
-        catch ( ReflectiveOperationException | SecurityException e )
+        catch ( ReflectiveOperationException | SecurityException | InaccessibleObjectException e )
         {
+            logger.severe( "Cannot reliably determine a window's modal-blocked status on this JVM" );
             return ( w ) ->
             {
                 return UNKNOWN;
