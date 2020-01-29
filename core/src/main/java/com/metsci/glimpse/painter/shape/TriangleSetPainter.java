@@ -26,15 +26,14 @@
  */
 package com.metsci.glimpse.painter.shape;
 
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
-import static javax.media.opengl.GL.GL_TRIANGLES;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL3;
-
+import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
