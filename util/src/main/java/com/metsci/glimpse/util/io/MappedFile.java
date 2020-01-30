@@ -55,7 +55,7 @@ import sun.misc.Unsafe;
  * <p>
  * Works on Oracle/OpenJDK 8 JVMs.
  * <p>
- * Works on OpenJDK 9+ JVMs, but requires the following JVM arg:
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
  * <pre>
  * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
  * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util

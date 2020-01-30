@@ -30,11 +30,11 @@ import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedSta
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_NOT_BLOCKED;
 import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.UNKNOWN;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logSevere;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
 import java.awt.Window;
-import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -117,9 +117,9 @@ public class NewtSwingEDTUtils
                 }
             };
         }
-        catch ( ReflectiveOperationException | SecurityException | InaccessibleObjectException e )
+        catch ( Exception e )
         {
-            logger.severe( "Cannot reliably determine a window's modal-blocked status on this JVM" );
+            logSevere( logger, "Cannot reliably determine a window's modal-blocked status on this JVM", e );
             return ( w ) ->
             {
                 return UNKNOWN;
