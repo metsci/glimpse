@@ -55,8 +55,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-core</artifactId>
+            <groupId>com.metsci.ext.swingx</groupId>
+            <artifactId>swingx-core-and-plaf</artifactId>
             <version>1.6.5-1</version>
         </dependency>
 

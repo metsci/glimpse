@@ -29,14 +29,14 @@ package com.metsci.glimpse.dnc.geosym;
 public class DncGeosymThemes
 {
 
-    public static final DncGeosymTheme DNC_THEME_STANDARD = new DncGeosymTheme( "com/metsci/glimpse/dnc/geosym/themes/standard/color.txt",
-                                                                                "com/metsci/glimpse/dnc/geosym/themes/standard/line-area-styles.csv",
-                                                                                "com/metsci/glimpse/dnc/geosym/themes/standard/cgm",
-                                                                                "com/metsci/glimpse/dnc/geosym/themes/standard/svg" );
+    public static final DncGeosymTheme DNC_THEME_STANDARD = new DncGeosymTheme( "/com/metsci/glimpse/dnc/geosym/themes/standard/color.txt",
+                                                                                "/com/metsci/glimpse/dnc/geosym/themes/standard/line-area-styles.csv",
+                                                                                "/com/metsci/glimpse/dnc/geosym/themes/standard/cgm",
+                                                                                "/com/metsci/glimpse/dnc/geosym/themes/standard/svg" );
 
-    public static final DncGeosymTheme DNC_THEME_NIGHT = new DncGeosymTheme( "com/metsci/glimpse/dnc/geosym/themes/night/color.txt",
-                                                                             "com/metsci/glimpse/dnc/geosym/themes/night/line-area-styles.csv",
-                                                                             "com/metsci/glimpse/dnc/geosym/themes/standard/cgm",
-                                                                             "com/metsci/glimpse/dnc/geosym/themes/night/svg" );
+    public static final DncGeosymTheme DNC_THEME_NIGHT = new DncGeosymTheme( "/com/metsci/glimpse/dnc/geosym/themes/night/color.txt",
+                                                                             "/com/metsci/glimpse/dnc/geosym/themes/night/line-area-styles.csv",
+                                                                             "/com/metsci/glimpse/dnc/geosym/themes/standard/cgm",
+                                                                             "/com/metsci/glimpse/dnc/geosym/themes/night/svg" );
 
 }

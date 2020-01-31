@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.charts.shoreline.gshhs;
 
+import static com.metsci.glimpse.util.io.IoUtils.url;
+
 import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -33,6 +35,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +43,6 @@ import com.metsci.glimpse.charts.shoreline.LandVertex;
 import com.metsci.glimpse.charts.shoreline.gshhs.GshhsPolygonHeader.UnrecognizedValueException;
 import com.metsci.glimpse.util.Pair;
 import com.metsci.glimpse.util.io.LittleEndianDataInput;
-import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * The GSHHS dataset can be downloaded from ftp://ftp.soest.hawaii.edu/pwessel/gshhs/ .
@@ -52,26 +54,14 @@ public class GshhsReader
 
     public static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments( File file ) throws IOException
     {
-        return readSegments( file.getPath( ), StreamOpener.file );
+        return readSegments( url( file ) );
     }
 
-    public static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments( String location, StreamOpener streamOpener ) throws IOException
+    public static Pair<List<List<LandVertex>>, List<GshhsPolygonHeader>> readSegments( URL url ) throws IOException
     {
-        InputStream stream = null;
-        try
+        try ( InputStream stream = url.openStream( ) )
         {
-            stream = streamOpener.openForRead( location );
             return readSegments( stream );
-        }
-        finally
-        {
-            if ( stream != null ) try
-            {
-                stream.close( );
-            }
-            catch ( IOException e )
-            {
-            }
         }
     }
 

@@ -10,7 +10,7 @@ module com.metsci.glimpse.dnc
     exports com.metsci.glimpse.dnc.facc;
     exports com.metsci.glimpse.dnc.util;
 
-    opens com.metsci.glimpse.dnc.shaders.DncPainter;
+    opens com.metsci.glimpse.dnc.shaders;
 
     requires transitive com.metsci.glimpse.core;
 

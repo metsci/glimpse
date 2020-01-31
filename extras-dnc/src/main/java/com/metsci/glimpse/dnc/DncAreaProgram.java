@@ -27,15 +27,15 @@
 package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 
 public class DncAreaProgram
 {
 
-    public static final String dncAreaVertShader_GLSL = requireResourceText( DncAreaProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/area.vs" );
-    public static final String dncAreaFragShader_GLSL = requireResourceText( DncAreaProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/area.fs" );
+    public static final String dncAreaVertShader_GLSL = requireText( DncAreaProgram.class.getResource( "shaders/area.vs" ) );
+    public static final String dncAreaFragShader_GLSL = requireText( DncAreaProgram.class.getResource( "shaders/area.fs" ) );
 
     public static class DncAreaProgramHandles
     {

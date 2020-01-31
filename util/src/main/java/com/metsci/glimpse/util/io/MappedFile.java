@@ -62,6 +62,7 @@ import sun.misc.Unsafe;
  * --add-opens java.base/java.nio=com.metsci.glimpse.util
  * </pre>
  */
+@SuppressWarnings( "restriction" )
 public class MappedFile
 {
 

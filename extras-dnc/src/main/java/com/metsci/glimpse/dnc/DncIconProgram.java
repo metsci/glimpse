@@ -27,16 +27,16 @@
 package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 
 public class DncIconProgram
 {
 
-    public static final String dncIconVertShader_GLSL = requireResourceText( DncIconProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/icon.vs" );
-    public static final String dncIconGeomShader_GLSL = requireResourceText( DncIconProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/icon.gs" );
-    public static final String dncIconFragShader_GLSL = requireResourceText( DncIconProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/icon.fs" );
+    public static final String dncIconVertShader_GLSL = requireText( DncIconProgram.class.getResource( "shaders/icon.vs" ) );
+    public static final String dncIconGeomShader_GLSL = requireText( DncIconProgram.class.getResource( "shaders/icon.gs" ) );
+    public static final String dncIconFragShader_GLSL = requireText( DncIconProgram.class.getResource( "shaders/icon.fs" ) );
 
     public static class DncIconProgramHandles
     {

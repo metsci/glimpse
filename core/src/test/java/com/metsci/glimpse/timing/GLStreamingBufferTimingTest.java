@@ -26,21 +26,27 @@
  */
 package com.metsci.glimpse.timing;
 
-import static com.metsci.glimpse.support.FrameUtils.*;
-import static com.metsci.glimpse.timing.GLVersionLogger.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.jogamp.opengl.GL.*;
-import static javax.swing.WindowConstants.*;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_POINTS;
+import static com.metsci.glimpse.support.FrameUtils.disposeOnWindowClosing;
+import static com.metsci.glimpse.support.FrameUtils.newFrame;
+import static com.metsci.glimpse.support.FrameUtils.showFrameCentered;
+import static com.metsci.glimpse.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.timing.GLVersionLogger.addGLVersionLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.nio.FloatBuffer;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAnimatorControl;
 import com.jogamp.opengl.GLProfile;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
@@ -59,7 +65,7 @@ public class GLStreamingBufferTimingTest
 
     public static void main( String[] args )
     {
-        initializeLogging( "timing/logging.properties" );
+        initLogging( GLStreamingBufferTimingTest.class.getResource( "logging.properties" ) );
 
         final EmptyPlot2D plot = new EmptyPlot2D( );
         plot.addPainter( new BackgroundPainter( ) );

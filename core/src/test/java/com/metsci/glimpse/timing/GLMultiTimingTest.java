@@ -62,7 +62,7 @@ public class GLMultiTimingTest
 
     public static void main( String[] args )
     {
-        initializeLogging( "timing/logging.properties" );
+        initLogging( GLMultiTimingTest.class.getResource( "logging.properties" ) );
 
         final EmptyPlot2D plot = new EmptyPlot2D( );
         plot.addPainter( new BackgroundPainter( ) );

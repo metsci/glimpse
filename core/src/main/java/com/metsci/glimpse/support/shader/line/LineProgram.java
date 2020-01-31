@@ -26,19 +26,18 @@
  */
 package com.metsci.glimpse.support.shader.line;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_BYTE;
 import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL3.GL_LINE_STRIP_ADJACENCY;
+import static com.jogamp.opengl.GL3ES3.GL_LINE_STRIP_ADJACENCY;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.support.wrapped.Wrapper2D.NOOP_WRAPPER_2D;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import java.util.Collection;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLStreamingBuffer;
@@ -54,9 +53,9 @@ import com.metsci.glimpse.support.wrapped.Wrapper2D;
  */
 public class LineProgram
 {
-    public static final String lineVertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/line_flat_color/line.vs" );
-    public static final String lineGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/line_flat_color/line.gs" );
-    public static final String lineFragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/line_flat_color/line.fs" );
+    public static final String lineVertShader_GLSL = requireText( LineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_flat_color/line.vs" ) );
+    public static final String lineGeomShader_GLSL = requireText( LineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_flat_color/line.gs" ) );
+    public static final String lineFragShader_GLSL = requireText( LineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_flat_color/line.fs" ) );
 
     public static class LineProgramHandles
     {

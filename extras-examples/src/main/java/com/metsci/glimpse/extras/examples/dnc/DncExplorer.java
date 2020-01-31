@@ -47,7 +47,7 @@ import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static java.awt.Font.BOLD;
 
 import java.io.IOException;
@@ -110,7 +110,7 @@ public class DncExplorer
 
     public static void main( String[] args ) throws IOException
     {
-        initializeLogging( "dnc-examples/logging.properties" );
+        initLogging( DncExplorer.class.getResource( "logging.properties" ) );
         initTinyLaf( );
         initStandardGlimpseApp( );
 

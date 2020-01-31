@@ -27,13 +27,13 @@
 package com.metsci.glimpse.dnc.facc;
 
 import static com.google.common.base.Objects.equal;
-import static com.metsci.glimpse.util.io.StreamOpener.resource;
 import static java.lang.Integer.parseInt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,20 +42,19 @@ import java.util.Map;
 public class FaccIo
 {
 
-    public static final String faccPath = "com/metsci/glimpse/dnc/facc/";
-    public static final String faccFeaturesFile = "facc-features.csv";
-    public static final String faccAttrsFile = "facc-attrs.csv";
-    public static final String faccAttrValsFile = "facc-attr-vals.csv";
+    public static final URL faccFeaturesUrl = FaccIo.class.getResource( "/com/metsci/glimpse/dnc/facc/facc-features.csv" );
+    public static final URL faccAttrsUrl = FaccIo.class.getResource( "/com/metsci/glimpse/dnc/facc/facc-attrs.csv" );
+    public static final URL faccAttrValsUrl = FaccIo.class.getResource( "/com/metsci/glimpse/dnc/facc/facc-attr-vals.csv" );
 
 
-    public static Reader faccReader( String filename ) throws IOException
+    protected static Reader createReader( URL url ) throws IOException
     {
-        return new BufferedReader( new InputStreamReader( resource.openForRead( faccPath + filename ) ) );
+        return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
     }
 
     public static Map<String,FaccFeature> readFaccFeatures( ) throws IOException
     {
-        try ( Reader reader = faccReader( faccFeaturesFile ) )
+        try ( Reader reader = createReader( faccFeaturesUrl ) )
         {
             return readFaccFeatures( reader );
         }
@@ -83,7 +82,7 @@ public class FaccIo
     public static Map<String,FaccAttr> readFaccAttrs( ) throws IOException
     {
         Map<String,Map<Object,Object>> valueLookups = readFaccValues( );
-        try ( Reader reader = faccReader( faccAttrsFile ) )
+        try ( Reader reader = createReader( faccAttrsUrl ) )
         {
             return readFaccAttrs( reader, valueLookups );
         }
@@ -113,7 +112,7 @@ public class FaccIo
 
     public static Map<String,Map<Object,Object>> readFaccValues( ) throws IOException
     {
-        try ( Reader reader = faccReader( faccAttrValsFile ) )
+        try ( Reader reader = createReader( faccAttrValsUrl ) )
         {
             return readFaccValues( reader );
         }

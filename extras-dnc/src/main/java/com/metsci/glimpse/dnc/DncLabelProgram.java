@@ -27,16 +27,16 @@
 package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 
 public class DncLabelProgram
 {
 
-    public static final String dncLabelVertShader_GLSL = requireResourceText( DncLabelProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/label.vs" );
-    public static final String dncLabelGeomShader_GLSL = requireResourceText( DncLabelProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/label.gs" );
-    public static final String dncLabelFragShader_GLSL = requireResourceText( DncLabelProgram.class.getModule( ), "com/metsci/glimpse/dnc/shaders/DncPainter/label.fs" );
+    public static final String dncLabelVertShader_GLSL = requireText( DncLabelProgram.class.getResource( "shaders/label.vs" ) );
+    public static final String dncLabelGeomShader_GLSL = requireText( DncLabelProgram.class.getResource( "shaders/label.gs" ) );
+    public static final String dncLabelFragShader_GLSL = requireText( DncLabelProgram.class.getResource( "shaders/label.fs" ) );
 
     public static class DncLabelProgramHandles
     {

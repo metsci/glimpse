@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.util.logging;
 
-import static com.metsci.glimpse.util.io.StreamOpener.fileThenResourceOpener;
 import static java.lang.String.format;
 import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.CONFIG;
@@ -51,7 +50,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.util.io.StreamOpener;
+import com.metsci.glimpse.util.io.IoUtils;
 import com.metsci.glimpse.util.logging.format.Formatter;
 import com.metsci.glimpse.util.logging.format.TerseLogFormatter;
 import com.metsci.glimpse.util.logging.format.TimestampingMethodNameLogFormatter;
@@ -126,73 +125,24 @@ public class LoggerUtils
     }
 
     /**
-     * Initialize Java logging to use "logging.properties" as the configuration
-     * file and re-read the logging configuration from this file.
-     * <p>
-     * Note: Similar to setting
-     * -Djava.util.logging.config.file=logging.properties on java command line.
-     * </p>
-     */
-    public static void initializeLogging( )
-    {
-        initializeLogging( "logging.properties" );
-    }
-
-    /**
-     * Initialize Java logging to use given configuration file and re-read the
-     * logging configuration from this file.
-     * <p>
-     * Note: Similar to setting
-     * -Djava.util.logging.config.file=configurationFilename on java command
-     * line.
-     * </p>
-     */
-    public static void initializeLogging( String configurationFilename )
-    {
-        initializeLogging( configurationFilename, fileThenResourceOpener );
-    }
-
-    /**
-     * Initialize Java logging to use given configuration file and re-read the
-     * logging configuration from this file.
-     * <p>
-     * Note: Similar to setting
-     * -Djava.util.logging.config.file=configurationFilename on java command
-     * line.
-     * </p>
-     */
-    public static void initializeLogging( String configurationFilename, StreamOpener streamOpener )
-    {
-        try
-        {
-            InputStream stream = null;
-            try
-            {
-                stream = streamOpener.openForRead( configurationFilename );
-                getLogManager( ).readConfiguration( stream );
-
-                System.setProperty( "java.util.logging.config.file", configurationFilename );
-
-                Logger logger = getLogger( LoggerUtils.class );
-                logger.info( "Loaded logging configuration from " + configurationFilename );
-            }
-            finally
-            {
-                if ( stream != null ) stream.close( );
-            }
-        }
-        catch ( IOException e )
-        {
-            System.err.println( LoggerUtils.class.getSimpleName( ) + ".initializeLogging: IO exception - " + e.toString( ) );
-            e.printStackTrace( System.err );
-        }
-    }
-
-    /**
      * This method tries to configure logging by loading a configuration from
      * each of the specified URLs, in order, until an attempt succeeds. After
      * the first successful attempt, the method returns true. If there are no
      * successful attempts, the method returns false.
+     * <p>
+     * Basic examples, using {@link IoUtils#file(String)} and {@link IoUtils#resource(Class, String)}:
+     * <pre>
+     * public static void main( String[] args )
+     * {
+     *     // Example 1: Use classpath resource "com/company/package/logging.properties"
+     *     initLogging( Main.class.getResource( "logging.properties" ) );
+     *     ...
+     *
+     *     // Example 2: Use a file, or fall back to classpath resource if file is not available
+     *     initLogging( file( "logging.properties" ), resource( Main.class, "logging.properties" ) );
+     *     ...
+     * }
+     * </pre>
      */
     public static boolean initLogging( URL... urls )
     {

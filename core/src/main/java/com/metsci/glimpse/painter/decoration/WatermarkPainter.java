@@ -45,16 +45,17 @@ import static java.lang.Math.sqrt;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GLProfile;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.awt.AWTTextureData;
 import com.metsci.glimpse.context.GlimpseBounds;
@@ -64,7 +65,6 @@ import com.metsci.glimpse.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
 import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
-import com.metsci.glimpse.util.io.StreamOpener;
 
 public class WatermarkPainter extends GlimpsePainterBase
 {
@@ -184,14 +184,14 @@ public class WatermarkPainter extends GlimpsePainterBase
         this( Suppliers.ofInstance( image ), config );
     }
 
-    public WatermarkPainter( StreamOpener imageOpener, String imageLocation )
+    public WatermarkPainter( URL imageUrl )
     {
-        this( imageOpener, imageLocation, defaultConfig );
+        this( imageUrl, defaultConfig );
     }
 
-    public WatermarkPainter( StreamOpener imageOpener, String imageLocation, WatermarkConfig config )
+    public WatermarkPainter( URL imageUrl, WatermarkConfig config )
     {
-        this( newImageLoader( imageOpener, imageLocation ), config );
+        this( newImageLoader( imageUrl ), config );
     }
 
     public WatermarkPainter( Supplier<BufferedImage> imageSupplier )
@@ -211,25 +211,16 @@ public class WatermarkPainter extends GlimpsePainterBase
         this.inS = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
-    public static Supplier<BufferedImage> newImageLoader( final StreamOpener opener, final String location )
+    public static Supplier<BufferedImage> newImageLoader( URL imageUrl )
     {
         return new Supplier<BufferedImage>( )
         {
             @Override
             public BufferedImage get( )
             {
-                try
+                try ( InputStream stream = imageUrl.openStream( ) )
                 {
-                    InputStream stream = null;
-                    try
-                    {
-                        stream = opener.openForRead( location );
-                        return ImageIO.read( stream );
-                    }
-                    finally
-                    {
-                        if ( stream != null ) stream.close( );
-                    }
+                    return ImageIO.read( stream );
                 }
                 catch ( IOException e )
                 {

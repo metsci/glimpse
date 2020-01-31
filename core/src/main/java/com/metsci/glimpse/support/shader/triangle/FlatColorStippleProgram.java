@@ -26,14 +26,13 @@
  */
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLEditableBuffer;
@@ -46,8 +45,8 @@ import com.metsci.glimpse.gl.util.GLUtils;
  */
 public class FlatColorStippleProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/flat_color_stipple/flat_color_stipple.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/flat_color_stipple/flat_color_stipple.fs" );
+    public static final String vertShader_GLSL = requireText( FlatColorStippleProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/flat_color_stipple/flat_color_stipple.vs" ) );
+    public static final String fragShader_GLSL = requireText( FlatColorStippleProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/flat_color_stipple/flat_color_stipple.fs" ) );
 
     public static class ProgramHandles
     {
