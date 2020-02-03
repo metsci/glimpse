@@ -44,12 +44,15 @@ import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingConstants;
 
+import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.TextLoader;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.font.FontUtils;
 
@@ -60,7 +63,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class DncGeosymIo
 {
-    public static final String geosymAssignmentPath = "com/metsci/glimpse/dnc/geosym/assignments/";
+
     public static final String geosymAttrExprsFile = "attexp.txt";
     public static final String geosymCodesFile = "code.txt";
     public static final String geosymFullAssignmentsFile = "fullsym.txt";
@@ -69,6 +72,7 @@ public class DncGeosymIo
     public static final String geosymLabelLocationsFile = "textloc.txt";
     public static final String geosymTextAbbreviationsFile = "textabbr.txt";
     public static final String geosymTextStylesFile = "textchar.txt";
+
 
     public static Object2IntMap<String> readSymbolAssignmentHeader( BufferedReader reader ) throws IOException
     {
@@ -89,31 +93,16 @@ public class DncGeosymIo
         return columnNums;
     }
 
-    public static BufferedReader resourceReader( String location ) throws IOException
+    public static Map<String,DncGeosymLineAreaStyle> readGeosymLineAreaStyles( TextLoader loader ) throws IOException
     {
-        return new BufferedReader( new InputStreamReader( DncGeosymIo.class.getModule( ).getResourceAsStream( location ) ) );
-    }
-
-    public static BufferedReader geosymReader( String filename ) throws IOException
-    {
-        return resourceReader( geosymAssignmentPath + filename );
-    }
-
-    public static Map<String, DncGeosymLineAreaStyle> readGeosymLineAreaStyles( String location ) throws IOException
-    {
-        BufferedReader reader = null;
-        try
+        String text = loader.loadText( );
+        try ( BufferedReader reader = new BufferedReader( new StringReader( text ) ) )
         {
-            reader = resourceReader( location );
             return readGeosymLineAreaStyles( reader );
         }
-        finally
-        {
-            if ( reader != null ) reader.close( );
-        }
     }
 
-    public static Map<String, DncGeosymLineAreaStyle> readGeosymLineAreaStyles( BufferedReader reader ) throws IOException
+    public static Map<String,DncGeosymLineAreaStyle> readGeosymLineAreaStyles( BufferedReader reader ) throws IOException
     {
         Map<String, DncGeosymLineAreaStyle> styles = newHashMap( );
         while ( true )
@@ -130,7 +119,7 @@ public class DncGeosymIo
             String symbolId = tokens[0];
             String symbolType = tokens[1];
 
-            // XXX: Yuck
+            // TODO: Yuck
             float lineWidthFactor = 2; // pixels per millimeter
             float lineWidth = ( tokens[2].isEmpty( ) ? 1 : max( 1, lineWidthFactor * parseFloat( tokens[2] ) ) );
 
@@ -149,6 +138,12 @@ public class DncGeosymIo
         return styles;
     }
 
+    private static BufferedReader resourceReader( String filename ) throws IOException
+    {
+        URL url = DncGeosymIo.class.getResource( "assignments/" + filename );
+        return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
+    }
+
     public static Int2ObjectMap<DncGeosymAssignment> readDncSymbolAssignments( ) throws IOException
     {
         return readDncSymbolAssignments( geosymFullAssignmentsFile );
@@ -165,18 +160,18 @@ public class DncGeosymIo
         BufferedReader assignmentsReader = null;
         try
         {
-            codesReader = geosymReader( geosymCodesFile );
+            codesReader = resourceReader( geosymCodesFile );
             List<DncGeosymCode> codes = readGeosymCodes( codesReader );
 
             int productId = findDncProductId( filename, codes );
 
             Int2ObjectMap<String> featureDelinCodes = findFeatureDelineationCodes( filename, codes );
 
-            attrExprsReader = geosymReader( geosymAttrExprsFile );
-            textStylesReader = geosymReader( geosymTextStylesFile );
-            textAbbrevsReader = geosymReader( geosymTextAbbreviationsFile );
-            labelLocationsReader = geosymReader( geosymLabelLocationsFile );
-            labelJoinsReader = geosymReader( geosymLabelJoinsFile );
+            attrExprsReader = resourceReader( geosymAttrExprsFile );
+            textStylesReader = resourceReader( geosymTextStylesFile );
+            textAbbrevsReader = resourceReader( geosymTextAbbreviationsFile );
+            labelLocationsReader = resourceReader( geosymLabelLocationsFile );
+            labelJoinsReader = resourceReader( geosymLabelJoinsFile );
             Int2ObjectMap<String> fontNameCodes = findFontNameCodes( codes );
             Int2ObjectMap<String> fontStyleCodes = findFontStyleCodes( codes );
             Int2ObjectMap<String> labelJustifyCodes = findLabelJustifyCodes( codes );
@@ -189,7 +184,7 @@ public class DncGeosymIo
             Int2ObjectMap<String> attrExprConnectorCodes = findAttrExprConnectorCodes( codes );
             Int2ObjectMap<DncGeosymAttributeExpression> attrExprs = readGeosymAttributeExpressions( attrExprsReader, attrComparisonCodes, attrExprConnectorCodes );
 
-            assignmentsReader = geosymReader( filename );
+            assignmentsReader = resourceReader( filename );
             return readGeosymAssignments( assignmentsReader, productId, featureDelinCodes, attrExprs, labelJoins );
         }
         finally
@@ -216,26 +211,26 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            String productId = tokens[columnNums.get( "pid" )];
+            String productId = tokens[ columnNums.getInt( "pid" ) ];
             if ( !productId.isEmpty( ) && parseInt( productId ) != productIdFilter ) continue;
 
-            int assignmentId = parseInt( tokens[columnNums.get( "id" )] );
-            String fcode = tokens[columnNums.get( "fcode" )];
-            String delineation = featureDelinCodes.get( parseInt( tokens[columnNums.get( "delin" )] ) );
-            String coverageType = tokens[columnNums.get( "cov" )];
+            int assignmentId = parseInt( tokens[ columnNums.getInt( "id" ) ] );
+            String fcode = tokens[ columnNums.getInt( "fcode" ) ];
+            String delineation = featureDelinCodes.get( parseInt( tokens[ columnNums.getInt( "delin" ) ] ) );
+            String coverageType = tokens[ columnNums.getInt( "cov" ) ];
 
             DncGeosymAttributeExpression attrExpr = attrExprs.get( assignmentId );
             if ( attrExpr == null ) attrExpr = alwaysTrue;
 
-            String pointSymbolId = tokens[columnNums.get( "pointsym" )];
-            String lineSymbolId = tokens[columnNums.get( "linesym" )];
-            String areaSymbolId = tokens[columnNums.get( "areasym" )];
-            int displayPriority = parseInt( tokens[columnNums.get( "dispri" )] );
+            String pointSymbolId = tokens[ columnNums.getInt( "pointsym" ) ];
+            String lineSymbolId = tokens[ columnNums.getInt( "linesym" ) ];
+            String areaSymbolId = tokens[ columnNums.getInt( "areasym" ) ];
+            int displayPriority = parseInt( tokens[ columnNums.getInt( "dispri" ) ] );
 
-            String orientationAttr = tokens[columnNums.get( "orient" )];
+            String orientationAttr = tokens[ columnNums.getInt( "orient" ) ];
 
-            String[] labelAttrs = tokens[columnNums.get( "labatt" )].split( ",", -1 );
-            String[] labelJoinIds = tokens[columnNums.get( "txrowid" )].split( ",", -1 );
+            String[] labelAttrs = tokens[ columnNums.getInt( "labatt" ) ].split( ",", -1 );
+            String[] labelJoinIds = tokens[ columnNums.getInt( "txrowid" ) ].split( ",", -1 );
             List<DncGeosymLabelMaker> labelMakers = newArrayList( );
             for ( int i = 0; i < labelAttrs.length; i++ )
             {
@@ -284,9 +279,9 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            int joinId = parseInt( tokens[columnNums.get( "id" )] );
-            DncGeosymTextStyle textStyle = textStyles.get( parseInt( tokens[columnNums.get( "textcharid" )] ) );
-            DncGeosymLabelLocation labelLocation = labelLocations.get( parseInt( tokens[columnNums.get( "textlocid" )] ) );
+            int joinId = parseInt( tokens[ columnNums.getInt( "id" ) ] );
+            DncGeosymTextStyle textStyle = textStyles.get( parseInt( tokens[ columnNums.getInt( "textcharid" ) ] ) );
+            DncGeosymLabelLocation labelLocation = labelLocations.get( parseInt( tokens[ columnNums.getInt( "textlocid" ) ] ) );
 
             DncGeosymLabelJoin join = new DncGeosymLabelJoin( textStyle, labelLocation );
             joins.put( joinId, join );
@@ -294,17 +289,12 @@ public class DncGeosymIo
         return joins;
     }
 
-    public static Int2ObjectMap<Color> readGeosymColors( String location ) throws IOException
+    public static Int2ObjectMap<Color> readGeosymColors( TextLoader loader ) throws IOException
     {
-        BufferedReader reader = null;
-        try
+        String text = loader.loadText( );
+        try ( BufferedReader reader = new BufferedReader( new StringReader( text ) ) )
         {
-            reader = resourceReader( location );
             return readGeosymColors( reader );
-        }
-        finally
-        {
-            if ( reader != null ) reader.close( );
         }
     }
 
@@ -320,10 +310,10 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            int index = parseInt( tokens[columnNums.get( "index" )] );
-            int r = parseInt( tokens[columnNums.get( "red" )] );
-            int g = parseInt( tokens[columnNums.get( "green" )] );
-            int b = parseInt( tokens[columnNums.get( "blue" )] );
+            int index = parseInt( tokens[ columnNums.getInt( "index" ) ] );
+            int r = parseInt( tokens[ columnNums.getInt( "red" ) ] );
+            int g = parseInt( tokens[ columnNums.getInt( "green" ) ] );
+            int b = parseInt( tokens[ columnNums.getInt( "blue" ) ] );
 
             rgbas.put( index, new Color( r, g, b ) );
         }
@@ -342,19 +332,19 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            int styleId = parseInt( tokens[columnNums.get( "id" )] );
+            int styleId = parseInt( tokens[ columnNums.getInt( "id" ) ] );
 
-            // XXX: Honor fontName and fontStyle
+            // TODO: Honor fontName and fontStyle
             //String fontName = fontNameCodes.get( parseInt( tokens[columnNums.get("tfont")] ) );
             //String fontStyle = fontStyleCodes.get( parseInt( tokens[columnNums.get("tstyle")] ) );
-            float pointSize = parseFloat( tokens[columnNums.get( "tsize" )] );
+            float pointSize = parseFloat( tokens[ columnNums.getInt( "tsize" ) ] );
             Font font = FontUtils.getDefaultPlain( pointSize );
 
-            int colorId = parseInt( tokens[columnNums.get( "tcolor" )] );
+            int colorId = parseInt( tokens[ columnNums.getInt( "tcolor" ) ] );
 
-            String prefix = parseHexCharOrFallback( tokens[columnNums.get( "tprepend" )], "" );
-            String suffix = parseHexCharOrFallback( tokens[columnNums.get( "tappend" )], "" );
-            Int2ObjectMap<String> abbrevs = textAbbrevs.get( parseIntOrFallback( tokens[columnNums.get( "abindexid" )], -1 ) );
+            String prefix = parseHexCharOrFallback( tokens[ columnNums.getInt( "tprepend" ) ], "" );
+            String suffix = parseHexCharOrFallback( tokens[ columnNums.getInt( "tappend" ) ], "" );
+            Int2ObjectMap<String> abbrevs = textAbbrevs.get( parseIntOrFallback( tokens[ columnNums.getInt( "abindexid" ) ], -1 ) );
 
             DncGeosymTextStyle style = new DncGeosymTextStyle( font, colorId, prefix, suffix, abbrevs );
             styles.put( styleId, style );
@@ -413,10 +403,10 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            int locationId = parseInt( tokens[columnNums.get( "id" )] );
-            String justify = labelJustifyCodes.get( parseInt( tokens[columnNums.get( "tjust" )] ) );
+            int locationId = parseInt( tokens[ columnNums.getInt( "id" ) ] );
+            String justify = labelJustifyCodes.get( parseInt( tokens[ columnNums.getInt( "tjust" ) ] ) );
 
-            // XXX: Ugly
+            // TODO: Ugly
             int hAlign = SwingConstants.CENTER;
             int vAlign = SwingConstants.CENTER;
             boolean forSoundings = false;
@@ -435,8 +425,8 @@ public class DncGeosymIo
                 else if ( justify.endsWith( " Right" ) ) hAlign = SwingConstants.RIGHT;
             }
 
-            double offsetDistance_MM = parseDouble( tokens[columnNums.get( "tdist" )] );
-            double offsetDirection_RAD = degreesToRadians( parseDouble( tokens[columnNums.get( "tdir" )] ) );
+            double offsetDistance_MM = parseDouble( tokens[ columnNums.getInt( "tdist" ) ] );
+            double offsetDirection_RAD = degreesToRadians( parseDouble( tokens[ columnNums.getInt( "tdir" ) ] ) );
             double xOffset_MM = offsetDistance_MM * sin( offsetDirection_RAD );
             double yOffset_MM = offsetDistance_MM * cos( offsetDirection_RAD );
 
@@ -463,20 +453,20 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            int assignmentId = parseInt( tokens[columnNums.get( "cond_index" )] );
+            int assignmentId = parseInt( tokens[ columnNums.getInt( "cond_index" ) ] );
             if ( workingAssignmentId != -1 && assignmentId != workingAssignmentId ) throw new RuntimeException( "Unexpected row id: " + line );
             workingAssignmentId = assignmentId;
 
-            int sequenceNum = parseInt( tokens[columnNums.get( "seq" )] );
+            int sequenceNum = parseInt( tokens[ columnNums.getInt( "seq" ) ] );
             if ( sequenceNum <= recentSequenceNum ) throw new RuntimeException( "Unexpected sequence number: " + line );
             recentSequenceNum = sequenceNum;
 
-            String attr = tokens[columnNums.get( "att" )];
-            String comparisonOp = comparisonOpCodes.get( parseInt( tokens[columnNums.get( "oper" )] ) );
-            String comparisonValue = tokens[columnNums.get( "value" )];
+            String attr = tokens[ columnNums.getInt( "att" ) ];
+            String comparisonOp = comparisonOpCodes.get( parseInt( tokens[ columnNums.getInt( "oper" ) ] ) );
+            String comparisonValue = tokens[ columnNums.getInt( "value" ) ];
             workingComparisons.add( new DncGeosymAttributeComparison( attr, comparisonOp, comparisonValue ) );
 
-            String connectorOp = connectorCodes.get( parseInt( tokens[columnNums.get( "connector" )] ) );
+            String connectorOp = connectorCodes.get( parseInt( tokens[ columnNums.getInt( "connector" ) ] ) );
             if ( !"None".equals( connectorOp ) )
             {
                 workingConnectorOps.add( connectorOp );
@@ -598,10 +588,10 @@ public class DncGeosymIo
             // The -1 means: don't discard trailing empty tokens
             String[] tokens = line.split( "\\|", -1 );
 
-            String filename = tokens[columnNums.get( "file" )];
-            String attribute = tokens[columnNums.get( "attribute" )];
-            int value = parseInt( tokens[columnNums.get( "value" )] );
-            String description = tokens[columnNums.get( "description" )];
+            String filename = tokens[ columnNums.getInt( "file" ) ];
+            String attribute = tokens[ columnNums.getInt( "attribute" ) ];
+            int value = parseInt( tokens[ columnNums.getInt( "value" ) ] );
+            String description = tokens[ columnNums.getInt( "description" ) ];
 
             codes.add( new DncGeosymCode( filename, attribute, value, description ) );
         }

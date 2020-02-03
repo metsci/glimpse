@@ -42,19 +42,20 @@ import java.util.Map;
 public class FaccIo
 {
 
-    public static final URL faccFeaturesUrl = FaccIo.class.getResource( "/com/metsci/glimpse/dnc/facc/facc-features.csv" );
-    public static final URL faccAttrsUrl = FaccIo.class.getResource( "/com/metsci/glimpse/dnc/facc/facc-attrs.csv" );
-    public static final URL faccAttrValsUrl = FaccIo.class.getResource( "/com/metsci/glimpse/dnc/facc/facc-attr-vals.csv" );
+    public static final String faccFeaturesFile = "facc-features.csv";
+    public static final String faccAttrsFile = "facc-attrs.csv";
+    public static final String faccAttrValsFile = "facc-attr-vals.csv";
 
 
-    protected static Reader createReader( URL url ) throws IOException
+    private static BufferedReader resourceReader( String filename ) throws IOException
     {
+        URL url = FaccIo.class.getResource( filename );
         return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
     }
 
     public static Map<String,FaccFeature> readFaccFeatures( ) throws IOException
     {
-        try ( Reader reader = createReader( faccFeaturesUrl ) )
+        try ( Reader reader = resourceReader( faccFeaturesFile ) )
         {
             return readFaccFeatures( reader );
         }
@@ -82,7 +83,7 @@ public class FaccIo
     public static Map<String,FaccAttr> readFaccAttrs( ) throws IOException
     {
         Map<String,Map<Object,Object>> valueLookups = readFaccValues( );
-        try ( Reader reader = createReader( faccAttrsUrl ) )
+        try ( Reader reader = resourceReader( faccAttrsFile ) )
         {
             return readFaccAttrs( reader, valueLookups );
         }
@@ -112,7 +113,7 @@ public class FaccIo
 
     public static Map<String,Map<Object,Object>> readFaccValues( ) throws IOException
     {
-        try ( Reader reader = createReader( faccAttrValsUrl ) )
+        try ( Reader reader = resourceReader( faccAttrValsFile ) )
         {
             return readFaccValues( reader );
         }

@@ -73,13 +73,13 @@ public class DockingThemes
                                                                            darkGray,
                                                                            darkGray,
 
-                                                                           requireIcon( "com/metsci/glimpse/docking/icons/maximize.gif" ),
-                                                                           requireIcon( "com/metsci/glimpse/docking/icons/unmaximize.gif" ),
-                                                                           requireIcon( "com/metsci/glimpse/docking/icons/options.gif" ),
+                                                                           requireIcon( DockingThemes.class.getResource( "icons/maximize.gif" ) ),
+                                                                           requireIcon( DockingThemes.class.getResource( "icons/unmaximize.gif" ) ),
+                                                                           requireIcon( DockingThemes.class.getResource( "icons/options.gif" ) ),
 
-                                                                           requireIcon( "com/metsci/glimpse/docking/icons/chromium/close.png" ),
-                                                                           requireIcon( "com/metsci/glimpse/docking/icons/chromium/close_h.png" ),
-                                                                           requireIcon( "com/metsci/glimpse/docking/icons/chromium/close_p.png" ) );
+                                                                           requireIcon( DockingThemes.class.getResource( "icons/chromium/close.png" ) ),
+                                                                           requireIcon( DockingThemes.class.getResource( "icons/chromium/close_h.png" ) ),
+                                                                           requireIcon( DockingThemes.class.getResource( "icons/chromium/close_p.png" ) ) );
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {

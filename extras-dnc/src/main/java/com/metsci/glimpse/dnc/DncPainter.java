@@ -28,6 +28,17 @@ package com.metsci.glimpse.dnc;
 
 import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_BLEND;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_LINE_STRIP;
+import static com.jogamp.opengl.GL.GL_MAX_TEXTURE_SIZE;
+import static com.jogamp.opengl.GL.GL_ONE;
+import static com.jogamp.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
+import static com.jogamp.opengl.GL.GL_POINTS;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.metsci.glimpse.dnc.DncChunks.createHostChunk;
 import static com.metsci.glimpse.dnc.DncChunks.xferChunkToDevice;
 import static com.metsci.glimpse.dnc.DncIconAtlases.createHostIconAtlas;
@@ -40,6 +51,8 @@ import static com.metsci.glimpse.dnc.DncPainterUtils.coverageSignificanceCompara
 import static com.metsci.glimpse.dnc.DncPainterUtils.groupRenderingOrder;
 import static com.metsci.glimpse.dnc.DncShaderUtils.setUniformAxisRect;
 import static com.metsci.glimpse.dnc.DncShaderUtils.setUniformViewport;
+import static com.metsci.glimpse.dnc.convert.Flat2Render.DncChunkPriority.IMMEDIATE;
+import static com.metsci.glimpse.dnc.convert.Flat2Render.DncChunkPriority.SOON;
 import static com.metsci.glimpse.dnc.convert.Render.coordsPerRenderIconVertex;
 import static com.metsci.glimpse.dnc.convert.Render.coordsPerRenderLabelVertex;
 import static com.metsci.glimpse.dnc.convert.Render.coordsPerRenderLineVertex;
@@ -48,8 +61,10 @@ import static com.metsci.glimpse.dnc.geosym.DncGeosymIo.readGeosymColors;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymIo.readGeosymLineAreaStyles;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.newWorkerDaemon;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.rethrowing;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.timeSince_MILLIS;
+import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getBounds;
 import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
@@ -59,17 +74,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.sort;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_BLEND;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_LINE_STRIP;
-import static com.jogamp.opengl.GL.GL_MAX_TEXTURE_SIZE;
-import static com.jogamp.opengl.GL.GL_ONE;
-import static com.jogamp.opengl.GL.GL_ONE_MINUS_SRC_ALPHA;
-import static com.jogamp.opengl.GL.GL_POINTS;
-import static com.jogamp.opengl.GL.GL_TEXTURE0;
-import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
 
 import java.awt.Color;
 import java.nio.CharBuffer;
@@ -84,12 +88,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 import com.jogamp.opengl.GL2ES2;
-
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -110,13 +112,12 @@ import com.metsci.glimpse.dnc.DncLabelProgram.DncLabelProgramHandles;
 import com.metsci.glimpse.dnc.DncLineProgram.DncLineProgramHandles;
 import com.metsci.glimpse.dnc.convert.Flat2Render.DncChunkPriority;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
-import com.metsci.glimpse.dnc.convert.Render.RenderChunk;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;
+import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.KeyedTextLoader;
+import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.TextLoader;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLineAreaStyle;
 import com.metsci.glimpse.dnc.geosym.DncGeosymTheme;
-import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.RateLimitedAxisLimitsListener1D;
-import com.metsci.glimpse.gl.util.GLUtils;
 import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
@@ -130,7 +131,7 @@ public class DncPainter implements GlimpsePainter
     protected static final Logger logger = getLogger( DncPainter.class );
 
 
-    // XXX: Maybe move these to settings
+    // TODO: Maybe move these to settings
 
     protected static final long chunkDisposeTimeLimit_MILLIS = 3;
     protected static final int guaranteedChunkDisposalsPerFrame = 1;
@@ -210,7 +211,7 @@ public class DncPainter implements GlimpsePainter
 
     // Accessed only on the labels thread
     protected Int2ObjectMap<Color> labelColors;
-    protected String labelColorsFile;
+    protected TextLoader labelColorsLoader;
 
 
 
@@ -228,7 +229,7 @@ public class DncPainter implements GlimpsePainter
 
         this.cache = cache;
         this.settings = settings;
-        this.allLibraries = cache.libraries;
+        this.allLibraries = this.cache.libraries;
 
         this.hChunks = new HashMap<>( );
         this.dChunks = new HashMap<>( );
@@ -253,6 +254,7 @@ public class DncPainter implements GlimpsePainter
         this.axes = new HashSet<>( );
         this.axisListener = new RateLimitedAxisLimitsListener1D( )
         {
+            @Override
             public void axisLimitsUpdatedRateLimited( Axis1D axis )
             {
                 updateActiveLibraries( allLibraries );
@@ -261,15 +263,12 @@ public class DncPainter implements GlimpsePainter
         this.activeLibraries = new HashSet<>( );
         this.activeCoverages = new HashSet<>( );
         this.activeChunksListeners = new CopyOnWriteArrayList<>( );
-        this.chunkPriorityFunc = new Function<DncChunkKey,DncChunkPriority>( )
+        this.chunkPriorityFunc = chunkKey ->
         {
-            public DncChunkPriority apply( DncChunkKey chunkKey )
+            synchronized ( this.mutex )
             {
-                synchronized ( mutex )
-                {
-                    boolean isActive = ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) );
-                    return ( isActive ? DncChunkPriority.IMMEDIATE : DncChunkPriority.SOON );
-                }
+                boolean isActive = ( this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) );
+                return ( isActive ? IMMEDIATE : SOON );
             }
         };
 
@@ -279,39 +278,39 @@ public class DncPainter implements GlimpsePainter
         this.rasterizeArgs = null;
 
         this.labelColors = new Int2ObjectOpenHashMap<>( );
-        this.labelColorsFile = null;
+        this.labelColorsLoader = null;
 
-        setTheme( theme );
+        this.setTheme( theme );
     }
 
     public void addAxis( Axis2D axis )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Don't allow axes to be re-enabled after disposal
-            if ( asyncExec.isShutdown( ) ) return;
+            if ( this.asyncExec.isShutdown( ) ) return;
 
-            if ( axes.add( axis ) )
+            if ( this.axes.add( axis ) )
             {
-                axis.getAxisX( ).addAxisListener( axisListener );
-                axis.getAxisY( ).addAxisListener( axisListener );
-                updateActiveLibraries( allLibraries );
+                axis.getAxisX( ).addAxisListener( this.axisListener );
+                axis.getAxisY( ).addAxisListener( this.axisListener );
+                this.updateActiveLibraries( this.allLibraries );
             }
         }
     }
 
     public void removeAxis( Axis2D axis )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Not necessary, since axes would already be empty
-            //if ( asyncExec.isShutdown( ) ) return;
+            //if ( this.asyncExec.isShutdown( ) ) return;
 
-            if ( axes.remove( axis ) )
+            if ( this.axes.remove( axis ) )
             {
-                axis.getAxisX( ).removeAxisListener( axisListener );
-                axis.getAxisY( ).removeAxisListener( axisListener );
-                updateActiveLibraries( allLibraries );
+                axis.getAxisX( ).removeAxisListener( this.axisListener );
+                axis.getAxisY( ).removeAxisListener( this.axisListener );
+                this.updateActiveLibraries( this.allLibraries );
             }
         }
     }
@@ -319,19 +318,19 @@ public class DncPainter implements GlimpsePainter
     public void addActiveChunksListener( Runnable listener )
     {
         // Thread-safe because listeners list is a CopyOnWriteArrayList
-        activeChunksListeners.add( listener );
+        this.activeChunksListeners.add( listener );
     }
 
     public void removeActiveChunksListener( Runnable listener )
     {
         // Thread-safe because listeners list is a CopyOnWriteArrayList
-        activeChunksListeners.remove( listener );
+        this.activeChunksListeners.remove( listener );
     }
 
     protected void notifyActiveChunksListeners( )
     {
         // Thread-safe because listeners list is a CopyOnWriteArrayList
-        for ( Runnable listener : activeChunksListeners )
+        for ( Runnable listener : this.activeChunksListeners )
         {
             listener.run( );
         }
@@ -339,20 +338,20 @@ public class DncPainter implements GlimpsePainter
 
     public boolean isChunkActive( DncChunkKey chunkKey )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
-            return ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) );
+            return ( this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) );
         }
     }
 
     public Collection<DncChunkKey> activeChunkKeys( )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             Collection<DncChunkKey> chunkKeys = new ArrayList<>( );
-            for ( DncLibrary library : activeLibraries )
+            for ( DncLibrary library : this.activeLibraries )
             {
-                for ( DncCoverage coverage : activeCoverages )
+                for ( DncCoverage coverage : this.activeCoverages )
                 {
                     DncChunkKey chunkKey = new DncChunkKey( library, coverage );
                     chunkKeys.add( chunkKey );
@@ -372,61 +371,61 @@ public class DncPainter implements GlimpsePainter
         // it turns out okay, because after writing this.theme we re-activate everything,
         // which gives eventual consistency.
         //
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
-            if ( !equal( newTheme, theme ) )
+            if ( !equal( newTheme, this.theme ) )
             {
                 // Drop everything that was created using the old theme
-                deactivateChunks( activeLibraries, activeCoverages );
+                this.deactivateChunks( this.activeLibraries, this.activeCoverages );
                 this.lineAreaStyles = emptyMap( );
 
                 // Store the theme
                 this.theme = newTheme;
 
                 // Reload everything using the new theme
-                activateChunks( activeLibraries, activeCoverages );
-                final String newLineAreaStylesFile = newTheme.lineAreaStylesFile;
-                asyncExec.execute( new ThrowingRunnable( )
+                this.activateChunks( this.activeLibraries, this.activeCoverages );
+                TextLoader newLineAreaStylesLoader = newTheme.lineAreaStylesLoader;
+                this.asyncExec.execute( rethrowing( ( ) ->
                 {
-                    public void runThrows( ) throws Exception
+                    Map<String,DncGeosymLineAreaStyle> newLineAreaStyles = readGeosymLineAreaStyles( newLineAreaStylesLoader );
+                    synchronized ( this.mutex )
                     {
-                        Map<String,DncGeosymLineAreaStyle> newLineAreaStyles = readGeosymLineAreaStyles( newLineAreaStylesFile );
-                        synchronized ( mutex )
+                        if ( equal( newLineAreaStylesLoader, this.theme.lineAreaStylesLoader ) )
                         {
-                            lineAreaStyles = newLineAreaStyles;
+                            this.lineAreaStyles = newLineAreaStyles;
                         }
                     }
-                } );
+                } ) );
             }
         }
     }
 
     public void highlightFeatures( DncChunkKey chunkKey, IntCollection featureNums )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
-            if ( !highlightSets.containsKey( chunkKey ) )
+            if ( !this.highlightSets.containsKey( chunkKey ) )
             {
-                highlightSets.put( chunkKey, new IndexSetTexture( ) );
+                this.highlightSets.put( chunkKey, new IndexSetTexture( ) );
             }
-            highlightSets.get( chunkKey ).set( featureNums );
+            this.highlightSets.get( chunkKey ).set( featureNums );
         }
     }
 
     public void setCoverageActive( DncCoverage coverage, boolean active )
     {
-        setCoveragesActive( singleton( coverage ), active );
+        this.setCoveragesActive( singleton( coverage ), active );
     }
 
     public void setCoveragesActive( Collection<DncCoverage> coverages, boolean active )
     {
         if ( active )
         {
-            activateCoverages( coverages );
+            this.activateCoverages( coverages );
         }
         else
         {
-            deactivateCoverages( coverages );
+            this.deactivateCoverages( coverages );
         }
     }
 
@@ -437,60 +436,60 @@ public class DncPainter implements GlimpsePainter
         {
             coverages.add( new DncCoverage( coverageName ) );
         }
-        activateCoverages( coverages );
+        this.activateCoverages( coverages );
     }
 
     public void activateCoverage( DncCoverage coverage )
     {
-        activateCoverages( singleton( coverage ) );
+        this.activateCoverages( singleton( coverage ) );
     }
 
     public void activateCoverages( Collection<DncCoverage> coverages )
     {
         boolean activeChunksChanged = false;
 
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Don't allow coverages to be re-activated after disposal
-            if ( asyncExec.isShutdown( ) ) return;
+            if ( this.asyncExec.isShutdown( ) ) return;
 
-            if ( activeCoverages.addAll( coverages ) )
+            if ( this.activeCoverages.addAll( coverages ) )
             {
-                activateChunks( activeLibraries, coverages );
+                this.activateChunks( this.activeLibraries, coverages );
                 activeChunksChanged = true;
             }
         }
 
         if ( activeChunksChanged )
         {
-            notifyActiveChunksListeners( );
+            this.notifyActiveChunksListeners( );
         }
     }
 
     public void deactivateCoverage( DncCoverage coverage )
     {
-        deactivateCoverages( singleton( coverage ) );
+        this.deactivateCoverages( singleton( coverage ) );
     }
 
     public void deactivateCoverages( Collection<DncCoverage> coverages )
     {
         boolean activeChunksChanged = false;
 
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Not necessary, since activeCoverages would already be empty
-            //if ( asyncExec.isShutdown( ) ) return;
+            //if ( this.asyncExec.isShutdown( ) ) return;
 
-            if ( activeCoverages.removeAll( coverages ) )
+            if ( this.activeCoverages.removeAll( coverages ) )
             {
-                deactivateChunks( activeLibraries, coverages );
+                this.deactivateChunks( this.activeLibraries, coverages );
                 activeChunksChanged = true;
             }
         }
 
         if ( activeChunksChanged )
         {
-            notifyActiveChunksListeners( );
+            this.notifyActiveChunksListeners( );
         }
     }
 
@@ -498,19 +497,19 @@ public class DncPainter implements GlimpsePainter
     {
         boolean activeChunksChanged = false;
 
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Not usually necessary, since axes would be empty, but guards against strange impls of isLibraryActive
-            if ( asyncExec.isShutdown( ) ) return;
+            if ( this.asyncExec.isShutdown( ) ) return;
 
             Set<DncLibrary> librariesToActivate = new HashSet<>( );
             Set<DncLibrary> librariesToDeactivate = new HashSet<>( );
 
             for ( DncLibrary library : librariesToUpdate )
             {
-                if ( settings.isLibraryActive( library, axes ) )
+                if ( this.settings.isLibraryActive( library, this.axes ) )
                 {
-                    if ( activeLibraries.add( library ) )
+                    if ( this.activeLibraries.add( library ) )
                     {
                         librariesToActivate.add( library );
                         activeChunksChanged = true;
@@ -518,7 +517,7 @@ public class DncPainter implements GlimpsePainter
                 }
                 else
                 {
-                    if ( activeLibraries.remove( library ) )
+                    if ( this.activeLibraries.remove( library ) )
                     {
                         librariesToDeactivate.add( library );
                         activeChunksChanged = true;
@@ -526,165 +525,153 @@ public class DncPainter implements GlimpsePainter
                 }
             }
 
-            deactivateChunks( librariesToDeactivate, activeCoverages );
-            activateChunks( librariesToActivate, activeCoverages );
+            this.deactivateChunks( librariesToDeactivate, this.activeCoverages );
+            this.activateChunks( librariesToActivate, this.activeCoverages );
         }
 
         if ( activeChunksChanged )
         {
-            notifyActiveChunksListeners( );
+            this.notifyActiveChunksListeners( );
         }
     }
 
     protected void activateChunks( Collection<DncLibrary> libraries, Collection<DncCoverage> coverages )
     {
         coverages = sorted( coverages, coverageSignificanceComparator );
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Not strictly necessary, but avoids submitting useless requests to the cache
-            if ( asyncExec.isShutdown( ) ) return;
+            if ( this.asyncExec.isShutdown( ) ) return;
 
             for ( DncLibrary library : libraries )
             {
                 for ( DncCoverage coverage : coverages )
                 {
-                    final DncChunkKey chunkKey = new DncChunkKey( library, coverage );
-                    if ( !dChunks.containsKey( chunkKey ) && !hChunks.containsKey( chunkKey ) )
+                    DncChunkKey chunkKey = new DncChunkKey( library, coverage );
+                    if ( !this.dChunks.containsKey( chunkKey ) && !this.hChunks.containsKey( chunkKey ) )
                     {
-                        cache.getChunk( chunkKey, chunkPriorityFunc, new Consumer<RenderChunk>( )
+                        this.cache.getChunk( chunkKey, this.chunkPriorityFunc, renderChunk ->
                         {
-                            public void accept( final RenderChunk renderChunk )
+                            // On the async thread ...
+                            this.asyncExec.execute( rethrowing( ( ) ->
                             {
-                                // On the async thread ...
-                                asyncExec.execute( new ThrowingRunnable( )
+                                // Wait until we have certain display info from our first paint
+                                RasterizeArgs rasterizeArgs = this.waitForRasterizeArgs( );
+                                if ( rasterizeArgs == null )
                                 {
-                                    public void runThrows( ) throws Exception
+                                    return;
+                                }
+
+                                // Bail out if chunk is no longer active
+                                synchronized ( this.mutex )
+                                {
+                                    if ( !( this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) ) )
                                     {
-                                        // Wait until we have certain display info from our first paint
-                                        final RasterizeArgs rasterizeArgs = waitForRasterizeArgs( );
-                                        if ( rasterizeArgs == null )
+                                        return;
+                                    }
+                                }
+
+                                // Load and put chunk vertices
+                                int featureCount = renderChunk.featureCount;
+                                IntBuffer groupsBuf = this.cache.sliceChunkGroups( renderChunk );
+                                FloatBuffer verticesBuf = this.cache.memmapChunkVertices( renderChunk );
+                                DncHostChunk hChunk = createHostChunk( chunkKey, featureCount, groupsBuf, verticesBuf, this.cache.geosymAssignments );
+                                synchronized ( this.mutex )
+                                {
+                                    if ( this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) )
+                                    {
+                                        this.hChunks.put( chunkKey, hChunk );
+
+                                        if ( !this.highlightSets.containsKey( chunkKey ) )
+                                        {
+                                            this.highlightSets.put( chunkKey, new IndexSetTexture( ) );
+                                        }
+                                    }
+                                }
+
+                                // On the icons thread ...
+                                this.iconsExec.execute( rethrowing( ( ) ->
+                                {
+                                    // Bail out if chunk is no longer active
+                                    synchronized ( this.mutex )
+                                    {
+                                        if ( !( this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) ) )
                                         {
                                             return;
                                         }
-
-                                        // Bail out if chunk is no longer active
-                                        synchronized ( mutex )
-                                        {
-                                            if ( !( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
-                                            {
-                                                return;
-                                            }
-                                        }
-
-                                        // Load and put chunk vertices
-                                        int featureCount = renderChunk.featureCount;
-                                        IntBuffer groupsBuf = cache.sliceChunkGroups( renderChunk );
-                                        FloatBuffer verticesBuf = cache.memmapChunkVertices( renderChunk );
-                                        final DncHostChunk hChunk = createHostChunk( chunkKey, featureCount, groupsBuf, verticesBuf, cache.geosymAssignments );
-                                        synchronized ( mutex )
-                                        {
-                                            if ( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
-                                            {
-                                                hChunks.put( chunkKey, hChunk );
-
-                                                if ( !highlightSets.containsKey( chunkKey ) )
-                                                {
-                                                    highlightSets.put( chunkKey, new IndexSetTexture( ) );
-                                                }
-                                            }
-                                        }
-
-                                        // On the icons thread ...
-                                        iconsExec.execute( new ThrowingRunnable( )
-                                        {
-                                            public void runThrows( ) throws Exception
-                                            {
-                                                // Bail out if chunk is no longer active
-                                                synchronized ( mutex )
-                                                {
-                                                    if ( !( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
-                                                    {
-                                                        return;
-                                                    }
-                                                }
-
-                                                // Get up-to-date cgmDir and svgDir
-                                                String cgmDir;
-                                                String svgDir;
-                                                synchronized ( mutex )
-                                                {
-                                                    if ( theme == null )
-                                                    {
-                                                        return;
-                                                    }
-                                                    cgmDir = theme.cgmDir;
-                                                    svgDir = theme.svgDir;
-                                                }
-
-                                                // Load, rasterize, and put chunk icons
-                                                DncHostIconAtlas hIconAtlas = createHostIconAtlas( hChunk, cgmDir, svgDir, rasterizeArgs.maxTextureDim, rasterizeArgs.screenDpi );
-                                                if ( hIconAtlas != null )
-                                                {
-                                                    synchronized ( mutex )
-                                                    {
-                                                        if ( equal( cgmDir, theme.cgmDir ) && equal( svgDir, theme.svgDir ) && activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
-                                                        {
-                                                            hIconAtlases.put( chunkKey, hIconAtlas );
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } );
-
-                                        // On the labels thread ...
-                                        labelsExec.execute( new ThrowingRunnable( )
-                                        {
-                                            public void runThrows( ) throws Exception
-                                            {
-                                                // Bail out if chunk is no longer active
-                                                synchronized ( mutex )
-                                                {
-                                                    if ( !( activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) ) )
-                                                    {
-                                                        return;
-                                                    }
-                                                }
-
-                                                // Get up-to-date colors map
-                                                String colorsFile;
-                                                synchronized ( mutex )
-                                                {
-                                                    if ( theme == null )
-                                                    {
-                                                        return;
-                                                    }
-                                                    colorsFile = theme.colorsFile;
-                                                }
-                                                if ( !equal( colorsFile, labelColorsFile ) )
-                                                {
-                                                    labelColors = readGeosymColors( colorsFile );
-                                                    labelColorsFile = colorsFile;
-                                                }
-
-                                                // Load, rasterize, and put chunk labels
-                                                CharBuffer labelCharsBuf = cache.sliceChunkLabelChars( renderChunk );
-                                                IntBuffer labelLengthsBuf = cache.sliceChunkLabelLengths( renderChunk );
-                                                DncHostLabelAtlas hLabelAtlas = createHostLabelAtlas( hChunk, labelCharsBuf, labelLengthsBuf, labelColors, rasterizeArgs.maxTextureDim, rasterizeArgs.screenDpi );
-                                                if ( hLabelAtlas != null )
-                                                {
-                                                    synchronized ( mutex )
-                                                    {
-                                                        if ( equal( colorsFile, theme.colorsFile ) && activeLibraries.contains( chunkKey.library ) && activeCoverages.contains( chunkKey.coverage ) )
-                                                        {
-                                                            hLabelAtlases.put( chunkKey, hLabelAtlas );
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } );
                                     }
-                                } );
-                            }
+
+                                    // Get up-to-date cgmDir and svgDir
+                                    KeyedTextLoader cgmLoader;
+                                    KeyedTextLoader svgLoader;
+                                    synchronized ( this.mutex )
+                                    {
+                                        if ( this.theme == null )
+                                        {
+                                            return;
+                                        }
+                                        cgmLoader = this.theme.cgmLoader;
+                                        svgLoader = this.theme.svgLoader;
+                                    }
+
+                                    // Load, rasterize, and put chunk icons
+                                    DncHostIconAtlas hIconAtlas = createHostIconAtlas( hChunk, cgmLoader, svgLoader, rasterizeArgs.maxTextureDim, rasterizeArgs.screenDpi );
+                                    if ( hIconAtlas != null )
+                                    {
+                                        synchronized ( this.mutex )
+                                        {
+                                            if ( equal( cgmLoader, this.theme.cgmLoader ) && equal( svgLoader, this.theme.svgLoader ) && this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) )
+                                            {
+                                                this.hIconAtlases.put( chunkKey, hIconAtlas );
+                                            }
+                                        }
+                                    }
+                                } ) );
+
+                                // On the labels thread ...
+                                this.labelsExec.execute( rethrowing( ( ) ->
+                                {
+                                    // Bail out if chunk is no longer active
+                                    synchronized ( this.mutex )
+                                    {
+                                        if ( !( this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) ) )
+                                        {
+                                            return;
+                                        }
+                                    }
+
+                                    // Get up-to-date colors map
+                                    TextLoader colorsLoader;
+                                    synchronized ( this.mutex )
+                                    {
+                                        if ( this.theme == null )
+                                        {
+                                            return;
+                                        }
+                                        colorsLoader = this.theme.colorsLoader;
+                                    }
+                                    if ( !equal( colorsLoader, this.labelColorsLoader ) )
+                                    {
+                                        this.labelColors = readGeosymColors( colorsLoader );
+                                        this.labelColorsLoader = colorsLoader;
+                                    }
+
+                                    // Load, rasterize, and put chunk labels
+                                    CharBuffer labelCharsBuf = this.cache.sliceChunkLabelChars( renderChunk );
+                                    IntBuffer labelLengthsBuf = this.cache.sliceChunkLabelLengths( renderChunk );
+                                    DncHostLabelAtlas hLabelAtlas = createHostLabelAtlas( hChunk, labelCharsBuf, labelLengthsBuf, this.labelColors, rasterizeArgs.maxTextureDim, rasterizeArgs.screenDpi );
+                                    if ( hLabelAtlas != null )
+                                    {
+                                        synchronized ( this.mutex )
+                                        {
+                                            if ( equal( colorsLoader, this.theme.colorsLoader ) && this.activeLibraries.contains( chunkKey.library ) && this.activeCoverages.contains( chunkKey.coverage ) )
+                                            {
+                                                this.hLabelAtlases.put( chunkKey, hLabelAtlas );
+                                            }
+                                        }
+                                    }
+                                } ) );
+                            } ) );
                         } );
                     }
                 }
@@ -698,24 +685,24 @@ public class DncPainter implements GlimpsePainter
      */
     protected RasterizeArgs waitForRasterizeArgs( )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             while ( true )
             {
                 // Stop waiting if painter has been disposed
-                if ( asyncExec.isShutdown( ) )
+                if ( this.asyncExec.isShutdown( ) )
                 {
                     return null;
                 }
 
-                if ( rasterizeArgs != null )
+                if ( this.rasterizeArgs != null )
                 {
-                    return rasterizeArgs;
+                    return this.rasterizeArgs;
                 }
 
                 try
                 {
-                    mutex.wait( );
+                    this.mutex.wait( );
                 }
                 catch ( InterruptedException e )
                 { }
@@ -725,10 +712,10 @@ public class DncPainter implements GlimpsePainter
 
     protected void deactivateChunks( Collection<DncLibrary> libraries, Collection<DncCoverage> coverages )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Not necessary, since everything would already be empty
-            //if ( asyncExec.isShutdown( ) ) return;
+            //if ( this.asyncExec.isShutdown( ) ) return;
 
             for ( DncLibrary library : libraries )
             {
@@ -736,22 +723,22 @@ public class DncPainter implements GlimpsePainter
                 {
                     DncChunkKey chunkKey = new DncChunkKey( library, coverage );
 
-                    hChunks.remove( chunkKey );
-                    hIconAtlases.remove( chunkKey );
-                    hLabelAtlases.remove( chunkKey );
+                    this.hChunks.remove( chunkKey );
+                    this.hIconAtlases.remove( chunkKey );
+                    this.hLabelAtlases.remove( chunkKey );
 
-                    DncDeviceChunk dChunk = dChunks.remove( chunkKey );
-                    if ( dChunk != null ) dChunksToDispose.add( dChunk );
+                    DncDeviceChunk dChunk = this.dChunks.remove( chunkKey );
+                    if ( dChunk != null ) this.dChunksToDispose.add( dChunk );
 
-                    DncDeviceIconAtlas dIconAtlas = dIconAtlases.remove( chunkKey );
-                    if ( dIconAtlas != null ) dIconAtlasesToDispose.add( dIconAtlas );
+                    DncDeviceIconAtlas dIconAtlas = this.dIconAtlases.remove( chunkKey );
+                    if ( dIconAtlas != null ) this.dIconAtlasesToDispose.add( dIconAtlas );
 
-                    DncDeviceLabelAtlas dLabelAtlas = dLabelAtlases.remove( chunkKey );
-                    if ( dLabelAtlas != null ) dLabelAtlasesToDispose.add( dLabelAtlas );
+                    DncDeviceLabelAtlas dLabelAtlas = this.dLabelAtlases.remove( chunkKey );
+                    if ( dLabelAtlas != null ) this.dLabelAtlasesToDispose.add( dLabelAtlas );
 
                     // Keep higlight-set objects in the map, but dispose their device resources
-                    IndexSetTexture highlightSet = highlightSets.get( chunkKey );
-                    if ( highlightSet != null ) highlightSetsToDispose.add( highlightSet );
+                    IndexSetTexture highlightSet = this.highlightSets.get( chunkKey );
+                    if ( highlightSet != null ) this.highlightSetsToDispose.add( highlightSet );
                 }
             }
         }
@@ -761,54 +748,54 @@ public class DncPainter implements GlimpsePainter
     public void dispose( GlimpseContext context )
     {
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             // Don't try to dispose again if already disposed
-            if ( asyncExec.isShutdown( ) ) return;
+            if ( this.asyncExec.isShutdown( ) ) return;
 
             // Chunks
-            for ( DncDeviceChunk dChunk : dChunksToDispose ) dChunk.dispose( gl );
-            for ( DncDeviceChunk dChunk : dChunks.values( ) ) dChunk.dispose( gl );
-            dChunksToDispose.clear( );
-            dChunks.clear( );
-            hChunks.clear( );
+            for ( DncDeviceChunk dChunk : this.dChunksToDispose ) dChunk.dispose( gl );
+            for ( DncDeviceChunk dChunk : this.dChunks.values( ) ) dChunk.dispose( gl );
+            this.dChunksToDispose.clear( );
+            this.dChunks.clear( );
+            this.hChunks.clear( );
 
             // Icon-atlases
-            for ( DncDeviceIconAtlas dIconAtlas : dIconAtlasesToDispose ) dIconAtlas.dispose( gl );
-            for ( DncDeviceIconAtlas dIconAtlas : dIconAtlases.values( ) ) dIconAtlas.dispose( gl );
-            dIconAtlasesToDispose.clear( );
-            dIconAtlases.clear( );
-            hIconAtlases.clear( );
+            for ( DncDeviceIconAtlas dIconAtlas : this.dIconAtlasesToDispose ) dIconAtlas.dispose( gl );
+            for ( DncDeviceIconAtlas dIconAtlas : this.dIconAtlases.values( ) ) dIconAtlas.dispose( gl );
+            this.dIconAtlasesToDispose.clear( );
+            this.dIconAtlases.clear( );
+            this.hIconAtlases.clear( );
 
             // Label-atlases
-            for ( DncDeviceLabelAtlas dLabelAtlas : dLabelAtlasesToDispose ) dLabelAtlas.dispose( gl );
-            for ( DncDeviceLabelAtlas dLabelAtlas : dLabelAtlases.values( ) ) dLabelAtlas.dispose( gl );
-            dLabelAtlasesToDispose.clear( );
-            dLabelAtlases.clear( );
-            hLabelAtlases.clear( );
+            for ( DncDeviceLabelAtlas dLabelAtlas : this.dLabelAtlasesToDispose ) dLabelAtlas.dispose( gl );
+            for ( DncDeviceLabelAtlas dLabelAtlas : this.dLabelAtlases.values( ) ) dLabelAtlas.dispose( gl );
+            this.dLabelAtlasesToDispose.clear( );
+            this.dLabelAtlases.clear( );
+            this.hLabelAtlases.clear( );
 
             // Highlight-sets
-            for ( IndexSetTexture highlightSet : highlightSets.values( ) ) highlightSet.freeDeviceResources( gl );
-            highlightSetsToDispose.clear( );
-            highlightSets.clear( );
+            for ( IndexSetTexture highlightSet : this.highlightSets.values( ) ) highlightSet.freeDeviceResources( gl );
+            this.highlightSetsToDispose.clear( );
+            this.highlightSets.clear( );
 
             // Shader programs
-            areaProgram.dispose( gl );
-            lineProgram.dispose( gl );
-            iconProgram.dispose( gl );
-            labelProgram.dispose( gl );
+            this.areaProgram.dispose( gl );
+            this.lineProgram.dispose( gl );
+            this.iconProgram.dispose( gl );
+            this.labelProgram.dispose( gl );
 
             // Axis listeners
-            for ( Axis2D axis : axes )
+            for ( Axis2D axis : this.axes )
             {
-                axis.getAxisX( ).removeAxisListener( axisListener );
-                axis.getAxisY( ).removeAxisListener( axisListener );
+                axis.getAxisX( ).removeAxisListener( this.axisListener );
+                axis.getAxisY( ).removeAxisListener( this.axisListener );
             }
-            axes.clear( );
+            this.axes.clear( );
 
             // Mark all chunks as deactivated
-            activeLibraries.clear( );
-            activeCoverages.clear( );
+            this.activeLibraries.clear( );
+            this.activeCoverages.clear( );
 
             // Executors
             //
@@ -817,21 +804,21 @@ public class DncPainter implements GlimpsePainter
             //
             // Jobs submitted later will be silently discarded.
             //
-            asyncExec.shutdown( );
-            iconsExec.shutdown( );
-            labelsExec.shutdown( );
+            this.asyncExec.shutdown( );
+            this.iconsExec.shutdown( );
+            this.labelsExec.shutdown( );
 
-            // Wake up any threads sleeping in waitForRasterizeArgs()
-            mutex.notifyAll( );
+            // Wake up any threads sleeping in this.waitForRasterizeArgs()
+            this.mutex.notifyAll( );
         }
     }
 
     @Override
     public boolean isDisposed( )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
-            return asyncExec.isShutdown( );
+            return this.asyncExec.isShutdown( );
         }
     }
 
@@ -842,16 +829,16 @@ public class DncPainter implements GlimpsePainter
     @Override
     public boolean isVisible( )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
-            return visible;
+            return this.visible;
         }
     }
 
     @Override
     public void setVisible( boolean visible )
     {
-        synchronized ( mutex )
+        synchronized ( this.mutex )
         {
             this.visible = visible;
         }
@@ -868,37 +855,37 @@ public class DncPainter implements GlimpsePainter
 
         // Premultiplied alpha
         gl.glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        
-        gl.getGL3( ).glBindVertexArray( GLUtils.defaultVertexAttributeArray( gl ) );
 
-        synchronized ( mutex )
+        gl.getGL3( ).glBindVertexArray( defaultVertexAttributeArray( gl ) );
+
+        synchronized ( this.mutex )
         {
-            if ( !visible ) return;
+            if ( !this.visible ) return;
 
             // Don't try to paint after disposal
-            if ( asyncExec.isShutdown( ) ) return;
+            if ( this.asyncExec.isShutdown( ) ) return;
 
 
             // Store values used in rasterizing icons and labels
-            if ( rasterizeArgs == null )
+            if ( this.rasterizeArgs == null )
             {
                 int[] maxTextureDim = new int[ 1 ];
                 gl.glGetIntegerv( GL_MAX_TEXTURE_SIZE, maxTextureDim, 0 );
                 this.rasterizeArgs = new RasterizeArgs( maxTextureDim[ 0 ], context.getDPI( ) );
-                logger.fine( "Rasterization args: max-texture-dim = " + rasterizeArgs.maxTextureDim + ", screen-dpi = " + rasterizeArgs.screenDpi );
-                mutex.notifyAll( );
+                logger.fine( "Rasterization args: max-texture-dim = " + this.rasterizeArgs.maxTextureDim + ", screen-dpi = " + this.rasterizeArgs.screenDpi );
+                this.mutex.notifyAll( );
             }
 
 
             // Dispose of deactivated chunks
             int chunkDisposeCount = 0;
-            long chunkDisposeStart_PMILLIS = System.currentTimeMillis( );
-            while ( !dChunksToDispose.isEmpty( ) )
+            long chunkDisposeStart_PMILLIS = currentTimeMillis( );
+            while ( !this.dChunksToDispose.isEmpty( ) )
             {
                 boolean allowDispose = ( chunkDisposeCount < guaranteedChunkDisposalsPerFrame || timeSince_MILLIS( chunkDisposeStart_PMILLIS ) <= chunkDisposeTimeLimit_MILLIS );
                 if ( !allowDispose ) break;
 
-                DncDeviceChunk dChunk = dChunksToDispose.remove( 0 );
+                DncDeviceChunk dChunk = this.dChunksToDispose.remove( 0 );
                 dChunk.dispose( gl );
                 chunkDisposeCount++;
             }
@@ -906,13 +893,13 @@ public class DncPainter implements GlimpsePainter
 
             // Dispose of deactivated icon-atlases
             int iconAtlasDisposeCount = 0;
-            long iconAtlasDisposeStart_PMILLIS = System.currentTimeMillis( );
-            while ( !dIconAtlasesToDispose.isEmpty( ) )
+            long iconAtlasDisposeStart_PMILLIS = currentTimeMillis( );
+            while ( !this.dIconAtlasesToDispose.isEmpty( ) )
             {
                 boolean allowDispose = ( iconAtlasDisposeCount < guaranteedIconAtlasDisposalsPerFrame || timeSince_MILLIS( iconAtlasDisposeStart_PMILLIS ) <= iconAtlasDisposeTimeLimit_MILLIS );
                 if ( !allowDispose ) break;
 
-                DncDeviceIconAtlas dIconAtlas = dIconAtlasesToDispose.remove( 0 );
+                DncDeviceIconAtlas dIconAtlas = this.dIconAtlasesToDispose.remove( 0 );
                 dIconAtlas.dispose( gl );
                 iconAtlasDisposeCount++;
             }
@@ -920,13 +907,13 @@ public class DncPainter implements GlimpsePainter
 
             // Dispose of deactivated label-atlases
             int labelAtlasDisposeCount = 0;
-            long labelAtlasDisposeStart_PMILLIS = System.currentTimeMillis( );
-            while ( !dLabelAtlasesToDispose.isEmpty( ) )
+            long labelAtlasDisposeStart_PMILLIS = currentTimeMillis( );
+            while ( !this.dLabelAtlasesToDispose.isEmpty( ) )
             {
                 boolean allowDispose = ( labelAtlasDisposeCount < guaranteedLabelAtlasDisposalsPerFrame || timeSince_MILLIS( labelAtlasDisposeStart_PMILLIS ) <= labelAtlasDisposeTimeLimit_MILLIS );
                 if ( !allowDispose ) break;
 
-                DncDeviceLabelAtlas dLabelAtlas = dLabelAtlasesToDispose.remove( 0 );
+                DncDeviceLabelAtlas dLabelAtlas = this.dLabelAtlasesToDispose.remove( 0 );
                 dLabelAtlas.dispose( gl );
                 labelAtlasDisposeCount++;
             }
@@ -934,13 +921,13 @@ public class DncPainter implements GlimpsePainter
 
             // Dispose of deactivated highlight-sets
             int highlightSetDisposeCount = 0;
-            long highlightSetDisposeStart_PMILLIS = System.currentTimeMillis( );
-            while ( !highlightSetsToDispose.isEmpty( ) )
+            long highlightSetDisposeStart_PMILLIS = currentTimeMillis( );
+            while ( !this.highlightSetsToDispose.isEmpty( ) )
             {
                 boolean allowDispose = ( highlightSetDisposeCount < guaranteedHighlightSetDisposalsPerFrame || timeSince_MILLIS( highlightSetDisposeStart_PMILLIS ) <= highlightSetDisposeTimeLimit_MILLIS );
                 if ( !allowDispose ) break;
 
-                IndexSetTexture highlightSet = highlightSetsToDispose.remove( 0 );
+                IndexSetTexture highlightSet = this.highlightSetsToDispose.remove( 0 );
                 highlightSet.freeDeviceResources( gl );
                 highlightSetDisposeCount++;
             }
@@ -948,7 +935,7 @@ public class DncPainter implements GlimpsePainter
 
             // Identify chunks to draw
             Collection<DncChunkKey> chunksToDraw = new ArrayList<>( );
-            for ( DncLibrary library : activeLibraries )
+            for ( DncLibrary library : this.activeLibraries )
             {
                 // If this axis is a control axis (i.e. it controls library activation),
                 // then paint only libraries that are active for it specifically.
@@ -956,9 +943,9 @@ public class DncPainter implements GlimpsePainter
                 // Otherwise, paint all libraries, regardless of which control axis they
                 // were loaded for.
                 //
-                if ( !axes.contains( axis ) || settings.isLibraryActive( library, axis ) )
+                if ( !this.axes.contains( axis ) || this.settings.isLibraryActive( library, axis ) )
                 {
-                    for ( DncCoverage coverage : activeCoverages )
+                    for ( DncCoverage coverage : this.activeCoverages )
                     {
                         chunksToDraw.add( new DncChunkKey( library, coverage ) );
                     }
@@ -968,17 +955,17 @@ public class DncPainter implements GlimpsePainter
 
             // Transfer chunks to the graphics device
             int chunkXferCount = 0;
-            long chunkXferStart_PMILLIS = System.currentTimeMillis( );
+            long chunkXferStart_PMILLIS = currentTimeMillis( );
             for ( DncChunkKey chunkKey : chunksToDraw )
             {
-                if ( hChunks.containsKey( chunkKey ) )
+                if ( this.hChunks.containsKey( chunkKey ) )
                 {
                     boolean allowXfer = ( chunkXferCount < guaranteedChunkXfersPerFrame || timeSince_MILLIS( chunkXferStart_PMILLIS ) <= chunkXferTimeLimit_MILLIS );
                     if ( allowXfer )
                     {
-                        DncHostChunk hChunk = hChunks.remove( chunkKey );
+                        DncHostChunk hChunk = this.hChunks.remove( chunkKey );
                         DncDeviceChunk dChunk = xferChunkToDevice( hChunk, gl );
-                        dChunks.put( chunkKey, dChunk );
+                        this.dChunks.put( chunkKey, dChunk );
                         chunkXferCount++;
                     }
                 }
@@ -987,17 +974,17 @@ public class DncPainter implements GlimpsePainter
 
             // Transfer icon-atlases to the graphics device
             int iconAtlasXferCount = 0;
-            long iconAtlasXferStart_PMILLIS = System.currentTimeMillis( );
+            long iconAtlasXferStart_PMILLIS = currentTimeMillis( );
             for ( DncChunkKey chunkKey : chunksToDraw )
             {
-                if ( hIconAtlases.containsKey( chunkKey ) )
+                if ( this.hIconAtlases.containsKey( chunkKey ) )
                 {
                     boolean allowXfer = ( iconAtlasXferCount < guaranteedIconAtlasXfersPerFrame || timeSince_MILLIS( iconAtlasXferStart_PMILLIS ) <= iconAtlasXferTimeLimit_MILLIS );
                     if ( allowXfer )
                     {
-                        DncHostIconAtlas hIconAtlas = hIconAtlases.remove( chunkKey );
+                        DncHostIconAtlas hIconAtlas = this.hIconAtlases.remove( chunkKey );
                         DncDeviceIconAtlas dIconAtlas = xferIconAtlasToDevice( hIconAtlas, gl );
-                        dIconAtlases.put( chunkKey, dIconAtlas );
+                        this.dIconAtlases.put( chunkKey, dIconAtlas );
                         iconAtlasXferCount++;
                     }
                 }
@@ -1006,17 +993,17 @@ public class DncPainter implements GlimpsePainter
 
             // Transfer label-atlases to the graphics device
             int labelAtlasXferCount = 0;
-            long labelAtlasXferStart_PMILLIS = System.currentTimeMillis( );
+            long labelAtlasXferStart_PMILLIS = currentTimeMillis( );
             for ( DncChunkKey chunkKey : chunksToDraw )
             {
-                if ( hLabelAtlases.containsKey( chunkKey ) )
+                if ( this.hLabelAtlases.containsKey( chunkKey ) )
                 {
                     boolean allowXfer = ( labelAtlasXferCount < guaranteedLabelAtlasXfersPerFrame || timeSince_MILLIS( labelAtlasXferStart_PMILLIS ) <= labelAtlasXferTimeLimit_MILLIS );
                     if ( allowXfer )
                     {
-                        DncHostLabelAtlas hLabelAtlas = hLabelAtlases.remove( chunkKey );
+                        DncHostLabelAtlas hLabelAtlas = this.hLabelAtlases.remove( chunkKey );
                         DncDeviceLabelAtlas dLabelAtlas = xferLabelAtlasToDevice( hLabelAtlas, gl );
-                        dLabelAtlases.put( chunkKey, dLabelAtlas );
+                        this.dLabelAtlases.put( chunkKey, dLabelAtlas );
                         labelAtlasXferCount++;
                     }
                 }
@@ -1024,21 +1011,21 @@ public class DncPainter implements GlimpsePainter
 
 
             // Do the actual drawing
-            boolean areasVisible = settings.areAreasVisible( axis );
-            boolean linesVisible = settings.areLinesVisible( axis );
-            boolean iconsVisible = settings.areIconsVisible( axis );
-            boolean labelsVisible = settings.areLabelsVisible( axis );
+            boolean areasVisible = this.settings.areAreasVisible( axis );
+            boolean linesVisible = this.settings.areLinesVisible( axis );
+            boolean iconsVisible = this.settings.areIconsVisible( axis );
+            boolean labelsVisible = this.settings.areLabelsVisible( axis );
             if ( areasVisible || linesVisible || iconsVisible || labelsVisible )
             {
                 List<DncGroup> groupsToDraw = new ArrayList<>( );
                 for ( DncChunkKey chunkKey : chunksToDraw )
                 {
-                    DncDeviceChunk dChunk = dChunks.get( chunkKey );
+                    DncDeviceChunk dChunk = this.dChunks.get( chunkKey );
                     if ( dChunk != null ) groupsToDraw.addAll( dChunk.groups );
                 }
                 sort( groupsToDraw, groupRenderingOrder );
 
-                float iconScale = settings.iconsGlobalScale( axis );
+                float iconScale = this.settings.iconsGlobalScale( axis );
 
                 long pulsatePeriod_MILLIS = 1100;
                 long currentTime_PMILLIS = currentTimeMillis( );
@@ -1052,10 +1039,10 @@ public class DncPainter implements GlimpsePainter
 
                 for ( DncGroup group : groupsToDraw )
                 {
-                    DncDeviceChunk dChunk = dChunks.get( group.chunkKey );
-                    DncDeviceIconAtlas dIconAtlas = dIconAtlases.get( group.chunkKey );
-                    DncDeviceLabelAtlas dLabelAtlas = dLabelAtlases.get( group.chunkKey );
-                    IndexSetTexture highlightSet = highlightSets.get( group.chunkKey );
+                    DncDeviceChunk dChunk = this.dChunks.get( group.chunkKey );
+                    DncDeviceIconAtlas dIconAtlas = this.dIconAtlases.get( group.chunkKey );
+                    DncDeviceLabelAtlas dLabelAtlas = this.dLabelAtlases.get( group.chunkKey );
+                    IndexSetTexture highlightSet = this.highlightSets.get( group.chunkKey );
                     DncGeosymAssignment geosymAssignment = group.geosymAssignment;
 
                     boolean drawGroupAreas = ( areasVisible && geosymAssignment.hasAreaSymbol( ) );
@@ -1067,14 +1054,14 @@ public class DncPainter implements GlimpsePainter
                     {
                         int highlightSetTextureUnit = 1;
                         gl.glActiveTexture( GL_TEXTURE0 + highlightSetTextureUnit );
-                        highlightSet.bind( gl, dChunk.featureCount, rasterizeArgs.maxTextureDim );
+                        highlightSet.bind( gl, dChunk.featureCount, this.rasterizeArgs.maxTextureDim );
 
                         if ( drawGroupAreas )
                         {
-                            DncGeosymLineAreaStyle style = lineAreaStyles.get( geosymAssignment.areaSymbolId );
+                            DncGeosymLineAreaStyle style = this.lineAreaStyles.get( geosymAssignment.areaSymbolId );
                             if ( style != null && style.symbolType.equals( "AreaPlain" ) )
                             {
-                                DncAreaProgramHandles handles = areaProgram.handles( gl );
+                                DncAreaProgramHandles handles = this.areaProgram.handles( gl );
                                 gl.glUseProgram( handles.program );
 
                                 setUniformAxisRect( gl, handles.AXIS_RECT, axis );
@@ -1093,10 +1080,10 @@ public class DncPainter implements GlimpsePainter
 
                         if ( drawGroupLines )
                         {
-                            DncGeosymLineAreaStyle style = lineAreaStyles.get( geosymAssignment.lineSymbolId );
+                            DncGeosymLineAreaStyle style = this.lineAreaStyles.get( geosymAssignment.lineSymbolId );
                             if ( style != null )
                             {
-                                DncLineProgramHandles handles = lineProgram.handles( gl );
+                                DncLineProgramHandles handles = this.lineProgram.handles( gl );
                                 gl.glUseProgram( handles.program );
 
                                 setUniformAxisRect( gl, handles.AXIS_RECT, axis );
@@ -1127,7 +1114,7 @@ public class DncPainter implements GlimpsePainter
                             DncAtlasEntry atlasEntry = dIconAtlas.entries.get( geosymAssignment.pointSymbolId );
                             if ( atlasEntry != null )
                             {
-                                DncIconProgramHandles handles = iconProgram.handles( gl );
+                                DncIconProgramHandles handles = this.iconProgram.handles( gl );
                                 gl.glUseProgram( handles.program );
 
                                 setUniformAxisRect( gl, handles.AXIS_RECT, axis );
@@ -1156,7 +1143,7 @@ public class DncPainter implements GlimpsePainter
 
                         if ( drawGroupLabels )
                         {
-                            DncLabelProgramHandles handles = labelProgram.handles( gl );
+                            DncLabelProgramHandles handles = this.labelProgram.handles( gl );
                             gl.glUseProgram( handles.program );
 
                             setUniformAxisRect( gl, handles.AXIS_RECT, axis );
@@ -1194,7 +1181,7 @@ public class DncPainter implements GlimpsePainter
 
 
                 gl.glUseProgram( 0 );
-                
+
                 gl.getGL3( ).glBindVertexArray( 0 );
             }
         }

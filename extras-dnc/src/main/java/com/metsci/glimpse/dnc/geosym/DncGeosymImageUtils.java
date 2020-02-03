@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.dnc.geosym;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static com.metsci.glimpse.util.units.Length.millimetersToInches;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -41,15 +40,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.io.CharStreams;
 import com.kitfox.svg.SVGDiagram;
 import com.kitfox.svg.SVGException;
 import com.kitfox.svg.SVGUniverse;
@@ -67,15 +61,25 @@ public class DncGeosymImageUtils
     public static final Color transparentWhite = new Color( 255, 255, 255, 0 );
 
 
-    public static AnchoredImage loadGeosymImage( String symbolId, String cgmDir, String svgDir, double screenDpi ) throws IOException, SVGException
+    public static interface TextLoader
     {
-        URL cgmUrl = DncGeosymImageUtils.class.getResource( cgmDir + "/" + symbolId + ".cgm" );
-        String cgmText = loadAsString( cgmUrl, UTF_8 );
-        int[] cgmBounds = extractCgmBounds( cgmText, cgmUrl );
-        double cgmScale = extractCgmScale( cgmText, cgmUrl );
+        String loadText( ) throws IOException;
+    }
 
-        URL svgUrl = DncGeosymImageUtils.class.getResource( svgDir + "/" + symbolId + ".svg" );
-        String svgText = removeSvgTransparency( loadAsString( svgUrl, UTF_8 ) );
+
+    public static interface KeyedTextLoader
+    {
+        String loadTextFor( String key ) throws IOException;
+    }
+
+
+    public static AnchoredImage loadGeosymImage( String symbolId, KeyedTextLoader cgmLoader, KeyedTextLoader svgLoader, double screenDpi ) throws IOException, SVGException
+    {
+        String cgmText = cgmLoader.loadTextFor( symbolId );
+        int[] cgmBounds = extractCgmBounds( cgmText, symbolId );
+        double cgmScale = extractCgmScale( cgmText, symbolId );
+
+        String svgText = removeSvgTransparency( svgLoader.loadTextFor( symbolId ) );
         String svgName = "geosym-" + symbolId;
         SVGUniverse svgUniverse = new SVGUniverse( );
         SVGDiagram svgDiagram = svgUniverse.getDiagram( svgUniverse.loadSVG( new StringReader( svgText ), svgName ) );
@@ -106,17 +110,9 @@ public class DncGeosymImageUtils
         }
     }
 
-    public static String loadAsString( URL url, Charset charset ) throws IOException
-    {
-        try ( InputStream in = url.openStream( ) )
-        {
-            return CharStreams.toString( new InputStreamReader( in, charset ) );
-        }
-    }
-
     public static final Pattern cgmBoundsPattern = Pattern.compile( "VDCEXT\\s([\\+|-]?\\d+)\\s([\\+|-]?\\d+)\\s([\\+|-]?\\d+)\\s([\\+|-]?\\d+);" );
 
-    public static int[] extractCgmBounds( String cgmText, URL cgmUrl ) throws SVGException
+    public static int[] extractCgmBounds( String cgmText, String symbolId ) throws SVGException
     {
         Matcher m = cgmBoundsPattern.matcher( cgmText );
         if ( m.find( ) )
@@ -128,13 +124,13 @@ public class DncGeosymImageUtils
         }
         else
         {
-            throw new SVGException( "Failed to parse CGM bounds: cgm-url = " + cgmUrl );
+            throw new SVGException( "Failed to parse CGM bounds: symbol-id = " + symbolId );
         }
     }
 
     public static final Pattern cgmScalePattern = Pattern.compile( "SCALEMODE\\sMETRIC\\s(\\d*\\.?\\d*);" );
 
-    public static double extractCgmScale( String cgmText, URL cgmUrl ) throws SVGException
+    public static double extractCgmScale( String cgmText, String symbolId ) throws SVGException
     {
         Matcher m = cgmScalePattern.matcher( cgmText );
         if ( m.find( ) )
@@ -143,7 +139,7 @@ public class DncGeosymImageUtils
         }
         else
         {
-            throw new SVGException( "Failed to parse CGM scale: cgm-url = " + cgmUrl );
+            throw new SVGException( "Failed to parse CGM scale: symbol-id = " + symbolId );
         }
     }
 

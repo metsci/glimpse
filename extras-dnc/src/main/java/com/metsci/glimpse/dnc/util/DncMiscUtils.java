@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.net.URL;
 import java.nio.Buffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
@@ -61,6 +62,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.function.Function;
+
+import com.google.common.io.Resources;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -173,6 +176,30 @@ public class DncMiscUtils
                 throw new RuntimeException( e );
             }
         }
+    }
+
+    public static interface Thrower
+    {
+        void run( ) throws Exception;
+    }
+
+    public static Runnable rethrowing( Thrower thrower )
+    {
+        return ( ) ->
+        {
+            try
+            {
+                thrower.run( );
+            }
+            catch ( RuntimeException e )
+            {
+                throw e;
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        };
     }
 
     /**
@@ -461,6 +488,11 @@ public class DncMiscUtils
             }
         }
         return dir;
+    }
+
+    public static String readText( URL url, Charset charset ) throws IOException
+    {
+        return Resources.toString( url, charset );
     }
 
 }

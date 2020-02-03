@@ -26,34 +26,58 @@
  */
 package com.metsci.glimpse.dnc.geosym;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.readText;
+
+import java.net.URL;
+import java.util.function.Function;
 
 import com.google.common.base.Objects;
+import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.KeyedTextLoader;
+import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.TextLoader;
 
 public class DncGeosymTheme
 {
 
-    public final String colorsFile;
-    public final String lineAreaStylesFile;
-    public final String cgmDir;
-    public final String svgDir;
+    public final TextLoader colorsLoader;
+    public final TextLoader lineAreaStylesLoader;
+    public final KeyedTextLoader cgmLoader;
+    public final KeyedTextLoader svgLoader;
 
 
-    public DncGeosymTheme( String colorsFile,
-                           String lineAreaStylesFile,
-                           String cgmDir,
-                           String svgDir )
+    public DncGeosymTheme( URL colorsUrl,
+                           URL lineAreaStylesUrl,
+                           Function<String,URL> cgmUrlForSymbolId,
+                           Function<String,URL> svgUrlForSymbolId )
     {
-        this.colorsFile = colorsFile;
-        this.lineAreaStylesFile = lineAreaStylesFile;
-        this.cgmDir = cgmDir;
-        this.svgDir = svgDir;
+        this( ( ) -> readText( colorsUrl, UTF_8 ),
+              ( ) -> readText( lineAreaStylesUrl, UTF_8 ),
+              symbolId -> readText( cgmUrlForSymbolId.apply( symbolId ), UTF_8 ),
+              symbolId -> readText( svgUrlForSymbolId.apply( symbolId ), UTF_8 ) );
+    }
+
+    public DncGeosymTheme( TextLoader colorsLoader,
+                           TextLoader lineAreaStylesLoader,
+                           KeyedTextLoader cgmLoader,
+                           KeyedTextLoader svgLoader )
+    {
+        this.colorsLoader = colorsLoader;
+        this.lineAreaStylesLoader = lineAreaStylesLoader;
+        this.cgmLoader = cgmLoader;
+        this.svgLoader = svgLoader;
     }
 
     @Override
     public int hashCode( )
     {
-        return Objects.hashCode( colorsFile, lineAreaStylesFile, cgmDir, svgDir );
+        final int prime = 42643;
+        int result = 1;
+        result = prime * result + Objects.hashCode( this.colorsLoader );
+        result = prime * result + Objects.hashCode( this.lineAreaStylesLoader );
+        result = prime * result + Objects.hashCode( this.cgmLoader );
+        result = prime * result + Objects.hashCode( this.svgLoader );
+        return result;
     }
 
     @Override
@@ -64,10 +88,10 @@ public class DncGeosymTheme
         if ( o.getClass( ) != getClass( ) ) return false;
 
         DncGeosymTheme other = ( DncGeosymTheme ) o;
-        return ( equal( other.colorsFile, colorsFile )
-              && equal( other.lineAreaStylesFile, lineAreaStylesFile )
-              && equal( other.cgmDir, cgmDir )
-              && equal( other.svgDir, svgDir ) );
+        return ( equal( other.colorsLoader, colorsLoader )
+              && equal( other.lineAreaStylesLoader, lineAreaStylesLoader )
+              && equal( other.cgmLoader, cgmLoader )
+              && equal( other.svgLoader, svgLoader ) );
     }
 
 }

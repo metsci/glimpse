@@ -299,33 +299,16 @@ public class DockingUtils
         }
     }
 
-    public static ImageIcon requireIcon( Module module, String resourcePath )
+    public static ImageIcon requireIcon( URL url )
     {
         try
         {
-            return new ImageIcon( ImageIO.read( module.getResourceAsStream( resourcePath ) ) );
+            return new ImageIcon( ImageIO.read( url ) );
         }
         catch ( IOException e )
         {
             throw new RuntimeException( e );
         }
-    }
-
-    public static ImageIcon requireIcon( String resourcePath )
-    {
-        try
-        {
-            return new ImageIcon( ImageIO.read( Thread.currentThread( ).getContextClassLoader( ).getResource( resourcePath ) ) );
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e );
-        }
-    }
-
-    public static URL resourceUrl( Class<?> clazz, String location )
-    {
-        return clazz.getClassLoader( ).getResource( location );
     }
 
     public static void setArrangementAndSaveOnDispose( DockingGroup dockingGroup, String appName, URL fallbackInput )
