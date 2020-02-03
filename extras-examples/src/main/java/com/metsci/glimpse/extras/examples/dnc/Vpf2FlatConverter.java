@@ -26,19 +26,29 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
-import static com.google.common.base.Charsets.*;
-import static com.metsci.glimpse.dnc.DncDataPaths.*;
-import static com.metsci.glimpse.dnc.convert.Vpf.*;
-import static com.metsci.glimpse.dnc.convert.Vpf2Flat.*;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
-import static com.metsci.glimpse.docking.DockingUtils.*;
-import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.*;
-import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static javax.swing.JFileChooser.*;
-import static javax.swing.JOptionPane.*;
-import static javax.swing.ScrollPaneConstants.*;
-import static javax.swing.WindowConstants.*;
+import static com.google.common.base.Charsets.UTF_8;
+import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncDefaultUserFlatDir;
+import static com.metsci.glimpse.dnc.convert.Vpf.vpfDatabaseDirsByName;
+import static com.metsci.glimpse.dnc.convert.Vpf2Flat.readVpfDatabase;
+import static com.metsci.glimpse.dnc.convert.Vpf2Flat.writeFlatDatabase;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.createNewDir;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.addTextListener;
+import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.setTreeEnabled;
+import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
+import static javax.swing.JFileChooser.APPROVE_OPTION;
+import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static javax.swing.JOptionPane.showMessageDialog;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -76,7 +86,7 @@ public class Vpf2FlatConverter
 
     public static void main( String[] args )
     {
-        initializeLogging( "dnc-examples/logging.properties" );
+        initLogging( Vpf2FlatConverter.class.getResource( "logging.properties" ) );
         initTinyLaf( );
 
 
@@ -101,7 +111,7 @@ public class Vpf2FlatConverter
             JTextField vpfParentField = new JTextField( 32 );
             vpfParentField.setText( "" );
 
-            JButton vpfParentButton = new JButton( requireIcon( "icons/fugue/folder-horizontal-open.png" ) );
+            JButton vpfParentButton = new JButton( requireIcon( Vpf2FlatConverter.class.getResource( "icons/fugue/folder-horizontal-open.png" ) ) );
             vpfParentButton.setToolTipText( "Browse" );
 
             JPanel vpfCheckboxesPanel = new JPanel( new MigLayout( "insets 2 4 2 2, gapy 0, wrap 1" ) );
@@ -111,16 +121,16 @@ public class Vpf2FlatConverter
             vpfCheckboxesScroller.getVerticalScrollBar( ).setUnitIncrement( vpfCheckboxHeight );
             vpfCheckboxesScroller.setPreferredSize( new Dimension( 100, 5*vpfCheckboxHeight + 4 ) );
 
-            JButton vpfCheckAllButton = new JButton( requireIcon( "icons/fugue/ui-check-box.png" ) );
+            JButton vpfCheckAllButton = new JButton( requireIcon( Vpf2FlatConverter.class.getResource( "icons/fugue/ui-check-box.png" ) ) );
             vpfCheckAllButton.setToolTipText( "Select All" );
 
-            JButton vpfCheckNoneButton = new JButton( requireIcon( "icons/fugue/ui-check-box-uncheck.png" ) );
+            JButton vpfCheckNoneButton = new JButton( requireIcon( Vpf2FlatConverter.class.getResource( "icons/fugue/ui-check-box-uncheck.png" ) ) );
             vpfCheckNoneButton.setToolTipText( "Select None" );
 
             JTextField flatParentField = new JTextField( 32 );
             flatParentField.setText( glimpseDncDefaultUserFlatDir.getAbsolutePath( ) );
 
-            JButton flatParentButton = new JButton( requireIcon( "icons/fugue/folder-horizontal-open.png" ) );
+            JButton flatParentButton = new JButton( requireIcon( Vpf2FlatConverter.class.getResource( "icons/fugue/folder-horizontal-open.png" ) ) );
             flatParentButton.setToolTipText( "Browse" );
 
             JButton convertButton = new JButton( "Convert" );
@@ -156,7 +166,7 @@ public class Vpf2FlatConverter
             // Browse to VPF dir
             //
 
-            vpfParentButton.addActionListener( ( ev ) ->
+            vpfParentButton.addActionListener( ev ->
             {
                 JFileChooser chooser = new JFileChooser( );
                 chooser.setApproveButtonText( "Select" );
@@ -237,7 +247,7 @@ public class Vpf2FlatConverter
             // Select all checkboxes
             //
 
-            vpfCheckAllButton.addActionListener( ( ev ) ->
+            vpfCheckAllButton.addActionListener( ev ->
             {
                 for ( Component c : vpfCheckboxesPanel.getComponents( ) )
                 {
@@ -252,7 +262,7 @@ public class Vpf2FlatConverter
             // De-select all checkboxes
             //
 
-            vpfCheckNoneButton.addActionListener( ( ev ) ->
+            vpfCheckNoneButton.addActionListener( ev ->
             {
                 for ( Component c : vpfCheckboxesPanel.getComponents( ) )
                 {
@@ -267,7 +277,7 @@ public class Vpf2FlatConverter
             // Browse to FLAT dir
             //
 
-            flatParentButton.addActionListener( ( ev ) ->
+            flatParentButton.addActionListener( ev ->
             {
                 JFileChooser chooser = new JFileChooser( );
                 chooser.setApproveButtonText( "Select" );
@@ -290,7 +300,7 @@ public class Vpf2FlatConverter
             // Convert button
             //
 
-            convertButton.addActionListener( ( ev ) ->
+            convertButton.addActionListener( ev ->
             {
                 File flatParentDir = new File( flatParentField.getText( ) );
                 Map<String,File> dbDirs = ImmutableMap.copyOf( state.dbDirs );

@@ -36,7 +36,6 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.sorted;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.startThread;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.takeNewValue;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
@@ -310,9 +309,9 @@ public class DncExplorer
 
             View[] views =
             {
-                new View( "geoView",   geoCanvas,     "Geo",      VIEW_NOT_CLOSEABLE, null, requireIcon( DncExplorer.class.getResource( "icons/fugue/map.png"        ) ) ),
-                new View( "attrsView", attrsScroller, "Features", VIEW_NOT_CLOSEABLE, null, requireIcon( DncExplorer.class.getResource( "icons/eclipse/class_hi.gif" ) ) ),
-                new View( "prefsView", prefsPanel,    "Prefs",    VIEW_NOT_CLOSEABLE, null, requireIcon( DncExplorer.class.getResource( "icons/fugue/equalizer.png"  ) ) ),
+                new View( "geoView",   geoCanvas,     "Geo",      VIEW_NOT_CLOSEABLE, null, DncExplorer.class.getResource( "icons/fugue/map.png"        ) ),
+                new View( "attrsView", attrsScroller, "Features", VIEW_NOT_CLOSEABLE, null, DncExplorer.class.getResource( "icons/eclipse/class_hi.gif" ) ),
+                new View( "prefsView", prefsPanel,    "Prefs",    VIEW_NOT_CLOSEABLE, null, DncExplorer.class.getResource( "icons/fugue/equalizer.png"  ) ),
             };
 
             DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );

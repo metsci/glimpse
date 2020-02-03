@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.docking;
 
-import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static java.awt.Color.black;
 import static java.awt.Color.darkGray;
 import static java.awt.Color.lightGray;
@@ -73,13 +72,13 @@ public class DockingThemes
                                                                            darkGray,
                                                                            darkGray,
 
-                                                                           requireIcon( DockingThemes.class.getResource( "icons/maximize.gif" ) ),
-                                                                           requireIcon( DockingThemes.class.getResource( "icons/unmaximize.gif" ) ),
-                                                                           requireIcon( DockingThemes.class.getResource( "icons/options.gif" ) ),
+                                                                           DockingThemes.class.getResource( "icons/maximize.gif" ),
+                                                                           DockingThemes.class.getResource( "icons/unmaximize.gif" ),
+                                                                           DockingThemes.class.getResource( "icons/options.gif" ),
 
-                                                                           requireIcon( DockingThemes.class.getResource( "icons/chromium/close.png" ) ),
-                                                                           requireIcon( DockingThemes.class.getResource( "icons/chromium/close_h.png" ) ),
-                                                                           requireIcon( DockingThemes.class.getResource( "icons/chromium/close_p.png" ) ) );
+                                                                           DockingThemes.class.getResource( "icons/chromium/close.png" ),
+                                                                           DockingThemes.class.getResource( "icons/chromium/close_h.png" ),
+                                                                           DockingThemes.class.getResource( "icons/chromium/close_p.png" ) );
 
     public static DockingTheme newDockingTheme( Color lineColor, Color textColor )
     {

@@ -26,10 +26,12 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 
 import java.awt.Component;
+import java.net.URL;
 
 import javax.swing.Icon;
 import javax.swing.JToolBar;
@@ -50,22 +52,32 @@ public class View
 
     public View( String viewId, Component component, String title )
     {
-        this( viewId, component, title, false, null, null, null );
+        this( viewId, component, title, false );
     }
 
     public View( String viewId, Component component, String title, boolean autoCloseable )
     {
-        this( viewId, component, title, autoCloseable, null, null, null );
+        this( viewId, component, title, autoCloseable, null );
     }
 
     public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip )
     {
-        this( viewId, component, title, autoCloseable, tooltip, null, null );
+        this( viewId, component, title, autoCloseable, tooltip, ( Icon ) null );
+    }
+
+    public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, URL iconUrl )
+    {
+        this( viewId, component, title, autoCloseable, tooltip, requireIcon( iconUrl ) );
     }
 
     public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, Icon icon )
     {
         this( viewId, component, title, autoCloseable, tooltip, icon, null );
+    }
+
+    public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, URL iconUrl, JToolBar toolbar )
+    {
+        this( viewId, component, title, autoCloseable, tooltip, requireIcon( iconUrl ), toolbar );
     }
 
     public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, Icon icon, JToolBar toolbar )
@@ -75,17 +87,27 @@ public class View
 
     public View( String viewId, Component component, String title, ViewCloseOption closeOption )
     {
-        this( viewId, component, title, closeOption, null, null, null );
+        this( viewId, component, title, closeOption, null );
     }
 
     public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip )
     {
-        this( viewId, component, title, closeOption, tooltip, null, null );
+        this( viewId, component, title, closeOption, tooltip, ( Icon ) null );
+    }
+
+    public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip, URL iconUrl )
+    {
+        this( viewId, component, title, closeOption, tooltip, requireIcon( iconUrl ) );
     }
 
     public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip, Icon icon )
     {
         this( viewId, component, title, closeOption, tooltip, icon, null );
+    }
+
+    public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip, URL iconUrl, JToolBar toolbar )
+    {
+        this( viewId, component, title, closeOption, tooltip, requireIcon( iconUrl ), toolbar );
     }
 
     public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip, Icon icon, JToolBar toolbar )

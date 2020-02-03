@@ -34,7 +34,7 @@ import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 
 import com.metsci.glimpse.dnc.DncPainter;
 import com.metsci.glimpse.dnc.DncPainterSettings;
@@ -53,7 +53,7 @@ public class DncPainterExample
 
     public static void main( String[] args )
     {
-        initializeLogging( "com/metsci/glimpse/extras/examples/dnc/logging.properties" );
+        initLogging( DncPainterExample.class.getResource( "logging.properties" ) );
         swingInvokeLater( ( ) ->
         {
             // Render config
