@@ -33,9 +33,9 @@ import static com.jogamp.opengl.GL.GL_LINES;
 import static com.jogamp.opengl.GL.GL_LINE_STRIP;
 import static com.jogamp.opengl.GL2ES2.GL_STREAM_DRAW;
 import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -699,10 +699,9 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
     public static class DynamicLineSetPainterProgram
     {
-
-        public static final String lineVertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.vs" );
-        public static final String lineGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.gs" );
-        public static final String lineFragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.fs" );
+        public static final String lineVertShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.vs" ) );
+        public static final String lineGeomShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.gs" ) );
+        public static final String lineFragShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.fs" ) );
 
         public static class LineProgramHandles
         {

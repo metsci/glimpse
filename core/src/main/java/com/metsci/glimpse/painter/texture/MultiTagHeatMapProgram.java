@@ -26,27 +26,26 @@
  */
 package com.metsci.glimpse.painter.texture;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
-
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.GLEditableBuffer;
 import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 public class MultiTagHeatMapProgram implements HeatMapProgram
 {
-    public static final String lineVertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.vs" );
-    public static final String lineGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.gs" );
-    public static final String lineFragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap-multitag.fs" );
+    public static final String lineVertShader_GLSL = requireText( MultiTagHeatMapProgram.class.getResource( "/com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.vs" ) );
+    public static final String lineGeomShader_GLSL = requireText( MultiTagHeatMapProgram.class.getResource( "/com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.gs" ) );
+    public static final String lineFragShader_GLSL = requireText( MultiTagHeatMapProgram.class.getResource( "/com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap-multitag.fs" ) );
 
 
     public static class Handles
@@ -129,7 +128,7 @@ public class MultiTagHeatMapProgram implements HeatMapProgram
     {
         this.alpha = alpha;
     }
-    
+
     @Override
     public void setUseColormapAlpha( boolean useColormapAlpha )
     {

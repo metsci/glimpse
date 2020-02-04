@@ -32,6 +32,8 @@ import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -70,7 +72,6 @@ import com.metsci.glimpse.plot.timeline.event.paint.GroupedEventPainterAdapter;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.plot.timeline.layout.TimePlotInfoWrapper;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.util.io.StreamOpener;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
 /**
@@ -124,10 +125,11 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         super( delegate );
 
-        try
+        URL defaultImageUrl = this.getClass( ).getResource( "/com/metsci/glimpse/core/icons/timeline/dot.png" );
+        try ( InputStream defaultImageStream = defaultImageUrl.openStream( ) )
         {
             defaultIconId = UUID.randomUUID( );
-            BufferedImage defaultImage = ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/icons/timeline/dot.png" ) );
+            BufferedImage defaultImage = ImageIO.read( defaultImageStream );
             atlas.loadImage( defaultIconId, defaultImage );
         }
         catch ( IOException e )

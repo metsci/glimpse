@@ -26,13 +26,12 @@
  */
 package com.metsci.glimpse.support.colormap;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.GeneralUtils;
@@ -45,8 +44,6 @@ import com.metsci.glimpse.util.primitives.FloatsArray;
  */
 public class ColorGradients
 {
-
-    private static final Logger logger = Logger.getLogger( ColorGradients.class.getName( ) );
 
     public static final ColorGradient clearToBlack = new ColorGradient( )
     {
@@ -275,27 +272,40 @@ public class ColorGradients
     };
 
     // matplotlib colormaps: http://matplotlib.org/examples/color/colormaps_reference.html
-    public static final ColorGradient wistia = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/wistia.csv" );
-    public static final ColorGradient viridis = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/viridis.csv" );
-    public static final ColorGradient terrain = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/terrain.csv" );
-    public static final ColorGradient summer = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/summer.csv" );
-    public static final ColorGradient spring = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/spring.csv" );
-    public static final ColorGradient spectral = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/spectral.csv" );
-    public static final ColorGradient seismic = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/seismic.csv" );
-    public static final ColorGradient rainbow = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/rainbow.csv" );
-    public static final ColorGradient prism = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/prism.csv" );
-    public static final ColorGradient plasma = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/plasma.csv" );
-    public static final ColorGradient oranges = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/oranges.csv" );
-    public static final ColorGradient ocean = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/ocean.csv" );
-    public static final ColorGradient magma = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/magma.csv" );
-    public static final ColorGradient inferno = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/inferno.csv" );
-    public static final ColorGradient hot = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/hot.csv" );
-    public static final ColorGradient flag = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/flag.csv" );
-    public static final ColorGradient copper = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/copper.csv" );
-    public static final ColorGradient coolwarm = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/coolwarm.csv" );
-    public static final ColorGradient cool = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/cool.csv" );
-    public static final ColorGradient autumn = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/autumn.csv" );
-    public static final ColorGradient accent = fromCSV( "com/metsci/glimpse/core/colormap/matplotlib/accent.csv" );
+    public static final ColorGradient wistia = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/wistia.csv" );
+    public static final ColorGradient viridis = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/viridis.csv" );
+    public static final ColorGradient terrain = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/terrain.csv" );
+    public static final ColorGradient summer = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/summer.csv" );
+    public static final ColorGradient spring = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/spring.csv" );
+    public static final ColorGradient spectral = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/spectral.csv" );
+    public static final ColorGradient seismic = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/seismic.csv" );
+    public static final ColorGradient rainbow = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/rainbow.csv" );
+    public static final ColorGradient prism = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/prism.csv" );
+    public static final ColorGradient plasma = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/plasma.csv" );
+    public static final ColorGradient oranges = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/oranges.csv" );
+    public static final ColorGradient ocean = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/ocean.csv" );
+    public static final ColorGradient magma = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/magma.csv" );
+    public static final ColorGradient inferno = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/inferno.csv" );
+    public static final ColorGradient hot = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/hot.csv" );
+    public static final ColorGradient flag = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/flag.csv" );
+    public static final ColorGradient copper = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/copper.csv" );
+    public static final ColorGradient coolwarm = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/coolwarm.csv" );
+    public static final ColorGradient cool = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/cool.csv" );
+    public static final ColorGradient autumn = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/autumn.csv" );
+    public static final ColorGradient accent = requireBuiltin( "/com/metsci/glimpse/core/colormap/matplotlib/accent.csv" );
+
+    private static ColorGradient requireBuiltin( String csvFile )
+    {
+        URL url = ColorGradients.class.getResource( csvFile );
+        try ( BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream( ) ) ) )
+        {
+            return fromCSV( reader );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
 
     public static ColorGradient twoColorFade( float[] color1, float[] color2 )
     {
@@ -486,29 +496,21 @@ public class ColorGradients
         };
     }
 
-    protected static ColorGradient fromCSV( String file )
+    public static ColorGradient fromCSV( BufferedReader reader ) throws IOException
     {
         FloatsArray f = new FloatsArray( );
+
         String line = null;
-        try (BufferedReader reader = new BufferedReader( new InputStreamReader( ColorGradients.class.getModule( ).getResourceAsStream( file ) ) ))
+        while ( ( line = reader.readLine( ) ) != null )
         {
-            while ( ( line = reader.readLine( ) ) != null )
-            {
-                String[] tokens = line.split( "," );
-                f.append( Float.parseFloat( tokens[0] ) );
-                f.append( Float.parseFloat( tokens[1] ) );
-                f.append( Float.parseFloat( tokens[2] ) );
-            }
-
-            f.compact( );
-
-            return new ColorGradientArray( f.a );
+            String[] tokens = line.split( "," );
+            f.append( Float.parseFloat( tokens[0] ) );
+            f.append( Float.parseFloat( tokens[1] ) );
+            f.append( Float.parseFloat( tokens[2] ) );
         }
-        catch ( Exception e )
-        {
-            logWarning( logger, "Unable to load ColorGradient: %s", e, file );
-            return new ColorGradientArray( new float[] { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f } );
-        }
+
+        f.compact( );
+        return new ColorGradientArray( f.a );
     }
 
     private ColorGradients( )

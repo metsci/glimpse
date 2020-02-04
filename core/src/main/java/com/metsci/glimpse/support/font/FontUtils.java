@@ -33,6 +33,7 @@ import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -55,6 +56,11 @@ public class FontUtils
     private static final Logger logger = Logger.getLogger( FontUtils.class.getName( ) );
 
     private static final boolean foundVerdana;
+
+    /**
+     * Map key is {@code url.toString()}, not just {@code url}, because {@code url.equals()}
+     * would block on hostname resolution.
+     */
     private static final Map<String, Font> loadedFonts = new HashMap<>( );
 
     static
@@ -104,22 +110,22 @@ public class FontUtils
 
     public static Font getBitstreamVeraSansPlain( float size )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/Vera.ttf", size, Font.PLAIN );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/bitstream/Vera.ttf", size, Font.PLAIN );
     }
 
     public static Font getBitstreamVeraSansBold( float size )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/VeraBd.ttf", size, Font.BOLD );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/bitstream/VeraBd.ttf", size, Font.BOLD );
     }
 
     public static Font getBitstreamVeraSansItalic( float size )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/VeraIt.ttf", size, Font.ITALIC );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/bitstream/VeraIt.ttf", size, Font.ITALIC );
     }
 
     public static Font getBitstreamVeraSansBoldItalic( float size )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/bitstream/Veralt.ttf", size, Font.ITALIC | Font.BOLD );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/bitstream/Veralt.ttf", size, Font.ITALIC | Font.BOLD );
     }
 
     /**
@@ -133,22 +139,28 @@ public class FontUtils
 
     public static Font getSilkscreenPlain( )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscr.ttf", 8, Font.PLAIN );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/silkscreen/slkscr.ttf", 8, Font.PLAIN );
     }
 
     public static Font getSilkscreenBold( )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscrb.ttf", 8, Font.BOLD );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/silkscreen/slkscrb.ttf", 8, Font.BOLD );
     }
 
     public static Font getSilkscreenItalic( )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscre.ttf", 8, Font.ITALIC );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/silkscreen/slkscre.ttf", 8, Font.ITALIC );
     }
 
     public static Font getSilkscreenBoldItalic( )
     {
-        return loadTrueTypeFont( "com/metsci/glimpse/core/fonts/silkscreen/slkscreb.ttf", 8, Font.ITALIC | Font.BOLD );
+        return requireBuiltinTtf( "/com/metsci/glimpse/core/fonts/silkscreen/slkscreb.ttf", 8, Font.ITALIC | Font.BOLD );
+    }
+
+    private static Font requireBuiltinTtf( String location, float size, int style )
+    {
+        URL url = FontUtils.class.getResource( location );
+        return loadTrueTypeFont( url, size, style );
     }
 
     public static Font getVerdanaPlain( float size )
@@ -171,44 +183,30 @@ public class FontUtils
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.ITALIC | Font.BOLD );
     }
 
-    public static Font loadTrueTypeFont( String filename, float size, int style )
+    public static Font loadTrueTypeFont( URL url, float size, int style )
     {
         synchronized ( loadedFonts )
         {
-            Font font = loadedFonts.get( filename );
+            // URLs make poor keys, because URL.equals() blocks on hostname resolution
+            String key = url.toString( );
+            Font font = loadedFonts.get( key );
             if ( font == null )
             {
-                font = readFont( filename );
-                loadedFonts.put( filename, font );
+                font = requireFont( url );
+                loadedFonts.put( key, font );
             }
 
             return font.deriveFont( style, size );
         }
     }
 
-    private static Font readFont( String filename )
+    private static Font requireFont( URL url )
     {
-        try
+        try ( InputStream stream = url.openStream( ) )
         {
-            InputStream stream = null;
-            try
-            {
-                stream = FontUtils.class.getModule( ).getResourceAsStream( filename );
-                return createFont( Font.TRUETYPE_FONT, stream );
-            }
-            finally
-            {
-                if ( stream != null )
-                {
-                    stream.close( );
-                }
-            }
+            return createFont( Font.TRUETYPE_FONT, stream );
         }
-        catch ( FontFormatException e )
-        {
-            throw new RuntimeException( "Could not load font.", e );
-        }
-        catch ( IOException e )
+        catch ( IOException | FontFormatException e )
         {
             throw new RuntimeException( "Could not load font.", e );
         }

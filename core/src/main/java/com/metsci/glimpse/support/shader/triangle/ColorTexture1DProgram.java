@@ -26,17 +26,16 @@
  */
 package com.metsci.glimpse.support.shader.triangle;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL3;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -52,8 +51,8 @@ import com.metsci.glimpse.gl.util.GLUtils;
  */
 public class ColorTexture1DProgram implements DrawableTextureProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/colortex1d/colortex1d.vs" );
-    public static final String fragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/triangle/colortex1d/colortex1d.fs" );
+    public static final String vertShader_GLSL = requireText( ColorTexture1DProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/colortex1d/colortex1d.vs" ) );
+    public static final String fragShader_GLSL = requireText( ColorTexture1DProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/colortex1d/colortex1d.fs" ) );
 
     public static class ProgramHandles
     {

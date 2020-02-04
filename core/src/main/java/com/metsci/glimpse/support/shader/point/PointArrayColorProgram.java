@@ -26,19 +26,18 @@
  */
 package com.metsci.glimpse.support.shader.point;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.disablePointSprite;
-import static com.metsci.glimpse.gl.util.GLUtils.enablePointSprite;
-import static com.metsci.glimpse.support.wrapped.Wrapper2D.NOOP_WRAPPER_2D;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_POINTS;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.util.GLUtils.disablePointSprite;
+import static com.metsci.glimpse.gl.util.GLUtils.enablePointSprite;
+import static com.metsci.glimpse.support.wrapped.Wrapper2D.NOOP_WRAPPER_2D;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL3;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLEditableBuffer;
@@ -51,9 +50,9 @@ import com.metsci.glimpse.support.wrapped.Wrapper2D;
  */
 public class PointArrayColorProgram
 {
-    public static final String vertShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/point/point_array_color/point.vs" );
-    public static final String geomShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/point/point_array_color/point.gs" );
-    public static final String fragShader_GLSL = requireResourceText( "com/metsci/glimpse/core/shaders/point/point_array_color/point.fs" );
+    public static final String vertShader_GLSL = requireText( PointArrayColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/point/point_array_color/point.vs" ) );
+    public static final String geomShader_GLSL = requireText( PointArrayColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/point/point_array_color/point.gs" ) );
+    public static final String fragShader_GLSL = requireText( PointArrayColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/point/point_array_color/point.fs" ) );
 
     public static class ProgramHandles
     {
