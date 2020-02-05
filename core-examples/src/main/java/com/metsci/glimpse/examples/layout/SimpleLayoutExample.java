@@ -28,7 +28,8 @@ package com.metsci.glimpse.examples.layout;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.UpdateMode;
 import com.metsci.glimpse.layout.GlimpseLayout;
@@ -40,12 +41,11 @@ import com.metsci.glimpse.plot.SimplePlot2D;
  * @author ulman
  * @see CustomLayoutExample
  */
-// FIXME DirectBuffer
 public class SimpleLayoutExample
 {
     public static void main( String[] args )
     {
-        swingInvokeLater( ( ) ->
+        SwingUtilities.invokeLater( ( ) ->
         {
             // create a delegate painter which lays out its child painters based on a mig layout
             GlimpseLayout layoutParent = new GlimpseLayout( );
@@ -104,7 +104,6 @@ public class SimpleLayoutExample
             leftPlotLayout.addLayout( leftPlot );
 
             quickGlimpseApp( "Simple Layout Example", GL3bc, layoutParent );
-
         } );
     }
 }

@@ -32,7 +32,6 @@ import java.nio.MappedByteBuffer;
 
 import com.metsci.glimpse.util.io.MappedFile;
 
-// FIXME DirectBuffer
 public class MappedFileExample
 {
 

@@ -28,7 +28,8 @@ package com.metsci.glimpse.examples.track;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.AxisListener1D;
@@ -37,7 +38,6 @@ import com.metsci.glimpse.plot.SimplePlot2D;
 import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.shader.line.LineJoinType;
 
-// FIXME Closing freezes computer?
 public class StaticTrackPainterExample
 {
     public static final int ParticleCount = 2000;
@@ -45,7 +45,7 @@ public class StaticTrackPainterExample
 
     public static void main( String args[] )
     {
-        swingInvokeLater( ( ) ->
+        SwingUtilities.invokeLater( ( ) ->
         {
             SimplePlot2D plot = new SimplePlot2D( );
 

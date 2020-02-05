@@ -31,12 +31,12 @@ import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
 import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLProfile;
@@ -59,12 +59,11 @@ import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
  *
  * @author ulman
  */
-// FIXME NPE
 public class ScreenCaptureExample
 {
     public static void main( String[] args )
     {
-        swingInvokeLater( ( ) ->
+        SwingUtilities.invokeLater( ( ) ->
         {
             // create a normal onscreen plot
             ColorAxisPlot2D plot = HeatMapExample.newHeatMapPlot( );
