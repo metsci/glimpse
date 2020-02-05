@@ -49,7 +49,6 @@ import com.metsci.glimpse.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.atlas.support.ImageDrawer;
 import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.util.io.StreamOpener;
 
 public class TextureAtlasExample
 {
@@ -231,6 +230,6 @@ public class TextureAtlasExample
             }
         } );
 
-        atlas.loadImage( "glimpse", ImageIO.read( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/core/examples/images/GlimpseLogo.png" ) ) );
+        atlas.loadImage( "glimpse", ImageIO.read( TextureAtlasExample.class.getResource( "/com/metsci/glimpse/core/examples/images/GlimpseLogo.png" ) ) );
     }
 }

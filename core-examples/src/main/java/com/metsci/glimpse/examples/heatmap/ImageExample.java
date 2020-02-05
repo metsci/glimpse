@@ -42,7 +42,6 @@ import com.metsci.glimpse.support.projection.FlatProjection;
 import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
 import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
-import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * Demonstrates display of a png file in a Glimpse plot.
@@ -84,7 +83,7 @@ public class ImageExample
             // load image data from a file
             try
             {
-                img = ImageIO.read( StreamOpener.fileThenResource.openForRead( "images/GlimpseLogo.png" ) );
+                img = ImageIO.read( ImageExample.class.getResource( "/com/metsci/glimpse/core/examples/images/GlimpseLogo.png" ) );
             }
             catch ( IOException e )
             {
