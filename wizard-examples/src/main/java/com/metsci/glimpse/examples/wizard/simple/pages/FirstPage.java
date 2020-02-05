@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard.simple.pages;
+package com.metsci.glimpse.examples.wizard.simple.pages;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,11 +35,11 @@ import javax.swing.JLabel;
 import com.metsci.glimpse.wizard.WizardError;
 import com.metsci.glimpse.wizard.page.DescriptionWizardPage;
 
-public class ThirdPage extends DescriptionWizardPage<Map<String, Object>>
+public class FirstPage extends DescriptionWizardPage<Map<String, Object>>
 {
-    public ThirdPage( )
+    public FirstPage( )
     {
-        super( null, "Third Page", ThirdPage.class.getModule( ), "com/metsci/glimpse/wizard/simple/pages/descriptions/Example1.html" );
+        super( "first-page-id", null, "First Page", FirstPage.class.getResource( "descriptions/Example1.html" ) );
 
         this.container.add( new JLabel( "Label" ) );
     }

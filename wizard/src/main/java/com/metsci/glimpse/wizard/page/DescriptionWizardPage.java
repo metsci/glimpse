@@ -27,6 +27,7 @@
 package com.metsci.glimpse.wizard.page;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.UUID;
 
@@ -51,17 +52,17 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
 
     protected JTextPane descriptionText;
 
-    public DescriptionWizardPage( Object parentId, String title, Module module, String descriptionFile )
+    public DescriptionWizardPage( Object parentId, String title, URL descriptionUrl )
     {
-        this( UUID.randomUUID( ), parentId, title, module, descriptionFile );
+        this( UUID.randomUUID( ), parentId, title, descriptionUrl );
     }
 
-    public DescriptionWizardPage( Object id, Object parentId, String title, Module module, String descriptionFile )
+    public DescriptionWizardPage( Object id, Object parentId, String title, URL descriptionUrl )
     {
-        this( id, parentId, title, module, descriptionFile, false );
+        this( id, parentId, title, descriptionUrl, false );
     }
 
-    public DescriptionWizardPage( Object id, Object parentId, String title, Module module, String descriptionFile, boolean scrollableContent )
+    public DescriptionWizardPage( Object id, Object parentId, String title, URL descriptionUrl, boolean scrollableContent )
     {
         super( id, parentId, title );
 
@@ -70,7 +71,7 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         this.descriptionText.setEditable( false );
         this.descriptionText.setOpaque( false );
 
-        this.setDescriptionFile( module, descriptionFile );
+        this.setDescription( descriptionUrl );
 
         if ( scrollableContent )
         {
@@ -92,27 +93,22 @@ public abstract class DescriptionWizardPage<D> extends SimpleWizardPage<D>
         }
     }
 
-    protected void setDescriptionFile( Module module, String descriptionFile )
+    protected void setDescription( URL descriptionUrl )
     {
-        if ( descriptionFile == null )
+        if ( descriptionUrl == null )
         {
             this.descriptionText.setText( "" );
         }
         else
         {
-            try
+            try ( InputStream stream = descriptionUrl.openStream( ) )
             {
-                this.descriptionText.read( module.getResourceAsStream( descriptionFile ), new HTMLEditorKit( ) );
+                this.descriptionText.read( stream, new HTMLEditorKit( ) );
             }
             catch ( IOException e1 )
             {
-                this.descriptionText.setText( String.format( "Error: Unable to load page description from: %s", descriptionFile ) );
+                this.descriptionText.setText( String.format( "Error: Unable to load page description from: %s", descriptionUrl ) );
             }
         }
-    }
-
-    protected URL getDescriptionResource( String descriptionFile )
-    {
-        return this.getClass( ).getClassLoader( ).getResource( descriptionFile );
     }
 }

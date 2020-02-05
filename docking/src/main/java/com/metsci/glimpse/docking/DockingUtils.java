@@ -287,18 +287,6 @@ public class DockingUtils
         return ( color == null ? fallback : color );
     }
 
-    public static ImageIcon requireIcon( InputStream stream )
-    {
-        try
-        {
-            return new ImageIcon( ImageIO.read( stream ) );
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException( e );
-        }
-    }
-
     public static ImageIcon requireIcon( URL url )
     {
         try

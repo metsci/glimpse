@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.wizard;
 
+import java.net.URL;
 import java.util.Collection;
 
 import javax.swing.ImageIcon;
@@ -34,21 +35,28 @@ import com.metsci.glimpse.docking.DockingUtils;
 
 public enum WizardErrorType
 {
-    Good( "icons/fugue-icon/tick-small-circle.png", "icons/fugue-icon/tick-circle.png" ),
-    Info( "icons/fugue-icon/exclamation-small-white.png", "icons/fugue-icon/exclamation-white.png" ),
-    Warning( "icons/fugue-icon/exclamation-small.png", "icons/fugue-icon/exclamation.png" ),
-    Error( "icons/fugue-icon/exclamation-small-red.png", "icons/fugue-icon/exclamation-red.png" );
+    Good( WizardErrorType.class.getResource( "icons/fugue-icon/tick-small-circle.png" ),
+          WizardErrorType.class.getResource( "icons/fugue-icon/tick-circle.png" ) ),
 
-    private final String smallIconPath;
-    private final String largeIconPath;
+    Info( WizardErrorType.class.getResource( "icons/fugue-icon/exclamation-small-white.png" ),
+          WizardErrorType.class.getResource( "icons/fugue-icon/exclamation-white.png" ) ),
+
+    Warning( WizardErrorType.class.getResource( "icons/fugue-icon/exclamation-small.png" ),
+             WizardErrorType.class.getResource( "icons/fugue-icon/exclamation.png" ) ),
+
+    Error( WizardErrorType.class.getResource( "icons/fugue-icon/exclamation-small-red.png" ),
+           WizardErrorType.class.getResource( "icons/fugue-icon/exclamation-red.png" ) );
+
+    private final URL smallIconUrl;
+    private final URL largeIconUrl;
 
     private volatile ImageIcon smallIcon;
     private volatile ImageIcon largeIcon;
 
-    private WizardErrorType( String smallIconPath, String largeIconPath )
+    private WizardErrorType( URL smallIconUrl, URL largeIconUrl )
     {
-        this.smallIconPath = smallIconPath;
-        this.largeIconPath = largeIconPath;
+        this.smallIconUrl = smallIconUrl;
+        this.largeIconUrl = largeIconUrl;
     }
 
     public ImageIcon getSmallIcon( )
@@ -56,7 +64,7 @@ public enum WizardErrorType
         // lazily load icons
         if ( this.smallIcon == null )
         {
-            this.smallIcon = DockingUtils.requireIcon( this.smallIconPath );
+            this.smallIcon = DockingUtils.requireIcon( this.smallIconUrl );
         }
 
         return this.smallIcon;
@@ -67,7 +75,7 @@ public enum WizardErrorType
         // lazily load icons
         if ( this.largeIcon == null )
         {
-            this.largeIcon = DockingUtils.requireIcon( this.largeIconPath );
+            this.largeIcon = DockingUtils.requireIcon( this.largeIconUrl );
         }
 
         return this.largeIcon;

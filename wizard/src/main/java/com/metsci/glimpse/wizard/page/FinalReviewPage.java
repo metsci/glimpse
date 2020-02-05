@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.wizard.page;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -40,17 +41,17 @@ public class FinalReviewPage<D> extends DescriptionWizardPage<D>
 
     public FinalReviewPage( Wizard<D> wizard )
     {
-        this( wizard, FinalReviewPage.class.getModule( ), "description/FinalReviewPage-description.html" );
+        this( wizard, FinalReviewPage.class.getResource( "FinalReviewPage-description.html" ) );
     }
 
-    public FinalReviewPage( Wizard<D> wizard, Module module, String descriptionFile )
+    public FinalReviewPage( Wizard<D> wizard, URL descriptionUrl )
     {
-        this( wizard, "FinalReviewPage", null, "Final Review", module, descriptionFile );
+        this( wizard, "FinalReviewPage", null, "Final Review", descriptionUrl );
     }
 
-    public FinalReviewPage( Wizard<D> wizard, Object id, Object parentId, String title, Module module, String descriptionFile )
+    public FinalReviewPage( Wizard<D> wizard, Object id, Object parentId, String title, URL descriptionUrl )
     {
-        super( id, parentId, title, module, descriptionFile );
+        super( id, parentId, title, descriptionUrl );
 
         this.wizard = wizard;
 

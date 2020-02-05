@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.wizard.simple;
+package com.metsci.glimpse.examples.wizard.simple;
 
 import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
 
@@ -35,19 +35,20 @@ import java.util.Map;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
+import com.metsci.glimpse.examples.wizard.simple.pages.ChildFirstPage;
+import com.metsci.glimpse.examples.wizard.simple.pages.FirstPage;
+import com.metsci.glimpse.examples.wizard.simple.pages.SecondPage;
+import com.metsci.glimpse.examples.wizard.simple.pages.ThirdPage;
 import com.metsci.glimpse.wizard.Wizard;
 import com.metsci.glimpse.wizard.WizardPageModel;
-import com.metsci.glimpse.wizard.page.FinalReviewPage;
-import com.metsci.glimpse.wizard.simple.pages.ChildFirstPage;
-import com.metsci.glimpse.wizard.simple.pages.FirstPage;
-import com.metsci.glimpse.wizard.simple.pages.SecondPage;
-import com.metsci.glimpse.wizard.simple.pages.ThirdPage;
+import com.metsci.glimpse.wizard.WizardPageModelSimple;
+import com.metsci.glimpse.wizard.WizardUISimple;
 
-public class WizardTreeExample
+public class WizardSimpleExample
 {
     public static void main( String[] args )
     {
-        Wizard<Map<String, Object>> wizard = new Wizard<Map<String, Object>>( );
+        Wizard<Map<String, Object>> wizard = new Wizard<Map<String, Object>>( null, new WizardPageModelSimple<>( ), new WizardUISimple<>( ) );
 
         // add some pages to the model
         WizardPageModel<Map<String, Object>> model = wizard.getPageModel( );
@@ -55,7 +56,6 @@ public class WizardTreeExample
         model.addPage( new SecondPage( ) );
         model.addPage( new ThirdPage( ) );
         model.addPage( new ChildFirstPage( ) );
-        model.addPage( new FinalReviewPage<>( wizard ) );
 
         // visit the first page
         wizard.visitNextPage( );
