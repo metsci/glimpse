@@ -26,17 +26,17 @@
  */
 package com.metsci.glimpse.layers.geo;
 
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.support.DisposableUtils.addGlimpsePainter;
-import static com.jogamp.opengl.GLProfile.GL3;
 
 import java.util.Collection;
 
-import com.jogamp.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.google.common.collect.ImmutableSet;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
 import com.metsci.glimpse.context.GlimpseContext;
@@ -64,8 +64,8 @@ public class GeoView extends GlimpseCanvasView
 
     public AxisInfo xAxisInfo;
     public AxisInfo yAxisInfo;
-    
-    
+
+
     public GeoView( ViewOption... viewOptions )
     {
         this( ImmutableSet.copyOf( viewOptions ) );
@@ -88,7 +88,7 @@ public class GeoView extends GlimpseCanvasView
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "com/metsci/glimpse/layers/icons/fugue/map.png" );
+        return requireIcon( GeoView.class.getResource( "icons/fugue/map.png" ) );
     }
 
     @Override

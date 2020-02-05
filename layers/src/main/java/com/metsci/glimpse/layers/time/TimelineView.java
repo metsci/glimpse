@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.layers.time;
 
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.requireTimeZoneTrait;
 import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
-import static com.jogamp.opengl.GLProfile.GL3;
 
 import java.time.ZoneId;
 import java.util.Collection;
@@ -40,10 +40,10 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
-import com.jogamp.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.google.common.collect.ImmutableSet;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
 import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
@@ -86,7 +86,7 @@ public class TimelineView extends GlimpseCanvasView
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "com/metsci/glimpse/layers/icons/openicon/time.png" );
+        return requireIcon( TimelineView.class.getResource( "icons/openicon/time.png" ) );
     }
 
     @Override

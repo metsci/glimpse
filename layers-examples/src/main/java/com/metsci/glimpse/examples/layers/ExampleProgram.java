@@ -26,16 +26,15 @@
  */
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_POINTS;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.gl.GLEditableBuffer;
@@ -43,9 +42,9 @@ import com.metsci.glimpse.gl.GLEditableBuffer;
 public class ExampleProgram
 {
 
-    public static final String exampleVertShader_GLSL = requireResourceText( "com/metsci/glimpse/examples/layers/shader/example.vs" );
-    public static final String exampleGeomShader_GLSL = requireResourceText( "com/metsci/glimpse/examples/layers/shader/example.gs" );
-    public static final String exampleFragShader_GLSL = requireResourceText( "com/metsci/glimpse/examples/layers/shader/example.fs" );
+    public static final String exampleVertShader_GLSL = requireText( ExampleProgram.class.getResource( "shader/example.vs" ) );
+    public static final String exampleGeomShader_GLSL = requireText( ExampleProgram.class.getResource( "shader/example.gs" ) );
+    public static final String exampleFragShader_GLSL = requireText( ExampleProgram.class.getResource( "shader/example.fs" ) );
 
 
     public static class ExampleProgramHandles
