@@ -155,6 +155,7 @@ import com.metsci.glimpse.dnc.DncLibrary;
 import com.metsci.glimpse.dnc.convert.Flat.FlatChunkKey;
 import com.metsci.glimpse.dnc.convert.Render.RenderChunk;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;
+import com.metsci.glimpse.dnc.geosym.DncGeosymIo;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLabelMaker;
 import com.metsci.glimpse.dnc.geosym.DncGeosymLabelMaker.DncGeosymLabelMakerEntry;
 import com.metsci.glimpse.dnc.proj.DncProjection;
@@ -190,7 +191,12 @@ public class Flat2Render
         public DncProjection proj = dncPlateCarree;
         public int projPointsPerBoundsEdge = 2;
 
+        /**
+         * See {@link DncGeosymIo#readDncSymbolAssignments(String)} for a list
+         * of supported values.
+         */
         public String geosymAssignmentsFilename = geosymFullAssignmentsFile;
+
         public Map<String,Object> externalAttrs = newAttrsMap( "isdm", 0,
                                                                "idsm", 1,
                                                                "ssdc", 18,

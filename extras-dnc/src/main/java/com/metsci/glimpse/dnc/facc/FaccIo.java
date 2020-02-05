@@ -27,13 +27,11 @@
 package com.metsci.glimpse.dnc.facc;
 
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.createReader;
 import static java.lang.Integer.parseInt;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,20 +40,9 @@ import java.util.Map;
 public class FaccIo
 {
 
-    public static final String faccFeaturesFile = "facc-features.csv";
-    public static final String faccAttrsFile = "facc-attrs.csv";
-    public static final String faccAttrValsFile = "facc-attr-vals.csv";
-
-
-    private static BufferedReader resourceReader( String filename ) throws IOException
-    {
-        URL url = FaccIo.class.getResource( filename );
-        return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
-    }
-
     public static Map<String,FaccFeature> readFaccFeatures( ) throws IOException
     {
-        try ( Reader reader = resourceReader( faccFeaturesFile ) )
+        try ( Reader reader = createReader( FaccIo.class.getResource( "facc-features.csv" ) ) )
         {
             return readFaccFeatures( reader );
         }
@@ -83,7 +70,7 @@ public class FaccIo
     public static Map<String,FaccAttr> readFaccAttrs( ) throws IOException
     {
         Map<String,Map<Object,Object>> valueLookups = readFaccValues( );
-        try ( Reader reader = resourceReader( faccAttrsFile ) )
+        try ( Reader reader = createReader( FaccIo.class.getResource( "facc-attrs.csv" ) ) )
         {
             return readFaccAttrs( reader, valueLookups );
         }
@@ -113,7 +100,7 @@ public class FaccIo
 
     public static Map<String,Map<Object,Object>> readFaccValues( ) throws IOException
     {
-        try ( Reader reader = resourceReader( faccAttrValsFile ) )
+        try ( Reader reader = createReader( FaccIo.class.getResource( "facc-attr-vals.csv" ) ) )
         {
             return readFaccValues( reader );
         }

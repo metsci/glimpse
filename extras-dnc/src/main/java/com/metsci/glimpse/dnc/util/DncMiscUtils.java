@@ -495,4 +495,9 @@ public class DncMiscUtils
         return Resources.toString( url, charset );
     }
 
+    public static BufferedReader createReader( URL url ) throws IOException
+    {
+        return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
+    }
+
 }

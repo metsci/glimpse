@@ -29,6 +29,7 @@ package com.metsci.glimpse.dnc.geosym;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymAttributeExpressions.alwaysTrue;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymAttributeExpressions.buildAttributeExpression;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymLabelLocation.appendToPrevious;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.createReader;
 import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 import static com.metsci.glimpse.util.GeneralUtils.newHashMap;
 import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
@@ -43,9 +44,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -64,14 +63,16 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 public class DncGeosymIo
 {
 
-    public static final String geosymAttrExprsFile = "attexp.txt";
-    public static final String geosymCodesFile = "code.txt";
+    // These strings are used both as resource filenames and as keys into the codes file
     public static final String geosymFullAssignmentsFile = "fullsym.txt";
     public static final String geosymSimplifiedAssignmentsFile = "simpsym.txt";
+    public static final String geosymTransparentLandAssignmentsFile = "bingsym.txt";
+    public static final String geosymCodesFile = "code.txt";
+    public static final String geosymAttrExprsFile = "attexp.txt";
+    public static final String geosymTextStylesFile = "textchar.txt";
     public static final String geosymLabelJoinsFile = "textjoin.txt";
     public static final String geosymLabelLocationsFile = "textloc.txt";
     public static final String geosymTextAbbreviationsFile = "textabbr.txt";
-    public static final String geosymTextStylesFile = "textchar.txt";
 
 
     public static Object2IntMap<String> readSymbolAssignmentHeader( BufferedReader reader ) throws IOException
@@ -138,64 +139,43 @@ public class DncGeosymIo
         return styles;
     }
 
-    private static BufferedReader resourceReader( String filename ) throws IOException
-    {
-        URL url = DncGeosymIo.class.getResource( "assignments/" + filename );
-        return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
-    }
-
     public static Int2ObjectMap<DncGeosymAssignment> readDncSymbolAssignments( ) throws IOException
     {
         return readDncSymbolAssignments( geosymFullAssignmentsFile );
     }
 
+    /**
+     * {@code filename} must be supported by the {@code geosym/assignments/} resources.
+     * Currently the supported options are:
+     * <ul>
+     * <li>{@link DncGeosymIo#geosymFullAssignmentsFile}
+     * <li>{@link DncGeosymIo#geosymSimplifiedAssignmentsFile}
+     * <li>{@link DncGeosymIo#geosymTransparentLandAssignmentsFile}
+     * </ul>
+     */
     public static Int2ObjectMap<DncGeosymAssignment> readDncSymbolAssignments( String filename ) throws IOException
     {
-        BufferedReader attrExprsReader = null;
-        BufferedReader codesReader = null;
-        BufferedReader textStylesReader = null;
-        BufferedReader textAbbrevsReader = null;
-        BufferedReader labelLocationsReader = null;
-        BufferedReader labelJoinsReader = null;
-        BufferedReader assignmentsReader = null;
-        try
+        List<DncGeosymCode> codes = readGeosymCodes( );
+
+        int productId = findDncProductId( filename, codes );
+
+        Int2ObjectMap<String> featureDelinCodes = findFeatureDelineationCodes( filename, codes );
+
+        Int2ObjectMap<String> fontNameCodes = findFontNameCodes( codes );
+        Int2ObjectMap<String> fontStyleCodes = findFontStyleCodes( codes );
+        Int2ObjectMap<String> labelJustifyCodes = findLabelJustifyCodes( codes );
+        Int2ObjectMap<Int2ObjectMap<String>> textAbbrevs = readGeosymTextAbbreviations( );
+        Int2ObjectMap<DncGeosymTextStyle> textStyles = readGeosymTextStyles( fontNameCodes, fontStyleCodes, textAbbrevs );
+        Int2ObjectMap<DncGeosymLabelLocation> labelLocations = readGeosymLabelLocations( labelJustifyCodes );
+        Int2ObjectMap<DncGeosymLabelJoin> labelJoins = readGeosymLabelJoins( textStyles, labelLocations );
+
+        Int2ObjectMap<String> attrComparisonCodes = findAttrComparisonCodes( codes );
+        Int2ObjectMap<String> attrExprConnectorCodes = findAttrExprConnectorCodes( codes );
+        Int2ObjectMap<DncGeosymAttributeExpression> attrExprs = readGeosymAttributeExpressions( attrComparisonCodes, attrExprConnectorCodes );
+
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + filename ) ) )
         {
-            codesReader = resourceReader( geosymCodesFile );
-            List<DncGeosymCode> codes = readGeosymCodes( codesReader );
-
-            int productId = findDncProductId( filename, codes );
-
-            Int2ObjectMap<String> featureDelinCodes = findFeatureDelineationCodes( filename, codes );
-
-            attrExprsReader = resourceReader( geosymAttrExprsFile );
-            textStylesReader = resourceReader( geosymTextStylesFile );
-            textAbbrevsReader = resourceReader( geosymTextAbbreviationsFile );
-            labelLocationsReader = resourceReader( geosymLabelLocationsFile );
-            labelJoinsReader = resourceReader( geosymLabelJoinsFile );
-            Int2ObjectMap<String> fontNameCodes = findFontNameCodes( codes );
-            Int2ObjectMap<String> fontStyleCodes = findFontStyleCodes( codes );
-            Int2ObjectMap<String> labelJustifyCodes = findLabelJustifyCodes( codes );
-            Int2ObjectMap<Int2ObjectMap<String>> textAbbrevs = readGeosymTextAbbreviations( textAbbrevsReader );
-            Int2ObjectMap<DncGeosymTextStyle> textStyles = readGeosymTextStyles( textStylesReader, fontNameCodes, fontStyleCodes, textAbbrevs );
-            Int2ObjectMap<DncGeosymLabelLocation> labelLocations = readGeosymLabelLocations( labelLocationsReader, labelJustifyCodes );
-            Int2ObjectMap<DncGeosymLabelJoin> labelJoins = readGeosymLabelJoins( labelJoinsReader, textStyles, labelLocations );
-
-            Int2ObjectMap<String> attrComparisonCodes = findAttrComparisonCodes( codes );
-            Int2ObjectMap<String> attrExprConnectorCodes = findAttrExprConnectorCodes( codes );
-            Int2ObjectMap<DncGeosymAttributeExpression> attrExprs = readGeosymAttributeExpressions( attrExprsReader, attrComparisonCodes, attrExprConnectorCodes );
-
-            assignmentsReader = resourceReader( filename );
-            return readGeosymAssignments( assignmentsReader, productId, featureDelinCodes, attrExprs, labelJoins );
-        }
-        finally
-        {
-            if ( attrExprsReader != null ) attrExprsReader.close( );
-            if ( codesReader != null ) codesReader.close( );
-            if ( textStylesReader != null ) textStylesReader.close( );
-            if ( textAbbrevsReader != null ) textAbbrevsReader.close( );
-            if ( labelLocationsReader != null ) labelLocationsReader.close( );
-            if ( labelJoinsReader != null ) labelJoinsReader.close( );
-            if ( assignmentsReader != null ) assignmentsReader.close( );
+            return readGeosymAssignments( reader, productId, featureDelinCodes, attrExprs, labelJoins );
         }
     }
 
@@ -267,6 +247,14 @@ public class DncGeosymIo
         }
     }
 
+    public static Int2ObjectMap<DncGeosymLabelJoin> readGeosymLabelJoins( Int2ObjectMap<DncGeosymTextStyle> textStyles, Int2ObjectMap<DncGeosymLabelLocation> labelLocations ) throws IOException
+    {
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + geosymLabelJoinsFile ) ) )
+        {
+            return readGeosymLabelJoins( reader, textStyles, labelLocations );
+        }
+    }
+
     public static Int2ObjectMap<DncGeosymLabelJoin> readGeosymLabelJoins( BufferedReader reader, Int2ObjectMap<DncGeosymTextStyle> textStyles, Int2ObjectMap<DncGeosymLabelLocation> labelLocations ) throws IOException
     {
         Int2ObjectMap<DncGeosymLabelJoin> joins = new Int2ObjectOpenHashMap<DncGeosymLabelJoin>( );
@@ -320,6 +308,14 @@ public class DncGeosymIo
         return rgbas;
     }
 
+    public static Int2ObjectMap<DncGeosymTextStyle> readGeosymTextStyles( Int2ObjectMap<String> fontNameCodes, Int2ObjectMap<String> fontStyleCodes, Int2ObjectMap<Int2ObjectMap<String>> textAbbrevs ) throws IOException
+    {
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + geosymTextStylesFile ) ) )
+        {
+            return readGeosymTextStyles( reader, fontNameCodes, fontStyleCodes, textAbbrevs );
+        }
+    }
+
     public static Int2ObjectMap<DncGeosymTextStyle> readGeosymTextStyles( BufferedReader reader, Int2ObjectMap<String> fontNameCodes, Int2ObjectMap<String> fontStyleCodes, Int2ObjectMap<Int2ObjectMap<String>> textAbbrevs ) throws IOException
     {
         Int2ObjectMap<DncGeosymTextStyle> styles = new Int2ObjectOpenHashMap<DncGeosymTextStyle>( );
@@ -350,6 +346,14 @@ public class DncGeosymIo
             styles.put( styleId, style );
         }
         return styles;
+    }
+
+    public static Int2ObjectMap<Int2ObjectMap<String>> readGeosymTextAbbreviations( ) throws IOException
+    {
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + geosymTextAbbreviationsFile ) ) )
+        {
+            return readGeosymTextAbbreviations( reader );
+        }
     }
 
     public static Int2ObjectMap<Int2ObjectMap<String>> readGeosymTextAbbreviations( BufferedReader reader ) throws IOException
@@ -387,6 +391,14 @@ public class DncGeosymIo
             }
         }
         return abbrevs;
+    }
+
+    public static Int2ObjectMap<DncGeosymLabelLocation> readGeosymLabelLocations( Int2ObjectMap<String> labelJustifyCodes ) throws IOException
+    {
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + geosymLabelLocationsFile ) ) )
+        {
+            return readGeosymLabelLocations( reader, labelJustifyCodes );
+        }
     }
 
     public static Int2ObjectMap<DncGeosymLabelLocation> readGeosymLabelLocations( BufferedReader reader, Int2ObjectMap<String> labelJustifyCodes ) throws IOException
@@ -434,6 +446,14 @@ public class DncGeosymIo
             locations.put( locationId, location );
         }
         return locations;
+    }
+
+    public static Int2ObjectMap<DncGeosymAttributeExpression> readGeosymAttributeExpressions( Int2ObjectMap<String> comparisonOpCodes, Int2ObjectMap<String> connectorCodes ) throws IOException
+    {
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + geosymAttrExprsFile ) ) )
+        {
+            return readGeosymAttributeExpressions( reader, comparisonOpCodes, connectorCodes );
+        }
     }
 
     public static Int2ObjectMap<DncGeosymAttributeExpression> readGeosymAttributeExpressions( BufferedReader reader, Int2ObjectMap<String> comparisonOpCodes, Int2ObjectMap<String> connectorCodes ) throws IOException
@@ -574,6 +594,14 @@ public class DncGeosymIo
             }
         }
         return justifications;
+    }
+
+    public static List<DncGeosymCode> readGeosymCodes( ) throws IOException
+    {
+        try ( BufferedReader reader = createReader( DncGeosymIo.class.getResource( "assignments/" + geosymCodesFile ) ) )
+        {
+            return readGeosymCodes( reader );
+        }
     }
 
     public static List<DncGeosymCode> readGeosymCodes( BufferedReader reader ) throws IOException
