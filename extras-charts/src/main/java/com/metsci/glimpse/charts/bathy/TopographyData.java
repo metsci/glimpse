@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -62,10 +63,13 @@ public class TopographyData
      */
     protected float[][] data;
 
-    public TopographyData( InputStream in ) throws IOException
+    public TopographyData( URL url ) throws IOException
     {
         super( );
-        read( in );
+        try ( InputStream stream = url.openStream( ) )
+        {
+            this.read( stream );
+        }
     }
 
     private static class Row

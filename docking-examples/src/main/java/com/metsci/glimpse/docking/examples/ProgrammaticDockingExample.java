@@ -31,12 +31,12 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.docking.examples.SimpleDockingExample.newSolidPanel;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -55,6 +55,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.docking.DockingTheme;
 import com.metsci.glimpse.docking.MultiSplitPane;
@@ -70,114 +71,114 @@ public class ProgrammaticDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        initTinyLaf( );
-        final DockingTheme dockingTheme = defaultDockingTheme( );
-
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
-        swingRun( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
-            {
+            initTinyLaf( );
+            initStandardGlimpseApp( );
+            DockingTheme dockingTheme = defaultDockingTheme( );
 
-                // Create view components
-                //
 
-                JPanel aPanel = newSolidPanel( red );
-                JPanel bPanel = newSolidPanel( green );
-                JPanel cPanel = newSolidPanel( blue );
-                JPanel dPanel = newSolidPanel( cyan );
-                JPanel ePanel = newSolidPanel( magenta );
-                JPanel fPanel = newSolidPanel( yellow );
-                JPanel gPanel = newSolidPanel( gray );
-                JPanel hPanel = newSolidPanel( white );
+            // Create view components
+            //
 
-                // Create view toolbars
-                //
+            JPanel aPanel = newSolidPanel( red );
+            JPanel bPanel = newSolidPanel( green );
+            JPanel cPanel = newSolidPanel( blue );
+            JPanel dPanel = newSolidPanel( cyan );
+            JPanel ePanel = newSolidPanel( magenta );
+            JPanel fPanel = newSolidPanel( yellow );
+            JPanel gPanel = newSolidPanel( gray );
+            JPanel hPanel = newSolidPanel( white );
 
-                JToolBar aToolbar = newToolbar( true );
-                aToolbar.add( new JButton( "A1" ) );
-                aToolbar.add( new JButton( "A2" ) );
-                aToolbar.add( new JButton( "A3" ) );
 
-                JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-                JPopupMenu aOptionsPopup = new JPopupMenu( );
-                attachPopupMenu( aOptionsButton, aOptionsPopup );
-                aOptionsPopup.add( new JMenuItem( "Option 1" ) );
-                aToolbar.add( aOptionsButton );
+            // Create view toolbars
+            //
 
-                JToolBar bToolbar = newToolbar( true );
-                bToolbar.add( new JButton( "B1" ) );
+            JToolBar aToolbar = newToolbar( true );
+            aToolbar.add( new JButton( "A1" ) );
+            aToolbar.add( new JButton( "A2" ) );
+            aToolbar.add( new JButton( "A3" ) );
 
-                JToolBar cToolbar = null;
+            JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
+            JPopupMenu aOptionsPopup = new JPopupMenu( );
+            attachPopupMenu( aOptionsButton, aOptionsPopup );
+            aOptionsPopup.add( new JMenuItem( "Option 1" ) );
+            aToolbar.add( aOptionsButton );
 
-                JToolBar dToolbar = newToolbar( true );
-                dToolbar.add( new JButton( "D1" ) );
-                dToolbar.add( new JButton( "D2" ) );
-                dToolbar.add( new JButton( "D3" ) );
-                dToolbar.add( new JButton( "D4" ) );
-                dToolbar.add( new JButton( "D5" ) );
+            JToolBar bToolbar = newToolbar( true );
+            bToolbar.add( new JButton( "B1" ) );
 
-                JToolBar eToolbar = newToolbar( true );
-                eToolbar.add( new JButton( "E1" ) );
-                eToolbar.add( new JButton( "E2" ) );
+            JToolBar cToolbar = null;
 
-                JToolBar fToolbar = newToolbar( true );
-                fToolbar.add( new JButton( "F1" ) );
-                fToolbar.add( new JButton( "F2" ) );
-                fToolbar.add( new JButton( "F3" ) );
+            JToolBar dToolbar = newToolbar( true );
+            dToolbar.add( new JButton( "D1" ) );
+            dToolbar.add( new JButton( "D2" ) );
+            dToolbar.add( new JButton( "D3" ) );
+            dToolbar.add( new JButton( "D4" ) );
+            dToolbar.add( new JButton( "D5" ) );
 
-                JToolBar gToolbar = newToolbar( true );
+            JToolBar eToolbar = newToolbar( true );
+            eToolbar.add( new JButton( "E1" ) );
+            eToolbar.add( new JButton( "E2" ) );
 
-                JToolBar hToolbar = newToolbar( true );
-                hToolbar.add( new JButton( "H1" ) );
+            JToolBar fToolbar = newToolbar( true );
+            fToolbar.add( new JButton( "F1" ) );
+            fToolbar.add( new JButton( "F2" ) );
+            fToolbar.add( new JButton( "F3" ) );
 
-                // Create views
-                //
+            JToolBar gToolbar = newToolbar( true );
 
-                View aView = new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ), aToolbar );
-                View bView = new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ), bToolbar );
-                View cView = new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewC.png" ), cToolbar );
-                View dView = new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewD.png" ), dToolbar );
-                View eView = new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewE.png" ), eToolbar );
-                View fView = new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewF.png" ), fToolbar );
-                View gView = new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewG.png" ), gToolbar );
-                View hView = new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewH.png" ), hToolbar );
+            JToolBar hToolbar = newToolbar( true );
+            hToolbar.add( new JButton( "H1" ) );
 
-                // Create and show the docking group
-                //
 
-                DockingGroupMultiframe dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
-                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
+            // Create views
+            //
 
-                Tile aTile = tileFactory.newTile( );
-                aTile.addView( aView, 0 );
-                aTile.addView( bView, 1 );
-                aTile.addView( cView, 2 );
+            View aView = new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewA.png" ) ), aToolbar );
+            View bView = new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewB.png" ) ), bToolbar );
+            View cView = new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewC.png" ) ), cToolbar );
+            View dView = new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewD.png" ) ), dToolbar );
+            View eView = new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewE.png" ) ), eToolbar );
+            View fView = new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewF.png" ) ), fToolbar );
+            View gView = new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewG.png" ) ), gToolbar );
+            View hView = new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( ProgrammaticDockingExample.class.getResource( "icons/ViewH.png" ) ), hToolbar );
 
-                Tile bTile = tileFactory.newTile( );
-                bTile.addView( dView, 0 );
-                bTile.addView( eView, 1 );
 
-                Tile cTile = tileFactory.newTile( );
-                cTile.addView( fView, 0 );
-                cTile.addView( gView, 1 );
-                cTile.addView( hView, 2 );
+            // Create and show the docking group
+            //
 
-                DockingFrame frame = dockingGroup.addNewFrame( );
-                MultiSplitPane docker = frame.docker;
+            DockingGroupMultiframe dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
+            dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
+            TileFactory tileFactory = new TileFactoryStandard( dockingGroup );
 
-                docker.addInitialLeaf( aTile );
-                docker.addNeighborLeaf( bTile, aTile, LEFT, 0.3 );
-                docker.addEdgeLeaf( cTile, BOTTOM, 0.3 );
+            Tile aTile = tileFactory.newTile( );
+            aTile.addView( aView, 0 );
+            aTile.addView( bView, 1 );
+            aTile.addView( cView, 2 );
 
-                frame.setPreferredSize( new Dimension( 1024, 768 ) );
-                frame.pack( );
-                frame.setLocationByPlatform( true );
-                frame.setVisible( true );
+            Tile bTile = tileFactory.newTile( );
+            bTile.addView( dView, 0 );
+            bTile.addView( eView, 1 );
 
-            }
+            Tile cTile = tileFactory.newTile( );
+            cTile.addView( fView, 0 );
+            cTile.addView( gView, 1 );
+            cTile.addView( hView, 2 );
+
+            DockingFrame frame = dockingGroup.addNewFrame( );
+            MultiSplitPane docker = frame.docker;
+
+            docker.addInitialLeaf( aTile );
+            docker.addNeighborLeaf( bTile, aTile, LEFT, 0.3 );
+            docker.addEdgeLeaf( cTile, BOTTOM, 0.3 );
+
+            frame.setPreferredSize( new Dimension( 1024, 768 ) );
+            frame.pack( );
+            frame.setLocationByPlatform( true );
+            frame.setVisible( true );
+
         } );
     }
 

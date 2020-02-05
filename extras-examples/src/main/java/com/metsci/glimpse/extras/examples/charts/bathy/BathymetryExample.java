@@ -170,7 +170,7 @@ public class BathymetryExample
         TopographyData bathymetryData;
         try
         {
-            bathymetryData = new TopographyData( getClass( ).getModule( ).getResourceAsStream( "com/metsci/glimpse/extras/examples/data/Cayman.bathy" ) );
+            bathymetryData = new TopographyData( BathymetryExample.class.getResource( "Cayman.bathy" ) );
         }
         catch ( IOException e )
         {

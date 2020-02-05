@@ -28,9 +28,7 @@ package com.metsci.glimpse.docking.examples;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
-import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
@@ -38,6 +36,8 @@ import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
+
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.metsci.glimpse.docking.DockingGroup;
@@ -53,63 +53,61 @@ public class GlimpseDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        initTinyLaf( );
-        initStandardGlimpseApp( );
-
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
-        swingRun( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            initTinyLaf( );
+            initStandardGlimpseApp( );
+
+
+            // Create view components
+            //
+
+            GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
+
+            NewtSwingEDTGlimpseCanvas aCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
+            aCanvas.addLayout( TaggedHeatMapExample.newPlot( greenBone ) );
+
+            NewtSwingEDTGlimpseCanvas bCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
+            bCanvas.addLayout( TaggedHeatMapExample.newPlot( jet ) );
+
+            SwingEDTAnimator glAnimator = new SwingEDTAnimator( 30 );
+            glAnimator.add( aCanvas.getGLDrawable( ) );
+            glAnimator.add( bCanvas.getGLDrawable( ) );
+            glAnimator.start( );
+
+
+            // Create views
+            //
+
+            View[] views =
             {
+                new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( GlimpseDockingExample.class.getResource( "icons/ViewA.png" ) ) ),
+                new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( GlimpseDockingExample.class.getResource( "icons/ViewB.png" ) ) )
+            };
 
-                // Create view components
-                //
 
-                GLOffscreenAutoDrawable glDrawable = newOffscreenDrawable( );
+            // Create and show the docking group
+            //
 
-                NewtSwingEDTGlimpseCanvas aCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
-                aCanvas.addLayout( TaggedHeatMapExample.newPlot( greenBone ) );
+            String appName = "glimpse-docking-example";
+            DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
+            dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
+            setArrangementAndSaveOnDispose( dockingGroup, appName, GlimpseDockingExample.class.getResource( "docking/glimpse-arrangement-default.xml" ) );
 
-                NewtSwingEDTGlimpseCanvas bCanvas = new NewtSwingEDTGlimpseCanvas( glDrawable.getContext( ) );
-                bCanvas.addLayout( TaggedHeatMapExample.newPlot( jet ) );
-
-                final SwingEDTAnimator glAnimator = new SwingEDTAnimator( 30 );
-                glAnimator.add( aCanvas.getGLDrawable( ) );
-                glAnimator.add( bCanvas.getGLDrawable( ) );
-                glAnimator.start( );
-
-                // Create views
-                //
-
-                View[] views =
-                        {
-                                new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ) ),
-                                new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ) )
-                        };
-
-                // Create and show the docking group
-                //
-
-                final String appName = "glimpse-docking-example";
-                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
-                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( GlimpseDockingExample.class, "com/metsci/glimpse/docking/examples/docking/glimpse-arrangement-default.xml" ) );
-
-                dockingGroup.addListener( new DockingGroupAdapter( )
+            dockingGroup.addListener( new DockingGroupAdapter( )
+            {
+                @Override
+                public void disposingAllWindows( DockingGroup group )
                 {
-                    @Override
-                    public void disposingAllWindows( DockingGroup group )
-                    {
-                        aCanvas.destroy( );
-                        bCanvas.destroy( );
-                    }
-                } );
+                    aCanvas.destroy( );
+                    bCanvas.destroy( );
+                }
+            } );
 
-                dockingGroup.addViews( views );
-                dockingGroup.setVisible( true );
+            dockingGroup.addViews( views );
+            dockingGroup.setVisible( true );
 
-            }
         } );
     }
 

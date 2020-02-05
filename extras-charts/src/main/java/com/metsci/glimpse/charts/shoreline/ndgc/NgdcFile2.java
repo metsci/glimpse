@@ -28,8 +28,8 @@ package com.metsci.glimpse.charts.shoreline.ndgc;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,9 +62,9 @@ public class NgdcFile2 implements LandShapeCapable
 
     private final LandShape _shape;
 
-    public NgdcFile2( InputStream in ) throws IOException
+    public NgdcFile2( URL url ) throws IOException
     {
-        List<String> fileContent = readFile( in );
+        List<String> fileContent = readFile( url );
         List<List<LandVertex>> segments = readSegments( fileContent );
         LandBox newLandBox = newLandBox( fileContent, segments );
 
@@ -83,18 +83,18 @@ public class NgdcFile2 implements LandShapeCapable
         _shape = new LandShape( segments3, newLandBox );
     }
 
-    private static List<String> readFile( InputStream in ) throws IOException
+    private static List<String> readFile( URL url ) throws IOException
     {
-        List<String> fileContent = new ArrayList<String>( );
-        String line = null;
-        BufferedReader reader = new BufferedReader( new InputStreamReader( in ) );
-
-        while ( ( line = reader.readLine( ) ) != null )
+        try ( BufferedReader reader = new BufferedReader( new InputStreamReader( url.openStream( ) ) ) )
         {
-            fileContent.add( line );
+            List<String> fileContent = new ArrayList<String>( );
+            String line = null;
+            while ( ( line = reader.readLine( ) ) != null )
+            {
+                fileContent.add( line );
+            }
+            return fileContent;
         }
-
-        return fileContent;
     }
 
     private static List<List<LandVertex>> readSegments( List<String> fileContent )

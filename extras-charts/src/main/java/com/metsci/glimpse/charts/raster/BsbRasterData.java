@@ -41,6 +41,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.HashSet;
@@ -94,6 +95,14 @@ public final class BsbRasterData
         this._width_PIXELS = width_PIXELS;
         this._height_PIXELS = height_PIXELS;
         this._registrationPoints = registrationPoints;
+    }
+
+    public static BsbRasterData readImage( URL url ) throws IOException
+    {
+        try ( InputStream in = url.openStream( ) )
+        {
+            return readImage( in );
+        }
     }
 
     public static BsbRasterData readImage( InputStream in ) throws IOException

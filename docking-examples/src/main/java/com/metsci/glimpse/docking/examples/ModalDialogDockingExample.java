@@ -28,9 +28,7 @@ package com.metsci.glimpse.docking.examples;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
-import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.docking.examples.SimpleDockingExample.newSolidPanel;
@@ -47,6 +45,7 @@ import static java.awt.Color.yellow;
 import static java.awt.Dialog.ModalityType.APPLICATION_MODAL;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.View;
@@ -58,53 +57,52 @@ public class ModalDialogDockingExample
     public static void main( String[] args ) throws Exception
     {
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
-        swingRun( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            initTinyLaf( );
+            initStandardGlimpseApp( );
+
+
+            // Create view components
+            //
+
+            JPanel aPanel = newSolidPanel( red );
+            JPanel bPanel = newSolidPanel( green );
+            JPanel cPanel = newSolidPanel( blue );
+            JPanel dPanel = newSolidPanel( cyan );
+            JPanel ePanel = newSolidPanel( magenta );
+            JPanel fPanel = newSolidPanel( yellow );
+            JPanel gPanel = newSolidPanel( gray );
+            JPanel hPanel = newSolidPanel( white );
+
+
+            // Create views
+            //
+
+            View[] views =
             {
-                initTinyLaf( );
-                initStandardGlimpseApp( );
+                new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewA.png" ) ) ),
+                new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewB.png" ) ) ),
+                new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewC.png" ) ) ),
+                new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewD.png" ) ) ),
+                new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewE.png" ) ) ),
+                new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewF.png" ) ) ),
+                new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewG.png" ) ) ),
+                new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( ModalDialogDockingExample.class.getResource( "icons/ViewH.png" ) ) ),
+            };
 
-                // Create view components
-                //
 
-                JPanel aPanel = newSolidPanel( red );
-                JPanel bPanel = newSolidPanel( green );
-                JPanel cPanel = newSolidPanel( blue );
-                JPanel dPanel = newSolidPanel( cyan );
-                JPanel ePanel = newSolidPanel( magenta );
-                JPanel fPanel = newSolidPanel( yellow );
-                JPanel gPanel = newSolidPanel( gray );
-                JPanel hPanel = newSolidPanel( white );
+            // Create and show the docking group
+            //
 
-                // Create views
-                //
+            String appName = "modal-dialog-docking-example";
+            DockingGroup dockingGroup = new DockingGroupDialog( null, APPLICATION_MODAL, DISPOSE_ALL_FRAMES );
+            dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
+            setArrangementAndSaveOnDispose( dockingGroup, appName, ModalDialogDockingExample.class.getResource( "docking/simple-arrangement-default.xml" ) );
 
-                View[] views =
-                        {
-                                new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ) ),
-                                new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ) ),
-                                new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewC.png" ) ),
-                                new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewD.png" ) ),
-                                new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewE.png" ) ),
-                                new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewF.png" ) ),
-                                new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewG.png" ) ),
-                                new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewH.png" ) ),
-                        };
+            dockingGroup.addViews( views );
+            dockingGroup.setVisible( true );
 
-                // Create and show the docking group
-                //
-
-                String appName = "modal-dialog-docking-example";
-                DockingGroup dockingGroup = new DockingGroupDialog( null, APPLICATION_MODAL, DISPOSE_ALL_FRAMES );
-                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( ModalDialogDockingExample.class, "com/metsci/glimpse/docking/examples/docking/simple-arrangement-default.xml" ) );
-
-                dockingGroup.addViews( views );
-                dockingGroup.setVisible( true );
-
-            }
         } );
     }
 

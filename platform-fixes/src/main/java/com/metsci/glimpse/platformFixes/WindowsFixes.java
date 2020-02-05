@@ -40,6 +40,14 @@ import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.util.jnlu.LibraryList;
 
+/**
+ * Works on Oracle/OpenJDK 8 JVMs.
+ * <p>
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
+ * <pre>
+ * --add-opens java.desktop/java.awt=ALL-UNNAMED
+ * </pre>
+ */
 public class WindowsFixes
 {
 
@@ -47,9 +55,9 @@ public class WindowsFixes
 
     private static LibraryList getLibs( )
     {
-        if ( onPlatform( "win", "amd64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
+        if ( onPlatform( "win", "amd64"  ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
         if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86" ) ) return new LibraryList( "platformFixes/windows32", "windowsFixes.dll" );
+        if ( onPlatform( "win", "x86"    ) ) return new LibraryList( "platformFixes/windows32", "windowsFixes.dll" );
         return null;
     }
 

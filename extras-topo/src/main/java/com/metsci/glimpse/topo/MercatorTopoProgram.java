@@ -26,21 +26,20 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
-import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
+import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
-
 import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.gl.texture.ColorTexture1D;
@@ -49,8 +48,8 @@ import com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection;
 public class MercatorTopoProgram
 {
 
-    public static final String vertShader_GLSL = requireResourceText( MercatorTopoProgram.class, "shaders/TopoProgram/topo-mercator.vs" );
-    public static final String fragShader_GLSL = requireResourceText( MercatorTopoProgram.class, "shaders/TopoProgram/topo-mercator.fs" );
+    public static final String vertShader_GLSL = requireText( MercatorTopoProgram.class.getResource( "shaders/topo-mercator.vs" ) );
+    public static final String fragShader_GLSL = requireText( MercatorTopoProgram.class.getResource( "shaders/topo-mercator.fs" ) );
 
 
     public static class Handles

@@ -30,18 +30,19 @@ import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
 import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.topo.io.TopoCache.topoCacheDataset;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.requireTopoDataFile;
 import static com.metsci.glimpse.topo.io.TopoReader.readTopoLevel;
 import static com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection.standardMercatorProj;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.GeneralUtils.require;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static java.lang.Math.PI;
 
 import java.io.File;
+
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.Axis2D;
@@ -55,15 +56,13 @@ import com.metsci.glimpse.topo.MercatorTopoPainter;
 import com.metsci.glimpse.topo.io.TopoDataFile;
 import com.metsci.glimpse.topo.io.TopoDataset;
 
-// FIXME DirectBuffer
 public class MercatorTopoPainterExample
 {
 
     public static void main( String[] args )
     {
-        initializeLogging( "com/metsci/glimpse/extras/examples/topo/logging.properties" );
-
-        swingInvokeLater( ( ) ->
+        initLogging( MercatorTopoPainterExample.class.getResource( "logging.properties" ) );
+        SwingUtilities.invokeLater( ( ) ->
         {
             MultiAxisPlot2D plot = new MultiAxisPlot2D( )
             {

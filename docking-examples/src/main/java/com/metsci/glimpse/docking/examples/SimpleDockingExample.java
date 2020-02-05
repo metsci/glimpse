@@ -31,11 +31,10 @@ import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
-import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
-import static com.metsci.glimpse.docking.DockingUtils.swingRun;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -54,6 +53,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingTheme;
@@ -65,95 +65,95 @@ public class SimpleDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        initTinyLaf( );
-        final DockingTheme dockingTheme = defaultDockingTheme( );
-
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
-        swingRun( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            initTinyLaf( );
+            initStandardGlimpseApp( );
+            DockingTheme dockingTheme = defaultDockingTheme( );
+
+
+            // Create view components
+            //
+
+            JPanel aPanel = newSolidPanel( red );
+            JPanel bPanel = newSolidPanel( green );
+            JPanel cPanel = newSolidPanel( blue );
+            JPanel dPanel = newSolidPanel( cyan );
+            JPanel ePanel = newSolidPanel( magenta );
+            JPanel fPanel = newSolidPanel( yellow );
+            JPanel gPanel = newSolidPanel( gray );
+            JPanel hPanel = newSolidPanel( white );
+
+
+            // Create view toolbars
+            //
+
+            JToolBar aToolbar = newToolbar( true );
+            aToolbar.add( new JButton( "A1" ) );
+            aToolbar.add( new JButton( "A2" ) );
+            aToolbar.add( new JButton( "A3" ) );
+
+            JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
+            JPopupMenu aOptionsPopup = new JPopupMenu( );
+            attachPopupMenu( aOptionsButton, aOptionsPopup );
+            aOptionsPopup.add( new JMenuItem( "Option 1" ) );
+            aToolbar.add( aOptionsButton );
+
+            JToolBar bToolbar = newToolbar( true );
+            bToolbar.add( new JButton( "B1" ) );
+
+            JToolBar cToolbar = null;
+
+            JToolBar dToolbar = newToolbar( true );
+            dToolbar.add( new JButton( "D1" ) );
+            dToolbar.add( new JButton( "D2" ) );
+            dToolbar.add( new JButton( "D3" ) );
+            dToolbar.add( new JButton( "D4" ) );
+            dToolbar.add( new JButton( "D5" ) );
+
+            JToolBar eToolbar = newToolbar( true );
+            eToolbar.add( new JButton( "E1" ) );
+            eToolbar.add( new JButton( "E2" ) );
+
+            JToolBar fToolbar = newToolbar( true );
+            fToolbar.add( new JButton( "F1" ) );
+            fToolbar.add( new JButton( "F2" ) );
+            fToolbar.add( new JButton( "F3" ) );
+
+            JToolBar gToolbar = newToolbar( true );
+
+            JToolBar hToolbar = newToolbar( true );
+            hToolbar.add( new JButton( "H1" ) );
+
+
+            // Create views
+            //
+
+            View[] views =
             {
+                new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewA.png" ) ), aToolbar ),
+                new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewB.png" ) ), bToolbar ),
+                new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewC.png" ) ), cToolbar ),
+                new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewD.png" ) ), dToolbar ),
+                new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewE.png" ) ), eToolbar ),
+                new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewF.png" ) ), fToolbar ),
+                new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewG.png" ) ), gToolbar ),
+                new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( SimpleDockingExample.class.getResource( "icons/ViewH.png" ) ), hToolbar ),
+            };
 
-                // Create view components
-                //
 
-                JPanel aPanel = newSolidPanel( red );
-                JPanel bPanel = newSolidPanel( green );
-                JPanel cPanel = newSolidPanel( blue );
-                JPanel dPanel = newSolidPanel( cyan );
-                JPanel ePanel = newSolidPanel( magenta );
-                JPanel fPanel = newSolidPanel( yellow );
-                JPanel gPanel = newSolidPanel( gray );
-                JPanel hPanel = newSolidPanel( white );
+            // Create and show the docking group
+            //
 
-                // Create view toolbars
-                //
+            String appName = "simple-docking-example";
+            DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
+            dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
+            setArrangementAndSaveOnDispose( dockingGroup, appName, SimpleDockingExample.class.getResource( "docking/simple-arrangement-default.xml" ) );
 
-                JToolBar aToolbar = newToolbar( true );
-                aToolbar.add( new JButton( "A1" ) );
-                aToolbar.add( new JButton( "A2" ) );
-                aToolbar.add( new JButton( "A3" ) );
+            dockingGroup.addViews( views );
+            dockingGroup.setVisible( true );
 
-                JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-                JPopupMenu aOptionsPopup = new JPopupMenu( );
-                attachPopupMenu( aOptionsButton, aOptionsPopup );
-                aOptionsPopup.add( new JMenuItem( "Option 1" ) );
-                aToolbar.add( aOptionsButton );
-
-                JToolBar bToolbar = newToolbar( true );
-                bToolbar.add( new JButton( "B1" ) );
-
-                JToolBar cToolbar = null;
-
-                JToolBar dToolbar = newToolbar( true );
-                dToolbar.add( new JButton( "D1" ) );
-                dToolbar.add( new JButton( "D2" ) );
-                dToolbar.add( new JButton( "D3" ) );
-                dToolbar.add( new JButton( "D4" ) );
-                dToolbar.add( new JButton( "D5" ) );
-
-                JToolBar eToolbar = newToolbar( true );
-                eToolbar.add( new JButton( "E1" ) );
-                eToolbar.add( new JButton( "E2" ) );
-
-                JToolBar fToolbar = newToolbar( true );
-                fToolbar.add( new JButton( "F1" ) );
-                fToolbar.add( new JButton( "F2" ) );
-                fToolbar.add( new JButton( "F3" ) );
-
-                JToolBar gToolbar = newToolbar( true );
-
-                JToolBar hToolbar = newToolbar( true );
-                hToolbar.add( new JButton( "H1" ) );
-
-                // Create views
-                //
-
-                View[] views =
-                        {
-                                new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewA.png" ), aToolbar ),
-                                new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewB.png" ), bToolbar ),
-                                new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewC.png" ), cToolbar ),
-                                new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewD.png" ), dToolbar ),
-                                new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewE.png" ), eToolbar ),
-                                new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewF.png" ), fToolbar ),
-                                new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewG.png" ), gToolbar ),
-                                new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "com/metsci/glimpse/docking/examples/icons/ViewH.png" ), hToolbar )
-                        };
-
-                // Create and show the docking group
-                //
-
-                final String appName = "simple-docking-example";
-                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
-                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
-                setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "com/metsci/glimpse/docking/examples/docking/simple-arrangement-default.xml" ) );
-
-                dockingGroup.addViews( views );
-                dockingGroup.setVisible( true );
-
-            }
         } );
     }
 

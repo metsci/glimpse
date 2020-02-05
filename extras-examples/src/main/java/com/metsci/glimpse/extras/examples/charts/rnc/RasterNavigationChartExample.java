@@ -40,7 +40,6 @@ import com.metsci.glimpse.support.projection.Projection;
 import com.metsci.glimpse.support.shader.colormap.ColorMapIntegerProgram;
 import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.MercatorProjection;
-import com.metsci.glimpse.util.io.StreamOpener;
 
 /**
  * Glimpse has preliminary support for displaying Electronic Navigation Chart
@@ -82,7 +81,7 @@ public class RasterNavigationChartExample
             ColorMapIntegerProgram fragShader = new ColorMapIntegerProgram( plot.getAxisZ( ), 0, 1 );
             painter.setProgram( fragShader );
 
-            BsbRasterData data = BsbRasterData.readImage( StreamOpener.fileThenResource.openForRead( "com/metsci/glimpse/extras/examples/data/ENCSample.bsb" ) );
+            BsbRasterData data = BsbRasterData.readImage( RasterNavigationChartExample.class.getResource( "ENCSample.bsb" ) );
             MercatorProjection mercatorProjection = new MercatorProjection( );
 
             ByteTextureProjected2D dataTexture = data.getDataTexture( );
