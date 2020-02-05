@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 /**
  * @author ulman
@@ -24,13 +24,12 @@ module com.metsci.glimpse.extras.examples
     opens com.metsci.glimpse.extras.examples.icons.eclipse;
     opens com.metsci.glimpse.extras.examples.icons.fugue;
     opens com.metsci.glimpse.extras.examples.topo;
-    
+
     requires transitive com.metsci.glimpse.charts;
     requires transitive com.metsci.glimpse.core;
     requires transitive com.metsci.glimpse.core.examples;
     requires transitive com.metsci.glimpse.dnc;
     requires transitive com.metsci.glimpse.docking;
-    requires transitive com.metsci.glimpse.dspl;
     requires transitive com.metsci.glimpse.text;
     requires transitive com.metsci.glimpse.tinylaf;
     requires transitive com.metsci.glimpse.topo;

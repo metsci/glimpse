@@ -72,7 +72,6 @@
         <module>wizard-examples</module>
 
         <module>extras-charts</module>
-        <module>extras-dspl</module>
         <module>extras-dnc</module>
         <module>extras-examples</module>
         <module>extras-tinylaf</module>
