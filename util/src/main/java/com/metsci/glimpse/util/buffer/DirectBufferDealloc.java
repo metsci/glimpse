@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.buffer;
 
+import static com.metsci.glimpse.util.UglyUtils.findClass;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 
 import java.lang.reflect.Method;
@@ -95,8 +96,7 @@ public class DirectBufferDealloc
             this.getCleanerMethod = directBufferClass.getMethod( "cleaner" );
             this.getAttachmentMethod = directBufferClass.getMethod( "attachment" );
 
-            // FIXME: Does this work on Oracle/OpenJDK 8?
-            this.cleanerClass = Class.forName( "jdk.internal.ref.Cleaner" );
+            this.cleanerClass = findClass( "jdk.internal.ref.Cleaner", "sun.misc.Cleaner" );
             this.doCleanMethod = cleanerClass.getMethod( "clean" );
         }
 

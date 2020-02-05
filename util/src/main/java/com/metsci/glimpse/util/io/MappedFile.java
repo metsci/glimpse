@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.io;
 
+import static com.metsci.glimpse.util.UglyUtils.findClass;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 import static java.lang.String.format;
 
@@ -92,7 +93,7 @@ public class MappedFile
         {
             try
             {
-                upstreamClass = firstClassFound( "sun.misc.Cleaner", "jdk.internal.ref.Cleaner" );
+                upstreamClass = findClass( "jdk.internal.ref.Cleaner", "sun.misc.Cleaner" );
                 upstreamCreateMethod = upstreamClass.getDeclaredMethod( "create", Object.class, Runnable.class );
                 upstreamCleanMethod = upstreamClass.getDeclaredMethod( "clean" );
             }
@@ -100,20 +101,6 @@ public class MappedFile
             {
                 throw new RuntimeException( e );
             }
-        }
-
-        protected static Class<?> firstClassFound( String... classnames ) throws ClassNotFoundException
-        {
-            for ( String classname : classnames )
-            {
-                try
-                {
-                    return Class.forName( classname );
-                }
-                catch ( ClassNotFoundException e )
-                { }
-            }
-            throw new ClassNotFoundException( );
         }
 
         protected final Object upstreamCleaner;
