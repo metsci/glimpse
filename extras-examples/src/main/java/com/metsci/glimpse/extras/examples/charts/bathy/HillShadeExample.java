@@ -67,7 +67,7 @@ public class HillShadeExample implements TopoTileProvider
 
     public HillShadeExample( ) throws IOException
     {
-        singleTile = new TopographyData( getClass( ).getModule( ).getResourceAsStream( "com/metsci/glimpse/extras/examples/data/Cayman.bathy" ) );
+        singleTile = new TopographyData( HillShadeExample.class.getResource( "Cayman.bathy" ) );
     }
 
     @Override
