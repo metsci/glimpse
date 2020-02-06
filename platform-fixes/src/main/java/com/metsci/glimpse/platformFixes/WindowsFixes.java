@@ -26,19 +26,21 @@
  */
 package com.metsci.glimpse.platformFixes;
 
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.extractAndLoad;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 import static java.awt.Window.getOwnerlessWindows;
 
 import java.awt.Component;
 import java.awt.Window;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Function;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.util.jnlu.LibraryList;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Works on Oracle/OpenJDK 8 JVMs.
@@ -51,26 +53,25 @@ import com.metsci.glimpse.util.jnlu.LibraryList;
 public class WindowsFixes
 {
 
-    public static final LibraryList libs = getLibs( );
-
-    private static LibraryList getLibs( )
+    private static final ImmutableList<URL> nativeLibs = findNativeLibs( );
+    private static ImmutableList<URL> findNativeLibs( )
     {
-        if ( onPlatform( "win", "amd64"  ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86"    ) ) return new LibraryList( "platformFixes/windows32", "windowsFixes.dll" );
-        return null;
+        if ( onPlatform( "win", "amd64"  ) ) return ImmutableList.of( WindowsFixes.class.getResource( "windows64/windowsFixes.dll" ) );
+        if ( onPlatform( "win", "x86_64" ) ) return ImmutableList.of( WindowsFixes.class.getResource( "windows64/windowsFixes.dll" ) );
+        if ( onPlatform( "win", "x86"    ) ) return ImmutableList.of( WindowsFixes.class.getResource( "windows32/windowsFixes.dll" ) );
+        return ImmutableList.of( );
     }
 
-    public static final boolean shouldApplyFixes = ( libs != null );
+    public static final boolean shouldApplyFixes = !nativeLibs.isEmpty( );
 
-    private static boolean libsNeedInit = shouldApplyFixes;
+    private static boolean nativeLibsNeedInit = shouldApplyFixes;
 
-    private static synchronized void initLibs( )
+    private static synchronized void initNativeLibs( )
     {
-        if ( libsNeedInit )
+        if ( nativeLibsNeedInit )
         {
-            libs.extractAndLoad( WindowsFixes.class.getClassLoader( ), "windowsFixes" );
-            libsNeedInit = false;
+            extractAndLoad( nativeLibs, "windowsFixes" );
+            nativeLibsNeedInit = false;
         }
     }
 
@@ -86,7 +87,7 @@ public class WindowsFixes
     {
         if ( pollingNeedsInit )
         {
-            initLibs( );
+            initNativeLibs( );
 
             TimerTask applyFixesTask = new TimerTask( )
             {
@@ -107,7 +108,7 @@ public class WindowsFixes
     {
         if ( shouldApplyFixes )
         {
-            initLibs( );
+            initNativeLibs( );
             String errorString = _applyFixes( );
             if ( errorString != null ) throw new RuntimeException( "Failed to apply Windows fixes: " + errorString );
         }

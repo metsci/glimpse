@@ -26,17 +26,15 @@
  */
 package com.metsci.glimpse.util.jnlu;
 
-import static java.util.Collections.unmodifiableList;
+import static com.metsci.glimpse.util.io.IoUtils.findUniqueFile;
+import static com.metsci.glimpse.util.jnlu.FileUtils.copy;
+import static com.metsci.glimpse.util.jnlu.FileUtils.createTempDir;
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * @author hogye
@@ -55,114 +53,67 @@ public class NativeLibUtils
         return actualOsName.startsWith( givenOsPrefix ) && actualOsArch.equals( givenOsArch );
     }
 
-    public static void loadLibs( String resourceSearchPath, File extractDir, String... libShortNames ) throws IOException
+    public static void extractAndLoad( List<URL> libraryUrls, String tempDirPrefix )
     {
-        loadLibs( new String[] { resourceSearchPath }, extractDir, libShortNames );
-    }
-
-    public static void loadLibs( String[] resourceSearchPaths, File extractDir, String... libShortNames ) throws IOException
-    {
-        for ( String libShortName : libShortNames )
+        try
         {
-            File libFile = extractLib( resourceSearchPaths, extractDir, libShortName );
-            System.load( libFile.getPath( ) );
-        }
-    }
-
-    public static File extractLib( String resourceSearchPath, File destDir, String libShortName ) throws IOException
-    {
-        return extractLib( new String[] { resourceSearchPath }, destDir, libShortName );
-    }
-
-    public static File extractLib( String[] resourceSearchPaths, File destDir, String libShortName ) throws IOException
-    {
-        List<String> resourceSearchPaths2 = unmodifiableList( Arrays.asList( resourceSearchPaths ) );
-
-        ResolvedResource lib = resolveLib( resourceSearchPaths2, libShortName );
-        if ( lib == null ) throw new RuntimeException( "Couldn't find library on classpath: " + libShortName );
-
-        return copy( lib, destDir );
-    }
-
-    public static class ResolvedResource
-    {
-        public final URL url;
-        public final String name;
-
-        public ResolvedResource( URL url, String name )
-        {
-            this.url = url;
-            this.name = name;
-        }
-    }
-
-    public static ResolvedResource resolveLib( List<String> resourceSearchPaths, String libShortName )
-    {
-        return resolveResource( resourceSearchPaths, possibleLibNames( libShortName ) );
-    }
-
-    public static List<String> possibleLibNames( String libShortName )
-    {
-        String likely = System.mapLibraryName( libShortName );
-
-        List<String> possibles = new ArrayList<String>( );
-        possibles.add( likely );
-
-        // On Darwin, we need to check the .dylib extension if no .jnilib is found
-        if ( likely.endsWith( ".jnilib" ) ) possibles.add( likely.substring( 0, likely.length( ) - ".jnilib".length( ) ) + ".dylib" );
-
-        return possibles;
-    }
-
-    public static ResolvedResource resolveResource( List<String> possiblePaths, List<String> possibleNames )
-    {
-        ClassLoader cl = NativeLibUtils.class.getClassLoader( );
-        for ( String path : possiblePaths )
-        {
-            for ( String name : possibleNames )
+            File tempDir = createTempDir( tempDirPrefix );
+            for ( URL url : libraryUrls )
             {
-                boolean needSep = ( !path.isEmpty( ) && !path.endsWith( "/" ) );
-                URL url = cl.getResource( path + ( needSep ? "/" : "" ) + name );
-                if ( url != null ) return new ResolvedResource( url, name );
+                String tentativeFilename = extractFilenameFromUrl( url );
+                String filename = findValidFilename( tempDir, tentativeFilename, "library.bin" );
+                File file = findUniqueFile( tempDir, ( i -> i == 0 ? filename : format( "%s--%d", filename, i ) ) );
+                copy( url, file );
+                System.load( file.getPath( ) );
             }
         }
-        return null;
-    }
-
-    public static File copy( ResolvedResource from, File toDir ) throws IOException
-    {
-        File toFile = new File( toDir, from.name );
-        FileUtils.copy( from.url, toFile );
-        return toFile;
-    }
-
-    /**
-     * By itself, this method is not very helpful, because the ClassLoader loads the
-     * "java.library.path" property once at startup. However, it can be useful in
-     * conjunction with {@link NativeLibUtils#addLibDirToClassLoader_FRAGILE(File)}.
-     */
-    public static void addLibDirToSystemProperty( File newDir, boolean prepend ) throws IOException
-    {
-        String propKey = "java.library.path";
-
-        String originalProp = System.getProperty( propKey, "" );
-        String[] originalArray = originalProp.split( Pattern.quote( File.pathSeparator ) );
-
-        Set<String> originalPaths = new HashSet<String>( );
-        for ( String p : originalArray )
-            originalPaths.add( ( new File( p ) ).getCanonicalPath( ) );
-        if ( originalPaths.contains( newDir.getCanonicalPath( ) ) ) return;
-
-        String newProp;
-        if ( prepend )
+        catch ( Exception e )
         {
-            newProp = newDir.getPath( ) + File.pathSeparator + originalProp;
+            throw new RuntimeException( "Failed to extract and load native libraries", e );
+        }
+    }
+
+    protected static String extractFilenameFromUrl( URL url )
+    {
+        String sWhole = url.getFile( );
+        int slashIndex = sWhole.lastIndexOf( '/' );
+        if ( slashIndex < 0 )
+        {
+            return sWhole;
         }
         else
         {
-            newProp = originalProp + File.pathSeparator + newDir.getPath( );
+            String sSegment = sWhole.substring( slashIndex + 1 );
+            return ( sSegment.isEmpty( ) ? null : sSegment );
         }
-        System.setProperty( propKey, newProp );
+    }
+
+    protected static String findValidFilename( File dir, String candidate, String fallback )
+    {
+        if ( candidate == null )
+        {
+            return fallback;
+        }
+        else
+        {
+            try
+            {
+                dir = dir.getCanonicalFile( );
+                File file = ( new File( dir, candidate ) ).getCanonicalFile( );
+                if ( file.getParentFile( ).equals( dir ) )
+                {
+                    return file.getName( );
+                }
+                else
+                {
+                    return fallback;
+                }
+            }
+            catch ( IOException e )
+            {
+                return fallback;
+            }
+        }
     }
 
 }
