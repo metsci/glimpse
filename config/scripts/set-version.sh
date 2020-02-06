@@ -9,9 +9,7 @@ mvn clean compile jar:jar install
 
 mvn -f assembly/assembly-full/pom.xml versions:update-parent -DparentVersion=[${1}] -DallowSnapshots=true
 mvn -f assembly/assembly-core/pom.xml versions:update-parent -DparentVersion=[${1}] -DallowSnapshots=true
-mvn -f assembly/assembly-webstart-examples/pom.xml versions:update-parent -DparentVersion=[${1}] -DallowSnapshots=true
 
 mvn -f assembly/assembly-full/pom.xml versions:commit
 mvn -f assembly/assembly-core/pom.xml versions:commit
-mvn -f assembly/assembly-webstart-examples/pom.xml versions:commit
 mvn -f pom.xml versions:commit
