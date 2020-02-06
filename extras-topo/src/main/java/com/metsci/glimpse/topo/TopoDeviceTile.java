@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.gl.util.GLUtils.deleteBuffers;
-import static com.metsci.glimpse.gl.util.GLUtils.deleteTextures;
+import static com.metsci.glimpse.core.gl.util.GLUtils.deleteBuffers;
+import static com.metsci.glimpse.core.gl.util.GLUtils.deleteTextures;
 
 import com.jogamp.opengl.GL;
 

@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -37,21 +37,21 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.ZipInputStream;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.UpdateMode;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.info.CursorTextPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.treemap.NestedTreeMap;
-import com.metsci.glimpse.painter.treemap.SimpleTreeMapPainter;
-import com.metsci.glimpse.painter.treemap.SquarifiedLayout;
-import com.metsci.glimpse.plot.Plot2D;
-import com.metsci.glimpse.support.colormap.ColorGradient;
-import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.UpdateMode;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.info.CursorTextPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.treemap.NestedTreeMap;
+import com.metsci.glimpse.core.painter.treemap.SimpleTreeMapPainter;
+import com.metsci.glimpse.core.painter.treemap.SquarifiedLayout;
+import com.metsci.glimpse.core.plot.Plot2D;
+import com.metsci.glimpse.core.support.colormap.ColorGradient;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
 
 /**
  * @author borkholder
- * @see com.metsci.glimpse.painter.treemap.SimpleTreeMapPainter
+ * @see com.metsci.glimpse.core.painter.treemap.SimpleTreeMapPainter
  */
 public class TreeMapExample
 {

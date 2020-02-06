@@ -26,16 +26,16 @@
  */
 package com.metsci.glimpse.layers.misc;
 
-import static com.metsci.glimpse.axis.tagged.TaggedAxisListener1D.newTaggedAxisListener1D;
+import static com.metsci.glimpse.core.axis.tagged.TaggedAxisListener1D.newTaggedAxisListener1D;
 
 import java.util.function.Consumer;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.axis.listener.AxisListener2D;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.AxisListener1D;
+import com.metsci.glimpse.core.axis.listener.AxisListener2D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisListener1D;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class AxisUtils

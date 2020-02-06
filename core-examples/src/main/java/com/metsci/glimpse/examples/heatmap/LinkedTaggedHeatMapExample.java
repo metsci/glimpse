@@ -27,17 +27,17 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import javax.swing.JFrame;
 
 import com.jogamp.opengl.GLProfile;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
 
 /**
  * Demonstrates Glimpse's axis linking capability by creating

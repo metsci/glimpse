@@ -28,9 +28,9 @@ package com.metsci.glimpse.charts.slippy;
 
 import java.awt.Font;
 
-import com.metsci.glimpse.painter.group.DelegatePainter;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.core.painter.group.DelegatePainter;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
+import com.metsci.glimpse.core.support.font.FontUtils;
 
 /**
  * This just wraps a tile painter and an attribution text painter (if one is specified).

@@ -27,10 +27,10 @@
 package com.metsci.glimpse.examples.screenshot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.context.TargetStackUtil.newTargetStack;
-import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.core.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -40,18 +40,18 @@ import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLProfile;
-import com.metsci.glimpse.axis.factory.AxisFactory2D;
-import com.metsci.glimpse.axis.factory.ConditionalEndsWithAxisFactory2D;
-import com.metsci.glimpse.axis.factory.FixedAxisFactory2D;
-import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.MouseButton;
+import com.metsci.glimpse.core.axis.factory.AxisFactory2D;
+import com.metsci.glimpse.core.axis.factory.ConditionalEndsWithAxisFactory2D;
+import com.metsci.glimpse.core.axis.factory.FixedAxisFactory2D;
+import com.metsci.glimpse.core.canvas.FBOGlimpseCanvas;
+import com.metsci.glimpse.core.context.GlimpseTargetStack;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseAdapter;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.MouseButton;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.font.FontUtils;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * Demonstrates the ability to render Glimpse plots to an off-screen buffer

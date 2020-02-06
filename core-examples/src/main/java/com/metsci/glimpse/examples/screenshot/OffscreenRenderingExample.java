@@ -33,11 +33,11 @@ import javax.imageio.ImageIO;
 
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
-import com.metsci.glimpse.canvas.FBOGlimpseCanvas;
+import com.metsci.glimpse.core.canvas.FBOGlimpseCanvas;
+import com.metsci.glimpse.core.gl.util.GLUtils;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 public class OffscreenRenderingExample
 {

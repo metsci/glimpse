@@ -30,7 +30,7 @@ import static com.metsci.glimpse.util.GeneralUtils.floats;
 
 import java.util.Arrays;
 
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 
 public class ExampleStyle
 {

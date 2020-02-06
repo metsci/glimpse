@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -36,12 +36,12 @@ import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
-import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
-import com.metsci.glimpse.support.texture.RGBATextureProjected2D;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.projection.FlatProjection;
+import com.metsci.glimpse.core.support.shader.triangle.ColorTexture2DProgram;
+import com.metsci.glimpse.core.support.texture.RGBATextureProjected2D;
+import com.metsci.glimpse.core.support.texture.ByteTextureProjected2D.MutatorByte2D;
 
 /**
  * Demonstrates display of a png file in a Glimpse plot.

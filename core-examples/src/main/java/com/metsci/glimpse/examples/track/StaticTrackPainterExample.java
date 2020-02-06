@@ -27,16 +27,16 @@
 package com.metsci.glimpse.examples.track;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.AxisListener1D;
-import com.metsci.glimpse.painter.track.StaticTrackPainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.line.LineJoinType;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.listener.AxisListener1D;
+import com.metsci.glimpse.core.painter.track.StaticTrackPainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.shader.line.LineJoinType;
 
 public class StaticTrackPainterExample
 {

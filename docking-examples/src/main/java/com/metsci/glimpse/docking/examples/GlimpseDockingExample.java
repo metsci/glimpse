@@ -26,27 +26,27 @@
  */
 package com.metsci.glimpse.docking.examples;
 
+import static com.metsci.glimpse.core.gl.util.GLUtils.newOffscreenDrawable;
+import static com.metsci.glimpse.core.support.QuickUtils.initStandardGlimpseApp;
+import static com.metsci.glimpse.core.support.colormap.ColorGradients.greenBone;
+import static com.metsci.glimpse.core.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
-import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
-import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
-import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
-import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 
 import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 
 public class GlimpseDockingExample
 {

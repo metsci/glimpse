@@ -27,24 +27,24 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener2D;
-import com.metsci.glimpse.axis.painter.NumericAxisPainter;
-import com.metsci.glimpse.axis.painter.NumericRotatedYAxisPainter;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.event.mouse.MouseButton;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.AxisListener2D;
+import com.metsci.glimpse.core.axis.painter.NumericAxisPainter;
+import com.metsci.glimpse.core.axis.painter.NumericRotatedYAxisPainter;
+import com.metsci.glimpse.core.axis.painter.label.AxisLabelHandler;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.core.event.mouse.MouseButton;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.font.FontUtils;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.font.FontUtils;
 
 /**
  * Demonstrates nesting of one Glimpse plot inside another. The inner Glimpse

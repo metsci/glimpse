@@ -27,20 +27,20 @@
 package com.metsci.glimpse.examples.projection;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.painter.info.CursorTextZPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.texture.HeatMapPainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.projection.PolarProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.info.CursorTextZPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.texture.HeatMapPainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.PolarProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
 
 /**
  * Demonstrates dynamically updating the projection applied to a texture.

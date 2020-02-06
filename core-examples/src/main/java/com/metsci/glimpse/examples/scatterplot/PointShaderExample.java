@@ -27,9 +27,9 @@
 package com.metsci.glimpse.examples.scatterplot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
 import static java.lang.Math.sqrt;
 
 import java.io.IOException;
@@ -39,18 +39,18 @@ import java.util.Random;
 import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLProfile;
-import com.metsci.glimpse.gl.GLCapabilityEventListener;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.texture.ColorTexture1D.ColorGradientBuilder;
-import com.metsci.glimpse.gl.texture.FloatTexture1D;
-import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.shape.ShadedPointPainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.gl.GLCapabilityEventListener;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.gl.texture.FloatTexture1D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D.ColorGradientBuilder;
+import com.metsci.glimpse.core.gl.texture.FloatTexture1D.MutatorFloat1D;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.shape.ShadedPointPainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * @author osborn

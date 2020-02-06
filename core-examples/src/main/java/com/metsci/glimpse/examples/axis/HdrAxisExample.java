@@ -27,12 +27,12 @@
 package com.metsci.glimpse.examples.axis;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.painter.label.HdrAxisLabelHandler;
-import com.metsci.glimpse.plot.SimplePlot2D;
+import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.core.axis.painter.label.HdrAxisLabelHandler;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
 
 /**
  * Use a high dynamic range axis label handler. The tick labels are always a fixed

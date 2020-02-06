@@ -27,14 +27,14 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
-import com.metsci.glimpse.plot.EmptyPlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter;
+import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.BulkLineAccumulator;
+import com.metsci.glimpse.core.plot.EmptyPlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 
 /**
  * @author ulman

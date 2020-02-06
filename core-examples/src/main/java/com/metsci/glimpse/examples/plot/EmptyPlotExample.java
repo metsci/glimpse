@@ -27,16 +27,16 @@
 package com.metsci.glimpse.examples.plot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.CrosshairPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.plot.Plot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.decoration.CrosshairPainter;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.plot.Plot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 
 /**
  * Demonstrates construction of a plot from scratch, starting with

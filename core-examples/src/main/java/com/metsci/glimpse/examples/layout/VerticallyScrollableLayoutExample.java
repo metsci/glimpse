@@ -27,10 +27,10 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.awt.BorderLayout;
 
@@ -38,13 +38,13 @@ import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.context.GlimpseTargetStack;
-import com.metsci.glimpse.context.TargetStackUtil;
+import com.metsci.glimpse.core.context.GlimpseTargetStack;
+import com.metsci.glimpse.core.context.TargetStackUtil;
+import com.metsci.glimpse.core.layout.GlimpseVerticallyScrollableLayout;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.examples.timeline.CollapsibleTimelinePlotExample;
-import com.metsci.glimpse.layout.GlimpseVerticallyScrollableLayout;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.support.settings.OceanLookAndFeel;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 
 public class VerticallyScrollableLayoutExample
 {

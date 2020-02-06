@@ -27,8 +27,8 @@
 package com.metsci.glimpse.topo;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
-import static com.metsci.glimpse.support.QuickUtils.requireSwingThread;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
+import static com.metsci.glimpse.core.support.QuickUtils.requireSwingThread;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
 import static com.metsci.glimpse.topo.TopoUtils.intersect;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
@@ -70,8 +70,8 @@ import java.util.concurrent.ExecutorService;
 import com.jogamp.opengl.GL3;
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
 import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.topo.proj.NormalCylindricalProjection;
 

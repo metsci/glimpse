@@ -27,18 +27,18 @@
 package com.metsci.glimpse.extras.examples.charts.rnc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.charts.raster.BsbRasterData;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.info.CursorTextZPainter;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.colormap.ColorMapIntegerProgram;
-import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.painter.info.CursorTextZPainter;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.shader.colormap.ColorMapIntegerProgram;
+import com.metsci.glimpse.core.support.texture.ByteTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.MercatorProjection;
 
 /**

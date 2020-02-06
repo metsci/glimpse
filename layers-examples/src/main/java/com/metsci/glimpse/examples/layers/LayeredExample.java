@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.examples.layers;
 
+import static com.metsci.glimpse.core.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.examples.layers.ExampleTrait.addExampleLinkage;
 import static com.metsci.glimpse.layers.FpsOption.FPS;
 import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
 import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.addTimeZoneLinkage;
-import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
@@ -41,14 +41,14 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimeTrait;
 import com.metsci.glimpse.layers.time.TimeZoneTrait;
 import com.metsci.glimpse.layers.time.TimelineView;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;

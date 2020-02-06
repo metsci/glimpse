@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.isFirstWrappedTile;
+import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.isFirstWrappedTile;
 import static com.metsci.glimpse.topo.TopoColorUtils.bathyColorTable;
 import static com.metsci.glimpse.topo.TopoColorUtils.bathyColormapMinValue;
 import static com.metsci.glimpse.topo.TopoColorUtils.topoColorTable;
@@ -39,11 +39,10 @@ import static java.lang.Math.min;
 import java.util.List;
 
 import com.jogamp.opengl.GL3;
-
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection;
 import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;

@@ -27,18 +27,18 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.info.CursorTextZPainter;
-import com.metsci.glimpse.painter.texture.HeatMapPainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.painter.info.CursorTextZPainter;
+import com.metsci.glimpse.core.painter.texture.HeatMapPainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.projection.FlatProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 
 /**
  * A square heat map plot with adjustable color scale. Uses GLSL shaders

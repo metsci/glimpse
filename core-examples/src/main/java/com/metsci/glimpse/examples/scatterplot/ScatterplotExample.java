@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.scatterplot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -37,22 +37,22 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.texture.ColorTexture1D.MutatorColor1D;
-import com.metsci.glimpse.gl.texture.FloatTexture1D;
-import com.metsci.glimpse.gl.texture.FloatTexture1D.MutatorFloat1D;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.painter.shape.TaggedShadedPointPainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
-import com.metsci.glimpse.support.colormap.ColorGradient;
-import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.core.axis.tagged.painter.TaggedPartialColorYAxisPainter;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.gl.texture.FloatTexture1D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D.MutatorColor1D;
+import com.metsci.glimpse.core.gl.texture.FloatTexture1D.MutatorFloat1D;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.painter.shape.TaggedShadedPointPainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.core.support.colormap.ColorGradient;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
 
 /**
  * A scatter plot with adjustable point size and color. Usage of GLSL

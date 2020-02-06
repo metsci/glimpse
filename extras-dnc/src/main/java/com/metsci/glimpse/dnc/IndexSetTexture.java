@@ -27,8 +27,8 @@
 package com.metsci.glimpse.dnc;
 
 import static com.jogamp.common.nio.Buffers.newDirectByteBuffer;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.nextPowerOfTwo;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.lang.Math.min;
 import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;

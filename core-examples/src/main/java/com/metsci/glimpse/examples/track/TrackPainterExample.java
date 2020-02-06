@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.track;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -38,22 +38,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
-import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
-import com.metsci.glimpse.painter.info.CursorTextPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.track.Point;
-import com.metsci.glimpse.painter.track.Pulsator;
-import com.metsci.glimpse.painter.track.TrackPainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.selection.SpatialSelectionListener;
-import com.metsci.glimpse.support.settings.OceanLookAndFeel;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.RateLimitedAxisListener1D;
+import com.metsci.glimpse.core.axis.painter.NumericXYAxisPainter;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseMotionListener;
+import com.metsci.glimpse.core.painter.info.CursorTextPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.track.Point;
+import com.metsci.glimpse.core.painter.track.Pulsator;
+import com.metsci.glimpse.core.painter.track.TrackPainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.selection.SpatialSelectionListener;
+import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.core.support.shader.line.LineStyle;
 
 /**
  * Demonstrates the dynamic update capability of the TrackPainter.

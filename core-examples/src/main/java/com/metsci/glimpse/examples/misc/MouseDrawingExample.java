@@ -27,26 +27,26 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.ModifierKey;
-import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
-import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
-import com.metsci.glimpse.painter.track.TrackPainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.ModifierKey;
+import com.metsci.glimpse.core.event.mouse.MouseButton;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter.VerticalPosition;
+import com.metsci.glimpse.core.painter.track.TrackPainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.font.FontUtils;
 
 /**
- * Demonstrates usage of a custom {@link com.metsci.glimpse.axis.listener.mouse.AxisMouseListener}
+ * Demonstrates usage of a custom {@link com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener}
  * to paint onto a Glimpse plot.
  *
  * @author ulman

@@ -27,9 +27,9 @@
 package com.metsci.glimpse.extras.examples.topo;
 
 import static com.jogamp.opengl.GLProfile.GL3;
-import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
-import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.core.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.topo.io.TopoCache.topoCacheDataset;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.requireTopoDataFile;
 import static com.metsci.glimpse.topo.io.TopoReader.readTopoLevel;
@@ -42,14 +42,14 @@ import java.io.File;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.WrappedAxis1D;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.group.WrappedPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.WrappedAxis1D;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.group.WrappedPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.topo.EquirectTopoPainter;
 import com.metsci.glimpse.topo.io.TopoDataFile;
 import com.metsci.glimpse.topo.io.TopoDataset;

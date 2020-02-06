@@ -31,18 +31,18 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.core.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.core.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
 import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection;
 
 public class EquirectTopoProgram

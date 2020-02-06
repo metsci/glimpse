@@ -51,12 +51,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.io.Files;
-import com.metsci.glimpse.support.polygon.Polygon.Interior;
-import com.metsci.glimpse.support.polygon.Polygon.Loop;
-import com.metsci.glimpse.support.polygon.Polygon.Loop.LoopBuilder;
-import com.metsci.glimpse.support.polygon.PolygonTessellator;
-import com.metsci.glimpse.support.polygon.PolygonTessellator.TessellationException;
-import com.metsci.glimpse.support.polygon.VertexAccumulator;
+import com.metsci.glimpse.core.support.polygon.PolygonTessellator;
+import com.metsci.glimpse.core.support.polygon.VertexAccumulator;
+import com.metsci.glimpse.core.support.polygon.Polygon.Interior;
+import com.metsci.glimpse.core.support.polygon.Polygon.Loop;
+import com.metsci.glimpse.core.support.polygon.Polygon.Loop.LoopBuilder;
+import com.metsci.glimpse.core.support.polygon.PolygonTessellator.TessellationException;
 import com.metsci.glimpse.util.Pair;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
@@ -365,7 +365,7 @@ public class ShorelineTiler
 
     static double[] tessellate( Loop loop )
     {
-        com.metsci.glimpse.support.polygon.Polygon p = new com.metsci.glimpse.support.polygon.Polygon( );
+        com.metsci.glimpse.core.support.polygon.Polygon p = new com.metsci.glimpse.core.support.polygon.Polygon( );
         p.add( loop );
 
         DoubleList list = new DoubleArrayList( );

@@ -34,15 +34,14 @@ import java.nio.FloatBuffer;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram.LineProgramHandles;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLStreamingBuffer;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
+import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram.LineProgramHandles;
+import com.metsci.glimpse.core.support.shader.line.LineStyle;
 
 /**
  * @author ulman

@@ -28,8 +28,7 @@ package com.metsci.glimpse.layers;
 
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLRunnable;
-
-import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.core.context.GlimpseContext;
 
 /**
  * Just like {@link GLRunnable}, but takes a {@link GlimpseContext} instead of a {@link GLAutoDrawable}.

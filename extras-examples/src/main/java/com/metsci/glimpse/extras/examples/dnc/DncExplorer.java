@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
+import static com.metsci.glimpse.core.support.QuickUtils.initStandardGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.facc.FaccIo.readFaccAttrs;
@@ -40,8 +42,6 @@ import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDis
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.newLabel;
-import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
@@ -68,8 +68,17 @@ import javax.swing.JSeparator;
 import org.jdesktop.swingx.JXTreeTable;
 
 import com.jogamp.opengl.GLAnimatorControl;
-import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.decoration.CrosshairPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.plot.Plot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.settings.SwingLookAndFeel;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.DncLineFeature;
@@ -89,15 +98,6 @@ import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.CrosshairPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.plot.Plot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.util.ThrowingRunnable;
 
 import it.unimi.dsi.fastutil.ints.IntCollection;

@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
@@ -38,27 +38,27 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
-import com.metsci.glimpse.axis.tagged.Tag;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisListener1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition;
-import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
-import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.data.EventSelection;
-import com.metsci.glimpse.plot.timeline.event.Event;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.event.listener.EventPlotListener;
-import com.metsci.glimpse.plot.timeline.event.listener.EventSelectionListener;
-import com.metsci.glimpse.plot.timeline.group.GroupInfo;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
-import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.core.axis.tagged.Tag;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisListener1D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter.HorizontalPosition;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter.VerticalPosition;
+import com.metsci.glimpse.core.plot.timeline.CollapsibleTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
+import com.metsci.glimpse.core.plot.timeline.data.EventSelection;
+import com.metsci.glimpse.core.plot.timeline.event.Event;
+import com.metsci.glimpse.core.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.core.plot.timeline.event.listener.EventPlotListener;
+import com.metsci.glimpse.core.plot.timeline.event.listener.EventSelectionListener;
+import com.metsci.glimpse.core.plot.timeline.group.GroupInfo;
+import com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.core.support.atlas.TextureAtlas;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.font.FontUtils;
+import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 

@@ -27,10 +27,10 @@
 package com.metsci.glimpse.extras.examples.charts.slippy;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,15 +41,15 @@ import javax.swing.JMenuBar;
 import javax.swing.JRadioButton;
 
 import com.jogamp.opengl.GLProfile;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
 import com.metsci.glimpse.charts.slippy.SlippyAxisListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyAxisMouseListener2D;
 import com.metsci.glimpse.charts.slippy.SlippyMapPainter;
 import com.metsci.glimpse.charts.slippy.SlippyPainterFactory;
-import com.metsci.glimpse.painter.geo.ScalePainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.core.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.core.painter.geo.ScalePainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;

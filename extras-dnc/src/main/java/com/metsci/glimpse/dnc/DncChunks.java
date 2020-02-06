@@ -28,7 +28,7 @@ package com.metsci.glimpse.dnc;
 
 import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genBuffer;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.util.Collections.unmodifiableCollection;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;

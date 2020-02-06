@@ -27,10 +27,10 @@
 package com.metsci.glimpse.examples.misc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.initGlimpseOrExitJvm;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseCanvas;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseWindow;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,15 +41,15 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLProfile;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
-import com.metsci.glimpse.context.TargetStackUtil;
-import com.metsci.glimpse.event.mouse.GlimpseMouseAdapter;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener1D;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.core.context.TargetStackUtil;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseAdapter;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.MouseButton;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 
 /**
  * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.

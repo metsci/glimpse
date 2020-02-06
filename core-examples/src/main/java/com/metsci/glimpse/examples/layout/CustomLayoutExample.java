@@ -27,27 +27,27 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.axis.painter.NumericXAxisPainter;
-import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
-import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
-import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.layout.GlimpseLayoutManagerMig;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.AxisUtil;
+import com.metsci.glimpse.core.axis.painter.NumericXAxisPainter;
+import com.metsci.glimpse.core.axis.painter.NumericYAxisPainter;
+import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayoutX;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayoutY;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.layout.GlimpseLayoutManagerMig;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
 
 /**
  * Many Glimpse applications can simply use the plots in the
- * {@link com.metsci.glimpse.plot package}. However, when a custom arrangement
+ * {@link com.metsci.glimpse.core.plot package}. However, when a custom arrangement
  * of axes and plotting areas is required, low level Glimpse axes and painters
  * can be arranged into any configuration.<p>
  *

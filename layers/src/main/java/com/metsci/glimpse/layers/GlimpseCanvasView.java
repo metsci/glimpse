@@ -28,12 +28,12 @@ package com.metsci.glimpse.layers;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Objects.equal;
-import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLRendererString;
-import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLVersionString;
+import static com.metsci.glimpse.core.gl.util.GLCapabilityUtils.getGLRendererString;
+import static com.metsci.glimpse.core.gl.util.GLCapabilityUtils.getGLVersionString;
+import static com.metsci.glimpse.core.support.DisposableUtils.onGLDispose;
+import static com.metsci.glimpse.core.support.DisposableUtils.onGLInit;
 import static com.metsci.glimpse.layers.misc.UiUtils.ensureAnimating;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
-import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
-import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static com.jogamp.opengl.GLContext.CONTEXT_NOT_CURRENT;
@@ -49,10 +49,10 @@ import java.util.logging.Logger;
 import com.jogamp.opengl.GLAnimatorControl;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLProfile;
-import javax.swing.JPanel;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import javax.swing.JPanel;
 
 public abstract class GlimpseCanvasView extends View
 {

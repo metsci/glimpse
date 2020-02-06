@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.charts.shoreline;
 
-import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
+import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.core.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 import static java.lang.Math.toDegrees;
@@ -52,14 +52,14 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import com.google.common.io.CountingInputStream;
-import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TilePainter;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLEditableBuffer;
-import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.gl.util.GLUtils;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.shader.triangle.FlatColorProgram;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;

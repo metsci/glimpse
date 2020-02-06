@@ -27,15 +27,15 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.util.TimeZone;
 
-import com.metsci.glimpse.painter.info.SimpleTextPainter.VerticalPosition;
-import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.layout.TimelineInfo;
-import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter.VerticalPosition;
+import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.layout.TimelineInfo;
+import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
 
 // DirectBuffer
 public class MultipleTimelineExample

@@ -27,29 +27,29 @@
 package com.metsci.glimpse.examples.axis;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.painter.ColorRightYAxisPainter;
-import com.metsci.glimpse.axis.painter.ColorXAxisPainter;
-import com.metsci.glimpse.axis.painter.ColorYAxisPainter;
-import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.axis.tagged.painter.TaggedColorXAxisPainter;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorXAxisPainter;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
-import com.metsci.glimpse.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.core.axis.painter.ColorRightYAxisPainter;
+import com.metsci.glimpse.core.axis.painter.ColorXAxisPainter;
+import com.metsci.glimpse.core.axis.painter.ColorYAxisPainter;
+import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.core.axis.tagged.painter.TaggedColorXAxisPainter;
+import com.metsci.glimpse.core.axis.tagged.painter.TaggedPartialColorXAxisPainter;
+import com.metsci.glimpse.core.axis.tagged.painter.TaggedPartialColorYAxisPainter;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
 
 /**
  * MultiAxisPlot2D allows users to create multiple axes above, below, and to the right and left

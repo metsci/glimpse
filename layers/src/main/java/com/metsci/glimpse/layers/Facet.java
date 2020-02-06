@@ -28,10 +28,10 @@ package com.metsci.glimpse.layers;
 
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
 
-import com.metsci.glimpse.canvas.GlimpseCanvas;
+import com.metsci.glimpse.core.canvas.GlimpseCanvas;
+import com.metsci.glimpse.core.painter.base.GlimpsePainter;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.time.TimeTrait;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.util.var.Var;
 
 /**

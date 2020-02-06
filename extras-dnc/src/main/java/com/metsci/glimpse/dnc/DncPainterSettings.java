@@ -28,7 +28,7 @@ package com.metsci.glimpse.dnc;
 
 import java.util.Collection;
 
-import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.core.axis.Axis2D;
 
 public interface DncPainterSettings
 {

@@ -27,23 +27,23 @@
 package com.metsci.glimpse.examples.plot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
-import com.metsci.glimpse.axis.painter.NumericAxisPainter;
-import com.metsci.glimpse.axis.painter.NumericRightYAxisPainter;
-import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.painter.decoration.LegendPainter.BlockLegendPainter;
-import com.metsci.glimpse.painter.decoration.LegendPainter.LegendPlacement;
-import com.metsci.glimpse.painter.info.CursorTextPainter;
-import com.metsci.glimpse.painter.plot.XYLinePainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.line.LineJoinType;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.core.axis.painter.NumericAxisPainter;
+import com.metsci.glimpse.core.axis.painter.NumericRightYAxisPainter;
+import com.metsci.glimpse.core.axis.painter.label.AxisLabelHandler;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.core.painter.decoration.LegendPainter.BlockLegendPainter;
+import com.metsci.glimpse.core.painter.decoration.LegendPainter.LegendPlacement;
+import com.metsci.glimpse.core.painter.info.CursorTextPainter;
+import com.metsci.glimpse.core.painter.plot.XYLinePainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.shader.line.LineJoinType;
+import com.metsci.glimpse.core.support.shader.line.LineStyle;
 
 /**
  * A basic x/y line plot with a simple legend.

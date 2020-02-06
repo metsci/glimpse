@@ -27,14 +27,14 @@
 package com.metsci.glimpse.extras.examples.charts.shoreline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import com.metsci.glimpse.charts.shoreline.LandShapePainter;
-import com.metsci.glimpse.painter.decoration.CopyrightPainter;
-import com.metsci.glimpse.painter.info.MeasurementPainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.painter.decoration.CopyrightPainter;
+import com.metsci.glimpse.core.painter.info.MeasurementPainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
 

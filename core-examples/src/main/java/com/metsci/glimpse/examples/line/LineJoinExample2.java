@@ -27,12 +27,12 @@
 package com.metsci.glimpse.examples.line;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
-import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
-import static com.metsci.glimpse.support.shader.line.LineJoinType.JOIN_MITER;
-import static com.metsci.glimpse.support.shader.line.LineUtils.ppvAspectRatio;
+import static com.metsci.glimpse.core.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.shader.line.LineJoinType.JOIN_MITER;
+import static com.metsci.glimpse.core.support.shader.line.LineUtils.ppvAspectRatio;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -40,23 +40,23 @@ import static java.lang.Math.toRadians;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandlerSimpleUnits;
-import com.metsci.glimpse.axis.tagged.Tag;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorXAxisPainter;
-import com.metsci.glimpse.axis.tagged.painter.TaggedPartialColorYAxisPainter;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
-import com.metsci.glimpse.support.shader.line.LineProgram;
-import com.metsci.glimpse.support.shader.line.LineStrip;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandlerSimpleUnits;
+import com.metsci.glimpse.core.axis.tagged.Tag;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.core.axis.tagged.painter.TaggedPartialColorXAxisPainter;
+import com.metsci.glimpse.core.axis.tagged.painter.TaggedPartialColorYAxisPainter;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.core.support.shader.line.LineProgram;
+import com.metsci.glimpse.core.support.shader.line.LineStrip;
+import com.metsci.glimpse.core.support.shader.line.LineStyle;
 
 public class LineJoinExample2
 {

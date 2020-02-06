@@ -27,10 +27,9 @@
 package com.metsci.glimpse.dnc;
 
 import com.jogamp.opengl.GL2ES2;
-
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
 
 public class DncShaderUtils
 {

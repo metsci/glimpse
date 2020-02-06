@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.dnc.util;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.listener.RateLimitedAxisListener1D;
 
 public abstract class RateLimitedAxisLimitsListener1D extends RateLimitedAxisListener1D
 {

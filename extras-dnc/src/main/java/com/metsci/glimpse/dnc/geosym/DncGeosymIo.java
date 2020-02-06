@@ -51,9 +51,9 @@ import java.util.regex.Pattern;
 
 import javax.swing.SwingConstants;
 
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.font.FontUtils;
 import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.TextLoader;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.font.FontUtils;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

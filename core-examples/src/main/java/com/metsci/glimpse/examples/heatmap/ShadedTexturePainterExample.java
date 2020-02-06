@@ -27,21 +27,21 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.projection.FlatProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.shader.colormap.ColorMapProgram;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 
 /**
  * Demonstrates use of the Glimpse
- * {@link com.metsci.glimpse.painter.texture.ShadedTexturePainter}.
+ * {@link com.metsci.glimpse.core.painter.texture.ShadedTexturePainter}.
  * This example reproduces
  * {@link com.metsci.glimpse.examples.heatmap.HeatMapExample} using the
  * more general ShadedTexturePainter.

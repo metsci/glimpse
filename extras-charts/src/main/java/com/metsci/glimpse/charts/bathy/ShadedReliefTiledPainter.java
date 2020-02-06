@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
@@ -56,12 +56,12 @@ import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import com.metsci.glimpse.gl.texture.DrawableTexture;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.projection.LatLonProjection;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.gl.texture.DrawableTexture;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.projection.LatLonProjection;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**

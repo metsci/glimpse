@@ -33,9 +33,9 @@ import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
 import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.dnc.DncAtlases.createHostAtlas;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.loadGeosymImage;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.util.Collections.unmodifiableMap;
 

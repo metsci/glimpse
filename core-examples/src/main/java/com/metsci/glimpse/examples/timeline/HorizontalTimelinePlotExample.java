@@ -27,23 +27,23 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.util.TimeZone;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.tagged.Tag;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.painter.track.TrackPainter;
-import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
-import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.tagged.Tag;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.core.painter.track.TrackPainter;
+import com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation;
+import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
+import com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -52,9 +52,9 @@ import com.metsci.glimpse.util.units.time.TimeStamp;
  * with lineplots stacked vertically on top, each with an independent y axis.<p>
  *
  * Lineplots can be added and removed with
- * {@link com.metsci.glimpse.plot.timeline.StackedTimePlot2D#createChartPlot( String )}
- * and {@link com.metsci.glimpse.plot.timeline.StackedTimePlot2D#deletePlot( String )}.
- * When a new chart is created, a {@link com.metsci.glimpse.plot.timeline.layout.TimePlotInfo}
+ * {@link com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D#createChartPlot( String )}
+ * and {@link com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D#deletePlot( String )}.
+ * When a new chart is created, a {@link com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo}
  * reference is provided, allowing addition of {@code GlimpsePainters} and modification of
  * chart size, ordering, and coloring.
  *

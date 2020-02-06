@@ -31,15 +31,15 @@ import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.core.gl.util.GLUtils.defaultVertexAttributeArray;
 import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.util.texture.Texture;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
 
 public class CursorLabelProgram
 {

@@ -27,28 +27,28 @@
 package com.metsci.glimpse.examples.icon;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
 import java.util.Collection;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
-import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.event.mouse.MouseButton;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.atlas.painter.IconPainter;
-import com.metsci.glimpse.support.atlas.painter.IconPainter.PickResult;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.selection.SpatialSelectionListener;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.core.axis.painter.NumericXYAxisPainter;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.core.event.mouse.MouseButton;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.support.atlas.TextureAtlas;
+import com.metsci.glimpse.core.support.atlas.painter.IconPainter;
+import com.metsci.glimpse.core.support.atlas.painter.IconPainter.PickResult;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.selection.SpatialSelectionListener;
 
 /**
  * Demonstrates how to use IconPainter.

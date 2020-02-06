@@ -27,7 +27,7 @@
 package com.metsci.glimpse.examples.scatterplot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
 
@@ -36,13 +36,13 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.shape.DynamicPointSetPainter;
-import com.metsci.glimpse.painter.shape.DynamicPointSetPainter.BulkPointAccumulator;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.RateLimitedAxisListener2D;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.shape.DynamicPointSetPainter;
+import com.metsci.glimpse.core.painter.shape.DynamicPointSetPainter.BulkPointAccumulator;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 
 /**
  * <p>Demonstrates use of DynamicPointSetPainter. This painter is useful when painting

@@ -27,11 +27,11 @@
 package com.metsci.glimpse.extras.examples.dnc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.core.support.FrameUtils.screenFracSize;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
-import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
@@ -39,20 +39,20 @@ import static java.lang.Math.PI;
 
 import java.io.IOException;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.WrappedAxis1D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.WrappedAxis1D;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.group.WrappedPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.dnc.DncPainter;
 import com.metsci.glimpse.dnc.DncPainterSettings;
 import com.metsci.glimpse.dnc.DncPainterSettingsImpl;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 import com.metsci.glimpse.dnc.proj.DncMercatorProjection;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.group.WrappedPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
 
 /**
  * DNC charts with a Mercator projection and wraparound horizontal axis.

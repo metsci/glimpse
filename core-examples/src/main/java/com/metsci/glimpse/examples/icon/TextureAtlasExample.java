@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.icon;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -37,18 +37,18 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.jogamp.opengl.GL;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener2D;
-import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.support.atlas.TextureAtlas;
-import com.metsci.glimpse.support.atlas.support.ImageDrawer;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener2D;
+import com.metsci.glimpse.core.axis.painter.NumericXYAxisPainter;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.util.GLUtils;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.support.atlas.TextureAtlas;
+import com.metsci.glimpse.core.support.atlas.support.ImageDrawer;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 
 public class TextureAtlasExample
 {

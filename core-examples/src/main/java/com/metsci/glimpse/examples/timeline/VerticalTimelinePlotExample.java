@@ -27,25 +27,25 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.DisposableUtils.onWindowClosing;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.DisposableUtils.onWindowClosing;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
-import com.metsci.glimpse.axis.tagged.Tag;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
-import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
-import com.metsci.glimpse.painter.track.TrackPainter;
-import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
-import com.metsci.glimpse.plot.timeline.StackedTimePlot2D;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.settings.OceanLookAndFeel;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.painter.label.time.RelativeTimeAxisLabelHandler;
+import com.metsci.glimpse.core.axis.tagged.Tag;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
+import com.metsci.glimpse.core.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.core.painter.track.TrackPainter;
+import com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation;
+import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
+import com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 

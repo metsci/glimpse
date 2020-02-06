@@ -27,29 +27,29 @@
 package com.metsci.glimpse.examples.axis;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
-import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.WrappedAxis1D;
-import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
-import com.metsci.glimpse.axis.painter.label.WrappedLabelHandler;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.WrappedAxis1D;
+import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.core.axis.painter.label.WrappedLabelHandler;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.gl.util.GLUtils;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.painter.group.WrappedPainter;
+import com.metsci.glimpse.core.painter.texture.HeatMapPainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.shader.point.PointFlatColorProgram;
+import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.gl.GLEditableBuffer;
-import com.metsci.glimpse.gl.util.GLUtils;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.group.WrappedPainter;
-import com.metsci.glimpse.painter.texture.HeatMapPainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
-import com.metsci.glimpse.support.wrapped.Wrapper2D;
 
 public class WrappedAxisExample
 {

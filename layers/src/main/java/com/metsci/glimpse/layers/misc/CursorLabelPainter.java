@@ -29,12 +29,12 @@ package com.metsci.glimpse.layers.misc;
 import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.jogamp.opengl.util.texture.awt.AWTTextureIO.newTextureData;
-import static com.metsci.glimpse.gl.util.GLUtils.disableBlending;
-import static com.metsci.glimpse.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.core.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.core.support.color.GlimpseColor.toColorAwt;
+import static com.metsci.glimpse.core.support.settings.AbstractLookAndFeel.TOOLTIP_BACKGROUND_COLOR;
+import static com.metsci.glimpse.core.support.settings.AbstractLookAndFeel.TOOLTIP_TEXT_COLOR;
 import static com.metsci.glimpse.layers.misc.UiUtils.paintComponentToImage;
-import static com.metsci.glimpse.support.color.GlimpseColor.toColorAwt;
-import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.TOOLTIP_BACKGROUND_COLOR;
-import static com.metsci.glimpse.support.settings.AbstractLookAndFeel.TOOLTIP_TEXT_COLOR;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.Font.MONOSPACED;
@@ -56,12 +56,12 @@ import javax.swing.JLabel;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureData;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLEditableBuffer;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.support.settings.LookAndFeel;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.support.settings.LookAndFeel;
 
 public abstract class CursorLabelPainter extends GlimpsePainterBase
 {

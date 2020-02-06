@@ -27,23 +27,23 @@
 package com.metsci.glimpse.examples.shape;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 
 import java.util.Random;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.RateLimitedAxisListener1D;
-import com.metsci.glimpse.painter.decoration.CopyrightPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.shape.PolygonPainter;
-import com.metsci.glimpse.plot.SimplePlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.colormap.ColorGradient;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.shader.line.LineJoinType;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.listener.RateLimitedAxisListener1D;
+import com.metsci.glimpse.core.painter.decoration.CopyrightPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.shape.PolygonPainter;
+import com.metsci.glimpse.core.plot.SimplePlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.colormap.ColorGradient;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.shader.line.LineJoinType;
+import com.metsci.glimpse.core.support.shader.line.LineStyle;
 
 /**
  * Demonstrates usage of Polygon painter to display arbitrary (convex and concave) polygons.

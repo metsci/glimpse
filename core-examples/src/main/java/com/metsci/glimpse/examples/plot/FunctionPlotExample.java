@@ -27,18 +27,18 @@
 package com.metsci.glimpse.examples.plot;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.AxisUtil;
-import com.metsci.glimpse.axis.listener.RateLimitedAxisListener2D;
-import com.metsci.glimpse.axis.painter.NumericXYAxisPainter;
-import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.painter.shape.LineSetPainter;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.AxisUtil;
+import com.metsci.glimpse.core.axis.listener.RateLimitedAxisListener2D;
+import com.metsci.glimpse.core.axis.painter.NumericXYAxisPainter;
+import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.painter.shape.LineSetPainter;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.util.math.fast.FastGaussian;
 
 /**

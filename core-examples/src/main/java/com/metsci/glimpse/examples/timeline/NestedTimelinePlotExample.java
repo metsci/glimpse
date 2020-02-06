@@ -27,13 +27,13 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.group.GroupInfo;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.color.GlimpseColor;
+import com.metsci.glimpse.core.plot.timeline.CollapsibleTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.group.GroupInfo;
+import com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 
 public class NestedTimelinePlotExample
 {

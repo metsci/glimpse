@@ -27,8 +27,8 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -37,17 +37,17 @@ import static java.lang.Math.sin;
 
 import java.nio.FloatBuffer;
 
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.info.FpsPainter;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.shader.colormap.ColorMapProgram;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D.MutatorFloat2D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.info.FpsPainter;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.projection.FlatProjection;
+import com.metsci.glimpse.core.support.shader.colormap.ColorMapProgram;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D.MutatorFloat2D;
 
 /**
  * Demonstrates dynamically updating the data stored in a texture.

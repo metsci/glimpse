@@ -34,10 +34,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import com.jogamp.opengl.util.FPSAnimator;
-import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.core.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 
 /**
  * Tests the capability of SwingGlimpseCanvas to move between JFrames.

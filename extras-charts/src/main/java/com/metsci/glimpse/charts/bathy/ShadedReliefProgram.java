@@ -34,14 +34,13 @@ import java.nio.FloatBuffer;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLUniformData;
-
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLEditableBuffer;
-import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
-import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
-import com.metsci.glimpse.support.shader.colormap.ColorMapProgram.ProgramHandles;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.core.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.core.support.shader.colormap.ColorMapProgram.ProgramHandles;
 
 /**
  * Takes two textures - the elevation data and the hillshade data - and does a nonlinear

@@ -27,27 +27,27 @@
 package com.metsci.glimpse.examples.heatmap;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.axis.tagged.Tag.TAG_COLOR_ATTR;
-import static com.metsci.glimpse.axis.tagged.Tag.TEX_COORD_ATTR;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.axis.tagged.Tag.TAG_COLOR_ATTR;
+import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.util.Arrays;
 
 import com.google.common.collect.Lists;
-import com.metsci.glimpse.axis.tagged.OrderedConstraint;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.painter.info.CursorTextZPainter;
-import com.metsci.glimpse.painter.texture.TaggedHeatMapPainter;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.plot.TaggedColorAxisPlot2D;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.colormap.ColorGradient;
-import com.metsci.glimpse.support.colormap.ColorGradients;
-import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.axis.tagged.OrderedConstraint;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.painter.info.CursorTextZPainter;
+import com.metsci.glimpse.core.painter.texture.TaggedHeatMapPainter;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.plot.TaggedColorAxisPlot2D;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.colormap.ColorGradient;
+import com.metsci.glimpse.core.support.colormap.ColorGradients;
+import com.metsci.glimpse.core.support.projection.FlatProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 
 /**
  * A variant of the basic HeatMapExample with tagged axes for controlling the color scale.

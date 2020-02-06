@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.charts.slippy;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.listener.AxisListener2D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.listener.AxisListener2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**

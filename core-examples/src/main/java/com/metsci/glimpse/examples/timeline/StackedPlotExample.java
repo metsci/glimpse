@@ -27,15 +27,15 @@
 package com.metsci.glimpse.examples.timeline;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
-import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
+import com.metsci.glimpse.core.plot.stacked.PlotInfo;
+import com.metsci.glimpse.core.plot.stacked.StackedPlot2D;
+import com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
-import com.metsci.glimpse.plot.stacked.PlotInfo;
-import com.metsci.glimpse.plot.stacked.StackedPlot2D;
-import com.metsci.glimpse.plot.stacked.StackedPlot2D.Orientation;
 
 /**
  * @author ulman

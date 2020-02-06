@@ -27,12 +27,12 @@
 package com.metsci.glimpse.examples.layout;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
+import com.metsci.glimpse.core.painter.info.MinimapLayout;
+import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
-import com.metsci.glimpse.painter.info.MinimapLayout;
-import com.metsci.glimpse.plot.ColorAxisPlot2D;
 
 /**
  * Demonstrates use of MinimapLayout to create a miniature navigation

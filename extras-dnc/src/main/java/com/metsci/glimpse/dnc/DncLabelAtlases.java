@@ -28,12 +28,12 @@ package com.metsci.glimpse.dnc;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.dnc.DncAtlases.createHostAtlas;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymLabelUtils.newLabelImage;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymLabelUtils.toTextAttributes;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.poslim;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sum;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;

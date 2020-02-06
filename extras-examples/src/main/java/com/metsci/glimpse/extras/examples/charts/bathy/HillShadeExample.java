@@ -27,8 +27,8 @@
 package com.metsci.glimpse.extras.examples.charts.bathy;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
-import static com.metsci.glimpse.support.QuickUtils.quickGlimpseApp;
-import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
+import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 
 import java.io.IOException;
@@ -40,9 +40,9 @@ import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.TopographyData;
-import com.metsci.glimpse.layout.GlimpseLayout;
-import com.metsci.glimpse.painter.geo.ScalePainter;
-import com.metsci.glimpse.plot.MapPlot2D;
+import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.painter.geo.ScalePainter;
+import com.metsci.glimpse.core.plot.MapPlot2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.dnc;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
 import com.jogamp.opengl.GL2ES2;

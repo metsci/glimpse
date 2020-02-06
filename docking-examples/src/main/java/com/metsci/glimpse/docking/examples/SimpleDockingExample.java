@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.docking.examples;
 
+import static com.metsci.glimpse.core.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
@@ -34,7 +35,6 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
 import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
-import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;

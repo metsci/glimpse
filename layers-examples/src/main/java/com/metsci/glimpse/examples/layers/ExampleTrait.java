@@ -28,7 +28,7 @@ package com.metsci.glimpse.examples.layers;
 
 import java.util.function.DoubleUnaryOperator;
 
-import com.metsci.glimpse.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.View;

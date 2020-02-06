@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.layers.misc;
 
-import static com.metsci.glimpse.support.DisposableUtils.addItemListener;
+import static com.metsci.glimpse.core.support.DisposableUtils.addItemListener;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 import java.awt.Color;
