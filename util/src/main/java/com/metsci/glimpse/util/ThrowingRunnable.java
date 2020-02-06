@@ -31,4 +31,27 @@ public interface ThrowingRunnable
 
     void run( ) throws Exception;
 
+    /**
+     * Converts a {@link ThrowingRunnable} into a {@code Runnable}, by wrapping
+     * checked exceptions in {@link RuntimeException}s.
+     */
+    public static Runnable rethrowing( ThrowingRunnable thrower )
+    {
+        return ( ) ->
+        {
+            try
+            {
+                thrower.run( );
+            }
+            catch ( RuntimeException e )
+            {
+                throw e;
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( e );
+            }
+        };
+    }
+
 }

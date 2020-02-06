@@ -38,6 +38,7 @@ import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.addTextListener;
 import static com.metsci.glimpse.extras.examples.dnc.DncExampleUtils.setTreeEnabled;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
+import static com.metsci.glimpse.util.ThrowingRunnable.rethrowing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
 import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
@@ -76,8 +77,8 @@ import javax.swing.SwingUtilities;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metsci.glimpse.dnc.convert.Vpf2Flat.Database;
-import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
+import com.metsci.glimpse.util.ThrowingRunnable;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -196,10 +197,12 @@ public class Vpf2FlatConverter
                 vpfParentPaths.add( vpfParentField.getText( ) );
             } );
 
-            startThread( "VPF Database Lister", true, new ThrowingRunnable( )
+            startThread( "VPF Database Lister", true, rethrowing( new ThrowingRunnable( )
             {
                 String oldPath = null;
-                public void runThrows( ) throws Exception
+
+                @Override
+                public void run( ) throws Exception
                 {
                     while ( true )
                     {
@@ -241,7 +244,7 @@ public class Vpf2FlatConverter
                         oldPath = newPath;
                     }
                 }
-            } );
+            } ) );
 
 
             // Select all checkboxes

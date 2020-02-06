@@ -45,6 +45,7 @@ import static com.metsci.glimpse.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
+import static com.metsci.glimpse.util.ThrowingRunnable.rethrowing;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static java.awt.Font.BOLD;
 
@@ -83,7 +84,6 @@ import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCache;
 import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
 import com.metsci.glimpse.dnc.facc.FaccAttr;
 import com.metsci.glimpse.dnc.facc.FaccFeature;
-import com.metsci.glimpse.dnc.util.DncMiscUtils.ThrowingRunnable;
 import com.metsci.glimpse.dnc.util.SingletonEvictingBlockingQueue;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
@@ -98,6 +98,7 @@ import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.util.ThrowingRunnable;
 
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -264,12 +265,12 @@ public class DncExplorer
         dncPainter.addActiveChunksListener( submitQuery );
         plot.addAxisListener( ( axis ) -> submitQuery.run( ) );
 
-        startThread( "DncQuery", true, new ThrowingRunnable( )
+        startThread( "DncQuery", true, rethrowing( new ThrowingRunnable( )
         {
             DncQuery oldQuery = null;
 
             @Override
-            public void runThrows( ) throws Exception
+            public void run( ) throws Exception
             {
                 while ( true )
                 {
@@ -291,7 +292,7 @@ public class DncExplorer
                     oldQuery = query;
                 }
             }
-        } );
+        } ) );
 
 
         // Show

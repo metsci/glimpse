@@ -160,48 +160,6 @@ public class DncMiscUtils
         };
     }
 
-    public static abstract class ThrowingRunnable implements Runnable
-    {
-        public abstract void runThrows( ) throws Exception;
-
-        @Override
-        public final void run( )
-        {
-            try
-            {
-                runThrows( );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
-        }
-    }
-
-    public static interface Thrower
-    {
-        void run( ) throws Exception;
-    }
-
-    public static Runnable rethrowing( Thrower thrower )
-    {
-        return ( ) ->
-        {
-            try
-            {
-                thrower.run( );
-            }
-            catch ( RuntimeException e )
-            {
-                throw e;
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
-        };
-    }
-
     /**
      * Throws {@link IllegalArgumentException} if x is negative
      */
