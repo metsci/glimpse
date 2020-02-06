@@ -11,17 +11,8 @@
 
 	<artifactId>glimpse-text</artifactId>
 
-	<!-- TEMPORARY JAVA 11 / JOGL 2.4.0 TEST CODE -->
-	<!-- REMOVE AND POINT AT MAVEN CENTRAL ARTIFACTS BEFORE RELEASE -->
+	<!-- FIXME: Point at Maven Central -->
 	<repositories>
-		<repository>
-			<id>metsci-releases</id>
-			<url>http://maven.metsci.com/metsci-releases</url>
-		</repository>
-		<repository>
-			<id>metsci-snapshots</id>
-			<url>http://maven.metsci.com/metsci-snapshots</url>
-		</repository>
 		<repository>
 			<id>thirdparty</id>
 			<url>http://maven.metsci.com/thirdparty</url>
@@ -30,9 +21,15 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.metsci.ext.com.jogamp.opengl</groupId>
-			<artifactId>jogamp-fat</artifactId>
-			<version>1479</version>
+			<groupId>com.metsci.ext.org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-main</artifactId>
+			<version>2.4.0-rc-20200202</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.metsci.ext.org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt-main</artifactId>
+			<version>2.4.0-rc-20200202</version>
 		</dependency>
 	</dependencies>
 
