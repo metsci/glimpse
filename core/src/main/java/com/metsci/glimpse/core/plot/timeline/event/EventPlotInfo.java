@@ -125,7 +125,7 @@ public class EventPlotInfo extends TimePlotInfoWrapper implements TimePlotInfo
     {
         super( delegate );
 
-        URL defaultImageUrl = this.getClass( ).getResource( "/com/metsci/glimpse/core/icons/timeline/dot.png" );
+        URL defaultImageUrl = this.getClass( ).getResource( "icons/dot.png" );
         try ( InputStream defaultImageStream = defaultImageUrl.openStream( ) )
         {
             defaultIconId = UUID.randomUUID( );
