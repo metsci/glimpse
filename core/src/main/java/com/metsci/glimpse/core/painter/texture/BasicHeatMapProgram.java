@@ -45,9 +45,9 @@ import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
 
 public class BasicHeatMapProgram implements HeatMapProgram
 {
-    public static final String lineVertShader_GLSL = requireText( BasicHeatMapProgram.class.getResource( "/com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.vs" ) );
-    public static final String lineGeomShader_GLSL = requireText( BasicHeatMapProgram.class.getResource( "/com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap.gs" ) );
-    public static final String lineFragShader_GLSL = requireText( BasicHeatMapProgram.class.getResource( "/com/metsci/glimpse/core/shaders/HeatMapProgram/heatmap-basic.fs" ) );
+    public static final String lineVertShader_GLSL = requireText( BasicHeatMapProgram.class.getResource( "heatmap/heatmap.vs" ) );
+    public static final String lineGeomShader_GLSL = requireText( BasicHeatMapProgram.class.getResource( "heatmap/heatmap.gs" ) );
+    public static final String lineFragShader_GLSL = requireText( BasicHeatMapProgram.class.getResource( "heatmap/heatmap-basic.fs" ) );
 
 
     public static class Handles
