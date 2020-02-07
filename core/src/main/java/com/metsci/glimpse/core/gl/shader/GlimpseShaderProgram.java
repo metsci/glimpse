@@ -94,7 +94,7 @@ public class GlimpseShaderProgram
                 array.enableBuffer( gl, on );
             }
         }
-        
+
         this.doUseProgram( gl, on );
 
         if ( !on )
@@ -107,7 +107,7 @@ public class GlimpseShaderProgram
     {
         // do nothing by default
     }
-    
+
     public ShaderCode addFragmentShader( String path )
     {
         return this.addShader( GL3.GL_FRAGMENT_SHADER, path );
@@ -125,6 +125,7 @@ public class GlimpseShaderProgram
 
     public ShaderCode addShader( int type, String path )
     {
+        // FIXME: Probably broken by Java 9+ resource access restrictions
         return this.addShader( ShaderCode.create( null, type, 1, this.getClass( ), new String[] { path }, true ) );
     }
 
