@@ -125,7 +125,7 @@ public class TreeMapExample
         Map<String, Integer> stateIdMap = new TreeMap<String, Integer>( );
         Map<String, Integer> countyIdMap = new TreeMap<String, Integer>( );
 
-        InputStream fileStream = TreeMapExample.class.getResourceAsStream( "/com/metsci/glimpse/core/examples/data/us_inc_civil_pop_2009.zip" );
+        InputStream fileStream = TreeMapExample.class.getResourceAsStream( "data/us_inc_civil_pop_2009.zip" );
 
         ZipInputStream zipStream = new ZipInputStream( fileStream );
         // advance to the first entry
