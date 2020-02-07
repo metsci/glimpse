@@ -49,9 +49,9 @@ import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
  */
 public class PointArrayColorSizeProgram
 {
-    public static final String vertShader_GLSL = requireText( PointArrayColorSizeProgram.class.getResource( "/com/metsci/glimpse/core/shaders/point/point_array_color_size/point.vs" ) );
-    public static final String geomShader_GLSL = requireText( PointArrayColorSizeProgram.class.getResource( "/com/metsci/glimpse/core/shaders/point/point_array_color_size/point.gs" ) );
-    public static final String fragShader_GLSL = requireText( PointArrayColorSizeProgram.class.getResource( "/com/metsci/glimpse/core/shaders/point/point_array_color_size/point.fs" ) );
+    public static final String vertShader_GLSL = requireText( PointArrayColorSizeProgram.class.getResource( "point_array_color_size/point.vs" ) );
+    public static final String geomShader_GLSL = requireText( PointArrayColorSizeProgram.class.getResource( "point_array_color_size/point.gs" ) );
+    public static final String fragShader_GLSL = requireText( PointArrayColorSizeProgram.class.getResource( "point_array_color_size/point.fs" ) );
 
     public static class ProgramHandles
     {
