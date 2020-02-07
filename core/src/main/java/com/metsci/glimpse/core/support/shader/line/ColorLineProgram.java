@@ -50,9 +50,9 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
 public class ColorLineProgram
 {
 
-    public static final String lineVertShader_GLSL = requireText( ColorLineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_multi_color/line_multi_color.vs" ) );
-    public static final String lineGeomShader_GLSL = requireText( ColorLineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_multi_color/line_multi_color.gs" ) );
-    public static final String lineFragShader_GLSL = requireText( ColorLineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_multi_color/line_multi_color.fs" ) );
+    public static final String lineVertShader_GLSL = requireText( ColorLineProgram.class.getResource( "line_multi_color/line_multi_color.vs" ) );
+    public static final String lineGeomShader_GLSL = requireText( ColorLineProgram.class.getResource( "line_multi_color/line_multi_color.gs" ) );
+    public static final String lineFragShader_GLSL = requireText( ColorLineProgram.class.getResource( "line_multi_color/line_multi_color.fs" ) );
 
     public static class LineProgramHandles
     {

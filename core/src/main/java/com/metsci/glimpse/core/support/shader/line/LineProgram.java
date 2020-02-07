@@ -53,9 +53,9 @@ import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
  */
 public class LineProgram
 {
-    public static final String lineVertShader_GLSL = requireText( LineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_flat_color/line.vs" ) );
-    public static final String lineGeomShader_GLSL = requireText( LineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_flat_color/line.gs" ) );
-    public static final String lineFragShader_GLSL = requireText( LineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/line_flat_color/line.fs" ) );
+    public static final String lineVertShader_GLSL = requireText( LineProgram.class.getResource( "line_flat_color/line.vs" ) );
+    public static final String lineGeomShader_GLSL = requireText( LineProgram.class.getResource( "line_flat_color/line.gs" ) );
+    public static final String lineFragShader_GLSL = requireText( LineProgram.class.getResource( "line_flat_color/line.fs" ) );
 
     public static class LineProgramHandles
     {
