@@ -62,6 +62,7 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
  *
  * @author ulman
  */
+// FIXME: After closing window: com.jogamp.opengl.GLException: Caught ThreadDeath: null on thread main-FPSAWTAnimator#00-Timer0
 public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
