@@ -699,9 +699,9 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
 
     public static class DynamicLineSetPainterProgram
     {
-        public static final String lineVertShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.vs" ) );
-        public static final String lineGeomShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.gs" ) );
-        public static final String lineFragShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/DynamicLineSetPainter/line.fs" ) );
+        public static final String lineVertShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "dynamicLineSet/line.vs" ) );
+        public static final String lineGeomShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "dynamicLineSet/line.gs" ) );
+        public static final String lineFragShader_GLSL = requireText( DynamicLineSetPainterProgram.class.getResource( "dynamicLineSet/line.fs" ) );
 
         public static class LineProgramHandles
         {

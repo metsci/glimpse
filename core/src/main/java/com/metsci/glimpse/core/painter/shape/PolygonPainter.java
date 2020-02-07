@@ -72,12 +72,12 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.support.interval.IntervalQuadTree;
 import com.metsci.glimpse.core.support.polygon.Polygon;
-import com.metsci.glimpse.core.support.polygon.PolygonTessellator;
-import com.metsci.glimpse.core.support.polygon.SimpleVertexAccumulator;
 import com.metsci.glimpse.core.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.core.support.polygon.Polygon.Loop;
 import com.metsci.glimpse.core.support.polygon.Polygon.Loop.LoopBuilder;
+import com.metsci.glimpse.core.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.core.support.polygon.PolygonTessellator.TessellationException;
+import com.metsci.glimpse.core.support.polygon.SimpleVertexAccumulator;
 import com.metsci.glimpse.core.support.shader.line.LinePath;
 import com.metsci.glimpse.core.support.shader.line.LineStyle;
 import com.metsci.glimpse.core.support.shader.line.LineUtils;
@@ -2014,9 +2014,9 @@ public class PolygonPainter extends GlimpsePainterBase
 
     public static class PolygonPainterFlatColorProgram
     {
-        public static final String vertShader_GLSL = requireText( PolygonPainterFlatColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/PolygonPainter/flat_color.vs" ) );
-        public static final String geomShader_GLSL = requireText( PolygonPainterFlatColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/PolygonPainter/flat_color.gs" ) );
-        public static final String fragShader_GLSL = requireText( PolygonPainterFlatColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/PolygonPainter/flat_color.fs" ) );
+        public static final String vertShader_GLSL = requireText( PolygonPainterFlatColorProgram.class.getResource( "polygonFlatColor/flat_color.vs" ) );
+        public static final String geomShader_GLSL = requireText( PolygonPainterFlatColorProgram.class.getResource( "polygonFlatColor/flat_color.gs" ) );
+        public static final String fragShader_GLSL = requireText( PolygonPainterFlatColorProgram.class.getResource( "polygonFlatColor/flat_color.fs" ) );
 
         public static class ProgramHandles
         {
@@ -2165,9 +2165,9 @@ public class PolygonPainter extends GlimpsePainterBase
 
     public static class PolygonPainterLineProgram
     {
-        public static final String lineVertShader_GLSL = requireText( PolygonPainterLineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/PolygonPainter/line.vs" ) );
-        public static final String lineGeomShader_GLSL = requireText( PolygonPainterLineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/PolygonPainter/line.gs" ) );
-        public static final String lineFragShader_GLSL = requireText( PolygonPainterLineProgram.class.getResource( "/com/metsci/glimpse/core/shaders/line/PolygonPainter/line.fs" ) );
+        public static final String lineVertShader_GLSL = requireText( PolygonPainterLineProgram.class.getResource( "polygonLine/line.vs" ) );
+        public static final String lineGeomShader_GLSL = requireText( PolygonPainterLineProgram.class.getResource( "polygonLine/line.gs" ) );
+        public static final String lineFragShader_GLSL = requireText( PolygonPainterLineProgram.class.getResource( "polygonLine/line.fs" ) );
 
         public static class LineProgramHandles
         {
