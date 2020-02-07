@@ -51,8 +51,8 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
  */
 public class ColorTexture2DProgram implements DrawableTextureProgram
 {
-    public static final String vertShader_GLSL = requireText( ColorTexture2DProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/colortex2d/colortex2d.vs" ) );
-    public static final String fragShader_GLSL = requireText( ColorTexture2DProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/colortex2d/colortex2d.fs" ) );
+    public static final String vertShader_GLSL = requireText( ColorTexture2DProgram.class.getResource( "colortex2d/colortex2d.vs" ) );
+    public static final String fragShader_GLSL = requireText( ColorTexture2DProgram.class.getResource( "colortex2d/colortex2d.fs" ) );
 
     public static class ProgramHandles
     {

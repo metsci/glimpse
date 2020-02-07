@@ -46,8 +46,8 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
  */
 public class ArrayColorProgram
 {
-    public static final String vertShader_GLSL = requireText( ArrayColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/array_color/array_color.vs" ) );
-    public static final String fragShader_GLSL = requireText( ArrayColorProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/array_color/array_color.fs" ) );
+    public static final String vertShader_GLSL = requireText( ArrayColorProgram.class.getResource( "array_color/array_color.vs" ) );
+    public static final String fragShader_GLSL = requireText( ArrayColorProgram.class.getResource( "array_color/array_color.fs" ) );
 
     public static class ProgramHandles
     {

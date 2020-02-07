@@ -45,8 +45,8 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
  */
 public class FlatColorStippleProgram
 {
-    public static final String vertShader_GLSL = requireText( FlatColorStippleProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/flat_color_stipple/flat_color_stipple.vs" ) );
-    public static final String fragShader_GLSL = requireText( FlatColorStippleProgram.class.getResource( "/com/metsci/glimpse/core/shaders/triangle/flat_color_stipple/flat_color_stipple.fs" ) );
+    public static final String vertShader_GLSL = requireText( FlatColorStippleProgram.class.getResource( "flat_color_stipple/flat_color_stipple.vs" ) );
+    public static final String fragShader_GLSL = requireText( FlatColorStippleProgram.class.getResource( "flat_color_stipple/flat_color_stipple.fs" ) );
 
     public static class ProgramHandles
     {
