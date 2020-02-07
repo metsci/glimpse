@@ -40,13 +40,13 @@ import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
+import com.metsci.glimpse.core.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
 import com.metsci.glimpse.docking.View;
 import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
-import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 
 public class GlimpseDockingExample
 {
