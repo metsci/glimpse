@@ -68,7 +68,6 @@ import javax.swing.JSeparator;
 import org.jdesktop.swingx.JXTreeTable;
 
 import com.jogamp.opengl.GLAnimatorControl;
-import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.core.painter.decoration.BorderPainter;
@@ -79,6 +78,7 @@ import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.core.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
+import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncFeature;
 import com.metsci.glimpse.dnc.DncLineFeature;
