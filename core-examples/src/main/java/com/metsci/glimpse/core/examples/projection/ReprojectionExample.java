@@ -26,144 +26,125 @@
  */
 package com.metsci.glimpse.core.examples.projection;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import static com.metsci.glimpse.core.gl.util.GLUtils.getDefaultGLProfile;
+import static com.metsci.glimpse.core.gl.util.GLUtils.newOffscreenDrawable;
+import static com.metsci.glimpse.core.support.DisposableUtils.onWindowClosed;
+import static com.metsci.glimpse.core.support.FrameUtils.fireWindowClosing;
+import static com.metsci.glimpse.core.support.QuickUtils.quickDefaultAnimator;
+import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.axis.AxisUtil;
 import com.metsci.glimpse.core.canvas.FBOGlimpseCanvas;
-import com.metsci.glimpse.core.canvas.NewtSwingGlimpseCanvas;
 import com.metsci.glimpse.core.context.GlimpseContext;
 import com.metsci.glimpse.core.examples.heatmap.HeatMapExample;
-import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.core.layout.GlimpseLayout;
+import com.metsci.glimpse.core.painter.base.GlimpsePainter;
 import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
 import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.core.plot.ColorAxisPlot2D;
 import com.metsci.glimpse.core.support.projection.PolarProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
 import com.metsci.glimpse.core.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.core.support.shader.triangle.ColorTexture2DProgram;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.core.support.texture.TextureProjected2D;
-import com.metsci.glimpse.util.geo.projection.TangentPlane;
 
 /**
  * Demonstrates using Glimpse offscreen rendering to distort an existing Glimpse plot.
- * This is a rather silly example, but this capability is used by
- * {@link com.metsci.glimpse.examples.worldwind.BathymetryTileExample}
- * to reproject Glimpse rendering performed using a {@link TangentPlane} onto the
- * WorldWind globe, which expects a {@link PlateCarreeProjection}.
  *
  * @author ulman
  */
-// FIXME: After closing window: com.jogamp.opengl.GLException: Caught ThreadDeath: null on thread main-FPSAWTAnimator#00-Timer0
 public class ReprojectionExample
 {
     public static void main( String[] args ) throws Exception
     {
-        GLProfile glProfile = GLUtils.getDefaultGLProfile( );
-
-        GLOffscreenAutoDrawable glDrawable = GLUtils.newOffscreenDrawable( glProfile );
-        GLContext glContext = glDrawable.getContext( );
-
-        final NewtSwingGlimpseCanvas canvas = new NewtSwingGlimpseCanvas( glContext );
-        ColorAxisPlot2D layout = HeatMapExample.newHeatMapPlot( );
-        canvas.addLayout( layout );
-        canvas.setLookAndFeel( new SwingLookAndFeel( ) );
-
-        final FBOGlimpseCanvas offscreenCanvas = new FBOGlimpseCanvas( glContext, 800, 800 );
-        offscreenCanvas.addLayout( layout );
-
-        final NewtSwingGlimpseCanvas canvas2 = new NewtSwingGlimpseCanvas( glContext );
-        canvas2.addLayout( new ReprojectionExample( ).getLayout( offscreenCanvas ) );
-        canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
-
-        // attach a repaint manager which repaints the canvas in a loop
-        FPSAnimator animator = new FPSAnimator( 120 );
-        animator.add( offscreenCanvas.getGLDrawable( ) );
-        animator.add( canvas2.getGLDrawable( ) );
-        animator.add( canvas.getGLDrawable( ) );
-        animator.start( );
-
-        createFrame( "Original", canvas );
-        createFrame( "Reprojected", canvas2 );
-
-        Runtime.getRuntime( ).addShutdownHook( new Thread( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
-            {
-                offscreenCanvas.disposeAttached( );
-            }
+            GLProfile glProfile = getDefaultGLProfile( );
+            GLContext glContext = newOffscreenDrawable( glProfile ).getContext( );
+
+            // Ordinary heatmap plot
+            ColorAxisPlot2D heatmapPlot = HeatMapExample.newHeatMapPlot( );
+
+            // Reprojected version of the heatmap plot
+            Projection proj = new PolarProjection( 0, 10, 0, 360 );
+            Axis2D reprojAxis = new Axis2D( );
+            reprojAxis.set( -10, 10, -10, 10 );
+            GlimpseAxisLayout2D reprojPlot = new GlimpseAxisLayout2D( reprojAxis );
+            AxisUtil.attachMouseListener( reprojPlot );
+            reprojPlot.addPainter( new BackgroundPainter( true ) );
+            reprojPlot.addPainter( createReprojectingPainter( glContext, heatmapPlot, proj ) );
+
+            // Canvas with ordinary plot
+            NewtSwingEDTGlimpseCanvas canvas1 = new NewtSwingEDTGlimpseCanvas( glContext );
+            canvas1.addLayout( heatmapPlot );
+            canvas1.setLookAndFeel( new SwingLookAndFeel( ) );
+
+            // Canvas with reprojected plot
+            NewtSwingEDTGlimpseCanvas canvas2 = new NewtSwingEDTGlimpseCanvas( glContext );
+            canvas2.addLayout( reprojPlot );
+            canvas2.setLookAndFeel( new SwingLookAndFeel( ) );
+
+            // Animator
+            SwingEDTAnimator animator = quickDefaultAnimator( );
+            animator.add( canvas1.getGLDrawable( ) );
+            animator.add( canvas2.getGLDrawable( ) );
+            animator.start( );
+
+            // Windows
+            JFrame frame1 = quickGlimpseWindow( "Original", canvas1 );
+            JFrame frame2 = quickGlimpseWindow( "Reprojected", canvas2 );
+            onWindowClosed( frame1, ev -> fireWindowClosing( frame2 ) );
+            onWindowClosed( frame2, ev -> fireWindowClosing( frame1 ) );
+            frame1.setLocation( frame1.getX( )-100, frame1.getY( )-80 );
+            frame2.setLocation( frame2.getX( )+100, frame2.getY( )+80 );
         } );
     }
 
-    public static JFrame createFrame( String name, final NewtSwingGlimpseCanvas canvas )
+    public static GlimpsePainter createReprojectingPainter( GLContext glContext, GlimpseLayout origLayout, Projection proj )
     {
-        final JFrame frame = new JFrame( name );
-
-        frame.addWindowListener( new WindowAdapter( )
+        return new ShadedTexturePainter( )
         {
-            @Override
-            public void windowClosing( WindowEvent e )
+            FBOGlimpseCanvas offscreen;
+            TextureProjected2D texture;
+
+            // Instance initializer
             {
-                // dispose of resources associated with the canvas
-                canvas.disposeAttached( );
+                this.setProgram( new ColorTexture2DProgram( ) );
 
-                // remove the canvas from the frame
-                frame.remove( canvas );
+                this.offscreen = new FBOGlimpseCanvas( glContext, 800, 800 );
+                this.offscreen.addLayout( origLayout );
+                this.texture = null;
             }
-        } );
-
-        frame.add( canvas );
-
-        frame.pack( );
-        frame.setSize( 800, 800 );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.setVisible( true );
-
-        return frame;
-    }
-
-    public GlimpseLayout getLayout( final FBOGlimpseCanvas offscreenCanvas ) throws Exception
-    {
-        Axis2D axis = new Axis2D( );
-        axis.set( -10, 10, -10, 10 );
-        GlimpseAxisLayout2D layout2 = new GlimpseAxisLayout2D( axis );
-        AxisUtil.attachMouseListener( layout2 );
-
-        ShadedTexturePainter painter = new ShadedTexturePainter( )
-        {
-            boolean initialized = false;
 
             @Override
             public void doPaintTo( GlimpseContext context )
             {
-                if ( !initialized && offscreenCanvas.getGLDrawable( ).isInitialized( ) )
+                this.offscreen.paint( );
+                if ( this.offscreen.getGLDrawable( ).isInitialized( ) && this.texture == null )
                 {
-                    TextureProjected2D texture = offscreenCanvas.getProjectedTexture( );
-                    texture.setProjection( new PolarProjection( 0, 10, 0, 360 ) );
-                    addDrawableTexture( texture );
-
-                    initialized = true;
+                    this.texture = this.offscreen.getProjectedTexture( );
+                    this.texture.setProjection( proj );
+                    this.addDrawableTexture( this.texture );
                 }
-
                 super.doPaintTo( context );
             }
+
+            @Override
+            public void doDispose( GlimpseContext context )
+            {
+                super.doDispose( context );
+                this.texture.dispose( context.getGLContext( ) );
+                this.offscreen.destroy( );
+            }
         };
-
-        ColorTexture2DProgram program = new ColorTexture2DProgram( );
-        painter.setProgram( program );
-
-        layout2.addPainter( new BackgroundPainter( true ) );
-        layout2.addPainter( painter );
-
-        return layout2;
     }
 }

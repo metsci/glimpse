@@ -28,6 +28,7 @@ package com.metsci.glimpse.core.support;
 
 import static com.metsci.glimpse.util.GeneralUtils.newArrayList;
 import static java.awt.GraphicsDevice.TYPE_RASTER_SCREEN;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import static java.lang.Math.round;
 
 import java.awt.Container;
@@ -58,6 +59,21 @@ public class FrameUtils
         frame.setDefaultCloseOperation( closeOperation );
         frame.setContentPane( contentPane );
         return frame;
+    }
+
+    /**
+     * Dispatch a window-closing event for the given window. Unlike a call to
+     * {@link Window#dispose()}, this will invoke the window's window-closing
+     * listeners.
+     * <p>
+     * This is the programmatic equivalent of clicking the close-window "X" button.
+     * It may or may not cause the window to actually close, depending on the window-
+     * closing listeners involved, and on the window's default close operation (see
+     * {@link JFrame#setDefaultCloseOperation(int)}).
+     */
+    public static void fireWindowClosing( Window w )
+    {
+        w.dispatchEvent( new WindowEvent( w, WINDOW_CLOSING ) );
     }
 
     /**
