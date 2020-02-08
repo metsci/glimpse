@@ -125,7 +125,6 @@ public class GlimpseShaderProgram
 
     public ShaderCode addShader( int type, String path )
     {
-        // FIXME: Probably broken by Java 9+ resource access restrictions
         return this.addShader( ShaderCode.create( null, type, 1, this.getClass( ), new String[] { path }, true ) );
     }
 

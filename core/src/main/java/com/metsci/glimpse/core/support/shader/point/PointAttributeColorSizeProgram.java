@@ -150,9 +150,8 @@ public class PointAttributeColorSizeProgram extends GlimpseShaderProgram
 
     protected void addDefaultVertexShader( )
     {
-        // FIXME: Probably broken by Java 9+ resource access restrictions
-        this.addVertexShader( "com/metsci/glimpse/core/shaders/point/point_attribute_color_size/point.vs" );
-        this.addFragmentShader( "com/metsci/glimpse/core/shaders/point/point_attribute_color_size/point.fs" );
+        this.addVertexShader( "com/metsci/glimpse/core/support/shader/point/point_attribute_color_size/point.vs" );
+        this.addFragmentShader( "com/metsci/glimpse/core/support/shader/point/point_attribute_color_size/point.fs" );
     }
 
     public void setProjectionMatrix( float minX, float maxX, float minY, float maxY )

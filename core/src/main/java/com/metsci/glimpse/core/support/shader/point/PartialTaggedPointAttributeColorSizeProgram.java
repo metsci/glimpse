@@ -65,9 +65,8 @@ public class PartialTaggedPointAttributeColorSizeProgram extends TaggedPointAttr
     @Override
     protected void addDefaultVertexShader( )
     {
-        // FIXME: Probably broken by Java 9+ resource access restrictions
-        this.addVertexShader( "com/metsci/glimpse/core/shaders/point/PartialTaggedPointGradientProgram/point.vs" );
-        this.addFragmentShader( "com/metsci/glimpse/core/shaders/point/PartialTaggedPointGradientProgram/point.fs" );
+        this.addVertexShader( "com/metsci/glimpse/core/support/shader/point/tagged_point_attribute_color_size/point.vs" );
+        this.addFragmentShader( "com/metsci/glimpse/core/support/shader/point/tagged_point_attribute_color_size/point.fs" );
     }
 
     @Override
