@@ -72,8 +72,8 @@ public class InterpColorMapProgram extends ColorMapProgram implements HeatMapPro
     @Override
     protected void addShaders( )
     {
-        this.addVertexShader( "com/metsci/glimpse/core/shaders/colormap/passthrough.vs" );
-        this.addFragmentShader( "com/metsci/glimpse/core/shaders/colormap/interp_colorscale_shader.fs" );
+        this.addVertexShader( InterpColorMapProgram.class.getResource( "passthrough.vs" ) );
+        this.addFragmentShader( InterpColorMapProgram.class.getResource( "interp_colorscale_shader.fs" ) );
     }
 
     @Override

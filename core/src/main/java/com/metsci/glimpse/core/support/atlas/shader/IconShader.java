@@ -31,7 +31,6 @@ import java.nio.FloatBuffer;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLUniformData;
-
 import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.GLArrayDataServer;
@@ -65,9 +64,9 @@ public class IconShader extends GlimpseShaderProgram
 
     public IconShader( int textureUnit, boolean enablePicking )
     {
-        this.addVertexShader( "com/metsci/glimpse/core/support/atlas/shader/texture_atlas_icon_shader.vs" );
-        this.addGeometryShader( "com/metsci/glimpse/core/support/atlas/shader/texture_atlas_icon_shader.gs" );
-        this.addFragmentShader( "com/metsci/glimpse/core/support/atlas/shader/texture_atlas_icon_shader.fs" );
+        this.addVertexShader( IconShader.class.getResource( "texture_atlas_icon_shader.vs" ) );
+        this.addGeometryShader( IconShader.class.getResource( "texture_atlas_icon_shader.gs" ) );
+        this.addFragmentShader( IconShader.class.getResource( "texture_atlas_icon_shader.fs" ) );
 
         // Fragment Shader
 

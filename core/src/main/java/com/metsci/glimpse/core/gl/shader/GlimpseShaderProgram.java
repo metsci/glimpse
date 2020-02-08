@@ -26,15 +26,19 @@
  */
 package com.metsci.glimpse.core.gl.shader;
 
+import static com.metsci.glimpse.util.GeneralUtils.array;
+
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
+import com.jogamp.common.net.Uri;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLArrayData;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLUniformData;
-
-import com.google.common.collect.Lists;
 import com.jogamp.opengl.util.GLArrayDataClient;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -108,24 +112,32 @@ public class GlimpseShaderProgram
         // do nothing by default
     }
 
-    public ShaderCode addFragmentShader( String path )
+    public ShaderCode addFragmentShader( URL sourceUrl )
     {
-        return this.addShader( GL3.GL_FRAGMENT_SHADER, path );
+        return this.addShader( GL3.GL_FRAGMENT_SHADER, sourceUrl );
     }
 
-    public ShaderCode addVertexShader( String path )
+    public ShaderCode addVertexShader( URL sourceUrl )
     {
-        return this.addShader( GL3.GL_VERTEX_SHADER, path );
+        return this.addShader( GL3.GL_VERTEX_SHADER, sourceUrl );
     }
 
-    public ShaderCode addGeometryShader( String path )
+    public ShaderCode addGeometryShader( URL sourceUrl )
     {
-        return this.addShader( GL3.GL_GEOMETRY_SHADER, path );
+        return this.addShader( GL3.GL_GEOMETRY_SHADER, sourceUrl );
     }
 
-    public ShaderCode addShader( int type, String path )
+    public ShaderCode addShader( int type, URL sourceUrl )
     {
-        return this.addShader( ShaderCode.create( null, type, 1, this.getClass( ), new String[] { path }, true ) );
+        try
+        {
+            Uri sourceUri = Uri.valueOf( sourceUrl );
+            return this.addShader( ShaderCode.create( null, type, 1, array( sourceUri ), true ) );
+        }
+        catch ( URISyntaxException e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     public ShaderCode addShader( ShaderCode code )

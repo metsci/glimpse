@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.support.shader.point;
 
-import static com.metsci.glimpse.core.axis.tagged.Tag.*;
+import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +37,6 @@ import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.axis.listener.AxisListener1D;
 import com.metsci.glimpse.core.axis.tagged.Tag;
 import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
-import com.metsci.glimpse.core.support.shader.point.TaggedPointAttributeColorSizeProgram;
 
 /**
  * A point shader attached to a TaggedAxis1D which allows adjusting of the color
@@ -65,8 +64,8 @@ public class PartialTaggedPointAttributeColorSizeProgram extends TaggedPointAttr
     @Override
     protected void addDefaultVertexShader( )
     {
-        this.addVertexShader( "com/metsci/glimpse/core/support/shader/point/tagged_point_attribute_color_size/point.vs" );
-        this.addFragmentShader( "com/metsci/glimpse/core/support/shader/point/tagged_point_attribute_color_size/point.fs" );
+        this.addVertexShader( PartialTaggedPointAttributeColorSizeProgram.class.getResource( "tagged_point_attribute_color_size/point.vs" ) );
+        this.addFragmentShader( PartialTaggedPointAttributeColorSizeProgram.class.getResource( "tagged_point_attribute_color_size/point.fs" ) );
     }
 
     @Override

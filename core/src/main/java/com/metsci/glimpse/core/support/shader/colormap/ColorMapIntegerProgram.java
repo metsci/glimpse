@@ -42,8 +42,8 @@ public class ColorMapIntegerProgram extends ColorMapProgram
     @Override
     protected void addShaders( )
     {
-        this.addVertexShader( "com/metsci/glimpse/core/shaders/colormap/passthrough.vs" );
-        this.addFragmentShader( "com/metsci/glimpse/core/shaders/colormap/sampled_colorscale_shader_integer.fs" );
+        this.addVertexShader( ColorMapIntegerProgram.class.getResource( "passthrough.vs" ) );
+        this.addFragmentShader( ColorMapIntegerProgram.class.getResource( "sampled_colorscale_shader_integer.fs" ) );
     }
 
     protected void initialize( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
