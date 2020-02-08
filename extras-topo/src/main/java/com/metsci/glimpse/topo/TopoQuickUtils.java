@@ -90,7 +90,7 @@ public class TopoQuickUtils
 
     public static GlimpsePainter createTopoPainter( TopoDataset topoDataset, NormalCylindricalProjection proj )
     {
-        // FIXME: Awkward
+        // TODO: Make this less awkward
         if ( proj instanceof EquirectNormalCylindricalProjection )
         {
             return new EquirectTopoPainter( topoDataset, ( EquirectNormalCylindricalProjection ) proj );

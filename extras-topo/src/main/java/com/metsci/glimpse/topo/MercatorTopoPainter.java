@@ -84,7 +84,7 @@ public class MercatorTopoPainter extends GlimpsePainterBase
 
         LatLonBox viewBounds = axisBounds( axis, this.proj );
 
-        // FIXME: maxPixelSize_DEG might not be the best number to use when choosing levelNum
+        // TODO: Is there a better way to choose levelNum than maxPixelSize_DEG?
         Axis1D yAxis = axis.getAxisY( );
         double dyPerPixel = 1.0 / yAxis.getPixelsPerValue( );
         double maxPixelSize_DEG = dyPerPixel * this.cache.proj.maxDlatDy_RAD( yAxis.getMin( ), yAxis.getMax( ) ) * radiansToDegrees;

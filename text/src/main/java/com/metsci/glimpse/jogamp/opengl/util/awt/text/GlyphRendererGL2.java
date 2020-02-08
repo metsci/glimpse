@@ -168,7 +168,7 @@ public final class GlyphRendererGL2 extends AbstractGlyphRenderer
         Check.notNull( gl, "GL cannot be null" );
         Check.notNull( value, "Value cannot be null" );
 
-        // FIXME: Could implement this...
+        // TODO: Consider implementing this
         throw new UnsupportedOperationException( "Use standard GL instead" );
     }
 

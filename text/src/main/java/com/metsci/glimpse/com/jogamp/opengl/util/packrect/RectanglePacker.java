@@ -206,8 +206,8 @@ public class RectanglePacker
     {
         // Have to either expand, compact or both. Need to figure out what
         // direction to go. Prefer to expand vertically. Expand
-        // horizontally only if rectangle being added is too wide. FIXME:
-        // may want to consider rebalancing the width and height to be
+        // horizontally only if rectangle being added is too wide.
+        // TODO: Consider rebalancing the width and height to be
         // more equal if it turns out we keep expanding in the vertical
         // direction.
         boolean done = false;
