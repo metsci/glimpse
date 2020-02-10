@@ -53,7 +53,7 @@ import com.metsci.glimpse.util.ThrowingSupplier;
  * </pre>
  * <p>
  * <strong><em>Use with caution.</em></strong> Deallocating a buffer inappropriately
- * can crash the JVM, or worse.
+ * can crash the JVM (or even worse, conceivably).
  */
 public class DirectBufferDealloc
 {
@@ -66,12 +66,12 @@ public class DirectBufferDealloc
     }
 
 
-    protected static class Impl0 implements Impl
+    protected static class NoopImpl implements Impl
     {
         @Override
         public void deallocate( Buffer buffer ) throws Exception
         {
-            logger.warning( "Ignoring request to deallocate a DirectBuffer" );
+            // Do nothing
         }
 
         @Override
@@ -82,15 +82,14 @@ public class DirectBufferDealloc
     }
 
 
-    protected static class Impl1 implements Impl
+    protected static class OpenJdkImpl implements Impl
     {
         private final Method getCleanerMethod;
         private final Method getAttachmentMethod;
-
         private final Class<?> cleanerClass;
         private final Method doCleanMethod;
 
-        public Impl1( ) throws Exception
+        public OpenJdkImpl( ) throws Exception
         {
             Class<?> directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
             this.getCleanerMethod = directBufferClass.getMethod( "cleaner" );
@@ -128,7 +127,7 @@ public class DirectBufferDealloc
     }
 
 
-    protected static final Impl impl = chooseImpl( Impl1::new );
+    protected static final Impl impl = chooseImpl( OpenJdkImpl::new );
 
     @SafeVarargs
     protected static Impl chooseImpl( ThrowingSupplier<? extends Impl>... suppliers )
@@ -146,8 +145,8 @@ public class DirectBufferDealloc
             { }
         }
 
-        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be logged but otherwise ignored" );
-        return new Impl0( );
+        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be ignored" );
+        return new NoopImpl( );
     }
 
 

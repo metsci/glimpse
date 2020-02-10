@@ -14,7 +14,7 @@ public class DirectBufferDeallocTest
     @Test
     void directBufferDeallocShouldNotBeANoop( )
     {
-        assertFalse( DirectBufferDealloc.impl instanceof DirectBufferDealloc.Impl0, "DirectBufferDealloc impl is a NOOP" );
+        assertFalse( DirectBufferDealloc.impl instanceof DirectBufferDealloc.NoopImpl, "DirectBufferDealloc impl is a NOOP" );
     }
 
     @Test
