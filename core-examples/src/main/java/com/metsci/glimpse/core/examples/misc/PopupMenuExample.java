@@ -54,6 +54,8 @@ import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 /**
  * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
  *
+ * FIXME: Rewrite using GlimpseAxisLayout2DWithPopup
+ *
  * @author ulman
  */
 public class PopupMenuExample

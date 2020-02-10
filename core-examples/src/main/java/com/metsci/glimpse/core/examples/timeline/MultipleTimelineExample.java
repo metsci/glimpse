@@ -37,7 +37,6 @@ import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.core.plot.timeline.layout.TimelineInfo;
 import com.metsci.glimpse.core.support.settings.OceanLookAndFeel;
 
-// DirectBuffer
 public class MultipleTimelineExample
 {
     public static void main( String[] args )
@@ -45,6 +44,8 @@ public class MultipleTimelineExample
         swingInvokeLater( ( ) ->
         {
             StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
+
+            // FIXME: Broken by commit 5aeb6a3 ... both timelines end up with the same labels
 
             // set up two timelines, one showing EST and one showing GMT time
             TimelineInfo gmtTimeline = plot.getDefaultTimeline( );
