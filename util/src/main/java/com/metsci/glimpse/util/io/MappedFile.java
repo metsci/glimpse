@@ -44,8 +44,6 @@ import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-import sun.misc.Unsafe;
-
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
  * <p>
@@ -63,7 +61,6 @@ import sun.misc.Unsafe;
  * --add-opens java.base/java.nio=com.metsci.glimpse.util
  * </pre>
  */
-@SuppressWarnings( "restriction" )
 public class MappedFile
 {
 
@@ -252,7 +249,7 @@ public class MappedFile
 
             long sAddr = this.address + position;
             long dAddr = getDirectBufferAddress( dest ) + dest.position( );
-            unsafe.copyMemory( sAddr, dAddr, size );
+            copyMemory( sAddr, dAddr, size );
             dest.position( dest.position( ) + size );
         }
         else
@@ -297,27 +294,39 @@ public class MappedFile
 
     // Lots of verbose code to get access to various JVM-internal functionality
 
-    protected static final Unsafe unsafe;
+    protected static final Object unsafe;
     protected static final int pageSize;
+    protected static final Method Unsafe_copyMemory;
     static
     {
         try
         {
-            // Should work on more platforms
-            Constructor<Unsafe> unsafeConstructor = Unsafe.class.getDeclaredConstructor( );
-            unsafeConstructor.setAccessible( true );
-            unsafe = unsafeConstructor.newInstance( );
+            Class<?> Unsafe_class = Class.forName( "sun.misc.Unsafe" );
 
-            // May not work on as many platforms
-            //Field field = Unsafe.class.getDeclaredField( "theUnsafe" );
-            //field.setAccessible( true );
-            //unsafe = ( Unsafe ) field.get( null );
+            Constructor<?> Unsafe_new = Unsafe_class.getDeclaredConstructor( );
+            Unsafe_new.setAccessible( true );
+            unsafe = Unsafe_new.newInstance( );
 
-            pageSize = unsafe.pageSize( );
+            Method Unsafe_pageSize = Unsafe_class.getDeclaredMethod( "pageSize" );
+            pageSize = ( Integer ) Unsafe_pageSize.invoke( unsafe );
+
+            Unsafe_copyMemory = Unsafe_class.getDeclaredMethod( "copyMemory", Long.TYPE, Long.TYPE, Long.TYPE );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access " + Unsafe.class.getName( ), e );
+            throw new RuntimeException( "Cannot access sun.misc.Unsafe", e );
+        }
+    }
+
+    protected static void copyMemory( long srcAddress, long destAddress, long bytes )
+    {
+        try
+        {
+            Unsafe_copyMemory.invoke( unsafe, srcAddress, destAddress, bytes );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
         }
     }
 
