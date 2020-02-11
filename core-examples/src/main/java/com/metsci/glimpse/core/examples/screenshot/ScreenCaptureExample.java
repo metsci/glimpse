@@ -95,7 +95,7 @@ public class ScreenCaptureExample
         // used to render the plot on the screen we must create an AxisFactory which
         // specifies how the axes for the ColorAxisPlot2D are duplicated when they are
         // used in different context (in this case we have two contexts: drawing to the
-        // SWT or Swing window and drawing to the offscreen buffer).
+        // onscreen window and drawing to the offscreen buffer).
         //
         // The ConditionalAxisFactory2D class uses a different axis factory for different contexts.
         // Here, we use a FixedAxisFactory which fixes the axis bound to 0 to 1000 when the axes

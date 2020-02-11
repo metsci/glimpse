@@ -43,10 +43,6 @@ import com.metsci.glimpse.core.support.color.GlimpseColor;
  * an EmptyFrame and adding custom painters to create a basic plot
  * with no data.
  *
- * This approach is a good one if the default painters that the
- * other frames in the com.metsci.glimpse.frame.swt package have
- * unwanted painters.
- *
  * @author ulman
  */
 public class EmptyPlotExample

@@ -42,7 +42,7 @@ import com.metsci.glimpse.core.painter.base.GlimpsePainter;
  * the base component onto which all Glimpse rendering
  * is ultimately performed. GlimpseCanvas provides a facade
  * that hides the implementation details of the specific
- * widget toolkit (Swt or Swing) being used, allowing most
+ * widget toolkit (e.g. Swing, SWT) being used, allowing most
  * Glimpse applications to be easily ported between the two.
  *
  * @author ulman
