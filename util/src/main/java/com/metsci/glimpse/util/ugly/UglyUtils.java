@@ -1,4 +1,8 @@
-package com.metsci.glimpse.util;
+package com.metsci.glimpse.util.ugly;
+
+import java.lang.reflect.Method;
+
+import com.metsci.glimpse.util.ThrowingSupplier;
 
 /**
  * Utilities that should only be used as a last resort -- because, for example,
@@ -33,6 +37,29 @@ public class UglyUtils
             { }
         }
         throw new ClassNotFoundException( );
+    }
+
+    public static Method requireDeclaredMethod( Class<?> clazz, String methodName, Class<?>... paramTypes ) throws Exception
+    {
+        Method method = clazz.getDeclaredMethod( methodName, paramTypes );
+        method.setAccessible( true );
+        return method;
+    }
+
+    @SafeVarargs
+    public static <T> T firstSuccessfulReturnValue( ThrowingSupplier<? extends T>... suppliers )
+    {
+        for ( ThrowingSupplier<? extends T> supplier : suppliers )
+        {
+            try
+            {
+                return supplier.get( );
+            }
+            catch ( Exception e )
+            { }
+        }
+
+        throw new RuntimeException( "No supplier successfully returned a value" );
     }
 
 }

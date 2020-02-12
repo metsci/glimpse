@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.buffer;
 
-import static com.metsci.glimpse.util.UglyUtils.findClass;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.ugly.UglyUtils.findClass;
 
 import java.lang.reflect.Method;
 import java.nio.Buffer;

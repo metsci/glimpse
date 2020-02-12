@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.UglyUtils.findClass;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static com.metsci.glimpse.util.ugly.CleanerUtils.registerCleaner;
 import static java.lang.String.format;
 
 import java.io.File;
@@ -43,6 +43,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
+
+import com.metsci.glimpse.util.ugly.CleanerUtils.Cleanable;
 
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
@@ -63,70 +65,6 @@ import java.nio.ReadOnlyBufferException;
  */
 public class MappedFile
 {
-
-    /**
-     * Cleaners serve the same purpose as finalize() methods, with 2 subtle differences:
-     * <ol>
-     * <li>finalize() methods are better when resource disposal is non-trivial and/or slow
-     * <li>The JVM does a better job of running Cleaners promptly
-     * </ol>
-     * <p>
-     * When the enclosing Object is ready to be GC-ed, the Cleaner gets magically triggered
-     * via the JVM's PhantomReference mechanism.
-     * <p>
-     * In Oracle/OpenJDK 8, the class of interest was {@code sun.misc.Cleaner}. In OpenJDK 9+,
-     * that class is now at {@code jdk.internal.ref.Cleaner}. OpenJDK 9+ also has a public
-     * Cleaner class at {@code java.lang.ref.Cleaner} ... but that one has a different usage
-     * pattern than the Oracle/OpenJDK 8 class. The easiest way to support as many JVMs
-     * as possible is to ignore the public Cleaner class, and use the private one, because it
-     * has an equivalent in Oracle/OpenJDK 8.
-     */
-    protected static class CleanerWrapper
-    {
-        protected static final Class<?> upstreamClass;
-        protected static final Method upstreamCreateMethod;
-        protected static final Method upstreamCleanMethod;
-        static
-        {
-            try
-            {
-                upstreamClass = findClass( "jdk.internal.ref.Cleaner", "sun.misc.Cleaner" );
-                upstreamCreateMethod = upstreamClass.getDeclaredMethod( "create", Object.class, Runnable.class );
-                upstreamCleanMethod = upstreamClass.getDeclaredMethod( "clean" );
-            }
-            catch ( ReflectiveOperationException e )
-            {
-                throw new RuntimeException( e );
-            }
-        }
-
-        protected final Object upstreamCleaner;
-
-        public CleanerWrapper( Object referent, Runnable thunk )
-        {
-            try
-            {
-                this.upstreamCleaner = upstreamCreateMethod.invoke( null, referent, thunk );
-            }
-            catch ( ReflectiveOperationException e )
-            {
-                throw new RuntimeException( e );
-            }
-        }
-
-        public void clean( )
-        {
-            try
-            {
-                upstreamCleanMethod.invoke( this.upstreamCleaner );
-            }
-            catch ( InvocationTargetException | IllegalAccessException e )
-            {
-                throw new RuntimeException( e );
-            }
-        }
-    }
-
 
     protected static final FileMapper mapper;
     static
@@ -150,7 +88,7 @@ public class MappedFile
     protected final long address;
     protected final long size;
 
-    protected final CleanerWrapper cleaner;
+    protected final Cleanable cleanable;
 
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
@@ -196,7 +134,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleaner = new CleanerWrapper( this, unmapper );
+            this.cleanable = registerCleaner( this, unmapper );
         }
     }
 
@@ -289,7 +227,7 @@ public class MappedFile
      */
     public void dispose( )
     {
-        this.cleaner.clean( );
+        this.cleanable.clean( );
     }
 
     // Lots of verbose code to get access to various JVM-internal functionality
