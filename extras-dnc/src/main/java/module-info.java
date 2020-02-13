@@ -3,11 +3,7 @@
  */
 open module com.metsci.glimpse.dnc
 {
-    // TODO: Only needed at runtime
-    requires com.sun.xml.bind;
-
     requires transitive com.metsci.glimpse.core;
-    requires transitive java.xml.bind;
     requires transitive svg.salamander;
     requires transitive worldwind;
 
