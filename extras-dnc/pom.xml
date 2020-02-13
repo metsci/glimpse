@@ -9,20 +9,6 @@
 
     <artifactId>glimpse-extras-dnc</artifactId>
 
-	<!-- Temporary fix: https://github.com/javaee/jaxb-v2/issues/1168 -->
-    <repositories>
-        <repository>
-            <id>releases.java.net</id>
-            <url>http://maven.java.net/content/repositories/releases/</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>jvnet-nexus-staging</id>
-            <url>http://maven.java.net/content/repositories/staging/</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-
     <dependencies>
 
         <dependency>
@@ -37,27 +23,23 @@
             <version>0.1.19</version>
         </dependency>
 
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
         <!-- For Vpf2Flat -->
         <dependency>
             <groupId>gov.nasa</groupId>
             <artifactId>worldwind</artifactId>
             <version>2.0.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>2.4.0-b180608.0325</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-xjc</artifactId>
-            <version>2.4.0-b180608.0325</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-jxc</artifactId>
-            <version>2.4.0-b180608.0325</version>
         </dependency>
 
     </dependencies>
