@@ -3,9 +3,6 @@
  */
 open module com.metsci.glimpse.docking
 {
-    // TODO: Only needed at runtime
-    requires com.sun.xml.bind;
-
     requires transitive com.metsci.glimpse.util;
     requires transitive com.metsci.glimpse.tinylaf;
     requires transitive java.xml.bind;
