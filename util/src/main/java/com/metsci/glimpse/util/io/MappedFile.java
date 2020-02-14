@@ -27,13 +27,14 @@
 package com.metsci.glimpse.util.io;
 
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
-import static com.metsci.glimpse.util.ugly.CleanerUtils.registerCleaner;
 import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.ref.Cleaner;
+import java.lang.ref.Cleaner.Cleanable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -43,8 +44,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
-
-import com.metsci.glimpse.util.ugly.CleanerUtils.Cleanable;
 
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
@@ -59,12 +58,12 @@ import com.metsci.glimpse.util.ugly.CleanerUtils.Cleanable;
  * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
  * <pre>
  * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
- * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
  * --add-opens java.base/java.nio=com.metsci.glimpse.util
  * </pre>
  */
 public class MappedFile
 {
+    protected static final Cleaner cleaner = Cleaner.create( );
 
     protected static final FileMapper mapper;
     static
@@ -134,7 +133,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleanable = registerCleaner( this, unmapper );
+            this.cleanable = cleaner.register( this, unmapper );
         }
     }
 
