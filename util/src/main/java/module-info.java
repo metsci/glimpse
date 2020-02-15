@@ -5,7 +5,6 @@ open module com.metsci.glimpse.util
 {
     requires jdk.unsupported;
 
-    requires transitive java.desktop;
     requires transitive java.logging;
     requires transitive it.unimi.dsi.fastutil;
     requires transitive com.google.common;
