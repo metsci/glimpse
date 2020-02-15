@@ -25,7 +25,6 @@ open module com.metsci.glimpse.util
     exports com.metsci.glimpse.util.geo.projection;
     exports com.metsci.glimpse.util.geo.util;
     exports com.metsci.glimpse.util.io;
-    exports com.metsci.glimpse.util.io.datapipe;
     exports com.metsci.glimpse.util.jnlu;
     exports com.metsci.glimpse.util.logging;
     exports com.metsci.glimpse.util.logging.format;
