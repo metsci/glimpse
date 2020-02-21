@@ -19,7 +19,6 @@ open module com.metsci.glimpse.extras.examples
     exports com.metsci.glimpse.extras.examples.charts.rnc;
     exports com.metsci.glimpse.extras.examples.charts.bathy;
     exports com.metsci.glimpse.extras.examples.topo;
-    exports com.metsci.glimpse.extras.examples;
     exports com.metsci.glimpse.extras.examples.charts.slippy;
     exports com.metsci.glimpse.extras.examples.dnc;
 }

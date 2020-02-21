@@ -2,7 +2,6 @@ open module com.metsci.glimpse.core.examples
 {
     requires transitive com.metsci.glimpse.core;
 
-    exports com.metsci.glimpse.core.examples;
     exports com.metsci.glimpse.core.examples.axis;
     exports com.metsci.glimpse.core.examples.heatmap;
     exports com.metsci.glimpse.core.examples.icon;

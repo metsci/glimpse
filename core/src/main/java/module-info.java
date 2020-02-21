@@ -8,7 +8,6 @@ open module com.metsci.glimpse.core
     requires transitive com.metsci.glimpse.platformFixes;
     requires transitive miglayout.core;
 
-    exports com.metsci.glimpse.core;
     exports com.metsci.glimpse.core.axis;
     exports com.metsci.glimpse.core.axis.factory;
     exports com.metsci.glimpse.core.axis.listener;
@@ -21,7 +20,6 @@ open module com.metsci.glimpse.core
     exports com.metsci.glimpse.core.axis.tagged.painter;
     exports com.metsci.glimpse.core.canvas;
     exports com.metsci.glimpse.core.context;
-    exports com.metsci.glimpse.core.event;
     exports com.metsci.glimpse.core.event.key;
     exports com.metsci.glimpse.core.event.key.newt;
     exports com.metsci.glimpse.core.event.mouse;
@@ -34,7 +32,6 @@ open module com.metsci.glimpse.core
     exports com.metsci.glimpse.core.gl.util;
     exports com.metsci.glimpse.core.layout;
     exports com.metsci.glimpse.core.layout.matcher;
-    exports com.metsci.glimpse.core.painter;
     exports com.metsci.glimpse.core.painter.base;
     exports com.metsci.glimpse.core.painter.decoration;
     exports com.metsci.glimpse.core.painter.geo;
@@ -71,7 +68,6 @@ open module com.metsci.glimpse.core
     exports com.metsci.glimpse.core.support.projection;
     exports com.metsci.glimpse.core.support.selection;
     exports com.metsci.glimpse.core.support.settings;
-    exports com.metsci.glimpse.core.support.shader;
     exports com.metsci.glimpse.core.support.shader.colormap;
     exports com.metsci.glimpse.core.support.shader.line;
     exports com.metsci.glimpse.core.support.shader.point;
