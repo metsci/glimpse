@@ -9,7 +9,7 @@
 
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Glimpse</name>
@@ -152,10 +152,9 @@
             </plugin>
 
             <plugin>
-                <!-- v3.8.1 breaks our compile, due to https://issues.apache.org/jira/browse/MCOMPILER-322 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
                 <configuration>
                     <release>11</release>
                 </configuration>
