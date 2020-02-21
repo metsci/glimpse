@@ -236,6 +236,7 @@
                             If no other javadoc is provided, the first line of the license header ends
                             up in the javadoc. -->
                         <exclude>**/package-info.java</exclude>
+                        <exclude>**/module-info.java</exclude>
                         <!-- these classes have their own license headers -->
                         <exclude>**/charts/bathy/Conrec.java</exclude>
                         <exclude>**/charts/bathy/Render.java</exclude>
