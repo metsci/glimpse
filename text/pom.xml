@@ -19,13 +19,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.metsci.ext.org.jogamp.jogl</groupId>
-			<artifactId>jogl-all</artifactId>
+			<groupId>com.metsci.ext.org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt-main</artifactId>
 			<version>2.4.0-rc-20200202</version>
 		</dependency>
 		<dependency>
-			<groupId>com.metsci.ext.org.jogamp.gluegen</groupId>
-			<artifactId>gluegen-rt</artifactId>
+			<groupId>com.metsci.ext.org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-main</artifactId>
 			<version>2.4.0-rc-20200202</version>
 		</dependency>
 	</dependencies>
