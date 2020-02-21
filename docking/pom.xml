@@ -30,17 +30,11 @@
         </dependency>
 
         <!--
-         When glimpse-docking is used as a NON-module, this dependency declaration is all
-         that is needed, in order for the jaxb-runtime impl to be found at runtime.
-
-         When glimpse-docking is used as a module, the jaxb-runtime jar referred to here
-         needs to be on the modulepath (NOT the classpath) at runtime! (If your tools choose
-         automatically which deps go on the modulepath/classpath, you should DOUBLE-CHECK
-         that they are choosing correctly in this case.) To make everything more complicated,
-         if the jaxb-runtime jar is placed (incorrectly) on the classpath, it will still work
-         ... usually, but NOT ALWAYS! It depends on the context-classloader of the thread on
-         which the JAXBContext gets created.
-         -->
+         When glimpse-docking is used AS A MODULE, make sure that
+         jaxb-runtime is on the MODULEPATH (not the classpath!) at
+         runtime. If it's on the classpath instead, it may or may
+         not work, depending on what classloaders are being used.
+        -->
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
