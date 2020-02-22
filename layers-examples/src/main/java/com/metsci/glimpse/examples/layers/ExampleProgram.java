@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,25 @@
  */
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_POINTS;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_POINTS;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.core.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
-
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
 
 public class ExampleProgram
 {
 
-    public static final String exampleVertShader_GLSL = requireResourceText( "ExampleProgram/example.vs" );
-    public static final String exampleGeomShader_GLSL = requireResourceText( "ExampleProgram/example.gs" );
-    public static final String exampleFragShader_GLSL = requireResourceText( "ExampleProgram/example.fs" );
+    public static final String exampleVertShader_GLSL = requireText( ExampleProgram.class.getResource( "shader/example.vs" ) );
+    public static final String exampleGeomShader_GLSL = requireText( ExampleProgram.class.getResource( "shader/example.gs" ) );
+    public static final String exampleFragShader_GLSL = requireText( ExampleProgram.class.getResource( "shader/example.fs" ) );
 
 
     public static class ExampleProgramHandles

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,18 @@
 package com.metsci.glimpse.dnc;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.metsci.glimpse.core.painter.group.WrappedPainter.wrappedBoundsIterator;
 import static com.metsci.glimpse.dnc.DncProjections.canProjectBrowse;
-import static com.metsci.glimpse.painter.group.WrappedPainter.wrappedBoundsIterator;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import java.util.Collection;
 import java.util.List;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.painter.group.WrappedPainter.WrappedTextureBounds;
 import com.metsci.glimpse.dnc.proj.DncProjection;
-import com.metsci.glimpse.painter.group.WrappedPainter.WrappedTextureBounds;
 
 public class DncPainterSettingsImpl implements DncPainterSettings
 {

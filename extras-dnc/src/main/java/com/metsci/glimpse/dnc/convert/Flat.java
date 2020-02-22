@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ import static com.metsci.glimpse.dnc.util.DncMiscUtils.unpackLongIntoBytes;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.sort;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -158,7 +157,20 @@ public class Flat
     public static void writeFlatChecksum( File flatDir, byte[] digest ) throws IOException
     {
         File checksumFile = new File( flatDir, flatChecksumFilename );
-        Files.write( printHexBinary( digest ).toLowerCase( ), checksumFile, US_ASCII );
+        Files.write( formatBytesAsHex( digest ).toLowerCase( ), checksumFile, US_ASCII );
+    }
+
+    public static String formatBytesAsHex( byte[] bytes )
+    {
+        StringBuilder s = new StringBuilder( 2*bytes.length );
+        for ( byte b : bytes )
+        {
+            int hi = ( b >> 4 ) & 0xF;
+            int lo = ( b ) & 0xF;
+            s.append( Character.forDigit( hi, 16 ) );
+            s.append( Character.forDigit( lo, 16 ) );
+        }
+        return s.toString( );
     }
 
 

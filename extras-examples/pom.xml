@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>CURRENT-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>glimpse-extras-examples</artifactId>
@@ -26,25 +25,7 @@
 
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-extras-swt</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-extras-dspl</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-charts</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-extras-worldwind</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -61,9 +42,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-core</artifactId>
-            <version>1.6.5-1</version>
+            <groupId>com.metsci.glimpse</groupId>
+            <artifactId>glimpse-docking</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -73,15 +54,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-docking</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metsci.glimpse</groupId>
-            <artifactId>glimpse-platform-fixes</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>com.metsci.ext.swingx</groupId>
+            <artifactId>swingx-core-and-plaf</artifactId>
+            <version>1.6.5-1</version>
         </dependency>
 
         <dependency>

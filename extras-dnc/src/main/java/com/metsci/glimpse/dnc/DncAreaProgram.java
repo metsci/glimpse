@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,16 @@
  */
 package com.metsci.glimpse.dnc;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 public class DncAreaProgram
 {
 
-    public static final String dncAreaVertShader_GLSL = requireResourceText( "shaders/DncPainter/area.vs" );
-    public static final String dncAreaFragShader_GLSL = requireResourceText( "shaders/DncPainter/area.fs" );
-
+    public static final String dncAreaVertShader_GLSL = requireText( DncAreaProgram.class.getResource( "shaders/area.vs" ) );
+    public static final String dncAreaFragShader_GLSL = requireText( DncAreaProgram.class.getResource( "shaders/area.fs" ) );
 
     public static class DncAreaProgramHandles
     {
@@ -62,9 +61,7 @@ public class DncAreaProgram
         }
     }
 
-
     protected DncAreaProgramHandles handles;
-
 
     public DncAreaProgram( )
     {

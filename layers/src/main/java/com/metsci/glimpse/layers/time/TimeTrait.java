@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,21 @@
  */
 package com.metsci.glimpse.layers.time;
 
-import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.CURRENT_TIME;
-import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MAX_TIME;
-import static com.metsci.glimpse.plot.timeline.StackedTimePlot2D.MIN_TIME;
+import static com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D.CURRENT_TIME;
+import static com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D.MAX_TIME;
+import static com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D.MIN_TIME;
 import static java.util.Arrays.asList;
 
 import java.util.function.DoubleUnaryOperator;
 
 import com.google.common.base.Objects;
-import com.metsci.glimpse.axis.tagged.OrderedConstraint;
-import com.metsci.glimpse.axis.tagged.Tag;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.tagged.OrderedConstraint;
+import com.metsci.glimpse.core.axis.tagged.Tag;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.View;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
 
 public class TimeTrait extends Trait
 {

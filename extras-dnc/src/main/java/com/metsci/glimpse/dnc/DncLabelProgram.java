@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,17 @@
  */
 package com.metsci.glimpse.dnc;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 public class DncLabelProgram
 {
 
-    public static final String dncLabelVertShader_GLSL = requireResourceText( "shaders/DncPainter/label.vs" );
-    public static final String dncLabelGeomShader_GLSL = requireResourceText( "shaders/DncPainter/label.gs" );
-    public static final String dncLabelFragShader_GLSL = requireResourceText( "shaders/DncPainter/label.fs" );
-
+    public static final String dncLabelVertShader_GLSL = requireText( DncLabelProgram.class.getResource( "shaders/label.vs" ) );
+    public static final String dncLabelGeomShader_GLSL = requireText( DncLabelProgram.class.getResource( "shaders/label.gs" ) );
+    public static final String dncLabelFragShader_GLSL = requireText( DncLabelProgram.class.getResource( "shaders/label.fs" ) );
 
     public static class DncLabelProgramHandles
     {
@@ -75,9 +74,7 @@ public class DncLabelProgram
         }
     }
 
-
     protected DncLabelProgramHandles handles;
-
 
     public DncLabelProgram( )
     {

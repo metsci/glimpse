@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,38 @@
  */
 package com.metsci.glimpse.dnc;
 
+import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.dnc.DncAtlases.createHostAtlas;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.loadGeosymImage;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.util.Collections.unmodifiableMap;
-import static javax.media.opengl.GL.GL_CLAMP_TO_EDGE;
-import static javax.media.opengl.GL.GL_LINEAR;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_S;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_T;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.media.opengl.GL;
-
+import com.jogamp.opengl.GL;
 import com.kitfox.svg.SVGException;
 import com.metsci.glimpse.dnc.DncAtlases.DncAtlasEntry;
 import com.metsci.glimpse.dnc.DncAtlases.DncHostAtlas;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncChunks.DncGroup;
 import com.metsci.glimpse.dnc.DncChunks.DncHostChunk;
+import com.metsci.glimpse.dnc.geosym.DncGeosymImageUtils.KeyedTextLoader;
 import com.metsci.glimpse.dnc.util.AnchoredImage;
 import com.metsci.glimpse.dnc.util.TexturableImage;
 
 public class DncIconAtlases
 {
 
-    public static DncHostIconAtlas createHostIconAtlas( DncHostChunk hChunk, String cgmDir, String svgDir, int maxTextureDim, double screenDpi ) throws IOException, SVGException
+    public static DncHostIconAtlas createHostIconAtlas( DncHostChunk hChunk, KeyedTextLoader cgmLoader, KeyedTextLoader svgLoader, int maxTextureDim, double screenDpi ) throws IOException, SVGException
     {
         Map<String,AnchoredImage> anchoredImages = new LinkedHashMap<>( );
         for ( DncGroup group : hChunk.groups )
@@ -65,7 +65,7 @@ public class DncIconAtlases
             String pointSymbolId = group.geosymAssignment.pointSymbolId;
             if ( pointSymbolId != null && !pointSymbolId.isEmpty( ) && !anchoredImages.containsKey( pointSymbolId ) )
             {
-                anchoredImages.put( pointSymbolId, loadGeosymImage( pointSymbolId, cgmDir, svgDir, screenDpi ) );
+                anchoredImages.put( pointSymbolId, loadGeosymImage( pointSymbolId, cgmLoader, svgLoader, screenDpi ) );
             }
         }
         if ( anchoredImages.isEmpty( ) ) return null;

@@ -27,9 +27,9 @@
  */
 package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL3;
 
 /**
  * Two-dimensional, grayscale OpenGL texture.

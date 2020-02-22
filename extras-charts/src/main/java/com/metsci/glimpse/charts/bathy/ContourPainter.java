@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,22 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLStreamingBuffer;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
-import com.metsci.glimpse.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram.LineProgramHandles;
-import com.metsci.glimpse.support.shader.line.LineStyle;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLStreamingBuffer;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
+import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram.LineProgramHandles;
+import com.metsci.glimpse.core.support.shader.line.LineStyle;
 
 /**
  * @author ulman

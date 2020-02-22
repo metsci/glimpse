@@ -30,8 +30,8 @@ package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 import java.awt.Rectangle;
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * Two-dimensional OpenGL texture.

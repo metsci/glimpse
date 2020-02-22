@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.HashSet;
@@ -51,13 +52,13 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.gl.texture.ColorTexture1D.MutatorColor1D;
-import com.metsci.glimpse.support.projection.FlatProjection;
-import com.metsci.glimpse.support.projection.GenericProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.texture.ByteTextureProjected2D;
-import com.metsci.glimpse.support.texture.ByteTextureProjected2D.MutatorByte2D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D.MutatorColor1D;
+import com.metsci.glimpse.core.support.projection.FlatProjection;
+import com.metsci.glimpse.core.support.projection.GenericProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.texture.ByteTextureProjected2D;
+import com.metsci.glimpse.core.support.texture.ByteTextureProjected2D.MutatorByte2D;
 import com.metsci.glimpse.util.Pair;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.LatLonRect;
@@ -94,6 +95,14 @@ public final class BsbRasterData
         this._width_PIXELS = width_PIXELS;
         this._height_PIXELS = height_PIXELS;
         this._registrationPoints = registrationPoints;
+    }
+
+    public static BsbRasterData readImage( URL url ) throws IOException
+    {
+        try ( InputStream in = url.openStream( ) )
+        {
+            return readImage( in );
+        }
     }
 
     public static BsbRasterData readImage( InputStream in ) throws IOException
@@ -196,16 +205,18 @@ public final class BsbRasterData
         Vector<Pair<String, String>> allTokenData = extractTokenData( header, "REF" );
         for ( Pair<String, String> tokenData : allTokenData )
         {
-            Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ).useDelimiter( "," );
-
-            s.nextInt( );
-            int x = s.nextInt( );
-            int y = s.nextInt( );
-            double lat_DEG = s.nextDouble( );
-            double lon_DEG = s.nextDouble( );
-
-            refPoints.add( new Pair<IntPoint2d, LatLonGeo>( new IntPoint2d( x, y ), new LatLonGeo( lat_DEG, lon_DEG ) ) );
-            s.close( );
+            try ( Scanner s = new Scanner( tokenData.second( ).replaceAll( "\r\n", "" ) ) )
+            {
+                s.useDelimiter( "," );
+                
+                s.nextInt( );
+                int x = s.nextInt( );
+                int y = s.nextInt( );
+                double lat_DEG = s.nextDouble( );
+                double lon_DEG = s.nextDouble( );
+    
+                refPoints.add( new Pair<IntPoint2d, LatLonGeo>( new IntPoint2d( x, y ), new LatLonGeo( lat_DEG, lon_DEG ) ) );
+            }
         }
 
         return refPoints;

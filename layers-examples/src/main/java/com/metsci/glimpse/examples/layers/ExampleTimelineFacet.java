@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,21 @@
  */
 package com.metsci.glimpse.examples.layers;
 
-import static com.metsci.glimpse.axis.painter.label.AxisUnitConverters.suShownAsFeet;
+import static com.metsci.glimpse.core.axis.painter.label.AxisUnitConverters.suShownAsFeet;
 import static com.metsci.glimpse.examples.layers.ExampleTrait.requireExampleTrait;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
 import static com.metsci.glimpse.layers.misc.AxisUtils.addAxisListener2D;
 import static com.metsci.glimpse.layers.misc.AxisUtils.addTaggedAxisListener1D;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxis1D;
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
+import com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.time.TimeTrait;
 import com.metsci.glimpse.layers.time.TimelineView;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.Listenable;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.layers;
 
-import static com.google.common.io.Resources.getResource;
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
 import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
@@ -71,7 +70,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -85,6 +83,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.docking.DockingFrameCloseOperation;
 import com.metsci.glimpse.docking.DockingGroup;
 import com.metsci.glimpse.docking.DockingGroupAdapter;
@@ -95,7 +95,6 @@ import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.docking.xml.DockerArrangementTile;
 import com.metsci.glimpse.docking.xml.GroupArrangement;
 import com.metsci.glimpse.layers.misc.LayerCardsPanel;
-import com.metsci.glimpse.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.util.var.Disposable;
 import com.metsci.glimpse.util.var.DisposableGroup;
 import com.metsci.glimpse.util.var.Var;
@@ -156,8 +155,8 @@ import com.metsci.glimpse.util.var.Var;
  */
 public class LayeredGui
 {
-    public static final Icon cloneIcon = requireIcon( "fugue-icons/cards.png" );
-    public static final Icon layersIcon = requireIcon( "fugue-icons/category.png" );
+    public static final Icon cloneIcon = requireIcon( LayeredGui.class.getResource( "icons/fugue/cards.png" ) );
+    public static final Icon layersIcon = requireIcon( LayeredGui.class.getResource( "icons/fugue/category.png" ) );
     public static final String layerCardsViewId = "com.metsci.glimpse.layers.geo.LayeredGui.layerCardsView";
 
 
@@ -315,12 +314,6 @@ public class LayeredGui
     public void setVisible( boolean visible )
     {
         this.dockingGroup.setVisible( visible );
-    }
-
-    public void arrange( String appName, String defaultArrResource )
-    {
-        URL defaultArrUrl = getResource( defaultArrResource );
-        this.arrange( appName, defaultArrUrl );
     }
 
     public void arrange( String appName, URL defaultArrUrl )

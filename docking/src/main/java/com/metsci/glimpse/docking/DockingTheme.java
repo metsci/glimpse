@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,10 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
+
 import java.awt.Color;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 
@@ -59,6 +62,53 @@ public class DockingTheme
     public final ImageIcon closeViewHoveredIcon;
     public final ImageIcon closeViewPressedIcon;
 
+
+    public DockingTheme( int dividerSize,
+
+                         int landingIndicatorThickness,
+                         Color landingIndicatorColor,
+
+                         int lineThickness, // Even lineThickness values do NOT work well
+                         int cornerRadius,
+                         int cardPadding,
+                         int labelPadding,
+
+                         Color lineColor,
+                         Color highlightColor,
+                         Color selectedTextColor,
+                         Color unselectedTextColor,
+
+                         URL maximizeIconUrl,
+                         URL unmaximizeIconUrl,
+                         URL optionsIconUrl,
+
+                         URL closeViewIconUrl,
+                         URL closeViewHoveredIconUrl,
+                         URL closeViewPressedIconUrl )
+    {
+        this( dividerSize,
+
+              landingIndicatorThickness,
+              landingIndicatorColor,
+
+              lineThickness,
+              cornerRadius,
+              cardPadding,
+              labelPadding,
+
+              lineColor,
+              highlightColor,
+              selectedTextColor,
+              unselectedTextColor,
+
+              requireIcon( maximizeIconUrl ),
+              requireIcon( unmaximizeIconUrl ),
+              requireIcon( optionsIconUrl ),
+
+              requireIcon( closeViewIconUrl ),
+              requireIcon( closeViewHoveredIconUrl ),
+              requireIcon( closeViewPressedIconUrl ) );
+    }
 
     public DockingTheme( int dividerSize,
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.gl.util.GLUtils.deleteBuffers;
-import static com.metsci.glimpse.gl.util.GLUtils.deleteTextures;
+import static com.metsci.glimpse.core.gl.util.GLUtils.deleteBuffers;
+import static com.metsci.glimpse.core.gl.util.GLUtils.deleteTextures;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import com.metsci.glimpse.topo.io.TopoDataType;
 

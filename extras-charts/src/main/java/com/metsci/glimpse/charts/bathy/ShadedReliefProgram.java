@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,21 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
-import javax.media.opengl.GLUniformData;
-
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLEditableBuffer;
-import com.metsci.glimpse.gl.shader.GlimpseShaderProgram;
-import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
-import com.metsci.glimpse.support.shader.colormap.ColorMapProgram.ProgramHandles;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLUniformData;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.gl.shader.GlimpseShaderProgram;
+import com.metsci.glimpse.core.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.core.support.shader.colormap.ColorMapProgram.ProgramHandles;
 
 /**
  * Takes two textures - the elevation data and the hillshade data - and does a nonlinear
@@ -70,8 +69,8 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
 
     protected void addShaders( )
     {
-        this.addVertexShader( "shaders/colormap/passthrough.vs" );
-        this.addFragmentShader( "shaders/relief/shaded_relief_shader.fs" );
+        this.addVertexShader( ShadedReliefProgram.class.getResource( "passthrough.vs" ) );
+        this.addFragmentShader( ShadedReliefProgram.class.getResource( "shaded_relief_shader.fs" ) );
     }
 
     protected void initialize( int elevTexUnit, int shadeTexUnit )

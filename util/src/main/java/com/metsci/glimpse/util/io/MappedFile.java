@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,15 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
-import static java.lang.String.*;
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.ref.Cleaner;
+import java.lang.ref.Cleaner.Cleanable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -43,10 +45,6 @@ import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-import sun.misc.Cleaner;
-import sun.misc.Unsafe;
-import sun.nio.ch.DirectBuffer;
-
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
  * <p>
@@ -54,10 +52,19 @@ import sun.nio.ch.DirectBuffer;
  * file through a single Buffer. Instead, this class does a single memory-map call for the whole
  * file, and then creates Buffer objects, as needed, for slices of the memory block. Buffer
  * object creation is cheap.
+ * <p>
+ * Works on Oracle/OpenJDK 8 JVMs.
+ * <p>
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
+ * <pre>
+ * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+ * --add-opens java.base/java.nio=com.metsci.glimpse.util
+ * </pre>
  */
-@SuppressWarnings( "restriction" )
 public class MappedFile
 {
+    protected static final Cleaner cleaner = Cleaner.create( );
+
     protected static final FileMapper mapper;
     static
     {
@@ -80,20 +87,7 @@ public class MappedFile
     protected final long address;
     protected final long size;
 
-    /**
-     * Cleaners serve the same purpose as finalize() methods, with 2 subtle differences:
-     * <ol>
-     * <li>finalize() methods are better when resource disposal is non-trivial and/or slow
-     * <li>The JVM does a better job of running Cleaners promptly
-     * </ol>
-     * <p>
-     * When the enclosing Object is ready to be GC-ed, the Cleaner gets magically triggered
-     * via the JVM's PhantomReference mechanism.
-     * <p>
-     * In Java 9, the Cleaner class is reportedly moving out of the sun.misc package and into
-     * a java.lang package.
-     */
-    protected final Cleaner cleaner;
+    protected final Cleanable cleanable;
 
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
@@ -118,7 +112,7 @@ public class MappedFile
         this.byteOrder = byteOrder;
 
         String rafMode = ( this.writable ? "rw" : "r" );
-        try ( RandomAccessFile raf = new RandomAccessFile( file, rafMode ) )
+        try (RandomAccessFile raf = new RandomAccessFile( file, rafMode ))
         {
             if ( setSize >= 0 )
             {
@@ -139,7 +133,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleaner = Cleaner.create( this, unmapper );
+            this.cleanable = cleaner.register( this, unmapper );
         }
     }
 
@@ -165,7 +159,7 @@ public class MappedFile
 
     public void copyTo( long position, int size, ByteBuffer dest )
     {
-        if ( dest.isDirect( ) && dest instanceof DirectBuffer )
+        if ( dest.isDirect( ) && isDirectBuffer( dest ) )
         {
             // This block does all the same steps as the block below,
             // but without creating a temporary slice buffer
@@ -191,8 +185,8 @@ public class MappedFile
             }
 
             long sAddr = this.address + position;
-            long dAddr = ( ( DirectBuffer ) dest ).address( ) + dest.position( );
-            unsafe.copyMemory( sAddr, dAddr, size );
+            long dAddr = getDirectBufferAddress( dest ) + dest.position( );
+            copyMemory( sAddr, dAddr, size );
             dest.position( dest.position( ) + size );
         }
         else
@@ -227,48 +221,82 @@ public class MappedFile
     }
 
     /**
-     * <strong>IMPORTANT:</strong> The clean() method of the returned Cleaner must not be called while
-     * slices of this MappedFile are still in use. If a slice is used after clean() is called, behavior
-     * is undefined.
-     */
-    public Cleaner cleaner( )
-    {
-        return this.cleaner;
-    }
-
-    /**
      * <strong>IMPORTANT:</strong> This method must not be called while slices of this MappedFile are
      * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
      */
     public void dispose( )
     {
-        this.cleaner.clean( );
+        this.cleanable.clean( );
     }
-
 
     // Lots of verbose code to get access to various JVM-internal functionality
 
-    protected static final Unsafe unsafe;
+    protected static final Object unsafe;
     protected static final int pageSize;
+    protected static final Method Unsafe_copyMemory;
     static
     {
         try
         {
-            // Should work on more platforms
-            Constructor<Unsafe> unsafeConstructor = Unsafe.class.getDeclaredConstructor( );
-            unsafeConstructor.setAccessible( true );
-            unsafe = unsafeConstructor.newInstance( );
+            Class<?> Unsafe_class = Class.forName( "sun.misc.Unsafe" );
 
-            // May not work on as many platforms
-            //Field field = Unsafe.class.getDeclaredField( "theUnsafe" );
-            //field.setAccessible( true );
-            //unsafe = ( Unsafe ) field.get( null );
+            Constructor<?> Unsafe_new = Unsafe_class.getDeclaredConstructor( );
+            Unsafe_new.setAccessible( true );
+            unsafe = Unsafe_new.newInstance( );
 
-            pageSize = unsafe.pageSize( );
+            Method Unsafe_pageSize = Unsafe_class.getDeclaredMethod( "pageSize" );
+            pageSize = ( Integer ) Unsafe_pageSize.invoke( unsafe );
+
+            Unsafe_copyMemory = Unsafe_class.getDeclaredMethod( "copyMemory", Long.TYPE, Long.TYPE, Long.TYPE );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access " + Unsafe.class.getName( ), e );
+            throw new RuntimeException( "Cannot access sun.misc.Unsafe", e );
+        }
+    }
+
+    protected static void copyMemory( long srcAddress, long destAddress, long bytes )
+    {
+        try
+        {
+            Unsafe_copyMemory.invoke( unsafe, srcAddress, destAddress, bytes );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    protected static final Class<?> DirectBuffer_class;
+    protected static final Method DirectBuffer_address;
+    static
+    {
+        try
+        {
+            DirectBuffer_class = Class.forName( "sun.nio.ch.DirectBuffer" );
+            DirectBuffer_address = DirectBuffer_class.getDeclaredMethod( "address" );
+            DirectBuffer_address.setAccessible( true );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Cannot access sun.nio.ch.DirectBuffer.address()", e );
+        }
+    }
+
+    public static boolean isDirectBuffer( Object obj )
+    {
+        return DirectBuffer_class.isInstance( obj );
+    }
+
+    public static long getDirectBufferAddress( Object directBuffer )
+    {
+        try
+        {
+            return ( Long ) DirectBuffer_address.invoke( directBuffer );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
         }
     }
 

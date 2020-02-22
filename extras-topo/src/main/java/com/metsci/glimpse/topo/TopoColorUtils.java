@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorGradient;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.newColorTable;
-import static com.metsci.glimpse.support.colormap.ColorGradientUtils.vc;
+import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorGradient;
+import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorTable;
+import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.vc;
 
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
-import com.metsci.glimpse.support.colormap.ColorGradient;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
+import com.metsci.glimpse.core.support.colormap.ColorGradient;
 
 public class TopoColorUtils
 {

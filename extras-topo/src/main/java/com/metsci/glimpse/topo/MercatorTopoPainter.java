@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.isFirstWrappedTile;
+import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.isFirstWrappedTile;
 import static com.metsci.glimpse.topo.TopoColorUtils.bathyColorTable;
 import static com.metsci.glimpse.topo.TopoColorUtils.bathyColormapMinValue;
 import static com.metsci.glimpse.topo.TopoColorUtils.topoColorTable;
@@ -38,12 +38,11 @@ import static java.lang.Math.min;
 
 import java.util.List;
 
-import javax.media.opengl.GL3;
-
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
+import com.jogamp.opengl.GL3;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection;
 import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;
@@ -85,7 +84,7 @@ public class MercatorTopoPainter extends GlimpsePainterBase
 
         LatLonBox viewBounds = axisBounds( axis, this.proj );
 
-        // FIXME: maxPixelSize_DEG might not be the best number to use when choosing levelNum
+        // TODO: Is there a better way to choose levelNum than maxPixelSize_DEG?
         Axis1D yAxis = axis.getAxisY( );
         double dyPerPixel = 1.0 / yAxis.getPixelsPerValue( );
         double maxPixelSize_DEG = dyPerPixel * this.cache.proj.maxDlatDy_RAD( yAxis.getMin( ), yAxis.getMax( ) ) * radiansToDegrees;

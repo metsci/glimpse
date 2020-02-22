@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,17 @@
  */
 package com.metsci.glimpse.dnc;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 public class DncIconProgram
 {
 
-    public static final String dncIconVertShader_GLSL = requireResourceText( "shaders/DncPainter/icon.vs" );
-    public static final String dncIconGeomShader_GLSL = requireResourceText( "shaders/DncPainter/icon.gs" );
-    public static final String dncIconFragShader_GLSL = requireResourceText( "shaders/DncPainter/icon.fs" );
-
+    public static final String dncIconVertShader_GLSL = requireText( DncIconProgram.class.getResource( "shaders/icon.vs" ) );
+    public static final String dncIconGeomShader_GLSL = requireText( DncIconProgram.class.getResource( "shaders/icon.gs" ) );
+    public static final String dncIconFragShader_GLSL = requireText( DncIconProgram.class.getResource( "shaders/icon.fs" ) );
 
     public static class DncIconProgramHandles
     {
@@ -75,9 +74,7 @@ public class DncIconProgram
         }
     }
 
-
     protected DncIconProgramHandles handles;
-
 
     public DncIconProgram( )
     {

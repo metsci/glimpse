@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,10 @@
 package com.metsci.glimpse.dnc.facc;
 
 import static com.google.common.base.Objects.equal;
-import static com.metsci.glimpse.util.io.StreamOpener.resource;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.createReader;
 import static java.lang.Integer.parseInt;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,20 +40,9 @@ import java.util.Map;
 public class FaccIo
 {
 
-    public static final String faccPath = "facc/";
-    public static final String faccFeaturesFile = "facc-features.csv";
-    public static final String faccAttrsFile = "facc-attrs.csv";
-    public static final String faccAttrValsFile = "facc-attr-vals.csv";
-
-
-    public static Reader faccReader( String filename ) throws IOException
-    {
-        return new BufferedReader( new InputStreamReader( resource.openForRead( faccPath + filename ) ) );
-    }
-
     public static Map<String,FaccFeature> readFaccFeatures( ) throws IOException
     {
-        try ( Reader reader = faccReader( faccFeaturesFile ) )
+        try ( Reader reader = createReader( FaccIo.class.getResource( "facc-features.csv" ) ) )
         {
             return readFaccFeatures( reader );
         }
@@ -83,7 +70,7 @@ public class FaccIo
     public static Map<String,FaccAttr> readFaccAttrs( ) throws IOException
     {
         Map<String,Map<Object,Object>> valueLookups = readFaccValues( );
-        try ( Reader reader = faccReader( faccAttrsFile ) )
+        try ( Reader reader = createReader( FaccIo.class.getResource( "facc-attrs.csv" ) ) )
         {
             return readFaccAttrs( reader, valueLookups );
         }
@@ -113,7 +100,7 @@ public class FaccIo
 
     public static Map<String,Map<Object,Object>> readFaccValues( ) throws IOException
     {
-        try ( Reader reader = faccReader( faccAttrValsFile ) )
+        try ( Reader reader = createReader( FaccIo.class.getResource( "facc-attr-vals.csv" ) ) )
         {
             return readFaccValues( reader );
         }

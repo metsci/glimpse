@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import static com.metsci.glimpse.painter.base.GlimpsePainterBase.getAxis2D;
-import static com.metsci.glimpse.support.PainterCache.SHARED_EXEC;
+import static com.metsci.glimpse.core.painter.base.GlimpsePainterBase.getAxis2D;
+import static com.metsci.glimpse.core.support.PainterCache.SHARED_EXEC;
 import static com.metsci.glimpse.util.GeneralUtils.clamp;
 import static java.lang.Math.abs;
 import static java.lang.Math.hypot;
@@ -46,10 +46,10 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.painter.group.DelegatePainter;
-import com.metsci.glimpse.support.PainterCache;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.group.DelegatePainter;
+import com.metsci.glimpse.core.support.PainterCache;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;

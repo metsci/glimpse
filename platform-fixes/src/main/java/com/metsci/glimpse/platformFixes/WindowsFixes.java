@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,52 @@
  */
 package com.metsci.glimpse.platformFixes;
 
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.extractAndLoad;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 import static java.awt.Window.getOwnerlessWindows;
 
+import java.awt.Component;
 import java.awt.Window;
-import java.awt.peer.ComponentPeer;
+import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Function;
 
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.util.jnlu.LibraryList;
+import com.google.common.collect.ImmutableList;
 
+/**
+ * Works on Oracle/OpenJDK 8 JVMs.
+ * <p>
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
+ * <pre>
+ * --add-opens java.desktop/java.awt=ALL-UNNAMED
+ * </pre>
+ */
 public class WindowsFixes
 {
 
-    public static final LibraryList libs = getLibs( );
-
-    private static LibraryList getLibs( )
+    private static final ImmutableList<URL> nativeLibs = findNativeLibs( );
+    private static ImmutableList<URL> findNativeLibs( )
     {
-        if ( onPlatform( "win", "amd64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86" ) ) return new LibraryList( "platformFixes/windows32", "windowsFixes.dll" );
-        return null;
+        if ( onPlatform( "win", "amd64"  ) ) return ImmutableList.of( WindowsFixes.class.getResource( "windows64/windowsFixes.dll" ) );
+        if ( onPlatform( "win", "x86_64" ) ) return ImmutableList.of( WindowsFixes.class.getResource( "windows64/windowsFixes.dll" ) );
+        if ( onPlatform( "win", "x86"    ) ) return ImmutableList.of( WindowsFixes.class.getResource( "windows32/windowsFixes.dll" ) );
+        return ImmutableList.of( );
     }
 
-    public static final boolean shouldApplyFixes = ( libs != null );
+    public static final boolean shouldApplyFixes = !nativeLibs.isEmpty( );
 
-    private static boolean libsNeedInit = shouldApplyFixes;
+    private static boolean nativeLibsNeedInit = shouldApplyFixes;
 
-    private static synchronized void initLibs( )
+    private static synchronized void initNativeLibs( )
     {
-        if ( libsNeedInit )
+        if ( nativeLibsNeedInit )
         {
-            libs.extractAndLoad( WindowsFixes.class.getClassLoader( ), "windowsFixes" );
-            libsNeedInit = false;
+            extractAndLoad( nativeLibs, "windowsFixes" );
+            nativeLibsNeedInit = false;
         }
     }
 
@@ -76,7 +87,7 @@ public class WindowsFixes
     {
         if ( pollingNeedsInit )
         {
-            initLibs( );
+            initNativeLibs( );
 
             TimerTask applyFixesTask = new TimerTask( )
             {
@@ -97,7 +108,7 @@ public class WindowsFixes
     {
         if ( shouldApplyFixes )
         {
-            initLibs( );
+            initNativeLibs( );
             String errorString = _applyFixes( );
             if ( errorString != null ) throw new RuntimeException( "Failed to apply Windows fixes: " + errorString );
         }
@@ -127,10 +138,9 @@ public class WindowsFixes
         // A map would scale better as the number of windows increases ...
         // but that would require bookkeeping, and presumably there won't be
         // all that many top-level windows
-        //
         for ( Window w : getOwnerlessWindows( ) )
         {
-            Long h = getHwnd( w );
+            Long h = getHWndFn.apply( w );
             if ( h != null && h == hwnd )
             {
                 return w;
@@ -139,25 +149,29 @@ public class WindowsFixes
         return null;
     }
 
-    private static Long getHwnd( Window window )
+    private static final Function<Window,Long> getHWndFn = createGetHWndFn( );
+    private static Function<Window,Long> createGetHWndFn( )
     {
         try
         {
-            @SuppressWarnings( "deprecation" )
-            ComponentPeer peer = window.getPeer( );
-            Class<?> wcpClass = Class.forName( "sun.awt.windows.WComponentPeer" );
-            if ( wcpClass.isInstance( peer ) )
+            Field Component_peer = Component.class.getDeclaredField( "peer" );
+            Component_peer.setAccessible( true );
+            return w ->
             {
-                return ( Long ) wcpClass.getMethod( "getHWnd" ).invoke( peer );
-            }
-            else
-            {
-                return null;
-            }
+                try
+                {
+                    Object peer = Component_peer.get( w );
+                    return ( Long ) peer.getClass( ).getMethod( "getHWnd" ).invoke( peer );
+                }
+                catch ( Exception e )
+                {
+                    return null;
+                }
+            };
         }
         catch ( Exception e )
         {
-            return null;
+            return w -> null;
         }
     }
 

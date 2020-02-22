@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.charts.bathy;
 
-import static com.metsci.glimpse.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
@@ -41,7 +41,6 @@ import static java.lang.Math.sqrt;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -57,12 +56,12 @@ import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import com.metsci.glimpse.gl.texture.DrawableTexture;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.support.color.GlimpseColor;
-import com.metsci.glimpse.support.projection.LatLonProjection;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.gl.texture.DrawableTexture;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.projection.LatLonProjection;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -197,9 +196,18 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
             try
             {
                 TopographyData data = tileProvider.getTile( key );
+                tile = new CachedTileData( );
+                tile.imageWidth = data.getImageWidth( );
+                tile.imageHeight = data.getImageHeight( );
+                tile.heightStep = data.getHeightStep( );
+                tile.widthStep = data.getWidthStep( );
+                tile.startLat = data.getStartLat( );
+                tile.startLon = data.getStartLon( );
+                tile.data = data.data;
+
                 float[][] shaded = new float[data.getImageWidth( )][data.getImageHeight( )];
                 hillshade( data, shaded );
-                tile = new CachedTileData( data, shaded );
+                tile.shaded = shaded;
 
                 cacheFile.getParentFile( ).mkdirs( );
                 writeCachedTile( cacheFile, tile );
@@ -210,8 +218,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
             }
         }
 
-        FloatTextureProjected2D shadeTexture = new FloatTextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
-        FloatTextureProjected2D elevationTexture = new FloatTextureProjected2D( tile.getImageWidth( ), tile.getImageHeight( ) );
+        FloatTextureProjected2D shadeTexture = new FloatTextureProjected2D( tile.imageWidth, tile.imageHeight );
+        FloatTextureProjected2D elevationTexture = new FloatTextureProjected2D( tile.imageWidth, tile.imageHeight );
         shadeTexture.setProjection( tile.getProjection( projection ) );
         elevationTexture.setProjection( tile.getProjection( projection ) );
 
@@ -234,10 +242,10 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         cached.heightStep = rf.readDouble( );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.getImageHeight( ) * Float.BYTES );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.imageHeight * Float.BYTES );
         FloatBuffer fb = bbuf.asFloatBuffer( );
 
-        cached.data = new float[cached.getImageWidth( )][cached.getImageHeight( )];
+        cached.data = new float[cached.imageWidth][cached.imageHeight];
         for ( float[] row : cached.data )
         {
             bbuf.rewind( );
@@ -246,7 +254,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
             fb.get( row );
         }
 
-        cached.shaded = new float[cached.getImageWidth( )][cached.getImageHeight( )];
+        cached.shaded = new float[cached.imageWidth][cached.imageHeight];
         for ( float[] row : cached.shaded )
         {
             bbuf.rewind( );
@@ -264,15 +272,15 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
         rf.setLength( 0 );
 
-        rf.writeInt( tile.getImageWidth( ) );
-        rf.writeInt( tile.getImageHeight( ) );
-        rf.writeDouble( tile.getStartLat( ) );
-        rf.writeDouble( tile.getStartLon( ) );
-        rf.writeDouble( tile.getWidthStep( ) );
-        rf.writeDouble( tile.getHeightStep( ) );
+        rf.writeInt( tile.imageWidth );
+        rf.writeInt( tile.imageHeight );
+        rf.writeDouble( tile.startLat );
+        rf.writeDouble( tile.startLon );
+        rf.writeDouble( tile.widthStep );
+        rf.writeDouble( tile.heightStep );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.getImageHeight( ) * Float.BYTES );
+        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.imageHeight * Float.BYTES );
         FloatBuffer fb = bbuf.asFloatBuffer( );
         for ( float[] row : tile.data )
         {
@@ -340,40 +348,28 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         return ( float ) hillshade;
     }
 
-    protected class CachedTileData extends TopographyData
+    protected class CachedTileData
     {
+        protected double widthStep;
+        protected double heightStep;
+
+        protected double startLon;
+        protected double startLat;
+
+        protected int imageHeight;
+        protected int imageWidth;
+
+        /**
+         * Data should be positive up.
+         */
+        protected float[][] data;
+
         float[][] shaded;
 
-        CachedTileData( ) throws IOException
-        {
-            super( null );
-        }
-
-        public CachedTileData( TopographyData src, float[][] shaded ) throws IOException
-        {
-            this( );
-            this.data = src.data;
-            this.shaded = shaded;
-            this.imageWidth = src.getImageWidth( );
-            this.imageHeight = src.getImageHeight( );
-            this.heightStep = src.getHeightStep( );
-            this.widthStep = src.getWidthStep( );
-            this.startLat = src.getStartLat( );
-            this.startLon = src.getStartLon( );
-        }
-
-        @Override
-        protected void read( InputStream in ) throws IOException
-        {
-            // nop
-        }
-
-        @Override
         public LatLonProjection getProjection( GeoProjection projection )
         {
             double endLat = startLat + heightStep * imageHeight;
             double endLon = startLon + widthStep * imageWidth;
-
             return new LatLonProjection( projection, clampNorthSouth( startLat ), clampNorthSouth( endLat ), clampAntiMeridian( startLon ), clampAntiMeridian( endLon ), false );
         }
     }

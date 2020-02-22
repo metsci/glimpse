@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,9 @@ public class MappedFileExample
 
         File file = new File( "test.dat" );
         System.err.println( file.getAbsolutePath( ) );
-        MappedFile mapped = new MappedFile( file, ByteOrder.nativeOrder( ), 5*GB );
+        MappedFile mapped = new MappedFile( file, ByteOrder.nativeOrder( ), 5 * GB );
 
-        MappedByteBuffer slice = mapped.slice( 3*GB, 1 );
+        MappedByteBuffer slice = mapped.slice( 3 * GB, 1 );
 
         byte r0 = slice.get( 0 );
         System.err.println( "Read: " + r0 );

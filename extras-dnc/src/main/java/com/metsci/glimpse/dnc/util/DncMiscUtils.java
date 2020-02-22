@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.net.URL;
 import java.nio.Buffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
@@ -61,6 +62,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.function.Function;
+
+import com.google.common.io.Resources;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -155,24 +158,6 @@ public class DncMiscUtils
                 return thread;
             }
         };
-    }
-
-    public static abstract class ThrowingRunnable implements Runnable
-    {
-        public abstract void runThrows( ) throws Exception;
-
-        @Override
-        public final void run( )
-        {
-            try
-            {
-                runThrows( );
-            }
-            catch ( Exception e )
-            {
-                throw new RuntimeException( e );
-            }
-        }
     }
 
     /**
@@ -461,6 +446,16 @@ public class DncMiscUtils
             }
         }
         return dir;
+    }
+
+    public static String readText( URL url, Charset charset ) throws IOException
+    {
+        return Resources.toString( url, charset );
+    }
+
+    public static BufferedReader createReader( URL url ) throws IOException
+    {
+        return new BufferedReader( new InputStreamReader( url.openStream( ) ) );
     }
 
 }

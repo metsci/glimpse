@@ -1,4 +1,4 @@
-Copyright (c) 2019, Metron, Inc.
+Copyright (c) 2020, Metron, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,6 @@ NASA WorldWind is released under the NOSA license.
 The full text of the license is available at:
 
 http://ti.arc.nasa.gov/opensource/nosa/
-
-The following Glimpse files are modified from WorldWind source files:
-
-extras-worldwind/src/main/java/com/metsci/glimpse/worldwind/tile/ElevatedSectorGeometryList.java
-extras-worldwind/src/main/java/com/metsci/glimpse/worldwind/tile/ElevatedSurfaceTileRenderer.java
 
 -----------------------------------------------------------------------------
 
@@ -122,46 +117,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 -----------------------------------------------------------------------------
 
-The following directories/files:
-
-extras-dspl/src/main/resources/dspl/datatypes.dtd
-extras-dspl/src/main/resources/dspl/dspl.xsd
-extras-dspl/src/main/resources/dspl/canonical/google/**
-
-relate to Google's Data Set Publish Language and are covered by the following license:
-
-
-Copyright 2011, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
------------------------------------------------------------------------------
-
 The following file:
 
 extras-charts/src/main/java/com/metsci/glimpse/charts/vector/parser/CsvTokenizer.java
@@ -219,7 +174,6 @@ Parts of the following files:
 
 util/src/main/java/com/metsci/glimpse/util/jnlu/FileUtils.java
 util/src/main/java/com/metsci/glimpse/util/jnlu/NativeLibUtils.java
-core/src/main/java/com/metsci/glimpse/gl/Jogular.java
 
 are based on Sun's JOGLAppletLauncher, which is covered under the following license:
 
@@ -263,50 +217,6 @@ are based on Sun's JOGLAppletLauncher, which is covered under the following lice
 
 -----------------------------------------------------------------------------
 
-The following files:
-
-core/src/main/resources/shader/antlr/GlslArg.g
-core/src/main/resources/shader/antlr/GlslArg.tokens
-core/src/main/resources/shader/antlr/GlslEs.g
-core/src/main/resources/shader/antlr/GlslEs.tokens
-
-are covered under the following license:
-
-Copyright 2009, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-The original files are available at:
-
-http://code.google.com/p/my-glsl/
-
------------------------------------------------------------------------------
-
 The following file:
 
 core/src/main/java/com/metsci/glimpse/support/font/AttributedTextRenderer.java
@@ -317,21 +227,6 @@ which is covered by the following license:
 
 2-clause BSD (http://www.opensource.org/licenses/bsd-license.php)
              (https://github.com/sgothel/gluegen/blob/1.0b06-maint/LICENSE.txt)
-
------------------------------------------------------------------------------
-
-The following file:
-
-extras-dspl/src/main/java/com/metsci/glimpse/dspl/util/MD5Checksum.java
-
-is based on code snippets from the article:
-
-http://www.rgagnon.com/javadetails/java-0416.html
-
-According to the site FAQ (http://www.rgagnon.com/varia/faq-e.htm#license)
-while the site is licensed under CC (http://creativecommons.org/licenses/by-nc-sa/2.0/)
-the individual how-to articles have no restriction on use.
-
 
 -----------------------------------------------------------------------------
 
@@ -369,36 +264,6 @@ Relevant sections allowing redistribution include:
 "NOAA RNC® data may be redistributed, but redistributed NOAA RNC® files are NOT considered official NOAA RNC® products, and do not meet federal chart carriage regulations for regulated vessels."
 
 "Copying of the NOAA RNC® files to any other server or location for further distribution is discouraged unless the following guidelines are followed: 1) this User Agreement is displayed and accepted by anyone accessing the NOAA RNC® data, and 2) a reference to this Web site is included so that anyone accessing the NOAA RNC® data is advised of their origin."
-
-
------------------------------------------------------------------------------
-
-The ANTLR Parser Generator (http://www.antlr.org/) is covered by the following license:
-
-[The BSD License]
-Copyright (c) 2010 Terence Parr
-All rights reserved.
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
-Redistributions in binary form must reproduce the above copyright notice, this
-list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-Neither the name of the author nor the names of its contributors may be used to
-endorse or promote products derived from this software without specific prior
-written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 -----------------------------------------------------------------------------
@@ -466,12 +331,6 @@ MigLayout (http://www.miglayout.com/) is covered by the following license:
 
 -----------------------------------------------------------------------------
 
-SWT (http://www.eclipse.org/swt/) is covered by the Eclipse Public License:
-
-http://www.eclipse.org/legal/
-
------------------------------------------------------------------------------
-
 jsyntaxpane (http://code.google.com/p/jsyntaxpane/) is covered by the Apache 2.0 License:
 
 http://www.apache.org/licenses/LICENSE-2.0
@@ -489,22 +348,3 @@ in Matplotlib (http://matplotlib.org/users/installing.html). Matplotlib uses a B
 license based on the PSF license:
 
 http://matplotlib.org/users/license.html
-
------------------------------------------------------------------------------
-
-Code in com.metsci.glimpse.wizard package is loosely inspired from
-https://github.com/cjwizard/cjwizard which is available under the following license:
-
-Copyright 2008  Eugene Creswick
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
- 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.

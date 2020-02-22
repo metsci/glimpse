@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@ import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.topo.io.TopoDataType;
 import com.metsci.glimpse.topo.proj.NormalCylindricalProjection;
 
