@@ -9,14 +9,6 @@
 
 	<artifactId>glimpse-text</artifactId>
 
-	<!-- FIXME: Point at Maven Central -->
-	<repositories>
-		<repository>
-			<id>thirdparty</id>
-			<url>http://maven.metsci.com/thirdparty</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.metsci.ext.org.jogamp.gluegen</groupId>
