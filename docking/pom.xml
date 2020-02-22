@@ -29,13 +29,13 @@
             <version>2.3.2</version>
         </dependency>
 
-        <!--
-         When glimpse-docking is used AS A MODULE, make sure that
-         jaxb-runtime is on the MODULEPATH (not the classpath!) at
-         runtime. If it's on the classpath instead, it may or may
-         not work, depending on what classloaders are being used.
-        -->
         <dependency>
+            <!--
+             When glimpse-docking is used AS A MODULE, make sure that
+             jaxb-runtime is on the MODULEPATH (not the classpath!) at
+             runtime. If it's on the classpath instead, it may or may
+             not work, depending on what classloaders are being used.
+            -->
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.2</version>
