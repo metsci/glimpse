@@ -189,7 +189,6 @@
                         </goals>
                         <configuration>
                             <release>9</release>
-                            <multiReleaseOutput>true</multiReleaseOutput>
                             <includes>
                                 <include>module-info.java</include>
                             </includes>
