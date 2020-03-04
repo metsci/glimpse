@@ -176,23 +176,26 @@
                 <executions>
                     <execution>
                         <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                         <configuration>
-                            <excludes>
-                                <exclude>module-info.java</exclude>
-                            </excludes>
+                            <release>8</release>
                         </configuration>
                     </execution>
                     <execution>
                         <id>moduleinfo-compile</id>
+                        <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
                         <configuration>
                             <release>9</release>
                             <multiReleaseOutput>true</multiReleaseOutput>
-                            <includes>
-                                <include>module-info.java</include>
-                            </includes>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
+                            </compileSourceRoots>
                         </configuration>
                     </execution>
                 </executions>
