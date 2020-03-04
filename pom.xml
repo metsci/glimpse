@@ -189,6 +189,7 @@
                         </goals>
                         <configuration>
                             <release>9</release>
+                            <multiReleaseOutput>true</multiReleaseOutput>
                             <includes>
                                 <include>module-info.java</include>
                             </includes>
@@ -238,6 +239,7 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                         <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
                             <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
                             <SCM-Revision>${mvngit.commit.id}</SCM-Revision>
                         </manifestEntries>
