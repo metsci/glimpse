@@ -167,32 +167,63 @@
             </plugin>
 
             <plugin>
+                <!--
+                 First compile everything with Java 9, then re-compile everything except
+                 module-info with Java 8. This results in a module-info.class compatible
+                 with Java 9, and all other classes compatible with Java 8. Importantly,
+                 it also does all the appropriate build-time checks on the module-info
+                 files.
+
+                 Maven always runs "default-compile" before other compile executions, so
+                 the Java 9 compile must have execution id "default-compile."
+
+                 To choose the compiler level for an Eclipse project, m2e uses the highest
+                 compiler level from all compile executions. That is inconvenient here,
+                 because we want the Eclipse project to use Java 8. However, m2e happens
+                 to give precedence to the release tag over the source/target tags (see
+                 AbstractJavaProjectConfigurator.addJavaProjectOptions()), so we can trick
+                 it into using Java 8 by using "release 8" and "source/target 9."
+
+                 Some of these phase/goal values are the defaults, so we could omit them.
+                 However, since we're doing something unusual it's probably better to be
+                 explicit about everything.
+                 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <configuration>
-                    <release>8</release>
-                </configuration>
                 <executions>
                     <execution>
                         <id>default-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                         <configuration>
+                            <source>9</source>
+                            <target>9</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>java8-recompile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>8</release>
                             <excludes>
                                 <exclude>module-info.java</exclude>
                             </excludes>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>moduleinfo-compile</id>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
                         <goals>
-                            <goal>compile</goal>
+                            <goal>testCompile</goal>
                         </goals>
                         <configuration>
-                            <release>9</release>
-                            <multiReleaseOutput>true</multiReleaseOutput>
-                            <includes>
-                                <include>module-info.java</include>
-                            </includes>
+                            <release>8</release>
                         </configuration>
                     </execution>
                 </executions>
