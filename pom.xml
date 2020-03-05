@@ -173,32 +173,18 @@
                 <configuration>
                     <release>8</release>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>8</release>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>moduleinfo-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>9</release>
-                            <multiReleaseOutput>true</multiReleaseOutput>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
-                            </compileSourceRoots>
-                        </configuration>
-                    </execution>
-                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <version>1.0.0.Beta2</version>
+                <configuration>
+                    <jvmVersion>9</jvmVersion>
+                    <module>
+                        <moduleInfoFile>src/main/java9/module-info.java</moduleInfoFile>
+                    </module>
+                </configuration>
             </plugin>
 
             <plugin>

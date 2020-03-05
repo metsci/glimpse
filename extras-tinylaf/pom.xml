@@ -10,13 +10,28 @@
     <artifactId>glimpse-extras-tinylaf</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>net.sf.tinylaf</groupId>
             <artifactId>tinylaf</artifactId>
             <version>1.4.0</version>
         </dependency>
-
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>add-module-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
