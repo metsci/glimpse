@@ -46,7 +46,7 @@ public class TinyLafUtils
 
     public static void initTinyLaf( )
     {
-        initTinyLaf( TinyLafUtils.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+        initTinyLaf( TinyLafUtils.class.getResource( "radiance.theme" ) );
     }
 
     public static void initTinyLaf( URL themeUrl )
