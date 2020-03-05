@@ -173,18 +173,29 @@
                 <configuration>
                     <release>8</release>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.moditect</groupId>
-                <artifactId>moditect-maven-plugin</artifactId>
-                <version>1.0.0.Beta2</version>
-                <configuration>
-                    <jvmVersion>9</jvmVersion>
-                    <module>
-                        <moduleInfoFile>src/main/java9/module-info.java</moduleInfoFile>
-                    </module>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>moduleinfo-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>9</release>
+                            <multiReleaseOutput>true</multiReleaseOutput>
+                            <includes>
+                                <include>module-info.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
