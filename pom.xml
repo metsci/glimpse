@@ -242,6 +242,50 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                            <argLine>
+                             --add-opens java.base/java.nio=ALL-UNNAMED
+                             --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+                             --add-opens java.base/jdk.internal.ref=ALL-UNNAMED
+                             --add-opens java.desktop/java.awt=ALL-UNNAMED
+                             --add-opens java.desktop/sun.awt=ALL-UNNAMED
+                             --add-opens java.desktop/sun.java2d=ALL-UNNAMED
+                            </argLine>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>modular-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>true</useModulePath>
+                            <argLine>
+                             --add-opens java.base/java.nio=com.metsci.glimpse.util
+                             --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+                             --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
+                             --add-opens java.desktop/java.awt=com.metsci.glimpse.core
+                             --add-opens java.desktop/sun.awt=com.jogamp.opengl
+                             --add-opens java.desktop/sun.java2d=com.jogamp.opengl
+                            </argLine>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- add the current commit SHA to the build jar -->
             <plugin>
                 <groupId>com.github.koraktor</groupId>
