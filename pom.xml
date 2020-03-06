@@ -88,14 +88,15 @@
                 <version>3.0.0-M3</version>
                 <executions>
                     <execution>
-                        <id>enforce-maven</id>
+                        <id>enforce-maven35</id>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.5</version>
+                                    <version>[3.5,)</version>
+                                    <message>Build requires Maven 3.5+</message>
                                 </requireMavenVersion>
                             </rules>
                         </configuration>
