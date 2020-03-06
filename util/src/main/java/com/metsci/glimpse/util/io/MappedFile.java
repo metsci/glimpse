@@ -229,6 +229,19 @@ public class MappedFile
         this.cleanable.clean( );
     }
 
+    /**
+     * Get the cleaner for this MappedFile so that {@link Cleanable}s can be built for wrapper objects.
+     * <p>
+     * <strong>IMPORTANT:</strong> The returned Cleanable must not be cleaned while slices of this MappedFile are
+     * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
+     * @return
+     * @see #dispose()
+     */
+    public Cleanable cleaner()
+    {
+        return this.cleanable;
+    }
+
     // Lots of verbose code to get access to various JVM-internal functionality
 
     protected static final Object unsafe;
