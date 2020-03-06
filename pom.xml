@@ -315,7 +315,6 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
                         <manifestEntries>
-                            <Multi-Release>true</Multi-Release>
                             <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
                             <SCM-Revision>${mvngit.commit.id}</SCM-Revision>
                         </manifestEntries>
