@@ -174,8 +174,6 @@
                 <configuration>
                     <!-- This may get overridden and/or augmented by active profiles -->
                     <release>9</release>
-                    <source>8</source>
-                    <target>9</target>
                 </configuration>
             </plugin>
 
@@ -447,7 +445,7 @@
 
     <profiles>
         <profile>
-            <id>java8-only-compile</id>
+            <id>java8-only</id>
             <activation>
                 <property>
                     <name>m2e.version</name>
@@ -471,7 +469,7 @@
         </profile>
 
         <profile>
-            <id>java8-compat-compile</id>
+            <id>java8-compat</id>
             <activation>
                 <property>
                     <name>!m2e.version</name>
@@ -484,7 +482,7 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <executions>
                             <execution>
-                                <!-- AFTER the default-compile, recompile everything (except module-info) with Java 8 -->
+                                <!-- After default-compile, recompile everything (except module-info) with Java 8 -->
                                 <id>java8-recompile</id>
                                 <phase>compile</phase>
                                 <goals>
@@ -498,7 +496,7 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <!-- Override the default-testCompile to be Java 8 only -->
+                                <!-- Override default-testCompile to be Java 8 only -->
                                 <id>default-testCompile</id>
                                 <configuration>
                                     <release>8</release>
