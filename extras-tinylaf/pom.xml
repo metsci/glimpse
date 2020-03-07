@@ -10,13 +10,11 @@
     <artifactId>glimpse-extras-tinylaf</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>net.sf.tinylaf</groupId>
             <artifactId>tinylaf</artifactId>
             <version>1.4.0</version>
         </dependency>
-
     </dependencies>
 
 </project>

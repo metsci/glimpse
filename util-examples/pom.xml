@@ -10,13 +10,11 @@
     <artifactId>glimpse-util-examples</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-util</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>

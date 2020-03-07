@@ -10,19 +10,16 @@
     <artifactId>glimpse-extras-charts</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.jai-imageio</groupId>
             <artifactId>jai-imageio-core</artifactId>
             <version>1.4.0</version>
         </dependency>
-
     </dependencies>
 
 </project>

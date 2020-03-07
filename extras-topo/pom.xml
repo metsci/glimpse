@@ -10,13 +10,11 @@
     <artifactId>glimpse-extras-topo</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>

@@ -18,19 +18,16 @@
             <artifactId>glimpse-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core-examples</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-examples</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-charts</artifactId>
@@ -40,6 +37,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
