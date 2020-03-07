@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.core.plot.timeline.data;
 
-import static com.metsci.glimpse.util.units.time.Time.*;
-import static java.lang.Math.*;
+import static com.metsci.glimpse.util.units.time.Time.millisecondsToSeconds;
+import static com.metsci.glimpse.util.units.time.Time.secondsToMilliseconds;
+import static java.lang.Math.round;
 
 import com.metsci.glimpse.util.units.time.TimeStamp;
 

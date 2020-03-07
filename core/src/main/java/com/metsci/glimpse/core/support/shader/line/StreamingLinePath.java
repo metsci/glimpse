@@ -26,9 +26,10 @@
  */
 package com.metsci.glimpse.core.support.shader.line;
 
-import static com.jogamp.opengl.GL.*;
-import static com.metsci.glimpse.core.support.shader.line.LinePathData.*;
-import static com.metsci.glimpse.core.support.shader.line.LineUtils.*;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.metsci.glimpse.core.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.core.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.core.support.shader.line.LineUtils.distance;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

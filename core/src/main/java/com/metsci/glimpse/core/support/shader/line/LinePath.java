@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.support.shader.line;
 
-import static com.jogamp.opengl.GL.*;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

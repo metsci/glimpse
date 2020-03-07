@@ -32,8 +32,6 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 
 import com.metsci.glimpse.util.geo.LatLonGeo;
-import com.metsci.glimpse.util.geo.projection.GeoProjection;
-import com.metsci.glimpse.util.geo.projection.KinematicVector2d;
 import com.metsci.glimpse.util.geo.util.DistanceAzimuth;
 import com.metsci.glimpse.util.vector.Vector2d;
 

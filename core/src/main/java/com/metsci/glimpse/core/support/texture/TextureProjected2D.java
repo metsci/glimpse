@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL3;
@@ -50,7 +51,6 @@ import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.painter.texture.TextureUnit;
 import com.metsci.glimpse.core.support.projection.InvertibleProjection;
 import com.metsci.glimpse.core.support.projection.Projection;
-import com.jogamp.common.nio.Buffers;
 
 public abstract class TextureProjected2D implements DrawableTexture
 {

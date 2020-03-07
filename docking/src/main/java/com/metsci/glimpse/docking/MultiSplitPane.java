@@ -43,8 +43,6 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.docking.SplitPaneListener;
-
 @SuppressWarnings( "serial" )
 public class MultiSplitPane extends JPanel
 {

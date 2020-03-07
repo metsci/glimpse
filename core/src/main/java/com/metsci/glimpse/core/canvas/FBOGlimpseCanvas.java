@@ -26,12 +26,13 @@
  */
 package com.metsci.glimpse.core.canvas;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
+import com.jogamp.opengl.FBObject.Colorbuffer;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
@@ -40,8 +41,6 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.GLRunnable;
-
-import com.jogamp.opengl.FBObject.Colorbuffer;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;

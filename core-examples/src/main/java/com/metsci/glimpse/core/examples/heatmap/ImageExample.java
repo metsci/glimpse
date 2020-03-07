@@ -40,8 +40,8 @@ import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.core.plot.SimplePlot2D;
 import com.metsci.glimpse.core.support.projection.FlatProjection;
 import com.metsci.glimpse.core.support.shader.triangle.ColorTexture2DProgram;
-import com.metsci.glimpse.core.support.texture.RGBATextureProjected2D;
 import com.metsci.glimpse.core.support.texture.ByteTextureProjected2D.MutatorByte2D;
+import com.metsci.glimpse.core.support.texture.RGBATextureProjected2D;
 
 /**
  * Demonstrates display of a png file in a Glimpse plot.

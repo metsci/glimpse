@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.nio.Buffer;
 
 import javax.imageio.ImageIO;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.metsci.glimpse.core.support.texture.ByteTextureProjected2D.MutatorByte2D;

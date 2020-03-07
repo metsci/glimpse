@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.core.gl.util;
 
-import static com.metsci.glimpse.core.gl.util.GLErrorUtils.logGLError;
-import static com.metsci.glimpse.core.gl.util.GLErrorUtils.logGLErrors;
-import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
 import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static com.jogamp.opengl.GL2ES1.GL_POINT_SPRITE;
+import static com.metsci.glimpse.core.gl.util.GLErrorUtils.logGLError;
+import static com.metsci.glimpse.core.gl.util.GLErrorUtils.logGLErrors;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 
 import java.util.logging.Logger;
 
@@ -42,7 +42,6 @@ import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawableFactory;
 import com.jogamp.opengl.GLOffscreenAutoDrawable;
 import com.jogamp.opengl.GLProfile;
-
 import com.jogamp.opengl.util.FPSAnimator;
 import com.metsci.glimpse.core.canvas.GlimpseCanvas;
 import com.metsci.glimpse.core.context.GlimpseBounds;

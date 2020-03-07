@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.core.axis.tagged.painter;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.jogamp.opengl.GL.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;

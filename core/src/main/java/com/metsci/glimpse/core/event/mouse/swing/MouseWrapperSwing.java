@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.event.mouse.swing;
 
-import static com.metsci.glimpse.core.event.mouse.FocusBehavior.*;
+import static com.metsci.glimpse.core.event.mouse.FocusBehavior.CLICK_FOCUS;
 
 import java.awt.Component;
 import java.awt.event.MouseEvent;

@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.core.painter.shape;
 
-import static com.jogamp.opengl.GL.*;
-import static com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.*;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.shift;
+import static com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.shiftMaps;
 import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import java.nio.FloatBuffer;
@@ -40,10 +41,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
-import com.google.common.collect.Sets;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.context.GlimpseBounds;
 import com.metsci.glimpse.core.context.GlimpseContext;

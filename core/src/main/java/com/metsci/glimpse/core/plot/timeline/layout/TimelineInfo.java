@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.core.plot.timeline.layout;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.*;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.util.TimeZone;

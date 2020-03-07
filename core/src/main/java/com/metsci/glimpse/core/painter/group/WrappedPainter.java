@@ -40,6 +40,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.jogamp.opengl.FBObject;
 import com.jogamp.opengl.FBObject.TextureAttachment;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.axis.WrappedAxis1D;
@@ -56,8 +58,6 @@ import com.metsci.glimpse.core.support.settings.LookAndFeel;
 import com.metsci.glimpse.core.support.shader.triangle.ColorTexture2DProgram;
 import com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext;
 import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
 
 /**
  * @see WrappedAxis1D

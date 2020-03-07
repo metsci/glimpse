@@ -33,7 +33,6 @@ import java.util.List;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLContext;
-
 import com.jogamp.opengl.util.packrect.BackingStoreManager;
 import com.jogamp.opengl.util.packrect.Rect;
 import com.metsci.glimpse.jogamp.opengl.util.awt.text.TextureBackingStore.EventListener;

@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.core.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode.*;
+import static com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -34,7 +35,6 @@ import java.util.Iterator;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
 import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.axis.Axis1D;
@@ -46,10 +46,10 @@ import com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation;
 import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.core.plot.timeline.data.Epoch;
 import com.metsci.glimpse.core.plot.timeline.event.Event;
-import com.metsci.glimpse.core.plot.timeline.event.EventBounds;
-import com.metsci.glimpse.core.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode;
 import com.metsci.glimpse.core.plot.timeline.event.Event.TextRenderingMode;
+import com.metsci.glimpse.core.plot.timeline.event.EventBounds;
+import com.metsci.glimpse.core.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.core.plot.timeline.event.listener.EventSelectionHandler;
 import com.metsci.glimpse.core.support.atlas.TextureAtlas;
 import com.metsci.glimpse.core.support.atlas.support.ImageData;

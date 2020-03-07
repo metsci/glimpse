@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jogamp.opengl.GL;
-
 import com.jogamp.opengl.util.packrect.BackingStoreManager;
 import com.jogamp.opengl.util.packrect.Rect;
 import com.jogamp.opengl.util.packrect.RectVisitor;

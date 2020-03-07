@@ -30,7 +30,6 @@ import static com.metsci.glimpse.core.gl.util.GLUtils.deleteBuffers;
 import static com.metsci.glimpse.core.gl.util.GLUtils.deleteTextures;
 
 import com.jogamp.opengl.GL;
-
 import com.metsci.glimpse.topo.io.TopoDataType;
 
 public class TopoDeviceTile

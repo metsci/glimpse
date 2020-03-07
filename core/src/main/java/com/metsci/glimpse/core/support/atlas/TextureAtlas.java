@@ -62,7 +62,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLException;
-
 import com.jogamp.opengl.util.packrect.BackingStoreManager;
 import com.jogamp.opengl.util.packrect.Rect;
 import com.jogamp.opengl.util.packrect.RectVisitor;

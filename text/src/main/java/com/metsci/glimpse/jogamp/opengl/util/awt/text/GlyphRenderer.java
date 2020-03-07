@@ -29,7 +29,6 @@ package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLException;
-
 import com.jogamp.opengl.util.texture.TextureCoords;
 
 /**

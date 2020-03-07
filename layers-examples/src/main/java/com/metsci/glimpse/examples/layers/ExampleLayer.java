@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.Facet;
+import com.metsci.glimpse.layers.Layer;
 import com.metsci.glimpse.layers.View;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimelineView;

@@ -27,13 +27,13 @@
 package com.metsci.glimpse.core.support.shader.line;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 import static com.metsci.glimpse.core.support.shader.line.LinePathData.FLAGS_CONNECT;
 import static com.metsci.glimpse.core.support.shader.line.LinePathData.FLAGS_JOIN;
 import static com.metsci.glimpse.core.support.shader.line.LinePathData.updateMileageBuffer;
 import static com.metsci.glimpse.util.buffer.DirectBufferUtils.sliced;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

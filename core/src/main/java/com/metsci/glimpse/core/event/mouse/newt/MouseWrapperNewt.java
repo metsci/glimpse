@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.event.mouse.newt;
 
-import static com.metsci.glimpse.core.event.mouse.FocusBehavior.*;
+import static com.metsci.glimpse.core.event.mouse.FocusBehavior.CLICK_FOCUS;
 
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseEvent.PointerType;

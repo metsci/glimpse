@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.core.painter.shape;
 
-import static com.metsci.glimpse.core.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.jogamp.opengl.GL.*;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.io.Serializable;
 import java.nio.FloatBuffer;
@@ -45,11 +45,11 @@ import com.metsci.glimpse.core.gl.GLEditableBuffer;
 import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.support.polygon.Polygon;
-import com.metsci.glimpse.core.support.polygon.PolygonTessellator;
-import com.metsci.glimpse.core.support.polygon.SimpleVertexAccumulator;
 import com.metsci.glimpse.core.support.polygon.Polygon.Interior;
 import com.metsci.glimpse.core.support.polygon.Polygon.Loop.LoopBuilder;
+import com.metsci.glimpse.core.support.polygon.PolygonTessellator;
 import com.metsci.glimpse.core.support.polygon.PolygonTessellator.TessellationException;
+import com.metsci.glimpse.core.support.polygon.SimpleVertexAccumulator;
 import com.metsci.glimpse.core.support.shader.triangle.FlatColorProgram;
 
 /**

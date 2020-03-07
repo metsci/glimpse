@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.io.MappedBufferStats.*;
-import static com.metsci.glimpse.util.io.MappedFile.*;
+import static com.metsci.glimpse.util.io.MappedBufferStats.addToMappedBufferStats;
+import static com.metsci.glimpse.util.io.MappedFile.getFileDescriptorForMapping;
 
 import java.io.File;
 import java.io.FileDescriptor;

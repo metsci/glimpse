@@ -26,10 +26,14 @@
  */
 package com.metsci.glimpse.core.support.shader.line;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.core.support.shader.line.LineUtils.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
+import static com.jogamp.common.nio.Buffers.newDirectByteBuffer;
+import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
+import static com.metsci.glimpse.core.support.shader.line.LineUtils.distance;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffers;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.flipped;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.grow1b;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.grow1f;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.grow2f;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

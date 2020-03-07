@@ -44,11 +44,11 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import com.jogamp.opengl.GLAnimatorControl;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.metsci.glimpse.core.canvas.GlimpseCanvas;
-
-import javax.swing.JFrame;
 
 public class FrameUtils
 {

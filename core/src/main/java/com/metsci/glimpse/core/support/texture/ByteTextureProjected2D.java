@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.support.texture;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.lang.Math.multiplyExact;
 
 import java.nio.Buffer;

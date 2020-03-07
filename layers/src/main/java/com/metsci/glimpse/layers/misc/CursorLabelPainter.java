@@ -28,6 +28,8 @@ package com.metsci.glimpse.layers.misc;
 
 import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.util.texture.awt.AWTTextureIO.newTextureData;
 import static com.metsci.glimpse.core.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
@@ -41,18 +43,16 @@ import static java.awt.Font.MONOSPACED;
 import static java.awt.Font.PLAIN;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static javax.swing.BorderFactory.createEmptyBorder;
 
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES3;
 import javax.swing.JLabel;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.TextureData;

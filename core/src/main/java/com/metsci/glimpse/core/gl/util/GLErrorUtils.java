@@ -26,10 +26,10 @@
  */
 package com.metsci.glimpse.core.gl.util;
 
+import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.getProgramInfoLog;
 import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.getShaderInfoLog;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static jogamp.opengl.glu.error.Error.gluErrorString;
 
 import java.util.logging.Logger;
