@@ -168,66 +168,15 @@
             </plugin>
 
             <plugin>
-                <!--
-                 First compile everything with Java 9, then re-compile everything except
-                 module-info with Java 8. This results in a module-info.class compatible
-                 with Java 9, and all other classes compatible with Java 8. Importantly,
-                 it also does all the appropriate build-time checks on the module-info
-                 files.
-
-                 Maven always runs "default-compile" before other compile executions, so
-                 the Java 9 compile must have execution id "default-compile."
-
-                 To choose the compiler level for an Eclipse project, m2e uses the highest
-                 compiler level from all compile executions. That is inconvenient here,
-                 because we want the Eclipse project to use Java 8. However, m2e happens
-                 to give precedence to the release tag over the source/target tags (see
-                 AbstractJavaProjectConfigurator.addJavaProjectOptions()), so we can trick
-                 it into using Java 8 by using "release 8" and "source/target 9."
-
-                 Some of these phase/goal values are the defaults, so we could omit them.
-                 However, since we're doing something unusual it's probably better to be
-                 explicit about everything.
-                 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <source>9</source>
-                            <target>9</target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java8-recompile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>8</release>
-                            <excludes>
-                                <exclude>module-info.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>default-testCompile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                        <configuration>
-                            <release>8</release>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <!-- This may get overridden and/or augmented by active profiles -->
+                    <release>9</release>
+                    <source>8</source>
+                    <target>9</target>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -498,8 +447,76 @@
 
     <profiles>
         <profile>
+            <id>java8-only-compile</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <!-- Override the common compiler config to be Java 8 only -->
+                            <release>8</release>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>java8-compat-compile</id>
+            <activation>
+                <property>
+                    <name>!m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <!-- AFTER the default-compile, recompile everything (except module-info) with Java 8 -->
+                                <id>java8-recompile</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>8</release>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <!-- Override the default-testCompile to be Java 8 only -->
+                                <id>default-testCompile</id>
+                                <configuration>
+                                    <release>8</release>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>release</id>
         </profile>
+
         <profile>
             <id>internal</id>
             <activation>
@@ -541,6 +558,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>glimpse.metsci.com</id>
             <distributionManagement>
