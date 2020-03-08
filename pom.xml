@@ -518,7 +518,9 @@
         <profile>
             <id>internal</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!public.release</name>
+                </property>
             </activation>
             <distributionManagement>
                 <repository>
