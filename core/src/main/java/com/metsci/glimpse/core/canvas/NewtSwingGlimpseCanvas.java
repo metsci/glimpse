@@ -35,6 +35,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
+import javax.swing.JPanel;
+
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
@@ -53,11 +57,6 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.layout.GlimpseLayout;
 import com.metsci.glimpse.core.painter.base.GlimpsePainter;
 import com.metsci.glimpse.core.support.settings.LookAndFeel;
-
-import javax.swing.JPanel;
-
-import com.jogamp.newt.awt.NewtCanvasAWT;
-import com.jogamp.newt.opengl.GLWindow;
 
 /**
  * A GlimpseCanvas backed by the JOGL {@link NewtCanvasAWT}. This is the default GlimpseCanvas

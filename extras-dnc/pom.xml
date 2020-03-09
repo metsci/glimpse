@@ -10,26 +10,22 @@
     <artifactId>glimpse-extras-dnc</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.metsci.ext.com.kitfox.svg</groupId>
             <artifactId>svg-salamander</artifactId>
             <version>0.1.19</version>
         </dependency>
-
-        <!-- For Vpf2Flat -->
         <dependency>
+            <!-- Used by Vpf2Flat -->
             <groupId>gov.nasa</groupId>
             <artifactId>worldwind</artifactId>
             <version>2.0.0</version>
         </dependency>
-
     </dependencies>
 
 </project>

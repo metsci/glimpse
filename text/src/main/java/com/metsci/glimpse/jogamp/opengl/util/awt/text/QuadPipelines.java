@@ -30,9 +30,8 @@ package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GLProfile;
-
 import com.jogamp.opengl.GLExtensions;
+import com.jogamp.opengl.GLProfile;
 
 /**
  * Utility for working with {@link QuadPipeline}'s.

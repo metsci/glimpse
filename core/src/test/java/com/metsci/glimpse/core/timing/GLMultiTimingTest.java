@@ -26,16 +26,26 @@
  */
 package com.metsci.glimpse.core.timing;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.core.support.FrameUtils.*;
-import static com.metsci.glimpse.core.timing.GLVersionLogger.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static com.jogamp.opengl.GL.*;
-import static javax.swing.WindowConstants.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.common.nio.Buffers.newDirectIntBuffer;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_POINTS;
+import static com.metsci.glimpse.core.support.FrameUtils.disposeOnWindowClosing;
+import static com.metsci.glimpse.core.support.FrameUtils.newFrame;
+import static com.metsci.glimpse.core.support.FrameUtils.showFrameCentered;
+import static com.metsci.glimpse.core.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.core.timing.GLVersionLogger.addGLVersionLogger;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.flipped;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -52,9 +62,6 @@ import com.metsci.glimpse.core.support.shader.triangle.FlatColorProgram;
 import com.metsci.glimpse.core.support.shader.triangle.FlatColorProgram.ProgramHandles;
 import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 
 public class GLMultiTimingTest

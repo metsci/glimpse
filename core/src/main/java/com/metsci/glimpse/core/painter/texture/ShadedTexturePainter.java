@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import com.jogamp.opengl.GL;
 import com.metsci.glimpse.core.context.GlimpseContext;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
@@ -39,7 +40,6 @@ import com.metsci.glimpse.core.gl.texture.Texture;
 import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.support.shader.triangle.ColorTexture2DProgram;
-import com.google.common.collect.Sets;
 
 /**
  * A painter which applies shaders to textures in order to display

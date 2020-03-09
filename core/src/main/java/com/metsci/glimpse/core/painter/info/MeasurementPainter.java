@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.painter.info;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.*;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
 
 import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;

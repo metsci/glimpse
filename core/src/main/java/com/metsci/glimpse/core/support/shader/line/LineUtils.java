@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.support.shader.line;
 
-import static java.lang.Math.*;
+import static java.lang.Math.sqrt;
 
 import com.metsci.glimpse.core.axis.Axis2D;
 

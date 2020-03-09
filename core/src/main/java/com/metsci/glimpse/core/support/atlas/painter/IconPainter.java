@@ -43,11 +43,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLContext;
-
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.axis.Axis2D;

@@ -26,9 +26,10 @@
  */
 package com.metsci.glimpse.util.math.approx;
 
-import static com.metsci.glimpse.util.math.MathConstants.*;
-import static java.lang.Double.*;
-import static java.lang.Math.*;
+import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
+import static java.lang.Double.doubleToRawLongBits;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
 
 /**
  * Similar to the classes in {@link com.metsci.glimpse.util.math.fast}, but uses linear interpolation

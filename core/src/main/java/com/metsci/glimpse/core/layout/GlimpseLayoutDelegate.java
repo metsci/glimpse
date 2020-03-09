@@ -34,6 +34,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.jogamp.opengl.GL;
 import com.metsci.glimpse.core.context.GlimpseBounds;
 import com.metsci.glimpse.core.context.GlimpseContext;
@@ -42,8 +44,6 @@ import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.painter.base.GlimpsePainter;
 import com.metsci.glimpse.core.painter.base.GlimpsePainterCallback;
 import com.metsci.glimpse.core.support.settings.LookAndFeel;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 import net.miginfocom.layout.ComponentWrapper;
 import net.miginfocom.layout.ContainerWrapper;

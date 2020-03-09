@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.core.painter.decoration;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.*;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
@@ -37,7 +38,6 @@ import java.util.Map;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.context.GlimpseBounds;
 import com.metsci.glimpse.core.context.GlimpseContext;

@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.math.approx;
 
-import static com.metsci.glimpse.util.math.MathConstants.*;
-import static java.lang.Math.*;
+import static com.metsci.glimpse.util.math.MathConstants.TWO_PI;
+import static java.lang.Math.floor;
 
 /**
  * Similar to the classes in {@link com.metsci.glimpse.util.math.fast}, but uses linear interpolation

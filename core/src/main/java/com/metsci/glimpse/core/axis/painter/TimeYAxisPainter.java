@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.jogamp.opengl.GL3;
-
 import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.axis.painter.label.time.AbsoluteTimeAxisLabelHandler;

@@ -41,7 +41,6 @@ import java.util.List;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLException;
-
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.metsci.glimpse.jogamp.opengl.util.awt.text.Check;
 import com.metsci.glimpse.jogamp.opengl.util.awt.text.Glyph;

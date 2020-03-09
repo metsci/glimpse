@@ -48,10 +48,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import com.google.common.io.CountingInputStream;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
-import com.google.common.io.CountingInputStream;
 import com.metsci.glimpse.charts.bathy.TileKey;
 import com.metsci.glimpse.charts.bathy.TilePainter;
 import com.metsci.glimpse.core.axis.Axis2D;

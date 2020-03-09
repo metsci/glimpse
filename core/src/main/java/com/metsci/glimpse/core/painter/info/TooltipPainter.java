@@ -33,6 +33,7 @@ import java.text.BreakIterator;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.axis.AxisNotSetException;
@@ -44,9 +45,8 @@ import com.metsci.glimpse.core.support.atlas.TextureAtlas;
 import com.metsci.glimpse.core.support.atlas.support.ImageData;
 import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.core.support.font.SimpleTextLayout;
-import com.metsci.glimpse.core.support.font.SimpleTextLayoutCenter;
 import com.metsci.glimpse.core.support.font.SimpleTextLayout.TextBoundingBox;
-import com.google.common.collect.Lists;
+import com.metsci.glimpse.core.support.font.SimpleTextLayoutCenter;
 
 /**
  * Displays tool tip text at a specified position.

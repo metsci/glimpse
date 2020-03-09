@@ -10,38 +10,30 @@
     <artifactId>glimpse-docking</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-util</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-extras-tinylaf</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
+            <!-- Not allowed at Java 9 compile-time, but required at Java 11+ runtime -->
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>2.3.2</version>
+            <scope>runtime</scope>
         </dependency>
-
         <dependency>
-            <!--
-             When glimpse-docking is used AS A MODULE, make sure that
-             jaxb-runtime is on the MODULEPATH (not the classpath!) at
-             runtime. If it's on the classpath instead, it may or may
-             not work, depending on what classloaders are being used.
-            -->
+            <!-- Not allowed at Java 9 compile-time, but required at Java 11+ runtime -->
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.2</version>
             <scope>runtime</scope>
         </dependency>
-
     </dependencies>
 
 </project>

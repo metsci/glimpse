@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.core.timing;
 
-import static com.metsci.glimpse.core.gl.util.GLCapabilityUtils.*;
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
-import static java.util.logging.Level.*;
+import static com.metsci.glimpse.core.gl.util.GLCapabilityUtils.logGLVersionInfo;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static java.util.logging.Level.INFO;
 
 import java.util.logging.Logger;
 

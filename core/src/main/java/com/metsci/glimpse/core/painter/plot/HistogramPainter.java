@@ -30,6 +30,7 @@ import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.core.axis.Axis2D;
@@ -38,7 +39,6 @@ import com.metsci.glimpse.core.gl.util.GLErrorUtils;
 import com.metsci.glimpse.core.gl.util.GLUtils;
 import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.support.shader.triangle.FlatColorProgram;
-import com.jogamp.common.nio.Buffers;
 
 import it.unimi.dsi.fastutil.floats.Float2IntMap;
 import it.unimi.dsi.fastutil.floats.Float2IntOpenHashMap;

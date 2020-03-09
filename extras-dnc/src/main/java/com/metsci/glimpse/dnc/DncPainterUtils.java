@@ -28,14 +28,15 @@ package com.metsci.glimpse.dnc;
 
 import static com.metsci.glimpse.util.GeneralUtils.compareInts;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
-import it.unimi.dsi.fastutil.chars.Char2IntMap;
-import it.unimi.dsi.fastutil.chars.Char2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import java.util.Comparator;
 
 import com.metsci.glimpse.dnc.DncChunks.DncGroup;
+
+import it.unimi.dsi.fastutil.chars.Char2IntMap;
+import it.unimi.dsi.fastutil.chars.Char2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class DncPainterUtils
 {

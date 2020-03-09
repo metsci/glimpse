@@ -31,11 +31,10 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLException;
-
-import com.jogamp.common.nio.Buffers;
 
 /**
  * Skeletal implementation of {@link QuadPipeline}.

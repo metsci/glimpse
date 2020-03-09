@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.dnc.util;
 
-import static com.metsci.glimpse.util.GeneralUtils.ints;
-import static java.awt.color.ColorSpace.CS_sRGB;
-import static java.awt.image.DataBuffer.TYPE_BYTE;
 import static com.jogamp.opengl.GL.GL_RGBA;
 import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.metsci.glimpse.util.GeneralUtils.ints;
+import static java.awt.color.ColorSpace.CS_sRGB;
+import static java.awt.image.DataBuffer.TYPE_BYTE;
 
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;

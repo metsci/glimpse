@@ -26,13 +26,14 @@
  */
 package com.metsci.glimpse.core.gl.texture;
 
-import static java.util.logging.Level.*;
+import static java.util.logging.Level.WARNING;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.core.axis.Axis2D;
@@ -40,7 +41,6 @@ import com.metsci.glimpse.core.context.GlimpseContext;
 import com.metsci.glimpse.core.gl.GLEditableBuffer;
 import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.painter.texture.TextureUnit;
-import com.jogamp.common.nio.Buffers;
 
 /**
  * A two dimensional texture storing float values.

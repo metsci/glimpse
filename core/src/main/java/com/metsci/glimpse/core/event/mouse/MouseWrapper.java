@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.core.event.mouse;
 
-import static com.metsci.glimpse.core.context.TargetStackUtil.*;
-import static com.metsci.glimpse.core.event.mouse.FocusBehavior.*;
+import static com.metsci.glimpse.core.context.TargetStackUtil.newTargetStack;
+import static com.metsci.glimpse.core.event.mouse.FocusBehavior.HOVER_FOCUS;
 
 import java.util.LinkedList;
 import java.util.List;

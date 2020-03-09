@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.core.axis.tagged.painter;
 
-import static com.jogamp.opengl.GL.*;
-import static com.metsci.glimpse.core.axis.tagged.Tag.*;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
+import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
 
 import java.nio.FloatBuffer;
 import java.util.List;

@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.core.painter.info;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.*;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
 import com.jogamp.opengl.math.Matrix4;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.context.GlimpseBounds;

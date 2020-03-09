@@ -28,10 +28,9 @@ package com.metsci.glimpse.core.gl.texture;
 
 import java.nio.FloatBuffer;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
-
-import com.jogamp.common.nio.Buffers;
 
 /**
  * A one dimensional texture storing float values.

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.painter.info;
 
-import static com.metsci.glimpse.core.context.TargetStackUtil.*;
+import static com.metsci.glimpse.core.context.TargetStackUtil.newTargetStack;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;

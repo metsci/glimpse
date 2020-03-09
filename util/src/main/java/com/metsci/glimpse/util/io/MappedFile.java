@@ -27,14 +27,13 @@
 package com.metsci.glimpse.util.io;
 
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static com.metsci.glimpse.util.ugly.CleanerUtils.registerCleaner;
 import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.ref.Cleaner;
-import java.lang.ref.Cleaner.Cleanable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -58,13 +57,12 @@ import java.nio.ReadOnlyBufferException;
  * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
  * <pre>
  * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+ * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
  * --add-opens java.base/java.nio=com.metsci.glimpse.util
  * </pre>
  */
 public class MappedFile
 {
-    protected static final Cleaner cleaner = Cleaner.create( );
-
     protected static final FileMapper mapper;
     static
     {
@@ -87,7 +85,23 @@ public class MappedFile
     protected final long address;
     protected final long size;
 
-    protected final Cleanable cleanable;
+    /**
+     * Invoking {@link #disposer} is equivalent to calling {@link #dispose()}. However,
+     * {@link #disposer} does not contain a strong reference to the {@link MappedFile}
+     * instance, and can therefore be used without preventing the {@link MappedFile}
+     * from being garbage collected.
+     * <p>
+     * Has the same semantics as a {@code java.lang.ref.Cleaner.Cleanable}:
+     * <ul>
+     * <li>Invoked automatically when the {@link MappedFile} is eligible for garbage collection
+     * <li>May be invoked explicitly
+     * <li>Runs its action at most once, regardless of how many times it gets invoked
+     * </ul>
+     * <strong>IMPORTANT:</strong> Must not be invoked while slices of this MappedFile
+     * are still in use. If a slice is used after its MappedFile has been disposed,
+     * behavior is undefined.
+     */
+    public final Runnable disposer;
 
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
@@ -133,7 +147,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleanable = cleaner.register( this, unmapper );
+            this.disposer = registerCleaner( this, unmapper )::clean;
         }
     }
 
@@ -226,7 +240,7 @@ public class MappedFile
      */
     public void dispose( )
     {
-        this.cleanable.clean( );
+        this.disposer.run( );
     }
 
     // Lots of verbose code to get access to various JVM-internal functionality

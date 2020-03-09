@@ -26,7 +26,8 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.logging.LoggerUtils.*;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
 import java.lang.reflect.Field;
 import java.util.logging.Logger;

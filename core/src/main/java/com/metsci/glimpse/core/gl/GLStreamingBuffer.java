@@ -26,10 +26,16 @@
  */
 package com.metsci.glimpse.core.gl;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static java.lang.Math.*;
-import static com.jogamp.opengl.GL.*;
-import static com.metsci.glimpse.core.gl.util.GLUtils.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_DOUBLE;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.common.nio.Buffers.SIZEOF_INT;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_RANGE_BIT;
+import static com.jogamp.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
+import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.metsci.glimpse.core.gl.util.GLUtils.deleteBuffers;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genBuffer;
+import static java.lang.Math.max;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;

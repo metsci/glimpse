@@ -26,16 +26,19 @@
  */
 package com.metsci.glimpse.core.text;
 
-import static com.metsci.glimpse.core.support.FrameUtils.*;
-import static com.metsci.glimpse.core.support.font.FontUtils.*;
-import static java.awt.Color.*;
-import static javax.swing.WindowConstants.*;
+import static com.metsci.glimpse.core.support.FrameUtils.disposeOnWindowClosing;
+import static com.metsci.glimpse.core.support.FrameUtils.newFrame;
+import static com.metsci.glimpse.core.support.FrameUtils.showFrameCentered;
+import static com.metsci.glimpse.core.support.FrameUtils.stopOnWindowClosing;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
+import static java.awt.Color.BLACK;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
-import com.jogamp.opengl.GLAnimatorControl;
-import com.jogamp.opengl.GLProfile;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.context.GlimpseBounds;
 import com.metsci.glimpse.core.context.GlimpseContext;

@@ -49,9 +49,6 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeListener;
 import java.util.function.Consumer;
 
-import com.jogamp.opengl.GLAnimatorControl;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLEventListener;
 import javax.swing.AbstractButton;
 import javax.swing.JMenu;
 import javax.swing.event.DocumentEvent;
@@ -61,6 +58,9 @@ import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.axis.listener.AxisListener1D;

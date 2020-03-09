@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.units.time;
 
-import static com.metsci.glimpse.util.units.time.format.TimeStampFormat.*;
+import static com.metsci.glimpse.util.units.time.format.TimeStampFormat.iso8601;
 
 import java.math.BigDecimal;
 

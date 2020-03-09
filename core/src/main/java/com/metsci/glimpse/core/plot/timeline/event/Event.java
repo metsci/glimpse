@@ -26,8 +26,9 @@
  */
 package com.metsci.glimpse.core.plot.timeline.event;
 
-import static com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode.*;
-import static com.metsci.glimpse.core.plot.timeline.event.Event.TextRenderingMode.*;
+import static com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
+import static com.metsci.glimpse.core.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.core.plot.timeline.event.Event.TextRenderingMode.Ellipsis;
 
 import java.util.Comparator;
 import java.util.Iterator;

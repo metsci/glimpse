@@ -26,18 +26,24 @@
  */
 package com.metsci.glimpse.core.gl;
 
-import static com.jogamp.common.nio.Buffers.*;
-import static com.metsci.glimpse.core.gl.util.GLUtils.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
-import static com.metsci.glimpse.util.buffer.DirectBufferUtils.*;
-import static java.lang.Math.*;
-import static com.jogamp.opengl.GL.*;
+import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
+import static com.jogamp.common.nio.Buffers.newDirectByteBuffer;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.metsci.glimpse.core.gl.util.GLUtils.deleteBuffers;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genBuffer;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffers;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.ensureCapacity;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.flipped;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.put1f;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.put2f;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.readonly;
+import static com.metsci.glimpse.util.buffer.DirectBufferUtils.sliced;
+import static java.lang.Math.max;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import com.jogamp.opengl.GL;
-
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSet;
 import com.metsci.glimpse.util.primitives.rangeset.IntRangeSetModifiable;
 import com.metsci.glimpse.util.primitives.sorted.SortedInts;

@@ -30,9 +30,8 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.List;
 
-import com.jogamp.opengl.GL;
-
 import com.google.common.collect.Lists;
+import com.jogamp.opengl.GL;
 import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.context.GlimpseBounds;
@@ -42,8 +41,8 @@ import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.plot.timeline.data.Epoch;
 import com.metsci.glimpse.core.plot.timeline.event.Event;
 import com.metsci.glimpse.core.plot.timeline.event.EventManager;
-import com.metsci.glimpse.core.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.core.plot.timeline.event.EventManager.Row;
+import com.metsci.glimpse.core.plot.timeline.event.EventPlotInfo;
 import com.metsci.glimpse.core.support.atlas.TextureAtlas;
 import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.core.support.font.FontUtils;

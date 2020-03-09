@@ -28,10 +28,10 @@ package com.metsci.glimpse.core.gl.texture;
 
 import java.nio.FloatBuffer;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.metsci.glimpse.core.support.colormap.ColorGradient;
-import com.jogamp.common.nio.Buffers;
 
 public class ColorTexture1D extends AbstractTexture
 {

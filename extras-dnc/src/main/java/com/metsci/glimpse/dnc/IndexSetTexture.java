@@ -27,10 +27,6 @@
 package com.metsci.glimpse.dnc;
 
 import static com.jogamp.common.nio.Buffers.newDirectByteBuffer;
-import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
-import static com.metsci.glimpse.dnc.util.DncMiscUtils.nextPowerOfTwo;
-import static com.metsci.glimpse.util.GeneralUtils.ints;
-import static java.lang.Math.min;
 import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
 import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
@@ -42,6 +38,10 @@ import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
 import static com.jogamp.opengl.GL2ES3.GL_R8UI;
 import static com.jogamp.opengl.GL2ES3.GL_RED_INTEGER;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
+import static com.metsci.glimpse.dnc.util.DncMiscUtils.nextPowerOfTwo;
+import static com.metsci.glimpse.util.GeneralUtils.ints;
+import static java.lang.Math.min;
 
 import java.nio.ByteBuffer;
 

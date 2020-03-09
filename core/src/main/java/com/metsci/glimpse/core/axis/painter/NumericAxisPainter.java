@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.core.axis.painter;
 
-import static com.metsci.glimpse.core.support.color.GlimpseColor.*;
-import static com.metsci.glimpse.core.support.font.FontUtils.*;
+import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
 import java.awt.Font;
 
