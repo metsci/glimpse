@@ -149,9 +149,14 @@ public class DncPainterSync extends DncPainter
         Axis2D axis = requireAxis2D( context );
         GL2ES2 gl = context.getGL( ).getGL2ES2( );
 
-        // Set rasterizeArgs and then release the mutex, so that async tasks can proceed
         synchronized ( this.mutex )
         {
+            if ( !this.visible ) return;
+
+            // Don't try to paint after disposal
+            if ( this.asyncExec.isShutdown( ) ) return;
+
+            // Store values used in rasterizing icons and labels
             if ( this.rasterizeArgs == null )
             {
                 int[] maxTextureDim = new int[ 1 ];
@@ -160,15 +165,6 @@ public class DncPainterSync extends DncPainter
                 logger.fine( "Rasterization args: max-texture-dim = " + this.rasterizeArgs.maxTextureDim + ", screen-dpi = " + rasterizeArgs.screenDpi );
                 this.mutex.notifyAll( );
             }
-        }
-
-        // No new conversions will be started while we hold the mutex
-        synchronized ( this.mutex )
-        {
-            if ( !this.visible ) return;
-
-            // Don't try to paint after disposal
-            if ( this.asyncExec.isShutdown( ) ) return;
 
             // Wait for pending async tasks to complete
             try
@@ -182,6 +178,34 @@ public class DncPainterSync extends DncPainter
             {
                 logger.warning( "Paint was interrupted while waiting for async tasks to complete" );
                 return;
+            }
+
+            // Dispose of deactivated chunks
+            while ( !dChunksToDispose.isEmpty( ) )
+            {
+                DncDeviceChunk dChunk = dChunksToDispose.remove( 0 );
+                dChunk.dispose( gl );
+            }
+
+            // Dispose of deactivated icon-atlases
+            while ( !dIconAtlasesToDispose.isEmpty( ) )
+            {
+                DncDeviceIconAtlas dIconAtlas = dIconAtlasesToDispose.remove( 0 );
+                dIconAtlas.dispose( gl );
+            }
+
+            // Dispose of deactivated label-atlases
+            while ( !dLabelAtlasesToDispose.isEmpty( ) )
+            {
+                DncDeviceLabelAtlas dLabelAtlas = dLabelAtlasesToDispose.remove( 0 );
+                dLabelAtlas.dispose( gl );
+            }
+
+            // Dispose of deactivated highlight-sets
+            while ( !highlightSetsToDispose.isEmpty( ) )
+            {
+                IndexSetTexture highlightSet = highlightSetsToDispose.remove( 0 );
+                highlightSet.freeDeviceResources( gl );
             }
 
             // Identify chunks to draw
