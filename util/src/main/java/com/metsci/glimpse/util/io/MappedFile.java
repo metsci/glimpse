@@ -44,8 +44,6 @@ import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-import com.metsci.glimpse.util.ugly.CleanerUtils.Cleanable;
-
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
  * <p>
@@ -87,7 +85,23 @@ public class MappedFile
     protected final long address;
     protected final long size;
 
-    protected final Cleanable cleanable;
+    /**
+     * Invoking {@link #disposer} is equivalent to calling {@link #dispose()}. However,
+     * {@link #disposer} does not contain a strong reference to the {@link MappedFile}
+     * instance, and can therefore be used without preventing the {@link MappedFile}
+     * from being garbage collected.
+     * <p>
+     * Has the same semantics as a {@code java.lang.ref.Cleaner.Cleanable}:
+     * <ul>
+     * <li>Invoked automatically when the {@link MappedFile} is eligible for garbage collection
+     * <li>May be invoked explicitly
+     * <li>Runs its action at most once, regardless of how many times it gets invoked
+     * </ul>
+     * <strong>IMPORTANT:</strong> Must not be invoked while slices of this MappedFile
+     * are still in use. If a slice is used after its MappedFile has been disposed,
+     * behavior is undefined.
+     */
+    public final Runnable disposer;
 
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
@@ -133,7 +147,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleanable = registerCleaner( this, unmapper );
+            this.disposer = registerCleaner( this, unmapper )::clean;
         }
     }
 
@@ -226,20 +240,7 @@ public class MappedFile
      */
     public void dispose( )
     {
-        this.cleanable.clean( );
-    }
-
-    /**
-     * Get the cleaner for this MappedFile so that {@link Cleanable}s can be built for wrapper objects.
-     * <p>
-     * <strong>IMPORTANT:</strong> The returned Cleanable must not be cleaned while slices of this MappedFile are
-     * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
-     * @return
-     * @see #dispose()
-     */
-    public Cleanable cleaner()
-    {
-        return this.cleanable;
+        this.disposer.run( );
     }
 
     // Lots of verbose code to get access to various JVM-internal functionality
