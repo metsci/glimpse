@@ -220,8 +220,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
 
         FloatTextureProjected2D shadeTexture = new FloatTextureProjected2D( tile.imageWidth, tile.imageHeight );
         FloatTextureProjected2D elevationTexture = new FloatTextureProjected2D( tile.imageWidth, tile.imageHeight );
-        shadeTexture.setProjection( tile.getProjection( projection ) );
-        elevationTexture.setProjection( tile.getProjection( projection ) );
+        shadeTexture.setProjection( getProjection( projection, tile ) );
+        elevationTexture.setProjection( getProjection( projection, tile ) );
 
         shadeTexture.setData( tile.shaded );
         elevationTexture.setData( tile.data );
@@ -348,6 +348,14 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         return ( float ) hillshade;
     }
 
+    protected LatLonProjection getProjection( GeoProjection projection, CachedTileData data )
+    {
+        double endLat = data.startLat + data.heightStep * data.imageHeight;
+        double endLon = data.startLon + data.widthStep * data.imageWidth;
+
+        return new LatLonProjection( projection, clampNorthSouth( data.startLat ), clampNorthSouth( endLat ), clampAntiMeridian( data.startLon ), clampAntiMeridian( endLon ), false );
+    }
+
     protected class CachedTileData
     {
         protected double widthStep;
@@ -363,15 +371,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
          * Data should be positive up.
          */
         protected float[][] data;
-
-        float[][] shaded;
-
-        public LatLonProjection getProjection( GeoProjection projection )
-        {
-            double endLat = startLat + heightStep * imageHeight;
-            double endLon = startLon + widthStep * imageWidth;
-            return new LatLonProjection( projection, clampNorthSouth( startLat ), clampNorthSouth( endLat ), clampAntiMeridian( startLon ), clampAntiMeridian( endLon ), false );
-        }
+        protected float[][] shaded;
     }
 
     @Override
