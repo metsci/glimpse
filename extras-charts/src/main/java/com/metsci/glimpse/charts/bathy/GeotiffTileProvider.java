@@ -38,7 +38,6 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -257,8 +256,6 @@ public class GeotiffTileProvider implements TopoTileProvider
     {
         public GeoToolsSampledGlobalTopoData( RenderedImage grid, TileKey key, int decimate ) throws IOException
         {
-            super( null );
-
             widthStep = 360.0 / grid.getWidth( ) * decimate;
             heightStep = 180.0 / grid.getHeight( ) * decimate;
 
@@ -302,20 +299,12 @@ public class GeotiffTileProvider implements TopoTileProvider
                 }
             }
         }
-
-        @Override
-        protected void read( InputStream in ) throws IOException
-        {
-            // nop
-        }
     }
 
     public static class GeoToolsTopoData extends TopographyData
     {
         public GeoToolsTopoData( RenderedImage grid, TileKey key ) throws IOException
         {
-            super( null );
-
             widthStep = 360.0 / grid.getWidth( );
             heightStep = 180.0 / grid.getHeight( );
 
@@ -361,12 +350,6 @@ public class GeotiffTileProvider implements TopoTileProvider
                     }
                 }
             }
-        }
-
-        @Override
-        protected void read( InputStream in ) throws IOException
-        {
-            // nop
         }
     }
 }

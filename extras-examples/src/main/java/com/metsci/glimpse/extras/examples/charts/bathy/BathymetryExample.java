@@ -32,6 +32,7 @@ import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -168,9 +169,14 @@ public class BathymetryExample
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
         TopographyData bathymetryData;
-        try
+        try ( InputStream is = HillShadeExample.class.getResourceAsStream( "Cayman.bathy" ) )
         {
-            bathymetryData = new TopographyData( BathymetryExample.class.getResource( "Cayman.bathy" ) );
+            bathymetryData = new TopographyData( )
+            {
+                {
+                    read( is );
+                }
+            };
         }
         catch ( IOException e )
         {

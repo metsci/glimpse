@@ -32,6 +32,7 @@ import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -67,7 +68,15 @@ public class HillShadeExample implements TopoTileProvider
 
     public HillShadeExample( ) throws IOException
     {
-        singleTile = new TopographyData( HillShadeExample.class.getResource( "Cayman.bathy" ) );
+        try ( InputStream is = HillShadeExample.class.getResourceAsStream( "Cayman.bathy" ) )
+        {
+            singleTile = new TopographyData( )
+            {
+                {
+                    read( is );
+                }
+            };
+        }
     }
 
     @Override

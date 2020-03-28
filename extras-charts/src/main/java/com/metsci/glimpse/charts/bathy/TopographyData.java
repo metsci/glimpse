@@ -63,15 +63,6 @@ public class TopographyData
      */
     protected float[][] data;
 
-    public TopographyData( URL url ) throws IOException
-    {
-        super( );
-        try ( InputStream stream = url.openStream( ) )
-        {
-            this.read( stream );
-        }
-    }
-
     private static class Row
     {
         public float centerLat;
@@ -86,6 +77,10 @@ public class TopographyData
         }
     }
 
+    /**
+     * To be removed in subsequent releases.
+     */
+    @Deprecated
     protected void read( InputStream in ) throws IOException
     {
         BufferedReader reader = new BufferedReader( new InputStreamReader( in ) );
