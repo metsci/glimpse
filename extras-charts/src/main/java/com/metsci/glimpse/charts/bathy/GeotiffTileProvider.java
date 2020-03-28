@@ -136,13 +136,29 @@ public class GeotiffTileProvider implements TopoTileProvider
     {
         if ( key.lengthScale == GLOBAL_TILE_LEVEL )
         {
-            return new GeoToolsSampledGlobalTopoData( topoData, key, 10 );
+            return getTile( key, 10 );
         }
         else
         {
             return new GeoToolsTopoData( topoData, key );
         }
     }
+
+    /**
+     * Read the topography tile data with a specified stride of the underlying data.
+     */
+    public TopographyData getTile( TileKey key, int dataStride ) throws IOException
+    {
+        if ( dataStride > 1 )
+        {
+            return new GeoToolsSampledGlobalTopoData( topoData, key, dataStride );
+        }
+        else
+        {
+            return new GeoToolsTopoData( topoData, key );
+        }
+    }
+
 
     @Override
     public String getAttribution( )
@@ -237,7 +253,7 @@ public class GeotiffTileProvider implements TopoTileProvider
         return ( y / img.getTileHeight( ) );
     }
 
-    private class GeoToolsSampledGlobalTopoData extends TopographyData
+    public static class GeoToolsSampledGlobalTopoData extends TopographyData
     {
         public GeoToolsSampledGlobalTopoData( RenderedImage grid, TileKey key, int decimate ) throws IOException
         {
@@ -294,7 +310,7 @@ public class GeotiffTileProvider implements TopoTileProvider
         }
     }
 
-    private class GeoToolsTopoData extends TopographyData
+    public static class GeoToolsTopoData extends TopographyData
     {
         public GeoToolsTopoData( RenderedImage grid, TileKey key ) throws IOException
         {
