@@ -46,11 +46,9 @@ void main()
 {
 	// retrieve the data value for this texel
     float dataVal = texture( datatex, vS ).r;
-    if( discardNaN )
+    if( discardNaN && isnan( dataVal ) )
     {
-       // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
-       if( ! ( dataVal < 0.0 || 0.0 < dataVal || dataVal == 0.0 ) )
-          discard;
+        discard;
     }
 
     float normalizedVal = ( dataVal - dataMin ) / ( dataMax - dataMin );

@@ -68,12 +68,6 @@ float kernel( float f )
     }
 }
 
-// The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
-bool checkNaN( float f )
-{
-    return ! ( f < 0.0 || 0.0 < f || f == 0.0 );
-}
-
 void main()
 {
     ivec2 texSize = textureSize( datatex, 0 );
@@ -83,7 +77,7 @@ void main()
     float texelSizeY = 1.0 / texSize.y;
 
     float exactVal = texture2D( datatex, vS ).r;
-    if( checkNaN( exactVal ) && discardNaN )
+    if( isnan exactVal ) && discardNaN )
         discard;
 
     // otherwise the interpolated pixels are shifted down and left
