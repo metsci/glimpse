@@ -28,9 +28,11 @@ package com.metsci.glimpse.core.support.font;
 
 import static java.awt.Font.createFont;
 
+import java.awt.AWTError;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -90,41 +92,49 @@ public class FontUtils
 
     public static Font getDefaultPlain( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return foundVerdana ? getVerdanaPlain( size ) : getBitstreamVeraSansPlain( size );
     }
 
     public static Font getDefaultBold( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return foundVerdana ? getVerdanaBold( size ) : getBitstreamVeraSansBold( size );
     }
 
     public static Font getDefaultItalic( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return foundVerdana ? getVerdanaItalic( size ) : getBitstreamVeraSansItalic( size );
     }
 
     public static Font getDefaultBoldItalic( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return foundVerdana ? getVerdanaBoldItalic( size ) : getBitstreamVeraSansBoldItalic( size );
     }
 
     public static Font getBitstreamVeraSansPlain( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/Vera.ttf" ), size, Font.PLAIN );
     }
 
     public static Font getBitstreamVeraSansBold( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/VeraBd.ttf" ), size, Font.BOLD );
     }
 
     public static Font getBitstreamVeraSansItalic( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/VeraIt.ttf" ), size, Font.ITALIC );
     }
 
     public static Font getBitstreamVeraSansBoldItalic( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/Veralt.ttf" ), size, Font.ITALIC | Font.BOLD );
     }
 
@@ -159,21 +169,25 @@ public class FontUtils
 
     public static Font getVerdanaPlain( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.PLAIN );
     }
 
     public static Font getVerdanaBold( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.BOLD );
     }
 
     public static Font getVerdanaItalic( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.ITALIC );
     }
 
     public static Font getVerdanaBoldItalic( float size )
     {
+        size = getScaledFontSize( size / 12 );
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.ITALIC | Font.BOLD );
     }
 
@@ -196,7 +210,7 @@ public class FontUtils
 
     private static Font requireFont( URL url )
     {
-        try ( InputStream stream = url.openStream( ) )
+        try (InputStream stream = url.openStream( ))
         {
             return createFont( Font.TRUETYPE_FONT, stream );
         }
@@ -204,5 +218,42 @@ public class FontUtils
         {
             throw new RuntimeException( "Could not load font.", e );
         }
+    }
+
+    /**
+     * Gets a font size (in pixels) relative to {@link #getDefaultFontSize()}.
+     */
+    public static int getScaledFontSize( double scale )
+    {
+        return ( int ) ( getDefaultFontSize( ) * scale );
+    }
+
+    /**
+     * Gets the default, DPI-adjusted font size. When DPI=96, the size is 12.
+     */
+    public static int getDefaultFontSize( )
+    {
+        int fontSize = 12;
+
+        try
+        {
+            // Works for GTK font-scaling
+            Object dpiProp = Toolkit.getDefaultToolkit( ).getDesktopProperty( "gnome.Xft/DPI" );
+            if ( dpiProp instanceof Number )
+            {
+                // Don't know why it's multiplied by 1024
+                int dpi = ( ( Number ) dpiProp ).intValue( ) / 1024;
+                if ( dpi != 96 )
+                {
+                    fontSize *= dpi / 96.0;
+                }
+            }
+        }
+        catch ( AWTError ex )
+        {
+            // ignore
+        }
+
+        return fontSize;
     }
 }
