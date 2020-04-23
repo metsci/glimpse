@@ -26,8 +26,10 @@
  */
 package com.metsci.glimpse.core.canvas;
 
+import static com.metsci.glimpse.core.gl.util.GLUtils.getAdjustedSurfaceSize;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.util.Objects.requireNonNull;
+import static javax.swing.SwingUtilities.invokeLater;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -216,6 +218,12 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 // ignore initial reshapes while canvas is not showing
                 // (the canvas can report incorrect/transient sizes during this time)
                 if ( !glCanvas.isShowing( ) ) return;
+
+                getAdjustedSurfaceSize( NewtSwingGlimpseCanvas.this, glWindow ).ifPresent( dim -> {
+                    invokeLater( ( ) -> {
+                        glWindow.setSurfaceSize( dim.width, dim.height );
+                    } );
+                } );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {

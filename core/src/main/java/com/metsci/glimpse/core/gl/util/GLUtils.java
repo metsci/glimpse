@@ -33,8 +33,15 @@ import static com.metsci.glimpse.core.gl.util.GLErrorUtils.logGLError;
 import static com.metsci.glimpse.core.gl.util.GLErrorUtils.logGLErrors;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.util.Optional;
 import java.util.logging.Logger;
 
+import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLCapabilities;
@@ -368,6 +375,45 @@ public class GLUtils
         {
             target.setLookAndFeel( laf );
         }
+    }
+
+    /**
+     * Windows has non-integer scaling and the Newt implementation is buggy.
+     * The GLWindow surface scaling doesn't respect the underlying Graphics2D
+     * transform to properly fill the parent component. Here we check the
+     * Graphics2D scaleX and scaleY and if we need to adjust the surface size,
+     * return the new dimensions in screen pixels.
+     *
+     * If we can't get the correct dimensions for any reason, or the surface
+     * is already the correct size, return empty.
+     */
+    public static Optional<Dimension> getAdjustedSurfaceSize( GlimpseCanvas canvas, GLWindow window )
+    {
+        // true in most cases
+        if ( canvas instanceof Component )
+        {
+            Component c = ( Component ) canvas;
+            int width = c.getWidth( );
+            int height = c.getHeight( );
+
+            Graphics g = c.getGraphics( );
+            if ( g instanceof Graphics2D )
+            {
+                AffineTransform transform = ( ( Graphics2D ) g ).getTransform( );
+                double scaleX = transform.getScaleX( );
+                double scaleY = transform.getScaleY( );
+                width = ( int ) ( width * scaleX );
+                height = ( int ) ( height * scaleY );
+
+                if ( window.getSurfaceWidth( ) != width || window.getSurfaceHeight( ) != height )
+                {
+                    return Optional.of( new Dimension( width, height ) );
+                }
+            }
+        }
+
+        // couldn't get adjusted height or doesn't need to be adjusted
+        return Optional.empty( );
     }
 
     public static void setViewportAndScissor( GlimpseContext context )
