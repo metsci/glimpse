@@ -66,8 +66,8 @@ public class AnnotationPainter extends GlimpsePainterBase
 {
     public static class Annotation
     {
-        protected float x;
-        protected float y;
+        protected double x;
+        protected double y;
         protected int xOffset_PX;
         protected int yOffset_PX;
         protected float[] color;
@@ -79,27 +79,27 @@ public class AnnotationPainter extends GlimpsePainterBase
         protected long startTime_PMILLIS;
         protected long endTime_PMILLIS;
 
-        public Annotation( String text, float x, float y )
+        public Annotation( String text, double x, double y )
         {
             this( text, x, y, HorizontalPosition.Left, VerticalPosition.Bottom );
         }
 
-        public Annotation( String text, float x, float y, HorizontalPosition hPos, VerticalPosition vPos )
+        public Annotation( String text, double x, double y, HorizontalPosition hPos, VerticalPosition vPos )
         {
             this( text, x, y, 0, 0, hPos, vPos, GlimpseColor.getBlack( ) );
         }
 
-        public Annotation( String text, float x, float y, float[] color )
+        public Annotation( String text, double x, double y, float[] color )
         {
             this( text, x, y, 0, 0, HorizontalPosition.Left, VerticalPosition.Bottom, color );
         }
 
-        public Annotation( String text, float x, float y, int xOffset_PX, int yOffset_PX, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
+        public Annotation( String text, double x, double y, int xOffset_PX, int yOffset_PX, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
         {
             this( text, x, y, xOffset_PX, yOffset_PX, hPos, vPos, color, 0L, 0L );
         }
 
-        public Annotation( String text, float x, float y, int xOffset_PX, int yOffset_PX, HorizontalPosition hPos, VerticalPosition vPos, float[] color, long startTime_PMILLIS, long endTime_PMILLIS )
+        public Annotation( String text, double x, double y, int xOffset_PX, int yOffset_PX, HorizontalPosition hPos, VerticalPosition vPos, float[] color, long startTime_PMILLIS, long endTime_PMILLIS )
         {
             this.text = text;
 
@@ -140,7 +140,7 @@ public class AnnotationPainter extends GlimpsePainterBase
             this.endTime_PMILLIS = endTime.toPosixMillis( );
         }
 
-        public float getX( )
+        public double getX( )
         {
             return x;
         }
@@ -150,7 +150,7 @@ public class AnnotationPainter extends GlimpsePainterBase
             this.x = x;
         }
 
-        public float getY( )
+        public double getY( )
         {
             return y;
         }
@@ -281,7 +281,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         this.fillBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
     }
 
-    public Annotation addAnnotation( String text, float x, float y )
+    public Annotation addAnnotation( String text, double x, double y )
     {
         this.painterLock.lock( );
         try
@@ -296,7 +296,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         }
     }
 
-    public Annotation addAnnotation( String text, float x, float y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
+    public Annotation addAnnotation( String text, double x, double y, int offset_x, int offset_y, HorizontalPosition hPos, VerticalPosition vPos, float[] color )
     {
         this.painterLock.lock( );
         try
