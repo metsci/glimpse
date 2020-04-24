@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.core.painter.info;
 
+import static com.metsci.glimpse.core.gl.util.GLUtils.disableBlending;
+import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.core.painter.info.SimpleTextPainter.xAlign;
 import static com.metsci.glimpse.core.painter.info.SimpleTextPainter.yAlign;
 import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
@@ -368,7 +370,9 @@ public class AnnotationPainter extends GlimpsePainterBase
         {
             for ( Annotation annotation : annotations )
             {
-                if ( !displayFilter.test( annotation ) )
+                if ( annotation.text == null ||
+                        annotation.text.isEmpty( ) ||
+                        !displayFilter.test( annotation ) )
                 {
                     continue;
                 }
@@ -419,6 +423,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         float xMax = ( float ) bound.getMaxX( );
         float yMax = ( float ) bound.getMaxY( );
 
+        enableStandardBlending( gl );
         if ( paintBackground || paintBorder )
         {
             float padX = 2.5f;
@@ -427,7 +432,7 @@ public class AnnotationPainter extends GlimpsePainterBase
             if ( paintBackground )
             {
                 this.fillBuffer.clear( );
-                this.fillBuffer.growQuad2f( xMin - padX, yMin - padY, xMax + padX, yMax + padY );
+                this.fillBuffer.growQuad2f( xMin - padX, yMin - padY / 2, xMax + padX, yMax + padY );
 
                 this.fillProg.begin( gl );
                 try
@@ -474,6 +479,7 @@ public class AnnotationPainter extends GlimpsePainterBase
         finally
         {
             textRenderer.endRendering( );
+            disableBlending( gl );
         }
     }
 
