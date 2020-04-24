@@ -37,7 +37,6 @@ import static com.metsci.glimpse.core.support.colormap.ColorGradients.jet;
 import static com.metsci.glimpse.core.support.shader.line.LineJoinType.JOIN_MITER;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.axis.WrappedAxis1D;
 import com.metsci.glimpse.core.axis.painter.label.GridAxisLabelHandler;
 import com.metsci.glimpse.core.axis.tagged.Tag;
@@ -100,7 +99,7 @@ public class WrappedAxisExample2
             // AnnotationPainter
             //
 
-            AnnotationPainter annotationPainter = new AnnotationPainter( new TextRenderer( FontUtils.getDefaultPlain( 28 ), true, true ) );
+            AnnotationPainter annotationPainter = new AnnotationPainter( FontUtils.getDefaultPlain( 28 ) );
             annotationPainter.addAnnotation( "Fairly loooooong string", 8.5f, 2.5f, 0, 7, HorizontalPosition.Center, VerticalPosition.Center, GlimpseColor.getRed( ) );
 
             // HeatMapPainter
