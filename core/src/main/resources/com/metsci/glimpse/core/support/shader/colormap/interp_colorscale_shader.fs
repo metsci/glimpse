@@ -77,7 +77,7 @@ void main()
     float texelSizeY = 1.0 / texSize.y;
 
     float exactVal = texture2D( datatex, vS ).r;
-    if( isnan exactVal ) && discardNaN )
+    if( isnan( exactVal ) && discardNaN )
         discard;
 
     // otherwise the interpolated pixels are shifted down and left
@@ -93,7 +93,7 @@ void main()
         for ( int n = -1; n <= 2; n++ )
         {
             float data = texture2D( datatex, vSS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
-            if( checkNaN( data ) )
+            if( isnan( data ) )
             {
                 continue;
             }
