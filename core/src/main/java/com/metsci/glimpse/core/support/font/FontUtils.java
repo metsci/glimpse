@@ -159,21 +159,45 @@ public class FontUtils
 
     public static Font getVerdanaPlain( float size )
     {
+        return getVerdanaPlain( size, getDefaultDpi( ) );
+    }
+
+    public static Font getVerdanaPlain( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.PLAIN );
     }
 
     public static Font getVerdanaBold( float size )
     {
+        return getVerdanaBold( size, getDefaultDpi( ) );
+    }
+
+    public static Font getVerdanaBold( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.BOLD );
     }
 
     public static Font getVerdanaItalic( float size )
     {
+        return getVerdanaItalic( size, getDefaultDpi( ) );
+    }
+
+    public static Font getVerdanaItalic( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.ITALIC );
     }
 
     public static Font getVerdanaBoldItalic( float size )
     {
+        return getVerdanaBoldItalic( size, getDefaultDpi( ) );
+    }
+
+    public static Font getVerdanaBoldItalic( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return Font.decode( "Verdana" ).deriveFont( size ).deriveFont( Font.ITALIC | Font.BOLD );
     }
 
@@ -204,5 +228,27 @@ public class FontUtils
         {
             throw new RuntimeException( "Could not load font.", e );
         }
+    }
+
+    public static float stringLengthToPixel (float length )
+    {
+        float standardEmToPixels = 12;
+        return adjustForDesktopScaling( length * standardEmToPixels );
+    }
+
+    public static int adjustForDesktopScaling( int px )
+    {
+        return (int) adjustForDesktopScaling( (float)px );
+    }
+
+    public static float adjustForDesktopScaling( float px )
+    {
+        return px * getDefaultDpi( ) / 96;
+    }
+
+    private static int getDefaultDpi( )
+    {
+        // TODO Not implemented yet...
+        return 120;
     }
 }

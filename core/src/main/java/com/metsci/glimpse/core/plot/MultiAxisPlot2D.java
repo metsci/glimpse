@@ -31,6 +31,7 @@ import static com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisOrientation.Left;
 import static com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisOrientation.Right;
 import static com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisOrientation.Top;
 import static com.metsci.glimpse.core.plot.Plot2D.BACKGROUND_LAYER;
+import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
 
 import java.awt.Font;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ import com.metsci.glimpse.core.support.settings.LookAndFeel;
 public class MultiAxisPlot2D extends GlimpseLayout
 {
     protected int outerBorder = 10;
-    protected int titleSpacing = 50;
+    protected int titleSpacing = adjustForDesktopScaling( 50 );
     protected int innerSpacing = 0;
 
     protected Map<String, AxisInfo> axesTopX;
@@ -380,7 +381,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
         this.plotBackgroundPainter = new BackgroundPainter( false );
         this.axisLayoutXY.addPainter( this.plotBackgroundPainter, BACKGROUND_LAYER );
     }
-    
+
     protected void initializeListeners( )
     {
         this.mouseListenerXY = createAxisMouseListenerXY( );
@@ -626,7 +627,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
         updatePainterLayout( );
         validate( );
     }
-    
+
     //////////////////////////////////////
     //        Listener Methods          //
     //////////////////////////////////////
@@ -795,12 +796,12 @@ public class MultiAxisPlot2D extends GlimpseLayout
     {
         super.removeAllGlimpseListeners( );
     }
-    
+
     public AxisMouseListener getLayoutCenterMouseListener( )
     {
         return this.mouseListenerXY;
     }
-    
+
     //////////////////////////////////////
     //      Axis Creation Methods       //
     //////////////////////////////////////

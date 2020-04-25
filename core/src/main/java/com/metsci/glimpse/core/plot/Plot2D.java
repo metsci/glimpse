@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.core.plot;
 
+import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+
 import java.awt.Font;
 
 import com.metsci.glimpse.core.axis.Axis1D;
@@ -140,6 +142,10 @@ public class Plot2D extends GlimpseAxisLayout2D
      */
     protected Plot2D( )
     {
+        axisThicknessX = adjustForDesktopScaling( 40 );
+        axisThicknessY = adjustForDesktopScaling( 60 );
+        axisThicknessZ = adjustForDesktopScaling( 65 );
+        titleSpacing = adjustForDesktopScaling( 50 );
     }
 
     public Plot2D( String name )
@@ -327,6 +333,7 @@ public class Plot2D extends GlimpseAxisLayout2D
             return outerBorder;
     }
 
+    @Override
     public GlimpseLayoutManagerMig getLayoutManager( )
     {
         return ( GlimpseLayoutManagerMig ) super.getLayoutManager( );
@@ -437,6 +444,7 @@ public class Plot2D extends GlimpseAxisLayout2D
         this.validate( );
     }
 
+    @Override
     public Axis2D getAxis( )
     {
         return axisXY;
