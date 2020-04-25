@@ -26,7 +26,6 @@
  */
 package com.metsci.glimpse.core.support.swing;
 
-import static com.metsci.glimpse.core.gl.util.GLUtils.getAdjustedSurfaceSize;
 import static com.metsci.glimpse.core.support.swing.NewtClickTimeoutWorkaround.attachNewtClickTimeoutWorkaround;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.lang.Long.parseLong;

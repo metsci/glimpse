@@ -291,7 +291,7 @@ public class WrappedPainter extends GlimpsePainterBase
                 this.fbo.reset( gl, boundsX.getTextureSize( ), boundsY.getTextureSize( ), 0 );
             }
 
-            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), floats( 1, 1 ), new Wrapper2D( axis ), isFirstTile );
+            GlimpseContext glimpseContext = new WrappedGlimpseContext( context.getGLContext( ), floats( 1, 1 ), context.getDPI( ), new Wrapper2D( axis ), isFirstTile );
             glimpseContext.getTargetStack( ).push( this.dummyLayout, new GlimpseBounds( 0, 0, boundsX.getTextureSize( ), boundsY.getTextureSize( ) ) );
 
             this.fbo.bind( gl );

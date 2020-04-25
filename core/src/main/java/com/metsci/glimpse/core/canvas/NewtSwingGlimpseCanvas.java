@@ -26,14 +26,20 @@
  */
 package com.metsci.glimpse.core.canvas;
 
-import static com.metsci.glimpse.core.gl.util.GLUtils.getAdjustedSurfaceSize;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.util.Objects.requireNonNull;
 import static javax.swing.SwingUtilities.invokeLater;
 
+import java.awt.AWTError;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
@@ -458,5 +464,90 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     public float[] getSurfaceScale( )
     {
         return this.glWindow.getCurrentSurfaceScale( new float[2] );
+    }
+
+    @Override
+    public int getDpi( )
+    {
+        Graphics g = getGraphics( );
+        // First try the windows way
+        if ( g instanceof Graphics2D )
+        {
+            AffineTransform transform = ( ( Graphics2D ) g ).getTransform( );
+            double scaleX = transform.getScaleX( );
+            double scaleY = transform.getScaleY( );
+
+            if ( scaleX != scaleY )
+            {
+                // Not sure why this would happen, but it's not handled downstream
+                logWarning( logger, "Window scaling is not 1:1: scaleX = %f, scaleY = %f", scaleX, scaleY );
+            }
+            else if ( scaleX != 1 )
+            {
+                return ( int ) ( 96 * scaleX );
+            }
+        }
+
+        try
+        {
+            // Works for GTK font-scaling
+            Object dpiProp = Toolkit.getDefaultToolkit( ).getDesktopProperty( "gnome.Xft/DPI" );
+            if ( dpiProp instanceof Number )
+            {
+                // Don't know why it's multiplied by 1024
+                int dpi = ( ( Number ) dpiProp ).intValue( ) / 1024;
+                if ( dpi != 96 )
+                {
+                    return dpi;
+                }
+            }
+        }
+        catch ( AWTError ex )
+        {
+            // ignore
+        }
+
+        // TODO I don't know of other methods, but add them here
+
+        return 96;
+    }
+
+    /**
+     * Windows has non-integer scaling and the Newt implementation is buggy.
+     * The GLWindow surface scaling doesn't respect the underlying Graphics2D
+     * transform to properly fill the parent component. Here we check the
+     * Graphics2D scaleX and scaleY and if we need to adjust the surface size,
+     * return the new dimensions in screen pixels.
+     *
+     * If we can't get the correct dimensions for any reason, or the surface
+     * is already the correct size, return empty.
+     */
+    protected static Optional<Dimension> getAdjustedSurfaceSize( GlimpseCanvas canvas, GLWindow window )
+    {
+        // true in most cases
+        if ( canvas instanceof Component )
+        {
+            Component c = ( Component ) canvas;
+            int width = c.getWidth( );
+            int height = c.getHeight( );
+
+            Graphics g = c.getGraphics( );
+            if ( g instanceof Graphics2D )
+            {
+                AffineTransform transform = ( ( Graphics2D ) g ).getTransform( );
+                double scaleX = transform.getScaleX( );
+                double scaleY = transform.getScaleY( );
+                width = ( int ) ( width * scaleX );
+                height = ( int ) ( height * scaleY );
+
+                if ( window.getSurfaceWidth( ) != width || window.getSurfaceHeight( ) != height )
+                {
+                    return Optional.of( new Dimension( width, height ) );
+                }
+            }
+        }
+
+        // couldn't get adjusted height or doesn't need to be adjusted
+        return Optional.empty( );
     }
 }

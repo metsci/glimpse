@@ -136,4 +136,12 @@ public interface GlimpseCanvas extends GlimpseTarget
      * @return the scale factors as {scaleX, scaleY}
      */
     public float[] getSurfaceScale( );
+
+    /**
+     * Returns the ratio of pixels-per-inch for this canvas.
+     */
+    public default int getDpi( )
+    {
+        return 96;
+    }
 }

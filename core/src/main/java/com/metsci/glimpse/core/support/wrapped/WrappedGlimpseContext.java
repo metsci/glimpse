@@ -64,9 +64,9 @@ public class WrappedGlimpseContext extends GlimpseContextImpl
     protected final boolean isFirstWrappedTile;
 
 
-    public WrappedGlimpseContext( GLContext glContext, float[] scale, Wrapper2D wrapper, boolean isFirstWrappedTile )
+    public WrappedGlimpseContext( GLContext glContext, float[] scale, int dpi, Wrapper2D wrapper, boolean isFirstWrappedTile )
     {
-        super( glContext, scale );
+        super( glContext, scale, dpi );
         this.wrapper = wrapper;
         this.isFirstWrappedTile = isFirstWrappedTile;
     }
