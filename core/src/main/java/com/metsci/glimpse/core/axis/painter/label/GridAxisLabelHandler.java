@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.core.axis.painter.label;
 
+import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 import static java.lang.Math.log10;
@@ -73,7 +74,7 @@ public class GridAxisLabelHandler implements AxisLabelHandler
 
         this.converter = AxisUnitConverters.identity;
 
-        this.tickSpacing = 100;
+        this.tickSpacing = adjustForDesktopScaling( 100 );
         this.minorTickCount = 4;
     }
 

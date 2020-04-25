@@ -29,6 +29,7 @@ package com.metsci.glimpse.core.examples.misc;
 import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
 
 import com.metsci.glimpse.core.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
@@ -73,7 +74,7 @@ public class ButtonExample
             // set the MIG Layout constraints for the GlimpseLayout (see http://migcalendar.com/miglayout/cheatsheet.html for
             // a great MIG Layout guide). These constraints will position the GlimpseLayout button floating in the upper
             // right hand corder of the plot.
-            button.setLayoutData( "pos (container.w-60) (container.h-30) (container.w-5) (container.h-5)" );
+            button.setLayoutData( String.format( "pos (container.w-%d) (container.h-30) (container.w-5) (container.h-5)", adjustForDesktopScaling( 60 ) ) );
 
             // add a mouse listener to the button which will print a message and change the background color when pressed
             button.addGlimpseMouseListener( new GlimpseMouseAdapter( )

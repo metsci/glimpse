@@ -29,6 +29,7 @@ package com.metsci.glimpse.core.examples.timeline;
 import static com.jogamp.opengl.GLProfile.GL3bc;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
 
 import java.util.TimeZone;
 
@@ -53,7 +54,7 @@ public class MultipleTimelineExample
             gmtTimeline.getTimeZonePainter( ).setSizeText( "EST" );
             // don't show the date labels for the GMT timeline
             gmtTimeline.getAxisPainter( ).setShowDateLabels( false );
-            gmtTimeline.setSize( 25 );
+            gmtTimeline.setSize( adjustForDesktopScaling( 25 ) );
 
             // set up the additional timeline showing EST
             TimelineInfo estTimeline = plot.createTimeline( );
@@ -61,7 +62,7 @@ public class MultipleTimelineExample
             estTimeline.getTimeZonePainter( ).setText( "EST" );
             estTimeline.getTimeZonePainter( ).setVerticalPosition( VerticalPosition.Top );
             estTimeline.getTimeZonePainter( ).setSizeText( "EST" );
-            estTimeline.setSize( 35 );
+            estTimeline.setSize( adjustForDesktopScaling( 35 ) );
 
             // create a window and show the plot
             quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );

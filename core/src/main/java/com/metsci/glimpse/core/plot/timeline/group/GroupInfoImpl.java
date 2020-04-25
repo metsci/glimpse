@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.core.plot.timeline.group;
 
+import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -58,7 +60,7 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         this.plot = _plot;
         this.labelPainter = new GroupLabelPainter( "" );
         this.info.getLayout( ).addPainter( this.labelPainter );
-        this.info.setSize( 22 );
+        this.info.setSize( adjustForDesktopScaling( 22 ) );
         this.collapsible = true;
         this.expanded = true;
 
@@ -130,36 +132,43 @@ public class GroupInfoImpl extends PlotInfoWrapper implements GroupInfo
         } );
     }
 
+    @Override
     public SimpleTextPainter getTextPainter( )
     {
         return this.labelPainter.getTextPainter( );
     }
 
+    @Override
     public void setShowArrow( boolean show )
     {
         this.labelPainter.setShowArrow( show );
     }
 
+    @Override
     public boolean isShowArrow( )
     {
         return this.labelPainter.isShowArrow( );
     }
 
+    @Override
     public void setShowDivider( boolean show )
     {
         this.labelPainter.setShowDivider( show );
     }
 
+    @Override
     public boolean isShowDivider( )
     {
         return this.labelPainter.isShowDivider( );
     }
 
+    @Override
     public void setDividerColor( float[] color )
     {
         this.labelPainter.setDividerColor( color );
     }
 
+    @Override
     public float[] getDividerColor( )
     {
         return this.labelPainter.getDividerColor( );
