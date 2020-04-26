@@ -32,14 +32,12 @@ import static javax.swing.SwingUtilities.invokeLater;
 
 import java.awt.AWTError;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
@@ -195,6 +193,8 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 {
                     GL gl = drawable.getGL( );
                     gl.setSwapInterval( 0 );
+
+                    adjustSurfaceSizeIfNecessary( );
                 }
                 catch ( Exception e )
                 {
@@ -225,11 +225,7 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 // (the canvas can report incorrect/transient sizes during this time)
                 if ( !glCanvas.isShowing( ) ) return;
 
-                getAdjustedSurfaceSize( NewtSwingGlimpseCanvas.this, glWindow ).ifPresent( dim -> {
-                    invokeLater( ( ) -> {
-                        glWindow.setSurfaceSize( dim.width, dim.height );
-                    } );
-                } );
+                adjustSurfaceSizeIfNecessary( );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -520,34 +516,31 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
      * return the new dimensions in screen pixels.
      *
      * If we can't get the correct dimensions for any reason, or the surface
-     * is already the correct size, return empty.
+     * is already the correct size, do nothing. Otherwise, resize.
      */
-    protected static Optional<Dimension> getAdjustedSurfaceSize( GlimpseCanvas canvas, GLWindow window )
+    protected void adjustSurfaceSizeIfNecessary( )
     {
-        // true in most cases
-        if ( canvas instanceof Component )
+        int width = getWidth( );
+        int height = getHeight( );
+
+        Graphics g = getGraphics( );
+        if ( g instanceof Graphics2D )
         {
-            Component c = ( Component ) canvas;
-            int width = c.getWidth( );
-            int height = c.getHeight( );
+            AffineTransform transform = ( ( Graphics2D ) g ).getTransform( );
+            double scaleX = transform.getScaleX( );
+            double scaleY = transform.getScaleY( );
+            int newWidth = ( int ) ( width * scaleX );
+            int newHeight = ( int ) ( height * scaleY );
 
-            Graphics g = c.getGraphics( );
-            if ( g instanceof Graphics2D )
+            if ( glWindow.getSurfaceWidth( ) != newWidth || glWindow.getSurfaceHeight( ) != newHeight )
             {
-                AffineTransform transform = ( ( Graphics2D ) g ).getTransform( );
-                double scaleX = transform.getScaleX( );
-                double scaleY = transform.getScaleY( );
-                width = ( int ) ( width * scaleX );
-                height = ( int ) ( height * scaleY );
-
-                if ( window.getSurfaceWidth( ) != width || window.getSurfaceHeight( ) != height )
-                {
-                    return Optional.of( new Dimension( width, height ) );
-                }
+                // If this is called inside a resize, resizing again will cause an infinite loop
+                invokeLater( ( ) -> {
+                    glWindow.setSurfaceSize( newWidth, newHeight );
+                } );
             }
         }
 
         // couldn't get adjusted height or doesn't need to be adjusted
-        return Optional.empty( );
     }
 }
