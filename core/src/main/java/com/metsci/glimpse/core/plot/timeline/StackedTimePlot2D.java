@@ -1202,7 +1202,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         // create a painter to display Y axis tick marks along the left edge of the graph
         NumericXYAxisPainter axisPainter = new NumericXYAxisPainter( xHandler, yHandler );
-        axisPainter.setFont( getDefaultPlain( 10 ), false );
+        axisPainter.setFont( getDefaultPlain( 11 ), false );
         axisPainter.setShowLabelsNearOrigin( true );
         axisPainter.setShowOriginLabel( true );
         plotLayout.addPainter( axisPainter );
