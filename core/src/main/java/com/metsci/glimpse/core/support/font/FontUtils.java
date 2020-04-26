@@ -110,21 +110,45 @@ public class FontUtils
 
     public static Font getBitstreamVeraSansPlain( float size )
     {
+        return getBitstreamVeraSansPlain( size, getDefaultDpi( ) );
+    }
+
+    public static Font getBitstreamVeraSansPlain( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/Vera.ttf" ), size, Font.PLAIN );
     }
 
     public static Font getBitstreamVeraSansBold( float size )
     {
+        return getBitstreamVeraSansPlain( size, getDefaultDpi( ) );
+    }
+
+    public static Font getBitstreamVeraSansBold( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/VeraBd.ttf" ), size, Font.BOLD );
     }
 
     public static Font getBitstreamVeraSansItalic( float size )
     {
+        return getBitstreamVeraSansPlain( size, getDefaultDpi( ) );
+    }
+
+    public static Font getBitstreamVeraSansItalic( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/VeraIt.ttf" ), size, Font.ITALIC );
     }
 
     public static Font getBitstreamVeraSansBoldItalic( float size )
     {
+        return getBitstreamVeraSansPlain( size, getDefaultDpi( ) );
+    }
+
+    public static Font getBitstreamVeraSansBoldItalic( float size, int targetDpi )
+    {
+        size = size * targetDpi / 96;
         return loadTrueTypeFont( FontUtils.class.getResource( "bitstream/Veralt.ttf" ), size, Font.ITALIC | Font.BOLD );
     }
 
@@ -220,7 +244,7 @@ public class FontUtils
 
     private static Font requireFont( URL url )
     {
-        try ( InputStream stream = url.openStream( ) )
+        try (InputStream stream = url.openStream( ))
         {
             return createFont( Font.TRUETYPE_FONT, stream );
         }
@@ -230,15 +254,9 @@ public class FontUtils
         }
     }
 
-    public static float stringLengthToPixel (float length )
-    {
-        float standardEmToPixels = 12;
-        return adjustForDesktopScaling( length * standardEmToPixels );
-    }
-
     public static int adjustForDesktopScaling( int px )
     {
-        return (int) adjustForDesktopScaling( (float)px );
+        return ( int ) adjustForDesktopScaling( ( float ) px );
     }
 
     public static float adjustForDesktopScaling( float px )
