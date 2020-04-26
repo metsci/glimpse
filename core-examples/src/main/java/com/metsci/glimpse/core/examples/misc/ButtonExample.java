@@ -27,9 +27,9 @@
 package com.metsci.glimpse.core.examples.misc;
 
 import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
 
 import com.metsci.glimpse.core.event.mouse.GlimpseMouseAdapter;
 import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;

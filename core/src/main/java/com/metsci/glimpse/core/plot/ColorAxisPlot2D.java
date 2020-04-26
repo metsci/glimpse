@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.plot;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 
 import com.metsci.glimpse.core.axis.painter.ColorYAxisPainter;
 import com.metsci.glimpse.core.axis.painter.NumericAxisPainter;

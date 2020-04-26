@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.plot.timeline.group;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.core.support.font;
 
+import static com.metsci.glimpse.core.support.DpiUtils.getDefaultDpi;
 import static java.awt.Font.createFont;
 
 import java.awt.Font;
@@ -252,21 +253,5 @@ public class FontUtils
         {
             throw new RuntimeException( "Could not load font.", e );
         }
-    }
-
-    public static int adjustForDesktopScaling( int px )
-    {
-        return ( int ) adjustForDesktopScaling( ( float ) px );
-    }
-
-    public static float adjustForDesktopScaling( float px )
-    {
-        return px * getDefaultDpi( ) / 96;
-    }
-
-    private static int getDefaultDpi( )
-    {
-        // TODO Not implemented yet...
-        return 120;
     }
 }

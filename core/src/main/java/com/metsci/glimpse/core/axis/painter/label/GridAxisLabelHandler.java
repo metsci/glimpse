@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.axis.painter.label;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 import static java.lang.Math.log10;

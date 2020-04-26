@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.plot;
 
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 
 import java.awt.Font;
 
@@ -102,11 +102,11 @@ public class Plot2D extends GlimpseAxisLayout2D
      */
     public static int FOREGROUND_LAYER = 100;
 
-    protected int outerBorder = 10;
-    protected int axisThicknessX = 40;
-    protected int axisThicknessY = 60;
-    protected int axisThicknessZ = 65;
-    protected int titleSpacing = 50;
+    protected int outerBorder;
+    protected int axisThicknessX;
+    protected int axisThicknessY;
+    protected int axisThicknessZ;
+    protected int titleSpacing;
 
     protected String title = null;
     protected boolean showTitle = false;
@@ -142,6 +142,7 @@ public class Plot2D extends GlimpseAxisLayout2D
      */
     protected Plot2D( )
     {
+        outerBorder = 10;
         axisThicknessX = adjustForDesktopScaling( 40 );
         axisThicknessY = adjustForDesktopScaling( 60 );
         axisThicknessZ = adjustForDesktopScaling( 65 );
@@ -150,6 +151,7 @@ public class Plot2D extends GlimpseAxisLayout2D
 
     public Plot2D( String name )
     {
+        this( );
         this.initialize( );
         this.setName( name );
     }

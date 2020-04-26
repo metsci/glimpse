@@ -31,7 +31,7 @@ import static com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisOrientation.Left;
 import static com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisOrientation.Right;
 import static com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisOrientation.Top;
 import static com.metsci.glimpse.core.plot.Plot2D.BACKGROUND_LAYER;
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 
 import java.awt.Font;
 import java.util.ArrayList;

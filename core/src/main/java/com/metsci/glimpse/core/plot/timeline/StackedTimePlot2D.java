@@ -28,7 +28,7 @@ package com.metsci.glimpse.core.plot.timeline;
 
 import static com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
 import static com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
-import static com.metsci.glimpse.core.support.font.FontUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
 import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
