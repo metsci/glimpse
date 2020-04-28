@@ -80,6 +80,9 @@ public class TinyLafUtils
             // TinyLaf progress bars look dated
             UIManager.put( "ProgressBarUI", TinyProgressBarUI2.class.getName( ) );
 
+            // TinyLaf table rows don't adjust
+            UIManager.put( "TableUI", TinyTableUI2.class.getName( ) );
+
             // TinyLaf top-level menus need tweaking
             UIManager.put( "MenuUI", TinyMenuUI2.class.getName( ) );
             UIManager.put( "Menu.border", createEmptyBorder( 6, 6, 4, 3 ) );
