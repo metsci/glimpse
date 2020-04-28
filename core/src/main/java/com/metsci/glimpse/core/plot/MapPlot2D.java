@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.core.plot;
 
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
+
 import java.awt.Font;
 
 import com.metsci.glimpse.core.axis.Axis2D;
@@ -156,8 +158,8 @@ public class MapPlot2D extends Plot2D
         this.setTickSpacingX( 200 );
         this.setTickSpacingY( 200 );
 
-        this.setAxisSizeX( 25 );
-        this.setAxisSizeY( 25 );
+        this.setAxisSizeX( adjustForDesktopScaling( 25 ) );
+        this.setAxisSizeY( adjustForDesktopScaling( 25 ) );
         this.setAxisSizeZ( 0 );
     }
 

@@ -26,13 +26,11 @@
  */
 package com.metsci.glimpse.core.support.swing;
 
-import static com.metsci.glimpse.core.gl.util.GLUtils.getAdjustedSurfaceSize;
 import static com.metsci.glimpse.core.support.swing.NewtClickTimeoutWorkaround.attachNewtClickTimeoutWorkaround;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
-import static javax.swing.SwingUtilities.invokeLater;
 
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -194,6 +192,8 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 {
                     GL gl = drawable.getGL( );
                     gl.setSwapInterval( 0 );
+
+                    adjustSurfaceSizeIfNecessary( );
                 }
                 catch ( Exception e )
                 {
@@ -230,11 +230,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 // (the canvas can report incorrect/transient sizes during this time)
                 if ( !glCanvas.isShowing( ) ) return;
 
-                getAdjustedSurfaceSize( NewtSwingEDTGlimpseCanvas.this, glWindow ).ifPresent( dim -> {
-                    invokeLater( ( ) -> {
-                        glWindow.setSurfaceSize( dim.width, dim.height );
-                    } );
-                } );
+                adjustSurfaceSizeIfNecessary( );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {

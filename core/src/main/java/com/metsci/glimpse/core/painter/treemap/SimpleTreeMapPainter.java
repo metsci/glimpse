@@ -69,8 +69,8 @@ public class SimpleTreeMapPainter extends AbstractTreeMapPainter
     protected float[] titleColor = GlimpseColor.getWhite( );
     protected float[] textColor = GlimpseColor.getBlack( );
 
-    protected Font titleFont = FontUtils.getDefaultBold( 14.0f );
-    protected Font textFont = FontUtils.getDefaultItalic( 12.0f );
+    protected Font titleFont = FontUtils.getDefaultBold( 14 );
+    protected Font textFont = FontUtils.getDefaultItalic( 12 );
 
     protected FlatColorProgram flatProg;
     protected GLEditableBuffer flatPath;

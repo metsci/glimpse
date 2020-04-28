@@ -43,7 +43,7 @@ public class CopyrightPainter extends GlimpsePainterBase
 {
     private static final String copyrightSymbol = "\u00A9";
 
-    private static final Font textFont = FontUtils.getDefaultPlain( 15.0f );
+    private static final Font textFont = FontUtils.getDefaultPlain( 15 );
     private static float[] textColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
 
     private static final int padding = 5;

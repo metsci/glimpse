@@ -74,7 +74,7 @@ public abstract class TimeAxisPainter extends NumericAxisPainter
 
         this.handler = handler;
 
-        this.newFont = FontUtils.getBitstreamVeraSansPlain( 12.0f );
+        this.newFont = FontUtils.getDefaultPlain( 12 );
 
         this.tickColor = GlimpseColor.getBlack( );
         this.textColor = GlimpseColor.getBlack( );

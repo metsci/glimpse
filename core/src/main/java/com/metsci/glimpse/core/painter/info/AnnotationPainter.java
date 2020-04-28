@@ -260,7 +260,7 @@ public class AnnotationPainter extends GlimpsePainterBase
 
     public AnnotationPainter( )
     {
-        this( FontUtils.getDefaultPlain( 14.0f ) );
+        this( FontUtils.getDefaultPlain( 14 ) );
     }
 
     public AnnotationPainter( Font font )
