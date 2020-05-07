@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.geo.format;
 
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 
 /**
@@ -48,6 +49,8 @@ public class Util
         secondsFormatter.setMinimumFractionDigits( nDecimals );
         secondsFormatter.setMaximumFractionDigits( nDecimals );
         secondsFormatter.setMinimumIntegerDigits( 2 );
+        // If we round up, sometimes this will go to 60
+        secondsFormatter.setRoundingMode( RoundingMode.DOWN );
 
         String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
@@ -68,6 +71,8 @@ public class Util
         minutesFormatter.setMinimumFractionDigits( nDecimals );
         minutesFormatter.setMaximumFractionDigits( nDecimals );
         minutesFormatter.setMinimumIntegerDigits( 2 );
+        // If we round up, sometimes this will go to 60
+        minutesFormatter.setRoundingMode( RoundingMode.DOWN );
 
         String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
