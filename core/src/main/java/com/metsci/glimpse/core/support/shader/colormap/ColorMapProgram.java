@@ -73,12 +73,12 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         // Vertex attributes
 
         public final int inXy;
-        public final int inS;
+        public final int inSt;
 
         public ProgramHandles( GL2ES2 gl, int program )
         {
             this.inXy = gl.glGetAttribLocation( program, "inXy" );
-            this.inS = gl.glGetAttribLocation( program, "inS" );
+            this.inSt = gl.glGetAttribLocation( program, "inSt" );
         }
     }
 
@@ -191,12 +191,12 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
         if ( on )
         {
             gl3.glEnableVertexAttribArray( this.handles.inXy );
-            gl3.glEnableVertexAttribArray( this.handles.inS );
+            gl3.glEnableVertexAttribArray( this.handles.inSt );
         }
         else
         {
             gl3.glDisableVertexAttribArray( this.handles.inXy );
-            gl3.glDisableVertexAttribArray( this.handles.inS );
+            gl3.glDisableVertexAttribArray( this.handles.inSt );
         }
     }
 
@@ -223,15 +223,15 @@ public class ColorMapProgram extends GlimpseShaderProgram implements AxisListene
     }
 
     @Override
-    public void draw( GlimpseContext context, int mode, int xyVbo, int sVbo, int first, int count )
+    public void draw( GlimpseContext context, int mode, int xyVbo, int stVbo, int first, int count )
     {
         GL3 gl = context.getGL( ).getGL3( );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, xyVbo );
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
-        gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
-        gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, 0 );
+        gl.glBindBuffer( GL_ARRAY_BUFFER, stVbo );
+        gl.glVertexAttribPointer( this.handles.inSt, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }

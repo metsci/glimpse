@@ -35,7 +35,7 @@ uniform float alpha;
 uniform vec4 colors[20];
 uniform int nColors;
 
-in vec2 vS;
+in vec2 vSt;
 
 out vec4 fRgba;
 
@@ -92,8 +92,8 @@ void main()
     // get texel size
     float texelSizeX = 1.0 / texSize.x;
     float texelSizeY = 1.0 / texSize.y;
-    float a = fract( vS.x * texSize.x );
-    float b = fract( vS.y * texSize.y );
+    float a = fract( vSt.x * texSize.x );
+    float b = fract( vSt.y * texSize.y );
 
     float sumElev = 0;
     float sumShade = 0;
@@ -102,8 +102,8 @@ void main()
     {
         for ( int n = -1; n <= 2; n++ )
         {
-			float elev = texture2D( elevtex, vS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
-			float shade = texture2D( shadetex, vS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
+			float elev = texture2D( elevtex, vSt + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
+			float shade = texture2D( shadetex, vSt + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
 			float f1 = kernel( float( m ) - a );
 			float f2 = kernel( -float( n ) + b );
 

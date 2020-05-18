@@ -38,14 +38,14 @@ uniform float alpha;
 // skips fragments with NaN values
 uniform bool discardNaN;
 
-in vec2 vS;
+in vec2 vSt;
 
 out vec4 fRgba;
 
 void main()
 {
 	// retrieve the data value for this texel
-    float dataVal = texture( datatex, vS ).r;
+    float dataVal = texture( datatex, vSt ).r;
     if( discardNaN && isnan( dataVal ) )
     {
         discard;
