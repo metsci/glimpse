@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.core.plot.timeline.group;
 
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
+
 import java.awt.geom.Rectangle2D;
 
 import com.jogamp.opengl.GL;
@@ -49,8 +51,8 @@ import com.metsci.glimpse.core.support.shader.triangle.FlatColorProgram;
 
 public class GroupLabelPainter extends GlimpsePainterBase
 {
-    protected int buttonSize = 8;
-    protected int padding = 5;
+    protected int buttonSize;
+    protected int padding;
 
     protected float[] lineColor = GlimpseColor.getBlack( );
 
@@ -70,6 +72,9 @@ public class GroupLabelPainter extends GlimpsePainterBase
 
     public GroupLabelPainter( String name )
     {
+        this.buttonSize = adjustForDesktopScaling( 8 );
+        this.padding = adjustForDesktopScaling( 5 );
+
         this.textDelegate = new SimpleTextPainter( );
         this.textDelegate.setHorizontalPosition( HorizontalPosition.Left );
         this.textDelegate.setVerticalPosition( VerticalPosition.Top );
