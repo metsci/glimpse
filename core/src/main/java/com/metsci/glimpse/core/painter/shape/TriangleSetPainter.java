@@ -75,6 +75,24 @@ public class TriangleSetPainter extends GlimpsePainterBase
         this.rgba = rgba;
     }
 
+    public void setData( float[] dataXY, int offset, int length )
+    {
+        assert length <= dataXY.length && ( length - offset ) % 2 == 0;
+
+        this.painterLock.lock( );
+        try
+        {
+            buffer.clear( );
+
+            FloatBuffer fbuf = buffer.growFloats( length - offset );
+            fbuf.put( dataXY, offset, length );
+        }
+        finally
+        {
+            this.painterLock.unlock( );
+        }
+    }
+
     public void setData( float[] dataX, float[] dataY )
     {
         assert dataX.length == dataY.length;
