@@ -134,7 +134,7 @@ public class AnnotationPainter extends GlimpsePainterBase
 
         public TimeStamp getEndTimeStamp( )
         {
-            return TimeStamp.fromPosixMillis( startTime_PMILLIS );
+            return TimeStamp.fromPosixMillis( endTime_PMILLIS );
         }
 
         public void setEndTime( TimeStamp endTime )
@@ -347,7 +347,7 @@ public class AnnotationPainter extends GlimpsePainterBase
 
     public void displayTimeRange( TimeStamp minTime, TimeStamp maxTime )
     {
-        setDisplayFilter( a -> minTime.isBeforeOrEquals( a.getEndTimeStamp( ) ) && a.getStartTimeStamp( ).isBeforeOrEquals( maxTime ) );
+        setDisplayFilter( a -> a.getStartTimeStamp( ).isBeforeOrEquals( maxTime ) && minTime.isBeforeOrEquals( a.getEndTimeStamp( ) ) );
     }
 
     public void setDisplayFilter( Predicate<Annotation> filter )
