@@ -35,13 +35,13 @@ uniform float dataMax;
 
 uniform float alpha;
 
-in vec2 vS;
+in vec2 vSt;
 
 out vec4 fRgba;
 
 void main()
 {
-    uint dataVal = texture( datatex, vS.st ).r;
+    uint dataVal = texture( datatex, vSt.st ).r;
     float normalizedVal = ( float(dataVal) - dataMin ) / ( dataMax - dataMin );
     normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 

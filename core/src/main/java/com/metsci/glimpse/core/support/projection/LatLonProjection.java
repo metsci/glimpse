@@ -40,7 +40,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
  */
 public class LatLonProjection implements InvertibleProjection
 {
-    public static final double SIZE_DOWNSAMPLE = 0.1;
+    public static final double SIZE_DOWNSAMPLE_DEFAULT = 0.1;
 
     protected double minLat, maxLat, minLon, maxLon;
 
@@ -50,8 +50,14 @@ public class LatLonProjection implements InvertibleProjection
 
     protected boolean crossesAntimeridian;
     protected boolean latIsX;
+    protected double sizeDownsample;
 
     public LatLonProjection( GeoProjection projection, double minLat, double maxLat, double minLon, double maxLon, boolean latIsX )
+    {
+        this( projection, minLat, maxLat, minLon, maxLon, latIsX, SIZE_DOWNSAMPLE_DEFAULT );
+    }
+
+    public LatLonProjection( GeoProjection projection, double minLat, double maxLat, double minLon, double maxLon, boolean latIsX, double sizeDownsample )
     {
         this.latIsX = latIsX;
 
@@ -60,6 +66,7 @@ public class LatLonProjection implements InvertibleProjection
         this.maxLat = maxLat;
         this.minLon = minLon;
         this.maxLon = maxLon;
+        this.sizeDownsample = sizeDownsample;
         
         this.crossesAntimeridian = maxLon < minLon;
 
@@ -103,13 +110,13 @@ public class LatLonProjection implements InvertibleProjection
     @Override
     public int getSizeX( int textureSizeX )
     {
-        return ( int ) Math.round( Math.max( 1, textureSizeX * SIZE_DOWNSAMPLE ) );
+        return ( int ) Math.round( Math.max( 1, textureSizeX * sizeDownsample ) );
     }
 
     @Override
     public int getSizeY( int textureSizeY )
     {
-        return ( int ) Math.round( Math.max( 1, textureSizeY * SIZE_DOWNSAMPLE ) );
+        return ( int ) Math.round( Math.max( 1, textureSizeY * sizeDownsample ) );
     }
 
     @Override

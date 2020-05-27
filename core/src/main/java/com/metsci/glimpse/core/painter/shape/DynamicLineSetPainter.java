@@ -34,6 +34,7 @@ import static com.jogamp.opengl.GL.GL_LINE_STRIP;
 import static com.jogamp.opengl.GL2ES2.GL_STREAM_DRAW;
 import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
 import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
+import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
@@ -57,6 +58,7 @@ import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.painter.shape.DynamicPointSetPainter.BulkColorAccumulator;
 import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.core.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.util.primitives.FloatsArray;
 
 /**
@@ -305,6 +307,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
     {
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = requireAxis2D( context );
+        Wrapper2D wrapper = getWrapper2D( context );
         GL3 gl = context.getGL( ).getGL3( );
 
         enableStandardBlending( gl );
@@ -335,6 +338,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             {
                 this.prog.setViewport( gl, bounds );
                 this.prog.setAxisOrtho( gl, axis );
+                this.prog.setWrapper( gl, wrapper );
                 this.prog.setStyle( gl, style );
 
                 this.prog.draw( gl, drawConnectedLines ? GL_LINE_STRIP : GL_LINES, xyStreamingBuffer, rgbaStreamingBuffer, 0, lineCount * 2 );
@@ -708,6 +712,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             public final int program;
 
             public final int AXIS_RECT;
+            public final int WRAP_RECT;
             public final int VIEWPORT_SIZE_PX;
 
             public final int LINE_THICKNESS_PX;
@@ -725,6 +730,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
                 this.program = createProgram( gl, lineVertShader_GLSL, lineGeomShader_GLSL, lineFragShader_GLSL );
 
                 this.AXIS_RECT = gl.glGetUniformLocation( program, "AXIS_RECT" );
+                this.WRAP_RECT = gl.glGetUniformLocation( program, "WRAP_RECT" );
                 this.VIEWPORT_SIZE_PX = gl.glGetUniformLocation( program, "VIEWPORT_SIZE_PX" );
 
                 this.LINE_THICKNESS_PX = gl.glGetUniformLocation( program, "LINE_THICKNESS_PX" );
@@ -800,6 +806,16 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
         public void setOrtho( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
         {
             gl.glUniform4f( this.handles.AXIS_RECT, xMin, xMax, yMin, yMax );
+        }
+
+        public void setWrapper( GL2ES2 gl, Wrapper2D wrapper )
+        {
+            this.setWrapper( gl, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+        }
+
+        public void setWrapper( GL2ES2 gl, float xMin, float xMax, float yMin, float yMax )
+        {
+            gl.glUniform4f( this.handles.WRAP_RECT, xMin, xMax, yMin, yMax );
         }
 
         public void setStyle( GL2ES2 gl, LineStyle style )

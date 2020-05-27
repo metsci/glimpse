@@ -28,6 +28,8 @@ package com.metsci.glimpse.core.plot.timeline;
 
 import static com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation.HORIZONTAL;
 import static com.metsci.glimpse.core.plot.stacked.StackedPlot2D.Orientation.VERTICAL;
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
+import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
 import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
 import java.util.Arrays;
@@ -81,7 +83,6 @@ import com.metsci.glimpse.core.plot.timeline.listener.PlotMouseListener;
 import com.metsci.glimpse.core.plot.timeline.listener.TimeAxisMouseListener1D;
 import com.metsci.glimpse.core.plot.timeline.painter.SelectedTimeRegionPainter;
 import com.metsci.glimpse.core.support.atlas.TextureAtlas;
-import com.metsci.glimpse.core.support.font.FontUtils;
 import com.metsci.glimpse.util.units.time.Time;
 import com.metsci.glimpse.util.units.time.TimeStamp;
 
@@ -208,7 +209,7 @@ public class StackedTimePlot2D extends StackedPlot2D
     {
         this.timeTickHandler = handler;
         this.timeTickHandler.setEpoch( this.epoch );
-        
+
         for ( PlotInfo info : getAllPlots( ) )
         {
             if ( info instanceof TimelineInfo )
@@ -768,6 +769,7 @@ public class StackedTimePlot2D extends StackedPlot2D
      * Method name changed to be more consistent with other setters.
      * @deprecated {@link #setShowLabels(boolean)}
      */
+    @Deprecated
     public void showLabels( boolean show )
     {
         this.setShowLabels( show );
@@ -1200,7 +1202,7 @@ public class StackedTimePlot2D extends StackedPlot2D
 
         // create a painter to display Y axis tick marks along the left edge of the graph
         NumericXYAxisPainter axisPainter = new NumericXYAxisPainter( xHandler, yHandler );
-        axisPainter.setFont( getDefaultPlain( 9 ), false );
+        axisPainter.setFont( getDefaultPlain( 11 ), false );
         axisPainter.setShowLabelsNearOrigin( true );
         axisPainter.setShowOriginLabel( true );
         plotLayout.addPainter( axisPainter );
@@ -1234,7 +1236,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         SimpleTextPainter labelPainter = new SimpleTextPainter( );
         labelPainter.setHorizontalPosition( HorizontalPosition.Center );
         labelPainter.setVerticalPosition( VerticalPosition.Center );
-        labelPainter.setFont( FontUtils.getDefaultBold( 9 ), false );
+        labelPainter.setFont( getDefaultBold( 11 ), false );
         labelPainter.setPadding( 2 );
         // don't use the plot unique identifier as the label by default, this makes
         // it too easy to think that the String argument to createPlot() is supposed to be the label
@@ -1265,7 +1267,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         if ( orient == HORIZONTAL )
         {
             gridPainter.setShowHorizontalLines( false );
-            labelHandler.setTickSpacing( 45 );
+            labelHandler.setTickSpacing( adjustForDesktopScaling( 45 ) );
             axisPainter.setShowVerticalTicks( false );
             axisPainter.setShowHorizontalTicks( true );
             axisPainter.setLockTop( true );
@@ -1273,7 +1275,7 @@ public class StackedTimePlot2D extends StackedPlot2D
         else
         {
             gridPainter.setShowVerticalLines( false );
-            labelHandler.setTickSpacing( 16 );
+            labelHandler.setTickSpacing( adjustForDesktopScaling( 16 ) );
             axisPainter.setShowVerticalTicks( true );
             axisPainter.setShowHorizontalTicks( false );
             axisPainter.setLockLeft( true );

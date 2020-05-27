@@ -45,7 +45,7 @@ public class SlippyMapPainter extends DelegatePainter
     protected final String attribution;
     protected final SimpleTextPainter attributionPainter;
 
-    private static final Font textFont = FontUtils.getDefaultPlain( 15.0f );
+    private static final Font textFont = FontUtils.getDefaultPlain( 15 );
     private static final float[] textColor = new float[] { 0.5f, 0.5f, 0.5f, 1.0f };
     private static final float[] bgColor = new float[] { 0.95f, 0.95f, 0.95f, 1f };
 

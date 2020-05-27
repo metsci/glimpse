@@ -32,13 +32,13 @@ import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Map;
 
 import com.metsci.glimpse.charts.bathy.ContourData;
 import com.metsci.glimpse.charts.bathy.ContourPainter;
 import com.metsci.glimpse.charts.bathy.TopographyData;
-import com.metsci.glimpse.com.jogamp.opengl.util.awt.TextRenderer;
 import com.metsci.glimpse.core.axis.Axis1D;
 import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener;
 import com.metsci.glimpse.core.axis.painter.ColorYAxisPainter;
@@ -54,6 +54,7 @@ import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.core.painter.geo.LatLonTrackPainter;
 import com.metsci.glimpse.core.painter.geo.ScalePainter;
 import com.metsci.glimpse.core.painter.info.AnnotationPainter;
+import com.metsci.glimpse.core.painter.info.AnnotationPainter.Annotation;
 import com.metsci.glimpse.core.painter.info.CursorTextZPainter;
 import com.metsci.glimpse.core.painter.info.SimpleTextPainter.HorizontalPosition;
 import com.metsci.glimpse.core.painter.info.SimpleTextPainter.VerticalPosition;
@@ -168,9 +169,14 @@ public class BathymetryExample
         // load a bathemetry data set from a data file obtained from
         // http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html
         TopographyData bathymetryData;
-        try
+        try ( InputStream is = HillShadeExample.class.getResourceAsStream( "Cayman.bathy" ) )
         {
-            bathymetryData = new TopographyData( BathymetryExample.class.getResource( "Cayman.bathy" ) );
+            bathymetryData = new TopographyData( )
+            {
+                {
+                    read( is );
+                }
+            };
         }
         catch ( IOException e )
         {
@@ -235,7 +241,7 @@ public class BathymetryExample
         cursorPainter.setTexture( texture );
 
         // create a painter to display text annotations
-        annotationPainter = new AnnotationPainter( new TextRenderer( FontUtils.getDefaultPlain( 12 ) ) );
+        annotationPainter = new AnnotationPainter( FontUtils.getDefaultPlain( 12 ) );
         plot.addPainter( annotationPainter );
 
         // create a painter to display "buoy" positions
@@ -246,19 +252,24 @@ public class BathymetryExample
         dotPainter.setPointColor( 1, GlimpseColor.getBlack( ) );
 
         Vector2d pos = projection.project( LatLonGeo.fromDeg( 19.14, -80.23 ) );
-        annotationPainter.addAnnotation( "buoy 125A-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        Annotation a = annotationPainter.addAnnotation( "buoy 125A-3", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a.setBackgroundColor( GlimpseColor.getGray( 0.3f ) );
         dotPainter.addPointGeo( 1, 1, 19.14, -80.23, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 18.88, -80.83 ) );
-        annotationPainter.addAnnotation( "buoy 126A-2", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a = annotationPainter.addAnnotation( "buoy 126A-2", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a.setBackgroundColor( GlimpseColor.getGray( 0.3f ) );
         dotPainter.addPointGeo( 1, 1, 18.88, -80.83, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 19.64, -79.50 ) );
-        annotationPainter.addAnnotation( "buoy 126A-1", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getRed( ) );
+        a = annotationPainter.addAnnotation( "buoy 126A-1", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getRed( ) );
+        a.setBackgroundColor( GlimpseColor.getCyan( 0.3f ) );
+        a.setBorderColor( GlimpseColor.getYellow( ) );
         dotPainter.addPointGeo( 1, 1, 19.64, -79.50, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 19.80, -79.08 ) );
-        annotationPainter.addAnnotation( "buoy 125B-3", ( float ) pos.getX( ), ( float ) pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a = annotationPainter.addAnnotation( "buoy 125B-3", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a.setBorderColor( GlimpseColor.getYellow( ) );
         dotPainter.addPointGeo( 1, 1, 19.80, -79.08, 0 );
 
         ScalePainter scale = new ScalePainter( );

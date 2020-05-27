@@ -317,7 +317,7 @@ public class DncExplorer
 
             DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
             dockingGroup.addListener( createDefaultWindowTitler( "DNC Explorer" ) );
-            setArrangementAndSaveOnDispose( dockingGroup, "dnc-explorer", DncExplorer.class.getResource( "dnc-examples/docking-defaults.xml" ) );
+            setArrangementAndSaveOnDispose( dockingGroup, "dnc-explorer", DncExplorer.class.getResource( "docking-defaults.xml" ) );
 
             dockingGroup.addListener( new DockingGroupAdapter( )
             {

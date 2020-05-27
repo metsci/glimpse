@@ -26,11 +26,16 @@
  */
 package com.metsci.glimpse.core.canvas;
 
+import static com.metsci.glimpse.core.support.DpiUtils.getDefaultDpi;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static java.util.Objects.requireNonNull;
+import static javax.swing.SwingUtilities.invokeLater;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
@@ -187,6 +192,8 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 {
                     GL gl = drawable.getGL( );
                     gl.setSwapInterval( 0 );
+
+                    adjustSurfaceSizeIfNecessary( );
                 }
                 catch ( Exception e )
                 {
@@ -216,6 +223,8 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
                 // ignore initial reshapes while canvas is not showing
                 // (the canvas can report incorrect/transient sizes during this time)
                 if ( !glCanvas.isShowing( ) ) return;
+
+                adjustSurfaceSizeIfNecessary( );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {
@@ -450,5 +459,47 @@ public class NewtSwingGlimpseCanvas extends JPanel implements NewtGlimpseCanvas
     public float[] getSurfaceScale( )
     {
         return this.glWindow.getCurrentSurfaceScale( new float[2] );
+    }
+
+    @Override
+    public int getDpi( )
+    {
+        return getDefaultDpi( );
+    }
+
+    /**
+     * Windows has non-integer scaling and the Newt implementation is buggy.
+     * The GLWindow surface scaling doesn't respect the underlying Graphics2D
+     * transform to properly fill the parent component. Here we check the
+     * Graphics2D scaleX and scaleY and if we need to adjust the surface size,
+     * return the new dimensions in screen pixels.
+     *
+     * If we can't get the correct dimensions for any reason, or the surface
+     * is already the correct size, do nothing. Otherwise, resize.
+     */
+    protected void adjustSurfaceSizeIfNecessary( )
+    {
+        int width = getWidth( );
+        int height = getHeight( );
+
+        Graphics g = getGraphics( );
+        if ( g instanceof Graphics2D )
+        {
+            AffineTransform transform = ( ( Graphics2D ) g ).getTransform( );
+            double scaleX = transform.getScaleX( );
+            double scaleY = transform.getScaleY( );
+            int newWidth = ( int ) ( width * scaleX );
+            int newHeight = ( int ) ( height * scaleY );
+
+            if ( glWindow.getSurfaceWidth( ) != newWidth || glWindow.getSurfaceHeight( ) != newHeight )
+            {
+                // If this is called inside a resize, resizing again will cause an infinite loop
+                invokeLater( ( ) -> {
+                    glWindow.setSurfaceSize( newWidth, newHeight );
+                } );
+            }
+        }
+
+        // couldn't get adjusted height or doesn't need to be adjusted
     }
 }

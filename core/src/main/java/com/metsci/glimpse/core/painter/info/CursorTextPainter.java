@@ -78,7 +78,7 @@ public class CursorTextPainter extends GlimpsePainterBase
 
     public CursorTextPainter( )
     {
-        this( FontUtils.getDefaultPlain( 12.0f ) );
+        this( FontUtils.getDefaultPlain( 12 ) );
     }
 
     public void setTextColor( float[] color )

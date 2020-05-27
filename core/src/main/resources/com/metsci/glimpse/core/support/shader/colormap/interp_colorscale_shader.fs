@@ -42,9 +42,9 @@ uniform bool discardNaN;
 uniform bool discardAbove;
 uniform bool discardBelow;
 
-in vec2 vS;
+in vec2 gSt;
 
-out vec4 fRgba;
+out vec4 outRgba;
 
 // This is a bicubic b-spline kernel from https://www.codeproject.com/Articles/236394/Bi-Cubic-and-Bi-Linear-Interpolation-with-GLSL#BSpline
 float kernel( float f )
@@ -68,12 +68,6 @@ float kernel( float f )
     }
 }
 
-// The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
-bool checkNaN( float f )
-{
-    return ! ( f < 0.0 || 0.0 < f || f == 0.0 );
-}
-
 void main()
 {
     ivec2 texSize = textureSize( datatex, 0 );
@@ -82,15 +76,15 @@ void main()
     float texelSizeX = 1.0 / texSize.x;
     float texelSizeY = 1.0 / texSize.y;
 
-    // otherwise the interpolated pixels are shifted down and left
-    vec2 vSS = vS - vec2( 0.5 * texelSizeX, 0.5 * texelSizeY );
-
-    float a = fract( vSS.x * texSize.x );
-    float b = fract( vSS.y * texSize.y );
-
-    float exactVal = texture2D( datatex, vSS ).r;
-    if( checkNaN( exactVal ) && discardNaN )
+    float exactVal = texture2D( datatex, gSt ).r;
+    if( isnan( exactVal ) && discardNaN )
         discard;
+
+    // otherwise the interpolated pixels are shifted down and left
+    vec2 gSS = gSt - vec2( 0.5 * texelSizeX, 0.5 * texelSizeY );
+
+    float a = fract( gSS.x * texSize.x );
+    float b = fract( gSS.y * texSize.y );
 
     float sum = 0;
     float denom = 0;
@@ -98,8 +92,8 @@ void main()
     {
         for ( int n = -1; n <= 2; n++ )
         {
-            float data = texture2D( datatex, vSS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
-            if( checkNaN( data ) )
+            float data = texture2D( datatex, gSS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
+            if( isnan( data ) )
             {
                 continue;
             }
@@ -123,8 +117,8 @@ void main()
     normalizedVal = clamp( normalizedVal, 0.0, 1.0 );
 
     vec4 color = texture( colortex, normalizedVal );
-    fRgba = color;
+    outRgba = color;
     if ( overrideAlpha )
-        fRgba.a = alpha;
+        outRgba.a = alpha;
 }
 

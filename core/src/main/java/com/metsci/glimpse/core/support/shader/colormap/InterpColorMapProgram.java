@@ -26,13 +26,21 @@
  */
 package com.metsci.glimpse.core.support.shader.colormap;
 
+import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 
+import java.nio.FloatBuffer;
 import java.util.logging.Logger;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GLUniformData;
 import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.texture.BasicHeatMapProgram;
 import com.metsci.glimpse.core.painter.texture.HeatMapProgram;
+import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
 
 /**
  * Does a non-linear interpolation on the GPU and then maps into the colorscale.
@@ -48,6 +56,20 @@ public class InterpColorMapProgram extends ColorMapProgram implements HeatMapPro
     protected GLUniformData discardBelow;
     protected GLUniformData overrideAlpha;
 
+    protected GLUniformData WRAP_RECT;
+
+    public static class Handles extends ColorMapProgram.ProgramHandles
+    {
+        public final int WRAP_RECT;
+
+        public Handles( GL2ES2 gl, int program )
+        {
+            super( gl, program );
+
+            this.WRAP_RECT = gl.glGetUniformLocation( program, "WRAP_RECT" );
+        }
+    }
+
     public InterpColorMapProgram( Axis1D colorAxis, int targetTexUnit, int colorTexUnit )
     {
         super( colorAxis, targetTexUnit, colorTexUnit );
@@ -59,9 +81,36 @@ public class InterpColorMapProgram extends ColorMapProgram implements HeatMapPro
     {
         super.initialize( colorAxis, targetTexUnit, colorTexUnit );
 
+        this.WRAP_RECT = this.addUniformData( GLUniformData.creatEmptyVector( "WRAP_RECT", 4 ) );
+
+        // without setting default data, we will get "com.jogamp.opengl.GLException: glUniform atom only available for 1i and 1f"
+        // if begin( ) is called before setOrtho( )
+        this.WRAP_RECT.setData( FloatBuffer.wrap( new float[] { 0, 1, 0, 1 } ) );
+
         this.discardAbove = this.addUniformData( new GLUniformData( "discardAbove", 0 ) );
         this.discardBelow = this.addUniformData( new GLUniformData( "discardBelow", 0 ) );
         this.overrideAlpha = this.addUniformData( new GLUniformData( "overrideAlpha", 0 ) );
+    }
+
+    @Override
+    public void begin( GlimpseContext context, float xMin, float xMax, float yMin, float yMax )
+    {
+        super.begin( context, xMin, xMax, yMin, yMax );
+
+        Wrapper2D wrapper = getWrapper2D( context );
+        GL2ES3 gl = context.getGL( ).getGL2ES3( );
+        gl.glUniform4f( ( ( Handles ) this.handles ).WRAP_RECT, ( float ) wrapper.x.wrapMin( ), ( float ) wrapper.x.wrapMax( ), ( float ) wrapper.y.wrapMin( ), ( float ) wrapper.y.wrapMax( ) );
+    }
+
+    @Override
+    public void doUseProgram( GL gl, boolean on )
+    {
+        if ( this.handles == null )
+        {
+            this.handles = new Handles( gl.getGL2ES2( ), this.getShaderProgram( ).program( ) );
+        }
+
+        super.doUseProgram( gl, on );
     }
 
     public void setOverrideAlpha( boolean override )
@@ -73,6 +122,7 @@ public class InterpColorMapProgram extends ColorMapProgram implements HeatMapPro
     protected void addShaders( )
     {
         this.addVertexShader( InterpColorMapProgram.class.getResource( "passthrough.vs" ) );
+        this.addGeometryShader( BasicHeatMapProgram.class.getResource( "heatmap/heatmap.gs" ) );
         this.addFragmentShader( InterpColorMapProgram.class.getResource( "interp_colorscale_shader.fs" ) );
     }
 

@@ -387,7 +387,7 @@ public class GLUtils
                 (int) ( bounds.getY( ) * scaleY ),
                 (int) ( bounds.getWidth( ) * scaleX ),
                 (int) ( bounds.getHeight( ) * scaleY ) );
-        
+
         gl.glScissor(
                 (int) ( clippedBounds.getX( ) * scaleX ),
                 (int) ( clippedBounds.getY( ) * scaleY ),

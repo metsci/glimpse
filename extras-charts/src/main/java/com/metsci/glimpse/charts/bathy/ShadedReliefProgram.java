@@ -40,6 +40,7 @@ import com.metsci.glimpse.core.context.GlimpseContext;
 import com.metsci.glimpse.core.gl.GLEditableBuffer;
 import com.metsci.glimpse.core.gl.shader.GlimpseShaderProgram;
 import com.metsci.glimpse.core.gl.texture.DrawableTextureProgram;
+import com.metsci.glimpse.core.support.shader.colormap.ColorMapProgram;
 import com.metsci.glimpse.core.support.shader.colormap.ColorMapProgram.ProgramHandles;
 
 /**
@@ -69,7 +70,7 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
 
     protected void addShaders( )
     {
-        this.addVertexShader( ShadedReliefProgram.class.getResource( "passthrough.vs" ) );
+        this.addVertexShader( ColorMapProgram.class.getResource( "passthrough.vs" ) );
         this.addFragmentShader( ShadedReliefProgram.class.getResource( "shaded_relief_shader.fs" ) );
     }
 
@@ -155,12 +156,12 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
         if ( on )
         {
             gl3.glEnableVertexAttribArray( this.handles.inXy );
-            gl3.glEnableVertexAttribArray( this.handles.inS );
+            gl3.glEnableVertexAttribArray( this.handles.inSt );
         }
         else
         {
             gl3.glDisableVertexAttribArray( this.handles.inXy );
-            gl3.glDisableVertexAttribArray( this.handles.inS );
+            gl3.glDisableVertexAttribArray( this.handles.inSt );
         }
     }
 
@@ -195,7 +196,7 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
         gl.glVertexAttribPointer( this.handles.inXy, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glBindBuffer( GL_ARRAY_BUFFER, sVbo );
-        gl.glVertexAttribPointer( this.handles.inS, 2, GL_FLOAT, false, 0, 0 );
+        gl.glVertexAttribPointer( this.handles.inSt, 2, GL_FLOAT, false, 0, 0 );
 
         gl.glDrawArrays( mode, first, count );
     }

@@ -32,19 +32,16 @@ import com.metsci.glimpse.core.canvas.GlimpseCanvas;
 
 public class GlimpseContextImpl implements GlimpseContext
 {
-    private static final String defaultDpiKey = "com.metsci.glimpse.dpi.default";
-    private static final int defaultDpiValue = Integer.parseInt( System.getProperty( defaultDpiKey, "96" ) );
-
     private GLContext glContext;
     private GlimpseTargetStack targetStack;
     private int dpi;
     private final float[] scale;
 
-    public GlimpseContextImpl( GLContext context, float[] scale )
+    public GlimpseContextImpl( GLContext context, float[] scale, int dpi )
     {
         this.glContext = context;
         this.targetStack = new GlimpseTargetStackImpl( );
-        this.dpi = defaultDpiValue; //TODO fix this
+        this.dpi = dpi;
         this.scale = scale;
     }
 
@@ -52,7 +49,7 @@ public class GlimpseContextImpl implements GlimpseContext
     {
         this.glContext = canvas.getGLContext( );
         this.targetStack = new GlimpseTargetStackImpl( canvas );
-        this.dpi = defaultDpiValue; //TODO fix this
+        this.dpi = canvas.getDpi( );
         this.scale = canvas.getSurfaceScale( );
     }
 

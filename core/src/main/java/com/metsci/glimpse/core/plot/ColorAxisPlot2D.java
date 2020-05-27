@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.core.plot;
 
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
+
 import com.metsci.glimpse.core.axis.painter.ColorYAxisPainter;
 import com.metsci.glimpse.core.axis.painter.NumericAxisPainter;
 import com.metsci.glimpse.core.axis.painter.label.AxisLabelHandler;
@@ -43,7 +45,7 @@ public class ColorAxisPlot2D extends SimplePlot2D
     public ColorAxisPlot2D( )
     {
         // show the Z axis
-        setAxisSizeZ( 65 );
+        setAxisSizeZ( adjustForDesktopScaling( 65 ) );
     }
 
     @Override

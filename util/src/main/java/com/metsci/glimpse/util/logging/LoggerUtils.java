@@ -66,6 +66,7 @@ public class LoggerUtils
      * Log statements with this level are always loggable -- even for loggers
      * set to OFF.
      */
+    @SuppressWarnings( "serial" )
     public static final Level FORCE = new Level( "FORCE", Integer.MAX_VALUE ) { };
 
     /**
@@ -298,6 +299,7 @@ public class LoggerUtils
          *
          * @throws java.io.IOException in case of error
          */
+        @Override
         public void flush( ) throws IOException
         {
 
@@ -378,7 +380,14 @@ public class LoggerUtils
     {
         if ( logger.isLoggable( level ) )
         {
-            logger.log( level, format( format, args ) );
+            String message = format;
+            if ( 0 < args.length )
+            {
+                // Only format if we have varargs
+                message = format( format, args );
+            }
+
+            logger.log( level, message );
         }
     }
 
@@ -457,7 +466,14 @@ public class LoggerUtils
     {
         if ( logger.isLoggable( level ) )
         {
-            logger.log( level, format( format, args ), thrown );
+            String message = format;
+            if ( 0 < args.length )
+            {
+                // Only format if we have varargs
+                message = format( format, args );
+            }
+
+            logger.log( level, message, thrown );
         }
     }
 

@@ -192,6 +192,8 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 {
                     GL gl = drawable.getGL( );
                     gl.setSwapInterval( 0 );
+
+                    adjustSurfaceSizeIfNecessary( );
                 }
                 catch ( Exception e )
                 {
@@ -227,6 +229,8 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
                 // ignore initial reshapes while canvas is not showing
                 // (the canvas can report incorrect/transient sizes during this time)
                 if ( !glCanvas.isShowing( ) ) return;
+
+                adjustSurfaceSizeIfNecessary( );
 
                 for ( GlimpseLayout layout : layoutManager.getLayoutList( ) )
                 {

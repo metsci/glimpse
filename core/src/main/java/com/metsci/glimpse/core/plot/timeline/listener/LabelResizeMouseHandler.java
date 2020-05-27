@@ -43,6 +43,7 @@ import com.metsci.glimpse.core.context.GlimpseTarget;
 import com.metsci.glimpse.core.event.mouse.GlimpseMouseAllAdapter;
 import com.metsci.glimpse.core.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.core.event.mouse.MouseButton;
+import com.metsci.glimpse.core.plot.timeline.CollapsibleTimePlot2D;
 import com.metsci.glimpse.core.plot.timeline.StackedTimePlot2D;
 import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 
@@ -140,10 +141,18 @@ public class LabelResizeMouseHandler extends GlimpseMouseAllAdapter
             if ( plot.isTimeAxisHorizontal( ) )
             {
                 plot.setLabelSize( e.getX( ) );
+                if ( plot instanceof CollapsibleTimePlot2D )
+                {
+                    ( ( CollapsibleTimePlot2D ) plot ).setIndentSize( e.getX( ) );
+                }
             }
             else
             {
                 plot.setLabelSize( e.getY( ) );
+                if ( plot instanceof CollapsibleTimePlot2D )
+                {
+                    ( ( CollapsibleTimePlot2D ) plot ).setIndentSize( e.getY( ) );
+                }
             }
             e.setHandled( true );
         }

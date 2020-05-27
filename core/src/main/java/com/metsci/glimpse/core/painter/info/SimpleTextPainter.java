@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.core.painter.info;
 
+import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultBold;
 import static com.metsci.glimpse.core.support.font.FontUtils.getDefaultPlain;
 
@@ -104,8 +105,9 @@ public class SimpleTextPainter extends GlimpsePainterBase
     protected float[] borderColor = GlimpseColor.getWhite( 1f );
     protected boolean borderColorSet = false;
 
-    protected int horizontalPadding = 5;
-    protected int verticalPadding = 5;
+    protected int horizontalPadding;
+    protected int verticalPadding;
+    protected int backgroundPadding;
 
     protected HorizontalPosition hPos;
     protected VerticalPosition vPos;
@@ -148,6 +150,10 @@ public class SimpleTextPainter extends GlimpsePainterBase
         this.fillBuffer = new GLEditableBuffer( GL.GL_STATIC_DRAW, 0 );
 
         this.transformMatrix = new Matrix4( );
+
+        this.horizontalPadding = adjustForDesktopScaling( 5 );
+        this.verticalPadding = adjustForDesktopScaling( 5 );
+        this.backgroundPadding = adjustForDesktopScaling( 2 );
     }
 
     public SimpleTextPainter setHorizontalLabels( boolean horizontal )
@@ -252,6 +258,12 @@ public class SimpleTextPainter extends GlimpsePainterBase
         return this;
     }
 
+    public SimpleTextPainter setBackgroundPadding( int padding )
+    {
+        this.backgroundPadding = padding;
+        return this;
+    }
+
     public SimpleTextPainter setVerticalPadding( int padding )
     {
         this.verticalPadding = padding;
@@ -332,11 +344,11 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
         int width = bounds.getWidth( );
         int height = bounds.getHeight( );
-        
+
         double xBaseline = textBounds.getX( );
         // distance from the top of the text to the baseline
         double yBaselineToTop = -textBounds.getY( );
-                
+
         switch ( hPos )
         {
             case Left:
@@ -472,7 +484,7 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
         if ( paintBackground || paintBorder )
         {
-            int buffer = 2;
+            int buffer = backgroundPadding;
 
             int xTextMin = xText + halfTextWidth - halfTextHeight - buffer;
             int yTextMin = yText + halfTextWidth + halfTextHeight + buffer;

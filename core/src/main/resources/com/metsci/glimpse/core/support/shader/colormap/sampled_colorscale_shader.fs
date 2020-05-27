@@ -38,19 +38,17 @@ uniform float alpha;
 // skips fragments with NaN values
 uniform bool discardNaN;
 
-in vec2 vS;
+in vec2 vSt;
 
 out vec4 fRgba;
 
 void main()
 {
 	// retrieve the data value for this texel
-    float dataVal = texture( datatex, vS ).r;
-    if( discardNaN )
+    float dataVal = texture( datatex, vSt ).r;
+    if( discardNaN && isnan( dataVal ) )
     {
-       // The isnan() function isn't defined in GLSL 1.20, which causes problems on OSX.
-       if( ! ( dataVal < 0.0 || 0.0 < dataVal || dataVal == 0.0 ) )
-          discard;
+        discard;
     }
 
     float normalizedVal = ( dataVal - dataMin ) / ( dataMax - dataMin );

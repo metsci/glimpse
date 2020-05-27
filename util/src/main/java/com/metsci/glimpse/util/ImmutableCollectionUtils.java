@@ -27,6 +27,7 @@
 package com.metsci.glimpse.util;
 
 import static com.google.common.base.Objects.equal;
+import static java.util.Collections.disjoint;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -125,6 +126,21 @@ public class ImmutableCollectionUtils
             return ImmutableMap.copyOf( newMap );
         }
     }
+
+    public static <K,V> ImmutableMap<K,V> mapMinus( ImmutableMap<K,V> map, Collection<K> keys )
+    {
+        if ( disjoint( map.keySet( ), keys ) )
+        {
+            return map;
+        }
+        else
+        {
+            Map<K,V> newMap = new LinkedHashMap<>( map );
+            keys.forEach( newMap::remove );
+            return ImmutableMap.copyOf( newMap );
+        }
+    }
+
 
     public static <K,V> ImmutableMap<K,V> mapSubset( ImmutableMap<K,V> map, Collection<K> keys )
     {

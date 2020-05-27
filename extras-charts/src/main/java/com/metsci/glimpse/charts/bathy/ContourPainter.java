@@ -29,6 +29,7 @@ package com.metsci.glimpse.charts.bathy;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import java.nio.FloatBuffer;
 
@@ -42,6 +43,7 @@ import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
 import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram;
 import com.metsci.glimpse.core.painter.shape.DynamicLineSetPainter.DynamicLineSetPainterProgram.LineProgramHandles;
 import com.metsci.glimpse.core.support.shader.line.LineStyle;
+import com.metsci.glimpse.core.support.wrapped.Wrapper2D;
 
 /**
  * @author ulman
@@ -81,6 +83,7 @@ public class ContourPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         Axis2D axis = requireAxis2D( context );
         GlimpseBounds bounds = getBounds( context );
+        Wrapper2D wrapper = getWrapper2D( context );
 
         if ( xyVbo.sealedOffset( ) < 0 || rgbaVbo.sealedOffset( ) < 0 || colorDirty )
         {
@@ -102,6 +105,7 @@ public class ContourPainter extends GlimpsePainterBase
         try
         {
             program.setAxisOrtho( gl, axis );
+            program.setWrapper( gl, wrapper );
             program.setViewport( gl, bounds );
             program.setStyle( gl, style );
 
