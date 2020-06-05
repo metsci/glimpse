@@ -126,7 +126,7 @@ public class MappedFile
         this.byteOrder = byteOrder;
 
         String rafMode = ( this.writable ? "rw" : "r" );
-        try (RandomAccessFile raf = new RandomAccessFile( file, rafMode ))
+        try ( RandomAccessFile raf = new RandomAccessFile( file, rafMode ) )
         {
             if ( setSize >= 0 )
             {

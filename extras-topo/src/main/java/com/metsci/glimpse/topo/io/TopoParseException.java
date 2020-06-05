@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.topo.io;
 
-public class TopoParseException extends Exception
+import java.io.IOException;
+
+public class TopoParseException extends IOException
 {
 
     public TopoParseException( String message )

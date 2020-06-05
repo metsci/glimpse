@@ -58,12 +58,12 @@ public class TopoCache
     public static final HashFunction topoConfigHashFn = Hashing.md5( );
 
 
-    public static TopoDataset topoCacheDataset( TopoDataFile baseLevel ) throws IOException, TopoParseException
+    public static TopoDataset topoCacheDataset( TopoDataFile baseLevel ) throws IOException
     {
         return topoCacheDataset( baseLevel, glimpseTopoCacheDir );
     }
 
-    public static TopoDataset topoCacheDataset( TopoDataFile baseLevel, File cacheParentDir ) throws IOException, TopoParseException
+    public static TopoDataset topoCacheDataset( TopoDataFile baseLevel, File cacheParentDir ) throws IOException
     {
         String configString = topoConfigString( baseLevel );
         String configHash = topoConfigHashFn.newHasher( ).putString( configString, UTF_8 ).hash( ).toString( );
