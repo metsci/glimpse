@@ -28,10 +28,7 @@ package com.metsci.glimpse.util.io;
 
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 import static com.metsci.glimpse.util.ugly.CleanerUtils.registerCleaner;
-import static java.lang.Double.longBitsToDouble;
-import static java.lang.Float.intBitsToFloat;
 import static java.lang.String.format;
-import static java.nio.ByteOrder.nativeOrder;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -46,8 +43,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
-
-import sun.misc.Unsafe;
 
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
@@ -66,7 +61,6 @@ import sun.misc.Unsafe;
  * --add-opens java.base/java.nio=com.metsci.glimpse.util
  * </pre>
  */
-@SuppressWarnings( "restriction" )
 public class MappedFile
 {
     protected static final FileMapper mapper;
@@ -86,7 +80,6 @@ public class MappedFile
     protected final File file;
     protected final boolean writable;
     protected final ByteOrder byteOrder;
-    protected final boolean mustReverseBytes;
 
     protected final FileDescriptor fd;
     protected final long address;
@@ -131,10 +124,9 @@ public class MappedFile
         this.file = file;
         this.writable = writable;
         this.byteOrder = byteOrder;
-        this.mustReverseBytes = ( this.byteOrder != nativeOrder( ) );
 
         String rafMode = ( this.writable ? "rw" : "r" );
-        try ( RandomAccessFile raf = new RandomAccessFile( file, rafMode ) )
+        try (RandomAccessFile raf = new RandomAccessFile( file, rafMode ))
         {
             if ( setSize >= 0 )
             {
@@ -234,74 +226,6 @@ public class MappedFile
         return buffer;
     }
 
-    public byte readByte( long position )
-    {
-        if ( position < 0 || position + Byte.BYTES > this.size )
-        {
-            throw new RuntimeException( format( "Value falls outside bounds of file: value-position = %d, value-size = %d, file-size = %d", position, Byte.SIZE, this.size ) );
-        }
-
-        // TODO: Be careful about unaligned access
-        //
-        // On some architectures, memory accesses must be done using addresses
-        // that are evenly divisible by an architecture-specific number of bytes.
-        // In Java 9+, the jdk.internal.misc.Unsafe class has methods that handle
-        // unaligned access carefully. It would be nice to use those here ... but
-        // they aren't available in Java 8.
-        //
-        // Fortunately, x86 architectures do support unaligned access, and x86 is
-        // currently all we care about. So for now, we can get away with calling
-        // the old sun.misc.Unsafe methods.
-        //
-        return unsafe.getByte( this.address + position );
-    }
-
-    public short readShort( long position )
-    {
-        if ( position < 0 || position + Short.BYTES > this.size )
-        {
-            throw new RuntimeException( format( "Value falls outside bounds of file: value-position = %d, value-size = %d, file-size = %d", position, Short.SIZE, this.size ) );
-        }
-
-        // TODO: Be careful about unaligned access
-        short raw = unsafe.getShort( this.address + position );
-        return ( this.mustReverseBytes ? Short.reverseBytes( raw ) : raw );
-    }
-
-    public int readInt( long position )
-    {
-        if ( position < 0 || position + Integer.BYTES > this.size )
-        {
-            throw new RuntimeException( format( "Value falls outside bounds of file: value-position = %d, value-size = %d, file-size = %d", position, Integer.SIZE, this.size ) );
-        }
-
-        // TODO: Be careful about unaligned access
-        int raw = unsafe.getInt( this.address + position );
-        return ( this.mustReverseBytes ? Integer.reverseBytes( raw ) : raw );
-    }
-
-    public long readLong( long position )
-    {
-        if ( position < 0 || position + Long.BYTES > this.size )
-        {
-            throw new RuntimeException( format( "Value falls outside bounds of file: value-position = %d, value-size = %d, file-size = %d", position, Long.SIZE, this.size ) );
-        }
-
-        // TODO: Be careful about unaligned access
-        long raw = unsafe.getLong( this.address + position );
-        return ( this.mustReverseBytes ? Long.reverseBytes( raw ) : raw );
-    }
-
-    public float readFloat ( long position )
-    {
-        return intBitsToFloat( this.readInt( position ) );
-    }
-
-    public double readDouble( long position )
-    {
-        return longBitsToDouble( this.readLong( position ) );
-    }
-
     public void force( )
     {
         if ( this.writable && this.size > 0 )
@@ -321,16 +245,23 @@ public class MappedFile
 
     // Lots of verbose code to get access to various JVM-internal functionality
 
-    protected static final Unsafe unsafe;
+    protected static final Object unsafe;
     protected static final int pageSize;
+    protected static final Method Unsafe_copyMemory;
     static
     {
         try
         {
-            Constructor<Unsafe> Unsafe_new = Unsafe.class.getDeclaredConstructor( );
+            Class<?> Unsafe_class = Class.forName( "sun.misc.Unsafe" );
+
+            Constructor<?> Unsafe_new = Unsafe_class.getDeclaredConstructor( );
             Unsafe_new.setAccessible( true );
             unsafe = Unsafe_new.newInstance( );
-            pageSize = unsafe.pageSize( );
+
+            Method Unsafe_pageSize = Unsafe_class.getDeclaredMethod( "pageSize" );
+            pageSize = ( Integer ) Unsafe_pageSize.invoke( unsafe );
+
+            Unsafe_copyMemory = Unsafe_class.getDeclaredMethod( "copyMemory", Long.TYPE, Long.TYPE, Long.TYPE );
         }
         catch ( Exception e )
         {
@@ -342,7 +273,7 @@ public class MappedFile
     {
         try
         {
-            unsafe.copyMemory( srcAddress, destAddress, bytes );
+            Unsafe_copyMemory.invoke( unsafe, srcAddress, destAddress, bytes );
         }
         catch ( Exception e )
         {
