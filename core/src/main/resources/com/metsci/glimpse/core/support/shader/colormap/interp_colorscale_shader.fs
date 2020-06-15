@@ -42,35 +42,73 @@ uniform bool discardNaN;
 uniform bool discardAbove;
 uniform bool discardBelow;
 
+mat4 kermat = mat4(
+  0, -0.5, 1, -0.5,
+  1, 0, -2.5, 1.5,
+  0, 0.5, 2, -1.5,
+  0, 0, -0.5, 0.5
+);
+
 in vec2 gSt;
 
 out vec4 outRgba;
 
-// This is a bicubic b-spline kernel from https://www.codeproject.com/Articles/236394/Bi-Cubic-and-Bi-Linear-Interpolation-with-GLSL#BSpline
-float kernel( float f )
+// This is the Keys-type interpolator in 1D
+float kernel( float f, vec4 vals )
 {
-    if( f < 0.0 )
-    {
-        f = -f;
-    }
+    float f2 = f*f;
+    vec4 v = vec4(1, f, f2, f2*f);
+    return dot(v, kermat * vals);
+}
 
-    if( f >= 0.0 && f <= 1.0 )
-    {
-        return ( 2.0 / 3.0 ) + ( 0.5 ) * ( f * f * f ) - ( f * f );
+float fixupLeft( mat4 points, int m )
+{
+    float val = points[0][m+1];
+    if (isnan(val)) {
+       val = 2*points[1][m+1] - points[2][m+1];
     }
-    else if( f > 1.0 && f <= 2.0 )
-    {
-        return 1.0 / 6.0 * pow( ( 2.0 - f ), 3.0 );
+    return val;
+}
+
+float fixupRight( mat4 points, int m )
+{
+    float val = points[3][m+1];
+    if (isnan(val)) {
+       val = 2*points[2][m+1] - points[1][m+1];
     }
-    else
-    {
-        return 1.0;
+    return val;
+}
+
+float fixupTop( mat4 points, int n )
+{
+    float val = points[n+1][3];
+    if (isnan(val)) {
+       val = 2*points[n+1][2] - points[n+1][1];
     }
+    return val;
+}
+
+float fixupBot( mat4 points, int n )
+{
+    float val = points[n+1][0];
+    if (isnan(val)) {
+        val = 2*points[n+1][1] - points[n+1][2];
+    }
+    return val;
 }
 
 void main()
 {
     ivec2 texSize = textureSize( datatex, 0 );
+
+    if ( texSize.x < 2 || texSize.y < 2) {
+        vec4 color = texture( colortex, 0 );
+        outRgba = color;
+        if ( overrideAlpha ) {
+            outRgba.a = alpha;
+        }
+        return;
+    }
 
     // get texel size
     float texelSizeX = 1.0 / texSize.x;
@@ -86,27 +124,36 @@ void main()
     float a = fract( gSS.x * texSize.x );
     float b = fract( gSS.y * texSize.y );
 
-    float sum = 0;
-    float denom = 0;
+    vec4 row = vec4(0);
+    mat4 points = mat4(0);
     for ( int m = -1; m <= 2; m++ )
     {
         for ( int n = -1; n <= 2; n++ )
         {
             float data = texture2D( datatex, gSS + vec2( texelSizeX * float( m ), texelSizeY * float( n ) ) ).r;
-            if( isnan( data ) )
-            {
-                continue;
-            }
-
-            float f1 = kernel( a - float( m ) );
-            float f2 = kernel( b - float( n ) );
-
-            sum = sum + ( data * f1 * f2  );
-            denom = denom + ( f1 * f2 );
+            points[m+1][n+1] = data;
         }
     }
+    // build from the center which we know is valid; extrapolate edges if missing
+    for (int m=0; m <= 1; m++) {
+        points[m+1][0] = fixupBot(points, m);
+        points[m+1][3] = fixupTop(points, m);
+    }
+    for (int n=0; n <= 1; n++) {
+        points[0][n+1] = fixupLeft(points, n);
+        points[3][n+1] = fixupRight(points, n);
+    }
+    points[0][0] = 0.5 * (fixupLeft(points, -1) + fixupBot(points, -1));
+    points[0][3] = 0.5 * (fixupLeft(points, 2) + fixupTop(points, -1));
+    points[3][0] = 0.5 * (fixupRight(points, -1) + fixupBot(points, 2));
+    points[3][3] = 0.5 * (fixupRight(points, 2) + fixupTop(points, 2));
 
-    float dataVal = sum / denom;
+    for (int m=-1; m<=2; m++) {
+        vec4 col = points[m+1];
+        row[m+1] = kernel(b, col);
+    }
+
+    float dataVal = kernel(a, row);
 
     if( discardAbove && dataVal > dataMax )
         discard;
