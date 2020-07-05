@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,15 +27,15 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingThemes.defaultDockingTheme;
-import static com.metsci.glimpse.docking.DockingUtils.newButtonPopup;
+import static com.metsci.glimpse.docking.DockingUtils.attachPopupMenu;
 import static com.metsci.glimpse.docking.DockingUtils.newToolbar;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static java.awt.Color.blue;
 import static java.awt.Color.cyan;
@@ -55,12 +55,13 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
+
 public class SimpleDockingExample
 {
 
     public static void main( String[] args ) throws Exception
     {
-        fixPlatformQuirks( );
         initTinyLaf( );
         final DockingTheme dockingTheme = defaultDockingTheme( );
 
@@ -93,7 +94,8 @@ public class SimpleDockingExample
                 aToolbar.add( new JButton( "A3" ) );
 
                 JToggleButton aOptionsButton = new JToggleButton( dockingTheme.optionsIcon );
-                JPopupMenu aOptionsPopup = newButtonPopup( aOptionsButton );
+                JPopupMenu aOptionsPopup = new JPopupMenu( );
+                attachPopupMenu( aOptionsButton, aOptionsPopup );
                 aOptionsPopup.add( new JMenuItem( "Option 1" ) );
                 aToolbar.add( aOptionsButton );
 
@@ -129,14 +131,14 @@ public class SimpleDockingExample
 
                 View[] views =
                 {
-                    new View( "aView", aPanel, "View A", false, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
-                    new View( "bView", bPanel, "View B", false, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
-                    new View( "cView", cPanel, "View C", false, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
-                    new View( "dView", dPanel, "View D", false, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
-                    new View( "eView", ePanel, "View E", false, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
-                    new View( "fView", fPanel, "View F", false, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
-                    new View( "gView", gPanel, "View G", false, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
-                    new View( "hView", hPanel, "View H", false, null, requireIcon( "icons/ViewH.png" ), hToolbar )
+                    new View( "aView", aPanel, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ), aToolbar ),
+                    new View( "bView", bPanel, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ), bToolbar ),
+                    new View( "cView", cPanel, "View C", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewC.png" ), cToolbar ),
+                    new View( "dView", dPanel, "View D", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewD.png" ), dToolbar ),
+                    new View( "eView", ePanel, "View E", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewE.png" ), eToolbar ),
+                    new View( "fView", fPanel, "View F", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewF.png" ), fToolbar ),
+                    new View( "gView", gPanel, "View G", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewG.png" ), gToolbar ),
+                    new View( "hView", hPanel, "View H", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewH.png" ), hToolbar )
                 };
 
 
@@ -144,11 +146,12 @@ public class SimpleDockingExample
                 //
 
                 final String appName = "simple-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES, dockingTheme );
-                dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
+                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES, dockingTheme );
+                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
                 setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( SimpleDockingExample.class, "docking/simple-arrangement-default.xml" ) );
 
                 dockingGroup.addViews( views );
+                dockingGroup.setVisible( true );
 
             }
         } );

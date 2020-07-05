@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,15 @@
  */
 package com.metsci.glimpse.gl.util;
 
+import static com.metsci.glimpse.gl.util.GLErrorUtils.logGLError;
+import static com.metsci.glimpse.gl.util.GLErrorUtils.logGLErrors;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static javax.media.opengl.GL.GL_INVALID_ENUM;
+import static javax.media.opengl.GL.GL_NO_ERROR;
+import static javax.media.opengl.GL2ES1.GL_POINT_SPRITE;
+
+import java.util.logging.Logger;
+
 import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLCapabilities;
@@ -39,14 +48,65 @@ import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.support.atlas.TextureAtlas;
 import com.metsci.glimpse.support.settings.LookAndFeel;
 
 public class GLUtils
 {
-    // GLES1.GL_POINT_SPRITE shouldn't be necessary (it is deprecated in GL3)
+    private static final Logger logger = getLogger( GLUtils.class );
+
+    // GL2ES1.GL_POINT_SPRITE shouldn't be necessary (it is deprecated in GL3)
     // however it appears necessary in order for setting gl_PointSize in a vertex shader
     // to have an effect on certain cards/systems/gpus
     public static final boolean DISABLE_POINT_SPRITE = getBooleanProperty( "glimpse.disablePointSprite", false );
+
+    /**
+     * If the property "glimpse.disablePointSprite" is set to true, do nothing.
+     * <p>
+     * Otherwise, equivalent to {@code glEnable(GL_POINT_SPRITE)} -- but with some extra
+     * code to clear out {@code GL_INVALID_ENUM} errors without logging them. Some drivers
+     * complain that {@code GL_POINT_SPRITE} is an invalid enumerant, while still requiring
+     * that it be used.
+     */
+    public static void enablePointSprite( GL gl )
+    {
+        if ( !DISABLE_POINT_SPRITE )
+        {
+            logGLErrors( logger, gl, "GL error before enabling GL_POINT_SPRITE" );
+
+            gl.glEnable( GL_POINT_SPRITE );
+
+            int error = gl.glGetError( );
+            if ( error != GL_NO_ERROR && error != GL_INVALID_ENUM )
+            {
+                logGLError( logger, error, "GL error while enabling GL_POINT_SPRITE" );
+            }
+        }
+    }
+
+    /**
+     * If the property "glimpse.disablePointSprite" is set to true, do nothing.
+     * <p>
+     * Otherwise, equivalent to {@code glDisable(GL_POINT_SPRITE)} -- but with some extra
+     * code to clear out {@code GL_INVALID_ENUM} errors without logging them. Some drivers
+     * complain that {@code GL_POINT_SPRITE} is an invalid enumerant, while still requiring
+     * that it be used.
+     */
+    public static void disablePointSprite( GL gl )
+    {
+        if ( !DISABLE_POINT_SPRITE )
+        {
+            logGLErrors( logger, gl, "GL error before disabling GL_POINT_SPRITE" );
+
+            gl.glDisable( GL_POINT_SPRITE );
+
+            int error = gl.glGetError( );
+            if ( error != GL_NO_ERROR && error != GL_INVALID_ENUM )
+            {
+                logGLError( logger, error, "GL error while disabling GL_POINT_SPRITE" );
+            }
+        }
+    }
 
     // - unsetValue specifies the default value if the property is not set
     // - setting the property without specifying a value ("0", "1", "true", "false") sets
@@ -138,7 +198,15 @@ public class GLUtils
     }
 
     /**
-     * Enables blending, and set the blend func that gives the intuitive
+     * See {@link #enableStandardBlending(GL)}.
+     */
+    public static void enableStandardBlending( GlimpseContext context )
+    {
+        enableStandardBlending( context.getGL( ) );
+    }
+
+    /**
+     * Enable blending, and set the blend func that gives the intuitive
      * behavior for most situations.
      * <p>
      * Blended RGB will be the weighted average of source RGB and dest RGB:
@@ -158,6 +226,35 @@ public class GLUtils
     {
         gl.glBlendFuncSeparate( GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
         gl.glEnable( GL.GL_BLEND );
+    }
+
+    /**
+     * See {@link #enablePremultipliedAlphaBlending(GL)}.
+     */
+    public static void enablePremultipliedAlphaBlending( GlimpseContext context )
+    {
+        enablePremultipliedAlphaBlending( context.getGL( ) );
+    }
+
+    /**
+     * Enable blending, and set the blend func that is appropriate for drawing
+     * with premultiplied alpha.
+     * <p>
+     * This is recommended in situations where GL may interpolate between colors
+     * (e.g. when using {@link TextureAtlas}).
+     */
+    public static void enablePremultipliedAlphaBlending( GL gl )
+    {
+        gl.glBlendFunc( GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA );
+        gl.glEnable( GL.GL_BLEND );
+    }
+
+    /**
+     * See {@link #disableBlending(GL)}.
+     */
+    public static void disableBlending( GlimpseContext context )
+    {
+        disableBlending( context.getGL( ) );
     }
 
     public static void disableBlending( GL gl )

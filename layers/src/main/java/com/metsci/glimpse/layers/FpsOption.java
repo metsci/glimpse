@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.metsci.glimpse.layers;
+
+import static com.metsci.glimpse.util.GeneralUtils.doublesEqual;
 
 import java.util.Collection;
 
@@ -74,7 +76,7 @@ public class FpsOption implements GuiOption
         if ( o.getClass( ) != this.getClass( ) ) return false;
 
         FpsOption other = ( FpsOption ) o;
-        return ( Double.compare( other.fps, this.fps ) == 0 );
+        return doublesEqual( other.fps, this.fps );
     }
 
 }

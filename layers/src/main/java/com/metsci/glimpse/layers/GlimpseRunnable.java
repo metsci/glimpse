@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,9 @@ public interface GlimpseRunnable
 {
 
     /**
-     * Just like {@link GLRunnable#run(GLAutoDrawable)}, but takes a {@link GlimpseContext} instead of a {@link GLAutoDrawable}.
+     * Similar to {@link GLRunnable#run(GLAutoDrawable)}, but takes a {@link GlimpseContext}
+     * instead of a {@link GLAutoDrawable}, and does not return a value.
      */
-    boolean run( GlimpseContext context );
+    void run( GlimpseContext context );
 
 }

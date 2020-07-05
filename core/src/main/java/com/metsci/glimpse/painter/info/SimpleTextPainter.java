@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,28 @@ public class SimpleTextPainter extends GlimpsePainterBase
     public static enum VerticalPosition
     {
         Bottom, Center, Top;
+    }
+
+    public static double xAlign( HorizontalPosition hPos )
+    {
+        switch ( hPos )
+        {
+            case Left: return 0.0;
+            case Center: return 0.5;
+            case Right: return 1.0;
+            default: throw new RuntimeException( "Unrecognized HorizontalPosition: " + hPos );
+        }
+    }
+
+    public static double yAlign( VerticalPosition vPos )
+    {
+        switch ( vPos )
+        {
+            case Bottom: return 0.0;
+            case Center: return 0.5;
+            case Top: return 1.0;
+            default: throw new RuntimeException( "Unrecognized VerticalPosition: " + vPos );
+        }
     }
 
     protected float[] textColor = GlimpseColor.getWhite( );
@@ -296,13 +318,6 @@ public class SimpleTextPainter extends GlimpsePainterBase
             setBorderColor( laf.getColor( AbstractLookAndFeel.BORDER_COLOR ) );
             borderColorSet = false;
         }
-    }
-
-    @Override
-    public void dispose( GlimpseContext context )
-    {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = null;
     }
 
     public Rectangle2D getTextBounds( )
@@ -571,15 +586,16 @@ public class SimpleTextPainter extends GlimpsePainterBase
 
     protected void updateTextRenderer( )
     {
-        if ( textRenderer != null ) textRenderer.dispose( );
-        textRenderer = new TextRenderer( newFont, antialias, false );
-        newFont = null;
+        if ( this.textRenderer != null ) this.textRenderer.dispose( );
+        this.textRenderer = new TextRenderer( this.newFont, this.antialias, false );
+        this.newFont = null;
     }
 
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        this.textRenderer.dispose( );
+        if ( this.textRenderer != null ) this.textRenderer.dispose( );
+        this.textRenderer = null;
 
         this.lineProg.dispose( context.getGL( ).getGL3( ) );
         this.fillProg.dispose( context.getGL( ).getGL3( ) );

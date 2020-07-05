@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
  */
 package com.metsci.glimpse.plot.timeline.event.paint;
 
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Intersecting;
-import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.Overfull;
+import static com.metsci.glimpse.plot.timeline.event.Event.OverlapRenderingMode.*;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -719,15 +718,13 @@ public class DefaultEventPainter implements EventPainter
 
     public static float getBorderThickness( Event event, EventPlotInfo info, boolean isSelected )
     {
-        float borderThickness = event.getBorderThickness( );
-
         if ( isSelected )
         {
             return info.getEventSelectionHandler( ).getSelectedEventBorderThickness( );
         }
         else
         {
-            return borderThickness;
+            return event.isUseDefaultBorderThickness( ) ? info.getDefaultEventBorderThickness( ) : event.getBorderThickness( );
         }
     }
 }

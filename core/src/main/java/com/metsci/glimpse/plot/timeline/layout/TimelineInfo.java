@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@ import com.metsci.glimpse.axis.painter.TimeYAxisPainter;
 import com.metsci.glimpse.layout.GlimpseAxisLayout1D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutY;
+import com.metsci.glimpse.layout.GlimpseLayout;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.group.DelegatePainter;
 import com.metsci.glimpse.painter.info.SimpleTextPainter;
@@ -55,6 +56,16 @@ public class TimelineInfo extends PlotInfoWrapper
     protected SimpleTextPainter timeZonePainter;
     protected BorderPainter borderPainter;
 
+    /**
+     * General layout section, empty by default, used for adding additional information
+     * to the section of the timeline that aligns with the label layouts of the timeline rows.
+     */
+    protected GlimpseLayout labelLayout;
+
+    /**
+     * Default layout of the timeline sized to be identical to the size of the plot sections of
+     * the timeline rows.
+     */
     protected GlimpseAxisLayout1D timeLayout;
 
     protected StackedTimePlot2D plot;
@@ -105,12 +116,23 @@ public class TimelineInfo extends PlotInfoWrapper
     }
 
     /**
-     * The layout on which the time axis markings are painted. Painters may be added
-     * to this layout to draw additional decorations onto the time axis.
+     * The layout on which the time axis markings are painted. Aligns with the plot section of the timeline rows.
+     * <p>
+     * Painters may be added to this layout to draw additional decorations onto the time axis.
      */
     public GlimpseAxisLayout1D getTimelineLayout( )
     {
         return this.timeLayout;
+    }
+
+    /**
+     * The layout which aligns to the label section of the timeline rows.
+     * <p>
+     * Painters may be added to this layout to draw additional decorations onto the label section of the time axis.
+     */
+    public GlimpseLayout getLabelLayout( )
+    {
+        return this.labelLayout;
     }
 
     public void setTimeAxisPainter( TimeAxisPainter painter )
@@ -144,6 +166,8 @@ public class TimelineInfo extends PlotInfoWrapper
 
     protected void initialize( )
     {
+        labelLayout = new GlimpseLayout( info.getLayout( ) );
+
         info.setPlotSpacing( 0 );
 
         if ( plot.isTimeAxisHorizontal( ) )
@@ -230,11 +254,13 @@ public class TimelineInfo extends PlotInfoWrapper
         // push the timeline plot over so that it lines up with the plot labels
         if ( plot.isTimeAxisHorizontal( ) )
         {
-            timeLayout.setLayoutData( String.format( "push x, grow x, gapleft %d!", plot.getOverlayLayoutOffsetX( ) ) );
+            labelLayout.setLayoutData( String.format( "width %d!", plot.getOverlayLayoutOffsetX( ) ) );
+            timeLayout.setLayoutData( String.format( "push x, grow x" ) );
         }
         else
         {
-            timeLayout.setLayoutData( String.format( "push y, grow y, gaptop %d!", plot.getOverlayLayoutOffsetY2( ) ) );
+            labelLayout.setLayoutData( String.format( "height %d!, wrap", plot.getOverlayLayoutOffsetY2( ) ) );
+            timeLayout.setLayoutData( String.format( "push y, grow y" ) );
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.docking;
 
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
+
 import java.awt.Component;
 
 import javax.swing.Icon;
@@ -39,40 +42,60 @@ public class View
     public final String viewId;
     public final Var<Component> component;
     public final Var<String> title;
-    public final boolean closeable;
+    public final ViewCloseOption closeOption;
     public final Var<String> tooltip;
     public final Var<Icon> icon;
     public final JToolBar toolbar;
+
 
     public View( String viewId, Component component, String title )
     {
         this( viewId, component, title, false, null, null, null );
     }
 
-    public View( String viewId, Component component, String title, boolean closeable )
+    public View( String viewId, Component component, String title, boolean autoCloseable )
     {
-        this( viewId, component, title, closeable, null, null, null );
+        this( viewId, component, title, autoCloseable, null, null, null );
     }
 
-    public View( String viewId, Component component, String title, boolean closeable, String tooltip )
+    public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip )
     {
-        this( viewId, component, title, closeable, tooltip, null, null );
+        this( viewId, component, title, autoCloseable, tooltip, null, null );
     }
 
-    public View( String viewId, Component component, String title, boolean closeable, String tooltip, Icon icon )
+    public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, Icon icon )
     {
-        this( viewId, component, title, closeable, tooltip, icon, null );
+        this( viewId, component, title, autoCloseable, tooltip, icon, null );
     }
 
-    public View( String viewId, Component component, String title, boolean closeable, String tooltip, Icon icon, JToolBar toolbar )
+    public View( String viewId, Component component, String title, boolean autoCloseable, String tooltip, Icon icon, JToolBar toolbar )
+    {
+        this( viewId, component, title, ( autoCloseable ? VIEW_AUTO_CLOSEABLE : VIEW_NOT_CLOSEABLE ), tooltip, icon, toolbar );
+    }
+
+    public View( String viewId, Component component, String title, ViewCloseOption closeOption )
+    {
+        this( viewId, component, title, closeOption, null, null, null );
+    }
+
+    public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip )
+    {
+        this( viewId, component, title, closeOption, tooltip, null, null );
+    }
+
+    public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip, Icon icon )
+    {
+        this( viewId, component, title, closeOption, tooltip, icon, null );
+    }
+
+    public View( String viewId, Component component, String title, ViewCloseOption closeOption, String tooltip, Icon icon, JToolBar toolbar )
     {
         this.viewId = viewId;
         this.component = new Var<>( component );
         this.title = new Var<>( title );
-        this.closeable = closeable;
+        this.closeOption = closeOption;
         this.tooltip = new Var<>( tooltip );
         this.icon = new Var<>( icon );
         this.toolbar = toolbar;
     }
-
 }

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Metron, Inc.
+// Copyright (c) 2019, Metron, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -27,16 +27,28 @@
 
 #version 150
 
-vec2 axisMin( vec4 axisRect )
+
+vec2 rectMin( vec4 rect )
 {
     // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
-    return axisRect.xz;
+    return rect.xz;
 }
 
-vec2 axisMax( vec4 axisRect )
+vec2 rectMax( vec4 rect )
 {
     // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
-    return axisRect.yw;
+    return rect.yw;
+}
+
+vec2 rectSize( vec4 rect )
+{
+    return ( rectMax( rect ) - rectMin( rect ) );
+}
+
+vec2 axisXyToNdc( vec2 xy_AXIS, vec4 axisRect )
+{
+    vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
+    return ( -1.0 + 2.0*xy_FRAC );
 }
 
 float near( vec2 nearFar )
@@ -51,24 +63,24 @@ float far( vec2 nearFar )
     return nearFar.y;
 }
 
-vec2 axisSize( vec4 axisRect )
+float axisZToNdc( float z_AXIS, vec2 axisNearFar )
 {
-    return ( axisMax( axisRect ) - axisMin( axisRect ) );
+    float near = near( axisNearFar );
+    float far = far( axisNearFar );
+    return ( z_AXIS - near ) / ( far - near );
 }
 
-vec4 axisXyToNdc( vec3 xy_AXIS, vec4 axisRect, vec2 nearFar )
-{
-    vec2 xy_FRAC = ( xy_AXIS.xy - axisMin( axisRect ) ) / axisSize( axisRect );
-    float z_FRAC = ( xy_AXIS.z - near( nearFar ) ) / ( far( nearFar ) - near( nearFar ) );
-    return vec4( 2 * xy_FRAC - 1, z_FRAC, 1.0 );
-}
 
 uniform vec4 AXIS_RECT;
 uniform vec2 NEAR_FAR;
 
-in vec3 inXy;
+
+in vec3 inXyz;
+
 
 void main( )
 {
-      gl_Position = axisXyToNdc( inXy, AXIS_RECT, NEAR_FAR );
+    vec3 xyz_AXIS = inXyz;
+    gl_Position.xy = axisXyToNdc( xyz_AXIS.xy, AXIS_RECT );
+    gl_Position.z = axisZToNdc( xyz_AXIS.z, NEAR_FAR );
 }

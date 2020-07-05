@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static java.util.Arrays.*;
+import static java.util.Arrays.asList;
 
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -58,12 +58,12 @@ public class ListenableGroup<T> implements Listenable<T>
     @Override
     public Disposable addListener( boolean runImmediately, Consumer<T> listener )
     {
-        DisposableGroup bindings = new DisposableGroup( );
+        DisposableGroup disposables = new DisposableGroup( );
         for ( Listenable<T> member : this.members )
         {
-            bindings.add( member.addListener( runImmediately, listener ) );
+            disposables.add( member.addListener( runImmediately, listener ) );
         }
-        return bindings;
+        return disposables;
     }
 
 }

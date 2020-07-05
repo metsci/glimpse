@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,10 @@
 package com.metsci.glimpse.support;
 
 import static com.google.common.base.Objects.equal;
+import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.support.DisposableUtils.onWindowClosing;
 import static com.metsci.glimpse.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.util.GeneralUtils.array;
-import static javax.media.opengl.GLProfile.GL3bc;
 import static javax.swing.JOptionPane.VALUE_PROPERTY;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
@@ -45,7 +45,11 @@ import javax.media.opengl.GLProfile;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
@@ -55,6 +59,7 @@ import com.metsci.glimpse.painter.base.GlimpsePainter;
 import com.metsci.glimpse.painter.decoration.BorderPainter;
 import com.metsci.glimpse.painter.decoration.CrosshairPainter;
 import com.metsci.glimpse.painter.decoration.GridPainter;
+import com.metsci.glimpse.platformFixes.PlatformFixes;
 import com.metsci.glimpse.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
@@ -75,6 +80,32 @@ import com.metsci.glimpse.support.swing.SwingEDTAnimator;
  */
 public class QuickUtils
 {
+
+    /**
+     * Performs several init operations that are desirable for most Glimpse applications:
+     * <ul>
+     * <li>{@link PlatformFixes#fixPlatformQuirks()}
+     * <li>Use heavyweight popup menus, which are visible over top of glimpse canvases
+     * <li>Show tooltips reliably, even if the focus manager gets confused by a glimpse canvas
+     * </ul>
+     * <p>
+     * This method is for convenience only. It is perfectly acceptable for an application
+     * to perform some or all of these init operations piecemeal, instead of calling this
+     * method.
+     * <p>
+     * <strong>NOTE:</strong> This method should be called near the beginning of main,
+     * after the Swing {@link LookAndFeel} has been set, but before any UI components get
+     * created.
+     */
+    public static void initStandardGlimpseApp( )
+    {
+        fixPlatformQuirks( );
+
+        ToolTipManager.sharedInstance( ).setLightWeightPopupEnabled( false );
+        JPopupMenu.setDefaultLightWeightPopupEnabled( false );
+
+        UIManager.put( "ToolTipManager.enableToolTipMode", "allWindows" );
+    }
 
     public static void requireSwingThread( )
     {
@@ -149,17 +180,49 @@ public class QuickUtils
         return plot;
     }
 
-    public static void quickGlimpseWindow( String progName, String glProfile, double screenFrac, GlimpseLayout layout )
+    /**
+     * Similar to {@link #quickGlimpseWindow(String, String, double, GlimpseLayout)},
+     * but with behavior suitable for a single-window application. In particular, starts
+     * by calling {@link #initStandardGlimpseApp()}, and warns the user if the named
+     * {@link GLProfile} is not available.
+     * <p>
+     * <strong>NOTE:</strong> If the named {@link GLProfile} is not available, and the
+     * user chooses to quit rather than continue, this method calls {@link System#exit(int)}!
+     */
+    public static void quickGlimpseApp( String appName, String glProfileName, double screenFrac, GlimpseLayout layout )
+    {
+        initStandardGlimpseApp( );
+
+        GLProfile glProfile = glProfileOrNull( glProfileName );
+        if ( glProfile == null && !showGLWarningDialog( appName ) )
+        {
+            System.exit( 1 );
+        }
+
+        quickGlimpseWindow( appName, glProfile, screenFrac, layout );
+    }
+
+    /**
+     * See {@link #quickGlimpseWindow(String, GLProfile, double, GlimpseLayout)}.
+     * <p>
+     * <strong>NOTE:</strong> Throws a runtime exception if the named {@link GLProfile}
+     * is not available.
+     */
+    public static void quickGlimpseWindow( String title, String glProfileName, double screenFrac, GlimpseLayout layout )
+    {
+        quickGlimpseWindow( title, GLProfile.get( glProfileName ), screenFrac, layout );
+    }
+
+    /**
+     * Creates and shows a new window displaying the specified {@code layout}.
+     * <p>
+     * <strong>NOTE:</strong> Must be called on the Swing EDT.
+     */
+    public static void quickGlimpseWindow( String title, GLProfile glProfile, double screenFrac, GlimpseLayout layout )
     {
         requireSwingThread( );
 
-        GLProfile profile = glProfileOrNull( GL3bc );
-        if ( glProfile == null && !showGLWarningDialog( progName ) )
-        {
-            return;
-        }
-
-        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( profile );
+        NewtSwingEDTGlimpseCanvas canvas = new NewtSwingEDTGlimpseCanvas( glProfile );
         canvas.addLayout( layout );
 
         GLAnimatorControl animator = new SwingEDTAnimator( 60 );
@@ -167,7 +230,7 @@ public class QuickUtils
         animator.start( );
 
         JFrame frame = new JFrame( );
-        frame.setTitle( progName );
+        frame.setTitle( title );
         frame.getContentPane( ).add( canvas );
         frame.setSize( screenFracSize( screenFrac ) );
         frame.setLocationRelativeTo( null );

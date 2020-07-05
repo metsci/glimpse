@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.metsci.glimpse.examples.timeline;
+
+import javax.swing.SwingUtilities;
 
 import com.metsci.glimpse.axis.Axis1D;
 import com.metsci.glimpse.axis.painter.label.time.RelativeTimeAxisLabelHandler;
@@ -82,7 +84,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
             {
                 while ( true )
                 {
-                    handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) );
+                    SwingUtilities.invokeLater( ( ) -> handler.setReferenceTime( handler.getReferenceTime( ).add( Time.fromSeconds( 10 ) ) ) );
                     try
                     {
                         Thread.sleep( 10 );

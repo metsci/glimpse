@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@ public enum StandardViewOption implements ViewOption
 {
 
     HIDE_CLOSE_BUTTON,
+    REQUEST_CLOSE_BUTTON,
     HIDE_CLONE_BUTTON,
     HIDE_FACETS_MENU;
 

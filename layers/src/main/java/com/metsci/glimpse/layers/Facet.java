@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,33 @@ public abstract class Facet
     protected Facet( )
     {
         this.isVisible = new Var<>( true, notNull );
+    }
+
+    /**
+     * Captures and returns the current state of this {@link Facet}, in a form that can be stored
+     * (e.g. while the {@link Facet} gets disposed and a replacement {@link Facet} gets created),
+     * and then possibly re-applied later to a new {@link Facet}.
+     */
+    public FacetState state( )
+    {
+        return new FacetState( this.isVisible.v( ) );
+    }
+
+    /**
+     * Sets this {@link Facet}'s internal state to match a previously captured state.
+     * <p>
+     * The {@code state} arg will typically have been created by this {@link Facet}'s own
+     * {@link Facet#state()} method, but this is NOT guaranteed -- if an overriding implementation
+     * of this method expects {@code state} to satisfy some condition (e.g. be of a particular {@link FacetState}
+     * subclass), it MUST CHECK. In particular, {@code state} could conceivably have been deserialized
+     * from long-term storage, and may therefore have been created by an older version of the code.
+     * <p>
+     * The {@code state} arg will never be null -- if there is no state to apply, this method will
+     * not be called.
+     */
+    public void applyState( FacetState state )
+    {
+        this.isVisible.set( state.isVisible );
     }
 
     /**

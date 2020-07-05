@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -214,6 +214,11 @@ public class GLEditableBuffer
     public void grow4f( float a, float b, float c, float d )
     {
         this.growFloats( 4 ).put( a ).put( b ).put( c ).put( d );
+    }
+
+    public void grow6f( float a, float b, float c, float d, float e, float f )
+    {
+        this.growFloats( 6 ).put( a ).put( b ).put( c ).put( d ).put( e ).put( f );
     }
 
     public void growNfv( float[] array, int offset, int length )

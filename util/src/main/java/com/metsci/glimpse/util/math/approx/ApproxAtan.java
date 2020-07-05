@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,10 @@ public class ApproxAtan
         double w = ( b - (-1.0) ) * this.oneOverBStep;
 
         int iBefore = ( int ) w;
+        if( iBefore + 1 == this.n ) {
+            // handle edge case where steps is the last edge
+            return +HALF_PI;
+        }
         double vBefore = this.v[ iBefore ];
         double vAfter = this.v[ iBefore + 1 ];
         double bFrac = w - iBefore;

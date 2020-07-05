@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,22 +106,18 @@ public class SortedFloatsArithmetic implements SortedFloats
     @Override
     public void copyTo( int i, float[] dest, int iDest, int c )
     {
-        float v = v0 + i * vStep;
         for ( int j = 0; j < c; j++ )
         {
-            dest[iDest + j] = v;
-            v += vStep;
+            dest[ iDest + j ] = v( i + j );
         }
     }
 
     @Override
     public void copyTo( int i, FloatBuffer dest, int c )
     {
-        float v = v0 + i * vStep;
         for ( int j = 0; j < c; j++ )
         {
-            dest.put( v );
-            v += vStep;
+            dest.put( v( i + j ) );
         }
     }
 

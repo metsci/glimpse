@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Metron, Inc.
+// Copyright (c) 2019, Metron, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 
 uniform float FEATHER_THICKNESS_PX;
 
-in vec4 vRgba;
-in float vSize;
+in vec4 gRgba;
+in float gSize_PX;
 
 out vec4 outRgba;
 
@@ -40,18 +40,18 @@ void main( )
   vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
 
   // distance from center in pixels (squared)
-	float distance_PX = dot(circCoord, circCoord) * vSize;
+	float distance_PX = dot(circCoord, circCoord) * gSize_PX;
 
-	if ( distance_PX <= vSize - FEATHER_THICKNESS_PX  )
+	if ( distance_PX <= gSize_PX - FEATHER_THICKNESS_PX  )
 	{
-		outRgba.rgba = vRgba.rgba;
+		outRgba.rgba = gRgba.rgba;
 	}
 	else
 	{
-		float frac = ( vSize - distance_PX ) / FEATHER_THICKNESS_PX;
+		float frac = ( gSize_PX - distance_PX ) / FEATHER_THICKNESS_PX;
 		frac = clamp( frac, 0, 1 );
 
-		outRgba.rgb = vRgba.rgb;
-		outRgba.a = vRgba.a * frac;
+		outRgba.rgb = gRgba.rgb;
+		outRgba.a = gRgba.a * frac;
 	}
 }

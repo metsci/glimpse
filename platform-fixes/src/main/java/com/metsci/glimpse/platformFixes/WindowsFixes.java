@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,9 @@ public class WindowsFixes
 
     private static LibraryList getLibs( )
     {
-        if ( onPlatform( "win", "amd64" ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "libgcc_s_seh-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
-        if ( onPlatform( "win", "x86" ) ) return new LibraryList( "platformFixes/windows32", "libwinpthread-1.dll", "libgcc_s_dw2-1.dll", "libstdc++-6.dll", "windowsFixes.dll" );
+        if ( onPlatform( "win", "amd64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
+        if ( onPlatform( "win", "x86_64" ) ) return new LibraryList( "platformFixes/windows64", "windowsFixes.dll" );
+        if ( onPlatform( "win", "x86" ) ) return new LibraryList( "platformFixes/windows32", "windowsFixes.dll" );
         return null;
     }
 

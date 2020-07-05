@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -172,6 +172,38 @@ public class Angle
         radians = normalizeAngleTwoPi( radians );
 
         return ( radians > Math.PI ) ? ( radians - twoPi ) : radians;
+    }
+
+    /**
+     * Takes two angles and normalizes {@code angle2} such that it is greater
+     * than or equal to {@code angle1 - Math.PI}.
+     */
+    public static double unwrap( double angle1, double angle2 )
+    {
+        while ( angle2 - angle1 < -Math.PI )
+        {
+            angle2 += twoPi;
+        }
+
+        return angle2;
+    }
+
+    /**
+     * Takes a series of angles and normalizes each one such that it is
+     * greater than or equal to the prior minus {@code Math.PI}.
+     *
+     * @return a copy of the input array with no wrapping angles
+     */
+    public static double[] unwrap( double... angles )
+    {
+        angles = angles.clone();
+        angles[0] = normalizeAnglePi( angles[0] );
+        for ( int i = 1; i < angles.length; i++ )
+        {
+            angles[i] = unwrap( angles[i - 1], angles[i] );
+        }
+
+        return angles;
     }
 
     private static double[] multiply( double[] array, double factor )

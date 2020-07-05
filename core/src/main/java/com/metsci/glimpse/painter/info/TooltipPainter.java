@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -494,10 +494,11 @@ public class TooltipPainter extends SimpleTextPainter
             // draw text
             if ( lines != null && textRenderer != null )
             {
-                GlimpseColor.setColor( textRenderer, textColor );
                 textRenderer.beginRendering( width, height );
                 try
                 {
+                    GlimpseColor.setColor( textRenderer, textColor );
+
                     double posX = x + iconSize + borderSize;
 
                     if ( iconIds != null && !iconIds.isEmpty( ) )

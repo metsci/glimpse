@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@ import static javax.media.opengl.GL.GL_FLOAT;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -57,8 +56,6 @@ import com.metsci.glimpse.gl.texture.DrawableTextureProgram;
  */
 public class ColorMapProgram extends GlimpseShaderProgram implements AxisListener1D, DrawableTextureProgram
 {
-    private static final Logger logger = Logger.getLogger( ColorMapProgram.class.getName( ) );
-
     protected GLUniformData dataMin;
     protected GLUniformData dataMax;
 

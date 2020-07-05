@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  */
 package com.metsci.glimpse.painter.track;
 
-import static com.metsci.glimpse.support.shader.line.LinePathData.*;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_CONNECT;
+import static com.metsci.glimpse.support.shader.line.LinePathData.FLAGS_JOIN;
+import static com.metsci.glimpse.support.wrapped.WrappedGlimpseContext.getWrapper2D;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -72,6 +74,7 @@ import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.line.LineUtils;
 import com.metsci.glimpse.support.shader.point.PointArrayColorSizeProgram;
 import com.metsci.glimpse.support.shader.point.PointFlatColorProgram;
+import com.metsci.glimpse.support.wrapped.Wrapper2D;
 import com.metsci.glimpse.util.quadtree.QuadTreeXys;
 
 /**
@@ -1076,6 +1079,7 @@ public class TrackPainter extends GlimpsePainterBase
         GL3 gl = context.getGL( ).getGL3( );
         GlimpseBounds bounds = getBounds( context );
         Axis2D axis = requireAxis2D( context );
+        Wrapper2D wrapper = getWrapper2D( context );
         double newPpvAspectRatio = LineUtils.ppvAspectRatio( axis );
         boolean keepPpvAspectRatio = ( newPpvAspectRatio / ppvAspectRatioThreshold <= this.ppvAspectRatio && this.ppvAspectRatio <= newPpvAspectRatio * ppvAspectRatioThreshold );
 
@@ -1152,7 +1156,7 @@ public class TrackPainter extends GlimpsePainterBase
                 this.trackUpdateLock.unlock( );
             }
 
-            GLErrorUtils.logGLError( logger, gl, "TrackPainter Error" );
+            GLErrorUtils.logGLErrors( logger, gl, "TrackPainter Error" );
         }
 
         if ( loadedTracks.isEmpty( ) ) return;
@@ -1166,6 +1170,7 @@ public class TrackPainter extends GlimpsePainterBase
             try
             {
                 lineProg.setAxisOrtho( gl, axis );
+                lineProg.setWrapper( gl, wrapper );
                 lineProg.setViewport( gl, bounds );
 
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
@@ -1188,6 +1193,8 @@ public class TrackPainter extends GlimpsePainterBase
             try
             {
                 pointFlatProg.setAxisOrtho( gl, axis );
+                pointFlatProg.setWrapper( gl, wrapper );
+                pointFlatProg.setViewport( gl, bounds );
                 pointFlatProg.setFeatherThickness( gl, 1.0f );
 
                 for ( LoadedTrack loaded : loadedTracks.values( ) )
@@ -1211,6 +1218,9 @@ public class TrackPainter extends GlimpsePainterBase
             try
             {
                 pointArrayProg.setAxisOrtho( gl, axis );
+                pointArrayProg.setWrapper( gl, wrapper );
+                pointArrayProg.setViewport( gl, bounds );
+                pointArrayProg.setFeatherThickness( gl, 1.0f );
 
                 pointXy.clear( );
                 pointColor.clear( );
@@ -1389,7 +1399,7 @@ public class TrackPainter extends GlimpsePainterBase
         this.trackUpdateLock.lock( );
         try
         {
-            for ( LoadedTrack track : loadedTracks.values( ) )
+            for ( LoadedTrack track : this.loadedTracks.values( ) )
             {
                 track.dispose( gl );
             }
@@ -1399,10 +1409,10 @@ public class TrackPainter extends GlimpsePainterBase
             this.trackUpdateLock.unlock( );
         }
 
-        if ( fontRenderer != null )
+        if ( this.fontRenderer != null )
         {
-            fontRenderer.dispose( );
-            fontRenderer = null;
+            this.fontRenderer.dispose( );
+            this.fontRenderer = null;
         }
 
         GL3 gl3 = gl.getGL3( );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@ public class Length
     public static final double nauticalMilesToFeet = nauticalMilesToMeters / feetToMeters;
     public static final double nauticalMilesToYards = nauticalMilesToMeters / yardsToMeters;
     public static final double nauticalMilesToKiloyards = nauticalMilesToMeters / kiloyardsToMeters;
+    public static final double nauticalMilesToKilometers = nauticalMilesToMeters * metersToKilometers;
     public static final double inchesToMillimeters = feetToMeters * metersToMillimeters / feetToInches;
     public static final double metersToInches = feetToInches / feetToMeters;
     public static final double feetToMillimeters = feetToMeters * metersToMillimeters;
@@ -68,6 +69,7 @@ public class Length
     public static final double feetToNauticalMiles = 1.0 / nauticalMilesToFeet;
     public static final double yardsToNauticalMiles = 1.0 / nauticalMilesToYards;
     public static final double kiloyardsToNauticalMiles = 1.0 / nauticalMilesToKiloyards;
+    public static final double kilometersToNauticalMiles = 1.0 / nauticalMilesToKilometers;
     public static final double millimetersToInches = 1.0 / inchesToMillimeters;
     public static final double inchesToMeters = 1.0 / metersToInches;
     public static final double millimetersToFeet = 1.0 / feetToMillimeters;
@@ -104,6 +106,38 @@ public class Length
     public static double[] nauticalMilesToMeters( double... lengths_NAUTICAL_MILES )
     {
         return multiply( lengths_NAUTICAL_MILES, nauticalMilesToMeters );
+    }
+
+    /**
+     * Converts length from kilometers to nautical-miles.
+     */
+    public static double kilometersToNauticalMiles( double length_KILOMETERS )
+    {
+        return length_KILOMETERS * kilometersToNauticalMiles;
+    }
+
+    /**
+     * Converts length from kilometers to nautical-miles.
+     */
+    public static double[] kilometersToNauticalMiles( double... lengths_KILOMETERS )
+    {
+        return multiply( lengths_KILOMETERS, kilometersToNauticalMiles );
+    }
+
+    /**
+     * Converts length from nautical-miles to kilometers.
+     */
+    public static double nauticalMilesToKilometers( double length_NAUTICAL_MILES )
+    {
+        return length_NAUTICAL_MILES * nauticalMilesToKilometers;
+    }
+
+    /**
+     * Converts length from nautical-miles to kilometers.
+     */
+    public static double[] nauticalMilesToKilometers( double... lengths_NAUTICAL_MILES )
+    {
+        return multiply( lengths_NAUTICAL_MILES, nauticalMilesToKilometers );
     }
 
     /**

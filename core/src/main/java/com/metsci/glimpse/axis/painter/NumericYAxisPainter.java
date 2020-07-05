@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -190,18 +190,21 @@ public class NumericYAxisPainter extends NumericLabelHandlerAxisPainter
                 GlimpseColor.setColor( textRenderer, axisLabelColor );
 
                 String label = ticks.getAxisLabel( axis );
-                Rectangle2D labelSize = textRenderer.getBounds( label );
-                int iAxisLabel = getAxisLabelPositionX( width, ( int ) labelSize.getHeight( ) );
-                int jAxisLabel = round( 0.5f * ( height - ( int ) labelSize.getWidth( ) ) );
+                if ( label != null )
+                {
+                    Rectangle2D labelSize = textRenderer.getBounds( label );
+                    int iAxisLabel = getAxisLabelPositionX( width, ( int ) labelSize.getHeight( ) );
+                    int jAxisLabel = round( 0.5f * ( height - ( int ) labelSize.getWidth( ) ) );
 
-                transformMatrix.loadIdentity( );
-                transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
-                transformMatrix.translate( iAxisLabel, jAxisLabel, 0 );
-                transformMatrix.rotate( PI_2, 0, 0, 1.0f );
+                    transformMatrix.loadIdentity( );
+                    transformMatrix.makeOrtho( 0, width, 0, height, -1, 1 );
+                    transformMatrix.translate( iAxisLabel, jAxisLabel, 0 );
+                    transformMatrix.rotate( PI_2, 0, 0, 1.0f );
 
-                textRenderer.setTransform( transformMatrix.getMatrix( ) );
+                    textRenderer.setTransform( transformMatrix.getMatrix( ) );
 
-                textRenderer.draw3D( label, 0, 0, 0, 1.0f );
+                    textRenderer.draw3D( label, 0, 0, 0, 1.0f );
+                }
             }
             finally
             {

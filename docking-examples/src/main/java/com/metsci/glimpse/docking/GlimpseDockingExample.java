@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,13 +27,14 @@
 package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingFrameCloseOperation.DISPOSE_ALL_FRAMES;
-import static com.metsci.glimpse.docking.DockingFrameTitlers.createDefaultFrameTitler;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.docking.DockingUtils.resourceUrl;
 import static com.metsci.glimpse.docking.DockingUtils.setArrangementAndSaveOnDispose;
 import static com.metsci.glimpse.docking.DockingUtils.swingRun;
+import static com.metsci.glimpse.docking.DockingWindowTitlers.createDefaultWindowTitler;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_NOT_CLOSEABLE;
 import static com.metsci.glimpse.gl.util.GLUtils.newOffscreenDrawable;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.support.QuickUtils.tearDownCanvas;
 import static com.metsci.glimpse.support.colormap.ColorGradients.greenBone;
 import static com.metsci.glimpse.support.colormap.ColorGradients.jet;
@@ -41,6 +42,7 @@ import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 
 import javax.media.opengl.GLOffscreenAutoDrawable;
 
+import com.metsci.glimpse.docking.group.frame.DockingGroupMultiframe;
 import com.metsci.glimpse.examples.heatmap.TaggedHeatMapExample;
 import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
 import com.metsci.glimpse.support.swing.SwingEDTAnimator;
@@ -50,8 +52,8 @@ public class GlimpseDockingExample
 
     public static void main( String[] args ) throws Exception
     {
-        fixPlatformQuirks( );
         initTinyLaf( );
+        initStandardGlimpseApp( );
 
         // Initialize the GUI on the Swing thread, to avoid graphics-driver coredumps on shutdown
         swingRun( new Runnable( )
@@ -82,8 +84,8 @@ public class GlimpseDockingExample
 
                 View[] views =
                 {
-                    new View( "aView", aCanvas, "View A", false, null, requireIcon( "icons/ViewA.png" ) ),
-                    new View( "bView", bCanvas, "View B", false, null, requireIcon( "icons/ViewB.png" ) )
+                    new View( "aView", aCanvas, "View A", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewA.png" ) ),
+                    new View( "bView", bCanvas, "View B", VIEW_NOT_CLOSEABLE, null, requireIcon( "icons/ViewB.png" ) )
                 };
 
 
@@ -91,14 +93,14 @@ public class GlimpseDockingExample
                 //
 
                 final String appName = "glimpse-docking-example";
-                final DockingGroup dockingGroup = new DockingGroup( DISPOSE_ALL_FRAMES );
-                dockingGroup.addListener( createDefaultFrameTitler( "Docking Example" ) );
+                final DockingGroup dockingGroup = new DockingGroupMultiframe( DISPOSE_ALL_FRAMES );
+                dockingGroup.addListener( createDefaultWindowTitler( "Docking Example" ) );
                 setArrangementAndSaveOnDispose( dockingGroup, appName, resourceUrl( GlimpseDockingExample.class, "docking/glimpse-arrangement-default.xml" ) );
 
                 dockingGroup.addListener( new DockingGroupAdapter( )
                 {
                     @Override
-                    public void disposingAllFrames( DockingGroup group )
+                    public void disposingAllWindows( DockingGroup group )
                     {
                         glAnimator.stop( );
                         tearDownCanvas( aCanvas );
@@ -107,6 +109,7 @@ public class GlimpseDockingExample
                 } );
 
                 dockingGroup.addViews( views );
+                dockingGroup.setVisible( true );
 
             }
         } );

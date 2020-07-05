@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ public class ErrorTablePanel<K> extends JPanel
                 int row = rowAtPoint( event.getPoint( ) );
                 row = convertRowIndexToModel( row );
                 WizardError error = model.getError( row );
-            
+
                 if ( error != null )
                 {
                     return error.getDescription( );
@@ -84,8 +84,9 @@ public class ErrorTablePanel<K> extends JPanel
                 }
             }
         };
-        
+
         this.table.setDefaultRenderer( WizardError.class, new ErrorTableCellRenderer( ) );
+
         this.scroll = new JScrollPane( this.table );
 
         this.table.getColumnModel( ).getColumn( 0 ).setMinWidth( 300 );

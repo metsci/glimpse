@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Metron, Inc.
+// Copyright (c) 2019, Metron, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,11 @@
 #version 150
 
 layout( lines_adjacency ) in;
-layout( triangle_strip, max_vertices = 18 ) out;
+
+// A single line segment takes 18 vertices, but with duplication for wrapping,
+// it can take arbitrarily many ... in practice we almost never need more than
+// four copies of a segment, so use max_vertices = 4*18 = 72
+layout( triangle_strip, max_vertices = 72 ) out;
 
 
 // Bit mask for whether to draw the line segment to the vertex in
@@ -45,7 +49,39 @@ vec4 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
     return vec4( -1.0 + 2.0*xy_FRAC, 0.0, 1.0 );
 }
 
+vec2 rectMin( vec4 rect )
+{
+    // Swizzle (xMin, yMin) out of (xMin, xMax, yMin, yMax)
+    return rect.xz;
+}
 
+vec2 rectMax( vec4 rect )
+{
+    // Swizzle (xMax, yMax) out of (xMin, xMax, yMin, yMax)
+    return rect.yw;
+}
+
+vec2 rectSize( vec4 rect )
+{
+    return ( rectMax( rect ) - rectMin( rect ) );
+}
+
+vec2 axisXyToPx( vec2 xy_AXIS, vec4 axisRect, vec2 viewportSize_PX )
+{
+    vec2 xy_FRAC = ( xy_AXIS - rectMin( axisRect ) ) / rectSize( axisRect );
+    return ( xy_FRAC * viewportSize_PX );
+}
+
+float wrapValue( float value, float wrapMin, float wrapSpan )
+{
+    float wrapCount = floor( ( value - wrapMin ) / wrapSpan );
+    return ( value - ( wrapCount * wrapSpan ) );
+}
+
+
+// RECT uniforms are (xMin, xMax, yMin, yMax)
+uniform vec4 AXIS_RECT;
+uniform vec4 WRAP_RECT;
 uniform vec2 VIEWPORT_SIZE_PX;
 uniform float LINE_THICKNESS_PX;
 
@@ -282,150 +318,235 @@ void main( )
             float mileageB_PX = vMileage_PX[ 1 ];
 
 
-            // Emit triangle-strip for line interior
+            // Compute render-shift values for wrapping
             //
 
-            gFeatherAlpha = 1.0;
+            vec2 wrapMin_PX = axisXyToPx( rectMin( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
+            vec2 wrapMax_PX = axisXyToPx( rectMax( WRAP_RECT ), AXIS_RECT, VIEWPORT_SIZE_PX );
+            vec2 wrapSpan_PX = wrapMax_PX - wrapMin_PX;
 
-            if ( joinB )
+            float xShiftFirst_PX;
+            float xShiftStep_PX;
+            int xShiftCount;
+            if ( isinf( wrapSpan_PX.x ) )
             {
-                gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
-                EmitVertex( );
+                xShiftFirst_PX = 0.0;
+                xShiftStep_PX = 0.0;
+                xShiftCount = 1;
+            }
+            else
+            {
+                float xMin_PX = outerJoinB_PX.x;
+                xMin_PX = min( xMin_PX, outerBelowB_PX.x );
+                xMin_PX = min( xMin_PX, outerBelowC_PX.x );
+                xMin_PX = min( xMin_PX, outerAboveC_PX.x );
+                xMin_PX = min( xMin_PX, outerAboveB_PX.x );
+                xMin_PX = min( xMin_PX, outerJoinC_PX.x );
+
+                float xMax_PX = outerJoinB_PX.x;
+                xMax_PX = max( xMax_PX, outerBelowB_PX.x );
+                xMax_PX = max( xMax_PX, outerBelowC_PX.x );
+                xMax_PX = max( xMax_PX, outerAboveC_PX.x );
+                xMax_PX = max( xMax_PX, outerAboveB_PX.x );
+                xMax_PX = max( xMax_PX, outerJoinC_PX.x );
+
+                xShiftFirst_PX = wrapValue( xMin_PX, wrapMin_PX.x, wrapSpan_PX.x ) - xMin_PX;
+                xShiftStep_PX = wrapSpan_PX.x;
+                float xShiftCount0 = ceil( ( ( xMax_PX + xShiftFirst_PX ) - wrapMin_PX.x ) / xShiftStep_PX );
+                xShiftCount = max( 0, int( xShiftCount0 ) );
             }
 
-            gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
-            gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
-            EmitVertex( );
-
-            gl_Position = pxToNdc( innerAboveB_PX, VIEWPORT_SIZE_PX );
-            gMileage_PX = mileageB_PX + dot( dirBC, innerAboveB_PX - posB_PX );
-            EmitVertex( );
-
-            gl_Position = pxToNdc( innerBelowC_PX, VIEWPORT_SIZE_PX );
-            gMileage_PX = mileageB_PX + dot( dirBC, innerBelowC_PX - posB_PX );
-            EmitVertex( );
-
-            gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
-            gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
-            EmitVertex( );
-
-            if ( joinC )
+            float yShiftFirst_PX;
+            float yShiftStep_PX;
+            int yShiftCount;
+            if ( isinf( wrapSpan_PX.y ) )
             {
-                gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
-                EmitVertex( );
+                yShiftFirst_PX = 0.0;
+                yShiftStep_PX = 0.0;
+                yShiftCount = 1;
+            }
+            else
+            {
+                float yMin_PX = outerJoinB_PX.y;
+                yMin_PX = min( yMin_PX, outerBelowB_PX.y );
+                yMin_PX = min( yMin_PX, outerBelowC_PX.y );
+                yMin_PX = min( yMin_PX, outerAboveC_PX.y );
+                yMin_PX = min( yMin_PX, outerAboveB_PX.y );
+                yMin_PX = min( yMin_PX, outerJoinC_PX.y );
+
+                float yMax_PX = outerJoinB_PX.y;
+                yMax_PX = max( yMax_PX, outerBelowB_PX.y );
+                yMax_PX = max( yMax_PX, outerBelowC_PX.y );
+                yMax_PX = max( yMax_PX, outerAboveC_PX.y );
+                yMax_PX = max( yMax_PX, outerAboveB_PX.y );
+                yMax_PX = max( yMax_PX, outerJoinC_PX.y );
+
+                yShiftFirst_PX = wrapValue( yMin_PX, wrapMin_PX.y, wrapSpan_PX.y ) - yMin_PX;
+                yShiftStep_PX = wrapSpan_PX.y;
+                float yShiftCount0 = ceil( ( ( yMax_PX + yShiftFirst_PX ) - wrapMin_PX.y ) / yShiftStep_PX );
+                yShiftCount = max( 0, int( yShiftCount0 ) );
             }
 
-            EndPrimitive( );
+            vec2 shiftFirst_PX = vec2( xShiftFirst_PX, yShiftFirst_PX );
+            vec2 shiftStep_PX = vec2( xShiftStep_PX, yShiftStep_PX );
 
 
-            if ( FEATHER_THICKNESS_PX > 0.0 )
+            // Emit primitives for each render-shift
+            //
+
+            for ( int iShift = 0; iShift < xShiftCount; iShift++ )
             {
-
-                // Emit triangle-strip for feather region below line
-                //
-
-                if ( isLeftTurnB )
+                for ( int jShift = 0; jShift < yShiftCount; jShift++ )
                 {
-                    gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
+                    vec2 shift_PX = shiftFirst_PX - vec2( float( iShift ), float( jShift ) )*shiftStep_PX;
+
+
+                    // Emit triangle-strip for line interior
+                    //
+
                     gFeatherAlpha = 1.0;
+
+                    if ( joinB )
+                    {
+                        gl_Position = pxToNdc( innerJoinB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
+                        EmitVertex( );
+                    }
+
+                    gl_Position = pxToNdc( innerBelowB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                    gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
                     EmitVertex( );
 
-                    gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, outerJoinB_PX - posB_PX );
-                    gFeatherAlpha = 0.0;
+                    gl_Position = pxToNdc( innerAboveB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                    gMileage_PX = mileageB_PX + dot( dirBC, innerAboveB_PX - posB_PX );
                     EmitVertex( );
+
+                    gl_Position = pxToNdc( innerBelowC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                    gMileage_PX = mileageB_PX + dot( dirBC, innerBelowC_PX - posB_PX );
+                    EmitVertex( );
+
+                    gl_Position = pxToNdc( innerAboveC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                    gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
+                    EmitVertex( );
+
+                    if ( joinC )
+                    {
+                        gl_Position = pxToNdc( innerJoinC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
+                        EmitVertex( );
+                    }
+
+                    EndPrimitive( );
+
+
+                    if ( FEATHER_THICKNESS_PX > 0.0 )
+                    {
+
+                        // Emit triangle-strip for feather region below line
+                        //
+
+                        if ( isLeftTurnB )
+                        {
+                            gl_Position = pxToNdc( innerJoinB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
+                            gFeatherAlpha = 1.0;
+                            EmitVertex( );
+
+                            gl_Position = pxToNdc( outerJoinB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, outerJoinB_PX - posB_PX );
+                            gFeatherAlpha = 0.0;
+                            EmitVertex( );
+                        }
+
+                        gl_Position = pxToNdc( innerBelowB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
+                        gFeatherAlpha = 1.0;
+                        EmitVertex( );
+
+                        gl_Position = pxToNdc( outerBelowB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, outerBelowB_PX - posB_PX );
+                        gFeatherAlpha = 0.0;
+                        EmitVertex( );
+
+                        gl_Position = pxToNdc( innerBelowC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, innerBelowC_PX - posB_PX );
+                        gFeatherAlpha = 1.0;
+                        EmitVertex( );
+
+                        gl_Position = pxToNdc( outerBelowC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, outerBelowC_PX - posB_PX );
+                        gFeatherAlpha = 0.0;
+                        EmitVertex( );
+
+                        if ( isLeftTurnC )
+                        {
+                            gl_Position = pxToNdc( innerJoinC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
+                            gFeatherAlpha = 1.0;
+                            EmitVertex( );
+
+                            gl_Position = pxToNdc( outerJoinC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, outerJoinC_PX - posB_PX );
+                            gFeatherAlpha = 0.0;
+                            EmitVertex( );
+                        }
+
+                        EndPrimitive( );
+
+
+                        // Emit triangle-strip for feather region above line
+                        //
+
+                        if ( !isLeftTurnC )
+                        {
+                            gl_Position = pxToNdc( innerJoinC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
+                            gFeatherAlpha = 1.0;
+                            EmitVertex( );
+
+                            gl_Position = pxToNdc( outerJoinC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, outerJoinC_PX - posB_PX );
+                            gFeatherAlpha = 0.0;
+                            EmitVertex( );
+                        }
+
+                        gl_Position = pxToNdc( innerAboveC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
+                        gFeatherAlpha = 1.0;
+                        EmitVertex( );
+
+                        gl_Position = pxToNdc( outerAboveC_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, outerAboveC_PX - posB_PX );
+                        gFeatherAlpha = 0.0;
+                        EmitVertex( );
+
+                        gl_Position = pxToNdc( innerAboveB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, innerAboveB_PX - posB_PX );
+                        gFeatherAlpha = 1.0;
+                        EmitVertex( );
+
+                        gl_Position = pxToNdc( outerAboveB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                        gMileage_PX = mileageB_PX + dot( dirBC, outerAboveB_PX - posB_PX );
+                        gFeatherAlpha = 0.0;
+                        EmitVertex( );
+
+                        if ( !isLeftTurnB )
+                        {
+                            gl_Position = pxToNdc( innerJoinB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
+                            gFeatherAlpha = 1.0;
+                            EmitVertex( );
+
+                            gl_Position = pxToNdc( outerJoinB_PX + shift_PX, VIEWPORT_SIZE_PX );
+                            gMileage_PX = mileageB_PX + dot( dirBC, outerJoinB_PX - posB_PX );
+                            gFeatherAlpha = 0.0;
+                            EmitVertex( );
+                        }
+
+                        EndPrimitive( );
+
+                    }
                 }
-
-                gl_Position = pxToNdc( innerBelowB_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, innerBelowB_PX - posB_PX );
-                gFeatherAlpha = 1.0;
-                EmitVertex( );
-
-                gl_Position = pxToNdc( outerBelowB_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, outerBelowB_PX - posB_PX );
-                gFeatherAlpha = 0.0;
-                EmitVertex( );
-
-                gl_Position = pxToNdc( innerBelowC_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, innerBelowC_PX - posB_PX );
-                gFeatherAlpha = 1.0;
-                EmitVertex( );
-
-                gl_Position = pxToNdc( outerBelowC_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, outerBelowC_PX - posB_PX );
-                gFeatherAlpha = 0.0;
-                EmitVertex( );
-
-                if ( isLeftTurnC )
-                {
-                    gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
-                    gFeatherAlpha = 1.0;
-                    EmitVertex( );
-
-                    gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, outerJoinC_PX - posB_PX );
-                    gFeatherAlpha = 0.0;
-                    EmitVertex( );
-                }
-
-                EndPrimitive( );
-
-
-                // Emit triangle-strip for feather region above line
-                //
-
-                if ( !isLeftTurnC )
-                {
-                    gl_Position = pxToNdc( innerJoinC_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, innerJoinC_PX - posB_PX );
-                    gFeatherAlpha = 1.0;
-                    EmitVertex( );
-
-                    gl_Position = pxToNdc( outerJoinC_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, outerJoinC_PX - posB_PX );
-                    gFeatherAlpha = 0.0;
-                    EmitVertex( );
-                }
-
-                gl_Position = pxToNdc( innerAboveC_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, innerAboveC_PX - posB_PX );
-                gFeatherAlpha = 1.0;
-                EmitVertex( );
-
-                gl_Position = pxToNdc( outerAboveC_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, outerAboveC_PX - posB_PX );
-                gFeatherAlpha = 0.0;
-                EmitVertex( );
-
-                gl_Position = pxToNdc( innerAboveB_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, innerAboveB_PX - posB_PX );
-                gFeatherAlpha = 1.0;
-                EmitVertex( );
-
-                gl_Position = pxToNdc( outerAboveB_PX, VIEWPORT_SIZE_PX );
-                gMileage_PX = mileageB_PX + dot( dirBC, outerAboveB_PX - posB_PX );
-                gFeatherAlpha = 0.0;
-                EmitVertex( );
-
-                if ( !isLeftTurnB )
-                {
-                    gl_Position = pxToNdc( innerJoinB_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, innerJoinB_PX - posB_PX );
-                    gFeatherAlpha = 1.0;
-                    EmitVertex( );
-
-                    gl_Position = pxToNdc( outerJoinB_PX, VIEWPORT_SIZE_PX );
-                    gMileage_PX = mileageB_PX + dot( dirBC, outerJoinB_PX - posB_PX );
-                    gFeatherAlpha = 0.0;
-                    EmitVertex( );
-                }
-
-                EndPrimitive( );
-
             }
         }
     }

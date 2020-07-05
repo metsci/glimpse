@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@ import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 public class DirectBufferUtils
 {
@@ -57,6 +58,11 @@ public class DirectBufferUtils
     }
 
     public static IntBuffer readonly( IntBuffer buffer )
+    {
+        return buffer.asReadOnlyBuffer( );
+    }
+
+    public static ShortBuffer readonly( ShortBuffer buffer )
     {
         return buffer.asReadOnlyBuffer( );
     }
@@ -85,6 +91,14 @@ public class DirectBufferUtils
     public static IntBuffer sliced( IntBuffer buffer, int first, int count )
     {
         IntBuffer buffer2 = buffer.duplicate( );
+        buffer2.limit( first + count );
+        buffer2.position( first );
+        return buffer2.slice( );
+    }
+
+    public static ShortBuffer sliced( ShortBuffer buffer, int first, int count )
+    {
+        ShortBuffer buffer2 = buffer.duplicate( );
         buffer2.limit( first + count );
         buffer2.position( first );
         return buffer2.slice( );

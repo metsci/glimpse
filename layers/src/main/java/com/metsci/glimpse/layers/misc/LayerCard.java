@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,9 @@ import static com.metsci.glimpse.layers.misc.UiUtils.bindLabel;
 import static com.metsci.glimpse.layers.misc.UiUtils.bindToggleButton;
 import static javax.swing.BorderFactory.createLineBorder;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -56,7 +59,6 @@ public class LayerCard extends JPanel
         this.setBorder( createLineBorder( this.getBackground( ).darker( ), 1 ) );
         this.setLayout( new MigLayout( "fillx", "[][][push,grow]" ) );
 
-
         // Layer
         //
 
@@ -67,6 +69,16 @@ public class LayerCard extends JPanel
         JLabel layerTitleLabel = new JLabel( );
         this.disposables.add( bindLabel( layerTitleLabel, layer.title ) );
         this.add( layerTitleLabel, "spanx 2" );
+
+        // Clicking anywhere in the LayerCard toggles the checkbox
+        addMouseListener( new MouseAdapter( )
+        {
+            @Override
+            public void mouseClicked( MouseEvent e )
+            {
+                layerVisibleCheck.doClick( );
+            }
+        } );
     }
 
     public void dispose( )

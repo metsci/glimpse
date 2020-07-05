@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,13 @@ public class TinyProgressBarUI2 extends TinyProgressBarUI
         int y = insets.top;
         int w = this.progressBar.getWidth( ) - ( insets.right + insets.left );
         int h = this.progressBar.getHeight( ) - ( insets.top + insets.bottom );
+
+        if ( w <= 0 || h <= 0 )
+        {
+            // Progress bar is too small to paint
+            return;
+        }
+
         int amountFull = this.getAmountFull( insets, w, h );
 
         // Background
@@ -77,17 +84,17 @@ public class TinyProgressBarUI2 extends TinyProgressBarUI
             ( ( Graphics2D ) g ).setStroke( new BasicStroke( ( float ) h, CAP_BUTT, JOIN_BEVEL ) );
             if ( c.getComponentOrientation( ).isLeftToRight( ) )
             {
-                g.drawLine( x, y+(h/2), x + amountFull, y+(h/2) );
+                g.drawLine( x, y + ( h / 2 ), x + amountFull, y + ( h / 2 ) );
             }
             else
             {
-                g.drawLine( x+w, y+(h/2), x+w - amountFull, y+(h/2) );
+                g.drawLine( x + w, y + ( h / 2 ), x + w - amountFull, y + ( h / 2 ) );
             }
         }
         else
         {
             ( ( Graphics2D ) g ).setStroke( new BasicStroke( ( float ) w, CAP_BUTT, JOIN_BEVEL ) );
-            g.drawLine( x+(w/2), y+h, x+(w/2), y+h - amountFull );
+            g.drawLine( x + ( w / 2 ), y + h, x + ( w / 2 ), y + h - amountFull );
         }
 
         // Text
@@ -106,6 +113,12 @@ public class TinyProgressBarUI2 extends TinyProgressBarUI
         int y = insets.top;
         int w = this.progressBar.getWidth( ) - ( insets.right + insets.left );
         int h = this.progressBar.getHeight( ) - ( insets.top + insets.bottom );
+
+        if ( w <= 0 || h <= 0 )
+        {
+            // Progress bar is too small to paint
+            return;
+        }
 
         // Background
         if ( !this.progressBar.isOpaque( ) )

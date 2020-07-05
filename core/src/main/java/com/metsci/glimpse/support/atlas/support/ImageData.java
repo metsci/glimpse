@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,12 +68,12 @@ public class ImageData
         return delegate.getLocationY( );
     }
 
-    public final int getCenterX( )
+    public final double getCenterX( )
     {
         return delegate.getCenterX( );
     }
 
-    public final int getCenterY( )
+    public final double getCenterY( )
     {
         return delegate.getCenterY( );
     }

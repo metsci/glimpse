@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@ import static com.metsci.glimpse.layers.FpsOption.FPS;
 import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
 import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.addTimeZoneLinkage;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
+import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
@@ -70,8 +70,8 @@ public class LayeredExample
             //
 
             initializeLogging( "LayeredExample/logging.properties" );
-            fixPlatformQuirks( );
             initTinyLaf( );
+            initStandardGlimpseApp( );
 
 
             // Set up default traits
@@ -157,6 +157,8 @@ public class LayeredExample
 
             gui.addLayer( exampleLayerA );
             gui.addLayer( exampleLayerB );
+
+            gui.setVisible( true );
 
 
 

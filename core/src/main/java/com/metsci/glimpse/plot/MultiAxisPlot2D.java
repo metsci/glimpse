@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@ import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Bottom;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Left;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Right;
 import static com.metsci.glimpse.plot.MultiAxisPlot2D.AxisOrientation.Top;
+import static com.metsci.glimpse.plot.Plot2D.BACKGROUND_LAYER;
 
 import java.awt.Font;
 import java.util.ArrayList;
@@ -52,6 +53,11 @@ import com.metsci.glimpse.axis.painter.NumericXAxisPainter;
 import com.metsci.glimpse.axis.painter.NumericYAxisPainter;
 import com.metsci.glimpse.axis.painter.label.AxisLabelHandler;
 import com.metsci.glimpse.axis.painter.label.GridAxisLabelHandler;
+import com.metsci.glimpse.event.key.GlimpseKeyListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseAllListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseMotionListener;
+import com.metsci.glimpse.event.mouse.GlimpseMouseWheelListener;
 import com.metsci.glimpse.event.mouse.Mouseable;
 import com.metsci.glimpse.layout.GlimpseAxisLayout2D;
 import com.metsci.glimpse.layout.GlimpseAxisLayoutX;
@@ -288,6 +294,7 @@ public class MultiAxisPlot2D extends GlimpseLayout
         initializeCenterAxis( );
         initializeLayout( );
         initializePainters( );
+        initializeListeners( );
         initializeLookAndFeel( );
         updatePainterLayout( );
     }
@@ -364,17 +371,20 @@ public class MultiAxisPlot2D extends GlimpseLayout
         super.addPainter0( backgroundPainter, null, Integer.MIN_VALUE );
 
         this.titleLayout = new GlimpseLayout( this, "Title" );
-        this.axisLayoutXY = new GlimpseAxisLayout2D( this, "Center", new Axis2D( centerAxisX, centerAxisY ) );
+        this.axisLayoutXY = createCenterLayout( "Center", new Axis2D( this.centerAxisX, this.centerAxisY ) );
 
         this.titlePainter = createTitlePainter( );
 
-        if ( titlePainter != null ) titleLayout.addPainter( titlePainter );
+        if ( this.titlePainter != null ) this.titleLayout.addPainter( this.titlePainter );
 
         this.plotBackgroundPainter = new BackgroundPainter( false );
-        this.axisLayoutXY.addPainter( this.plotBackgroundPainter );
-
+        this.axisLayoutXY.addPainter( this.plotBackgroundPainter, BACKGROUND_LAYER );
+    }
+    
+    protected void initializeListeners( )
+    {
         this.mouseListenerXY = createAxisMouseListenerXY( );
-        this.attachAxisMouseListener( axisLayoutXY, mouseListenerXY );
+        this.attachAxisMouseListener( this.axisLayoutXY, this.mouseListenerXY );
     }
 
     protected void initializeLookAndFeel( )
@@ -616,7 +626,181 @@ public class MultiAxisPlot2D extends GlimpseLayout
         updatePainterLayout( );
         validate( );
     }
+    
+    //////////////////////////////////////
+    //        Listener Methods          //
+    //////////////////////////////////////
 
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void addGlimpseMouseListener( GlimpseMouseListener listener )
+    {
+        super.addGlimpseMouseListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseMotionListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void addGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
+    {
+        super.addGlimpseMouseMotionListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseWheelListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void addGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
+    {
+        super.addGlimpseMouseWheelListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseMouseAllListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void addGlimpseMouseAllListener( GlimpseMouseAllListener listener )
+    {
+        super.addGlimpseMouseAllListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseAllListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void removeGlimpseMouseAllListener( GlimpseMouseAllListener listener )
+    {
+        super.removeGlimpseMouseAllListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().addGlimpseKeyListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void addGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        super.addGlimpseKeyListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void removeGlimpseMouseListener( GlimpseMouseListener listener )
+    {
+        super.removeGlimpseMouseListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseMotionListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void removeGlimpseMouseMotionListener( GlimpseMouseMotionListener listener )
+    {
+        super.removeGlimpseMouseMotionListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseMouseWheelListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void removeGlimpseMouseWheelListener( GlimpseMouseWheelListener listener )
+    {
+        super.removeGlimpseMouseWheelListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeGlimpseKeyListener()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void removeGlimpseKeyListener( GlimpseKeyListener listener )
+    {
+        super.removeGlimpseKeyListener( listener );
+    }
+
+    /**
+     * In most cases you want to call {@code MultiAxisPlot2D.getLayoutCenter().removeAllGlimpseListeners()}
+     * instead of this method.
+     * <p>
+     * This method is not really deprecated -- it is marked deprecated to make it harder to call
+     * accidentally. If you really do want to call this method, you can use the {@link SuppressWarnings}
+     * annotation to silence the deprecation warning.
+     */
+    @Deprecated
+    @Override
+    public void removeAllGlimpseListeners( )
+    {
+        super.removeAllGlimpseListeners( );
+    }
+    
+    public AxisMouseListener getLayoutCenterMouseListener( )
+    {
+        return this.mouseListenerXY;
+    }
+    
     //////////////////////////////////////
     //      Axis Creation Methods       //
     //////////////////////////////////////
@@ -874,6 +1058,11 @@ public class MultiAxisPlot2D extends GlimpseLayout
         painter.setHorizontalPosition( HorizontalPosition.Center );
         painter.setVerticalPosition( VerticalPosition.Center );
         return painter;
+    }
+
+    protected GlimpseAxisLayout2D createCenterLayout( String name, Axis2D axis )
+    {
+        return new GlimpseAxisLayout2D( this, name, axis );
     }
 
     protected boolean isTitleVisible( )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.worldwind.event;
 
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -37,6 +39,7 @@ import com.metsci.glimpse.axis.Axis2D;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.ModifierKey;
 import com.metsci.glimpse.event.mouse.MouseButton;
@@ -82,15 +85,20 @@ public class MouseWrapperWorldwind extends MouseWrapperImpl<GlimpseMouseEvent> i
 
     public static void linkMouseEvents( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
     {
-        MouseWrapperWorldwind wrapper = new MouseWrapperWorldwind( wwd, projection, tile );
+        linkMouseEvents( wwd, projection, tile, CLICK_FOCUS );
+    }
+
+    public static void linkMouseEvents( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile, FocusBehavior focusBehavior )
+    {
+        MouseWrapperWorldwind wrapper = new MouseWrapperWorldwind( wwd, projection, tile, focusBehavior );
         wwd.getInputHandler( ).addMouseListener( wrapper );
         wwd.getInputHandler( ).addMouseMotionListener( wrapper );
         wwd.getInputHandler( ).addMouseWheelListener( wrapper );
     }
 
-    private MouseWrapperWorldwind( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile )
+    private MouseWrapperWorldwind( WorldWindow wwd, GeoProjection projection, GlimpseSurfaceTile tile, FocusBehavior focusBehavior )
     {
-        super( tile.getGlimpseCanvas( ) );
+        super( tile.getGlimpseCanvas( ), focusBehavior );
 
         this.wwd = wwd;
         this.projection = projection;

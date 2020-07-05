@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.math.approx;
 
-import static java.lang.Math.PI;
 import static com.metsci.glimpse.util.math.MathConstants.*;
+import static java.lang.Math.*;
 
 /**
  * Similar to the classes in {@link com.metsci.glimpse.util.math.fast}, but uses linear interpolation
@@ -63,7 +63,7 @@ public class ApproxAsin
             this.y[ i ] = Math.asin( x );
         }
     }
-    
+
     // Helper method for taking advantage of the precalculated asin values to
     // compute acos values. Requires an additional subtraction over creating
     // an ApproxAcos class, but requires no additional storage.
@@ -83,6 +83,10 @@ public class ApproxAsin
         double w = ( x - (-1.0) ) * this.oneOverXStep;
 
         int iBefore = ( int ) w;
+        if( iBefore + 1 == this.n ) {
+            // handle edge case where steps is the last edge
+            return PI_OVER_2;
+        }
         double yBefore = this.y[ iBefore ];
         double yAfter = this.y[ iBefore + 1 ];
         double xFrac = w - iBefore;

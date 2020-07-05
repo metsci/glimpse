@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,23 @@
  */
 package com.metsci.glimpse.support.swing;
 
+import static com.jogamp.newt.event.MouseEvent.BUTTON3;
+import static com.metsci.glimpse.event.mouse.FocusBehavior.CLICK_FOCUS;
+import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.getModalBlockedStatus;
+import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_BLOCKED;
+
+import javax.swing.JPopupMenu;
+import javax.swing.MenuSelectionManager;
 import javax.swing.SwingUtilities;
 
 import com.jogamp.newt.event.MouseEvent;
-import com.metsci.glimpse.canvas.NewtGlimpseCanvas;
+import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
+import com.metsci.glimpse.context.GlimpseTarget;
+import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
+import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
+import com.metsci.glimpse.support.popup.GlimpsePopupMenuTarget;
 
 /**
  * A version of MouseWrapperNewt which fires Glimpse events on the Swing EDT
@@ -39,111 +51,152 @@ import com.metsci.glimpse.event.mouse.newt.MouseWrapperNewt;
 public class MouseWrapperNewtSwingEDT extends MouseWrapperNewt
 {
 
-    public MouseWrapperNewtSwingEDT( NewtGlimpseCanvas canvas )
+    protected NewtSwingGlimpseCanvas swingCanvas;
+
+    public MouseWrapperNewtSwingEDT( NewtSwingGlimpseCanvas canvas )
     {
-        super( canvas );
+        this( canvas, CLICK_FOCUS );
+    }
+
+    public MouseWrapperNewtSwingEDT( NewtSwingGlimpseCanvas canvas, FocusBehavior focusBehavior )
+    {
+        super( canvas, focusBehavior );
+        this.swingCanvas = canvas;
     }
 
     @Override
-    public void mouseClicked( final MouseEvent e )
+    public void mouseClicked( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseClicked0( e );
+                this.mouseClicked0( ev );
             }
         } );
     }
 
     @Override
-    public void mousePressed( final MouseEvent e )
+    public void mousePressed( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mousePressed0( e );
+                MenuSelectionManager menuMan = MenuSelectionManager.defaultManager( );
+                boolean isMenuVisible = ( menuMan.getSelectedPath( ) != null && menuMan.getSelectedPath( ).length > 0 );
+                if ( isMenuVisible )
+                {
+                    menuMan.clearSelectedPath( );
+                    ev.setConsumed( true );
+                }
+                else if ( ev.getButton( ) == BUTTON3 )
+                {
+                    GlimpseTargetStack stack = null;
+                    GlimpsePopupMenuTarget target = null;
+                    for ( GlimpseTargetStack stack0 : this.getContainingTargets( ev ) )
+                    {
+                        GlimpseTarget target0 = stack0.getTarget( );
+                        if ( target0 instanceof GlimpsePopupMenuTarget )
+                        {
+                            stack = stack0;
+                            target = ( ( GlimpsePopupMenuTarget ) target0 );
+                            break;
+                        }
+                    }
+
+                    if ( target != null )
+                    {
+                        JPopupMenu menu = target.getPopupMenu( );
+                        if ( menu != null )
+                        {
+                            GlimpseMouseEvent ev2 = this.toGlimpseEvent( ev, stack );
+                            target.getPopupMenuNotifier( ).fire( ev2 );
+                            menu.show( this.swingCanvas, ev.getX( ), ev.getY( ) );
+                        }
+                        ev.setConsumed( true );
+                    }
+                    else
+                    {
+                        this.mousePressed0( ev );
+                    }
+                }
+                else
+                {
+                    this.mousePressed0( ev );
+                }
             }
         } );
     }
 
     @Override
-    public void mouseReleased( final MouseEvent e )
+    public void mouseReleased( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseReleased0( e );
+                this.mouseReleased0( ev );
             }
         } );
     }
 
     @Override
-    public void mouseEntered( final MouseEvent e )
+    public void mouseEntered( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseEntered0( e );
+                this.mouseEntered0( ev );
             }
         } );
     }
 
     @Override
-    public void mouseExited( final MouseEvent e )
+    public void mouseExited( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseExited0( e );
+                this.mouseExited0( ev );
             }
         } );
     }
 
     @Override
-    public void mouseDragged( final MouseEvent e )
+    public void mouseDragged( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseDragged0( e );
+                this.mouseDragged0( ev );
             }
         } );
     }
 
     @Override
-    public void mouseMoved( final MouseEvent e )
+    public void mouseMoved( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseMoved0( e );
+                this.mouseMoved0( ev );
             }
         } );
     }
 
     @Override
-    public void mouseWheelMoved( final MouseEvent e )
+    public void mouseWheelMoved( MouseEvent ev )
     {
-        SwingUtilities.invokeLater( new Runnable( )
+        SwingUtilities.invokeLater( ( ) ->
         {
-            @Override
-            public void run( )
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
             {
-                mouseWheelMoved0( e );
+                this.mouseWheelMoved0( ev );
             }
         } );
     }

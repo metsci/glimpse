@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  */
 package com.metsci.glimpse.util.var;
 
-import static com.google.common.base.Objects.*;
-import static com.metsci.glimpse.util.PredicateUtils.*;
+import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
@@ -38,50 +38,17 @@ import java.util.function.Supplier;
 public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 {
 
-    protected static final ThreadLocal<Txn> activeTxn = new ThreadLocal<>( );
+    protected static final VarEvent syntheticEvent = new VarEvent( false );
+
 
     public static void doTxn( Runnable task )
     {
-        doTxn( ( ) ->
-        {
-            task.run( );
-            return null;
-        } );
+        Txn.doTxn( task );
     }
 
     public static <T> T doTxn( Supplier<T> task )
     {
-        if ( activeTxn.get( ) == null )
-        {
-            Txn txn = new Txn( );
-            try
-            {
-                T result;
-                activeTxn.set( txn );
-                try
-                {
-                    result = task.get( );
-                }
-                finally
-                {
-                    // Make sure we set activeTxn back to null before firing listeners
-                    activeTxn.set( null );
-                }
-
-                txn.commit( );
-                return result;
-            }
-            catch ( Exception e )
-            {
-                txn.rollback( );
-                throw e;
-            }
-        }
-        else
-        {
-            // Already inside a txn
-            return task.get( );
-        }
+        return Txn.doTxn( task );
     }
 
 
@@ -90,16 +57,14 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     protected Var<V> parent;
     protected final Set<Var<V>> children;
 
-    protected V rollbackValue;
-    protected boolean rollbackOngoing;
-
     protected V value;
     protected boolean ongoing;
+    protected boolean hasTxnMember;
 
 
     public Var( V value )
     {
-        this( value, alwaysTrue );
+        this( value, v -> true );
     }
 
     public Var( V value, Predicate<? super V> validateFn )
@@ -109,11 +74,9 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         this.parent = null;
         this.children = new CopyOnWriteArraySet<>( );
 
-        this.rollbackValue = null;
-        this.rollbackOngoing = false;
-
         this.value = this.requireValid( value );
         this.ongoing = false;
+        this.hasTxnMember = false;
     }
 
     public boolean isValid( V value )
@@ -128,6 +91,11 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     public void setParent( Var<V> parent )
     {
+        if ( this.hasTxnMember )
+        {
+            throw new RuntimeException( "Var's parent cannot be changed while a txn is pending" );
+        }
+
         if ( this.parent != null )
         {
             this.parent.children.remove( this );
@@ -137,7 +105,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         if ( parent != null )
         {
             // Make sure child state exactly matches parent state, to keep the tree consistent
-            if ( this.ongoing != parent.ongoing || !equal( this.value, parent.value ) )
+            if ( this.ongoing != parent.ongoing || !Objects.equals( this.value, parent.value ) )
             {
                 this.requireValidForSubtree( parent.value );
                 this.setForSubtree( parent.ongoing, parent.value );
@@ -173,22 +141,45 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     public V set( boolean ongoing, V value )
     {
         // Update if value has changed, or if changes were previously ongoing but no longer are
-        if ( ( !ongoing && this.ongoing ) || !equal( value, this.value ) )
+        if ( ( !ongoing && this.ongoing ) || !Objects.equals( value, this.value ) )
         {
             Var<V> root = this.root( );
             root.requireValidForSubtree( value );
+
+            if ( !root.hasTxnMember )
+            {
+                root.hasTxnMember = true;
+
+                V rollbackValue = root.value;
+                boolean rollbackOngoing = root.ongoing;
+
+                addToActiveTxn( new TxnMember( )
+                {
+                    @Override
+                    public void rollback( )
+                    {
+                        root.setForSubtree( rollbackOngoing, rollbackValue );
+                        root.hasTxnMember = false;
+                    }
+
+                    @Override
+                    public void commit( )
+                    {
+                        root.hasTxnMember = false;
+                    }
+                } );
+            }
+
             root.setForSubtree( ongoing, value );
 
-            Txn txn = activeTxn.get( );
-            if ( txn == null )
+            addToActiveTxn( new TxnMember( )
             {
-                root.commitForSubtree( );
-                root.fireForSubtree( new VarEvent( ongoing ) );
-            }
-            else
-            {
-                txn.recordSubtreeMod( root, new VarEvent( ongoing ) );
-            }
+                @Override
+                public void postCommit( )
+                {
+                    root.fireForSubtree( new VarEvent( ongoing ) );
+                }
+            } );
         }
         return this.value;
     }
@@ -220,7 +211,7 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
     {
         if ( !this.validateFn.test( value ) )
         {
-            throw new InvalidValueException( this, value );
+            throw new InvalidValueException( "Value was rejected by this Var's validate function: var = " + this + ", value = " + value );
         }
 
         for ( Var<V> child : this.children )
@@ -233,9 +224,6 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
 
     protected void setForSubtree( boolean ongoing, V value )
     {
-        this.rollbackValue = this.value;
-        this.rollbackOngoing = this.ongoing;
-
         this.value = value;
         this.ongoing = ongoing;
 
@@ -245,43 +233,6 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         }
     }
 
-    /**
-     * This method is protected to discourage access from client code, while still allowing
-     * access from {@link Txn}.
-     */
-    protected void commitForSubtree( )
-    {
-        this.rollbackValue = null;
-        this.rollbackOngoing = false;
-
-        for ( Var<V> child : this.children )
-        {
-            child.commitForSubtree( );
-        }
-    }
-
-    /**
-     * This method is protected to discourage access from client code, while still allowing
-     * access from {@link Txn}.
-     */
-    protected void rollbackForSubtree( )
-    {
-        this.value = this.rollbackValue;
-        this.ongoing = this.rollbackOngoing;
-
-        this.rollbackValue = null;
-        this.rollbackOngoing = false;
-
-        for ( Var<V> child : this.children )
-        {
-            child.rollbackForSubtree( );
-        }
-    }
-
-    /**
-     * This method is protected to discourage access from client code, while still allowing
-     * access from {@link Txn}.
-     */
     protected void fireForSubtree( VarEvent ev )
     {
         this.fire( ev );
@@ -290,6 +241,15 @@ public class Var<V> extends Notifier<VarEvent> implements ReadableVar<V>
         {
             child.fireForSubtree( ev );
         }
+    }
+
+    /**
+     * Overridden so that listeners never receive a null event.
+     */
+    @Override
+    protected VarEvent getSyntheticEvent( )
+    {
+        return syntheticEvent;
     }
 
 }

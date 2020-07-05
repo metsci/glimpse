@@ -53,6 +53,8 @@
     <modules>
 
         <module>util</module>
+        <module>util-examples</module>
+
         <module>text</module>
 
         <module>platform-fixes</module>
@@ -68,7 +70,7 @@
 
         <module>wizard</module>
         <module>wizard-examples</module>
-        
+
         <module>extras-charts</module>
         <module>extras-dspl</module>
         <module>extras-dnc</module>
@@ -76,6 +78,7 @@
         <module>extras-examples</module>
         <module>extras-worldwind</module>
         <module>extras-tinylaf</module>
+        <module>extras-topo</module>
 
     </modules>
 

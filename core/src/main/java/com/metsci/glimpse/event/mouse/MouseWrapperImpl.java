@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@ import com.metsci.glimpse.context.GlimpseTargetStack;
 public abstract class MouseWrapperImpl<I> extends MouseWrapper<I>
 {
 
-    public MouseWrapperImpl( GlimpseCanvas canvas )
+    public MouseWrapperImpl( GlimpseCanvas canvas, FocusBehavior focusBehavior )
     {
-        super( canvas );
+        super( canvas, focusBehavior );
     }
 
     public void mouseClicked0( I event )

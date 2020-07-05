@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Metron, Inc.
+ * Copyright (c) 2019 Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,14 @@ public class GshhsPolygonHeader
 
     static
     {
-        supportedVersions.add( 7 );
+        supportedVersions.add( 15 );
+        supportedVersions.add( 14 );
+        supportedVersions.add( 13 );
+        supportedVersions.add( 12 );
+        supportedVersions.add( 11 );
+        supportedVersions.add( 10 );
+        supportedVersions.add( 9 );
+        supportedVersions.add( 8 );
         supportedVersions.add( 6 );
         supportedVersions.add( 4 );
     }
@@ -167,7 +174,7 @@ public class GshhsPolygonHeader
 
         area_KM2 = 0.1 * in.readInt( );
 
-        if ( versionByte == 7 )
+        if ( versionByte >= 7 )
         {
             area_full = 0.1 * in.readInt( );
             container = in.readInt( );

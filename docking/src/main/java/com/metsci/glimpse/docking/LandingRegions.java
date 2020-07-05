@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ import static com.metsci.glimpse.docking.Side.BOTTOM;
 import static com.metsci.glimpse.docking.Side.LEFT;
 import static com.metsci.glimpse.docking.Side.RIGHT;
 import static com.metsci.glimpse.docking.Side.TOP;
-import static java.awt.Frame.ICONIFIED;
 import static javax.swing.SwingUtilities.convertPointToScreen;
 
 import java.awt.Component;
@@ -42,58 +41,15 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
+import java.util.function.Supplier;
 
 import com.metsci.glimpse.docking.MiscUtils.IntAndIndex;
 
 public class LandingRegions
 {
 
-    public static LandingRegion findLandingRegion( DockingGroup dockingGroup, Tile fromTile, int fromViewNum, Point pOnScreen )
-    {
-        for ( DockingFrame frame : dockingGroup.frames )
-        {
-            if ( !frame.isVisible( ) ) continue;
-            if ( ( frame.getExtendedState( ) & ICONIFIED ) != 0 ) continue;
-
-            MultiSplitPane docker = frame.docker;
-            if ( !docker.isVisible( ) ) continue;
-
-            Point pInDocker = convertPointFromScreen( pOnScreen, docker );
-            if ( docker.contains( pInDocker ) )
-            {
-                return findLandingRegion( docker, fromTile, fromViewNum, pOnScreen );
-            }
-        }
-
-        // Not inside any docking-pane
-        DockingFrame frame = getAncestorOfClass( DockingFrame.class, fromTile );
-        MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, fromTile );
-        Point frameOrigin = convertPointToScreen( frame, new Point( 0, 0 ) );
-        Point dockerOrigin = convertPointToScreen( docker, new Point( 0, 0 ) );
-        Insets dockerInsets = docker.getInsets( );
-        int xInset = ( dockerOrigin.x - frameOrigin.x ) + dockerInsets.left;
-        int yInset = ( dockerOrigin.y - frameOrigin.y ) + dockerInsets.top;
-
-        Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
-
-        Rectangle leftmostTabBounds = draggedTabBounds;
-        for ( int i = 0; i < fromTile.numViews( ); i++ )
-        {
-            if ( fromTile.hasViewTab( i ) )
-            {
-                leftmostTabBounds = fromTile.viewTabBounds( i );
-                break;
-            }
-        }
-
-        // XXX: Could do better by accounting for the mouse-press point
-        int xTileOffset = leftmostTabBounds.x + 7 * draggedTabBounds.width / 16;
-        int yTileOffset = leftmostTabBounds.y + 5 * draggedTabBounds.height / 8;
-
-        return new InNewWindow( dockingGroup, pOnScreen.x - xTileOffset, pOnScreen.y - yTileOffset, fromTile.getWidth( ), fromTile.getHeight( ), xInset, yInset );
-    }
-
-    public static LandingRegion findLandingRegion( MultiSplitPane docker, Tile fromTile, int fromViewNum, Point pOnScreen )
+    public static LandingRegion landingInExistingDocker( MultiSplitPane docker, Tile fromTile, int fromViewNum, Point pOnScreen )
     {
         Point pInDocker = convertPointFromScreen( pOnScreen, docker );
 
@@ -373,29 +329,52 @@ public class LandingRegions
 
     public static class InNewWindow implements LandingRegion
     {
-        public final DockingGroup dockingGroup;
-        public final int xOnScreen;
-        public final int yOnScreen;
-        public final int width;
-        public final int height;
-        public final int xFrameInset;
-        public final int yFrameInset;
+        protected final Supplier<DockingWindow> addWindowFn;
 
-        public InNewWindow( DockingGroup dockingGroup, int xOnScreen, int yOnScreen, int width, int height, int xFrameInset, int yFrameInset )
+        protected final int xRegion_SCREEN;
+        protected final int yRegion_SCREEN;
+        protected final int wRegion;
+        protected final int hRegion;
+
+        protected final int wWindowInset;
+        protected final int hWindowInset;
+
+        public InNewWindow( Tile fromTile, int fromViewNum, Point pOnScreen, Supplier<DockingWindow> addWindowFn )
         {
-            this.dockingGroup = dockingGroup;
-            this.xOnScreen = xOnScreen;
-            this.yOnScreen = yOnScreen;
-            this.width = width;
-            this.height = height;
-            this.xFrameInset = xFrameInset;
-            this.yFrameInset = yFrameInset;
+            this.addWindowFn = addWindowFn;
+
+            Window window = getAncestorOfClass( Window.class, fromTile );
+            MultiSplitPane docker = getAncestorOfClass( MultiSplitPane.class, fromTile );
+            Point windowOrigin = convertPointToScreen( window, new Point( 0, 0 ) );
+            Point dockerOrigin = convertPointToScreen( docker, new Point( 0, 0 ) );
+            Insets dockerInsets = docker.getInsets( );
+            this.wWindowInset = ( dockerOrigin.x - windowOrigin.x ) + dockerInsets.left;
+            this.hWindowInset = ( dockerOrigin.y - windowOrigin.y ) + dockerInsets.top;
+
+            Rectangle draggedTabBounds = fromTile.viewTabBounds( fromViewNum );
+            Rectangle leftmostTabBounds = draggedTabBounds;
+            for ( int i = 0; i < fromTile.numViews( ); i++ )
+            {
+                if ( fromTile.hasViewTab( i ) )
+                {
+                    leftmostTabBounds = fromTile.viewTabBounds( i );
+                    break;
+                }
+            }
+
+            // TODO: Could do better by accounting for the mouse-press point
+            int xTileOffset = leftmostTabBounds.x + 7 * draggedTabBounds.width / 16;
+            int yTileOffset = leftmostTabBounds.y + 5 * draggedTabBounds.height / 8;
+            this.xRegion_SCREEN = pOnScreen.x - xTileOffset;
+            this.yRegion_SCREEN = pOnScreen.y - yTileOffset;
+            this.wRegion = fromTile.getWidth( );
+            this.hRegion = fromTile.getHeight( );
         }
 
         @Override
         public Rectangle getIndicator( )
         {
-            return new Rectangle( xOnScreen, yOnScreen, width, height );
+            return new Rectangle( this.xRegion_SCREEN, this.yRegion_SCREEN, this.wRegion, this.hRegion );
         }
 
         @Override
@@ -404,12 +383,12 @@ public class LandingRegions
             Tile tile = tileFactory.newTile( );
             tile.addView( view, 0 );
 
-            DockingFrame frame = dockingGroup.addNewFrame( );
-            frame.docker.addInitialLeaf( tile );
-            frame.setLocation( xOnScreen - xFrameInset, yOnScreen - yFrameInset );
-            tile.setPreferredSize( new Dimension( width, height ) );
-            frame.pack( );
-            frame.setVisible( true );
+            DockingWindow window = this.addWindowFn.get( );
+            window.docker( ).addInitialLeaf( tile );
+            window.setLocation( this.xRegion_SCREEN - this.wWindowInset, this.yRegion_SCREEN - this.hWindowInset );
+            tile.setPreferredSize( new Dimension( this.wRegion, this.hRegion ) );
+            window.pack( );
+            window.setVisible( true );
         }
     }
 

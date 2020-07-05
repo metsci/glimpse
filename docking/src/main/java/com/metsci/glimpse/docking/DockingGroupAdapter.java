@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,82 +28,85 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Component;
 
+import com.metsci.glimpse.docking.xml.GroupArrangement;
+
 public class DockingGroupAdapter implements DockingGroupListener
 {
 
     @Override
     public void addedView( Tile tile, View view )
-    {
-    }
+    { }
 
     @Override
     public void removedView( Tile tile, View view )
-    {
-    }
+    { }
 
     @Override
     public void selectedView( Tile tile, View view )
-    {
-    }
+    { }
 
     @Override
     public void addedLeaf( MultiSplitPane docker, Component leaf )
-    {
-    }
+    { }
 
     @Override
     public void removedLeaf( MultiSplitPane docker, Component leaf )
-    {
-    }
+    { }
 
     @Override
     public void movedDivider( MultiSplitPane docker, SplitPane splitPane )
-    {
-    }
+    { }
 
     @Override
     public void maximizedLeaf( MultiSplitPane docker, Component leaf )
-    {
-    }
+    { }
 
     @Override
     public void unmaximizedLeaf( MultiSplitPane docker, Component leaf )
-    {
-    }
+    { }
 
     @Override
     public void restoredTree( MultiSplitPane docker )
-    {
-    }
+    { }
 
     @Override
-    public void addedFrame( DockingGroup group, DockingFrame frame )
-    {
-    }
+    public void addedWindow( DockingGroup group, DockingWindow window )
+    { }
 
     @Override
-    public void disposingAllFrames( DockingGroup group )
-    {
-    }
+    public void disposingAllWindows( DockingGroup group )
+    { }
 
     @Override
-    public void disposingFrame( DockingGroup group, DockingFrame frame )
-    {
-    }
+    public void userRequestingDisposeWindow( DockingGroup group, DockingWindow window )
+    { }
 
     @Override
-    public void disposedFrame( DockingGroup group, DockingFrame frame )
-    {
-    }
+    public void disposingWindow( DockingGroup group, DockingWindow window )
+    { }
+
+    @Override
+    public void disposedWindow( DockingGroup group, DockingWindow window )
+    { }
+
+    @Override
+    public void userRequestingCloseView( DockingGroup group, View view )
+    { }
 
     @Override
     public void closingView( DockingGroup group, View view )
-    {
-    }
+    { }
 
     @Override
     public void closedView( DockingGroup group, View view )
-    {
-    }
+    { }
+
+    @Override
+    public void settingArrangement( DockingGroup group, GroupArrangement groupArr )
+    { }
+
+    @Override
+    public void setArrangement( DockingGroup group, GroupArrangement groupArr )
+    { }
 
 }

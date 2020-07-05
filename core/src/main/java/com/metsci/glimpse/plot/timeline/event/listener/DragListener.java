@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,74 +70,46 @@ public class DragListener implements EventPlotListener, GlimpseMouseAllListener
     public void setEnabled( boolean enabled )
     {
         this.enabled = enabled;
-
-        reset( );
+        this.reset( );
     }
 
     public void reset( )
     {
-        dragType = null;
-        anchorTime = null;
-        eventStart = null;
-        eventEnd = null;
-        dragEvent = null;
+        this.dragType = null;
+        this.anchorTime = null;
+        this.eventStart = null;
+        this.eventEnd = null;
+        this.dragEvent = null;
     }
 
     @Override
-    public void mouseMoved( GlimpseMouseEvent e )
+    public void eventsClicked( GlimpseMouseEvent ev, Set<EventSelection> events, TimeStamp time )
     {
-        if ( !enabled ) return;
+        if ( !this.enabled ) return;
 
-        if ( e.isButtonDown( MouseButton.Button1 ) && dragEvent != null )
-        {
-            TimeStamp time = info.getTime( e );
-
-            if ( dragType == Location.Center )
-            {
-                double diff = time.durationAfter( anchorTime );
-                dragEvent.setTimes( eventStart.add( diff ), eventEnd.add( diff ), false );
-            }
-            else if ( dragType == Location.End && eventStart.isBefore( time ) )
-            {
-                dragEvent.setTimes( eventStart, time, false );
-            }
-            else if ( dragType == Location.Start && eventEnd.isAfter( time ) )
-            {
-                dragEvent.setTimes( time, eventEnd, false );
-            }
-
-            e.setHandled( true );
-        }
-    }
-
-    @Override
-    public void eventsClicked( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time )
-    {
-        if ( !enabled ) return;
-
-        if ( e.isButtonDown( MouseButton.Button1 ) )
+        if ( this.dragEvent == null && ev.isButtonDown( MouseButton.Button1 ) )
         {
             for ( EventSelection selection : events )
             {
                 if ( selection.isLocation( Center, Start, End ) && selection.getEvent( ).isEditable( ) )
                 {
-                    dragEvent = selection.getEvent( );
-                    eventStart = dragEvent.getStartTime( );
-                    eventEnd = dragEvent.getEndTime( );
-                    anchorTime = time;
-                    e.setHandled( true );
+                    this.dragEvent = selection.getEvent( );
+                    this.eventStart = dragEvent.getStartTime( );
+                    this.eventEnd = dragEvent.getEndTime( );
+                    this.anchorTime = time;
+                    ev.setHandled( true );
 
                     if ( selection.isCenterSelection( ) )
                     {
-                        dragType = Center;
+                        this.dragType = Center;
                     }
                     else if ( selection.isStartTimeSelection( ) )
                     {
-                        dragType = Start;
+                        this.dragType = Start;
                     }
                     else if ( selection.isEndTimeSelection( ) )
                     {
-                        dragType = End;
+                        this.dragType = End;
                     }
 
                     return;
@@ -147,21 +119,62 @@ public class DragListener implements EventPlotListener, GlimpseMouseAllListener
     }
 
     @Override
-    public void mouseReleased( GlimpseMouseEvent event )
+    public void mouseMoved( GlimpseMouseEvent ev )
+    {
+        if ( !this.enabled ) return;
+
+        if ( this.dragEvent != null )
+        {
+            this.doDrag( ev );
+            ev.setHandled( true );
+        }
+    }
+
+    @Override
+    public void mouseReleased( GlimpseMouseEvent ev )
     {
         if ( !enabled ) return;
 
-        reset( );
+        if ( this.dragEvent != null && ev.isButtonDown( MouseButton.Button1 ) )
+        {
+            // TODO: Find a less kludgy way to distinguish mouse-release from mouse-drag
+            // If the mouse is outside the canvas when released, the incoming clickCount is zero; subtract 1 so that releaseClickCount is always negative
+            int releaseClickCount = ( -1 * ev.getClickCount( ) ) - 1;
+            GlimpseMouseEvent releaseEv = new GlimpseMouseEvent( ev.getTargetStack( ), ev.getModifiers( ), ev.getButtons( ), ev.getAllX( ), ev.getAllY( ), ev.getWheelIncrement( ), releaseClickCount, false );
+
+            this.doDrag( releaseEv );
+            this.reset( );
+            ev.setHandled( true );
+        }
+    }
+
+    protected void doDrag( GlimpseMouseEvent ev )
+    {
+        TimeStamp time = this.info.getTime( ev );
+
+        if ( this.dragType == Center )
+        {
+            double diff = time.durationAfter( this.anchorTime );
+            this.dragEvent.setTimes( ev, this.eventStart.add( diff ), this.eventEnd.add( diff ), false );
+        }
+        else if ( this.dragType == End && this.eventStart.isBefore( time ) )
+        {
+            this.dragEvent.setTimes( ev, this.eventStart, time, false );
+        }
+        else if ( this.dragType == Start && this.eventEnd.isAfter( time ) )
+        {
+            this.dragEvent.setTimes( ev, time, this.eventEnd, false );
+        }
     }
 
     //@formatter:off
-    @Override public void eventsHovered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-    @Override public void eventsExited( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-    @Override public void eventsEntered( GlimpseMouseEvent e, Set<EventSelection> events, TimeStamp time ) { }
-    @Override public void eventUpdated( GlimpseMouseEvent e, Event event ) { }
-    @Override public void mouseEntered( GlimpseMouseEvent event ) { }
-    @Override public void mouseExited( GlimpseMouseEvent event ) { }
-    @Override public void mousePressed( GlimpseMouseEvent event ) { }
-    @Override public void mouseWheelMoved( GlimpseMouseEvent e ) { }
+    @Override public void eventsHovered( GlimpseMouseEvent ev, Set<EventSelection> events, TimeStamp time ) { }
+    @Override public void eventsExited( GlimpseMouseEvent ev, Set<EventSelection> events, TimeStamp time ) { }
+    @Override public void eventsEntered( GlimpseMouseEvent ev, Set<EventSelection> events, TimeStamp time ) { }
+    @Override public void eventUpdated( GlimpseMouseEvent ev, Event event ) { }
+    @Override public void mouseEntered( GlimpseMouseEvent ev ) { }
+    @Override public void mouseExited( GlimpseMouseEvent ev ) { }
+    @Override public void mousePressed( GlimpseMouseEvent ev ) { }
+    @Override public void mouseWheelMoved( GlimpseMouseEvent ev ) { }
     //@formatter:on
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,6 @@ public class ExampleTimelineFacet extends ExampleFacet
         this.view.glimpseInvoke( ( context ) ->
         {
             this.painter.dispose( context );
-            return true;
         } );
     }
 

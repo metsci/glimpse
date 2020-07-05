@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,22 @@ public class AxisUnitConverters
             return ( 0.01 * value );
         }
     };
+
+    public static final AxisUnitConverter valueShownMultipliedBy( double factor )
+    {
+        return new AxisUnitConverter( )
+        {
+            public double toAxisUnits( double value )
+            {
+                return ( factor * value );
+            }
+
+            public double fromAxisUnits( double value )
+            {
+                return ( value / factor );
+            }
+        };
+    }
 
     // Length
 

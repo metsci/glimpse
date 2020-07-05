@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.metsci.glimpse.dnc;
+
+import static com.metsci.glimpse.util.GeneralUtils.floatsEqual;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -75,10 +77,10 @@ public class DncQuery
 
         DncQuery other = ( DncQuery ) o;
         return ( Objects.equals( other.chunkKeys, chunkKeys )
-              && Float.compare( other.xMin, xMin ) == 0
-              && Float.compare( other.xMax, xMax ) == 0
-              && Float.compare( other.yMin, yMin ) == 0
-              && Float.compare( other.yMax, yMax ) == 0 );
+              && floatsEqual( other.xMin, xMin )
+              && floatsEqual( other.xMax, xMax )
+              && floatsEqual( other.yMin, yMin )
+              && floatsEqual( other.yMax, yMax ) );
     }
 
 }

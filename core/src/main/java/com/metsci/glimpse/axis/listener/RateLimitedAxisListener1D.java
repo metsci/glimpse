@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,21 @@ public abstract class RateLimitedAxisListener1D extends RateLimitedEventDispatch
     public RateLimitedAxisListener1D( long _idleTimeMillis )
     {
         super( _idleTimeMillis );
+    }
+
+    public RateLimitedAxisListener1D( String name )
+    {
+        super( 1000l / 60l, name );
+    }
+
+    public RateLimitedAxisListener1D( double maxFreqHz, String name )
+    {
+        super( ( long ) ( 1000 / maxFreqHz ), name );
+    }
+
+    public RateLimitedAxisListener1D( long _idleTimeMillis, String name )
+    {
+        super( _idleTimeMillis, name );
     }
 
     public abstract void axisUpdatedRateLimited( Axis1D axis );

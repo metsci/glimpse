@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@ package com.metsci.glimpse.docking;
 
 import java.awt.Component;
 
+import com.metsci.glimpse.docking.xml.GroupArrangement;
+
 public interface DockingGroupListener
 {
 
@@ -49,16 +51,32 @@ public interface DockingGroupListener
 
     void restoredTree( MultiSplitPane docker );
 
-    void addedFrame( DockingGroup group, DockingFrame frame );
+    void addedWindow( DockingGroup group, DockingWindow window );
 
-    void disposingAllFrames( DockingGroup group );
+    /**
+     * Called when the user tries to close a window in the {@link DockingGroup}, e.g. by clicking the
+     * close button in the window's title bar.
+     * <p>
+     * Depending on the {@link DockingFrameCloseOperation}, this call might be followed automatically by
+     * calls to {@link #disposingAllWindows(DockingGroup)}, {@link #disposingWindow(DockingGroup, DockingWindow)},
+     * and/or {@link #disposedWindow(DockingGroup, DockingWindow)}.
+     */
+    void userRequestingDisposeWindow( DockingGroup group, DockingWindow window );
 
-    void disposingFrame( DockingGroup group, DockingFrame frame );
+    void disposingAllWindows( DockingGroup group );
 
-    void disposedFrame( DockingGroup group, DockingFrame frame );
+    void disposingWindow( DockingGroup group, DockingWindow window );
+
+    void disposedWindow( DockingGroup group, DockingWindow window );
+
+    void userRequestingCloseView( DockingGroup group, View view );
 
     void closingView( DockingGroup group, View view );
 
     void closedView( DockingGroup group, View view );
+
+    void settingArrangement( DockingGroup group, GroupArrangement groupArr );
+
+    void setArrangement( DockingGroup group, GroupArrangement groupArr );
 
 }

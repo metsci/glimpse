@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.support.swing;
 
+import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.getModalBlockedStatus;
+import static com.metsci.glimpse.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.DEFINITELY_BLOCKED;
+
 import javax.swing.SwingUtilities;
 
 import com.jogamp.newt.event.KeyEvent;
@@ -51,7 +54,10 @@ public class KeyWrapperNewtSwingEDT extends KeyWrapperNewt
     {
         SwingUtilities.invokeLater( ( ) ->
         {
-            this.doKeyPressed( ev );
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
+            {
+                this.doKeyPressed( ev );
+            }
         } );
     }
 
@@ -60,7 +66,10 @@ public class KeyWrapperNewtSwingEDT extends KeyWrapperNewt
     {
         SwingUtilities.invokeLater( ( ) ->
         {
-            this.doKeyReleased( ev );
+            if ( getModalBlockedStatus( ev ) != DEFINITELY_BLOCKED )
+            {
+                this.doKeyReleased( ev );
+            }
         } );
     }
 

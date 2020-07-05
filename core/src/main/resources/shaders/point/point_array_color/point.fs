@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Metron, Inc.
+// Copyright (c) 2019, Metron, Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 uniform float FEATHER_THICKNESS_PX;
 uniform float POINT_SIZE_PX;
 
-in vec4 vRgba;
+in vec4 gRgba;
 
 out vec4 outRgba;
 
@@ -44,14 +44,14 @@ void main( )
 
 	if ( distance_PX <= POINT_SIZE_PX - FEATHER_THICKNESS_PX  )
 	{
-		outRgba.rgba = vRgba.rgba;
+		outRgba.rgba = gRgba.rgba;
 	}
 	else
 	{
 		float frac = ( POINT_SIZE_PX - distance_PX ) / FEATHER_THICKNESS_PX;
 		frac = clamp( frac, 0, 1 );
 
-		outRgba.rgb = vRgba.rgb;
-		outRgba.a = vRgba.a * frac;
+		outRgba.rgb = gRgba.rgb;
+		outRgba.a = gRgba.a * frac;
 	}
 }

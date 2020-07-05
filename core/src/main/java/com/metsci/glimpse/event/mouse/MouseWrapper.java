@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
 package com.metsci.glimpse.event.mouse;
 
 import static com.metsci.glimpse.context.TargetStackUtil.*;
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -43,6 +44,7 @@ import com.metsci.glimpse.context.TargetStackUtil;
 public abstract class MouseWrapper<I>
 {
     protected GlimpseCanvas canvas;
+    protected FocusBehavior focusBehavior;
     // set of hovered stacks which does not change during drags
     protected LinkedList<GlimpseTargetStack> dragHoveredSet;
     // set of hovered stacks which changes even during drags
@@ -52,9 +54,10 @@ public abstract class MouseWrapper<I>
     // set of stacks that should receive keyboard events
     protected LinkedList<GlimpseTargetStack> focusedSet;
 
-    public MouseWrapper( GlimpseCanvas canvas )
+    public MouseWrapper( GlimpseCanvas canvas, FocusBehavior focusBehavior )
     {
         this.canvas = canvas;
+        this.focusBehavior = focusBehavior;
         this.dragHoveredSet = new LinkedList<GlimpseTargetStack>( );
         this.hoveredSet = new LinkedList<GlimpseTargetStack>( );
         this.focusedSet = new LinkedList<GlimpseTargetStack>( );
@@ -186,6 +189,12 @@ public abstract class MouseWrapper<I>
         List<GlimpseTargetStack> oldHovered = copyHovered( );
         dragHoveredSet.clear( );
         hoveredSet.clear( );
+
+        if ( focusBehavior == HOVER_FOCUS )
+        {
+            focusedSet.clear( );
+        }
+
         return oldHovered;
     }
 
@@ -199,12 +208,24 @@ public abstract class MouseWrapper<I>
     {
         List<GlimpseTargetStack> oldHovered = copyDragHovered( );
         dragHoveredSet.clear( );
+
+        if ( focusBehavior == HOVER_FOCUS )
+        {
+            focusedSet.clear( );
+        }
+
         return oldHovered;
     }
 
     protected void addDragHovered( GlimpseTargetStack stack )
     {
-        dragHoveredSet.add( TargetStackUtil.newTargetStack( stack ) );
+        GlimpseTargetStack stackCopy = TargetStackUtil.newTargetStack( stack );
+        dragHoveredSet.add( stackCopy );
+
+        if ( focusBehavior == HOVER_FOCUS )
+        {
+            focusedSet.add( stackCopy );
+        }
     }
 
     protected void setDragHovered( List<GlimpseTargetStack> list )

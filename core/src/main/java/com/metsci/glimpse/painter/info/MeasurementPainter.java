@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,8 @@ import com.metsci.glimpse.support.shader.line.LinePath;
 import com.metsci.glimpse.support.shader.line.LineProgram;
 import com.metsci.glimpse.support.shader.line.LineStyle;
 import com.metsci.glimpse.support.shader.triangle.FlatColorProgram;
+import com.metsci.glimpse.util.geo.util.DistanceAzimuth;
+import com.metsci.glimpse.util.vector.Vector2d;
 
 /**
  * Displays a protractor and ruler when the mouse cursor is locked
@@ -174,6 +176,14 @@ public class MeasurementPainter extends GlimpsePainterBase
         this.fillBuffer.dispose( context.getGL( ) );
     }
 
+    /**
+     * Need to override this in certain geo projections.
+     */
+    protected DistanceAzimuth getDistanceAzimuth( Vector2d originPos, Vector2d mousePos )
+    {
+        return new DistanceAzimuth( originPos.distance( mousePos ), originPos.angleWith( mousePos ) );
+    }
+
     @Override
     public void doPaintTo( GlimpseContext context )
     {
@@ -192,18 +202,16 @@ public class MeasurementPainter extends GlimpsePainterBase
 
         if ( !lockedX && !lockedY ) return;
 
-        float lockX = ( float ) axisX.getSelectionCenter( );
-        float lockY = ( float ) axisY.getSelectionCenter( );
+        double lockX = axisX.getSelectionCenter( );
+        double lockY = axisY.getSelectionCenter( );
 
-        float mouseX = ( float ) axisX.getMouseValue( );
-        float mouseY = ( float ) axisY.getMouseValue( );
+        double mouseX = axisX.getMouseValue( );
+        double mouseY = axisY.getMouseValue( );
 
-        float diffX = mouseX - lockX;
-        float diffY = mouseY - lockY;
+        DistanceAzimuth distAz = getDistanceAzimuth( new Vector2d( lockX, lockY ), new Vector2d( mouseX, mouseY ) );
+        double distance = distAz.getDistance( );
+        double angle = distAz.getAzimuth( );
 
-        float distance = ( float ) Math.sqrt( diffX * diffX + diffY * diffY );
-
-        float angle = ( float ) Math.atan2( mouseY - lockY, mouseX - lockX );
         int sign = angle < 0 ? -1 : 1;
         float step = ( float ) RADIANS_PER_VERTEX;
         float radius = ( float ) ( distance * ANGLE_WEDGE_RADIUS_FRACTION );
@@ -211,8 +219,8 @@ public class MeasurementPainter extends GlimpsePainterBase
         //// draw ruler ////
 
         this.linePath.clear( );
-        this.linePath.moveTo( lockX, lockY );
-        this.linePath.lineTo( mouseX, mouseY );
+        this.linePath.moveTo( ( float ) lockX, ( float ) lockY );
+        this.linePath.lineTo( ( float ) mouseX, ( float ) mouseY );
 
         this.lineProg.begin( gl );
         try
@@ -232,7 +240,7 @@ public class MeasurementPainter extends GlimpsePainterBase
 
         this.fillBuffer.clear( );
 
-        this.fillBuffer.grow2f( lockX, lockY );
+        this.fillBuffer.grow2f( ( float ) lockX, ( float ) lockY );
 
         for ( double a = 0; a < angle * sign; a += step )
         {

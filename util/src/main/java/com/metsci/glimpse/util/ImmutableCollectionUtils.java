@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util;
 
-import static com.google.common.base.Objects.*;
+import static com.google.common.base.Objects.equal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -106,7 +106,7 @@ public class ImmutableCollectionUtils
         return ( newMap == null ? map : ImmutableMap.copyOf( newMap ) );
     }
 
-    public static <K,V> ImmutableMap<K,V> mapWith( ImmutableMap<K,V> map, K key, Function<? super V,? extends V> transformFn )
+    public static <K,V> ImmutableMap<K,V> mapUpdated( ImmutableMap<K,V> map, K key, Function<? super V,? extends V> transformFn )
     {
         V value = transformFn.apply( map.get( key ) );
         return mapWith( map, key, value );
@@ -124,6 +124,13 @@ public class ImmutableCollectionUtils
             newMap.remove( key );
             return ImmutableMap.copyOf( newMap );
         }
+    }
+
+    public static <K,V> ImmutableMap<K,V> mapSubset( ImmutableMap<K,V> map, Collection<K> keys )
+    {
+        Map<K,V> subset = new LinkedHashMap<>( map );
+        subset.keySet( ).retainAll( keys );
+        return ImmutableMap.copyOf( subset );
     }
 
     public static <V> ImmutableSet<V> setPlus( ImmutableSet<V> set, V value )

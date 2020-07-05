@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,58 +26,93 @@
  */
 package com.metsci.glimpse.util.var;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class Txn
 {
 
-    protected static class SubtreeModification
-    {
-        public final Var<?> root;
-        public final VarEvent ev;
+    protected static final ThreadLocal<LinkedHashSet<TxnMember>> activeTxns = new ThreadLocal<>( );
 
-        public SubtreeModification( Var<?> root, VarEvent ev )
+    /**
+     * Generally, this method shouldn't be called directly from application
+     * code. It is public to allow new utilities to be implemented in ways
+     * that use the {@link Txn} mechanism.
+     */
+    public static void addToActiveTxn( TxnMember member )
+    {
+        Set<TxnMember> txn = activeTxns.get( );
+        if ( txn == null )
         {
-            this.root = root;
-            this.ev = ev;
+            // No active txn, so commit immediately
+            member.commit( );
+            member.postCommit( );
+        }
+        else
+        {
+            // Defer until commit or rollback of active txn
+            txn.add( member );
         }
     }
 
-
-    protected final List<SubtreeModification> subtreeMods;
-
-
-    public Txn( )
+    public static void doTxn( Runnable task )
     {
-        this.subtreeMods = new ArrayList<>( );
+        doTxn( ( ) ->
+        {
+            task.run( );
+            return null;
+        } );
     }
 
-    public void recordSubtreeMod( Var<?> root, VarEvent ev )
+    public static <T> T doTxn( Supplier<T> task )
     {
-        this.subtreeMods.add( new SubtreeModification( root, ev ) );
-    }
+        if ( activeTxns.get( ) != null )
+        {
+            // Already inside a txn
+            return task.get( );
+        }
+        else
+        {
+            LinkedHashSet<TxnMember> txn = new LinkedHashSet<>( );
+            T result;
 
-    public void commit( )
-    {
-        for ( SubtreeModification mod : this.subtreeMods )
-        {
-            mod.root.commitForSubtree( );
-        }
-        for ( SubtreeModification mod : this.subtreeMods )
-        {
-            mod.root.fireForSubtree( mod.ev );
-        }
-        this.subtreeMods.clear( );
-    }
+            activeTxns.set( txn );
+            try
+            {
+                result = task.get( );
 
-    public void rollback( )
-    {
-        for ( SubtreeModification mod : this.subtreeMods )
-        {
-            mod.root.rollbackForSubtree( );
+                // By general contract, commit() must always succeed
+                for ( TxnMember member : txn )
+                {
+                    member.commit( );
+                }
+            }
+            catch ( Exception e )
+            {
+                // By general contract, rollback() must always succeed
+                for ( TxnMember member : txn )
+                {
+                    member.rollback( );
+                }
+
+                // Re-throwing the exception here pops us out of the method
+                throw e;
+            }
+            finally
+            {
+                activeTxns.set( null );
+            }
+
+            // An exception from postCommit() will cause this method to terminate
+            // immediately, without calling postCommit() for subsequent members
+            for ( TxnMember member : txn )
+            {
+                member.postCommit( );
+            }
+
+            return result;
         }
-        this.subtreeMods.clear( );
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,7 @@ public class Event implements Iterable<Event>
     protected float[] borderColor;
     protected float[] textColor;
     protected float borderThickness = 1.8f;
+    protected boolean useDefaultBorderThickness = true;
 
     protected TimeStamp startTime;
     protected TimeStamp endTime;
@@ -570,6 +571,7 @@ public class Event implements Iterable<Event>
     public void setBorderThickness( float thickness )
     {
         this.borderThickness = thickness;
+        this.useDefaultBorderThickness = false;
     }
 
     /**
@@ -579,6 +581,16 @@ public class Event implements Iterable<Event>
     public float getBorderThickness( )
     {
         return this.borderThickness;
+    }
+
+    public void setUseDefaultBorderThickness( boolean value )
+    {
+        this.useDefaultBorderThickness = value;
+    }
+
+    public boolean isUseDefaultBorderThickness( )
+    {
+        return this.useDefaultBorderThickness;
     }
 
     /**
@@ -645,10 +657,10 @@ public class Event implements Iterable<Event>
      */
     public void setTimes( TimeStamp startTime, TimeStamp endTime, boolean force )
     {
-        setTimes0( null, startTime, endTime, force );
+        setTimes( null, startTime, endTime, force );
     }
 
-    protected void setTimes0( GlimpseMouseEvent mouseEvent, TimeStamp startTime, TimeStamp endTime, boolean force )
+    public void setTimes( GlimpseMouseEvent mouseEvent, TimeStamp startTime, TimeStamp endTime, boolean force )
     {
         if ( !force )
         {

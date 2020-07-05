@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,12 +44,15 @@ public class SimpleLayoutExample implements GlimpseLayoutProvider
     {
         Example.showWithSwing( new SimpleLayoutExample( ) );
     }
-
-    @Override
-    public GlimpseLayout getLayout( )
+    
+    protected SimplePlot2D rightPlot;
+    protected SimplePlot2D leftPlot;
+    protected GlimpseLayout layoutParent;
+    
+    public SimpleLayoutExample( )
     {
         // create a delegate painter which lays out its child painters based on a mig layout
-        GlimpseLayout layoutParent = new GlimpseLayout( );
+        this.layoutParent = new GlimpseLayout( );
 
         // create a layout manager
         GlimpseLayoutManagerMig layout = new GlimpseLayoutManagerMig( );
@@ -70,7 +73,7 @@ public class SimpleLayoutExample implements GlimpseLayoutProvider
         leftPlotLayout.setLayoutData( String.format( "cell 0 0 1 1, push, grow" ) );
 
         // create two pre-configured plots
-        SimplePlot2D rightPlot = new SimplePlot2D( );
+        this.rightPlot = new SimplePlot2D( );
         rightPlot.setTitle( "Right Plot" );
         rightPlot.setAxisLabelX( "Right Axis X" );
         rightPlot.setAxisLabelY( "Right Axis Y" );
@@ -85,7 +88,7 @@ public class SimpleLayoutExample implements GlimpseLayoutProvider
         rightPlot.setMinY( 0.0 );
         rightPlot.lockAspectRatioXY( 1.0 );
 
-        SimplePlot2D leftPlot = new SimplePlot2D( );
+        this.leftPlot = new SimplePlot2D( );
         leftPlot.setTitle( "Left Plot" );
         leftPlot.setAxisLabelX( "Left Axis X" );
         leftPlot.setAxisLabelY( "Left Axis Y" );
@@ -103,7 +106,21 @@ public class SimpleLayoutExample implements GlimpseLayoutProvider
         // add the plots to their respective layouts
         rightPlotLayout.addLayout( rightPlot );
         leftPlotLayout.addLayout( leftPlot );
-
+    }
+    
+    @Override
+    public GlimpseLayout getLayout( )
+    {
         return layoutParent;
+    }
+
+    public SimplePlot2D getRightPlot( )
+    {
+        return rightPlot;
+    }
+
+    public SimplePlot2D getLeftPlot( )
+    {
+        return leftPlot;
     }
 }

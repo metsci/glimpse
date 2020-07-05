@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,10 @@ package com.metsci.glimpse.docking;
 
 import static com.metsci.glimpse.docking.DockingUtils.getAncestorOfClass;
 import static com.metsci.glimpse.docking.MiscUtils.createVerticalBox;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_AUTO_CLOSEABLE;
+import static com.metsci.glimpse.docking.ViewCloseOption.VIEW_CUSTOM_CLOSEABLE;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.attachMulticastTileListener;
+import static com.metsci.glimpse.docking.group.DockingGroupListenerUtils.notifyUserRequestingCloseView;
 import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
 import static java.lang.Math.ceil;
@@ -47,14 +51,16 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 
 import com.metsci.glimpse.docking.TileImpl.TabComponentFactory;
+import com.metsci.glimpse.docking.group.DockingGroupBase;
 
 @SuppressWarnings( "serial" )
 public class TileFactoryStandard implements TileFactory
 {
 
-    protected final DockingGroup dockingGroup;
+    protected final DockingGroupBase dockingGroup;
 
-    public TileFactoryStandard( DockingGroup dockingGroup )
+
+    public TileFactoryStandard( DockingGroupBase dockingGroup )
     {
         this.dockingGroup = dockingGroup;
     }
@@ -62,7 +68,7 @@ public class TileFactoryStandard implements TileFactory
     @Override
     public Tile newTile( )
     {
-        final DockingTheme theme = dockingGroup.theme;
+        final DockingTheme theme = dockingGroup.theme( );
 
         final Tile[] tileRef = { null };
 
@@ -85,7 +91,7 @@ public class TileFactoryStandard implements TileFactory
             @Override
             public Component createComponent( final Tile tile, final View view )
             {
-                if ( view.closeable )
+                if ( view.closeOption == VIEW_AUTO_CLOSEABLE || view.closeOption == VIEW_CUSTOM_CLOSEABLE )
                 {
                     JButton closeButton = new JButton( )
                     {
@@ -122,7 +128,12 @@ public class TileFactoryStandard implements TileFactory
                         @Override
                         public void actionPerformed( ActionEvent ev )
                         {
-                            dockingGroup.closeView( view );
+                            notifyUserRequestingCloseView( dockingGroup.listeners( ), dockingGroup, view );
+
+                            if ( view.closeOption == VIEW_AUTO_CLOSEABLE )
+                            {
+                                dockingGroup.closeView( view );
+                            }
                         }
                     } );
 
@@ -140,7 +151,7 @@ public class TileFactoryStandard implements TileFactory
         final Tile tile = new TileImpl( theme, tabCornerComponentFactory, new Component[] { maximizeButton } );
         tileRef[0] = tile;
 
-        dockingGroup.attachListenerTo( tile );
+        attachMulticastTileListener( tile, dockingGroup.listeners( ) );
 
         final DockingMouseAdapter mouseAdapter = new DockingMouseAdapter( tile, dockingGroup, this );
         tile.addDockingMouseAdapter( mouseAdapter );

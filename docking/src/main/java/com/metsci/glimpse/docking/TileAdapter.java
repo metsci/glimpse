@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,17 +31,14 @@ public class TileAdapter implements TileListener
 
     @Override
     public void addedView( View view )
-    {
-    }
+    { }
 
     @Override
     public void removedView( View view )
-    {
-    }
+    { }
 
     @Override
     public void selectedView( View view )
-    {
-    }
+    { }
 
 }

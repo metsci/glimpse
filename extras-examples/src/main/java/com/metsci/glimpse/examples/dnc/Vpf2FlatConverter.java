@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ import static com.metsci.glimpse.dnc.convert.Vpf2Flat.*;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.*;
 import static com.metsci.glimpse.docking.DockingUtils.*;
 import static com.metsci.glimpse.examples.dnc.DncExampleUtils.*;
-import static com.metsci.glimpse.platformFixes.PlatformFixes.*;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.*;
 import static com.metsci.glimpse.util.logging.LoggerUtils.*;
 import static javax.swing.JFileChooser.*;
@@ -78,7 +77,6 @@ public class Vpf2FlatConverter
     public static void main( String[] args )
     {
         initializeLogging( "dnc-examples/logging.properties" );
-        fixPlatformQuirks( );
         initTinyLaf( );
 
 

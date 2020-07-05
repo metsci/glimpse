@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,28 @@ public class WrappedGlimpseContext extends GlimpseContextImpl
         }
     }
 
+    public static boolean isFirstWrappedTile( GlimpseContext context )
+    {
+        if ( context instanceof WrappedGlimpseContext )
+        {
+            return ( ( WrappedGlimpseContext ) context ).isFirstWrappedTile;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
 
     protected final Wrapper2D wrapper;
+    protected final boolean isFirstWrappedTile;
 
 
-    public WrappedGlimpseContext( GLContext glContext, int[] scale, Wrapper2D wrapper )
+    public WrappedGlimpseContext( GLContext glContext, int[] scale, Wrapper2D wrapper, boolean isFirstWrappedTile )
     {
         super( glContext, scale );
         this.wrapper = wrapper;
+        this.isFirstWrappedTile = isFirstWrappedTile;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,13 @@
  */
 package com.metsci.glimpse.support.swing;
 
+import static com.metsci.glimpse.support.swing.NewtClickTimeoutWorkaround.attachNewtClickTimeoutWorkaround;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
+import static java.lang.Long.parseLong;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 
@@ -45,6 +48,8 @@ import javax.swing.SwingUtilities;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Window;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 import com.metsci.glimpse.canvas.NewtSwingGlimpseCanvas;
@@ -84,6 +89,33 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
 
     private static final long serialVersionUID = 1L;
 
+    protected static final long clickTimeout_MILLIS = findClickTimeout_MILLIS( );
+    protected static long findClickTimeout_MILLIS( )
+    {
+        try
+        {
+            String sysPropValue = System.getProperty( "glimpse.clickTimeoutMillis" );
+            return parseLong( sysPropValue );
+        }
+        catch ( Exception e )
+        {
+            try
+            {
+                Object awtPropValue = Toolkit.getDefaultToolkit( ).getDesktopProperty( "awt.multiClickInterval" );
+                return ( ( Number ) awtPropValue ).longValue( );
+            }
+            catch ( Exception e2 )
+            {
+                return 500;
+            }
+        }
+    }
+
+    static
+    {
+        logger.fine( "Glimpse click timeout is " + clickTimeout_MILLIS + " ms" );
+    }
+
     public NewtSwingEDTGlimpseCanvas( String profile )
     {
         super( profile );
@@ -109,11 +141,23 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     {
         Window window = NewtFactory.createWindow( glCapabilities );
 
+        // Workaround for https://jogamp.org/bugzilla/show_bug.cgi?id=1127
+        window.addWindowListener( 0, new WindowAdapter( )
+        {
+            @Override
+            public void windowGainedFocus( WindowEvent ev )
+            {
+                ev.setConsumed( true );
+            }
+        } );
+
         Display display = window.getScreen( ).getDisplay( );
         if ( !( display.getEDTUtil( ) instanceof AWTEDTUtil ) )
         {
             display.setEDTUtil( new AWTEDTUtil( currentThread( ).getThreadGroup( ), "AWTDisplay-" + display.getFQName( ), display::dispatchMessages ) );
         }
+
+        attachNewtClickTimeoutWorkaround( window, clickTimeout_MILLIS );
 
         return GLWindow.create( window );
     }
@@ -204,7 +248,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
     public BufferedImage toBufferedImage( )
     {
         requireSwingThread( );
-        
+
         GLContext glContext = this.getGLDrawable( ).getContext( );
         glContext.makeCurrent( );
         try
@@ -218,7 +262,7 @@ public class NewtSwingEDTGlimpseCanvas extends NewtSwingGlimpseCanvas
             glContext.release( );
         }
     }
-    
+
     protected static void requireSwingThread( )
     {
         if ( !SwingUtilities.isEventDispatchThread( ) )

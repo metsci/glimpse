@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -207,7 +207,18 @@ public class LandingIndicator
 
                 if ( w > 0 && h > 0 )
                 {
-                    frame.setBounds( x, y, w, h );
+                    // Leaving the frame visible while changing its bounds makes flicker worse in some cases,
+                    // but better in others -- empirically, the best approach seems to be to leave it visible
+                    // during pure translations, but hide it during changes that involve resizing
+                    if ( w != frame.getWidth( ) || h != frame.getHeight( ) )
+                    {
+                        frame.setVisible( false );
+                        frame.setBounds( x, y, w, h );
+                    }
+                    else if ( x != frame.getX( ) || y != frame.getY( ) )
+                    {
+                        frame.setLocation( x, y );
+                    }
 
                     int border = theme.landingIndicatorThickness;
                     int topBorder = max( 0, border - ( y - bounds.y ) );

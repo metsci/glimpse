@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -375,7 +375,7 @@ public class HistogramPainter extends GlimpsePainterBase
                 // copy data from the host memory buffer to the device
                 gl.glBufferData( GL.GL_ARRAY_BUFFER, dataSizeTemp * FLOATS_PER_BAR * GLUtils.BYTES_PER_FLOAT, dataBuffer.rewind( ), GL.GL_DYNAMIC_DRAW );
 
-                GLErrorUtils.logGLError( logger, gl, "Error copying HistogramPainter data to device." );
+                GLErrorUtils.logGLErrors( logger, gl, "Error copying HistogramPainter data to device." );
 
                 this.newData = false;
             }

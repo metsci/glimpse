@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.swt.event.mouse;
 
+import static com.metsci.glimpse.event.mouse.FocusBehavior.*;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -39,6 +41,7 @@ import org.eclipse.swt.widgets.Event;
 import com.metsci.glimpse.canvas.GlimpseCanvas;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseTargetStack;
+import com.metsci.glimpse.event.mouse.FocusBehavior;
 import com.metsci.glimpse.event.mouse.GlimpseMouseEvent;
 import com.metsci.glimpse.event.mouse.MouseWrapperImpl;
 
@@ -46,7 +49,12 @@ public class MouseWrapperSWT extends MouseWrapperImpl<MouseEvent> implements Mou
 {
     public MouseWrapperSWT( GlimpseCanvas canvas )
     {
-        super( canvas );
+        this( canvas, CLICK_FOCUS );
+    }
+
+    public MouseWrapperSWT( GlimpseCanvas canvas, FocusBehavior focusBehavior )
+    {
+        super( canvas, focusBehavior );
     }
 
     @Override

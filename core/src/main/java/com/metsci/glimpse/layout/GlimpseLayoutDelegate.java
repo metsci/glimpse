@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,8 @@ import java.util.Objects;
 
 import javax.media.opengl.GL;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.metsci.glimpse.context.GlimpseBounds;
 import com.metsci.glimpse.context.GlimpseContext;
 import com.metsci.glimpse.context.GlimpseTargetStack;
@@ -76,6 +78,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     private GlimpseLayoutDelegate layoutParent;
 
     private List<GlimpseLayoutDelegate> layoutChildren;
+    private BiMap<Object, GlimpsePainter> keyMap;
     private LinkedHashMap<GlimpsePainter, Member> memberMap;
     private List<Member> memberList;
 
@@ -126,6 +129,7 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         this.layoutChildren = new ArrayList<GlimpseLayoutDelegate>( );
         this.memberList = new ArrayList<Member>( );
         this.memberMap = new LinkedHashMap<GlimpsePainter, Member>( );
+        this.keyMap = HashBiMap.create( );
     }
 
     public void paintTo( GlimpseContext context )
@@ -241,9 +245,21 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
     {
         Member member = memberMap.remove( layout );
         memberList.remove( member );
+        keyMap.inverse( ).remove( layout );
 
         GlimpseLayoutDelegate delegate = layout.getDelegate( );
         layoutChildren.remove( delegate );
+    }
+    
+    public void removeLayoutByKey( Object key )
+    {
+        GlimpseLayout layout = (GlimpseLayout) keyMap.get( key );
+        if ( layout != null ) removeLayout( layout );
+    }
+    
+    public GlimpseLayout getLayoutByKey( Object key )
+    {
+        return (GlimpseLayout) keyMap.get( key );
     }
 
     public void removeAll( )
@@ -251,19 +267,21 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         layoutChildren.clear( );
         memberList.clear( );
         memberMap.clear( );
+        keyMap.clear( );
     }
 
     public void addLayout( GlimpseLayout layout )
     {
-        addLayout( layout, null, 0 );
+        addLayout( null, layout, null, 0 );
     }
 
-    public void addLayout( GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
+    public void addLayout( Object key, GlimpseLayout layout, GlimpsePainterCallback callback, int zOrder )
     {
         Member member = new Member( layout, callback, zOrder );
         memberMap.put( layout, member );
         memberList.add( member );
-        updateMemeberList( );
+        if ( key != null ) keyMap.put( key, layout );
+        updateMemberList( );
 
         GlimpseLayoutDelegate delegate = layout.getDelegate( );
         layoutChildren.add( delegate );
@@ -271,21 +289,34 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
 
     public void addPainter( GlimpsePainter painter )
     {
-        addPainter( painter, null, 0 );
+        addPainter( null, painter, null, 0 );
     }
 
-    public void addPainter( GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
+    public void addPainter( Object key, GlimpsePainter painter, GlimpsePainterCallback callback, int zOrder )
     {
         Member member = new Member( painter, callback, zOrder );
         memberMap.put( painter, member );
         memberList.add( member );
-        updateMemeberList( );
+        if ( key != null ) keyMap.put( key, painter );
+        updateMemberList( );
     }
 
     public void removePainter( GlimpsePainter painter )
     {
         Member member = memberMap.remove( painter );
         memberList.remove( member );
+        keyMap.inverse( ).remove( painter );
+    }
+    
+    public void removePainterByKey( Object key )
+    {
+        GlimpsePainter painter = keyMap.get( key );
+        if ( painter != null ) removePainter( painter );
+    }
+    
+    public GlimpsePainter getPainterByKey( Object key )
+    {
+        return keyMap.get( key );
     }
 
     public void setZOrder( GlimpsePainter painter, int zOrder )
@@ -295,11 +326,11 @@ public class GlimpseLayoutDelegate implements ComponentWrapper, ContainerWrapper
         if ( member != null )
         {
             member.setZOrder( zOrder );
-            updateMemeberList( );
+            updateMemberList( );
         }
     }
 
-    public void updateMemeberList( )
+    public void updateMemberList( )
     {
         Collections.sort( memberList, new Comparator<Member>( )
         {

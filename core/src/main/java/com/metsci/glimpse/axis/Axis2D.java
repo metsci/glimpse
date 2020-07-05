@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -156,8 +156,7 @@ public class Axis2D
         y.setMin( minY + transY );
         y.setMax( maxY + transY );
 
-        x.validate( );
-        y.validate( );
+        validate( );
     }
 
     public void set( double minX, double maxX, double minY, double maxY )
@@ -166,6 +165,8 @@ public class Axis2D
         x.setMax( maxX );
         y.setMin( minY );
         y.setMax( maxY );
+        
+        validate( );
     }
 
     public void lock( )

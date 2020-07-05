@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,8 @@ public class ImageDataInternal
 
     // the coordinates of the "center" of the image relative to the lower left pixel
     // (not necessarily width/2, height/2)
-    private int centerX;
-    private int centerY;
+    private double centerX;
+    private double centerY;
 
     // the x and y location of the lower left of the image relative to the whole texture atlas
     private int locationX;
@@ -63,7 +63,7 @@ public class ImageDataInternal
 
     private boolean delete = false; // whether the texture is no longer needed
 
-    public ImageDataInternal( Object id, int centerX, int centerY, int bufferX, int bufferY, int width, int height )
+    public ImageDataInternal( Object id, double centerX, double centerY, int bufferX, int bufferY, int width, int height )
     {
         this.id = id;
 
@@ -107,12 +107,12 @@ public class ImageDataInternal
         return locationY;
     }
 
-    public int getCenterX( )
+    public double getCenterX( )
     {
         return centerX;
     }
 
-    public int getCenterY( )
+    public double getCenterY( )
     {
         return centerY;
     }

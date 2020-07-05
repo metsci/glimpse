@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Metron, Inc.
+ * Copyright (c) 2019, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,8 @@
  */
 package com.metsci.glimpse.util;
 
+import static java.lang.Double.doubleToLongBits;
+import static java.lang.Float.floatToIntBits;
 import static java.util.Collections.unmodifiableList;
 
 import java.math.BigDecimal;
@@ -40,6 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -64,6 +67,25 @@ public class GeneralUtils
      */
     private GeneralUtils( )
     {
+    }
+
+    /**
+     * Convenience function for tersely re-throwing a checked exception wrapped in a {@link RuntimeException}.
+     */
+    public static <T> T require( ThrowingSupplier<T> fn )
+    {
+        try
+        {
+            return fn.get( );
+        }
+        catch ( RuntimeException e )
+        {
+            throw e;
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
     }
 
     /**
@@ -270,6 +292,22 @@ public class GeneralUtils
     public static <T, U> T cast( U u )
     {
         return ( T ) u;
+    }
+
+    /**
+     * Return true iff the set contains any of the specified values.
+     */
+    @SafeVarargs
+    public static <T> boolean containsAny( Set<? super T> set, T... values )
+    {
+        for ( T value : values )
+        {
+            if ( set.contains( value ) )
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -518,6 +556,22 @@ public class GeneralUtils
     public static boolean approximateNotEqual( double d1, double d2, double epsilon )
     {
         return Math.abs( d1 - d2 ) > epsilon;
+    }
+
+    /**
+     * See {@link Double#equals(Object)}.
+     */
+    public static boolean doublesEqual( double d1, double d2 )
+    {
+        return ( doubleToLongBits( d1 ) == doubleToLongBits( d2 ) );
+    }
+
+    /**
+     * See {@link Float#equals(Object)}.
+     */
+    public static boolean floatsEqual( float f1, float f2 )
+    {
+        return ( floatToIntBits( f1 ) == floatToIntBits( f2 ) );
     }
 
     /**
