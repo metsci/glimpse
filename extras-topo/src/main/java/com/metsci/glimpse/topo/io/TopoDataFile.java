@@ -80,7 +80,7 @@ public class TopoDataFile
 
     public void requireValid( ) throws IOException
     {
-        long expectedSize = this.numRows * this.numCols * this.dataType.numBytes;
+        long expectedSize = ( long ) this.numRows * ( long ) this.numCols * this.dataType.numBytes;
         long actualSize = this.dataFile.length( );
 
         if ( actualSize == 0 && !this.dataFile.exists( ) )
