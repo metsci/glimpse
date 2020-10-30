@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.charts.bathy;
+package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
@@ -56,6 +56,8 @@ import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
+import com.metsci.glimpse.charts.bathy.TopoTileProvider;
+import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
 import com.metsci.glimpse.core.painter.geo.TileKey;
 import com.metsci.glimpse.core.painter.geo.TilePainter;
@@ -197,7 +199,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
             logFine( LOGGER, "Building topo tile for %s", key );
             try
             {
-                TopographyData data = tileProvider.getTile( key );
+                TopoHostTile data = tileProvider.getTile( key );
                 tile = new CachedTileData( );
                 tile.imageWidth = data.getImageWidth( );
                 tile.imageHeight = data.getImageHeight( );
@@ -225,8 +227,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         shadeTexture.setProjection( getProjection( projection, tile ) );
         elevationTexture.setProjection( getProjection( projection, tile ) );
 
-        shadeTexture.setData( tile.shaded );
-        elevationTexture.setData( tile.data );
+        shadeTexture.mutate( (data, sizeX, sizeY) -> data.put( tile.shaded ) );
+        elevationTexture.mutate( (data, sizeX, sizeY) -> data.put( tile.elevation ) );
 
         return new DrawableTexture[] { shadeTexture, elevationTexture };
     }
@@ -369,11 +371,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         protected int imageHeight;
         protected int imageWidth;
 
-        /**
-         * Data should be positive up.
-         */
-        protected float[][] data;
-        protected float[][] shaded;
+        protected FloatBuffer elevation;
+        protected FloatBuffer shaded;
     }
 
     @Override

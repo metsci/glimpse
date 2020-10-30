@@ -37,13 +37,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.logging.Level;
 
-import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
 import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.core.layout.GlimpseLayout;
 import com.metsci.glimpse.core.painter.geo.ScalePainter;
 import com.metsci.glimpse.core.painter.geo.TileKey;
 import com.metsci.glimpse.core.plot.MapPlot2D;
+import com.metsci.glimpse.topo.ShadedReliefTiledPainter;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
