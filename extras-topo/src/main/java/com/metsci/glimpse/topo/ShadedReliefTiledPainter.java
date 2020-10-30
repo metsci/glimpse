@@ -27,16 +27,22 @@
 package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
+import static com.metsci.glimpse.core.support.color.GlimpseColor.toColorAwt;
+import static com.metsci.glimpse.topo.TopoColorUtils.bathyColorGradient2;
+import static com.metsci.glimpse.topo.TopoColorUtils.bathyColormapMinValue;
 import static com.metsci.glimpse.util.GlimpseDataPaths.glimpseUserCacheDir;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
 import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
+import static java.awt.Color.RGBtoHSB;
 import static java.lang.Math.atan;
 import static java.lang.Math.atan2;
+import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
 
 import java.awt.Color;
 import java.io.File;
@@ -46,17 +52,15 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import javax.print.attribute.standard.NumberOfDocuments;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import com.metsci.glimpse.charts.bathy.TopoTileProvider;
 import com.metsci.glimpse.charts.bathy.TopographyData;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
 import com.metsci.glimpse.core.painter.geo.TileKey;
@@ -64,8 +68,10 @@ import com.metsci.glimpse.core.painter.geo.TilePainter;
 import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.core.support.color.GlimpseColor;
+import com.metsci.glimpse.core.support.colormap.ColorGradient;
 import com.metsci.glimpse.core.support.projection.LatLonProjection;
 import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
 /**
@@ -108,14 +114,14 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     protected static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
     protected static final double LIGHT_AZIMUTH = fromDeg( -135 );
 
-    protected TopoTileProvider tileProvider;
+    protected TopoDataset topoDataset;
     protected ShadedTexturePainter topoImagePainter;
     protected ShadedReliefProgram shadedReliefProgram;
 
-    public ShadedReliefTiledPainter( GeoProjection projection, TopoTileProvider tileProvider )
+    public ShadedReliefTiledPainter( GeoProjection projection, TopoDataset topoDataset )
     {
         super( projection );
-        this.tileProvider = tileProvider;
+        this.topoDataset = topoDataset;
 
         topoImagePainter = new ShadedTexturePainter( );
         shadedReliefProgram = new ShadedReliefProgram( ELEVATION_TEXTURE_UNIT, HILLSHADE_TEXTURE_UNIT );
@@ -123,7 +129,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         addPainter( topoImagePainter );
 
         setAlpha( 1 );
-        setColors( BATHYMETRY_LIGHT_COLORS );
+        setColors( bathyColorGradient2 );
 
         if ( tileProvider.getAttribution( ) != null )
         {
@@ -145,21 +151,30 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     /**
      * Sets color scale.  The map from the maximum elevation to the color for that elevation. The color
      * shade is changed with the hillshade value.
+     *
+     * See {@link TopoColorUtils#bathyColormapMinValue} for the minimum elevation. The gradient goes from that
+     * depth to 0 depth.
      */
-    public void setColors( Map<Float, float[]> elevation2Colors )
+    public void setColors( ColorGradient gradient )
     {
-        List<Entry<Float, float[]>> entries = new ArrayList<>( elevation2Colors.entrySet( ) );
-        entries.sort( Comparator.comparing( Entry::getKey ) );
+        float stepSize = 1;
+        int nSteps = ( int ) ceil( 0 - bathyColormapMinValue );
 
-        float[][] newColors = new float[entries.size( )][4];
-        for ( int i = 0; i < entries.size( ); i++ )
+        float[][] newColors = new float[nSteps][4];
+        float[] rgba = new float[4];
+        for ( int i = 0; i < nSteps; i++ )
         {
-            Color awt = GlimpseColor.toColorAwt( entries.get( i ).getValue( ) );
-            Color.RGBtoHSB( awt.getRed( ), awt.getGreen( ), awt.getBlue( ), newColors[i] );
+            float elevation = bathyColormapMinValue + i * stepSize;
+            float fraction = ( elevation - bathyColormapMinValue ) / ( 0 - bathyColormapMinValue );
+            gradient.toColor( fraction, rgba );
+            Color awt = toColorAwt( rgba );
+            RGBtoHSB( awt.getRed( ), awt.getGreen( ), awt.getBlue( ), newColors[i] );
+
+            // Shift to add the elevation value
             newColors[i][3] = newColors[i][2];
             newColors[i][2] = newColors[i][1];
             newColors[i][1] = newColors[i][0];
-            newColors[i][0] = entries.get( i ).getKey( );
+            newColors[i][0] = elevation;
         }
 
         shadedReliefProgram.setColors( newColors );
@@ -213,7 +228,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
                 hillshade( data, shaded );
                 tile.shaded = shaded;
 
-                cacheFile.getParentFile( ).mkdirs( );
                 writeCachedTile( cacheFile, tile );
             }
             catch ( IOException ex )
@@ -227,8 +241,11 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         shadeTexture.setProjection( getProjection( projection, tile ) );
         elevationTexture.setProjection( getProjection( projection, tile ) );
 
-        shadeTexture.mutate( (data, sizeX, sizeY) -> data.put( tile.shaded ) );
-        elevationTexture.mutate( (data, sizeX, sizeY) -> data.put( tile.elevation ) );
+        tile.shaded.rewind( );
+        tile.elevation.rewind( );
+
+        shadeTexture.mutate( ( data, sizeX, sizeY ) -> data.put( tile.shaded.asFloatBuffer( ) ) );
+        elevationTexture.mutate( ( data, sizeX, sizeY ) -> data.put( tile.elevation.asFloatBuffer( ) ) );
 
         return new DrawableTexture[] { shadeTexture, elevationTexture };
     }
@@ -246,26 +263,12 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         cached.heightStep = rf.readDouble( );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( cached.imageHeight * Float.BYTES );
-        FloatBuffer fb = bbuf.asFloatBuffer( );
 
-        cached.data = new float[cached.imageWidth][cached.imageHeight];
-        for ( float[] row : cached.data )
-        {
-            bbuf.rewind( );
-            ch.read( bbuf );
-            fb.rewind( );
-            fb.get( row );
-        }
+        cached.elevation = ByteBuffer.allocateDirect( cached.imageWidth * cached.imageHeight * Float.BYTES );
+        cached.shaded = ByteBuffer.allocateDirect( cached.imageWidth * cached.imageHeight * Float.BYTES );
 
-        cached.shaded = new float[cached.imageWidth][cached.imageHeight];
-        for ( float[] row : cached.shaded )
-        {
-            bbuf.rewind( );
-            ch.read( bbuf );
-            fb.rewind( );
-            fb.get( row );
-        }
+        ch.read( cached.elevation );
+        ch.read( cached.shaded );
 
         rf.close( );
         return cached;
@@ -273,6 +276,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
 
     protected void writeCachedTile( File cacheFile, CachedTileData tile ) throws IOException
     {
+        cacheFile.getParentFile( ).mkdirs( );
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
         rf.setLength( 0 );
 
@@ -284,65 +288,75 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         rf.writeDouble( tile.heightStep );
 
         FileChannel ch = rf.getChannel( );
-        ByteBuffer bbuf = ByteBuffer.allocateDirect( tile.imageHeight * Float.BYTES );
-        FloatBuffer fb = bbuf.asFloatBuffer( );
-        for ( float[] row : tile.data )
-        {
-            bbuf.rewind( );
-            fb.rewind( );
-            fb.put( row );
-            ch.write( bbuf );
-        }
 
-        for ( float[] row : tile.shaded )
-        {
-            bbuf.rewind( );
-            fb.rewind( );
-            fb.put( row );
-            ch.write( bbuf );
-        }
+        tile.elevation.rewind( );
+        tile.shaded.rewind( );
+
+        ch.write( tile.elevation );
+        ch.write( tile.shaded );
 
         rf.close( );
     }
 
-    protected void hillshade( TopographyData data, float[][] dest )
+    protected void hillshade( TopoHostTile tile, FloatBuffer dest )
     {
+        double cellDLat_DEG = toDegrees( tile.northLat_RAD - tile.southLat_RAD ) / tile.numDataRows;
+        double cellDLon_DEG = toDegrees( tile.eastLon_RAD - tile.westLon_RAD ) / tile.numDataCols;
+
         /*
          * dx certainly changes as we change latitude, but the transition is
          * uneven and visually disturbing. Also found that tweaking by 0.5
          * helps increase visual separation.
          */
-        double dy = 60 * fromNauticalMiles( 1 ) * data.heightStep / 2;
-        double dx = 60 * fromNauticalMiles( 1 ) * data.widthStep / 2;
+        double dy = 60 * fromNauticalMiles( 1 ) * 0.5 * cellDLat_DEG;
+        double dx = 60 * fromNauticalMiles( 1 ) * 0.5 * cellDLon_DEG;
 
-        for ( int x = 1; x < data.imageWidth - 1; x++ )
+        for ( int x = 1; x < tile.numDataRows - 1; x++ )
         {
-            for ( int y = 1; y < data.imageHeight - 1; y++ )
+            for ( int y = 1; y < tile.numDataCols - 1; y++ )
             {
-                dest[x][y] = hillshade0( data.data, x, y, dx, dy );
+                float value = hillshade0( tile.dataBytes.asFloatBuffer( ), x, y, dx, dy, tile.numDataCols );
+                int idx = x + y * tile.numDataCols;
+                dest.put( idx, value );
             }
 
-            dest[x][0] = dest[x][1];
-            dest[x][data.imageHeight - 1] = dest[x][data.imageHeight - 2];
+            // Can't hillshade the very edges, so just copy out
+            int idxCol0 = x + 0 * tile.numDataCols;
+            int idxCol1 = x + 1 * tile.numDataCols;
+            dest.put( idxCol0, dest.get( idxCol1 ));
+
+            int idxEnd0 = x + (tile.numDataCols - 1) * tile.numDataCols;
+            int idxEnd1 = x + (tile.numDataCols - 2) * tile.numDataCols;
+            dest.put( idxEnd0, dest.get( idxEnd1 ));
         }
 
-        System.arraycopy( dest[1], 0, dest[0], 0, data.imageHeight );
-        System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
+//        System.arraycopy( dest[1], 0, dest[0], 0, data.imageHeight );
+//        System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
     }
 
     /**
      * From http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
      */
-    protected float hillshade0( float[][] data, int x, int y, double dx, double dy )
+    protected float hillshade0( FloatBuffer data, int x, int y, double dx, double dy, int numCols )
     {
-        float a = -data[x - 1][y + 1];
-        float b = -data[x + 0][y + 1];
-        float c = -data[x + 1][y + 1];
-        float d = -data[x - 1][y + 0];
-        float f = -data[x + 1][y + 0];
-        float g = -data[x - 1][y - 1];
-        float h = -data[x + 0][y - 1];
-        float i = -data[x + 1][y - 1];
+        int ai = (x - 1) + (y + 1) * numCols;
+        int bi = (x + 0) + (y + 1) * numCols;
+        int ci = (x + 1) + (y + 1) * numCols;
+        int di = (x - 1) + (y + 0) * numCols;
+        // skip e middle
+        int fi = (x + 0) + (y + 0) * numCols;
+        int gi = (x - 1) + (y - 1) * numCols;
+        int hi = (x + 0) + (y - 1) * numCols;
+        int ii = (x + 1) + (y - 1) * numCols;
+
+        float a = -data.get( ai );
+        float b = -data.get( bi );
+        float c = -data.get( ci );
+        float d = -data.get( di );
+        float f = -data.get( fi );
+        float g = -data.get( gi );
+        float h = -data.get( hi );
+        float i = -data.get( ii );
         double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
         double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
         double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
@@ -371,8 +385,8 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         protected int imageHeight;
         protected int imageWidth;
 
-        protected FloatBuffer elevation;
-        protected FloatBuffer shaded;
+        protected ByteBuffer elevation;
+        protected ByteBuffer shaded;
     }
 
     @Override

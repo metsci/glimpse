@@ -75,6 +75,14 @@ public class ColorGradientUtils
     }
 
     /**
+     * See {@link #newColorGradient(float, float, ValueAndColor...)}.
+     */
+    public static ValueAndColor vc( float v, float... rgba )
+    {
+        return new ValueAndColor( v, rgba[0], rgba[1], rgba[2], rgba[3] );
+    }
+
+    /**
      * Like {@link #newColorGradient(float, float, ValueAndColor...)}, but without the value scaling, so
      * values are always interpreted as fractions on [0,1].
      */

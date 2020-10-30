@@ -26,9 +26,12 @@
  */
 package com.metsci.glimpse.topo;
 
+import static com.metsci.glimpse.core.support.color.GlimpseColor.fromColorHex;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorGradient;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorTable;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.vc;
+
+import java.text.ParseException;
 
 import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.core.support.colormap.ColorGradient;
@@ -47,6 +50,43 @@ public class TopoColorUtils
                                                                              vc(  -6000f,  0.40f, 0.72f, 0.90f  ),
                                                                              vc(  -5000f,  0.53f, 0.79f, 0.95f  ),
                                                                              vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
+
+    public static final ColorGradient bathyColorGradient2;
+    static
+    {
+        try
+        {
+            bathyColorGradient2 = newColorGradient(
+                    bathyColormapMinValue,
+                    0,
+                    vc( -8_000f, fromColorHex( "#3c6e98" ) ),
+                    vc( -4_000f, fromColorHex( "#3c6e98" ) ),
+
+                    vc( -4_000f, fromColorHex( "#6499c1" ) ),
+                    vc( -2_000f, fromColorHex( "#6499c1" ) ),
+
+                    vc( -2_000f, fromColorHex( "#76a5cf" ) ),
+                    vc( -1_000f, fromColorHex( "#76a5cf" ) ),
+
+                    vc( -1_000f, fromColorHex( "#81acd6" ) ),
+                    vc( -500f, fromColorHex( "#81acd6" ) ),
+
+                    vc( -500f, fromColorHex( "#a3c9e6" ) ),
+                    vc( -100f, fromColorHex( "#a3c9e6" ) ),
+
+                    vc( -100f, fromColorHex( "#b0cee8" ) ),
+                    vc( -20f, fromColorHex( "#b0cee8" ) ),
+
+                    vc( -20f, fromColorHex( "#bbd9f0" ) ),
+                    vc( 0, fromColorHex( "#bbd9f0" ) ),
+
+                    vc( 0, fromColorHex( "#c9dfef" ) ) );
+        }
+        catch ( ParseException ex )
+        {
+            throw new RuntimeException( ex );
+        }
+    }
 
     public static final ColorGradient topoColorGradient = newColorGradient( +0f,
                                                                             topoColormapMaxValue,

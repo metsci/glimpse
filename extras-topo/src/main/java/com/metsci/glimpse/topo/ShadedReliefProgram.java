@@ -71,7 +71,7 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
     protected void addShaders( )
     {
         this.addVertexShader( ColorMapProgram.class.getResource( "passthrough.vs" ) );
-        this.addFragmentShader( ShadedReliefProgram.class.getResource( "shaded_relief_shader.fs" ) );
+        this.addFragmentShader( ShadedReliefProgram.class.getResource( "shaded_relief.fs" ) );
     }
 
     protected void initialize( int elevTexUnit, int shadeTexUnit )
