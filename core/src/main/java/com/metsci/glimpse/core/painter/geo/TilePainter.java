@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.charts.bathy;
+package com.metsci.glimpse.core.painter.geo;
 
 import static com.metsci.glimpse.core.painter.base.GlimpsePainterBase.getAxis2D;
 import static com.metsci.glimpse.core.support.PainterCache.SHARED_EXEC;
@@ -144,7 +144,7 @@ public abstract class TilePainter<V> extends DelegatePainter
         return clamp( lat_DEG, -90 + ANTIMERIDIAN_EPSILON, 90 - ANTIMERIDIAN_EPSILON );
     }
 
-    private Map<TileKey, Area> createTileAreas( )
+    protected Map<TileKey, Area> createTileAreas( )
     {
         Map<TileKey, Area> keys = new HashMap<>( );
         for ( TileKey key : allKeys( ) )

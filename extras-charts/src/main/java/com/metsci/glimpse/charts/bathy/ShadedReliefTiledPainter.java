@@ -57,6 +57,8 @@ import java.util.logging.Logger;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
+import com.metsci.glimpse.core.painter.geo.TileKey;
+import com.metsci.glimpse.core.painter.geo.TilePainter;
 import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
 import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.core.support.color.GlimpseColor;

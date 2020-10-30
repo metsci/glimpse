@@ -45,6 +45,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import com.metsci.glimpse.core.painter.geo.TileKey;
 import com.metsci.glimpse.util.GlimpseDataPaths;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

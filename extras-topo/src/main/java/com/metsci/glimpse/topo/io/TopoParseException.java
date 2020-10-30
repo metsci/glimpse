@@ -30,6 +30,7 @@ import java.io.IOException;
 
 public class TopoParseException extends IOException
 {
+    private static final long serialVersionUID = -4186120642347734233L;
 
     public TopoParseException( String message )
     {
