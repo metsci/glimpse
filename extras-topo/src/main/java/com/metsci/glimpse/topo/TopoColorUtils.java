@@ -27,12 +27,12 @@
 package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.fromColorHex;
-import static com.metsci.glimpse.core.support.color.WebColors.DarkGreen;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorGradient;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorTable;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.vc;
 
 import java.text.ParseException;
+import java.util.Arrays;
 
 import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.core.support.colormap.ColorGradient;
@@ -59,7 +59,6 @@ public class TopoColorUtils
         try
         {
             bathyColorsStepped = new ValueAndColor[] {
-                    vc( bathyColormapMinValue, fromColorHex( "#3c6e98" ) ),
                     vc( -8_000f, fromColorHex( "#3c6e98" ) ),
                     vc( -4_000f, fromColorHex( "#6499c1" ) ),
                     vc( -2_000f, fromColorHex( "#76a5cf" ) ),
@@ -68,12 +67,25 @@ public class TopoColorUtils
                     vc( -100f, fromColorHex( "#b0cee8" ) ),
                     vc( -20f, fromColorHex( "#bbd9f0" ) ),
                     vc( 0, fromColorHex( "#c9dfef" ) ),
-                    vc( 10_000, DarkGreen.toFloat4( ) ) };
+                    vc( topoColormapMaxValue, fromColorHex( "#c9dfef" ) ) };
         }
         catch ( ParseException ex )
         {
             throw new RuntimeException( ex );
         }
+    }
+
+    public static final ValueAndColor[] topoColorsStepped;
+    static
+    {
+        topoColorsStepped = Arrays.copyOf( bathyColorsStepped, bathyColorsStepped.length + 6 );
+        int i = bathyColorsStepped.length;
+        topoColorsStepped[i++] = vc( +0f, 0.36f, 0.63f, 0.31f );
+        topoColorsStepped[i++] = vc( +50f, 0.42f, 0.70f, 0.38f );
+        topoColorsStepped[i++] = vc( +750f, 0.49f, 0.76f, 0.45f );
+        topoColorsStepped[i++] = vc( +3000f, 0.67f, 0.90f, 0.65f );
+        topoColorsStepped[i++] = vc( +5500f, 0.90f, 0.95f, 0.90f );
+        topoColorsStepped[i++] = vc( +6500f, 0.99f, 0.99f, 0.99f );
     }
 
     public static final ColorGradient topoColorGradient = newColorGradient( +0f,

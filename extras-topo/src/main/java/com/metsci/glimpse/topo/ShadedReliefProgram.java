@@ -53,6 +53,9 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
 {
     public static final int MAX_COLORS = 20;
 
+    public static final int HILLSHADE_TEXTURE_UNIT = 0;
+    public static final int ELEVATION_TEXTURE_UNIT = 1;
+
     protected GLUniformData alpha;
     protected GLUniformData elevationTexUnit;
     protected GLUniformData hillshadeTexUnit;
@@ -62,6 +65,11 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
     protected GLUniformData AXIS_RECT;
 
     protected ProgramHandles handles;
+
+    public ShadedReliefProgram( )
+    {
+        this( ELEVATION_TEXTURE_UNIT, HILLSHADE_TEXTURE_UNIT );
+    }
 
     public ShadedReliefProgram( int elevTexUnit, int shadeTexUnit )
     {

@@ -28,43 +28,17 @@ package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.core.support.color.GlimpseColor.toColorAwt;
-import static com.metsci.glimpse.topo.TopoColorUtils.bathyColorsStepped;
-import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
-import static com.metsci.glimpse.topo.io.TopoCache.topoConfigString;
-import static com.metsci.glimpse.topo.io.TopoDataPaths.glimpseTopoCacheDir;
-import static com.metsci.glimpse.util.io.FileSync.lockFile;
-import static com.metsci.glimpse.util.io.FileSync.unlockFile;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
-import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
-import static com.metsci.glimpse.util.units.Angle.fromDeg;
-import static com.metsci.glimpse.util.units.Angle.unwrap;
-import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
+import static com.metsci.glimpse.topo.ShadedReliefProgram.ELEVATION_TEXTURE_UNIT;
+import static com.metsci.glimpse.topo.ShadedReliefProgram.HILLSHADE_TEXTURE_UNIT;
+import static com.metsci.glimpse.topo.TopoColorUtils.topoColorsStepped;
 import static java.awt.Color.RGBtoHSB;
-import static java.lang.Math.atan;
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.toDegrees;
 import static java.util.Arrays.sort;
 import static java.util.Comparator.comparing;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
-import com.google.common.hash.Hashing;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
 import com.metsci.glimpse.core.painter.geo.TileKey;
 import com.metsci.glimpse.core.painter.geo.TilePainter;
@@ -73,6 +47,8 @@ import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
 import com.metsci.glimpse.core.support.colormap.ColorGradientUtils.ValueAndColor;
 import com.metsci.glimpse.core.support.projection.LatLonProjection;
 import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.topo.ShadedReliefTileCache.CachedTileData;
+import com.metsci.glimpse.topo.ShadedReliefTileCache.ReliefTileKey;
 import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 
@@ -83,17 +59,7 @@ import com.metsci.glimpse.util.geo.projection.GeoProjection;
  */
 public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
 {
-    private static final Logger LOGGER = Logger.getLogger( ShadedReliefTiledPainter.class.getName( ) );
-
-    public static final int HILLSHADE_TEXTURE_UNIT = 0;
-    public static final int ELEVATION_TEXTURE_UNIT = 1;
-
-    protected static final double COS_LIGHT_ZENITH = cos( fromDeg( 45 ) );
-    protected static final double SIN_LIGHT_ZENITH = sin( fromDeg( 45 ) );
-    protected static final double LIGHT_AZIMUTH = fromDeg( -135 );
-
-    protected TopoLevelSet topoLevelSet;
-    protected TopoReliefTileCache tileFileCache;
+    protected ShadedReliefTileCache tileCache;
     protected ShadedTexturePainter topoImagePainter;
     protected ShadedReliefProgram shadedReliefProgram;
 
@@ -101,16 +67,15 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     {
         super( projection );
 
-        this.topoLevelSet = createTopoLevels( topoDataset, 1_024, 1_024 );
-        tileFileCache = new TopoReliefTileCache( );
+        this.tileCache = new ShadedReliefTileCache( topoDataset );
 
         topoImagePainter = new ShadedTexturePainter( );
-        shadedReliefProgram = new ShadedReliefProgram( ELEVATION_TEXTURE_UNIT, HILLSHADE_TEXTURE_UNIT );
+        shadedReliefProgram = new ShadedReliefProgram( );
         topoImagePainter.setProgram( shadedReliefProgram );
         addPainter( topoImagePainter );
 
         setAlpha( 1 );
-        setColors( bathyColorsStepped );
+        setColors( topoColorsStepped );
 
         if ( attributionText != null )
         {
@@ -159,7 +124,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     @Override
     protected DrawableTexture[] loadTileData( TileKey key )
     {
-        CachedTileData tile = tileFileCache.readOrBuildTile( ( ReliefTileKey ) key );
+        CachedTileData tile = tileCache.readOrBuildTile( ( ReliefTileKey ) key );
 
         FloatTextureProjected2D shadeTexture = new FloatTextureProjected2D( tile.numLon, tile.numLat );
         FloatTextureProjected2D elevationTexture = new FloatTextureProjected2D( tile.numLon, tile.numLat );
@@ -174,137 +139,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         elevationTexture.mutate( ( data, sizeX, sizeY ) -> data.put( tile.elevation.asFloatBuffer( ) ) );
 
         return new DrawableTexture[] { shadeTexture, elevationTexture };
-    }
-
-    protected void copyElevationData( TopoHostTile source, CachedTileData target )
-    {
-        switch ( source.dataType )
-        {
-            case TOPO_I2:
-            {
-                source.dataBytes.rewind( );
-                target.elevation.rewind( );
-
-                ShortBuffer srcBuf = source.dataBytes.asShortBuffer( );
-                FloatBuffer tgtBuf = target.elevation.asFloatBuffer( );
-
-                for ( int y = 0; y < target.numLat; y++ )
-                {
-                    for ( int x = 0; x < target.numLon; x++ )
-                    {
-                        int srcIdx = y * source.numDataCols + x;
-                        float elevation = srcBuf.get( srcIdx );
-                        tgtBuf.put( elevation );
-                    }
-                }
-
-                break;
-            }
-
-            case TOPO_F4:
-            {
-                source.dataBytes.rewind( );
-                target.elevation.rewind( );
-
-                FloatBuffer srcBuf = source.dataBytes.asFloatBuffer( );
-                FloatBuffer tgtBuf = target.elevation.asFloatBuffer( );
-
-                for ( int y = 0; y < target.numLat; y++ )
-                {
-                    for ( int x = 0; x < target.numLon; x++ )
-                    {
-                        int srcIdx = y * source.numDataCols + x;
-                        float elevation = srcBuf.get( srcIdx );
-                        tgtBuf.put( elevation );
-                    }
-                }
-
-                break;
-            }
-
-            default:
-                throw new AssertionError( "Unsupported format" );
-        }
-    }
-
-    protected void hillshade( CachedTileData tile )
-    {
-        tile.elevation.rewind( );
-        tile.shaded.rewind( );
-
-        FloatBuffer elevation = tile.elevation.asFloatBuffer( );
-        FloatBuffer dest = tile.shaded.asFloatBuffer( );
-
-        /*
-         * dx certainly changes as we change latitude, but the transition is
-         * uneven and visually disturbing. Also found that tweaking by 0.5
-         * helps increase visual separation.
-         */
-        double dy = 60 * fromNauticalMiles( 1 ) * 0.5 * tile.latStep_DEG;
-        double dx = 60 * fromNauticalMiles( 1 ) * 0.5 * tile.lonStep_DEG;
-
-        for ( int x = 1; x < tile.numLon - 1; x++ )
-        {
-            for ( int y = 1; y < tile.numLat - 1; y++ )
-            {
-                float value = hillshade0( elevation, x, y, dx, dy, tile.numLat );
-                int idx = x * tile.numLat + y;
-                dest.put( idx, value );
-            }
-
-            // Can't hillshade the very edges, so just copy out
-            int idxDst = x * tile.numLat + 0;
-            int idxSrc = x * tile.numLat + 1;
-            dest.put( idxDst, dest.get( idxSrc ) );
-
-            idxDst = x * tile.numLat + ( tile.numLat - 1 );
-            idxSrc = x * tile.numLat + ( tile.numLat - 2 );
-            dest.put( idxDst, dest.get( idxSrc ) );
-        }
-
-        // Can't hillshade the very edges, so just copy out
-        for ( int y = 0; y < tile.numLat; y++ )
-        {
-            int idxDst = 0 * tile.numLat + y;
-            int idxSrc = 1 * tile.numLat + y;
-            dest.put( idxDst, dest.get( idxSrc ) );
-
-            idxDst = ( tile.numLon - 1 ) * tile.numLat + y;
-            idxSrc = ( tile.numLon - 2 ) * tile.numLat + y;
-            dest.put( idxDst, dest.get( idxSrc ) );
-        }
-    }
-
-    /**
-     * From http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
-     */
-    protected float hillshade0( FloatBuffer data, int x, int y, double dx, double dy, int stride )
-    {
-        int ai = ( x - 1 ) * stride + ( y + 1 );
-        int bi = ( x + 0 ) * stride + ( y + 1 );
-        int ci = ( x + 1 ) * stride + ( y + 1 );
-        int di = ( x - 1 ) * stride + ( y + 0 );
-        // skip e middle
-        int fi = ( x + 0 ) * stride + ( y + 0 );
-        int gi = ( x - 1 ) * stride + ( y - 1 );
-        int hi = ( x + 0 ) * stride + ( y - 1 );
-        int ii = ( x + 1 ) * stride + ( y - 1 );
-
-        float a = data.get( ai );
-        float b = data.get( bi );
-        float c = data.get( ci );
-        float d = data.get( di );
-        float f = data.get( fi );
-        float g = data.get( gi );
-        float h = data.get( hi );
-        float i = data.get( ii );
-        double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
-        double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
-        double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
-        double aspect = atan2( dzdy, -dzdx );
-
-        double hillshade = ( COS_LIGHT_ZENITH * cos( slope ) ) + ( SIN_LIGHT_ZENITH * sin( slope ) * cos( LIGHT_AZIMUTH - aspect ) );
-        return ( float ) hillshade;
     }
 
     /**
@@ -335,216 +169,6 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     @Override
     protected Collection<TileKey> allKeys( )
     {
-        Collection<TileKey> tileKeys = new ArrayList<>( );
-
-        for ( int levelIdx = 0; levelIdx < topoLevelSet.size( ); levelIdx++ )
-        {
-            TopoLevel level = topoLevelSet.levels.get( levelIdx );
-
-            // Aim for 1 cell per pixel in a 1600x1200 screen
-            int expectedNumPixels = 1_600;
-            double nmPerDegreeAtEquator = 60;
-            double lengthScale = fromNauticalMiles( nmPerDegreeAtEquator * expectedNumPixels * topoLevelSet.cellSizes_DEG.v( levelIdx ) );
-
-            for ( int bandIdx = 0; bandIdx < level.numBands; bandIdx++ )
-            {
-                for ( int tileIdx = 0; tileIdx < level.numTiles; tileIdx++ )
-                {
-                    TopoTileBounds bounds = level.tileBounds( bandIdx, tileIdx );
-                    tileKeys.add( new ReliefTileKey( levelIdx, bandIdx, tileIdx, bounds, lengthScale ) );
-                }
-            }
-        }
-
-        return tileKeys;
-    }
-
-    protected static class CachedTileData
-    {
-        protected final double latStep_DEG;
-        protected final double lonStep_DEG;
-
-        protected final double startLat_DEG;
-        protected final double startLon_DEG;
-
-        protected final int numLat;
-        protected final int numLon;
-
-        /*
-         * Byte buffer for the elevation, but underlying data is floats.
-         * Data is packed as a linearized row-major matrix of [lon][lat].
-         */
-        protected ByteBuffer elevation;
-        /*
-         * Byte buffer for the shaded relief, but underlying data is floats.
-         * Data is packed as a linearized row-major matrix of [lon][lat].
-         */
-        protected ByteBuffer shaded;
-
-        protected CachedTileData( double latStep_DEG, double lonStep_DEG, double startLat_DEG, double startLon_DEG, int numLat, int numLon )
-        {
-            this.latStep_DEG = latStep_DEG;
-            this.lonStep_DEG = lonStep_DEG;
-            this.startLat_DEG = startLat_DEG;
-            this.startLon_DEG = startLon_DEG;
-            this.numLat = numLat;
-            this.numLon = numLon;
-
-            this.elevation = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
-            this.shaded = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
-        }
-
-        protected CachedTileData( TopoHostTile data )
-        {
-            this.startLon_DEG = toDegrees( data.westLon_RAD );
-            this.startLat_DEG = toDegrees( data.southLat_RAD );
-            this.numLat = data.numDataRows;
-            this.numLon = data.numDataCols;
-            this.lonStep_DEG = toDegrees( unwrap( data.westLon_RAD, data.eastLon_RAD ) - data.westLon_RAD ) / numLon;
-            this.latStep_DEG = toDegrees( data.northLat_RAD - data.southLat_RAD ) / numLat;
-
-            this.elevation = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
-            this.shaded = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
-        }
-    }
-
-    protected class TopoReliefTileCache
-    {
-        public static final int VERSION_ID = 4;
-
-        public TopoHostTile readTopoData( ReliefTileKey key )
-        {
-            return topoLevelSet.get( key.level ).copyTile( key.bandNum, key.tileNum, 2 );
-        }
-
-        public CachedTileData readOrBuildTile( ReliefTileKey key )
-        {
-            String configString = topoConfigString( topoLevelSet.levels.get( 0 ).file );
-            String hash = Hashing.murmur3_128( ).newHasher( )
-                    .putString( configString, Charset.defaultCharset( ) )
-                    .putDouble( key.lengthScale )
-                    .putDouble( key.minLat_DEG )
-                    .putDouble( key.maxLat_DEG )
-                    .putDouble( key.minLon_DEG )
-                    .putDouble( key.maxLon_DEG )
-                    .hash( )
-                    .toString( );
-
-            CachedTileData tile = null;
-            String name = String.format( "%s/tile_v%d_%s.bin", ShadedReliefTiledPainter.class.getSimpleName( ), VERSION_ID, hash );
-            File cacheFile = new File( glimpseTopoCacheDir, name );
-            if ( cacheFile.isFile( ) )
-            {
-                logFine( LOGGER, "Loading cached topo tile from %s", cacheFile );
-                try
-                {
-                    tile = readCachedTile( cacheFile );
-                }
-                catch ( IOException ex )
-                {
-                    logWarning( LOGGER, "Failed to read cache file", ex );
-                }
-            }
-
-            if ( tile == null )
-            {
-                logFine( LOGGER, "Building topo tile for %s", key );
-                try
-                {
-                    TopoHostTile data = readTopoData( key );
-                    tile = new CachedTileData( data );
-                    copyElevationData( data, tile );
-
-                    hillshade( tile );
-
-                    writeCachedTile( cacheFile, tile );
-                }
-                catch ( IOException ex )
-                {
-                    throw new UncheckedIOException( ex );
-                }
-            }
-
-            return tile;
-        }
-
-        protected CachedTileData readCachedTile( File cacheFile ) throws IOException
-        {
-            RandomAccessFile rf = new RandomAccessFile( cacheFile, "r" );
-
-            lockFile( cacheFile );
-            try
-            {
-                int numLat = rf.readInt( );
-                int numLon = rf.readInt( );
-                double startLat_DEG = rf.readDouble( );
-                double startLon_DEG = rf.readDouble( );
-                double latStep_DEG = rf.readDouble( );
-                double lonStep_DEG = rf.readDouble( );
-
-                FileChannel ch = rf.getChannel( );
-
-                CachedTileData cached = new CachedTileData( latStep_DEG, lonStep_DEG, startLat_DEG, startLon_DEG, numLat, numLon );
-
-                ch.read( cached.elevation );
-                ch.read( cached.shaded );
-
-                rf.close( );
-                return cached;
-            }
-            finally
-            {
-                unlockFile( cacheFile );
-            }
-        }
-
-        protected void writeCachedTile( File cacheFile, CachedTileData tile ) throws IOException
-        {
-            cacheFile.getParentFile( ).mkdirs( );
-            RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
-
-            lockFile( cacheFile );
-            try
-            {
-                rf.setLength( 0 );
-
-                rf.writeInt( tile.numLat );
-                rf.writeInt( tile.numLon );
-                rf.writeDouble( tile.startLat_DEG );
-                rf.writeDouble( tile.startLon_DEG );
-                rf.writeDouble( tile.latStep_DEG );
-                rf.writeDouble( tile.lonStep_DEG );
-
-                FileChannel ch = rf.getChannel( );
-
-                tile.elevation.rewind( );
-                tile.shaded.rewind( );
-
-                ch.write( tile.elevation );
-                ch.write( tile.shaded );
-
-                rf.close( );
-            }
-            finally
-            {
-                unlockFile( cacheFile );
-            }
-        }
-    }
-
-    protected static class ReliefTileKey extends TileKey
-    {
-        public int tileNum;
-        public int bandNum;
-        public int level;
-
-        public ReliefTileKey( int levelIdx, int bandIdx, int tileIdx, TopoTileBounds bounds, double lengthScale )
-        {
-            super( lengthScale, bounds.southLat_DEG, bounds.northLat_DEG, bounds.westLon_DEG, bounds.eastLon_DEG );
-
-            this.level = levelIdx;
-            this.bandNum = bandIdx;
-            this.tileNum = tileIdx;
-        }
+        return tileCache.getAllTileKeys( );
     }
 }

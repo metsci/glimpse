@@ -71,6 +71,8 @@ public class HillShadeExample
             double dx = fromNauticalMiles( 400 );
             double dy = dx;
             plot.getAxis( ).set( -dx, +dx, -dy, +dy );
+            plot.getAxis( ).lockAspectRatioXY( 1 );
+            plot.getAxis( ).validate( );
 
             ScalePainter scale = new ScalePainter( );
             scale.setPixelBufferX( 8 );
