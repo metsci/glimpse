@@ -27,7 +27,7 @@
 package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.fromColorHex;
-import static com.metsci.glimpse.core.support.color.GlimpseColor.getGreen;
+import static com.metsci.glimpse.core.support.color.WebColors.DarkGreen;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorGradient;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorTable;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.vc;
@@ -53,12 +53,12 @@ public class TopoColorUtils
                                                                              vc(  -5000f,  0.53f, 0.79f, 0.95f  ),
                                                                              vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
 
-    public static final ValueAndColor[] bathyColors2;
+    public static final ValueAndColor[] bathyColorsStepped;
     static
     {
         try
         {
-            bathyColors2 = new ValueAndColor[] {
+            bathyColorsStepped = new ValueAndColor[] {
                     vc( bathyColormapMinValue, fromColorHex( "#3c6e98" ) ),
                     vc( -8_000f, fromColorHex( "#3c6e98" ) ),
                     vc( -4_000f, fromColorHex( "#6499c1" ) ),
@@ -68,7 +68,7 @@ public class TopoColorUtils
                     vc( -100f, fromColorHex( "#b0cee8" ) ),
                     vc( -20f, fromColorHex( "#bbd9f0" ) ),
                     vc( 0, fromColorHex( "#c9dfef" ) ),
-                    vc( 10_000, getGreen( ) ) };
+                    vc( 10_000, DarkGreen.toFloat4( ) ) };
         }
         catch ( ParseException ex )
         {

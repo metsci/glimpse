@@ -28,7 +28,7 @@ package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.getBlack;
 import static com.metsci.glimpse.core.support.color.GlimpseColor.toColorAwt;
-import static com.metsci.glimpse.topo.TopoColorUtils.bathyColors2;
+import static com.metsci.glimpse.topo.TopoColorUtils.bathyColorsStepped;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
 import static com.metsci.glimpse.topo.io.TopoCache.topoConfigString;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.glimpseTopoCacheDir;
@@ -110,7 +110,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         addPainter( topoImagePainter );
 
         setAlpha( 1 );
-        setColors( bathyColors2 );
+        setColors( bathyColorsStepped );
 
         if ( attributionText != null )
         {
@@ -193,35 +193,34 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
                     for ( int x = 0; x < target.numLon; x++ )
                     {
                         int srcIdx = y * source.numDataCols + x;
-                        int dstIdx = ( target.numLat - y - 1 ) * target.numLon + x;
                         float elevation = srcBuf.get( srcIdx );
-                        tgtBuf.put( dstIdx, elevation );
+                        tgtBuf.put( elevation );
                     }
                 }
 
                 break;
             }
 
-//            case TOPO_F4:
-//            {
-//                source.dataBytes.rewind( );
-//                target.elevation.rewind( );
-//
-//                FloatBuffer srcBuf = source.dataBytes.asFloatBuffer( );
-//                FloatBuffer tgtBuf = target.elevation.asFloatBuffer( );
-//
-//                for ( int y = 0; y < target.numLat; y++ )
-//                {
-//                    for ( int x = 0; x < target.numLon; x++ )
-//                    {
-//                        int srcIdx = y * source.numDataCols + x;
-//                        float elevation = srcBuf.get( srcIdx );
-//                        tgtBuf.put( elevation );
-//                    }
-//                }
-//
-//                break;
-//            }
+            case TOPO_F4:
+            {
+                source.dataBytes.rewind( );
+                target.elevation.rewind( );
+
+                FloatBuffer srcBuf = source.dataBytes.asFloatBuffer( );
+                FloatBuffer tgtBuf = target.elevation.asFloatBuffer( );
+
+                for ( int y = 0; y < target.numLat; y++ )
+                {
+                    for ( int x = 0; x < target.numLon; x++ )
+                    {
+                        int srcIdx = y * source.numDataCols + x;
+                        float elevation = srcBuf.get( srcIdx );
+                        tgtBuf.put( elevation );
+                    }
+                }
+
+                break;
+            }
 
             default:
                 throw new AssertionError( "Unsupported format" );
@@ -254,17 +253,26 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
             }
 
             // Can't hillshade the very edges, so just copy out
-            int idxCol0 = x * tile.numLat + 0;
-            int idxCol1 = x * tile.numLat + 1;
-            dest.put( idxCol0, dest.get( idxCol1 ) );
+            int idxDst = x * tile.numLat + 0;
+            int idxSrc = x * tile.numLat + 1;
+            dest.put( idxDst, dest.get( idxSrc ) );
 
-            int idxEnd0 = x * tile.numLat + ( tile.numLon - 1 );
-            int idxEnd1 = x * tile.numLat + ( tile.numLon - 2 );
-            dest.put( idxEnd0, dest.get( idxEnd1 ) );
+            idxDst = x * tile.numLat + ( tile.numLat - 1 );
+            idxSrc = x * tile.numLat + ( tile.numLat - 2 );
+            dest.put( idxDst, dest.get( idxSrc ) );
         }
 
-        //        System.arraycopy( dest[1], 0, dest[0], 0, data.imageHeight );
-        //        System.arraycopy( dest[data.imageWidth - 2], 0, dest[data.imageWidth - 1], 0, data.imageHeight );
+        // Can't hillshade the very edges, so just copy out
+        for ( int y = 0; y < tile.numLat; y++ )
+        {
+            int idxDst = 0 * tile.numLat + y;
+            int idxSrc = 1 * tile.numLat + y;
+            dest.put( idxDst, dest.get( idxSrc ) );
+
+            idxDst = ( tile.numLon - 1 ) * tile.numLat + y;
+            idxSrc = ( tile.numLon - 2 ) * tile.numLat + y;
+            dest.put( idxDst, dest.get( idxSrc ) );
+        }
     }
 
     /**
@@ -282,14 +290,14 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         int hi = ( x + 0 ) * stride + ( y - 1 );
         int ii = ( x + 1 ) * stride + ( y - 1 );
 
-        float a = -data.get( ai );
-        float b = -data.get( bi );
-        float c = -data.get( ci );
-        float d = -data.get( di );
-        float f = -data.get( fi );
-        float g = -data.get( gi );
-        float h = -data.get( hi );
-        float i = -data.get( ii );
+        float a = data.get( ai );
+        float b = data.get( bi );
+        float c = data.get( ci );
+        float d = data.get( di );
+        float f = data.get( fi );
+        float g = data.get( gi );
+        float h = data.get( hi );
+        float i = data.get( ii );
         double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
         double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
         double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
@@ -307,7 +315,10 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         double endLat = data.startLat_DEG + data.latStep_DEG * data.numLat;
         double endLon = data.startLon_DEG + data.lonStep_DEG * data.numLon;
 
-        return new LatLonProjection( projection, clampNorthSouth( data.startLat_DEG ), clampNorthSouth( endLat ), clampAntiMeridian( data.startLon_DEG ), clampAntiMeridian( endLon ), false );
+        /*
+         * Topo data is ordered top-to-bottom, so we flip our Latitude extents
+         */
+        return new LatLonProjection( projection, clampNorthSouth( endLat ), clampNorthSouth( data.startLat_DEG ), clampAntiMeridian( data.startLon_DEG ), clampAntiMeridian( endLon ), false );
     }
 
     @Override
