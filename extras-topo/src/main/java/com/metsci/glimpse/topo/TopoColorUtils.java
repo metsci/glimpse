@@ -27,6 +27,7 @@
 package com.metsci.glimpse.topo;
 
 import static com.metsci.glimpse.core.support.color.GlimpseColor.fromColorHex;
+import static com.metsci.glimpse.core.support.color.GlimpseColor.getGreen;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorGradient;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorTable;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.vc;
@@ -58,6 +59,7 @@ public class TopoColorUtils
         try
         {
             bathyColors2 = new ValueAndColor[] {
+                    vc( bathyColormapMinValue, fromColorHex( "#3c6e98" ) ),
                     vc( -8_000f, fromColorHex( "#3c6e98" ) ),
                     vc( -4_000f, fromColorHex( "#6499c1" ) ),
                     vc( -2_000f, fromColorHex( "#76a5cf" ) ),
@@ -65,7 +67,8 @@ public class TopoColorUtils
                     vc( -500f, fromColorHex( "#a3c9e6" ) ),
                     vc( -100f, fromColorHex( "#b0cee8" ) ),
                     vc( -20f, fromColorHex( "#bbd9f0" ) ),
-                    vc( 0, fromColorHex( "#c9dfef" ) ) };
+                    vc( 0, fromColorHex( "#c9dfef" ) ),
+                    vc( 10_000, getGreen( ) ) };
         }
         catch ( ParseException ex )
         {

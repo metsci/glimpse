@@ -176,7 +176,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
         return new DrawableTexture[] { shadeTexture, elevationTexture };
     }
 
-    protected void copyElevation( TopoHostTile source, CachedTileData target )
+    protected void copyElevationData( TopoHostTile source, CachedTileData target )
     {
         switch ( source.dataType )
         {
@@ -193,34 +193,35 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
                     for ( int x = 0; x < target.numLon; x++ )
                     {
                         int srcIdx = y * source.numDataCols + x;
+                        int dstIdx = ( target.numLat - y - 1 ) * target.numLon + x;
                         float elevation = srcBuf.get( srcIdx );
-                        tgtBuf.put( elevation );
+                        tgtBuf.put( dstIdx, elevation );
                     }
                 }
 
                 break;
             }
 
-            case TOPO_F4:
-            {
-                source.dataBytes.rewind( );
-                target.elevation.rewind( );
-
-                FloatBuffer srcBuf = source.dataBytes.asFloatBuffer( );
-                FloatBuffer tgtBuf = target.elevation.asFloatBuffer( );
-
-                for ( int y = 0; y < target.numLat; y++ )
-                {
-                    for ( int x = 0; x < target.numLon; x++ )
-                    {
-                        int srcIdx = y * source.numDataCols + x;
-                        float elevation = srcBuf.get( srcIdx );
-                        tgtBuf.put( elevation );
-                    }
-                }
-
-                break;
-            }
+//            case TOPO_F4:
+//            {
+//                source.dataBytes.rewind( );
+//                target.elevation.rewind( );
+//
+//                FloatBuffer srcBuf = source.dataBytes.asFloatBuffer( );
+//                FloatBuffer tgtBuf = target.elevation.asFloatBuffer( );
+//
+//                for ( int y = 0; y < target.numLat; y++ )
+//                {
+//                    for ( int x = 0; x < target.numLon; x++ )
+//                    {
+//                        int srcIdx = y * source.numDataCols + x;
+//                        float elevation = srcBuf.get( srcIdx );
+//                        tgtBuf.put( elevation );
+//                    }
+//                }
+//
+//                break;
+//            }
 
             default:
                 throw new AssertionError( "Unsupported format" );
@@ -419,7 +420,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
                     .toString( );
 
             CachedTileData tile = null;
-            String name = String.format( "%s/tile_v%d_%s.bin", getClass( ).getSimpleName( ), VERSION_ID, hash );
+            String name = String.format( "%s/tile_v%d_%s.bin", ShadedReliefTiledPainter.class.getSimpleName( ), VERSION_ID, hash );
             File cacheFile = new File( glimpseTopoCacheDir, name );
             if ( cacheFile.isFile( ) )
             {
@@ -441,6 +442,7 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
                 {
                     TopoHostTile data = readTopoData( key );
                     tile = new CachedTileData( data );
+                    copyElevationData( data, tile );
 
                     hillshade( tile );
 
