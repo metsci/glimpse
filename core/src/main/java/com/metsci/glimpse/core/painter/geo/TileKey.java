@@ -33,19 +33,24 @@ import static com.metsci.glimpse.util.units.Length.toKilometers;
  */
 public class TileKey
 {
+    /**
+     * This is a measure of the zoom scale.  When picking which tile to display, {@code TilePainter} will choose
+     * the tiles that have a {@code lengthScale} closest to the total distance across the viewport.
+     */
     public final double lengthScale;
-    public final double minLat;
-    public final double maxLat;
-    public final double minLon;
-    public final double maxLon;
 
-    public TileKey( double lengthScale, double minLat, double maxLat, double minLon, double maxLon )
+    public final double minLat_DEG;
+    public final double maxLat_DEG;
+    public final double minLon_DEG;
+    public final double maxLon_DEG;
+
+    public TileKey( double lengthScale, double minLat_DEG, double maxLat_DEG, double minLon_DEG, double maxLon_DEG )
     {
         this.lengthScale = lengthScale;
-        this.minLat = minLat;
-        this.maxLat = maxLat;
-        this.minLon = minLon;
-        this.maxLon = maxLon;
+        this.minLat_DEG = minLat_DEG;
+        this.maxLat_DEG = maxLat_DEG;
+        this.minLon_DEG = minLon_DEG;
+        this.maxLon_DEG = maxLon_DEG;
     }
 
     @Override
@@ -53,10 +58,10 @@ public class TileKey
     {
         int hash = 0;
         hash += 31 * Double.hashCode( lengthScale );
-        hash += 31 * Double.hashCode( minLat );
-        hash += 31 * Double.hashCode( maxLat );
-        hash += 31 * Double.hashCode( minLon );
-        hash += 31 * Double.hashCode( maxLon );
+        hash += 31 * Double.hashCode( minLat_DEG );
+        hash += 31 * Double.hashCode( maxLat_DEG );
+        hash += 31 * Double.hashCode( minLon_DEG );
+        hash += 31 * Double.hashCode( maxLon_DEG );
         return hash;
     }
 
@@ -67,10 +72,10 @@ public class TileKey
         {
             TileKey other = ( TileKey ) obj;
             return lengthScale == other.lengthScale &&
-                    minLat == other.minLat &&
-                    maxLat == other.maxLat &&
-                    minLon == other.minLon &&
-                    maxLon == other.maxLon;
+                    minLat_DEG == other.minLat_DEG &&
+                    maxLat_DEG == other.maxLat_DEG &&
+                    minLon_DEG == other.minLon_DEG &&
+                    maxLon_DEG == other.maxLon_DEG;
         }
         else
         {
@@ -81,6 +86,6 @@ public class TileKey
     @Override
     public String toString( )
     {
-        return String.format( "TileKey[scale=%f; lat=%f,%f; lon=%f,%f]", toKilometers( lengthScale ), minLat, maxLat, minLon, maxLon );
+        return String.format( "TileKey[scale=%f; lat=%f,%f; lon=%f,%f]", toKilometers( lengthScale ), minLat_DEG, maxLat_DEG, minLon_DEG, maxLon_DEG );
     }
 }

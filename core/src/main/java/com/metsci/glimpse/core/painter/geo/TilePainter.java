@@ -56,9 +56,6 @@ import com.metsci.glimpse.util.primitives.sorted.SortedDoubles;
 import com.metsci.glimpse.util.primitives.sorted.SortedDoublesArray;
 import com.metsci.glimpse.util.vector.Vector2d;
 
-import it.unimi.dsi.fastutil.doubles.DoubleAVLTreeSet;
-import it.unimi.dsi.fastutil.doubles.DoubleSortedSet;
-
 /**
  * Paints a geo with tiled data. The subclass must implement the actual painting of the tiles themselves.
  * This class takes care of identifying the visible tiles (and tiles that are appropriate to paint in
@@ -103,9 +100,9 @@ public abstract class TilePainter<V> extends DelegatePainter
         }
 
         if ( abs( lastAxis.getMinX( ) - axis.getMinX( ) ) > 1e-9 ||
-             abs( lastAxis.getMaxX( ) - axis.getMaxX( ) ) > 1e-9 ||
-             abs( lastAxis.getMinY( ) - axis.getMinY( ) ) > 1e-9 ||
-             abs( lastAxis.getMaxY( ) - axis.getMaxY( ) ) > 1e-9 )
+                abs( lastAxis.getMaxX( ) - axis.getMaxX( ) ) > 1e-9 ||
+                abs( lastAxis.getMinY( ) - axis.getMinY( ) ) > 1e-9 ||
+                abs( lastAxis.getMaxY( ) - axis.getMaxY( ) ) > 1e-9 )
         {
             lastAxis = new Rectangle2D.Double( axis.getMinX( ), axis.getMinY( ), axis.getMaxX( ) - axis.getMinX( ), axis.getMaxY( ) - axis.getMinY( ) );
 
@@ -149,10 +146,10 @@ public abstract class TilePainter<V> extends DelegatePainter
         Map<TileKey, Area> keys = new HashMap<>( );
         for ( TileKey key : allKeys( ) )
         {
-            double minLat = clampNorthSouth( key.minLat );
-            double minLon = clampAntiMeridian( key.minLon );
-            double maxLat = clampNorthSouth( key.maxLat );
-            double maxLon = clampAntiMeridian( key.maxLon );
+            double minLat = clampNorthSouth( key.minLat_DEG );
+            double minLon = clampAntiMeridian( key.minLon_DEG );
+            double maxLat = clampNorthSouth( key.maxLat_DEG );
+            double maxLon = clampAntiMeridian( key.maxLon_DEG );
 
             Vector2d sw = projection.project( LatLonGeo.fromDeg( minLat, minLon ) );
             Vector2d nw = projection.project( LatLonGeo.fromDeg( maxLat, minLon ) );
@@ -220,9 +217,12 @@ public abstract class TilePainter<V> extends DelegatePainter
 
     protected SortedDoubles populateLengthScale( Collection<TileKey> allKeys )
     {
-        DoubleSortedSet set = new DoubleAVLTreeSet( );
-        allKeys.forEach( k -> set.add( k.lengthScale ) );
-        return new SortedDoublesArray( set.toDoubleArray( ) );
+        double[] array = allKeys.stream( )
+                .mapToDouble( k -> k.lengthScale )
+                .distinct( )
+                .sorted( )
+                .toArray( );
+        return new SortedDoublesArray( array );
     }
 
     protected Collection<TileKey> getVisibleTiles( Rectangle2D bounds, Axis2D axis, Stream<Entry<TileKey, Area>> keys )
@@ -257,6 +257,9 @@ public abstract class TilePainter<V> extends DelegatePainter
 
     /**
      * Provides all available keys.  This does not need to cover the globe.
+     *
+     * This method does not need to be fast, it will be called once when
+     * painting starts.
      */
     protected abstract Collection<TileKey> allKeys( );
 

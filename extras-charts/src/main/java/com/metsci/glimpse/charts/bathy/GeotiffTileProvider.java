@@ -260,15 +260,15 @@ public class GeotiffTileProvider implements TopoTileProvider
             widthStep = 360.0 / grid.getWidth( ) * decimate;
             heightStep = 180.0 / grid.getHeight( ) * decimate;
 
-            startLon = key.minLon;
-            startLat = key.minLat;
+            startLon = key.minLon_DEG;
+            startLat = key.minLat_DEG;
 
             double lon2px = grid.getWidth( ) / 360.0;
             double lat2px = grid.getHeight( ) / 180.0;
-            int pixelX0 = ( int ) round( ( key.minLon + 180 ) * lon2px );
-            int pixelX1 = ( int ) round( ( key.maxLon + 180 ) * lon2px );
-            int pixelY0 = ( int ) round( ( 180 - ( key.maxLat + 90 ) ) * lat2px );
-            int pixelY1 = ( int ) round( ( 180 - ( key.minLat + 90 ) ) * lat2px );
+            int pixelX0 = ( int ) round( ( key.minLon_DEG + 180 ) * lon2px );
+            int pixelX1 = ( int ) round( ( key.maxLon_DEG + 180 ) * lon2px );
+            int pixelY0 = ( int ) round( ( 180 - ( key.maxLat_DEG + 90 ) ) * lat2px );
+            int pixelY1 = ( int ) round( ( 180 - ( key.minLat_DEG + 90 ) ) * lat2px );
             pixelY1 = min( pixelY1, grid.getHeight( ) - 1 );
             pixelX1 = min( pixelX1, grid.getWidth( ) - 1 );
 
@@ -309,13 +309,13 @@ public class GeotiffTileProvider implements TopoTileProvider
             widthStep = 360.0 / grid.getWidth( );
             heightStep = 180.0 / grid.getHeight( );
 
-            startLon = key.minLon;
-            startLat = key.minLat;
+            startLon = key.minLon_DEG;
+            startLat = key.minLat_DEG;
 
-            int pixelX0 = ( int ) round( ( key.minLon + 180 ) / widthStep );
-            int pixelX1 = ( int ) round( ( key.maxLon + 180 ) / widthStep );
-            int pixelY0 = ( int ) round( ( 180 - ( key.maxLat + 90 ) ) / heightStep );
-            int pixelY1 = ( int ) round( ( 180 - ( key.minLat + 90 ) ) / heightStep );
+            int pixelX0 = ( int ) round( ( key.minLon_DEG + 180 ) / widthStep );
+            int pixelX1 = ( int ) round( ( key.maxLon_DEG + 180 ) / widthStep );
+            int pixelY0 = ( int ) round( ( 180 - ( key.maxLat_DEG + 90 ) ) / heightStep );
+            int pixelY1 = ( int ) round( ( 180 - ( key.minLat_DEG + 90 ) ) / heightStep );
             pixelY1 = min( pixelY1, grid.getHeight( ) - 1 );
             pixelX1 = min( pixelX1, grid.getWidth( ) - 1 );
 
