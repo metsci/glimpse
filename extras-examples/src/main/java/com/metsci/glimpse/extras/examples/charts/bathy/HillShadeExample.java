@@ -65,7 +65,7 @@ public class HillShadeExample
             GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 19, -77 ) );
 
             MapPlot2D plot = new MapPlot2D( projection );
-            ShadedReliefTiledPainter painter = new ShadedReliefTiledPainter( projection, topoDataset );
+            ShadedReliefTiledPainter painter = new ShadedReliefTiledPainter( projection, topoDataset, "Glimpse Example Data" );
             plot.addPainter( painter );
 
             double dx = fromNauticalMiles( 400 );
