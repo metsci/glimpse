@@ -30,6 +30,7 @@ import static com.google.common.base.Objects.equal;
 import static java.util.Collections.disjoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -217,6 +218,12 @@ public class ImmutableCollectionUtils
         List<V> newList = new ArrayList<>( list );
         newList.add( index, value );
         return ImmutableList.copyOf( newList );
+    }
+
+    @SafeVarargs
+    public static <V> ImmutableList<V> listPlus( ImmutableList<V> list, V... values )
+    {
+        return listPlus( list, Arrays.asList( values ) );
     }
 
     public static <V> ImmutableList<V> listPlus( ImmutableList<V> list, Collection<? extends V> values )

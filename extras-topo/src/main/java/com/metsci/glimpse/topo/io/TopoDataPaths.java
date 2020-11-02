@@ -87,8 +87,7 @@ public class TopoDataPaths
     public static final ImmutableList<String> topoDataFileRoots = ImmutableList.of( "gebco2020",
                                                                                     "gebco2019",
                                                                                     "gebco2014",
-                                                                                    "etopo1_ice",
-                                                                                    "etopo1_bed" );
+                                                                                    "etopo1_ice" );
 
     public static final ImmutableList<String> topoDataFileSuffixes = ImmutableList.of( "_c_i2.bin",
                                                                                        "_c.bin",

@@ -37,6 +37,7 @@ import static java.util.Comparator.comparing;
 
 import java.awt.Color;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
@@ -97,6 +98,14 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     public void setAlpha( float alpha )
     {
         shadedReliefProgram.setAlpha( alpha );
+    }
+
+    /**
+     * @see #setColors(List)
+     */
+    public void setColors( List<ValueAndColor> levelColors )
+    {
+        setColors( levelColors.toArray( new ValueAndColor[0] ) );
     }
 
     /**

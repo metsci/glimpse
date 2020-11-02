@@ -30,10 +30,11 @@ import static com.metsci.glimpse.core.support.color.GlimpseColor.fromColorHex;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorGradient;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.newColorTable;
 import static com.metsci.glimpse.core.support.colormap.ColorGradientUtils.vc;
+import static com.metsci.glimpse.util.ImmutableCollectionUtils.listPlus;
 
 import java.text.ParseException;
-import java.util.Arrays;
 
+import com.google.common.collect.ImmutableList;
 import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.core.support.colormap.ColorGradient;
 import com.metsci.glimpse.core.support.colormap.ColorGradientUtils.ValueAndColor;
@@ -53,41 +54,6 @@ public class TopoColorUtils
                                                                              vc(  -5000f,  0.53f, 0.79f, 0.95f  ),
                                                                              vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
 
-    public static final ValueAndColor[] bathyColorsStepped;
-    static
-    {
-        try
-        {
-            bathyColorsStepped = new ValueAndColor[] {
-                    vc( -8_000f, fromColorHex( "#3c6e98" ) ),
-                    vc( -4_000f, fromColorHex( "#6499c1" ) ),
-                    vc( -2_000f, fromColorHex( "#76a5cf" ) ),
-                    vc( -1_000f, fromColorHex( "#81acd6" ) ),
-                    vc( -500f, fromColorHex( "#a3c9e6" ) ),
-                    vc( -100f, fromColorHex( "#b0cee8" ) ),
-                    vc( -20f, fromColorHex( "#bbd9f0" ) ),
-                    vc( 0, fromColorHex( "#c9dfef" ) ),
-                    vc( topoColormapMaxValue, fromColorHex( "#c9dfef" ) ) };
-        }
-        catch ( ParseException ex )
-        {
-            throw new RuntimeException( ex );
-        }
-    }
-
-    public static final ValueAndColor[] topoColorsStepped;
-    static
-    {
-        topoColorsStepped = Arrays.copyOf( bathyColorsStepped, bathyColorsStepped.length + 6 );
-        int i = bathyColorsStepped.length;
-        topoColorsStepped[i++] = vc( +0f, 0.36f, 0.63f, 0.31f );
-        topoColorsStepped[i++] = vc( +50f, 0.42f, 0.70f, 0.38f );
-        topoColorsStepped[i++] = vc( +750f, 0.49f, 0.76f, 0.45f );
-        topoColorsStepped[i++] = vc( +3000f, 0.67f, 0.90f, 0.65f );
-        topoColorsStepped[i++] = vc( +5500f, 0.90f, 0.95f, 0.90f );
-        topoColorsStepped[i++] = vc( +6500f, 0.99f, 0.99f, 0.99f );
-    }
-
     public static final ColorGradient topoColorGradient = newColorGradient( +0f,
                                                                             topoColormapMaxValue,
                                                                             vc(     +0f,  0.36f, 0.63f, 0.31f  ),
@@ -96,6 +62,51 @@ public class TopoColorUtils
                                                                             vc(  +3000f,  0.67f, 0.90f, 0.65f  ),
                                                                             vc(  +5500f,  0.90f, 0.95f, 0.90f  ),
                                                                             vc(  +6500f,  0.99f, 0.99f, 0.99f  ) );
+
+    /**
+     * Colors as a function of bathymetry only, not including topography.
+     * These colors, when used as a step function and not a gradient, provide
+     * good visual separation for depths in a blue hue.
+     *
+     * These colors are based on an existing popular colormap.
+     *
+     * Particularly useful in {@link ShadedReliefTiledPainter}.
+     */
+    public static final ImmutableList<ValueAndColor> bathyColorsStepped;
+    static
+    {
+        try
+        {
+            bathyColorsStepped = ImmutableList.of(
+                    vc( -8_000f, fromColorHex( "#3c6e98" ) ),
+                    vc( -4_000f, fromColorHex( "#6499c1" ) ),
+                    vc( -2_000f, fromColorHex( "#76a5cf" ) ),
+                    vc( -1_000f, fromColorHex( "#81acd6" ) ),
+                    vc( -500f, fromColorHex( "#a3c9e6" ) ),
+                    vc( -100f, fromColorHex( "#b0cee8" ) ),
+                    vc( -20f, fromColorHex( "#bbd9f0" ) ),
+                    vc( 0, fromColorHex( "#c9dfef" ) ),
+                    vc( topoColormapMaxValue, fromColorHex( "#c9dfef" ) ) );
+        }
+        catch ( ParseException ex )
+        {
+            throw new RuntimeException( ex );
+        }
+    }
+
+    /**
+     * Colors as a function of bathymetry and topography. The bathymetry colors
+     * come from {@link #bathyColorsStepped}.
+     *
+     * Particularly useful in {@link ShadedReliefTiledPainter}.
+     */
+    public static final ImmutableList<ValueAndColor> topoColorsStepped = listPlus( bathyColorsStepped,
+                    vc( +0f, 0.36f, 0.63f, 0.31f ),
+                    vc( +50f, 0.42f, 0.70f, 0.38f ),
+                    vc( +750f, 0.49f, 0.76f, 0.45f ),
+                    vc( +3000f, 0.67f, 0.90f, 0.65f ),
+                    vc( +5500f, 0.90f, 0.95f, 0.90f ),
+                    vc( +6500f, 0.99f, 0.99f, 0.99f ) );
 
     public static ColorTexture1D bathyColorTable( )
     {
