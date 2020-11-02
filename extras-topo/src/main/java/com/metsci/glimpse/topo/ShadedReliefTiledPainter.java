@@ -63,6 +63,11 @@ public class ShadedReliefTiledPainter extends TilePainter<DrawableTexture[]>
     protected ShadedTexturePainter topoImagePainter;
     protected ShadedReliefProgram shadedReliefProgram;
 
+    public ShadedReliefTiledPainter( GeoProjection projection, TopoDataset topoDataset )
+    {
+        this( projection, topoDataset, null );
+    }
+
     public ShadedReliefTiledPainter( GeoProjection projection, TopoDataset topoDataset, String attributionText )
     {
         super( projection );
