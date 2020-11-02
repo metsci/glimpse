@@ -205,6 +205,19 @@ public class ImmutableCollectionUtils
         return ( changed ? ImmutableSet.copyOf( newSet ) : castOrConvert( set ) );
     }
 
+    public static <K, V> ImmutableSet<V> transform( Set<K> set, Function<K, V> transformFn )
+    {
+        Set<V> newSet = new LinkedHashSet<>( );
+
+        for ( K key : set )
+        {
+            V value = transformFn.apply( key );
+            newSet.add( value );
+        }
+
+        return ImmutableSet.copyOf( newSet );
+    }
+
     public static <V> ImmutableList<V> listPlus( List<V> list, V value )
     {
         List<V> newList = new ArrayList<>( list );
@@ -283,6 +296,19 @@ public class ImmutableCollectionUtils
     {
         List<V> newList = new ArrayList<>( list );
         newList.remove( index );
+        return ImmutableList.copyOf( newList );
+    }
+
+    public static <K, V> ImmutableList<V> transform( List<K> list, Function<K, V> transformFn )
+    {
+        List<V> newList = new ArrayList<>( );
+
+        for ( K key : list )
+        {
+            V value = transformFn.apply( key );
+            newList.add( value );
+        }
+
         return ImmutableList.copyOf( newList );
     }
 
