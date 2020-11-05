@@ -29,8 +29,6 @@ package com.metsci.glimpse.topo;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
 import static com.metsci.glimpse.topo.io.TopoCache.topoConfigString;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.glimpseTopoCacheDir;
-import static com.metsci.glimpse.util.io.FileSync.lockFile;
-import static com.metsci.glimpse.util.io.FileSync.unlockFile;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
@@ -51,6 +49,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -302,30 +301,22 @@ public class ShadedReliefTileCache
     {
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "r" );
 
-        lockFile( cacheFile );
-        try
-        {
-            int numLat = rf.readInt( );
-            int numLon = rf.readInt( );
-            double startLat_DEG = rf.readDouble( );
-            double startLon_DEG = rf.readDouble( );
-            double latStep_DEG = rf.readDouble( );
-            double lonStep_DEG = rf.readDouble( );
+        int numLat = rf.readInt( );
+        int numLon = rf.readInt( );
+        double startLat_DEG = rf.readDouble( );
+        double startLon_DEG = rf.readDouble( );
+        double latStep_DEG = rf.readDouble( );
+        double lonStep_DEG = rf.readDouble( );
 
-            FileChannel ch = rf.getChannel( );
+        FileChannel ch = rf.getChannel( );
 
-            CachedTileData cached = new CachedTileData( latStep_DEG, lonStep_DEG, startLat_DEG, startLon_DEG, numLat, numLon );
+        CachedTileData cached = new CachedTileData( latStep_DEG, lonStep_DEG, startLat_DEG, startLon_DEG, numLat, numLon );
 
-            ch.read( cached.elevation );
-            ch.read( cached.shaded );
+        ch.read( cached.elevation );
+        ch.read( cached.shaded );
 
-            rf.close( );
-            return cached;
-        }
-        finally
-        {
-            unlockFile( cacheFile );
-        }
+        rf.close( );
+        return cached;
     }
 
     public void writeCachedTile( File cacheFile, CachedTileData tile ) throws IOException
@@ -333,7 +324,9 @@ public class ShadedReliefTileCache
         cacheFile.getParentFile( ).mkdirs( );
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
 
-        lockFile( cacheFile );
+        // Get an exclusive lock while writing
+        FileLock lock = rf.getChannel( ).lock( );
+
         try
         {
             rf.setLength( 0 );
@@ -352,12 +345,10 @@ public class ShadedReliefTileCache
 
             ch.write( tile.elevation );
             ch.write( tile.shaded );
-
-            rf.close( );
         }
         finally
         {
-            unlockFile( cacheFile );
+            rf.close( );
         }
     }
 
