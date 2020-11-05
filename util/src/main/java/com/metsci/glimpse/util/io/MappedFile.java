@@ -382,38 +382,74 @@ public class MappedFile
 
     /**
      * DirectByteBuffer( int cap, long addr, FileDescriptor fd, Runnable unmapper )
+     * OR
+     * DirectByteBuffer( int cap, long addr, FileDescriptor fd, Runnable unmapper, boolean isSync, MemorySegmentProxy segment )
      */
-    protected static final Constructor<?> DirectByteBuffer_init;
+    protected static final BufferAllocator DirectByteBuffer_init;
+
     static
     {
+        BufferAllocator allocator = null;
         try
         {
             Class<?> clazz = Class.forName( "java.nio.DirectByteBuffer" );
-            DirectByteBuffer_init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
-            DirectByteBuffer_init.setAccessible( true );
+            Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
+            init.setAccessible( true );
+            allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access java.nio.DirectByteBuffer.<init>()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "java.nio.DirectByteBuffer" );
+                Class<?> memSegmentProxyClass = Class.forName( "jdk.internal.access.foreign.MemorySegmentProxy" );
+                Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class, boolean.class, memSegmentProxyClass );
+                init.setAccessible( true );
+                allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null, true, null );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access java.nio.DirectByteBuffer.<init>()", ex );
+            }
         }
+
+        DirectByteBuffer_init = allocator;
     }
 
     /**
      * DirectByteBufferR( int cap, long addr, FileDescriptor fd, Runnable unmapper )
+     * OR
+     * DirectByteBufferR( int cap, long addr, FileDescriptor fd, Runnable unmapper, boolean isSync, MemorySegmentProxy segment )
      */
-    protected static final Constructor<?> DirectByteBufferR_init;
+    protected static final BufferAllocator DirectByteBufferR_init;
+
     static
     {
+        BufferAllocator allocator = null;
         try
         {
             Class<?> clazz = Class.forName( "java.nio.DirectByteBufferR" );
-            DirectByteBufferR_init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
-            DirectByteBufferR_init.setAccessible( true );
+            Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
+            init.setAccessible( true );
+            allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access java.nio.DirectByteBufferR.<init>()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "java.nio.DirectByteBufferR" );
+                Class<?> memSegmentProxyClass = Class.forName( "jdk.internal.access.foreign.MemorySegmentProxy" );
+                Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class, boolean.class, memSegmentProxyClass );
+                init.setAccessible( true );
+                allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null, true, null );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access java.nio.DirectByteBuffer.<init>()", ex );
+            }
         }
+
+        DirectByteBufferR_init = allocator;
     }
 
     /**
@@ -445,8 +481,8 @@ public class MappedFile
     {
         try
         {
-            Constructor<?> init = ( writable ? DirectByteBuffer_init : DirectByteBufferR_init );
-            MappedByteBuffer buffer = ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null );
+            BufferAllocator allocator = ( writable ? DirectByteBuffer_init : DirectByteBufferR_init );
+            MappedByteBuffer buffer = allocator.newInstance( capacity, address, fd );
             DirectByteBuffer_att.set( buffer, attachment );
             return buffer;
         }
@@ -462,15 +498,27 @@ public class MappedFile
     protected static final Method MappedByteBuffer_force0;
     static
     {
+        Method method = null;
         try
         {
-            MappedByteBuffer_force0 = MappedByteBuffer.class.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
-            MappedByteBuffer_force0.setAccessible( true );
+            method = MappedByteBuffer.class.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
+            method.setAccessible( true );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access " + MappedByteBuffer.class.getName( ) + ".force0()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "java.nio.MappedMemoryUtils" );
+                method = clazz.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
+                method.setAccessible( true );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access " + MappedByteBuffer.class.getName( ) + ".force0()", ex );
+            }
         }
+
+        MappedByteBuffer_force0 = method;
     }
 
     protected static void force( FileDescriptor fd, long address, long length ) throws RuntimeException
@@ -496,4 +544,8 @@ public class MappedFile
         }
     }
 
+    private interface BufferAllocator
+    {
+        MappedByteBuffer newInstance( int capacity, long address, FileDescriptor fd ) throws InvocationTargetException, InstantiationException, IllegalAccessException;
+    }
 }
