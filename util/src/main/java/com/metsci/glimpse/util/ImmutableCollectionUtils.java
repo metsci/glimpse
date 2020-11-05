@@ -47,7 +47,7 @@ import com.google.common.collect.ImmutableSet;
 public class ImmutableCollectionUtils
 {
 
-    public static <K1, K2, V> ImmutableMap<K1, ImmutableMap<K2, V>> mapWith( ImmutableMap<K1, ImmutableMap<K2, V>> map, K1 key1, K2 key2, V value )
+    public static <K1, K2, V> ImmutableMap<K1, ImmutableMap<K2, V>> mapWith( Map<K1, ImmutableMap<K2, V>> map, K1 key1, K2 key2, V value )
     {
         ImmutableMap<K2, V> innerMap = mapWith( map.get( key1 ), key2, value );
         return mapWith( map, key1, innerMap );
