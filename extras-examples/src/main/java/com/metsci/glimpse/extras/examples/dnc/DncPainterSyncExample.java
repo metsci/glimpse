@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
@@ -96,7 +96,7 @@ public class DncPainterSyncExample
             // Create image
             //
 
-            FBOGlimpseCanvas canvas = new FBOGlimpseCanvas( GLProfile.get( GL3bc ), 1000, 1000 );
+            FBOGlimpseCanvas canvas = new FBOGlimpseCanvas( GLProfile.get( GL3 ), 1000, 1000 );
             canvas.addLayout( plot );
             canvas.setLookAndFeel( new SwingLookAndFeel( ) );
             BufferedImage image = canvas.toBufferedImage( );

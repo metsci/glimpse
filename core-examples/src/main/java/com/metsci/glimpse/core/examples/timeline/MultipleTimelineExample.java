@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.timeline;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -65,7 +65,7 @@ public class MultipleTimelineExample
             estTimeline.setSize( adjustForDesktopScaling( 35 ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Multiple Timeline Plot Example", GL3, plot, new OceanLookAndFeel( ) );
         } );
     }
 }

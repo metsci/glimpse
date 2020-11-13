@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.heatmap;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -54,7 +54,7 @@ public class HeatMapExample
         swingInvokeLater( ( ) ->
         {
             // create a window and show the plot
-            quickGlimpseApp( "Heat Map Example", GL3bc, newHeatMapPlot( ) );
+            quickGlimpseApp( "Heat Map Example", GL3, newHeatMapPlot( ) );
         } );
     }
 

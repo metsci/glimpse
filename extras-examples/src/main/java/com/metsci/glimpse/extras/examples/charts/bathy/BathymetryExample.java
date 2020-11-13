@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.extras.examples.charts.bathy;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -83,7 +83,7 @@ public class BathymetryExample
         swingInvokeLater( ( ) ->
         {
             // create a window and show the plot
-            quickGlimpseApp( "Bathymetry Example", GL3bc, new BathymetryExample( ).getPlot( ) );
+            quickGlimpseApp( "Bathymetry Example", GL3, new BathymetryExample( ).getPlot( ) );
         } );
     }
 

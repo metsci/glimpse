@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.heatmap;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.axis.tagged.Tag.TAG_COLOR_ATTR;
 import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
@@ -65,7 +65,7 @@ public class TaggedHeatMapExample
             ColorAxisPlot2D plot = newPlot( );
 
             // create a window and show the plot
-            quickGlimpseApp( "Tagged Heat Map Example", GL3bc, plot );
+            quickGlimpseApp( "Tagged Heat Map Example", GL3, plot );
         } );
     }
 

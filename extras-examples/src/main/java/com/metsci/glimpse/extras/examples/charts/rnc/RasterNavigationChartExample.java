@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.extras.examples.charts.rnc;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -115,7 +115,7 @@ public class RasterNavigationChartExample
             plot.setMaxY( Math.max( xy00[1], xy11[1] ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Raster Navigation Chart Example", GL3bc, plot );
+            quickGlimpseApp( "Raster Navigation Chart Example", GL3, plot );
         } );
     }
 }

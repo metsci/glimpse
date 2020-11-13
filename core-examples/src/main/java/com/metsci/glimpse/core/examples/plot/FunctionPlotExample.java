@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.plot;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -118,7 +118,7 @@ public class FunctionPlotExample
             layout.addPainter( functionPainter2 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Function Plot Example", GL3bc, layout );
+            quickGlimpseApp( "Function Plot Example", GL3, layout );
         } );
     }
 

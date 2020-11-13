@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.extras.examples.charts.slippy;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
@@ -133,7 +133,7 @@ public class SlippyTileExample
 
             // create a window and show the plot
             String appName = "Slippy Tile Example";
-            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3 );
             NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, mapPlot );
             JFrame frame = quickGlimpseWindow( appName, canvas );
 

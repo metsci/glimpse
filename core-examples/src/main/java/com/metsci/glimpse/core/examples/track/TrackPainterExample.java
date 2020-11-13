@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.track;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -174,7 +174,7 @@ public class TrackPainterExample
             plot.addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Slippy Tile Example", GL3bc, plot, new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Slippy Tile Example", GL3, plot, new OceanLookAndFeel( ) );
         } );
     }
 

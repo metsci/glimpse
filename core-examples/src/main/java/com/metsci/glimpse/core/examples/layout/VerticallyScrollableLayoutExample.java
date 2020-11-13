@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.layout;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.layout.GlimpseVerticallyScrollableLayout.attachScrollableToScrollbar;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
@@ -64,7 +64,7 @@ public class VerticallyScrollableLayoutExample
             // Swing scrollbar, for interactively controlling the scroller's vertical offset
             final JScrollBar scrollbar = new JScrollBar( );
 
-            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( GL3bc, scroller, new OceanLookAndFeel( ) );
+            NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( GL3, scroller, new OceanLookAndFeel( ) );
             JFrame frame = quickGlimpseWindow( "Vertically Scrollable Example", canvas, 800, 600 );
 
             // perform some additional setup of the scroll bar

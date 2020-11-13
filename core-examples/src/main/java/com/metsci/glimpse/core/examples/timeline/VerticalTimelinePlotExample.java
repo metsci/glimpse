@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.timeline;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.DisposableUtils.onWindowClosing;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -92,7 +92,7 @@ public class VerticalTimelinePlotExample extends HorizontalTimelinePlotExample
             }
 
             // create a window and show the plot
-            JFrame frame = quickGlimpseApp( "Vertical Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
+            JFrame frame = quickGlimpseApp( "Vertical Timeline Plot Example", GL3, plot, new OceanLookAndFeel( ) );
 
             // Stop the timer when the window closes
             onWindowClosing( frame, ev ->

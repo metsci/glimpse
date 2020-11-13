@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.misc;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -99,7 +99,7 @@ public class ButtonExample
             plot.getLayoutCenter( ).addLayout( button, Plot2D.FOREGROUND_LAYER );
 
             // create a window and show the plot
-            quickGlimpseApp( "Button Example", GL3bc, plot );
+            quickGlimpseApp( "Button Example", GL3, plot );
         } );
     }
 }

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.scatterplot;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
@@ -132,7 +132,7 @@ public class DynamicPointPainterExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Animated Polar Projection Example", GL3bc, plot );
+            quickGlimpseApp( "Animated Polar Projection Example", GL3, plot );
         } );
     }
 }

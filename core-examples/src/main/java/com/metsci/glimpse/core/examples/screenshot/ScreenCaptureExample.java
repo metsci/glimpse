@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.screenshot;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.context.TargetStackUtil.newTargetStack;
 import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
@@ -74,7 +74,7 @@ public class ScreenCaptureExample
 
             // create a window and show the plot
             String appName = "Screen Capture Example";
-            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3 );
             NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
             quickGlimpseWindow( appName, canvas );
 

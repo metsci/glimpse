@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.line;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.gl.util.GLUtils.disableBlending;
 import static com.metsci.glimpse.core.gl.util.GLUtils.enableStandardBlending;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
@@ -61,7 +61,7 @@ public class LinePathExample
             plot.addPainter( new BackgroundPainter( ) );
             plot.addPainter( new CustomLinesPainter( ) );
 
-            quickGlimpseApp( "LinePathExample", GL3bc, plot );
+            quickGlimpseApp( "LinePathExample", GL3, plot );
         } );
     }
 

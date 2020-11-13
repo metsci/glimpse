@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.track;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 
 import javax.swing.SwingUtilities;
@@ -101,7 +101,7 @@ public class StaticTrackPainterExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Static Track Painter Example", GL3bc, plot );
+            quickGlimpseApp( "Static Track Painter Example", GL3, plot );
         } );
     }
 }

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.layout;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -74,7 +74,7 @@ public class MiniMapLayoutExample
             mini.addPainter( plot.getPainterByKey( TaggedHeatMapExample.PainterKey ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Mini Map Layout Example", GL3bc, plot );
+            quickGlimpseApp( "Mini Map Layout Example", GL3, plot );
         } );
     }
 }
