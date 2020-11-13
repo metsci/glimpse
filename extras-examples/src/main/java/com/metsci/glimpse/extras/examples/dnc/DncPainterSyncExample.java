@@ -32,10 +32,12 @@ import static com.metsci.glimpse.dnc.DncDataPaths.glimpseDncFlatDir;
 import static com.metsci.glimpse.dnc.DncProjections.dncTangentPlane;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymThemes.DNC_THEME_STANDARD;
 import static com.metsci.glimpse.util.GlimpseDataPaths.requireExistingDir;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -56,6 +58,7 @@ import com.metsci.glimpse.dnc.convert.Flat2Render.RenderCacheConfig;
  */
 public class DncPainterSyncExample
 {
+    private static final Logger logger = getLogger( DncPainterSyncExample.class );
 
     public static void main( String[] args )
     {
@@ -97,7 +100,14 @@ public class DncPainterSyncExample
             canvas.addLayout( plot );
             canvas.setLookAndFeel( new SwingLookAndFeel( ) );
             BufferedImage image = canvas.toBufferedImage( );
-            ImageIO.write( image, "PNG", new File( "DncPainterSyncExample.png" ) );
+
+
+            // Write image to file
+            //
+
+            File outFile = new File( "DncPainterSyncExample.png" );
+            ImageIO.write( image, "PNG", outFile );
+            logger.info( "Wrote image to " + outFile.getAbsolutePath( ) );
         } );
     }
 
