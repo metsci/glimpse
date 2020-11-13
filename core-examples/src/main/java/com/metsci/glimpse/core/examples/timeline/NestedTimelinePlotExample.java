@@ -56,7 +56,7 @@ public class NestedTimelinePlotExample
             topGroup1.setShowDivider( false );
 
             GroupInfo topGroup2 = plot.createGroup( );
-            topGroup2.setLabelText( "Top Group 1" );
+            topGroup2.setLabelText( "Top Group 2" );
             topGroup2.setShowDivider( false );
 
             GroupInfo midGroup1 = plot.createGroup( );
