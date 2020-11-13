@@ -135,8 +135,7 @@ public class LandShapePainter extends GlimpsePainterBase
             }
         } );
 
-        //XXX Here we load every Shape segment as a different polygon
-        //XXX This won't work for shapes with holes, still need to figure this out
+        // TODO: This won't work for shapes with holes
         Polygon p = new Polygon( );
         PathIterator iter = shape.getPathIterator( null );
         double[] vertices = new double[6];

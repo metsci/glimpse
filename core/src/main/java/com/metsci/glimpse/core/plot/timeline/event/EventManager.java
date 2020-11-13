@@ -1016,7 +1016,7 @@ public class EventManager
     {
         double totalOverlap = 0;
 
-        //XXX Heuristic: we want overlaps with very small events (in the
+        // TODO: Heuristic: we want overlaps with very small events (in the
         // limit we have 0 duration events) to count for something, so
         // we make the minimum time penalty for any overlap be 1/20th
         // of the total duration of either event

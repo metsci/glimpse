@@ -126,7 +126,7 @@ public abstract class CursorLabelPainter extends GlimpsePainterBase
     @Override
     public void setLookAndFeel( LookAndFeel laf )
     {
-        // XXX: Add a TOOLTIP_FONT entry to lafs -- typical AXIS_FONT is too small
+        // TODO: Add a TOOLTIP_FONT entry to lafs -- typical AXIS_FONT is too small
         //this.label.setFont( laf.getFont( AXIS_FONT ) );
         this.label.setBackground( toColorAwt( laf.getColor( TOOLTIP_BACKGROUND_COLOR ) ) );
         this.label.setForeground( toColorAwt( laf.getColor( TOOLTIP_TEXT_COLOR ) ) );

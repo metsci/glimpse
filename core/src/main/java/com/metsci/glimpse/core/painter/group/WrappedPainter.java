@@ -85,7 +85,7 @@ public class WrappedPainter extends GlimpsePainterBase
         return Integer.compare( a.zOrder, b.zOrder );
     };
 
-    // XXX: This should probably be something more flexible, maybe along the lines of GLCapabilities
+    // TODO: This should probably be something more flexible, maybe along the lines of GLCapabilities
     private final boolean attachStencilBuffer;
 
     private final List<Entry> entriesSorted;
@@ -248,7 +248,7 @@ public class WrappedPainter extends GlimpsePainterBase
             }
 
             // before figuring out which tiles need to be rendered, make sure constraints are applied, etc.
-            // XXX: not sure why this doesn't get called automatically somewhere else
+            // TODO: not sure why this doesn't get called automatically somewhere else
             axis.validate( );
 
             List<WrappedTextureBounds> boundsX = Lists.newArrayList( wrappedBoundsIterator( axisX, bounds.getWidth( ) ) );

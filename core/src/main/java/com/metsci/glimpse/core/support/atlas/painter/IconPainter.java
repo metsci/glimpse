@@ -133,7 +133,7 @@ public class IconPainter extends GlimpsePainterBase
         this.pickListeners = new CopyOnWriteArrayList<SpatialSelectionListener<PickResult>>( );
         this.pickNotificationThread = Executors.newSingleThreadExecutor( ( runnable )->
         {
-            Thread thread = new Thread( runnable );  
+            Thread thread = new Thread( runnable );
             thread.setDaemon( true );
             return thread;
         });
@@ -772,8 +772,7 @@ public class IconPainter extends GlimpsePainterBase
     @Override
     protected void doDispose( GlimpseContext context )
     {
-        //XXX who should dispose of the texture atlas?
-        //XXX us if we created it, someone else if it was passed in...?
+        // TODO: Who should dispose of the texture atlas? ... Us if we created it, caller if it was passed in?
 
         for ( IconGroup group : this.iconGroupMap.values( ) )
         {
@@ -976,7 +975,7 @@ public class IconPainter extends GlimpsePainterBase
             this.rotation = rotation;
             this.scale = scale;
 
-            //XXX: Check length of rotation and scale arrays as well
+            // TODO: Check length of rotation and scale arrays as well
             if ( positionX.length != positionY.length ) throw new IllegalArgumentException( String.format( "Size of positionX and positionY arrays must be identical. Found: %d and %d.", positionX.length, positionY.length ) );
 
             this.size = positionX.length;

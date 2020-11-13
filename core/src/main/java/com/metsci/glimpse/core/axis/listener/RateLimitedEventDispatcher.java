@@ -163,7 +163,7 @@ public abstract class RateLimitedEventDispatcher<D>
         this.thread.setDaemon( true );
         this.thread.setName( name );
 
-        // XXX: FIX, Don't start a thread in the constructor b/c subclasses possibly won't function properly
+        // TODO: Don't start a thread in the constructor b/c subclasses might not function properly
         this.thread.start( );
     }
 

@@ -129,7 +129,7 @@ public class FBOGlimpseCanvas extends AbstractGlimpseCanvas
         }
     }
 
-    //XXX this link probably no longer relevant to 2.2.0
+    // TODO: this link probably no longer relevant to 2.2.0
     // see: http://forum.jogamp.org/querying-textures-bound-to-default-draw-read-framebuffers-td4026564.html
     public int getTextureName( )
     {

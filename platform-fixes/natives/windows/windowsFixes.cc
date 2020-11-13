@@ -167,7 +167,7 @@ BOOL CALLBACK setHooksIfNeeded( HWND hwnd, LPARAM lParam )
                 HHOOK hCallWndHook = SetWindowsHookEx( WH_CALLWNDPROC, callWndProc, NULL, tidHwnd );
                 if ( hCallWndHook == NULL )
                 {
-                    // XXX: This unhook probably trashes the last-error code
+                    // TODO: This unhook probably trashes the last-error code
                     UnhookWindowsHookEx( hGetMsgHook );
                     ReleaseMutex( _threadsWithFixMutex );
                     return FALSE;
