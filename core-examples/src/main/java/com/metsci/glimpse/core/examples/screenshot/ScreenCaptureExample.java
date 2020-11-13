@@ -31,9 +31,11 @@ import static com.metsci.glimpse.core.context.TargetStackUtil.newTargetStack;
 import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
@@ -61,6 +63,8 @@ import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
  */
 public class ScreenCaptureExample
 {
+    private static final Logger logger = getLogger( ScreenCaptureExample.class );
+
     public static void main( String[] args )
     {
         SwingUtilities.invokeLater( ( ) ->
@@ -118,7 +122,9 @@ public class ScreenCaptureExample
                     try
                     {
                         BufferedImage image = offscreenCanvas.toBufferedImage( );
-                        ImageIO.write( image, "PNG", new File( "ScreenCaptureExample.png" ) );
+                        File outFile = new File( "ScreenCaptureExample.png" );
+                        ImageIO.write( image, "PNG", outFile );
+                        logger.info( "Wrote image to " + outFile.getAbsolutePath( ) );
                     }
                     catch ( Exception e )
                     {
