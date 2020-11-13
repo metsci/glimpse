@@ -46,7 +46,7 @@ public class MultipleTimelineExample
         {
             StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
 
-            // FIXME: Broken by commit 5aeb6a3 ... both timelines end up with the same labels
+            // FIXME: Broken by commit 5aeb6a3 ... timelines have different timezones but the same tick labels
 
             // set up two timelines, one showing EST and one showing GMT time
             TimelineInfo gmtTimeline = plot.getDefaultTimeline( );
