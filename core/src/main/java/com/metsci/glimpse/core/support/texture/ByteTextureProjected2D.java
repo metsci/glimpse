@@ -34,7 +34,8 @@ import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
 
 /**
  * A texture class which stores 8 bit integer values (uncapped).
@@ -58,12 +59,12 @@ public class ByteTextureProjected2D extends TextureProjected2D
 
     protected Buffer prepare_setPixelStore( GL gl, int i )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, dataSizeX );
+        gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
-        //gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, texStartY[i] );
+        //gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, texStartY[i] );
         // however, skipping rows manually using data.position works
         return data.position( texStartsY[i] * dataSizeX );
     }
@@ -78,12 +79,12 @@ public class ByteTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_R8UI, texSizesX[i], texSizesY[i], 0, GL2.GL_RED_INTEGER, GL2.GL_UNSIGNED_BYTE, positionedBuffer );
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2ES3.GL_R8UI, texSizesX[i], texSizesY[i], 0, GL2ES3.GL_RED_INTEGER, GL.GL_UNSIGNED_BYTE, positionedBuffer );
         }
 
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, 0 );
     }
 
     @Override

@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES2;
 
 /**
  * A texture class which stores 16 bit integer values (uncapped).
@@ -59,12 +60,12 @@ public class ShortTextureProjected2D extends TextureProjected2D
 
     protected Buffer prepare_setPixelStore( GL gl, int i )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, dataSizeX );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
-        //gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
+        //gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
         // however, skipping rows manually using data.position works
         return data.asShortBuffer( ).position( texStartsY[i] * dataSizeX );
     }
@@ -79,12 +80,13 @@ public class ShortTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL2.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16I, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE_INTEGER, GL2.GL_SHORT, positionedBuffer );
+            // TODO: Does this work with a GL3 profile (e.g. on OSX)?
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16I, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE_INTEGER, GL.GL_SHORT, positionedBuffer );
         }
 
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, 0 );
     }
 
     @Override

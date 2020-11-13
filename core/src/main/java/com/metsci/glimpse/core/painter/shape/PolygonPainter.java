@@ -1050,7 +1050,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 }
 
                 // Renders incorrectly on some machines if one of the arrays is > 65535 in size
-                // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
+                // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
             }
             finally
             {
@@ -1092,7 +1092,7 @@ public class PolygonPainter extends GlimpsePainterBase
                 }
 
                 // Renders incorrectly on some machines if one of the arrays is > 65535 in size
-                // gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
+                // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
             }
             finally
             {
