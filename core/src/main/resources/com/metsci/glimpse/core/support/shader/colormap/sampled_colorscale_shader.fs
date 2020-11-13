@@ -44,7 +44,7 @@ out vec4 fRgba;
 
 void main()
 {
-	// retrieve the data value for this texel
+    // retrieve the data value for this texel
     float dataVal = texture( datatex, vSt ).r;
     if( discardNaN && isnan( dataVal ) )
     {
