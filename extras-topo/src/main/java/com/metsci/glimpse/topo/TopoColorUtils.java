@@ -45,24 +45,6 @@ public class TopoColorUtils
     public static final float bathyColormapMinValue = -11000f;
     public static final float topoColormapMaxValue = +8000f;
 
-    public static final ColorGradient bathyColorGradient = newColorGradient( bathyColormapMinValue,
-                                                                             -0f,
-                                                                             vc( -10000f,  0.00f, 0.00f, 0.00f  ),
-                                                                             vc(  -8000f,  0.12f, 0.44f, 0.60f  ),
-                                                                             vc(  -7000f,  0.32f, 0.62f, 0.80f  ),
-                                                                             vc(  -6000f,  0.40f, 0.72f, 0.90f  ),
-                                                                             vc(  -5000f,  0.53f, 0.79f, 0.95f  ),
-                                                                             vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
-
-    public static final ColorGradient topoColorGradient = newColorGradient( +0f,
-                                                                            topoColormapMaxValue,
-                                                                            vc(     +0f,  0.36f, 0.63f, 0.31f  ),
-                                                                            vc(    +50f,  0.42f, 0.70f, 0.38f  ),
-                                                                            vc(   +750f,  0.49f, 0.76f, 0.45f  ),
-                                                                            vc(  +3000f,  0.67f, 0.90f, 0.65f  ),
-                                                                            vc(  +5500f,  0.90f, 0.95f, 0.90f  ),
-                                                                            vc(  +6500f,  0.99f, 0.99f, 0.99f  ) );
-
     /**
      * Colors as a function of bathymetry only, not including topography.
      * These colors, when used as a step function and not a gradient, provide
@@ -107,6 +89,44 @@ public class TopoColorUtils
                     vc( +3000f, 0.67f, 0.90f, 0.65f ),
                     vc( +5500f, 0.90f, 0.95f, 0.90f ),
                     vc( +6500f, 0.99f, 0.99f, 0.99f ) );
+
+    /**
+     * Can be combined with {@link #topoColorGradient} to create a color map with a discontinuity
+     * at zero. The discontinuity provides a strong visual cue about what is below sea level, and
+     * what is above sea level.
+     * <p>
+     * This works well when bathymetry is shown as a general backdrop behind the data of interest.
+     * However, it may be misleading if the user is focused on the bathymetry itself, because sea
+     * level isn't always the dividing line between water and land. Rivers, for example, tend to
+     * be above sea level.
+     */
+    public static final ColorGradient bathyColorGradient = newColorGradient( bathyColormapMinValue,
+                                                                             -0f,
+                                                                             vc( -10000f,  0.00f, 0.00f, 0.00f  ),
+                                                                             vc(  -8000f,  0.12f, 0.44f, 0.60f  ),
+                                                                             vc(  -7000f,  0.32f, 0.62f, 0.80f  ),
+                                                                             vc(  -6000f,  0.40f, 0.72f, 0.90f  ),
+                                                                             vc(  -5000f,  0.53f, 0.79f, 0.95f  ),
+                                                                             vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
+
+    /**
+     * Can be combined with {@link #bathyColorGradient} to create a color map with a discontinuity
+     * at zero. The discontinuity provides a strong visual cue about what is below sea level, and
+     * what is above sea level.
+     * <p>
+     * This works well when bathymetry is shown as a general backdrop behind the data of interest.
+     * However, it may be misleading if the user is focused on the bathymetry itself, because sea
+     * level isn't always the dividing line between water and land. Rivers, for example, tend to
+     * be above sea level.
+     */
+    public static final ColorGradient topoColorGradient = newColorGradient( +0f,
+                                                                            topoColormapMaxValue,
+                                                                            vc(     +0f,  0.36f, 0.63f, 0.31f  ),
+                                                                            vc(    +50f,  0.42f, 0.70f, 0.38f  ),
+                                                                            vc(   +750f,  0.49f, 0.76f, 0.45f  ),
+                                                                            vc(  +3000f,  0.67f, 0.90f, 0.65f  ),
+                                                                            vc(  +5500f,  0.90f, 0.95f, 0.90f  ),
+                                                                            vc(  +6500f,  0.99f, 0.99f, 0.99f  ) );
 
     public static ColorTexture1D bathyColorTable( )
     {
