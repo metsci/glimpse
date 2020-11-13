@@ -76,6 +76,7 @@ public class AzimuthalEquidistant implements GeoProjection
     @Override
     public KinematicVector2d reprojectPosVelFrom( double x, double y, double vx, double vy, GeoProjection fromProjection )
     {
+        // TODO: Can we implement this?
         throw new UnsupportedOperationException( );
     }
 }
