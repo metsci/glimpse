@@ -205,7 +205,7 @@ public class ImmutableCollectionUtils
         return ( changed ? ImmutableSet.copyOf( newSet ) : castOrConvert( set ) );
     }
 
-    public static <K, V> ImmutableSet<V> transform( Set<K> set, Function<K, V> transformFn )
+    public static <K, V> ImmutableSet<V> transform( Set<K> set, Function<? super K, V> transformFn )
     {
         Set<V> newSet = new LinkedHashSet<>( );
 
@@ -299,7 +299,7 @@ public class ImmutableCollectionUtils
         return ImmutableList.copyOf( newList );
     }
 
-    public static <K, V> ImmutableList<V> transform( List<K> list, Function<K, V> transformFn )
+    public static <K, V> ImmutableList<V> transform( List<K> list, Function<? super K, V> transformFn )
     {
         List<V> newList = new ArrayList<>( );
 
@@ -312,6 +312,11 @@ public class ImmutableCollectionUtils
         return ImmutableList.copyOf( newList );
     }
 
+    /**
+     * {@link ImmutableList#copyOf(Collection)} will create a copy of the data
+     * even for an immutable list if the list is a partial view. This avoid
+     * that copy and will return the argument {@code list} if it is immutable.
+     */
     private static <V> ImmutableList<V> castOrConvert( List<V> list )
     {
         if ( list instanceof ImmutableList )
@@ -324,6 +329,9 @@ public class ImmutableCollectionUtils
         }
     }
 
+    /**
+     * @see #castOrConvert(List)
+     */
     private static <V> ImmutableSet<V> castOrConvert( Set<V> set )
     {
         if ( set instanceof ImmutableSet )
@@ -336,6 +344,9 @@ public class ImmutableCollectionUtils
         }
     }
 
+    /**
+     * @see #castOrConvert(List)
+     */
     private static <K, V> ImmutableMap<K, V> castOrConvert( Map<K, V> map )
     {
         if ( map instanceof ImmutableMap )
