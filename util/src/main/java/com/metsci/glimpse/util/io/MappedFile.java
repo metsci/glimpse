@@ -71,6 +71,11 @@ public class MappedFile
         expectDeepReflectiveAccess( MappedFile.class, "java.base", "java.nio" );
     }
 
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
     protected static final FileMapper mapper;
     static
     {

@@ -53,6 +53,11 @@ public class NewtSwingEDTUtils
         expectDeepReflectiveAccess( NewtSwingEDTUtils.class, "java.desktop", "java.awt" );
     }
 
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
     public static enum ModalBlockedStatus
     {
         DEFINITELY_BLOCKED, DEFINITELY_NOT_BLOCKED, UNKNOWN

@@ -47,17 +47,32 @@ public class ModuleAccessChecker
         }
     }
 
+    public static void expectInternalApiAccess( Class<?> fromClass, String toModuleName, String toPackageName )
+    {
+        expectAccess( "--add-exports", fromClass, toModuleName, toPackageName, SEVERE );
+    }
+
+    public static void expectInternalApiAccess( Class<?> fromClass, String toModuleName, String toPackageName, Level logLevel )
+    {
+        expectAccess( "--add-exports", fromClass, toModuleName, toPackageName, logLevel );
+    }
+
     public static void expectDeepReflectiveAccess( Class<?> fromClass, String toModuleName, String toPackageName )
     {
-        expectDeepReflectiveAccess( fromClass, toModuleName, toPackageName, SEVERE );
+        expectAccess( "--add-opens", fromClass, toModuleName, toPackageName, SEVERE );
     }
 
     public static void expectDeepReflectiveAccess( Class<?> fromClass, String toModuleName, String toPackageName, Level logLevel )
     {
+        expectAccess( "--add-opens", fromClass, toModuleName, toPackageName, logLevel );
+    }
+
+    protected static void expectAccess( String jvmFlag, Class<?> fromClass, String toModuleName, String toPackageName, Level logLevel )
+    {
         if ( jvmSupportsModules )
         {
             String fromModuleName = getModuleName( fromClass );
-            String jvmArg = "--add-opens=" + toModuleName + "/" + toPackageName + "=" + ( fromModuleName != null ? fromModuleName : "ALL-UNNAMED" );
+            String jvmArg = jvmFlag + "=" + toModuleName + "/" + toPackageName + "=" + ( fromModuleName != null ? fromModuleName : "ALL-UNNAMED" );
             expectJvmArg( jvmArg, logLevel );
         }
     }

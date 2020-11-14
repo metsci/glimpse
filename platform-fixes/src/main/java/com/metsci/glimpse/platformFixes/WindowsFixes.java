@@ -58,6 +58,11 @@ public class WindowsFixes
         expectDeepReflectiveAccess( WindowsFixes.class, "java.desktop", "java.awt" );
     }
 
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
     private static final ImmutableList<URL> nativeLibs = findNativeLibs( );
     private static ImmutableList<URL> findNativeLibs( )
     {

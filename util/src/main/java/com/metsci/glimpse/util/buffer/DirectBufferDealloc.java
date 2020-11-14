@@ -66,6 +66,11 @@ public class DirectBufferDealloc
         expectDeepReflectiveAccess( DirectBufferDealloc.class, "java.base", "jdk.internal.ref" );
     }
 
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
     protected static interface Impl
     {
         void deallocate( Buffer buffer ) throws Exception;
