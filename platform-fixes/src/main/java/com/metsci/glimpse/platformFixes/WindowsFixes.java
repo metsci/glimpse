@@ -28,6 +28,7 @@ package com.metsci.glimpse.platformFixes;
 
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.extractAndLoad;
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectDeepReflectiveAccess;
 import static java.awt.Window.getOwnerlessWindows;
 
 import java.awt.Component;
@@ -47,11 +48,20 @@ import com.google.common.collect.ImmutableList;
  * <p>
  * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
  * <pre>
- * --add-opens java.desktop/java.awt=ALL-UNNAMED
+ * --add-opens java.desktop/java.awt=com.metsci.glimpse.platformFixes
  * </pre>
  */
 public class WindowsFixes
 {
+    static
+    {
+        expectDeepReflectiveAccess( WindowsFixes.class, "java.desktop", "java.awt" );
+    }
+
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
 
     private static final ImmutableList<URL> nativeLibs = findNativeLibs( );
     private static ImmutableList<URL> findNativeLibs( )

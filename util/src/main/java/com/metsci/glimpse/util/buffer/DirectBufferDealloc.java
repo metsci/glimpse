@@ -27,6 +27,7 @@
 package com.metsci.glimpse.util.buffer;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectDeepReflectiveAccess;
 import static com.metsci.glimpse.util.ugly.UglyUtils.findClass;
 
 import java.lang.reflect.Method;
@@ -59,12 +60,21 @@ public class DirectBufferDealloc
 {
     private static final Logger logger = getLogger( DirectBufferDealloc.class );
 
+    static
+    {
+        expectDeepReflectiveAccess( DirectBufferDealloc.class, "java.base", "sun.nio.ch" );
+        expectDeepReflectiveAccess( DirectBufferDealloc.class, "java.base", "jdk.internal.ref" );
+    }
+
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
 
     protected static interface Impl
     {
         void deallocate( Buffer buffer ) throws Exception;
     }
-
 
     protected static class NoopImpl implements Impl
     {
@@ -80,7 +90,6 @@ public class DirectBufferDealloc
             return "DirectBufferDealloc impl NOOP stub for unsupported JVMs";
         }
     }
-
 
     protected static class OpenJdkImpl implements Impl
     {
@@ -126,7 +135,6 @@ public class DirectBufferDealloc
         }
     }
 
-
     protected static final Impl impl = chooseImpl( OpenJdkImpl::new );
 
     @SafeVarargs
@@ -148,7 +156,6 @@ public class DirectBufferDealloc
         logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be ignored" );
         return new NoopImpl( );
     }
-
 
     public static void deallocateDirectBuffer( Buffer directBuffer )
     {

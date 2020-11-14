@@ -28,6 +28,7 @@ package com.metsci.glimpse.util.io;
 
 import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
 import static com.metsci.glimpse.util.ugly.CleanerUtils.registerCleaner;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectDeepReflectiveAccess;
 import static java.lang.String.format;
 
 import java.io.File;
@@ -63,6 +64,18 @@ import java.nio.ReadOnlyBufferException;
  */
 public class MappedFile
 {
+    static
+    {
+        expectDeepReflectiveAccess( MappedFile.class, "java.base", "sun.nio.ch" );
+        expectDeepReflectiveAccess( MappedFile.class, "java.base", "jdk.internal.ref" );
+        expectDeepReflectiveAccess( MappedFile.class, "java.base", "java.nio" );
+    }
+
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
     protected static final FileMapper mapper;
     static
     {
