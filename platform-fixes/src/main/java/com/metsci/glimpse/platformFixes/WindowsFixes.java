@@ -162,6 +162,13 @@ public class WindowsFixes
     private static final Function<Window,Long> getHWndFn = createGetHWndFn( );
     private static Function<Window,Long> createGetHWndFn( )
     {
+        // If this reflective access isn't necessary, avoid it, because
+        // it triggers JVM warning messages that can be quite confusing
+        if ( !shouldApplyFixes )
+        {
+            return w -> null;
+        }
+
         try
         {
             Field Component_peer = Component.class.getDeclaredField( "peer" );
