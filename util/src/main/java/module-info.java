@@ -4,6 +4,7 @@
 open module com.metsci.glimpse.util
 {
     requires jdk.unsupported;
+    requires java.management;
 
     requires transitive java.logging;
     requires transitive it.unimi.dsi.fastutil;
