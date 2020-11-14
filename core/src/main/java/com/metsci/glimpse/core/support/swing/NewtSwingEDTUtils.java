@@ -31,6 +31,7 @@ import static com.metsci.glimpse.core.support.swing.NewtSwingEDTUtils.ModalBlock
 import static com.metsci.glimpse.core.support.swing.NewtSwingEDTUtils.ModalBlockedStatus.UNKNOWN;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logSevere;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectDeepReflectiveAccess;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 import java.awt.Component;
@@ -47,6 +48,10 @@ public class NewtSwingEDTUtils
 {
     private static final Logger logger = getLogger( NewtSwingEDTUtils.class );
 
+    static
+    {
+        expectDeepReflectiveAccess( NewtSwingEDTUtils.class, "java.desktop", "java.awt" );
+    }
 
     public static enum ModalBlockedStatus
     {
