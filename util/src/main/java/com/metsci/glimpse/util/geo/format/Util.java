@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.util.geo.format;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
+
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 
@@ -40,7 +43,9 @@ public class Util
 
     public final static String toDegreesMinutesSeconds( double degrees, int nDecimals, boolean longitude )
     {
-        double[] dms = toDegreesMinutesSeconds( degrees );
+        double precisionFactor = 3600 * pow( 10, nDecimals );
+        double degreesRounded = round( degrees * precisionFactor ) / precisionFactor;
+        double[] dms = toDegreesMinutesSeconds( degreesRounded );
         int deg = ( int ) dms[0];
         int min = ( int ) dms[1];
         double sec = dms[2];
@@ -49,8 +54,7 @@ public class Util
         secondsFormatter.setMinimumFractionDigits( nDecimals );
         secondsFormatter.setMaximumFractionDigits( nDecimals );
         secondsFormatter.setMinimumIntegerDigits( 2 );
-        // If we round up, sometimes this will go to 60
-        secondsFormatter.setRoundingMode( RoundingMode.DOWN );
+        secondsFormatter.setRoundingMode( RoundingMode.HALF_UP );
 
         String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
@@ -63,7 +67,9 @@ public class Util
 
     public final static String toDegreesMinutes( double degrees, int nDecimals, boolean longitude )
     {
-        double[] dms = toDegreesMinutes( degrees );
+        double precisionFactor = 60 * pow( 10, nDecimals );
+        double degreesRounded = round( degrees * precisionFactor ) / precisionFactor;
+        double[] dms = toDegreesMinutes( degreesRounded );
         int deg = ( int ) dms[0];
         double min = dms[1];
 
@@ -71,8 +77,7 @@ public class Util
         minutesFormatter.setMinimumFractionDigits( nDecimals );
         minutesFormatter.setMaximumFractionDigits( nDecimals );
         minutesFormatter.setMinimumIntegerDigits( 2 );
-        // If we round up, sometimes this will go to 60
-        minutesFormatter.setRoundingMode( RoundingMode.DOWN );
+        minutesFormatter.setRoundingMode( RoundingMode.HALF_UP );
 
         String hemisphere = longitude ? ( degrees >= 0.0 ? "E" : "W" ) : ( degrees >= 0.0 ? "N" : "S" );
 
