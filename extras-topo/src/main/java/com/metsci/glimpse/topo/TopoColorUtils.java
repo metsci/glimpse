@@ -110,14 +110,7 @@ public class TopoColorUtils
                                                                              vc(     -0f,  0.84f, 0.92f, 1.00f  ) );
 
     /**
-     * Can be combined with {@link #bathyColorGradient} to create a color map with a discontinuity
-     * at zero. The discontinuity provides a strong visual cue about what is below sea level, and
-     * what is above sea level.
-     * <p>
-     * This works well when bathymetry is shown as a general backdrop behind the data of interest.
-     * However, it may be misleading if the user is focused on the bathymetry itself, because sea
-     * level isn't always the dividing line between water and land. Rivers, for example, tend to
-     * be above sea level.
+     * See {@link #bathyColorGradient}.
      */
     public static final ColorGradient topoColorGradient = newColorGradient( +0f,
                                                                             topoColormapMaxValue,
