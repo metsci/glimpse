@@ -42,6 +42,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.context.GlimpseContext;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
@@ -572,7 +573,8 @@ public abstract class TextureProjected2D implements DrawableTexture
     }
 
     /**
-     * Relies on {@link GL2}, so may not work on OSX.
+     * Relies on {@link GL2}, so may not work on platforms like OSX that don't support
+     * backward-compatible GL profiles like {@link GLProfile#GL3bc}.
      */
     @Deprecated
     public boolean isResident( GL2 gl )

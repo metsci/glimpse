@@ -80,7 +80,7 @@ public class ShortTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            // TODO: Does this work with a GL3 profile (e.g. on OSX)?
+            // TODO: Does this work with a GL3 profile (e.g. on OSX), or does it require GL3bc?
             gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL2.GL_LUMINANCE16I, texSizesX[i], texSizesY[i], 0, GL2.GL_LUMINANCE_INTEGER, GL.GL_SHORT, positionedBuffer );
         }
 
