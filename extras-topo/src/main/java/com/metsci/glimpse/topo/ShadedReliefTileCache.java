@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
@@ -68,7 +69,7 @@ public class ShadedReliefTileCache
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTileCache.class.getName( ) );
 
-    public static final int CACHE_VERSION_ID = 4;
+    public static final int CACHE_VERSION_ID = 5;
 
     private static final int PIXELS_PER_TILE_LAT = 1_024;
     private static final int PIXELS_PER_TILE_LON = 1_024;
@@ -399,8 +400,8 @@ public class ShadedReliefTileCache
             this.numLat = numLat;
             this.numLon = numLon;
 
-            this.elevation = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
-            this.shaded = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
+            this.elevation = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES ).order( ByteOrder.nativeOrder( ) );
+            this.shaded = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES ).order( ByteOrder.nativeOrder( ) );
         }
 
         protected CachedTileData( TopoHostTile data )
@@ -412,8 +413,8 @@ public class ShadedReliefTileCache
             this.lonStep_DEG = toDegrees( unwrap( data.westLon_RAD, data.eastLon_RAD ) - data.westLon_RAD ) / numLon;
             this.latStep_DEG = toDegrees( data.northLat_RAD - data.southLat_RAD ) / numLat;
 
-            this.elevation = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
-            this.shaded = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES );
+            this.elevation = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES ).order( ByteOrder.nativeOrder( ) );
+            this.shaded = ByteBuffer.allocateDirect( numLat * numLon * Float.BYTES ).order( ByteOrder.nativeOrder( ) );
         }
     }
 }
