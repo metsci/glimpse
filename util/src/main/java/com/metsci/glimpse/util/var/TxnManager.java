@@ -31,9 +31,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * In most cases, client code should call the static methods in {@link Txn}.
- * This class is public for situations in which a separate set of txns needs
- * to be managed.
+ * In most cases, client code should call the static methods in {@link Txn},
+ * instead of using this class. This class can be used when there is a set
+ * of txns that needs to be managed separately, for some reason.
  */
 public class TxnManager
 {
