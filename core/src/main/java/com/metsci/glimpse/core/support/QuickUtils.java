@@ -30,6 +30,7 @@ import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.core.support.DisposableUtils.onWindowClosing;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.util.GeneralUtils.array;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.coalesceModuleAccessWarnings;
 import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectInternalApiAccess;
 import static javax.swing.JOptionPane.VALUE_PROPERTY;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
@@ -122,15 +123,18 @@ public class QuickUtils
 
     public static void checkGlimpseModuleAccess( )
     {
-        WindowsFixes.checkModuleAccess( );
-        NewtSwingEDTUtils.checkModuleAccess( );
-        DirectBufferDealloc.checkModuleAccess( );
-        MappedFile.checkModuleAccess( );
+        coalesceModuleAccessWarnings( ( ) ->
+        {
+            WindowsFixes.checkModuleAccess( );
+            NewtSwingEDTUtils.checkModuleAccess( );
+            DirectBufferDealloc.checkModuleAccess( );
+            MappedFile.checkModuleAccess( );
 
-        // JOGL
-        expectInternalApiAccess( AppContextInfo.class, "java.desktop", "sun.awt" );
-        expectInternalApiAccess( JAWTUtil.class, "java.desktop", "sun.awt" );
-        expectInternalApiAccess( Java2D.class, "java.desktop", "sun.java2d" );
+            // JOGL
+            expectInternalApiAccess( AppContextInfo.class, "java.desktop", "sun.awt" );
+            expectInternalApiAccess( JAWTUtil.class, "java.desktop", "sun.awt" );
+            expectInternalApiAccess( Java2D.class, "java.desktop", "sun.java2d" );
+        } );
     }
 
     public static void requireSwingThread( )

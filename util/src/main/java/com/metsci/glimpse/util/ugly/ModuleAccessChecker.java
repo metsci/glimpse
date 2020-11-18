@@ -1,9 +1,13 @@
 package com.metsci.glimpse.util.ugly;
 
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static java.util.Collections.singleton;
 import static java.util.logging.Level.SEVERE;
 
 import java.lang.management.ManagementFactory;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -22,14 +26,112 @@ public class ModuleAccessChecker
 {
     private static final Logger logger = getLogger( ModuleAccessChecker.class );
 
-    protected static final ImmutableSet<String> jvmArgs = ImmutableSet.copyOf( ManagementFactory.getRuntimeMXBean( ).getInputArguments( ) );
-
-    protected static final Set<String> checkedJvmArgs = ConcurrentHashMap.newKeySet( );
-    protected static void expectJvmArg( String arg, Level logLevel )
+    protected static class Warning
     {
-        if ( checkedJvmArgs.add( arg ) && !jvmArgs.contains( arg ) )
+        public final String missingJvmArg;
+        public final Level logLevel;
+
+        public Warning( String missingJvmArg, Level logLevel )
         {
-            logger.log( logLevel, "Missing expected JVM arg: " + arg );
+            this.missingJvmArg = missingJvmArg;
+            this.logLevel = logLevel;
+        }
+
+        @Override
+        public int hashCode( )
+        {
+            int prime = 30671;
+            int result = 1;
+            result = prime * result + Objects.hashCode( this.missingJvmArg );
+            result = prime * result + Objects.hashCode( this.logLevel );
+            return result;
+        }
+
+        @Override
+        public boolean equals( Object o )
+        {
+            if ( o == this ) return true;
+            if ( o == null ) return false;
+            if ( o.getClass( ) != this.getClass( ) ) return false;
+
+            Warning other = ( Warning ) o;
+            return ( Objects.equals( other.missingJvmArg, this.missingJvmArg )
+                  && Objects.equals( other.logLevel, this.logLevel ) );
+        }
+    }
+
+    protected static void logWarning( String jvmArg, Level logLevel )
+    {
+        logWarnings( singleton( new Warning( jvmArg, logLevel ) ) );
+    }
+
+    protected static void logWarnings( Collection<? extends Warning> warnings )
+    {
+        if ( warnings.size( ) == 1 )
+        {
+            Warning warning = warnings.iterator( ).next( );
+            logger.log( warning.logLevel, "Missing expected JVM arg: " + warning.missingJvmArg );
+        }
+        else if ( warnings.size( ) > 1 )
+        {
+            StringBuilder message = new StringBuilder( "Missing expected JVM args: " );
+            Level maxLogLevel = null;
+            for ( Warning warning : warnings )
+            {
+                message.append( System.lineSeparator( ) );
+                message.append( "  " );
+                message.append( warning.missingJvmArg );
+
+                if ( maxLogLevel == null || warning.logLevel.intValue( ) > maxLogLevel.intValue( ) )
+                {
+                    maxLogLevel = warning.logLevel;
+                }
+            }
+            logger.log( maxLogLevel, message.toString( ) );
+        }
+    }
+
+    protected static final ThreadLocal<LinkedHashSet<Warning>> activeWarnings = new ThreadLocal<>( );
+    public static void coalesceModuleAccessWarnings( Runnable task )
+    {
+        if ( activeWarnings.get( ) != null )
+        {
+            // Already inside a coalescer
+            task.run( );
+        }
+        else
+        {
+            LinkedHashSet<Warning> warnings = new LinkedHashSet<>( );
+            activeWarnings.set( warnings );
+            try
+            {
+                task.run( );
+                logWarnings( warnings );
+            }
+            finally
+            {
+                activeWarnings.set( null );
+            }
+        }
+    }
+
+    protected static final ImmutableSet<String> jvmArgs = ImmutableSet.copyOf( ManagementFactory.getRuntimeMXBean( ).getInputArguments( ) );
+    protected static final Set<String> checkedJvmArgs = ConcurrentHashMap.newKeySet( );
+    protected static void expectJvmArg( String jvmArg, Level logLevel )
+    {
+        if ( checkedJvmArgs.add( jvmArg ) && !jvmArgs.contains( jvmArg ) )
+        {
+            Set<Warning> warnings = activeWarnings.get( );
+            if ( warnings == null )
+            {
+                // No active coalescer, so log the warning immediately
+                logWarning( jvmArg, logLevel );
+            }
+            else
+            {
+                // Defer the warning until the end of the active coalescer
+                warnings.add( new Warning( jvmArg, logLevel ) );
+            }
         }
     }
 
