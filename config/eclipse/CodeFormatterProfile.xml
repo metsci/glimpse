@@ -277,7 +277,7 @@
 <setting id="org.eclipse.jdt.core.formatter.insert_space_before_closing_paren_in_annotation" value="insert"/>
 <setting id="org.eclipse.jdt.core.formatter.insert_space_after_opening_angle_bracket_in_type_parameters" value="do not insert"/>
 <setting id="org.eclipse.jdt.core.formatter.indent_body_declarations_compare_to_enum_constant_header" value="true"/>
-<setting id="org.eclipse.jdt.core.formatter.insert_space_after_lambda_arrow" value="do not insert"/>
+<setting id="org.eclipse.jdt.core.formatter.insert_space_after_lambda_arrow" value="insert"/>
 <setting id="org.eclipse.jdt.core.formatter.insert_space_before_opening_brace_in_constructor_declaration" value="insert"/>
 <setting id="org.eclipse.jdt.core.formatter.insert_space_before_comma_in_constructor_declaration_throws" value="do not insert"/>
 <setting id="org.eclipse.jdt.core.formatter.join_lines_in_comments" value="true"/>
