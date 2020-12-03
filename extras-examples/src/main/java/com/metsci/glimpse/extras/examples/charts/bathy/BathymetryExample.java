@@ -244,7 +244,7 @@ public class BathymetryExample
         annotationPainter = new AnnotationPainter( FontUtils.getDefaultPlain( 12 ) );
         plot.addPainter( annotationPainter );
 
-        // create a painter to display "buoy" positions
+        // create a painter to display dots at annotation locations
         LatLonTrackPainter dotPainter = new LatLonTrackPainter( projection );
         plot.addPainter( dotPainter );
         dotPainter.setShowLines( 1, false );
@@ -252,23 +252,23 @@ public class BathymetryExample
         dotPainter.setPointColor( 1, GlimpseColor.getBlack( ) );
 
         Vector2d pos = projection.project( LatLonGeo.fromDeg( 19.14, -80.23 ) );
-        Annotation a = annotationPainter.addAnnotation( "buoy 125A-3", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        Annotation a = annotationPainter.addAnnotation( "annotation 1", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
         a.setBackgroundColor( GlimpseColor.getGray( 0.3f ) );
         dotPainter.addPointGeo( 1, 1, 19.14, -80.23, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 18.88, -80.83 ) );
-        a = annotationPainter.addAnnotation( "buoy 126A-2", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a = annotationPainter.addAnnotation( "annotation 2", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
         a.setBackgroundColor( GlimpseColor.getGray( 0.3f ) );
         dotPainter.addPointGeo( 1, 1, 18.88, -80.83, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 19.64, -79.50 ) );
-        a = annotationPainter.addAnnotation( "buoy 126A-1", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getRed( ) );
+        a = annotationPainter.addAnnotation( "annotation 3", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getRed( ) );
         a.setBackgroundColor( GlimpseColor.getCyan( 0.3f ) );
         a.setBorderColor( GlimpseColor.getYellow( ) );
         dotPainter.addPointGeo( 1, 1, 19.64, -79.50, 0 );
 
         pos = projection.project( LatLonGeo.fromDeg( 19.80, -79.08 ) );
-        a = annotationPainter.addAnnotation( "buoy 125B-3", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
+        a = annotationPainter.addAnnotation( "annotation 4", pos.getX( ), pos.getY( ), 5, 2, HorizontalPosition.Left, VerticalPosition.Center, GlimpseColor.getGreen( ) );
         a.setBorderColor( GlimpseColor.getYellow( ) );
         dotPainter.addPointGeo( 1, 1, 19.80, -79.08, 0 );
 
