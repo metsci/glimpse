@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.axis;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.core.support.wrapped.WrappedGlimpseContext.getWrapper2D;
@@ -111,7 +111,7 @@ public class WrappedAxisExample
             wrappedPainter.addPainter( new DotPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Wrapped Axis Example", GL3bc, plot );
+            quickGlimpseApp( "Wrapped Axis Example", GL3, plot );
         } );
     }
 

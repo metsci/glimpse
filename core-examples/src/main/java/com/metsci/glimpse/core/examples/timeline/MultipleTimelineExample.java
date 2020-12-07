@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.timeline;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.DpiUtils.adjustForDesktopScaling;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -46,7 +46,7 @@ public class MultipleTimelineExample
         {
             StackedTimePlot2D plot = new CollapsibleTimelinePlotExample( ).getPlot( );
 
-            // FIXME: Broken by commit 5aeb6a3 ... both timelines end up with the same labels
+            // FIXME: Broken by commit 5aeb6a3 ... timelines have different timezones but the same tick labels
 
             // set up two timelines, one showing EST and one showing GMT time
             TimelineInfo gmtTimeline = plot.getDefaultTimeline( );
@@ -65,7 +65,7 @@ public class MultipleTimelineExample
             estTimeline.setSize( adjustForDesktopScaling( 35 ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Multiple Timeline Plot Example", GL3bc, plot, new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Multiple Timeline Plot Example", GL3, plot, new OceanLookAndFeel( ) );
         } );
     }
 }

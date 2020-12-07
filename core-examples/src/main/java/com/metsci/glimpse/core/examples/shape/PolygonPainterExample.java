@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.shape;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
@@ -237,7 +237,7 @@ public class PolygonPainterExample
             } );
 
             // create a window and show the plot
-            quickGlimpseApp( "Polygon Painter Example", GL3bc, polyplot );
+            quickGlimpseApp( "Polygon Painter Example", GL3, polyplot );
 
         } );
     }

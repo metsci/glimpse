@@ -44,6 +44,16 @@ public class PdfContUniform implements PdfCont
         _max = max;
     }
 
+    public double getMax( )
+    {
+        return _max;
+    }
+
+    public double getMin( )
+    {
+        return _min;
+    }
+
     @Override
     public double draw( Generator g )
     {

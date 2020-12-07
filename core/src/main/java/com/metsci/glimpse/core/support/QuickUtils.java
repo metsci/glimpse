@@ -30,6 +30,8 @@ import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.core.support.DisposableUtils.onWindowClosing;
 import static com.metsci.glimpse.platformFixes.PlatformFixes.fixPlatformQuirks;
 import static com.metsci.glimpse.util.GeneralUtils.array;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.coalesceModuleAccessWarnings;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectInternalApiAccess;
 import static javax.swing.JOptionPane.VALUE_PROPERTY;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_OPTION;
@@ -46,6 +48,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
+import com.jogamp.nativewindow.awt.AppContextInfo;
 import com.jogamp.opengl.GLAnimatorControl;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLException;
@@ -63,9 +66,16 @@ import com.metsci.glimpse.core.support.settings.AbstractLookAndFeel;
 import com.metsci.glimpse.core.support.settings.LookAndFeel;
 import com.metsci.glimpse.core.support.settings.SwingLookAndFeel;
 import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTUtils;
 import com.metsci.glimpse.core.support.swing.SwingEDTAnimator;
 import com.metsci.glimpse.platformFixes.PlatformFixes;
+import com.metsci.glimpse.platformFixes.WindowsFixes;
 import com.metsci.glimpse.util.ThrowingRunnable;
+import com.metsci.glimpse.util.buffer.DirectBufferDealloc;
+import com.metsci.glimpse.util.io.MappedFile;
+
+import jogamp.nativewindow.jawt.JAWTUtil;
+import jogamp.opengl.awt.Java2D;
 
 /**
  * A collection of functions for quickly creating plots and showing them in windows.
@@ -86,6 +96,7 @@ public class QuickUtils
     /**
      * Performs several init operations that are desirable for most Glimpse applications:
      * <ul>
+     * <li>{@link #checkGlimpseModuleAccess()}
      * <li>{@link PlatformFixes#fixPlatformQuirks()}
      * <li>Use heavyweight popup menus, which are visible over top of glimpse canvases
      * <li>Show tooltips reliably, even if the focus manager gets confused by a glimpse canvas
@@ -100,12 +111,30 @@ public class QuickUtils
      */
     public static void initStandardGlimpseApp( )
     {
+        checkGlimpseModuleAccess( );
+
         fixPlatformQuirks( );
 
         ToolTipManager.sharedInstance( ).setLightWeightPopupEnabled( false );
         JPopupMenu.setDefaultLightWeightPopupEnabled( false );
 
         UIManager.put( "ToolTipManager.enableToolTipMode", "allWindows" );
+    }
+
+    public static void checkGlimpseModuleAccess( )
+    {
+        coalesceModuleAccessWarnings( ( ) ->
+        {
+            WindowsFixes.checkModuleAccess( );
+            NewtSwingEDTUtils.checkModuleAccess( );
+            DirectBufferDealloc.checkModuleAccess( );
+            MappedFile.checkModuleAccess( );
+
+            // JOGL
+            expectInternalApiAccess( AppContextInfo.class, "java.desktop", "sun.awt" );
+            expectInternalApiAccess( JAWTUtil.class, "java.desktop", "sun.awt" );
+            expectInternalApiAccess( Java2D.class, "java.desktop", "sun.java2d" );
+        } );
     }
 
     public static void requireSwingThread( )

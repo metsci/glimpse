@@ -279,7 +279,7 @@ public class PolygonPainterSimple extends GlimpsePainterBase
 
                     prog.setColor( gl, color );
 
-                    // XXX: Repeated edit-after-draw may cause GL pipeline stalls
+                    // TODO: Repeated edit-after-draw may cause GL pipeline stalls
                     buffer.clear( );
                     FloatBuffer floatBuffer = buffer.editFloats( 0, data.length );
                     floatBuffer.put( data );

@@ -383,7 +383,7 @@ public class DynamicLineSetPainter extends GlimpsePainterBase
             idMap.remove( id );
         }
 
-        //XXX this is inefficient for low index values
+        // TODO: this is inefficient for low index values
         // shift everything down in the index map
         int lastDelete = -1;
         int nextDelete = -1;

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.heatmap;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.examples.heatmap.HeatMapExample.generateData;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -69,7 +69,7 @@ public class InterpolatedHeatMapExample
             plot.setColorScale( heatmapPainter.getColorScale( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Interpolated Heat Map Example", GL3bc, plot );
+            quickGlimpseApp( "Interpolated Heat Map Example", GL3, plot );
         } );
     }
 

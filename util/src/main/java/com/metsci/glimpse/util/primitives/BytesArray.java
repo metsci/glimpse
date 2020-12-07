@@ -230,7 +230,7 @@ public class BytesArray implements BytesModifiable
         insert( i, s, 0, s.length( ) );
     }
 
-    // XXX: Test me!
+    // FIXME: Test me!
     @Override
     public void insert( int i, String s, int from, int to )
     {

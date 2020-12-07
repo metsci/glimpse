@@ -35,6 +35,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.channels.FileChannel;
 
 public class FileMapperStandard implements FileMapper
 {
@@ -42,19 +43,39 @@ public class FileMapperStandard implements FileMapper
     /**
      * long map0( int mode, long position, long size )
      */
-    protected static final Method FileChannelImpl_map0;
+    protected static final BufferMapper mapper;
     static
     {
+        BufferMapper mapper0;
         try
         {
             Class<?> clazz = Class.forName( "sun.nio.ch.FileChannelImpl" );
-            FileChannelImpl_map0 = clazz.getDeclaredMethod( "map0", int.class, long.class, long.class );
+            Method FileChannelImpl_map0 = clazz.getDeclaredMethod( "map0", int.class, long.class, long.class );
             FileChannelImpl_map0.setAccessible( true );
+            mapper0 = ( channel, mapMode, offset, size ) -> ( long ) FileChannelImpl_map0.invoke( channel, mapMode, offset, size );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access sun.nio.ch.FileChannelImpl.map0()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "sun.nio.ch.FileChannelImpl" );
+                // Oracle JRE 15+
+                Method FileChannelImpl_map0 = clazz.getDeclaredMethod( "map0", int.class, long.class, long.class, boolean.class );
+                FileChannelImpl_map0.setAccessible( true );
+                mapper0 = ( channel, mapMode, offset, size ) -> ( long ) FileChannelImpl_map0.invoke( channel, mapMode, offset, size, false );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access sun.nio.ch.FileChannelImpl.map0()", ex );
+            }
         }
+
+        mapper = mapper0;
+    }
+
+    private interface BufferMapper
+    {
+        long map( FileChannel channel, int mapMode, long offset, long size ) throws InvocationTargetException, IllegalAccessException;
     }
 
     @Override
@@ -63,7 +84,7 @@ public class FileMapperStandard implements FileMapper
         try
         {
             int mapMode = ( writable ? 1 : 0 );
-            return ( ( long ) FileChannelImpl_map0.invoke( raf.getChannel( ), mapMode, 0, size ) );
+            return ( mapper.map( raf.getChannel( ), mapMode, 0, size ) );
         }
         catch ( InvocationTargetException e )
         {
@@ -117,8 +138,7 @@ public class FileMapperStandard implements FileMapper
 
             FileDescriptor fd = getFileDescriptorForMapping( raf );
             Runnable unmapper = ( Runnable ) Unmapper_init.newInstance( address, size, 0, fd );
-            return ( ) ->
-            {
+            return ( ) -> {
                 unmapper.run( );
                 addToMappedBufferStats( 0, 0, -size );
             };

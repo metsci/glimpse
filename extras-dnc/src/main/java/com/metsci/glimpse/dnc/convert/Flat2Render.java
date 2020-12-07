@@ -1271,7 +1271,7 @@ public class Flat2Render
                 int xyCount = xys.length / coordsPerXy;
                 loop.addVertices( xys, xyCount );
 
-                // XXX: loop.complete() does some data copying that could probably be avoided
+                // TODO: loop.complete() does some data copying that could probably be avoided
                 polygon.add( loop.complete( Interior.onLeft ) );
             }
 

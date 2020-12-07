@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.extras.examples.dnc;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
@@ -110,7 +110,7 @@ public class DncPainterExample2
             // Show
             //
 
-            quickGlimpseApp( "DNC Example", GL3bc, plot, screenFracSize( 0.8 ) );
+            quickGlimpseApp( "DNC Example", GL3, plot, screenFracSize( 0.8 ) );
         } );
     }
 

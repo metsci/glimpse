@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.icon;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
@@ -155,7 +155,7 @@ public class IconPainterExample
             layout.addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Icon Painter Example", GL3bc, layout );
+            quickGlimpseApp( "Icon Painter Example", GL3, layout );
         } );
     }
 }

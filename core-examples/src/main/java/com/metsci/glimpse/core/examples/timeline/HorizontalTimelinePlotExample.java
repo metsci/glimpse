@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.timeline;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -69,7 +69,7 @@ public class HorizontalTimelinePlotExample
             StackedTimePlot2D plot = new HorizontalTimelinePlotExample( ).getPlot( );
 
             // create a window and show the plot
-            quickGlimpseApp( "Horizontal Timeline Example", GL3bc, plot, new OceanLookAndFeel( ) );
+            quickGlimpseApp( "Horizontal Timeline Example", GL3, plot, new OceanLookAndFeel( ) );
         } );
     }
 

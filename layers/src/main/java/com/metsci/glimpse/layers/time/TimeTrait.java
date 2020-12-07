@@ -77,7 +77,7 @@ public class TimeTrait extends Trait
 
         this.epoch = epoch;
 
-        // XXX: Duplicated from StackedTimePlot2D.addTimeTags()
+        // TODO: Duplicated from StackedTimePlot2D.addTimeTags()
         this.axis = new TaggedAxis1D( );
         this.selectionMinTag = this.axis.addTag( MIN_TIME, 0 );
         this.selectionMaxTag = this.axis.addTag( MAX_TIME, 10 );

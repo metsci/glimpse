@@ -67,7 +67,7 @@ public class DragUtils
     static int getSpacerSize( Orientation orientation, List<PlotInfo> sortedPlots, List<DragInfo> list )
     {
         PlotInfo topPlot = getTopPlot( orientation, sortedPlots );
-        DragInfo topDrag = list.get( 0 ); //XXX does this also need to use index size-1 for HORIZONTAL plots?
+        DragInfo topDrag = list.get( 0 ); // TODO: does this also need to use index size-1 for HORIZONTAL plots?
 
         int size = getTotalSize( list );
 

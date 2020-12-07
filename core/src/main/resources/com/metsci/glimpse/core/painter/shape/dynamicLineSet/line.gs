@@ -28,7 +28,10 @@
 #version 150
 
 layout( lines ) in;
-layout( triangle_strip, max_vertices = 4 ) out;
+// A single line segment takes 4 vertices, but with duplication for wrapping,
+// it can take arbitrarily many ... in practice we almost never need more than
+// four copies of a segment, so use max_vertices = 4*4 = 16
+layout( triangle_strip, max_vertices = 16 ) out;
 
 vec2 pxToNdc( vec2 xy_PX, vec2 viewportSize_PX )
 {

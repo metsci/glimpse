@@ -31,7 +31,7 @@ import java.awt.Rectangle;
 import java.nio.ByteBuffer;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES2;
 
 /**
  * Two-dimensional OpenGL texture.
@@ -137,15 +137,15 @@ abstract class Texture2D extends Texture
 
         // Store unpack parameters
         gl.glGetIntegerv( GL.GL_UNPACK_ALIGNMENT, parameters, 0 );
-        gl.glGetIntegerv( GL2.GL_UNPACK_SKIP_ROWS, parameters, 1 );
-        gl.glGetIntegerv( GL2.GL_UNPACK_SKIP_PIXELS, parameters, 2 );
-        gl.glGetIntegerv( GL2.GL_UNPACK_ROW_LENGTH, parameters, 3 );
+        gl.glGetIntegerv( GL2ES2.GL_UNPACK_SKIP_ROWS, parameters, 1 );
+        gl.glGetIntegerv( GL2ES2.GL_UNPACK_SKIP_PIXELS, parameters, 2 );
+        gl.glGetIntegerv( GL2ES2.GL_UNPACK_ROW_LENGTH, parameters, 3 );
 
         // Change unpack parameters
         gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, 1 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, area.y );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, area.x );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, width );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, area.y );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, area.x );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, width );
 
         // Update the texture
         gl.glTexSubImage2D( GL.GL_TEXTURE_2D, // target
@@ -160,9 +160,9 @@ abstract class Texture2D extends Texture
 
         // Reset unpack parameters
         gl.glPixelStorei( GL.GL_UNPACK_ALIGNMENT, parameters[0] );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, parameters[1] );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, parameters[2] );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, parameters[3] );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, parameters[1] );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, parameters[2] );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, parameters[3] );
 
         // Generate mipmaps
         if ( mipmap )

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.timeline;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -62,7 +62,7 @@ public class StackedPlotExample
             info2.setSize( 250 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Stacked Plot Example", GL3bc, plot );
+            quickGlimpseApp( "Stacked Plot Example", GL3, plot );
         } );
     }
 

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.timeline;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -56,7 +56,7 @@ public class NestedTimelinePlotExample
             topGroup1.setShowDivider( false );
 
             GroupInfo topGroup2 = plot.createGroup( );
-            topGroup2.setLabelText( "Top Group 1" );
+            topGroup2.setLabelText( "Top Group 2" );
             topGroup2.setShowDivider( false );
 
             GroupInfo midGroup1 = plot.createGroup( );
@@ -104,7 +104,7 @@ public class NestedTimelinePlotExample
             midGroup4.addChildPlot( plot6 );
 
             // create a window and show the plot
-            quickGlimpseApp( "Nested Timeline Plot Example", GL3bc, plot );
+            quickGlimpseApp( "Nested Timeline Plot Example", GL3, plot );
         } );
     }
 

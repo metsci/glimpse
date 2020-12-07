@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.misc;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
@@ -54,7 +54,7 @@ import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 /**
  * A Glimpse plot with a Swing JPopupMenu which appears when right clicking on the plot.
  *
- * FIXME: Rewrite using GlimpseAxisLayout2DWithPopup
+ * TODO: Rewrite using GlimpseAxisLayout2DWithPopup
  *
  * @author ulman
  */
@@ -101,7 +101,7 @@ public class PopupMenuExample
 
             // create a window and show the plot
             String appName = "Popup Menu Example";
-            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3 );
             NewtSwingEDTGlimpseCanvas canvas = quickGlimpseCanvas( glProfile, plot );
             quickGlimpseWindow( appName, canvas );
 

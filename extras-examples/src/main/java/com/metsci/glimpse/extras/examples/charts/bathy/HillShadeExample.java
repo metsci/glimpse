@@ -26,24 +26,24 @@
  */
 package com.metsci.glimpse.extras.examples.charts.bathy;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.core.support.FrameUtils.screenFracSize;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
+import static com.metsci.glimpse.topo.io.TopoCache.topoCacheDataset;
+import static com.metsci.glimpse.topo.io.TopoDataPaths.requireTopoDataFile;
+import static com.metsci.glimpse.topo.io.TopoReader.readTopoLevel;
 import static com.metsci.glimpse.util.logging.LoggerUtils.setTerseConsoleLogger;
+import static com.metsci.glimpse.util.units.Length.fromNauticalMiles;
+import static java.util.logging.Level.FINE;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.logging.Level;
+import java.io.File;
 
-import com.metsci.glimpse.charts.bathy.ShadedReliefTiledPainter;
-import com.metsci.glimpse.charts.bathy.TileKey;
-import com.metsci.glimpse.charts.bathy.TopoTileProvider;
-import com.metsci.glimpse.charts.bathy.TopographyData;
-import com.metsci.glimpse.core.layout.GlimpseLayout;
 import com.metsci.glimpse.core.painter.geo.ScalePainter;
 import com.metsci.glimpse.core.plot.MapPlot2D;
+import com.metsci.glimpse.topo.ShadedReliefTiledPainter;
+import com.metsci.glimpse.topo.io.TopoDataFile;
+import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -51,71 +51,35 @@ import com.metsci.glimpse.util.geo.projection.TangentPlane;
 /**
  * @author borkholder
  */
-public class HillShadeExample implements TopoTileProvider
+public class HillShadeExample
 {
-    private TopographyData singleTile;
-
     public static void main( String[] args )
     {
-        setTerseConsoleLogger( Level.FINE );
+        setTerseConsoleLogger( FINE );
 
-        swingInvokeLater( ( ) ->
-        {
-            // create a window and show the plot
-            quickGlimpseApp( "Hill Shade Example", GL3bc, new HillShadeExample( ).getLayout( ) );
+        swingInvokeLater( ( ) -> {
+            File topoDataFile = requireTopoDataFile( );
+            TopoDataFile topoBase = readTopoLevel( topoDataFile );
+            TopoDataset topoDataset = topoCacheDataset( topoBase );
+
+            GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 19, -77 ) );
+
+            MapPlot2D plot = new MapPlot2D( projection );
+            ShadedReliefTiledPainter painter = new ShadedReliefTiledPainter( projection, topoDataset, "Glimpse Example Data" );
+            plot.addPainter( painter );
+
+            double dx = fromNauticalMiles( 400 );
+            double dy = dx;
+            plot.getAxis( ).set( -dx, +dx, -dy, +dy );
+            plot.getAxis( ).lockAspectRatioXY( 1 );
+            plot.getAxis( ).validate( );
+
+            ScalePainter scale = new ScalePainter( );
+            scale.setPixelBufferX( 8 );
+            scale.setPixelBufferY( 8 );
+            plot.addPainter( scale );
+
+            quickGlimpseApp( "HillShadeExample", GL3, plot, screenFracSize( 0.8 ) );
         } );
-    }
-
-    public HillShadeExample( ) throws IOException
-    {
-        try ( InputStream is = HillShadeExample.class.getResourceAsStream( "Cayman.bathy" ) )
-        {
-            singleTile = new TopographyData( )
-            {
-                {
-                    read( is );
-                }
-            };
-        }
-    }
-
-    @Override
-    public String getAttribution( )
-    {
-        return "Obtained from http://www.ngdc.noaa.gov/mgg/gdas/gd_designagrid.html";
-    }
-
-    @Override
-    public Collection<TileKey> keys( )
-    {
-        double maxLat = singleTile.getStartLat( ) + singleTile.getHeightStep( ) * singleTile.getImageHeight( );
-        double maxLon = singleTile.getStartLon( ) + singleTile.getWidthStep( ) * singleTile.getImageWidth( );
-        TileKey key = new TileKey( 0, singleTile.getStartLat( ), maxLat, singleTile.getStartLon( ), maxLon );
-        return Collections.singleton( key );
-    }
-
-    @Override
-    public TopographyData getTile( TileKey key ) throws IOException
-    {
-        return singleTile;
-    }
-
-    public GlimpseLayout getLayout( )
-    {
-        GeoProjection projection = new TangentPlane( LatLonGeo.fromDeg( 20.14, -79.23 ) );
-
-        MapPlot2D plot = new MapPlot2D( projection );
-        ShadedReliefTiledPainter painter = new ShadedReliefTiledPainter( projection, this );
-        plot.addPainter( painter );
-
-        // set the x and y axis bounds based on the extent of the bathemetry data
-        singleTile.setAxisBounds( plot.getAxis( ), projection );
-
-        ScalePainter scale = new ScalePainter( );
-        scale.setPixelBufferX( 8 );
-        scale.setPixelBufferY( 8 );
-        plot.addPainter( scale );
-
-        return plot;
     }
 }

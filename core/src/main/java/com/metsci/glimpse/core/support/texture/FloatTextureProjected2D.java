@@ -34,8 +34,7 @@ import java.nio.FloatBuffer;
 import java.util.logging.Logger;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GL2ES2;
 
 /**
  * A texture class which stores 32 bit fixed point values (uncapped).
@@ -59,12 +58,12 @@ public class FloatTextureProjected2D extends TextureProjected2D
 
     protected Buffer prepare_setPixelStore( GL gl, int i )
     {
-        gl.glPixelStorei( GL2.GL_UNPACK_ALIGNMENT, 1 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, dataSizeX );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ALIGNMENT, 1 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, texStartsX[i] );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
-        //gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
+        //gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
         // however, skipping rows manually using data.position works
         return data.asFloatBuffer( ).position( texStartsY[i] * dataSizeX );
     }
@@ -79,12 +78,12 @@ public class FloatTextureProjected2D extends TextureProjected2D
             prepare_setTexParameters( gl );
             Buffer positionedBuffer = prepare_setPixelStore( gl, i );
 
-            gl.glTexImage2D( GL3.GL_TEXTURE_2D, 0, GL3.GL_R32F, texSizesX[i], texSizesY[i], 0, GL3.GL_RED, GL3.GL_FLOAT, positionedBuffer );
+            gl.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_R32F, texSizesX[i], texSizesY[i], 0, GL2ES2.GL_RED, GL.GL_FLOAT, positionedBuffer );
         }
 
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_PIXELS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, 0 );
-        gl.glPixelStorei( GL2.GL_UNPACK_ROW_LENGTH, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_PIXELS, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, 0 );
+        gl.glPixelStorei( GL2ES2.GL_UNPACK_ROW_LENGTH, 0 );
     }
 
     @Override

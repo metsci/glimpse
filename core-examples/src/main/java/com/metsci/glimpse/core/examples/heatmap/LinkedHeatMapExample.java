@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.heatmap;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.initGlimpseOrExitJvm;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseCanvas;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseWindow;
@@ -68,7 +68,7 @@ public class LinkedHeatMapExample
 
             // create windows and show the plots
             String appName = "Linked Heat Map Example";
-            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3bc );
+            GLProfile glProfile = initGlimpseOrExitJvm( appName, GL3 );
             JFrame leftFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, leftPlot ) );
             JFrame rightFrame = quickGlimpseWindow( appName, quickGlimpseCanvas( glProfile, rightPlot ) );
 

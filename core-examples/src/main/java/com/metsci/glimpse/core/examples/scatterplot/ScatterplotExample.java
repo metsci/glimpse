@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.scatterplot;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.axis.tagged.Tag.TEX_COORD_ATTR;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 
@@ -273,7 +273,7 @@ public class ScatterplotExample
                 painter.setDiscardBelowColor( true );
 
                 // create a window and show the plot
-                quickGlimpseApp( "Scatterplot Example", GL3bc, plot );
+                quickGlimpseApp( "Scatterplot Example", GL3, plot );
             }
             catch ( Exception e )
             {

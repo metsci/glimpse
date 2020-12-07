@@ -807,7 +807,7 @@ public class TextureAtlas
         AffineTransform transform = g.getTransform( );
         g.translate( x, y );
 
-        //XXX mask drawing area: http://stackoverflow.com/questions/1241253/inside-clipping-with-java-graphics
+        // TODO: mask drawing area: http://stackoverflow.com/questions/1241253/inside-clipping-with-java-graphics
 
         // delegate drawing of the image to the provided ImageDrawer
         data.getImageDrawer( ).drawImage( g, width, height );

@@ -42,6 +42,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
 import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.core.context.GlimpseContext;
 import com.metsci.glimpse.core.gl.texture.DrawableTexture;
@@ -357,8 +358,6 @@ public abstract class TextureProjected2D implements DrawableTexture
     protected void prepare_glState( GL gl )
     {
         // generally does nothing
-        // kept for backwards compatibility for Glimpse-World Wind support
-        // which still relies on GL2 functionality
     }
 
     protected void allocate_calcSizes( GL gl )
@@ -447,7 +446,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     public static int getMaxGLTextureSize( GL gl )
     {
         int[] result = new int[1];
-        gl.glGetIntegerv( GL2.GL_MAX_TEXTURE_SIZE, result, 0 );
+        gl.glGetIntegerv( GL.GL_MAX_TEXTURE_SIZE, result, 0 );
         return result[0];
     }
 
@@ -469,13 +468,13 @@ public abstract class TextureProjected2D implements DrawableTexture
 
             this.coordBuffer.rewind( );
             this.putVerticesCoords( i, this.texStartsX[i], this.texStartsY[i], this.texSizesX[i], this.texSizesY[i], temp );
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, this.vertexCoordHandles[i] );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, this.coordBuffer.rewind( ), GL2.GL_STATIC_DRAW );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, this.vertexCoordHandles[i] );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, this.coordBuffer.rewind( ), GL.GL_STATIC_DRAW );
 
             this.coordBuffer.rewind( );
             this.putVerticesTexCoords( i, this.texStartsX[i], this.texStartsY[i], this.texSizesX[i], this.texSizesY[i] );
-            gl.glBindBuffer( GL2.GL_ARRAY_BUFFER, this.texCoordHandles[i] );
-            gl.glBufferData( GL2.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, this.coordBuffer.rewind( ), GL2.GL_STATIC_DRAW );
+            gl.glBindBuffer( GL.GL_ARRAY_BUFFER, this.texCoordHandles[i] );
+            gl.glBufferData( GL.GL_ARRAY_BUFFER, projectFloats * BYTES_PER_FLOAT, this.coordBuffer.rewind( ), GL.GL_STATIC_DRAW );
         }
     }
 
@@ -560,7 +559,7 @@ public abstract class TextureProjected2D implements DrawableTexture
     protected void prepare_setTexParameters( GL gl )
     {
         GL3 gl3 = gl.getGL3( );
-        
+
         gl3.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MAG_FILTER, GL3.GL_NEAREST );
         gl3.glTexParameteri( GL3.GL_TEXTURE_2D, GL3.GL_TEXTURE_MIN_FILTER, GL3.GL_NEAREST );
 
@@ -573,6 +572,11 @@ public abstract class TextureProjected2D implements DrawableTexture
         return Buffers.newDirectByteBuffer( this.getRequiredCapacityBytes( ) );
     }
 
+    /**
+     * Relies on {@link GL2}, so may not work on platforms like OSX that don't support
+     * backward-compatible GL profiles like {@link GLProfile#GL3bc}.
+     */
+    @Deprecated
     public boolean isResident( GL2 gl )
     {
         this.lock.lock( );

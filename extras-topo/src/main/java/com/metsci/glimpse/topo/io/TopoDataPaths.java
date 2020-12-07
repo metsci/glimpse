@@ -84,14 +84,19 @@ public class TopoDataPaths
         return ( glimpseTopoDefaultUserDataDir.isDirectory( ) ? glimpseTopoDefaultUserDataDir : glimpseTopoDefaultSharedDataDir );
     }
 
-    public static final ImmutableList<String> topoDataFilenames = ImmutableList.of( "etopo1_ice_c_i2.bin",
-                                                                                    "etopo1_ice_c.bin",
-                                                                                    "etopo1_ice_c_f4.flt",
-                                                                                    "etopo1_ice_c.flt",
-                                                                                    "etopo1_ice_g_i2.bin",
-                                                                                    "etopo1_ice_g.bin",
-                                                                                    "etopo1_ice_g_f4.flt",
-                                                                                    "etopo1_ice_g.flt" );
+    public static final ImmutableList<String> topoDataFileRoots = ImmutableList.of( "gebco2020",
+                                                                                    "gebco2019",
+                                                                                    "gebco2014",
+                                                                                    "etopo1_ice" );
+
+    public static final ImmutableList<String> topoDataFileSuffixes = ImmutableList.of( "_c_i2.bin",
+                                                                                       "_c.bin",
+                                                                                       "_c_f4.flt",
+                                                                                       "_c.flt",
+                                                                                       "_g_i2.bin",
+                                                                                       "_g.bin",
+                                                                                       "_g_f4.flt",
+                                                                                       "_g.flt" );
 
     public static File requireTopoDataFile( )
     {
@@ -113,12 +118,16 @@ public class TopoDataPaths
 
     public static File findTopoDataFile( File dir )
     {
-        for ( String filename : topoDataFilenames )
+        for ( String root : topoDataFileRoots )
         {
-            File file = new File( dir, filename );
-            if ( file.isFile( ) && file.canRead( ) )
+            for ( String suffix : topoDataFileSuffixes )
             {
-                return file;
+                String filename = root + suffix;
+                File file = new File( dir, filename );
+                if ( file.isFile( ) && file.canRead( ) )
+                {
+                    return file;
+                }
             }
         }
         return null;

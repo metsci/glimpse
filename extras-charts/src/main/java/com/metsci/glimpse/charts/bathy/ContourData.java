@@ -63,6 +63,7 @@ public class ContourData implements Render
         }
         catch ( Exception e1 )
         {
+            // TODO: Maybe throw a RuntimeException instead?
             e1.printStackTrace( );
         }
     }

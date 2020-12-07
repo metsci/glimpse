@@ -147,8 +147,7 @@ public class EventSelectionHandler
         // set of newly selected events
         Set<Event> newlySelectedEvents = Sets.difference( newEvents, oldEvents ).immutableCopy( );
 
-        //XXX these two operations should really happen atomically
-        // (we want the end result to be that selectedEvents contains everything in newEvents)
+        // TODO: these two operations should really happen atomically -- we want the end result to be that selectedEvents contains everything in newEvents
         selectedEvents.retainAll( newEvents );
         selectedEvents.addAll( newEvents );
 

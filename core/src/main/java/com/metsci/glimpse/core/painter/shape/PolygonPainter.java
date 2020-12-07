@@ -1049,8 +1049,8 @@ public class PolygonPainter extends GlimpsePainterBase
                     }
                 }
 
-                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-                // gl.glMultiDrawArrays( GL2.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
+                // Renders incorrectly on some machines if one of the arrays is > 65535 in size
+                // gl.glMultiDrawArrays( GL.GL_TRIANGLES, loaded.glFillOffsetBuffer, loaded.glFillCountBuffer, loaded.glTotalFillPrimitives );
             }
             finally
             {
@@ -1091,8 +1091,8 @@ public class PolygonPainter extends GlimpsePainterBase
                     }
                 }
 
-                // XXX: Old way uses glMultiDrawArrays, but if one of the arrays is > 65535 in size, it will render incorrectly on some machines.
-                // gl.glMultiDrawArrays( GL2.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
+                // Renders incorrectly on some machines if one of the arrays is > 65535 in size
+                // gl.glMultiDrawArrays( GL.GL_LINE_LOOP, loaded.glLineOffsetBuffer, loaded.glLineCountBuffer, loaded.glTotalLinePrimitives );
             }
             finally
             {

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.layout;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -151,7 +151,7 @@ public class CustomLayoutExample
             leftPlotLayout.addPainter( new GridPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Custom Layout Example", GL3bc, layoutParent );
+            quickGlimpseApp( "Custom Layout Example", GL3, layoutParent );
         } );
     }
 }

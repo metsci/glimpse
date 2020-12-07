@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.layout;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 
 import javax.swing.SwingUtilities;
@@ -103,7 +103,7 @@ public class SimpleLayoutExample
             rightPlotLayout.addLayout( rightPlot );
             leftPlotLayout.addLayout( leftPlot );
 
-            quickGlimpseApp( "Simple Layout Example", GL3bc, layoutParent );
+            quickGlimpseApp( "Simple Layout Example", GL3, layoutParent );
         } );
     }
 }

@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.plot;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -82,7 +82,7 @@ public class HistogramPlotExample
             layout.invalidateLayout( );
 
             // create a window and show the plot
-            quickGlimpseApp( "Histogram Plot Example", GL3bc, layout );
+            quickGlimpseApp( "Histogram Plot Example", GL3, layout );
         } );
     }
 

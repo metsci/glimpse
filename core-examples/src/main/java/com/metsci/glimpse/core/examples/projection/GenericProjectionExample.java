@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.projection;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -140,7 +140,7 @@ public class GenericProjectionExample
             cursorPainter.setTexture( texture );
 
             // create a window and show the plot
-            quickGlimpseApp( "Generic Projection Example", GL3bc, plot );
+            quickGlimpseApp( "Generic Projection Example", GL3, plot );
         } );
     }
 }

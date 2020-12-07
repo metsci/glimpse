@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.heatmap;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.startThread;
@@ -155,7 +155,7 @@ public class AnimatedTextureExample
             plot.addPainter( new FpsPainter( ) );
 
             // create a window and show the plot
-            quickGlimpseApp( "Animated Texture Example", GL3bc, plot );
+            quickGlimpseApp( "Animated Texture Example", GL3, plot );
         } );
     }
 

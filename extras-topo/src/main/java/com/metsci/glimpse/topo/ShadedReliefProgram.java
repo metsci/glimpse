@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.charts.bathy;
+package com.metsci.glimpse.topo;
 
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
@@ -53,6 +53,9 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
 {
     public static final int MAX_COLORS = 20;
 
+    public static final int HILLSHADE_TEXTURE_UNIT = 0;
+    public static final int ELEVATION_TEXTURE_UNIT = 1;
+
     protected GLUniformData alpha;
     protected GLUniformData elevationTexUnit;
     protected GLUniformData hillshadeTexUnit;
@@ -63,6 +66,11 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
 
     protected ProgramHandles handles;
 
+    public ShadedReliefProgram( )
+    {
+        this( ELEVATION_TEXTURE_UNIT, HILLSHADE_TEXTURE_UNIT );
+    }
+
     public ShadedReliefProgram( int elevTexUnit, int shadeTexUnit )
     {
         this.initialize( elevTexUnit, shadeTexUnit );
@@ -71,7 +79,7 @@ public class ShadedReliefProgram extends GlimpseShaderProgram implements Drawabl
     protected void addShaders( )
     {
         this.addVertexShader( ColorMapProgram.class.getResource( "passthrough.vs" ) );
-        this.addFragmentShader( ShadedReliefProgram.class.getResource( "shaded_relief_shader.fs" ) );
+        this.addFragmentShader( ShadedReliefProgram.class.getResource( "shaders/shaded-relief.fs" ) );
     }
 
     protected void initialize( int elevTexUnit, int shadeTexUnit )

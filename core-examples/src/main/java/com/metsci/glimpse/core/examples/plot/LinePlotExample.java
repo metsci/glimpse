@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.core.examples.plot;
 
-import static com.jogamp.opengl.GLProfile.GL3bc;
+import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.QuickUtils.quickGlimpseApp;
 import static com.metsci.glimpse.core.support.QuickUtils.swingInvokeLater;
 
@@ -129,7 +129,7 @@ public class LinePlotExample
             // add the legend painter to the top of the center GlimpseLayout
             plot.addPainter( legend );
 
-            quickGlimpseApp( "LinePlotExample", GL3bc, plot );
+            quickGlimpseApp( "LinePlotExample", GL3, plot );
         } );
     }
 

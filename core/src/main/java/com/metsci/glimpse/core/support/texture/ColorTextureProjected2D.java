@@ -83,7 +83,7 @@ public class ColorTextureProjected2D extends FloatTextureProjected2D
         gl.glPixelStorei( GL3.GL_UNPACK_ROW_LENGTH, dataSizeX );
 
         // for some reason, the following does not work:
-        //gl.glPixelStorei( GL2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
+        //gl.glPixelStorei( GL2ES2.GL_UNPACK_SKIP_ROWS, texStartsY[i] );
         // however, skipping rows manually using data.position works
         return data.asFloatBuffer( ).position( texStartsY[i] * dataSizeX * FLOATS_PER_PIXEL );
     }

@@ -29,6 +29,9 @@ package com.metsci.glimpse.charts.bathy;
 import java.io.IOException;
 import java.util.Collection;
 
+import com.metsci.glimpse.core.painter.geo.TileKey;
+import com.metsci.glimpse.core.painter.geo.TilePainter;
+
 /**
  * Provides tiles to the {@link TilePainter}.  Tiles are expected to be rectilinear in lat/lon space.
  *

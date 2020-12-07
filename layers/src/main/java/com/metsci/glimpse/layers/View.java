@@ -240,7 +240,7 @@ public abstract class View
         }
         catch ( Exception e )
         {
-            // XXX: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
+            // TODO: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
             logWarning( logger, "Failed to install a " + layer.getClass( ).getName( ) + " to a " + this.getClass( ).getName( ), e );
         }
 
