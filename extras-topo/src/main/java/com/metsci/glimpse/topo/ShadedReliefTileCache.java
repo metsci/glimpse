@@ -70,7 +70,7 @@ public class ShadedReliefTileCache
 {
     private static final Logger LOGGER = Logger.getLogger( ShadedReliefTileCache.class.getName( ) );
 
-    public static final int CACHE_VERSION_ID = 5;
+    public static final int CACHE_VERSION_ID = 6;
 
     private static final int PIXELS_PER_TILE_LAT = 1_024;
     private static final int PIXELS_PER_TILE_LON = 1_024;
