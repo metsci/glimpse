@@ -29,6 +29,8 @@ package com.metsci.glimpse.topo;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
 import static com.metsci.glimpse.topo.io.TopoCache.topoConfigString;
 import static com.metsci.glimpse.topo.io.TopoDataPaths.glimpseTopoCacheDir;
+import static com.metsci.glimpse.util.io.FileSync.lockFile;
+import static com.metsci.glimpse.util.io.FileSync.unlockFile;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logFine;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logWarning;
 import static com.metsci.glimpse.util.units.Angle.fromDeg;
@@ -50,7 +52,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -234,22 +235,22 @@ public class ShadedReliefTileCache
         double dy = 60 * fromNauticalMiles( 1 ) * 0.5 * tile.latStep_DEG;
         double dx = 60 * fromNauticalMiles( 1 ) * 0.5 * tile.lonStep_DEG;
 
-        for ( int x = 1; x < tile.numLon - 1; x++ )
+        for ( int y = 1; y < tile.numLat - 1; y++ )
         {
-            for ( int y = 1; y < tile.numLat - 1; y++ )
+            for ( int x = 1; x < tile.numLon - 1; x++ )
             {
-                float value = hillshadeBuffer( elevation, x, y, dx, dy, tile.numLat );
-                int idx = x * tile.numLat + y;
+                float value = hillshadeBuffer( elevation, x, y, dx, dy, tile.numLon );
+                int idx = y * tile.numLon + x;
                 dest.put( idx, value );
             }
 
             // Can't hillshade the very edges, so just copy out
-            int idxDst = x * tile.numLat + 0;
-            int idxSrc = x * tile.numLat + 1;
+            int idxDst = y * tile.numLon + 0;
+            int idxSrc = y * tile.numLon + 1;
             dest.put( idxDst, dest.get( idxSrc ) );
 
-            idxDst = x * tile.numLat + ( tile.numLat - 1 );
-            idxSrc = x * tile.numLat + ( tile.numLat - 2 );
+            idxDst = y * tile.numLon + ( tile.numLon - 1 );
+            idxSrc = y * tile.numLon + ( tile.numLon - 2 );
             dest.put( idxDst, dest.get( idxSrc ) );
         }
 
@@ -267,19 +268,19 @@ public class ShadedReliefTileCache
     }
 
     /**
-     * From http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
+     * From https://pro.arcgis.com/en/pro-app/tool-reference/3d-analyst/how-hillshade-works.htm
      */
     protected float hillshadeBuffer( FloatBuffer data, int x, int y, double dx, double dy, int stride )
     {
-        int ai = ( x - 1 ) * stride + ( y + 1 );
-        int bi = ( x + 0 ) * stride + ( y + 1 );
-        int ci = ( x + 1 ) * stride + ( y + 1 );
-        int di = ( x - 1 ) * stride + ( y + 0 );
-        // skip e middle
-        int fi = ( x + 0 ) * stride + ( y + 0 );
-        int gi = ( x - 1 ) * stride + ( y - 1 );
-        int hi = ( x + 0 ) * stride + ( y - 1 );
-        int ii = ( x + 1 ) * stride + ( y - 1 );
+        int ai = ( y + 1 ) * stride + ( x - 1 );
+        int bi = ( y + 1 ) * stride + ( x + 0 );
+        int ci = ( y + 1 ) * stride + ( x + 1 );
+        int di = ( y + 0 ) * stride + ( x - 1 );
+        // skip e center
+        int fi = ( y + 0 ) * stride + ( x + 0 );
+        int gi = ( y - 1 ) * stride + ( x - 1 );
+        int hi = ( y - 1 ) * stride + ( x + 0 );
+        int ii = ( y - 1 ) * stride + ( x + 1 );
 
         float a = data.get( ai );
         float b = data.get( bi );
@@ -289,9 +290,10 @@ public class ShadedReliefTileCache
         float g = data.get( gi );
         float h = data.get( hi );
         float i = data.get( ii );
+
         double dzdx = ( ( 3 * c + 10 * f + 3 * i ) - ( 3 * a + 10 * d + 3 * g ) ) / ( 32 * dx );
         double dzdy = ( ( 3 * g + 10 * h + 3 * i ) - ( 3 * a + 10 * b + 3 * c ) ) / ( 32 * dy );
-        double slope = atan( sqrt( dzdx * dzdx ) + ( dzdy * dzdy ) );
+        double slope = atan( sqrt( dzdx * dzdx + dzdy * dzdy ) );
         double aspect = atan2( dzdy, -dzdx );
 
         double hillshade = ( COS_LIGHT_ZENITH * cos( slope ) ) + ( SIN_LIGHT_ZENITH * sin( slope ) * cos( LIGHT_AZIMUTH - aspect ) );
@@ -326,7 +328,7 @@ public class ShadedReliefTileCache
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
 
         // Get an exclusive lock while writing
-        FileLock lock = rf.getChannel( ).lock( );
+        lockFile( cacheFile );
 
         try
         {
@@ -349,7 +351,7 @@ public class ShadedReliefTileCache
         }
         finally
         {
-            lock.release( );
+            unlockFile( cacheFile );
             rf.close( );
         }
     }
