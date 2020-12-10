@@ -349,6 +349,7 @@ public class ShadedReliefTileCache
         }
         finally
         {
+            lock.release( );
             rf.close( );
         }
     }
