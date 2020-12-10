@@ -228,9 +228,9 @@ public class ShadedReliefTileCache
         FloatBuffer dest = tile.shaded.asFloatBuffer( );
 
         /*
-         * dx certainly changes as we change latitude, but the transition is
-         * uneven and visually disturbing. Also found that tweaking by 0.5
-         * helps increase visual separation.
+         * dx certainly changes as we change latitude, but it exaggerates depth
+         * changes at the poles. I also found that tweaking by 0.5 helps to
+         * increase visual separation.
          */
         double dy = 60 * fromNauticalMiles( 1 ) * 0.5 * tile.latStep_DEG;
         double dx = 60 * fromNauticalMiles( 1 ) * 0.5 * tile.lonStep_DEG;
@@ -245,24 +245,24 @@ public class ShadedReliefTileCache
             }
 
             // Can't hillshade the very edges, so just copy out
-            int idxDst = y * tile.numLon + 0;
             int idxSrc = y * tile.numLon + 1;
+            int idxDst = y * tile.numLon + 0;
             dest.put( idxDst, dest.get( idxSrc ) );
 
-            idxDst = y * tile.numLon + ( tile.numLon - 1 );
             idxSrc = y * tile.numLon + ( tile.numLon - 2 );
+            idxDst = y * tile.numLon + ( tile.numLon - 1 );
             dest.put( idxDst, dest.get( idxSrc ) );
         }
 
         // Can't hillshade the very edges, so just copy out
-        for ( int y = 0; y < tile.numLat; y++ )
+        for ( int x = 0; x < tile.numLon; x++ )
         {
-            int idxDst = 0 * tile.numLat + y;
-            int idxSrc = 1 * tile.numLat + y;
+            int idxSrc = 1 * tile.numLon + x;
+            int idxDst = 0 * tile.numLon + x;
             dest.put( idxDst, dest.get( idxSrc ) );
 
-            idxDst = ( tile.numLon - 1 ) * tile.numLat + y;
-            idxSrc = ( tile.numLon - 2 ) * tile.numLat + y;
+            idxSrc = ( tile.numLat - 2 ) * tile.numLon + x;
+            idxDst = ( tile.numLat - 1 ) * tile.numLon + x;
             dest.put( idxDst, dest.get( idxSrc ) );
         }
     }
