@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.metsci.glimpse.extras.examples.charts.bathy;
+package com.metsci.glimpse.extras.examples.topo;
 
 import static com.jogamp.opengl.GLProfile.GL3;
 import static com.metsci.glimpse.core.support.FrameUtils.screenFracSize;

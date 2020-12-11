@@ -65,6 +65,7 @@ import com.metsci.glimpse.core.support.colormap.ColorGradients;
 import com.metsci.glimpse.core.support.font.FontUtils;
 import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.core.support.texture.mutator.ColorGradientConcatenator;
+import com.metsci.glimpse.extras.examples.topo.HillShadeExample;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
