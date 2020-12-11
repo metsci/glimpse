@@ -65,7 +65,7 @@ import com.metsci.glimpse.util.vector.Vector2d;
  */
 public abstract class TilePainter<V> extends DelegatePainter
 {
-    protected static final double ANTIMERIDIAN_EPSILON = 1e-5;
+    protected static final double PROJECTION_EPSILON = 1e-7;
 
     protected GeoProjection projection;
     protected SortedDoubles lengthScale;
@@ -133,12 +133,12 @@ public abstract class TilePainter<V> extends DelegatePainter
 
     protected static double clampAntiMeridian( double lon_DEG )
     {
-        return clamp( lon_DEG, -180 + ANTIMERIDIAN_EPSILON, 180 - ANTIMERIDIAN_EPSILON );
+        return clamp( lon_DEG, -180 + PROJECTION_EPSILON, 180 - PROJECTION_EPSILON );
     }
 
     protected static double clampNorthSouth( double lat_DEG )
     {
-        return clamp( lat_DEG, -90 + ANTIMERIDIAN_EPSILON, 90 - ANTIMERIDIAN_EPSILON );
+        return clamp( lat_DEG, -90 + PROJECTION_EPSILON, 90 - PROJECTION_EPSILON );
     }
 
     protected Map<TileKey, Area> createTileAreas( )

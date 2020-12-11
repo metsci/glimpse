@@ -26,6 +26,9 @@
  */
 package com.metsci.glimpse.core.painter.geo;
 
+import static com.metsci.glimpse.util.units.Angle.degreesToRadians;
+import static com.metsci.glimpse.util.units.Angle.radiansToDegrees;
+import static com.metsci.glimpse.util.units.Angle.unwrap;
 import static com.metsci.glimpse.util.units.Length.toKilometers;
 
 /**
@@ -50,7 +53,7 @@ public class TileKey
         this.minLat_DEG = minLat_DEG;
         this.maxLat_DEG = maxLat_DEG;
         this.minLon_DEG = minLon_DEG;
-        this.maxLon_DEG = maxLon_DEG;
+        this.maxLon_DEG = radiansToDegrees( unwrap( degreesToRadians( minLon_DEG ), degreesToRadians( maxLon_DEG ) ) );
     }
 
     @Override

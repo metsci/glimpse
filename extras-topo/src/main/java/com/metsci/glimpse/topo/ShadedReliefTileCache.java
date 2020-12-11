@@ -72,6 +72,7 @@ public class ShadedReliefTileCache
 
     public static final int CACHE_VERSION_ID = 6;
 
+    private static final int PIXELS_TILE_BUFFER = 1;
     private static final int PIXELS_PER_TILE_LAT = 1_024;
     private static final int PIXELS_PER_TILE_LON = 1_024;
 
@@ -94,6 +95,13 @@ public class ShadedReliefTileCache
         {
             TopoLevel level = topoLevelSet.levels.get( levelIdx );
 
+            /*
+             * We need 1 buffer pixel to do the hillshading well. But we need to
+             * tell the TileKey the actual bounds, otherwise the TilePainter
+             * won't correctly identify which tiles to paint.
+             */
+            double buffer_DEG = PIXELS_TILE_BUFFER * level.cellSize_DEG;
+
             // Aim for 1 cell per pixel in a 1600x1200 screen
             int expectedNumPixels = 1_600;
             double nmPerDegreeAtEquator = 60;
@@ -104,7 +112,7 @@ public class ShadedReliefTileCache
                 for ( int tileIdx = 0; tileIdx < level.numTiles; tileIdx++ )
                 {
                     TopoTileBounds bounds = level.tileBounds( bandIdx, tileIdx );
-                    tileKeys.add( new ReliefTileKey( levelIdx, bandIdx, tileIdx, bounds, lengthScale ) );
+                    tileKeys.add( new ReliefTileKey( levelIdx, bandIdx, tileIdx, bounds, lengthScale, buffer_DEG ) );
                 }
             }
         }
@@ -165,7 +173,7 @@ public class ShadedReliefTileCache
 
     public TopoHostTile readTopoData( ReliefTileKey key )
     {
-        return topoLevelSet.get( key.level ).copyTile( key.bandNum, key.tileNum, 2 );
+        return topoLevelSet.get( key.level ).copyTile( key.bandNum, key.tileNum, PIXELS_TILE_BUFFER );
     }
 
     protected void copyElevationData( TopoHostTile source, CachedTileData target )
@@ -362,9 +370,9 @@ public class ShadedReliefTileCache
         public final int bandNum;
         public final int level;
 
-        public ReliefTileKey( int levelIdx, int bandIdx, int tileIdx, TopoTileBounds bounds, double lengthScale )
+        public ReliefTileKey( int levelIdx, int bandIdx, int tileIdx, TopoTileBounds bounds, double lengthScale, double buffer_DEG )
         {
-            super( lengthScale, bounds.southLat_DEG, bounds.northLat_DEG, bounds.westLon_DEG, bounds.eastLon_DEG );
+            super( lengthScale, bounds.southLat_DEG - buffer_DEG, bounds.northLat_DEG + buffer_DEG, bounds.westLon_DEG - buffer_DEG, bounds.eastLon_DEG + buffer_DEG );
 
             this.level = levelIdx;
             this.bandNum = bandIdx;
