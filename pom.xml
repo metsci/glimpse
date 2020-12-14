@@ -125,10 +125,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <doclint>none</doclint>
-                </configuration>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>deploy</id>
@@ -139,7 +136,20 @@
                             <show>public</show>
                             <maxmemory>2056m</maxmemory>
                             <doctitle>Glimpse Data Visualization Library</doctitle>
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <doclint>none</doclint>
+                            <additionalDependencies>
+                                <!-- Keep javadoc from choking on xml-bind-api deps; more info in the docking POM -->
+                                <additionalDependency>
+                                    <groupId>jakarta.xml.bind</groupId>
+                                    <artifactId>jakarta.xml.bind-api</artifactId>
+                                    <version>2.3.2</version>
+                                </additionalDependency>
+                                <additionalDependency>
+                                    <groupId>jakarta.activation</groupId>
+                                    <artifactId>jakarta.activation-api</artifactId>
+                                    <version>1.2.1</version>
+                                </additionalDependency>
+                            </additionalDependencies>
                         </configuration>
                     </execution>
                 </executions>
