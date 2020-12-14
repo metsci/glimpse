@@ -177,6 +177,15 @@ public class PainterCache<K, V>
         }
     }
 
+    public void invalidate( K key )
+    {
+        synchronized ( locks )
+        {
+            locks.remove( key );
+            cache.invalidate( key );
+        }
+    }
+
     public void clear( )
     {
         synchronized ( locks )
