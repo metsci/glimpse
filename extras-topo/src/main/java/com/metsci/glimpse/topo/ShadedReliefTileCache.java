@@ -276,7 +276,7 @@ public class ShadedReliefTileCache
     }
 
     /**
-     * From https://pro.arcgis.com/en/pro-app/tool-reference/3d-analyst/how-hillshade-works.htm
+     * Based on https://pro.arcgis.com/en/pro-app/tool-reference/3d-analyst/how-hillshade-works.htm
      */
     protected float hillshadeBuffer( FloatBuffer data, int x, int y, double dx, double dy, int stride )
     {
