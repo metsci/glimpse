@@ -506,7 +506,12 @@
         </profile>
 
         <profile>
-            <id>release</id>
+            <id>public-release</id>
+            <activation>
+                <property>
+                    <name>public.release</name>
+                </property>
+            </activation>
             <distributionManagement>
                 <snapshotRepository>
                     <id>ossrh</id>
