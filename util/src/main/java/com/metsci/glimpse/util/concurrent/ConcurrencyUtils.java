@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,14 @@ public class ConcurrencyUtils
                                           .setNameFormat( nameFormat )
                                           .setDaemon( true )
                                           .build( );
+    }
+
+    public static Thread startThread( String name, boolean daemon, Runnable runnable )
+    {
+        Thread thread = new Thread( runnable, name );
+        thread.setDaemon( daemon );
+        thread.start( );
+        return thread;
     }
 
 }

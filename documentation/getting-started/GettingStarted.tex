@@ -23,7 +23,7 @@
 
 \section{What Is Glimpse?}
 
-Glimpse is a Java library for creating interactive data visualization applications which integrates into Swing or SWT based Java applications. Glimpse simplifies utilization of powerful GPU hardware like programmable shader pipelines and texture memory to display large quantities of data at interactive speeds. Complicated plots and visualizations can be created by arranging pre-built components using the popular MigLayout manager. Axes, timelines, color scales, cursor crosshairs, and other plot embellishments are provided out of the box, as well as common plot arrangements and layers for visualizing common data types (like histograms, line charts, heat maps, and tree maps). Glimpse is also excellent for constructing geographic visualization applications. Layers to display bathymetry and topographic contours, electronic navigation charts, land contours, and arbitrary projected images are built in.
+Glimpse is a Java library for creating interactive data visualization applications which integrates into Swing-based Java applications. Glimpse simplifies utilization of powerful GPU hardware like programmable shader pipelines and texture memory to display large quantities of data at interactive speeds. Complicated plots and visualizations can be created by arranging pre-built components using the popular MigLayout manager. Axes, timelines, color scales, cursor crosshairs, and other plot embellishments are provided out of the box, as well as common plot arrangements and layers for visualizing common data types (like histograms, line charts, heat maps, and tree maps). Glimpse is also excellent for constructing geographic visualization applications. Layers to display bathymetry and topographic contours, electronic navigation charts, land contours, and arbitrary projected images are built in.
 
 \section{Requirements}
 
@@ -42,7 +42,7 @@ The best way to get familiar with what Glimpse offers and how it works is to che
 
 \section{Glimpse Canvas}
 
-All Glimpse applications start with a GlimpseCanvas which represents something onto which OpenGL rendering can take place. For Swing applications, this is a SwingGlimpseCanvas, which is also a JPanel and can be directly incorporated into an existing Swing application. SWTGlimpseCanvas provides the analogous capability for SWT applications. Other GlimpseCanvas implementations exist for drawing to off-screen buffers.
+All Glimpse applications start with a GlimpseCanvas which represents something onto which OpenGL rendering can take place. For Swing applications, this is a SwingGlimpseCanvas, which is also a JPanel and can be directly incorporated into an existing Swing application. Other GlimpseCanvas implementations exist for drawing to off-screen buffers.
 
 The following code snippit is all that is necessary to bring up a Swing JFrame containing a GlimpseCanvas:
 

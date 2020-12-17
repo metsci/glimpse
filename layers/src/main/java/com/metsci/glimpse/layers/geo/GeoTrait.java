@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@ import static com.google.common.primitives.Doubles.min;
 import java.util.function.DoubleUnaryOperator;
 
 import com.google.common.base.Objects;
-import com.metsci.glimpse.axis.Axis2D;
+import com.metsci.glimpse.core.axis.Axis2D;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.Trait;
 import com.metsci.glimpse.layers.View;

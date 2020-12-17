@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,11 +66,13 @@ public interface Bytes
 
     byte[] copyOf( );
 
+    Bytes copy( );
+
     /**
      * Strings are encoded and decoded using the UTF-8 charset (multi-byte
      * charsets just aren't worth the increased complication in indexing).
      *
-     * XXX: This is probably broken, because UTF-8 *is* a multi-byte charset
+     * FIXME: This is probably broken, because UTF-8 *is* a multi-byte charset
      */
     String string( int i, int c );
 

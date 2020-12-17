@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,10 @@ public class FileUtils
         {
             File temp = File.createTempFile( prefix + "_", "" );
 
-            if ( !temp.delete( ) ) throw new RuntimeException( "Failed to delete temp file while creating temp directory: " + temp.getAbsolutePath( ) );
+            if ( !temp.delete( ) )
+            {
+                throw new RuntimeException( "Failed to delete temp file while creating temp directory: " + temp.getAbsolutePath( ) );
+            }
 
             if ( temp.mkdirs( ) )
             {
@@ -73,6 +76,7 @@ public class FileUtils
     {
         Runtime.getRuntime( ).addShutdownHook( new Thread( )
         {
+            @Override
             public void run( )
             {
                 try
@@ -126,44 +130,28 @@ public class FileUtils
         if ( fileOrDir.isDirectory( ) )
         {
             for ( File child : fileOrDir.listFiles( ) )
+            {
                 deleteRecursively( child );
+            }
         }
-
         return fileOrDir.delete( );
     }
 
     public static void copy( URL fromUrl, File toFile ) throws IOException
     {
-        InputStream in = null;
-        OutputStream out = null;
-        try
+        try ( InputStream in = fromUrl.openStream( );
+              OutputStream out = new FileOutputStream( toFile ) )
         {
-            in = fromUrl.openStream( );
-            out = new FileOutputStream( toFile );
-            byte[] bytes = new byte[16384];
+            byte[] bytes = new byte[ 16384 ];
             while ( true )
             {
                 int bytesRead = in.read( bytes );
-                if ( bytesRead < 0 ) break;
+                if ( bytesRead < 0 )
+                {
+                    break;
+                }
 
                 out.write( bytes, 0, bytesRead );
-            }
-        }
-        finally
-        {
-            if ( in != null ) try
-            {
-                in.close( );
-            }
-            catch ( IOException e )
-            {
-            }
-            if ( out != null ) try
-            {
-                out.close( );
-            }
-            catch ( IOException e )
-            {
             }
         }
     }

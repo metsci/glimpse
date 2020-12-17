@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.metsci.glimpse</groupId>
 		<artifactId>glimpse-parent</artifactId>
-		<version>CURRENT-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>glimpse-core</artifactId>
@@ -16,35 +16,26 @@
 			<artifactId>miglayout-core</artifactId>
 			<version>4.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.metsci.glimpse</groupId>
 			<artifactId>glimpse-text</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.metsci.glimpse</groupId>
 			<artifactId>glimpse-platform-fixes</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.metsci.glimpse</groupId>
 			<artifactId>glimpse-util</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
-
 		<dependency>
-			<groupId>org.jogamp.jogl</groupId>
-			<artifactId>jogl-all-main</artifactId>
-			<version>2.2.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jogamp.gluegen</groupId>
-			<artifactId>gluegen-rt-main</artifactId>
-			<version>2.2.4</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.6.0</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

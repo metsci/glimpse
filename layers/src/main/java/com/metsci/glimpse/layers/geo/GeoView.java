@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,30 @@
  */
 package com.metsci.glimpse.layers.geo;
 
+import static com.jogamp.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.core.support.DisposableUtils.addGlimpsePainter;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.geo.GeoTrait.requireGeoTrait;
-import static com.metsci.glimpse.support.DisposableUtils.addGlimpsePainter;
-import static javax.media.opengl.GLProfile.GL3;
 
 import java.util.Collection;
 
-import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.google.common.collect.ImmutableSet;
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.listener.mouse.AxisMouseListener1D;
-import com.metsci.glimpse.context.GlimpseContext;
+import com.jogamp.opengl.GLProfile;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.listener.mouse.AxisMouseListener1D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.base.GlimpsePainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.decoration.CrosshairPainter;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.painter.group.DelegatePainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.layers.GlimpseCanvasView;
 import com.metsci.glimpse.layers.ViewOption;
 import com.metsci.glimpse.layers.misc.CompositeCursorLabelPainter;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.decoration.CrosshairPainter;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.painter.group.DelegatePainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
-import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class GeoView extends GlimpseCanvasView
@@ -64,8 +64,8 @@ public class GeoView extends GlimpseCanvasView
 
     public AxisInfo xAxisInfo;
     public AxisInfo yAxisInfo;
-    
-    
+
+
     public GeoView( ViewOption... viewOptions )
     {
         this( ImmutableSet.copyOf( viewOptions ) );
@@ -88,7 +88,7 @@ public class GeoView extends GlimpseCanvasView
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "fugue-icons/map.png" );
+        return requireIcon( GeoView.class.getResource( "icons/fugue/map.png" ) );
     }
 
     @Override

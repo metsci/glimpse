@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,7 +106,7 @@ public class DncAtlases
                 float tMin = ( yPadded )           / ( float ) hTotal;
                 float tMax = ( yPadded + hPadded ) / ( float ) hTotal;
 
-                // XXX: Off by half a pixel?
+                // TODO: Off by half a pixel?
                 float xAlign = ( anchoredImage.iAnchor + imagePadding ) / ( float ) wPadded;
                 float yAlign = ( anchoredImage.jAnchor + imagePadding ) / ( float ) hPadded;
 

@@ -1,16 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
 
     <groupId>com.metsci.glimpse</groupId>
     <artifactId>glimpse-parent</artifactId>
-    <version>CURRENT-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Glimpse</name>
@@ -68,15 +61,9 @@
         <module>docking</module>
         <module>docking-examples</module>
 
-        <module>wizard</module>
-        <module>wizard-examples</module>
-
         <module>extras-charts</module>
-        <module>extras-dspl</module>
         <module>extras-dnc</module>
-        <module>extras-swt</module>
         <module>extras-examples</module>
-        <module>extras-worldwind</module>
         <module>extras-tinylaf</module>
         <module>extras-topo</module>
 
@@ -90,11 +77,55 @@
         <plugins>
 
             <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                 <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven35</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.5,)</version>
+                                    <message>Build requires Maven 3.5+</message>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>require-java9</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[9,)</version>
+                                    <message>Build requires Java 9+ JDK</message>
+                                </requireJavaVersion>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>deploy</id>
@@ -105,7 +136,20 @@
                             <show>public</show>
                             <maxmemory>2056m</maxmemory>
                             <doctitle>Glimpse Data Visualization Library</doctitle>
-                            <additionalparam>-Xdoclint:none</additionalparam>
+                            <doclint>none</doclint>
+                            <additionalDependencies>
+                                <!-- Keep javadoc from choking on xml-bind-api deps; more info in the docking POM -->
+                                <additionalDependency>
+                                    <groupId>jakarta.xml.bind</groupId>
+                                    <artifactId>jakarta.xml.bind-api</artifactId>
+                                    <version>2.3.2</version>
+                                </additionalDependency>
+                                <additionalDependency>
+                                    <groupId>jakarta.activation</groupId>
+                                    <artifactId>jakarta.activation-api</artifactId>
+                                    <version>1.2.1</version>
+                                </additionalDependency>
+                            </additionalDependencies>
                         </configuration>
                     </execution>
                 </executions>
@@ -115,11 +159,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.4</version>
+                <version>1.6</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
-                        <phase>deploy</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>sign</goal>
                         </goals>
@@ -128,17 +172,19 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <!-- This may get overridden and/or augmented by active profiles -->
+                    <release>9</release>
                 </configuration>
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -148,11 +194,55 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                            <argLine>
+                             --add-opens java.base/java.nio=ALL-UNNAMED
+                             --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+                             --add-opens java.base/jdk.internal.ref=ALL-UNNAMED
+                             --add-opens java.desktop/java.awt=ALL-UNNAMED
+                             --add-opens java.desktop/sun.awt=ALL-UNNAMED
+                             --add-opens java.desktop/sun.java2d=ALL-UNNAMED
+                            </argLine>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>modular-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>true</useModulePath>
+                            <argLine>
+                             --add-opens java.base/java.nio=com.metsci.glimpse.util
+                             --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+                             --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
+                             --add-opens java.desktop/java.awt=com.metsci.glimpse.core
+                             --add-opens java.desktop/sun.awt=com.jogamp.opengl
+                             --add-opens java.desktop/sun.java2d=com.jogamp.opengl
+                            </argLine>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- add the current commit SHA to the build jar -->
             <plugin>
                 <groupId>com.github.koraktor</groupId>
                 <artifactId>mavanagaiata</artifactId>
-                <version>0.5.0</version>
+                <version>0.9.4</version>
                 <executions>
                     <execution>
                         <goals>
@@ -166,8 +256,9 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>3.2.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -185,7 +276,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.7</version>
+                <version>3.0</version>
                 <configuration>
                     <basedir>${basedir}</basedir>
                     <header>${basedir}/LICENSE</header>
@@ -201,7 +292,7 @@
                         <include>**/*.gs</include>
                     </includes>
                     <mapping>
-                        <!-- using JAVADOC_STYLE can sometimes cause the 
+                        <!-- using JAVADOC_STYLE can sometimes cause the
                             license header to find its way into the javadocs, so SLASHSTAR_STYLE is used -->
                         <java>SLASHSTAR_STYLE</java>
                         <fs>DOUBLESLASH_STYLE</fs>
@@ -210,10 +301,11 @@
                     </mapping>
                     <excludes>
                         <exclude>target/**</exclude>
-                        <!-- don't put license header on package descriptions. 
-                            If no other javadoc is provided, the first line of the license header ends 
+                        <!-- don't put license header on package descriptions.
+                            If no other javadoc is provided, the first line of the license header ends
                             up in the javadoc. -->
                         <exclude>**/package-info.java</exclude>
+                        <exclude>**/module-info.java</exclude>
                         <!-- these classes have their own license headers -->
                         <exclude>**/charts/bathy/Conrec.java</exclude>
                         <exclude>**/charts/bathy/Render.java</exclude>
@@ -240,10 +332,11 @@
             </plugin>
 
             <plugin>
-                <!-- explicitly define maven-deploy-plugin after other to 
+                <!-- explicitly define maven-deploy-plugin after other to
                     force exec order -->
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.8.2</version>
                 <executions>
                     <execution>
                         <id>deploy</id>
@@ -256,10 +349,11 @@
             </plugin>
 
             <plugin>
-                <!-- explicitly define maven-install-plugin after other to 
+                <!-- explicitly define maven-install-plugin after other to
                     force exec order -->
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>2.5.2</version>
                 <executions>
                     <execution>
                         <id>install</id>
@@ -275,7 +369,7 @@
 
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -348,19 +442,104 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>2.10</version>
+                <version>2.12</version>
             </extension>
         </extensions>
     </build>
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>java8-only</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <!-- Override the common compiler config to be Java 8 only -->
+                            <release>8</release>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
+
+        <profile>
+            <id>java8-compat</id>
+            <activation>
+                <property>
+                    <name>!m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <!-- After default-compile, recompile everything (except module-info) with Java 8 -->
+                                <id>java8-recompile</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>8</release>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <!-- Override default-testCompile to be Java 8 only -->
+                                <id>default-testCompile</id>
+                                <configuration>
+                                    <release>8</release>
+                                    <excludes>
+                                        <exclude>module-info.java</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>public-release</id>
+            <activation>
+                <property>
+                    <name>public.release</name>
+                </property>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+
         <profile>
             <id>internal</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!public.release</name>
+                </property>
             </activation>
             <distributionManagement>
                 <repository>
@@ -386,18 +565,19 @@
                         </executions>
                     </plugin>
                     <!-- don't javadoc for internal releases -->
-		    <plugin>
-			<artifactId>maven-javadoc-plugin</artifactId>
-                      <executions>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
                             <execution>
                                 <id>deploy</id>
                                 <phase>none</phase>
                             </execution>
                         </executions>
-		    </plugin>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>glimpse.metsci.com</id>
             <distributionManagement>

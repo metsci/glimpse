@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,20 +28,19 @@ package com.metsci.glimpse.dnc;
 
 import static com.google.common.base.Objects.equal;
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.metsci.glimpse.gl.util.GLUtils.genBuffer;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genBuffer;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
 import static java.util.Collections.unmodifiableCollection;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.media.opengl.GL;
-
 import com.google.common.base.Objects;
+import com.jogamp.opengl.GL;
 import com.metsci.glimpse.dnc.geosym.DncGeosymAssignment;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

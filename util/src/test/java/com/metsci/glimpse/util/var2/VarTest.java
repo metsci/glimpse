@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,74 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.ListenerFlag.IMMEDIATE;
 import static com.metsci.glimpse.util.var2.VarTestUtils.f;
 import static com.metsci.glimpse.util.var2.VarUtils.addOldNewListener;
+import static com.metsci.glimpse.util.var2.VarUtils.mapValueVar;
 import static com.metsci.glimpse.util.var2.VarUtils.propertyVar;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 class VarTest
 {
+
+    @Test
+    void mapValueVarShouldHonorImmediateFlag( )
+    {
+        Var<ImmutableMap<String,String>> mapVar = new VarBasic<>( ImmutableMap.of( "theKey", "theValue" ) );
+        Var<String> valueVar = mapValueVar( mapVar, "theKey" );
+
+        List<VarFiring<String>> fs = new ArrayList<>( );
+        valueVar.addListener( IMMEDIATE, ongoing ->
+        {
+            fs.add( f( ongoing, valueVar.v( ) ) );
+        } );
+
+        assertEquals( asList( f( false, "theValue" ) ),
+                      fs );
+    }
+
+    @Test
+    void listenerTensesShouldNotAffectFiringOrder( )
+    {
+        Var<String> a = new VarBasic<>( "x" );
+
+        List<String> expected = new ArrayList<>( );
+        List<String> actual = new ArrayList<>( );
+
+        Random random = new Random( 0 );
+        for ( int i = 0; i < 100; i++ )
+        {
+            String s = "Listener " + i;
+
+            expected.add( s );
+
+            int listenerTense = ( random.nextInt( ) & Integer.MAX_VALUE ) % 3;
+            switch ( listenerTense )
+            {
+                case 0: a.addListener( ongoing -> actual.add( s ) ); break;
+                case 1: a.all( ).addListener( ( ) -> actual.add( s ) ); break;
+                case 2: a.completed( ).addListener( ( ) -> actual.add( s ) ); break;
+                default: throw new RuntimeException( "Illegal listener tense: " + listenerTense );
+            }
+        }
+
+        // Listener firing order should be determined entirely by the sequence
+        // of addListener() calls -- regardless of whether they were added via
+        // via completed().addListener(), all().addListener(), etc.
+        a.set( false, "w" );
+
+        assertEquals( expected, actual );
+    }
 
     @Test
     void derivedVarShouldFireEvenIfMembersDontChange( )
@@ -77,7 +130,7 @@ class VarTest
 
     /**
      * Same as {@link #derivedVarShouldFireEvenIfMembersDontChange()}, but
-     * adding a {@link Runnable} instead of a {@link ListenablePairListener}.
+     * adding a {@link Runnable} instead of a {@link ActivityListener}.
      */
     @Test
     void derivedVarShouldFireEvenIfMembersDontChange2( )
@@ -117,7 +170,7 @@ class VarTest
     {
         Var<String> a = new VarBasic<>( "x" );
 
-        List<OldNewPairFiring<String>> fs = new ArrayList<>( );
+        List<OldNewFiring<String>> fs = new ArrayList<>( );
         addOldNewListener( a, ( ongoing, vOld, vNew ) ->
         {
             fs.add( f( ongoing, vOld, vNew ) );

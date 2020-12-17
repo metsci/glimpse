@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,10 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.jnlu.NativeLibUtils.*;
-import static java.lang.String.*;
+import static com.metsci.glimpse.util.jnlu.NativeLibUtils.onPlatform;
+import static com.metsci.glimpse.util.ugly.CleanerUtils.registerCleaner;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectDeepReflectiveAccess;
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -43,10 +45,6 @@ import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.ReadOnlyBufferException;
 
-import sun.misc.Cleaner;
-import sun.misc.Unsafe;
-import sun.nio.ch.DirectBuffer;
-
 /**
  * Represents a file that gets memory-mapped, in its entirety, even if it is larger than 2GB.
  * <p>
@@ -54,10 +52,30 @@ import sun.nio.ch.DirectBuffer;
  * file through a single Buffer. Instead, this class does a single memory-map call for the whole
  * file, and then creates Buffer objects, as needed, for slices of the memory block. Buffer
  * object creation is cheap.
+ * <p>
+ * Works on Oracle/OpenJDK 8 JVMs.
+ * <p>
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
+ * <pre>
+ * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+ * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
+ * --add-opens java.base/java.nio=com.metsci.glimpse.util
+ * </pre>
  */
-@SuppressWarnings( "restriction" )
 public class MappedFile
 {
+    static
+    {
+        expectDeepReflectiveAccess( MappedFile.class, "java.base", "sun.nio.ch" );
+        expectDeepReflectiveAccess( MappedFile.class, "java.base", "jdk.internal.ref" );
+        expectDeepReflectiveAccess( MappedFile.class, "java.base", "java.nio" );
+    }
+
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
     protected static final FileMapper mapper;
     static
     {
@@ -81,19 +99,22 @@ public class MappedFile
     protected final long size;
 
     /**
-     * Cleaners serve the same purpose as finalize() methods, with 2 subtle differences:
-     * <ol>
-     * <li>finalize() methods are better when resource disposal is non-trivial and/or slow
-     * <li>The JVM does a better job of running Cleaners promptly
-     * </ol>
+     * Invoking {@link #disposer} is equivalent to calling {@link #dispose()}. However,
+     * {@link #disposer} does not contain a strong reference to the {@link MappedFile}
+     * instance, and can therefore be used without preventing the {@link MappedFile}
+     * from being garbage collected.
      * <p>
-     * When the enclosing Object is ready to be GC-ed, the Cleaner gets magically triggered
-     * via the JVM's PhantomReference mechanism.
-     * <p>
-     * In Java 9, the Cleaner class is reportedly moving out of the sun.misc package and into
-     * a java.lang package.
+     * Has the same semantics as a {@code java.lang.ref.Cleaner.Cleanable}:
+     * <ul>
+     * <li>Invoked automatically when the {@link MappedFile} is eligible for garbage collection
+     * <li>May be invoked explicitly
+     * <li>Runs its action at most once, regardless of how many times it gets invoked
+     * </ul>
+     * <strong>IMPORTANT:</strong> Must not be invoked while slices of this MappedFile
+     * are still in use. If a slice is used after its MappedFile has been disposed,
+     * behavior is undefined.
      */
-    protected final Cleaner cleaner;
+    public final Runnable disposer;
 
 
     public MappedFile( File file, ByteOrder byteOrder ) throws IOException
@@ -139,7 +160,7 @@ public class MappedFile
             }
 
             Runnable unmapper = mapper.createUnmapper( this.address, this.size, raf );
-            this.cleaner = Cleaner.create( this, unmapper );
+            this.disposer = registerCleaner( this, unmapper )::clean;
         }
     }
 
@@ -165,7 +186,7 @@ public class MappedFile
 
     public void copyTo( long position, int size, ByteBuffer dest )
     {
-        if ( dest.isDirect( ) && dest instanceof DirectBuffer )
+        if ( dest.isDirect( ) && isDirectBuffer( dest ) )
         {
             // This block does all the same steps as the block below,
             // but without creating a temporary slice buffer
@@ -191,8 +212,8 @@ public class MappedFile
             }
 
             long sAddr = this.address + position;
-            long dAddr = ( ( DirectBuffer ) dest ).address( ) + dest.position( );
-            unsafe.copyMemory( sAddr, dAddr, size );
+            long dAddr = getDirectBufferAddress( dest ) + dest.position( );
+            copyMemory( sAddr, dAddr, size );
             dest.position( dest.position( ) + size );
         }
         else
@@ -227,48 +248,82 @@ public class MappedFile
     }
 
     /**
-     * <strong>IMPORTANT:</strong> The clean() method of the returned Cleaner must not be called while
-     * slices of this MappedFile are still in use. If a slice is used after clean() is called, behavior
-     * is undefined.
-     */
-    public Cleaner cleaner( )
-    {
-        return this.cleaner;
-    }
-
-    /**
      * <strong>IMPORTANT:</strong> This method must not be called while slices of this MappedFile are
      * still in use. If a slice is used after its MappedFile has been disposed, behavior is undefined.
      */
     public void dispose( )
     {
-        this.cleaner.clean( );
+        this.disposer.run( );
     }
-
 
     // Lots of verbose code to get access to various JVM-internal functionality
 
-    protected static final Unsafe unsafe;
+    protected static final Object unsafe;
     protected static final int pageSize;
+    protected static final Method Unsafe_copyMemory;
     static
     {
         try
         {
-            // Should work on more platforms
-            Constructor<Unsafe> unsafeConstructor = Unsafe.class.getDeclaredConstructor( );
-            unsafeConstructor.setAccessible( true );
-            unsafe = unsafeConstructor.newInstance( );
+            Class<?> Unsafe_class = Class.forName( "sun.misc.Unsafe" );
 
-            // May not work on as many platforms
-            //Field field = Unsafe.class.getDeclaredField( "theUnsafe" );
-            //field.setAccessible( true );
-            //unsafe = ( Unsafe ) field.get( null );
+            Constructor<?> Unsafe_new = Unsafe_class.getDeclaredConstructor( );
+            Unsafe_new.setAccessible( true );
+            unsafe = Unsafe_new.newInstance( );
 
-            pageSize = unsafe.pageSize( );
+            Method Unsafe_pageSize = Unsafe_class.getDeclaredMethod( "pageSize" );
+            pageSize = ( Integer ) Unsafe_pageSize.invoke( unsafe );
+
+            Unsafe_copyMemory = Unsafe_class.getDeclaredMethod( "copyMemory", Long.TYPE, Long.TYPE, Long.TYPE );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access " + Unsafe.class.getName( ), e );
+            throw new RuntimeException( "Cannot access sun.misc.Unsafe", e );
+        }
+    }
+
+    protected static void copyMemory( long srcAddress, long destAddress, long bytes )
+    {
+        try
+        {
+            Unsafe_copyMemory.invoke( unsafe, srcAddress, destAddress, bytes );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    protected static final Class<?> DirectBuffer_class;
+    protected static final Method DirectBuffer_address;
+    static
+    {
+        try
+        {
+            DirectBuffer_class = Class.forName( "sun.nio.ch.DirectBuffer" );
+            DirectBuffer_address = DirectBuffer_class.getDeclaredMethod( "address" );
+            DirectBuffer_address.setAccessible( true );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Cannot access sun.nio.ch.DirectBuffer.address()", e );
+        }
+    }
+
+    public static boolean isDirectBuffer( Object obj )
+    {
+        return DirectBuffer_class.isInstance( obj );
+    }
+
+    public static long getDirectBufferAddress( Object directBuffer )
+    {
+        try
+        {
+            return ( Long ) DirectBuffer_address.invoke( directBuffer );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
         }
     }
 
@@ -340,38 +395,74 @@ public class MappedFile
 
     /**
      * DirectByteBuffer( int cap, long addr, FileDescriptor fd, Runnable unmapper )
+     * OR
+     * DirectByteBuffer( int cap, long addr, FileDescriptor fd, Runnable unmapper, boolean isSync, MemorySegmentProxy segment )
      */
-    protected static final Constructor<?> DirectByteBuffer_init;
+    protected static final BufferAllocator DirectByteBuffer_init;
+
     static
     {
+        BufferAllocator allocator = null;
         try
         {
             Class<?> clazz = Class.forName( "java.nio.DirectByteBuffer" );
-            DirectByteBuffer_init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
-            DirectByteBuffer_init.setAccessible( true );
+            Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
+            init.setAccessible( true );
+            allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access java.nio.DirectByteBuffer.<init>()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "java.nio.DirectByteBuffer" );
+                Class<?> memSegmentProxyClass = Class.forName( "jdk.internal.access.foreign.MemorySegmentProxy" );
+                Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class, boolean.class, memSegmentProxyClass );
+                init.setAccessible( true );
+                allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null, true, null );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access java.nio.DirectByteBuffer.<init>()", ex );
+            }
         }
+
+        DirectByteBuffer_init = allocator;
     }
 
     /**
      * DirectByteBufferR( int cap, long addr, FileDescriptor fd, Runnable unmapper )
+     * OR
+     * DirectByteBufferR( int cap, long addr, FileDescriptor fd, Runnable unmapper, boolean isSync, MemorySegmentProxy segment )
      */
-    protected static final Constructor<?> DirectByteBufferR_init;
+    protected static final BufferAllocator DirectByteBufferR_init;
+
     static
     {
+        BufferAllocator allocator = null;
         try
         {
             Class<?> clazz = Class.forName( "java.nio.DirectByteBufferR" );
-            DirectByteBufferR_init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
-            DirectByteBufferR_init.setAccessible( true );
+            Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class );
+            init.setAccessible( true );
+            allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access java.nio.DirectByteBufferR.<init>()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "java.nio.DirectByteBufferR" );
+                Class<?> memSegmentProxyClass = Class.forName( "jdk.internal.access.foreign.MemorySegmentProxy" );
+                Constructor<?> init = clazz.getDeclaredConstructor( int.class, long.class, FileDescriptor.class, Runnable.class, boolean.class, memSegmentProxyClass );
+                init.setAccessible( true );
+                allocator = ( capacity, address, fd ) -> ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null, true, null );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access java.nio.DirectByteBuffer.<init>()", ex );
+            }
         }
+
+        DirectByteBufferR_init = allocator;
     }
 
     /**
@@ -403,8 +494,8 @@ public class MappedFile
     {
         try
         {
-            Constructor<?> init = ( writable ? DirectByteBuffer_init : DirectByteBufferR_init );
-            MappedByteBuffer buffer = ( MappedByteBuffer ) init.newInstance( capacity, address, fd, null );
+            BufferAllocator allocator = ( writable ? DirectByteBuffer_init : DirectByteBufferR_init );
+            MappedByteBuffer buffer = allocator.newInstance( capacity, address, fd );
             DirectByteBuffer_att.set( buffer, attachment );
             return buffer;
         }
@@ -420,15 +511,27 @@ public class MappedFile
     protected static final Method MappedByteBuffer_force0;
     static
     {
+        Method method = null;
         try
         {
-            MappedByteBuffer_force0 = MappedByteBuffer.class.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
-            MappedByteBuffer_force0.setAccessible( true );
+            method = MappedByteBuffer.class.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
+            method.setAccessible( true );
         }
         catch ( Exception e )
         {
-            throw new RuntimeException( "Cannot access " + MappedByteBuffer.class.getName( ) + ".force0()", e );
+            try
+            {
+                Class<?> clazz = Class.forName( "java.nio.MappedMemoryUtils" );
+                method = clazz.getDeclaredMethod( "force0", FileDescriptor.class, long.class, long.class );
+                method.setAccessible( true );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( "Cannot access " + MappedByteBuffer.class.getName( ) + ".force0()", ex );
+            }
         }
+
+        MappedByteBuffer_force0 = method;
     }
 
     protected static void force( FileDescriptor fd, long address, long length ) throws RuntimeException
@@ -454,4 +557,8 @@ public class MappedFile
         }
     }
 
+    private interface BufferAllocator
+    {
+        MappedByteBuffer newInstance( int capacity, long address, FileDescriptor fd ) throws InvocationTargetException, InstantiationException, IllegalAccessException;
+    }
 }

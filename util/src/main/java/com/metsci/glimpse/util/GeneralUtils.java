@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@ package com.metsci.glimpse.util;
 
 import static java.lang.Double.doubleToLongBits;
 import static java.lang.Float.floatToIntBits;
+import static java.lang.Math.multiplyExact;
 import static java.util.Collections.unmodifiableList;
 
 import java.math.BigDecimal;
@@ -556,6 +557,33 @@ public class GeneralUtils
     public static boolean approximateNotEqual( double d1, double d2, double epsilon )
     {
         return Math.abs( d1 - d2 ) > epsilon;
+    }
+
+    /**
+     * Multiplies int factors and returns the int product, or throws {@link ArithmeticException}
+     * if there is an overflow (either positive or negative).
+     */
+    public static int multiplyInts( int... factors )
+    {
+        try
+        {
+            int r = 1;
+            for ( int factor : factors )
+            {
+                r = multiplyExact( r, factor );
+            }
+            return r;
+        }
+        catch ( ArithmeticException e )
+        {
+            StringBuilder s = new StringBuilder( );
+            for ( int factor : factors )
+            {
+                s.append( factor ).append( " * " );
+            }
+            s.setLength( max( 0, s.length( ) - 3 ) );
+            throw new ArithmeticException( "Integer overflow while multiplying factors:" + s );
+        }
     }
 
     /**

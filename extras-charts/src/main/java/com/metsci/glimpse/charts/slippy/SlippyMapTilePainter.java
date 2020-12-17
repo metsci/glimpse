@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,17 +37,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.texture.DrawableTexture;
-import com.metsci.glimpse.painter.base.GlimpsePainterBase;
-import com.metsci.glimpse.painter.texture.ShadedTexturePainter;
-import com.metsci.glimpse.painter.texture.TextureUnit;
-import com.metsci.glimpse.support.projection.LatLonProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.shader.triangle.ColorTexture2DProgram;
-import com.metsci.glimpse.support.texture.RGBTextureProjected2D;
-import com.metsci.glimpse.support.texture.TextureProjected2D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.texture.DrawableTexture;
+import com.metsci.glimpse.core.painter.base.GlimpsePainterBase;
+import com.metsci.glimpse.core.painter.texture.ShadedTexturePainter;
+import com.metsci.glimpse.core.painter.texture.TextureUnit;
+import com.metsci.glimpse.core.support.projection.LatLonProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.shader.triangle.ColorTexture2DProgram;
+import com.metsci.glimpse.core.support.texture.RGBTextureProjected2D;
+import com.metsci.glimpse.core.support.texture.TextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.vector.Vector2d;

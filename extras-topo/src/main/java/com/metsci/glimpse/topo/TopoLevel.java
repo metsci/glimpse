@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,6 @@ public class TopoLevel
     public final int numTiles;
     protected final TopoTileBounds[][] tileBounds;
 
-
     public TopoLevel( TopoDataFile file, int maxRowsPerBand, int maxColsPerTile ) throws IOException
     {
         file.requireValid( );
@@ -86,7 +85,7 @@ public class TopoLevel
         this.numBands = ceilDiv( this.numRows, rowsPerBand );
         this.numTiles = ceilDiv( this.numCols, colsPerTile );
 
-        this.tileBounds = new TopoTileBounds[ this.numBands ][ this.numTiles ];
+        this.tileBounds = new TopoTileBounds[this.numBands][this.numTiles];
         for ( int bandNum = 0; bandNum < this.numBands; bandNum++ )
         {
             int bandFirstRow = bandNum * rowsPerBand;
@@ -101,15 +100,15 @@ public class TopoLevel
                 double tileWestLon_DEG = this.westLon_DEG + ( this.cellSize_DEG * ( tileFirstCol ) );
                 double tileEastLon_DEG = this.westLon_DEG + ( this.cellSize_DEG * ( tileFirstCol + tileNumCols ) );
 
-                this.tileBounds[ bandNum ][ tileNum ] = new TopoTileBounds( bandFirstRow,
-                                                                            bandNumRows,
-                                                                            bandSouthLat_DEG,
-                                                                            bandNorthLat_DEG,
+                this.tileBounds[bandNum][tileNum] = new TopoTileBounds( bandFirstRow,
+                        bandNumRows,
+                        bandSouthLat_DEG,
+                        bandNorthLat_DEG,
 
-                                                                            tileFirstCol,
-                                                                            tileNumCols,
-                                                                            tileWestLon_DEG,
-                                                                            tileEastLon_DEG );
+                        tileFirstCol,
+                        tileNumCols,
+                        tileWestLon_DEG,
+                        tileEastLon_DEG );
             }
         }
     }
@@ -121,12 +120,12 @@ public class TopoLevel
 
     public TopoTileBounds tileBounds( int bandNum, int tileNum )
     {
-        return this.tileBounds[ bandNum ][ tileNum ];
+        return this.tileBounds[bandNum][tileNum];
     }
 
     public TopoHostTile copyTile( int bandNum, int tileNum, int numBorderCells )
     {
-        TopoTileBounds tile = this.tileBounds[ bandNum ][ tileNum ];
+        TopoTileBounds tile = this.tileBounds[bandNum][tileNum];
 
         double borderSize_RAD = degreesToRadians( numBorderCells * this.cellSize_DEG );
         double dataNorthLat_RAD = degreesToRadians( tile.northLat_DEG ) + borderSize_RAD;
@@ -139,8 +138,8 @@ public class TopoLevel
         int rLast = tile.firstRow + tile.numRows + numBorderCells - 1;
         int cLast = tile.firstCol + tile.numCols + numBorderCells - 1;
 
-        int numDataRows = tile.numRows + 2*numBorderCells;
-        int numDataCols = tile.numCols + 2*numBorderCells;
+        int numDataRows = tile.numRows + 2 * numBorderCells;
+        int numDataCols = tile.numCols + 2 * numBorderCells;
         TopoDataType dataType = this.file.dataType;
         ByteBuffer dataBytes = newDirectByteBuffer( dataType.numBytes * numDataRows * numDataCols );
         dataBytes.order( this.file.dataByteOrder );
@@ -177,18 +176,18 @@ public class TopoLevel
         dataBytes.flip( );
 
         return new TopoHostTile( dataNorthLat_RAD,
-                                 dataSouthLat_RAD,
-                                 dataEastLon_RAD,
-                                 dataWestLon_RAD,
+                dataSouthLat_RAD,
+                dataEastLon_RAD,
+                dataWestLon_RAD,
 
-                                 numDataRows,
-                                 numDataCols,
-                                 dataBytes,
-                                 dataType,
+                numDataRows,
+                numDataCols,
+                dataBytes,
+                dataType,
 
-                                 borderSize_RAD,
+                borderSize_RAD,
 
-                                 0 );
+                0 );
     }
 
     protected void copyTo( long rowNum, long firstCol, int numCols, ByteBuffer dest )

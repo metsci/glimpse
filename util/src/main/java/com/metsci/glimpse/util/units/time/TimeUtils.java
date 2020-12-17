@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  */
 package com.metsci.glimpse.util.units.time;
 
-import static com.metsci.glimpse.util.units.time.format.TimeStampFormat.*;
+import static com.metsci.glimpse.util.units.time.format.TimeStampFormat.iso8601;
 
 import java.math.BigDecimal;
 

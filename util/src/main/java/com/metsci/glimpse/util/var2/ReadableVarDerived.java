@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  */
 package com.metsci.glimpse.util.var2;
 
+import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListener;
 import static java.util.Arrays.asList;
@@ -38,20 +39,20 @@ import com.metsci.glimpse.util.var.Disposable;
 public abstract class ReadableVarDerived<V> implements ReadableVar<V>
 {
 
-    protected final ListenablePairSet listenables;
+    protected final ActivityListenableSet listenables;
     protected final Listenable completed;
     protected final Listenable all;
 
 
     @SafeVarargs
-    public ReadableVarDerived( ListenablePair... listenables )
+    public ReadableVarDerived( ActivityListenable... listenables )
     {
         this( asList( listenables ) );
     }
 
-    public ReadableVarDerived( Collection<? extends ListenablePair> listenables )
+    public ReadableVarDerived( Collection<? extends ActivityListenable> listenables )
     {
-        this.listenables = new ListenablePairSet( listenables );
+        this.listenables = new ActivityListenableSet( listenables );
         this.completed = filterListenable( this.listenables.completed( ), this::v );
         this.all = filterListenable( this.listenables.all( ), this::v );
     }
@@ -72,9 +73,12 @@ public abstract class ReadableVarDerived<V> implements ReadableVar<V>
     }
 
     @Override
-    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    public Disposable addListener( Set<? extends ListenerFlag> flags, ActivityListener listener )
     {
-        return this.listenables.addListener( flags, filterListener( listener, this::v ) );
+        return doHandleImmediateFlag( flags, listener, flags2 ->
+        {
+            return this.listenables.addListener( flags2, filterListener( listener, this::v ) );
+        } );
     }
 
 }

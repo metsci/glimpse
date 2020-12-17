@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.support.projection.LatLonProjection;
-import com.metsci.glimpse.support.projection.Projection;
-import com.metsci.glimpse.support.texture.FloatTextureProjected2D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.support.projection.LatLonProjection;
+import com.metsci.glimpse.core.support.projection.Projection;
+import com.metsci.glimpse.core.support.texture.FloatTextureProjected2D;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.units.Angle;
@@ -62,12 +63,6 @@ public class TopographyData
      */
     protected float[][] data;
 
-    public TopographyData( InputStream in ) throws IOException
-    {
-        super( );
-        read( in );
-    }
-
     private static class Row
     {
         public float centerLat;
@@ -82,6 +77,10 @@ public class TopographyData
         }
     }
 
+    /**
+     * To be removed in subsequent releases.
+     */
+    @Deprecated
     protected void read( InputStream in ) throws IOException
     {
         BufferedReader reader = new BufferedReader( new InputStreamReader( in ) );

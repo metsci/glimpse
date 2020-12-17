@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -388,7 +388,7 @@ public class Flat2Query
 
         public Int2ObjectMap<DncFeature> loadFeatures( DncChunkKey chunkKey, IntCollection featureNums )
         {
-            // XXX: Try caching DncFeature instances (might not make much difference, though)
+            // TODO: Try caching DncFeature instances (might not make much difference, though)
             int databaseNum = chunkKey.library.databaseNum;
             QueryDatabase database = databases.get( databaseNum );
             return database.loadFeatures( chunkKey, featureNums );

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,5 +124,8 @@ public interface SortedFloats extends Floats
      * @see com.metsci.glimpse.util.primitives.sorted.ContinuousIndexArray
      */
     ContinuousIndexArray continuousIndicesOf( SortedFloats xs );
+
+    @Override
+    SortedFloats copy( );
 
 }

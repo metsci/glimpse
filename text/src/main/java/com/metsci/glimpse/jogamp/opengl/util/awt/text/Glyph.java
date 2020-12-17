@@ -27,11 +27,11 @@
  */
 package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
-import com.jogamp.opengl.util.packrect.Rect;
-import com.jogamp.opengl.util.texture.TextureCoords;
-
 import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
+
+import com.jogamp.opengl.util.packrect.Rect;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,16 @@ public class PdfContUniform implements PdfCont
     {
         _min = min;
         _max = max;
+    }
+
+    public double getMax( )
+    {
+        return _max;
+    }
+
+    public double getMin( )
+    {
+        return _min;
     }
 
     @Override

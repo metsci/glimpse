@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,6 +116,7 @@ public class TileFactoryStandard implements TileFactory
                             icon.paintIcon( this, g, 0, y );
                         }
                     };
+                    closeButton.setFocusable( false );
                     closeButton.setOpaque( false );
                     closeButton.setBorder( null );
 

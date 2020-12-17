@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,22 @@
 package com.metsci.glimpse.topo;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
-import static com.metsci.glimpse.support.QuickUtils.requireSwingThread;
+import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_R32F;
+import static com.jogamp.opengl.GL.GL_SHORT;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
+import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
+import static com.jogamp.opengl.GL2ES2.GL_RED;
+import static com.jogamp.opengl.GL2GL3.GL_R16_SNORM;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
+import static com.metsci.glimpse.core.support.QuickUtils.requireSwingThread;
 import static com.metsci.glimpse.topo.TopoLevelSet.createTopoLevels;
 import static com.metsci.glimpse.topo.TopoUtils.intersect;
 import static com.metsci.glimpse.util.concurrent.ConcurrencyUtils.newDaemonThreadFactory;
@@ -38,20 +52,6 @@ import static java.lang.Math.floor;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static javax.media.opengl.GL.GL_CLAMP_TO_EDGE;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_LINEAR;
-import static javax.media.opengl.GL.GL_SHORT;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_S;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_T;
-import static javax.media.opengl.GL.GL_UNPACK_ALIGNMENT;
-import static javax.media.opengl.GL2ES2.GL_R32F;
-import static javax.media.opengl.GL2ES2.GL_RED;
-import static javax.media.opengl.GL2GL3.GL_R16_SNORM;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -67,11 +67,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import javax.media.opengl.GL3;
 import javax.swing.SwingUtilities;
 
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.jogamp.opengl.GL3;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
 import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.topo.proj.NormalCylindricalProjection;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,6 +139,12 @@ public class SortedLongsArithmetic implements SortedLongs
         long[] copy = new long[n];
         copyTo( 0, copy, 0, n );
         return copy;
+    }
+
+    @Override
+    public SortedLongsArithmetic copy( )
+    {
+        return new SortedLongsArithmetic( v0, vStep, n );
     }
 
     @Override

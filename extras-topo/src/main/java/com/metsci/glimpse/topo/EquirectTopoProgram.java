@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,32 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static com.metsci.glimpse.painter.base.GlimpsePainterBase.requireAxis2D;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.core.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.core.painter.base.GlimpsePainterBase.requireAxis2D;
 import static com.metsci.glimpse.topo.TopoUtils.dataDenormFactor;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_TEXTURE0;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
-import javax.media.opengl.GL3;
-
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.gl.texture.ColorTexture1D;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GL3;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.gl.texture.ColorTexture1D;
 import com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection;
 
 public class EquirectTopoProgram
 {
 
-    public static final String vertShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect.vs" );
+    public static final String vertShader_GLSL = requireText( EquirectTopoProgram.class.getResource( "shaders/topo-equirect.vs" ) );
 
-    public static final String radiansFragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect-rad.fs" );
-    public static final String degreesFragShader_GLSL = requireResourceText( "shaders/TopoProgram/topo-equirect-deg.fs" );
+    public static final String radiansFragShader_GLSL = requireText( EquirectTopoProgram.class.getResource( "shaders/topo-equirect-rad.fs" ) );
+    public static final String degreesFragShader_GLSL = requireText( EquirectTopoProgram.class.getResource( "shaders/topo-equirect-deg.fs" ) );
 
     public static String fragShader_GLSL( boolean xyInDegrees )
     {

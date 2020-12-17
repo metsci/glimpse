@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,21 @@ public class PdfContTriangle implements PdfCont
         f = ( mode - min ) / ( max - min );
     }
 
+    public double getMin( )
+    {
+        return min;
+    }
+
+    public double getMode( )
+    {
+        return mode;
+    }
+
+    public double getMax( )
+    {
+        return max;
+    }
+
     @Override
     public double draw( Generator g )
     {
@@ -104,9 +119,9 @@ public class PdfContTriangle implements PdfCont
         }
 
         PdfContTriangle other = ( PdfContTriangle ) o;
-        return doublesEqual( other.min, other.min ) &&
-                doublesEqual( other.mode, other.mode ) &&
-                doublesEqual( other.max, other.max );
+        return doublesEqual( min, other.min ) &&
+                doublesEqual( mode, other.mode ) &&
+                doublesEqual( max, other.max );
 
     }
 }

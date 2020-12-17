@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.logging;
 
-import static com.metsci.glimpse.util.io.StreamOpener.fileThenResourceOpener;
 import static java.lang.String.format;
+import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.CONFIG;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.FINER;
@@ -43,14 +43,16 @@ import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.metsci.glimpse.util.io.StreamOpener;
+import com.metsci.glimpse.util.io.IoUtils;
 import com.metsci.glimpse.util.logging.format.Formatter;
+import com.metsci.glimpse.util.logging.format.TerseLogFormatter;
 import com.metsci.glimpse.util.logging.format.TimestampingMethodNameLogFormatter;
 
 /**
@@ -58,6 +60,14 @@ import com.metsci.glimpse.util.logging.format.TimestampingMethodNameLogFormatter
  */
 public class LoggerUtils
 {
+    private static final Logger logger = getLogger( LoggerUtils.class );
+
+    /**
+     * Log statements with this level are always loggable -- even for loggers
+     * set to OFF.
+     */
+    @SuppressWarnings( "serial" )
+    public static final Level FORCE = new Level( "FORCE", Integer.MAX_VALUE ) { };
 
     /**
      * Convenience wrapper around {@link Logger#getLogger(String)}. Uses
@@ -116,65 +126,54 @@ public class LoggerUtils
     }
 
     /**
-     * Initialize Java logging to use "logging.properties" as the configuration
-     * file and re-read the logging configuration from this file.
+     * This method tries to configure logging by loading a configuration from
+     * each of the specified URLs, in order, until an attempt succeeds. After
+     * the first successful attempt, the method returns true. If there are no
+     * successful attempts, the method returns false.
      * <p>
-     * Note: Similar to setting
-     * -Djava.util.logging.config.file=logging.properties on java command line.
-     * </p>
+     * Basic examples, using {@link IoUtils#file(String)} and {@link IoUtils#resource(Class, String)}:
+     * <pre>
+     * public static void main( String[] args )
+     * {
+     *     // Example 1: Use classpath resource "com/company/package/logging.properties"
+     *     initLogging( Main.class.getResource( "logging.properties" ) );
+     *     ...
+     *
+     *     // Example 2: Use a file, or fall back to classpath resource if file is not available
+     *     initLogging( file( "logging.properties" ), resource( Main.class, "logging.properties" ) );
+     *     ...
+     * }
+     * </pre>
      */
-    public static void initializeLogging( )
+    public static boolean initLogging( URL... urls )
     {
-        initializeLogging( "logging.properties" );
-    }
-
-    /**
-     * Initialize Java logging to use given configuration file and re-read the
-     * logging configuration from this file.
-     * <p>
-     * Note: Similar to setting
-     * -Djava.util.logging.config.file=configurationFilename on java command
-     * line.
-     * </p>
-     */
-    public static void initializeLogging( String configurationFilename )
-    {
-        initializeLogging( configurationFilename, fileThenResourceOpener );
-    }
-
-    /**
-     * Initialize Java logging to use given configuration file and re-read the
-     * logging configuration from this file.
-     * <p>
-     * Note: Similar to setting
-     * -Djava.util.logging.config.file=configurationFilename on java command
-     * line.
-     * </p>
-     */
-    public static void initializeLogging( String configurationFilename, StreamOpener streamOpener )
-    {
-        try
+        setConsoleLogger( new TerseLogFormatter( ), ALL );
+        for ( URL url : urls )
         {
-            InputStream stream = null;
-            try
+            logger.log( FORCE, "Logger config attempt: url = " + url );
+            if ( doInitLogging( url ) )
             {
-                stream = streamOpener.openForRead( configurationFilename );
-                getLogManager( ).readConfiguration( stream );
-
-                System.setProperty( "java.util.logging.config.file", configurationFilename );
-
-                Logger logger = getLogger( LoggerUtils.class );
-                logger.info( "Loaded logging configuration from " + configurationFilename );
+                logger.log( FORCE, "Logger config SUCCESS: url = " + url );
+                return true;
             }
-            finally
+            else
             {
-                if ( stream != null ) stream.close( );
+                logger.log( FORCE, "Logger config FAILURE: url = " + url );
             }
         }
-        catch ( IOException e )
+        return false;
+    }
+
+    protected static boolean doInitLogging( URL url )
+    {
+        try ( InputStream stream = url.openStream( ) )
         {
-            System.err.println( LoggerUtils.class.getSimpleName( ) + ".initializeLogging: IO exception - " + e.toString( ) );
-            e.printStackTrace( System.err );
+            getLogManager( ).readConfiguration( stream );
+            return true;
+        }
+        catch ( Exception e )
+        {
+            return false;
         }
     }
 
@@ -184,29 +183,35 @@ public class LoggerUtils
      *
      * @param level maximum logging level; set on root logger
      */
-    public static final void setTerseConsoleLogger( Level level )
+    public static void setTerseConsoleLogger( Level level )
     {
-        java.util.logging.Logger logger = Logger.getLogger( "" );
+        setConsoleLogger( new TimestampingMethodNameLogFormatter( ), level );
+    }
 
-        if ( logger == null ) return;
-
-        Handler[] handlers = logger.getHandlers( );
-        for ( Handler h : handlers )
-            if ( h instanceof ConsoleHandler ) logger.removeHandler( h );
-
-        ConsoleHandler handler = new ConsoleHandler( )
+    public static void setConsoleLogger( Formatter formatter, Level level )
+    {
+        Logger rootLogger = Logger.getLogger( "" );
+        if ( rootLogger != null )
         {
-            Formatter formatter = new TimestampingMethodNameLogFormatter( );
-
-            @Override
-            public Formatter getFormatter( )
+            for ( Handler h : rootLogger.getHandlers( ) )
             {
-                return formatter;
+                if ( h instanceof ConsoleHandler )
+                {
+                    rootLogger.removeHandler( h );
+                }
             }
-        };
 
-        handler.setLevel( level );
-        logger.addHandler( handler );
+            ConsoleHandler handler = new ConsoleHandler( )
+            {
+                @Override
+                public Formatter getFormatter( )
+                {
+                    return formatter;
+                }
+            };
+            handler.setLevel( level );
+            rootLogger.addHandler( handler );
+        }
     }
 
     /**
@@ -294,6 +299,7 @@ public class LoggerUtils
          *
          * @throws java.io.IOException in case of error
          */
+        @Override
         public void flush( ) throws IOException
         {
 
@@ -374,7 +380,14 @@ public class LoggerUtils
     {
         if ( logger.isLoggable( level ) )
         {
-            logger.log( level, format( format, args ) );
+            String message = format;
+            if ( 0 < args.length )
+            {
+                // Only format if we have varargs
+                message = format( format, args );
+            }
+
+            logger.log( level, message );
         }
     }
 
@@ -453,7 +466,14 @@ public class LoggerUtils
     {
         if ( logger.isLoggable( level ) )
         {
-            logger.log( level, format( format, args ), thrown );
+            String message = format;
+            if ( 0 < args.length )
+            {
+                // Only format if we have varargs
+                message = format( format, args );
+            }
+
+            logger.log( level, message, thrown );
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,11 +56,9 @@ public class FileSync
         }
     }
 
+    private static final Map<File, FileSync.FileEntry> fileEntries = new HashMap<>( );
 
-    private static final Map<File,FileSync.FileEntry> fileEntries = new HashMap<>( );
-
-
-    public static void lockFile( File file ) throws IOException
+    private static FileSync.FileEntry getOrCreateEntry( File file ) throws IOException
     {
         FileSync.FileEntry entry;
         synchronized ( fileEntries )
@@ -83,40 +81,77 @@ public class FileSync
             entry = fileEntries.get( file );
         }
 
-        if ( !entry.lock.isHeldByCurrentThread( ) )
+        return entry;
+    }
+
+    /**
+     * Locks the file. This call is re-entrant. Each call on the same thread
+     * increases the hold count.
+     */
+    public static void lockFile( File file ) throws IOException
+    {
+        FileSync.FileEntry entry = getOrCreateEntry( file );
+
+        // First lock the reentrant lock
+        entry.lock.lock( );
+
+        // If this is not the first time this thread locked, then we know the file is locked
+        if ( entry.lock.getHoldCount( ) > 1 )
         {
-            entry.lock.lock( );
-            try
+            return;
+        }
+
+        // Next lock the file
+        try
+        {
+            while ( true )
             {
-                while ( true )
+                try
                 {
+                    entry.fileLock = entry.fileChannel.lock( );
+                    break;
+                }
+                catch ( OverlappingFileLockException e )
+                {
+                    // Another thread in the same JVM but with a different classloader
+                    // may have the file locked, without holding entry.lock -- in which
+                    // case, our lock attempt will throw an exception. The only way to
+                    // deal with this, AFAICT, is to spin.
+                    //
                     try
                     {
-                        entry.fileLock = entry.fileChannel.lock( );
-                        break;
+                        Thread.sleep( 10 );
                     }
-                    catch ( OverlappingFileLockException e )
+                    catch ( InterruptedException e2 )
                     {
-                        // Another thread in the same JVM but with a different classloader
-                        // may have the file locked, without holding entry.lock -- in which
-                        // case, our lock attempt will throw an exception. The only way to
-                        // deal with this, AFAICT, is to spin.
-                        //
-                        try { Thread.sleep( 10 ); } catch ( InterruptedException e2 ) { }
                     }
                 }
             }
-            finally
+        }
+        finally
+        {
+            if ( entry.fileLock == null )
             {
-                if ( entry.fileLock == null )
-                {
-                    entry.lock.unlock( );
-                }
+                entry.lock.unlock( );
             }
         }
     }
 
+    public static boolean isHeldByCurrentThread( File file )
+    {
+        FileSync.FileEntry entry;
+        synchronized ( fileEntries )
+        {
+            entry = fileEntries.get( file );
+        }
 
+        return entry != null && entry.lock.isHeldByCurrentThread( );
+    }
+
+    /**
+     * Unlocks the file. This call is re-entrant. Only when the calling thread
+     * has no more holds will the file be unlocked.
+     */
     public static void unlockFile( File file ) throws IOException
     {
         FileSync.FileEntry entry;
@@ -125,10 +160,16 @@ public class FileSync
             entry = fileEntries.get( file );
         }
 
-        if ( entry.lock.isHeldByCurrentThread( ) )
+        // Only unlock if we hold this lock
+        if ( entry != null && entry.lock.getHoldCount( ) > 0 )
         {
-            entry.fileLock.release( );
-            entry.fileLock = null;
+            // Only release the file if after this unlock we don't hold it anymore
+            if ( entry.lock.getHoldCount( ) == 1 )
+            {
+                entry.fileLock.release( );
+                entry.fileLock = null;
+            }
+
             entry.lock.unlock( );
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,12 @@ public class SortedDoublesArithmetic implements SortedDoubles
         double[] copy = new double[n];
         copyTo( 0, copy, 0, n );
         return copy;
+    }
+
+    @Override
+    public SortedDoublesArithmetic copy( )
+    {
+        return new SortedDoublesArithmetic( v0, vStep, n );
     }
 
     @Override

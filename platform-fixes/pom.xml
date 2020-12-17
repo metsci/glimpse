@@ -4,19 +4,17 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>CURRENT-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>glimpse-platform-fixes</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.metsci.glimpse</groupId>
             <artifactId>glimpse-util</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>

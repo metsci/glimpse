@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,8 @@ public interface DockingGroup
     void addViews( View... views );
 
     void addViews( Collection<View> views );
+
+    void selectView( View view );
 
     void closeView( View view );
 

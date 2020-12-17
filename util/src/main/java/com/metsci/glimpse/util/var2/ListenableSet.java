@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,9 +60,9 @@ public class ListenableSet implements Listenable
         return doHandleImmediateFlag( flags, listener, flags2 ->
         {
             DisposableGroup disposables = new DisposableGroup( );
-            if ( flags.contains( ONCE ) )
+            if ( flags2.contains( ONCE ) )
             {
-                Set<ListenerFlag> flags3 = setMinus( ImmutableSet.copyOf( flags ), ONCE );
+                Set<ListenerFlag> flags3 = setMinus( ImmutableSet.copyOf( flags2 ), ONCE );
                 Runnable listener2 = ( ) ->
                 {
                     listener.run( );

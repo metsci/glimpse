@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,13 +43,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GLAnimatorControl;
 import javax.swing.Icon;
 import javax.swing.JToolBar;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.jogamp.opengl.GLAnimatorControl;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.misc.UiUtils;
 import com.metsci.glimpse.util.var.ReadableVar;
@@ -240,7 +240,7 @@ public abstract class View
         }
         catch ( Exception e )
         {
-            // XXX: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
+            // TODO: Allow client code to pass in a custom exception handler (e.g. for showing a dialog box)
             logWarning( logger, "Failed to install a " + layer.getClass( ).getName( ) + " to a " + this.getClass( ).getName( ), e );
         }
 

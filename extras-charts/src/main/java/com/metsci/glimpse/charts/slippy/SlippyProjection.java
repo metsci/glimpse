@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.charts.slippy;
 
+import static java.lang.Math.PI;
+
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.KinematicVector2d;
 import com.metsci.glimpse.util.vector.Vector2d;
-
-import static java.lang.Math.PI;
 
 /**
  * See http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Java

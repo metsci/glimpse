@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@ import com.metsci.glimpse.util.primitives.FloatsArray;
  */
 public class SortedFloatsArray extends FloatsArray implements SortedFloatsModifiable
 {
-
-    // Instantiation
 
     /**
      * If the values of {@code a} are not in ascending order, the behavior of
@@ -84,8 +82,6 @@ public class SortedFloatsArray extends FloatsArray implements SortedFloatsModifi
     {
         super( xs );
     }
-
-    // Search
 
     @Override
     public int indexOf( float x )
@@ -307,14 +303,18 @@ public class SortedFloatsArray extends FloatsArray implements SortedFloatsModifi
         return hs;
     }
 
-    // Mutators
-
     @Override
     public int add( float v )
     {
         int i = indexAfter( v );
         insert( i, v );
         return i;
+    }
+
+    @Override
+    public SortedFloatsArray copy( )
+    {
+        return new SortedFloatsArray( this.a.clone( ), this.n );
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@ class VarTestUtils
         return new VarFiring<>( ongoing, value );
     }
 
-    public static <V> OldNewPairFiring<V> f( boolean ongoing, V vOld, V vNew )
+    public static <V> OldNewFiring<V> f( boolean ongoing, V vOld, V vNew )
     {
-        return new OldNewPairFiring<>( ongoing, vOld, vNew );
+        return new OldNewFiring<>( ongoing, vOld, vNew );
     }
 
 }

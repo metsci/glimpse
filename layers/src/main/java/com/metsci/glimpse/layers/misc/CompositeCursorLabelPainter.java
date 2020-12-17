@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,8 @@ import static java.lang.String.format;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.plot.MultiAxisPlot2D.AxisInfo;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D.AxisInfo;
 import com.metsci.glimpse.util.var.Disposable;
 
 public class CompositeCursorLabelPainter extends CursorLabelPainter

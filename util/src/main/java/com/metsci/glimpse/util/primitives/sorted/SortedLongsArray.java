@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@ import com.metsci.glimpse.util.primitives.LongsArray;
  */
 public class SortedLongsArray extends LongsArray implements SortedLongsModifiable
 {
-
-    // Instantiation
 
     /**
      * If the values of {@code a} are not in ascending order, the behavior of
@@ -84,8 +82,6 @@ public class SortedLongsArray extends LongsArray implements SortedLongsModifiabl
     {
         super( xs );
     }
-
-    // Search
 
     @Override
     public int indexOf( long x )
@@ -307,14 +303,18 @@ public class SortedLongsArray extends LongsArray implements SortedLongsModifiabl
         return hs;
     }
 
-    // Mutators
-
     @Override
     public int add( long v )
     {
         int i = indexAfter( v );
         insert( i, v );
         return i;
+    }
+
+    @Override
+    public SortedLongsArray copy( )
+    {
+        return new SortedLongsArray( this.a.clone( ), this.n );
     }
 
 }

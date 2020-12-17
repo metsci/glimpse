@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,9 @@
  */
 package com.metsci.glimpse.layers;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLRunnable;
-
-import com.metsci.glimpse.context.GlimpseContext;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLRunnable;
+import com.metsci.glimpse.core.context.GlimpseContext;
 
 /**
  * Just like {@link GLRunnable}, but takes a {@link GlimpseContext} instead of a {@link GLAutoDrawable}.

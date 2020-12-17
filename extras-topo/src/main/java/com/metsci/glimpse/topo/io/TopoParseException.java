@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,11 @@
  */
 package com.metsci.glimpse.topo.io;
 
-public class TopoParseException extends Exception
+import java.io.IOException;
+
+public class TopoParseException extends IOException
 {
+    private static final long serialVersionUID = -4186120642347734233L;
 
     public TopoParseException( String message )
     {

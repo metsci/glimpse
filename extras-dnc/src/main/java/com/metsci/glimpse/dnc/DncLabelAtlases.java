@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,22 +28,22 @@ package com.metsci.glimpse.dnc;
 
 import static com.jogamp.common.nio.Buffers.SIZEOF_FLOAT;
 import static com.jogamp.common.nio.Buffers.newDirectFloatBuffer;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
+import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
+import static com.metsci.glimpse.core.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.dnc.DncAtlases.createHostAtlas;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymLabelUtils.newLabelImage;
 import static com.metsci.glimpse.dnc.geosym.DncGeosymLabelUtils.toTextAttributes;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.poslim;
 import static com.metsci.glimpse.dnc.util.DncMiscUtils.sum;
-import static com.metsci.glimpse.gl.util.GLUtils.genTexture;
 import static com.metsci.glimpse.util.GeneralUtils.ints;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_CLAMP_TO_EDGE;
-import static javax.media.opengl.GL.GL_LINEAR;
-import static javax.media.opengl.GL.GL_STATIC_DRAW;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_S;
-import static javax.media.opengl.GL.GL_TEXTURE_WRAP_T;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -56,8 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL;
-
+import com.jogamp.opengl.GL;
 import com.metsci.glimpse.dnc.DncAtlases.DncAtlasEntry;
 import com.metsci.glimpse.dnc.DncAtlases.DncHostAtlas;
 import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;

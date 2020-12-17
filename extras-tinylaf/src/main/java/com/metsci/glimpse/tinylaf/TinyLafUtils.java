@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,19 @@ import static java.lang.Boolean.FALSE;
 import static java.util.logging.Level.WARNING;
 import static javax.swing.BorderFactory.createEmptyBorder;
 
+import java.awt.AWTError;
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.FontUIResource;
 
 import net.sf.tinylaf.Theme;
 import net.sf.tinylaf.TinyLookAndFeel;
@@ -46,7 +53,7 @@ public class TinyLafUtils
 
     public static void initTinyLaf( )
     {
-        initTinyLaf( TinyLafUtils.class.getClassLoader( ).getResource( "tinylaf/radiance.theme" ) );
+        initTinyLaf( TinyLafUtils.class.getResource( "radiance.theme" ) );
     }
 
     public static void initTinyLaf( URL themeUrl )
@@ -54,7 +61,11 @@ public class TinyLafUtils
         try
         {
             Theme.loadTheme( themeUrl );
-            UIManager.setLookAndFeel( new TinyLookAndFeel( ) );
+
+            TinyLookAndFeel laf = new TinyLookAndFeel( );
+            UIManager.setLookAndFeel( laf );
+
+            scaleFonts( laf );
 
             // TinyLaf uses text-area foreground color for option-pane foreground, which doesn't look right
             Color fgColor = UIManager.getColor( "Label.foreground" );
@@ -68,6 +79,9 @@ public class TinyLafUtils
 
             // TinyLaf progress bars look dated
             UIManager.put( "ProgressBarUI", TinyProgressBarUI2.class.getName( ) );
+
+            // TinyLaf table rows don't adjust
+            UIManager.put( "TableUI", TinyTableUI2.class.getName( ) );
 
             // TinyLaf top-level menus need tweaking
             UIManager.put( "MenuUI", TinyMenuUI2.class.getName( ) );
@@ -85,4 +99,56 @@ public class TinyLafUtils
         }
     }
 
+    private static void scaleFonts( LookAndFeel laf )
+    {
+        float scale = getDesktopTextScaling( );
+        if ( scale == 1 )
+        {
+            return;
+        }
+
+        Enumeration<Object> keysItr = laf.getDefaults( ).keys( );
+        Map<Object, Object> toChange = new HashMap<>( );
+        while ( keysItr.hasMoreElements( ) )
+        {
+            Object key = keysItr.nextElement( );
+            Object value = laf.getDefaults( ).getFont( key );
+
+            // only scale fonts
+            if ( value instanceof FontUIResource && !toChange.containsKey( key ) )
+            {
+                FontUIResource r = ( FontUIResource ) value;
+                toChange.put( key, new FontUIResource( r.deriveFont( r.getSize( ) * scale ) ) );
+            }
+        }
+
+        toChange.forEach( UIManager::put );
+    }
+
+    /**
+     * Gets the text-scaling parameter which is often used to adjust for HiDPI displays on Windows and Linux.
+     */
+    public static float getDesktopTextScaling( )
+    {
+        try
+        {
+            // Works for GTK font-scaling
+            Object dpiProp = Toolkit.getDefaultToolkit( ).getDesktopProperty( "gnome.Xft/DPI" );
+            if ( dpiProp instanceof Number )
+            {
+                // Don't know why it's multiplied by 1024
+                int dpi = ( ( Number ) dpiProp ).intValue( ) / 1024;
+                if ( dpi != 96 )
+                {
+                    return dpi / 96.0f;
+                }
+            }
+        }
+        catch ( AWTError ex )
+        {
+            // ignore
+        }
+
+        return 1;
+    }
 }

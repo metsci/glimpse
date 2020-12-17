@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  */
 package com.metsci.glimpse.util.io;
 
-import static com.metsci.glimpse.util.io.MappedBufferStats.*;
-import static com.metsci.glimpse.util.io.MappedFile.*;
+import static com.metsci.glimpse.util.io.MappedBufferStats.addToMappedBufferStats;
+import static com.metsci.glimpse.util.io.MappedFile.getFileDescriptorForMapping;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -45,7 +45,7 @@ public class FileMapperWindows64 implements FileMapper
     {
         try
         {
-            URL resourceUrl = MappedFile.class.getClassLoader( ).getResource( "MappedFile/FileMapperWindows64.dll" );
+            URL resourceUrl = MappedFile.class.getResource( "FileMapperWindows64.dll" );
 
             File tempDir = FileUtils.createTempDir( "MappedFile" );
             File tempFile = new File( tempDir, "FileMapperWindows64.dll" );

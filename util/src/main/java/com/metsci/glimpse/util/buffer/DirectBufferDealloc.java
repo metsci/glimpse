@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,18 @@
  */
 package com.metsci.glimpse.util.buffer;
 
-import java.lang.reflect.InvocationTargetException;
+import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
+import static com.metsci.glimpse.util.ugly.ModuleAccessChecker.expectDeepReflectiveAccess;
+import static com.metsci.glimpse.util.ugly.UglyUtils.findClass;
+
 import java.lang.reflect.Method;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collection;
+import java.util.logging.Logger;
+
+import com.metsci.glimpse.util.ThrowingSupplier;
 
 /**
  * Uses non-public APIs (e.g. via reflection) to free the off-heap memory that
@@ -37,47 +45,127 @@ import java.util.Collection;
  * the garbage collector finalizes the direct buffer. This delay causes problems
  * when a lot of off-heap memory is used, but garbage collections are infrequent.
  * <p>
- * Currently only works for Oracle and OpenJDK, but could probably be extended to
- * others.
+ * Works on Oracle/OpenJDK 8 JVMs.
+ * <p>
+ * Works on OpenJDK 9+ JVMs, but requires the following JVM args:
+ * <pre>
+ * --add-opens java.base/sun.nio.ch=com.metsci.glimpse.util
+ * --add-opens java.base/jdk.internal.ref=com.metsci.glimpse.util
+ * </pre>
  * <p>
  * <strong><em>Use with caution.</em></strong> Deallocating a buffer inappropriately
- * can crash the JVM, or worse.
+ * can crash the JVM (or even worse, conceivably).
  */
 public class DirectBufferDealloc
 {
-
-    protected static final Class<?> directBufferClass;
-    protected static final Method getCleanerMethod;
-    protected static final Method getAttachmentMethod;
-
-    protected static final Class<?> cleanerClass;
-    protected static final Method doCleanMethod;
+    private static final Logger logger = getLogger( DirectBufferDealloc.class );
 
     static
     {
-        try
-        {
-            directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
-            getCleanerMethod = directBufferClass.getMethod( "cleaner" );
-            getAttachmentMethod = directBufferClass.getMethod( "attachment" );
+        expectDeepReflectiveAccess( DirectBufferDealloc.class, "java.base", "sun.nio.ch" );
+        expectDeepReflectiveAccess( DirectBufferDealloc.class, "java.base", "jdk.internal.ref" );
+    }
 
-            cleanerClass = Class.forName( "sun.misc.Cleaner" );
-            doCleanMethod = cleanerClass.getMethod( "clean" );
-        }
-        catch ( ClassNotFoundException | NoSuchMethodException e )
+    public static void checkModuleAccess( )
+    {
+        // This method provides a way to explicitly trigger the static initializer
+    }
+
+    protected static interface Impl
+    {
+        void deallocate( Buffer buffer ) throws Exception;
+    }
+
+    protected static class NoopImpl implements Impl
+    {
+        @Override
+        public void deallocate( Buffer buffer ) throws Exception
         {
-            throw new RuntimeException( e );
+            // Do nothing
+        }
+
+        @Override
+        public String toString( )
+        {
+            return "DirectBufferDealloc impl NOOP stub for unsupported JVMs";
         }
     }
 
-    public static void deallocateDirectBuffers( Collection<? extends Buffer> directBuffers )
+    protected static class OpenJdkImpl implements Impl
     {
-        if ( directBuffers != null )
+        private final Method getCleanerMethod;
+        private final Method getAttachmentMethod;
+        private final Class<?> cleanerClass;
+        private final Method doCleanMethod;
+
+        public OpenJdkImpl( ) throws Exception
         {
-            for ( Buffer b : directBuffers )
+            Class<?> directBufferClass = Class.forName( "sun.nio.ch.DirectBuffer" );
+            this.getCleanerMethod = directBufferClass.getMethod( "cleaner" );
+            this.getAttachmentMethod = directBufferClass.getMethod( "attachment" );
+
+            this.cleanerClass = findClass( "jdk.internal.ref.Cleaner", "sun.misc.Cleaner" );
+            this.doCleanMethod = cleanerClass.getMethod( "clean" );
+        }
+
+        @Override
+        public void deallocate( Buffer buffer ) throws Exception
+        {
+            if ( buffer.isDirect( ) )
             {
-                deallocateDirectBuffer0( b );
+                Object cleaner = this.getCleanerMethod.invoke( buffer );
+                Object attachment = this.getAttachmentMethod.invoke( buffer );
+
+                if ( this.cleanerClass.isInstance( cleaner ) )
+                {
+                    this.doCleanMethod.invoke( cleaner );
+                }
+
+                if ( attachment instanceof Buffer )
+                {
+                    this.deallocate( ( Buffer ) attachment );
+                }
             }
+        }
+
+        @Override
+        public String toString( )
+        {
+            return "DirectBufferDealloc impl for Oracle/OpenJDK 8 JVMs, and OpenJDK 9+ JVMs (JVM args required -- see javadocs)";
+        }
+    }
+
+    protected static final Impl impl = chooseImpl( OpenJdkImpl::new );
+
+    @SafeVarargs
+    protected static Impl chooseImpl( ThrowingSupplier<? extends Impl>... suppliers )
+    {
+        FloatBuffer testBuffer = ByteBuffer.allocateDirect( 8 ).asFloatBuffer( );
+        for ( ThrowingSupplier<? extends Impl> supplier : suppliers )
+        {
+            try
+            {
+                Impl impl = supplier.get( );
+                impl.deallocate( testBuffer );
+                return impl;
+            }
+            catch ( Exception e )
+            { }
+        }
+
+        logger.severe( "DirectBuffer dealloc is not supported on this JVM -- deallocation requests will be ignored" );
+        return new NoopImpl( );
+    }
+
+    public static void deallocateDirectBuffer( Buffer directBuffer )
+    {
+        try
+        {
+            impl.deallocate( directBuffer );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( e );
         }
     }
 
@@ -87,34 +175,18 @@ public class DirectBufferDealloc
         {
             for ( Buffer b : directBuffers )
             {
-                deallocateDirectBuffer0( b );
+                deallocateDirectBuffer( b );
             }
         }
     }
 
-    public static void deallocateDirectBuffer( Buffer directBuffer )
+    public static void deallocateDirectBuffers( Collection<? extends Buffer> directBuffers )
     {
-        deallocateDirectBuffer0( directBuffer );
-    }
-
-    public static void deallocateDirectBuffer0( Object directBuffer )
-    {
-        if ( directBufferClass.isInstance( directBuffer ) )
+        if ( directBuffers != null )
         {
-            try
+            for ( Buffer b : directBuffers )
             {
-                Object cleaner = getCleanerMethod.invoke( directBuffer );
-                if ( cleanerClass.isInstance( cleaner ) )
-                {
-                    doCleanMethod.invoke( cleaner );
-                }
-
-                Object attachment = getAttachmentMethod.invoke( directBuffer );
-                deallocateDirectBuffer0( attachment );
-            }
-            catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e )
-            {
-                throw new RuntimeException( e );
+                deallocateDirectBuffer( b );
             }
         }
     }

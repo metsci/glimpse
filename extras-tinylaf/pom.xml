@@ -4,19 +4,17 @@
     <parent>
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
-        <version>CURRENT-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>glimpse-extras-tinylaf</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>net.sf.tinylaf</groupId>
             <artifactId>tinylaf</artifactId>
             <version>1.4.0</version>
         </dependency>
-
     </dependencies>
 
 </project>

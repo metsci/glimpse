@@ -27,7 +27,7 @@
  */
 package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
-import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.GL2GL3;
 
 /**
  * Uniform for a {@code vec4}.

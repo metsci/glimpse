@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,5 +94,8 @@ public interface ObjectsModifiable extends Objects
     void ensureCapacity( int minCapacity );
 
     void compact( );
+
+    @Override
+    ObjectsModifiable copy( );
 
 }

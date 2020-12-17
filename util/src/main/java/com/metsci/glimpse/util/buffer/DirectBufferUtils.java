@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,12 @@
  */
 package com.metsci.glimpse.util.buffer;
 
-import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.*;
-import static java.lang.Math.*;
-import static java.nio.ByteBuffer.*;
-import static java.nio.ByteOrder.*;
+import static com.metsci.glimpse.util.buffer.DirectBufferDealloc.deallocateDirectBuffers;
+import static java.lang.Math.ceil;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.nio.ByteBuffer.allocateDirect;
+import static java.nio.ByteOrder.nativeOrder;
 
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;

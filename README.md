@@ -7,7 +7,6 @@ Glimpse is a library for building dynamic, interactive Java applications for vis
 There's lots of information available at http://glimpse.metsci.com including:
 
 * [Video](http://metsci.github.com/glimpse/videos.html)
-* [Web Start Demo](http://metsci.github.com/glimpse/webstart.html)
 * [Screenshots](http://metsci.github.com/glimpse/screenshots.html)
 * [Getting Started Guide](http://metsci.github.com/glimpse/guide.html)
 * [Discussion Forums](https://groups.google.com/forum/?fromgroups#!forum/metsci-glimpse)

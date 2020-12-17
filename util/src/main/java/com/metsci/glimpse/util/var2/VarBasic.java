@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ package com.metsci.glimpse.util.var2;
 
 import static com.google.common.base.Objects.equal;
 import static com.metsci.glimpse.util.var.Txn.addToActiveTxn;
-import static com.metsci.glimpse.util.var2.VarUtils.doAddPairListener;
+import static com.metsci.glimpse.util.var2.VarUtils.doAddActivityListener;
 import static com.metsci.glimpse.util.var2.VarUtils.doHandleImmediateFlag;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListenable;
 import static com.metsci.glimpse.util.var2.VarUtils.filterListener;
@@ -163,12 +163,12 @@ public class VarBasic<V> implements Var<V>
     }
 
     @Override
-    public Disposable addListener( Set<? extends ListenerFlag> flags, ListenablePairListener listener )
+    public Disposable addListener( Set<? extends ListenerFlag> flags, ActivityListener listener )
     {
         return doHandleImmediateFlag( flags, listener, flags2 ->
         {
-            ListenablePairListener listener2 = filterListener( listener, this::v );
-            return doAddPairListener( this.ongoingRaw, this.completedRaw, flags2, listener2 );
+            ActivityListener listener2 = filterListener( listener, this::v );
+            return doAddActivityListener( this.ongoingRaw, this.completedRaw, flags2, listener2 );
         } );
     }
 

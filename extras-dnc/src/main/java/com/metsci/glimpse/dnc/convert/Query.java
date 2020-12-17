@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.io.Files;
+import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 import com.metsci.glimpse.dnc.DncCoverage;
 import com.metsci.glimpse.dnc.DncLibrary;
-import com.metsci.glimpse.dnc.DncChunks.DncChunkKey;
 
 public class Query
 {

@@ -45,6 +45,9 @@ Session.vim
 # HotSpot
 hs_err*.log
 
+# Git
+*.bundle
+
 # Glimpse Specific
 ignore-strings
 results-filtered

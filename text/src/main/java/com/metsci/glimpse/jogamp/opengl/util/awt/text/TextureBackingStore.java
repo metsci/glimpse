@@ -38,7 +38,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 /**
  * Wrapper for an OpenGL texture that can be drawn into.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,17 @@
  */
 package com.metsci.glimpse.dnc;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 public class DncLineProgram
 {
 
-    public static final String dncLineVertShader_GLSL = requireResourceText( "shaders/DncPainter/line.vs" );
-    public static final String dncLineGeomShader_GLSL = requireResourceText( "shaders/DncPainter/line.gs" );
-    public static final String dncLineFragShader_GLSL = requireResourceText( "shaders/DncPainter/line.fs" );
-
+    public static final String dncLineVertShader_GLSL = requireText( DncLineProgram.class.getResource( "shaders/line.vs" ) );
+    public static final String dncLineGeomShader_GLSL = requireText( DncLineProgram.class.getResource( "shaders/line.gs" ) );
+    public static final String dncLineFragShader_GLSL = requireText( DncLineProgram.class.getResource( "shaders/line.fs" ) );
 
     public static class DncLineProgramHandles
     {
@@ -79,9 +78,7 @@ public class DncLineProgram
         }
     }
 
-
     protected DncLineProgramHandles handles;
-
 
     public DncLineProgram( )
     {

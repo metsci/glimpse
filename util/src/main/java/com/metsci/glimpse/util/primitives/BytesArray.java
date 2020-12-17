@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,6 +145,12 @@ public class BytesArray implements BytesModifiable
     }
 
     @Override
+    public BytesArray copy( )
+    {
+        return new BytesArray( this.a.clone( ), this.n );
+    }
+
+    @Override
     public String string( )
     {
         return new String( a, 0, n, utf8 );
@@ -224,7 +230,7 @@ public class BytesArray implements BytesModifiable
         insert( i, s, 0, s.length( ) );
     }
 
-    // XXX: Test me!
+    // FIXME: Test me!
     @Override
     public void insert( int i, String s, int from, int to )
     {

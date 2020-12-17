@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,27 +26,26 @@
  */
 package com.metsci.glimpse.layers.misc;
 
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.createProgram;
-import static com.metsci.glimpse.gl.shader.GLShaderUtils.requireResourceText;
-import static com.metsci.glimpse.gl.util.GLUtils.defaultVertexAttributeArray;
-import static javax.media.opengl.GL.GL_ARRAY_BUFFER;
-import static javax.media.opengl.GL.GL_FLOAT;
-import static javax.media.opengl.GL.GL_TEXTURE0;
-import static javax.media.opengl.GL.GL_TEXTURE_2D;
-import static javax.media.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
+import static com.metsci.glimpse.core.gl.shader.GLShaderUtils.createProgram;
+import static com.metsci.glimpse.core.gl.util.GLUtils.defaultVertexAttributeArray;
+import static com.metsci.glimpse.util.io.IoUtils.requireText;
 
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2ES3;
-
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.util.texture.Texture;
-import com.metsci.glimpse.context.GlimpseBounds;
-import com.metsci.glimpse.gl.GLEditableBuffer;
+import com.metsci.glimpse.core.context.GlimpseBounds;
+import com.metsci.glimpse.core.gl.GLEditableBuffer;
 
 public class CursorLabelProgram
 {
 
-    public static final String cursorLabelVertShader_GLSL = requireResourceText( "CursorLabelProgram/cursorLabel.vs" );
-    public static final String cursorLabelFragShader_GLSL = requireResourceText( "CursorLabelProgram/cursorLabel.fs" );
+    public static final String cursorLabelVertShader_GLSL = requireText( CursorLabelProgram.class.getResource( "shader/cursorLabel.vs" ) );
+    public static final String cursorLabelFragShader_GLSL = requireText( CursorLabelProgram.class.getResource( "shader/cursorLabel.fs" ) );
 
 
     public static class CursorLabelProgramHandles

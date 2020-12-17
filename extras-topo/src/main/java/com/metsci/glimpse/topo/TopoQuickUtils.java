@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,19 @@
  */
 package com.metsci.glimpse.topo;
 
-import static com.metsci.glimpse.axis.UpdateMode.CenterScale;
+import static com.metsci.glimpse.core.axis.UpdateMode.CenterScale;
 import static com.metsci.glimpse.util.GeneralUtils.floats;
 import static com.metsci.glimpse.util.math.MathConstants.HALF_PI;
 import static java.lang.Math.PI;
 
-import com.metsci.glimpse.axis.Axis1D;
-import com.metsci.glimpse.axis.Axis2D;
-import com.metsci.glimpse.axis.WrappedAxis1D;
-import com.metsci.glimpse.painter.base.GlimpsePainter;
-import com.metsci.glimpse.painter.decoration.BackgroundPainter;
-import com.metsci.glimpse.painter.decoration.BorderPainter;
-import com.metsci.glimpse.painter.group.WrappedPainter;
-import com.metsci.glimpse.plot.MultiAxisPlot2D;
+import com.metsci.glimpse.core.axis.Axis1D;
+import com.metsci.glimpse.core.axis.Axis2D;
+import com.metsci.glimpse.core.axis.WrappedAxis1D;
+import com.metsci.glimpse.core.painter.base.GlimpsePainter;
+import com.metsci.glimpse.core.painter.decoration.BackgroundPainter;
+import com.metsci.glimpse.core.painter.decoration.BorderPainter;
+import com.metsci.glimpse.core.painter.group.WrappedPainter;
+import com.metsci.glimpse.core.plot.MultiAxisPlot2D;
 import com.metsci.glimpse.topo.io.TopoDataset;
 import com.metsci.glimpse.topo.proj.EquirectNormalCylindricalProjection;
 import com.metsci.glimpse.topo.proj.MercatorNormalCylindricalProjection;
@@ -90,7 +90,7 @@ public class TopoQuickUtils
 
     public static GlimpsePainter createTopoPainter( TopoDataset topoDataset, NormalCylindricalProjection proj )
     {
-        // FIXME: Awkward
+        // TODO: Make this less awkward
         if ( proj instanceof EquirectNormalCylindricalProjection )
         {
             return new EquirectTopoPainter( topoDataset, ( EquirectNormalCylindricalProjection ) proj );

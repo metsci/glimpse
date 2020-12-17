@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,6 +134,12 @@ public class SortedIntsArithmetic implements SortedInts
         int[] copy = new int[n];
         copyTo( 0, copy, 0, n );
         return copy;
+    }
+
+    @Override
+    public SortedIntsArithmetic copy( )
+    {
+        return new SortedIntsArithmetic( v0, vStep, n );
     }
 
     @Override

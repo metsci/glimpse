@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,6 +128,12 @@ public class FloatsArray implements FloatsModifiable
         float[] copy = new float[n];
         System.arraycopy( a, 0, copy, 0, n );
         return copy;
+    }
+
+    @Override
+    public FloatsArray copy( )
+    {
+        return new FloatsArray( this.a.clone( ), this.n );
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,14 @@
  */
 package com.metsci.glimpse.examples.layers;
 
+import static com.metsci.glimpse.core.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.examples.layers.ExampleTrait.addExampleLinkage;
 import static com.metsci.glimpse.layers.FpsOption.FPS;
 import static com.metsci.glimpse.layers.geo.GeoTrait.addGeoLinkage;
 import static com.metsci.glimpse.layers.time.TimeTrait.addTimeLinkage;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.addTimeZoneLinkage;
-import static com.metsci.glimpse.support.QuickUtils.initStandardGlimpseApp;
 import static com.metsci.glimpse.tinylaf.TinyLafUtils.initTinyLaf;
-import static com.metsci.glimpse.util.logging.LoggerUtils.initializeLogging;
+import static com.metsci.glimpse.util.logging.LoggerUtils.initLogging;
 import static com.metsci.glimpse.util.units.Angle.normalizeAngle360;
 
 import java.time.ZoneId;
@@ -41,14 +41,14 @@ import java.util.Random;
 
 import javax.swing.SwingUtilities;
 
+import com.metsci.glimpse.core.plot.timeline.data.Epoch;
+import com.metsci.glimpse.core.support.color.GlimpseColor;
 import com.metsci.glimpse.layers.LayeredGui;
 import com.metsci.glimpse.layers.geo.GeoTrait;
 import com.metsci.glimpse.layers.geo.GeoView;
 import com.metsci.glimpse.layers.time.TimeTrait;
 import com.metsci.glimpse.layers.time.TimeZoneTrait;
 import com.metsci.glimpse.layers.time.TimelineView;
-import com.metsci.glimpse.plot.timeline.data.Epoch;
-import com.metsci.glimpse.support.color.GlimpseColor;
 import com.metsci.glimpse.util.geo.LatLonGeo;
 import com.metsci.glimpse.util.geo.projection.GeoProjection;
 import com.metsci.glimpse.util.geo.projection.TangentPlane;
@@ -65,11 +65,7 @@ public class LayeredExample
     {
         SwingUtilities.invokeLater( ( ) ->
         {
-
-            // Typical preamble for Swing/Glimpse
-            //
-
-            initializeLogging( "LayeredExample/logging.properties" );
+            initLogging( LayeredExample.class.getResource( "config/logging.properties" ) );
             initTinyLaf( );
             initStandardGlimpseApp( );
 
@@ -81,7 +77,7 @@ public class LayeredExample
             GeoTrait geoTemplate = new GeoTrait( false, proj );
             geoTemplate.setProjectedBounds( Length::fromNauticalMiles, -2, +2, -2, +2 );
             geoTemplate.setSelectionSize( Length::fromNauticalMiles, 0.4 );
-            // WIP: Specify axis units for display
+            // TODO: Specify axis units for display
 
             Epoch epoch = new Epoch( TimeStamp.fromString( "2016-01-01T00:00:00Z" ) );
             TimeTrait timeTemplate = new TimeTrait( false, epoch );
@@ -118,8 +114,8 @@ public class LayeredExample
 
                 if ( r.nextDouble( ) < 0.1 )
                 {
-                    speedA_SU = Speed.fromKnots( 4.0 + 2.0*r.nextDouble( ) );
-                    courseA_NAVDEG = normalizeAngle360( courseA_NAVDEG - 30.0 + 60.0*r.nextDouble( ) );
+                    speedA_SU = Speed.fromKnots( 4.0 + 2.0 * r.nextDouble( ) );
+                    courseA_NAVDEG = normalizeAngle360( courseA_NAVDEG - 30.0 + 60.0 * r.nextDouble( ) );
                 }
 
                 if ( r.nextDouble( ) < 0.003 )
@@ -131,10 +127,10 @@ public class LayeredExample
                 double courseA_SU = Azimuth.fromNavDeg( courseA_NAVDEG );
                 latlonA = latlonA.displacedBy( distanceA_SU, courseA_SU );
 
-                double errorDistance_SU = Length.fromNauticalMiles( 0.03*r.nextDouble( ) );
+                double errorDistance_SU = Length.fromNauticalMiles( 0.03 * r.nextDouble( ) );
                 double errorDirection_SU = Azimuth.fromNavDeg( 360.0 * r.nextDouble( ) );
                 LatLonGeo latlonB = latlonA.displacedBy( errorDistance_SU, errorDirection_SU );
-                double zB_SU = zA_SU + Length.fromFeet( -5.0 + 10.0*r.nextDouble( ) );
+                double zB_SU = zA_SU + Length.fromFeet( -5.0 + 10.0 * r.nextDouble( ) );
 
                 exampleLayerA.addPoint( new ExamplePoint( time_PMILLIS, latlonA, zA_SU ) );
                 exampleLayerB.addPoint( new ExamplePoint( time_PMILLIS, latlonB, zB_SU ) );
@@ -145,7 +141,7 @@ public class LayeredExample
             //
 
             LayeredGui gui = new LayeredGui( "Layered Example", FPS( 30 ) );
-            gui.arrange( "LayeredExample", "LayeredExample/docking-defaults.xml" );
+            gui.arrange( "LayeredExample", LayeredExample.class.getResource( "config/docking-defaults.xml" ) );
 
             addGeoLinkage( gui, "Geo Defaults", geoTemplate );
             addTimeLinkage( gui, "Time Defaults", timeTemplate );
@@ -161,27 +157,25 @@ public class LayeredExample
             gui.setVisible( true );
 
 
+            /*
+            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
+            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
+            exec.schedule( ( ) ->
+            {
+                SwingUtilities.invokeLater( ( ) ->
+                {
 
-//            ThreadFactory threadFactory = new ThreadFactoryBuilder( ).setThreadFactory( Executors.defaultThreadFactory( ) ).setDaemon( true ).build( );
-//            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor( threadFactory );
-//            exec.schedule( ( ) ->
-//            {
-//                SwingUtilities.invokeLater( ( ) ->
-//                {
-//
-//                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
-//                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
-//                    geoTrait2.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
-//
-//                    GeoView geo2 = new GeoView( );
-//                    gui.addView( geo2 );
-//                    GeoTrait.setGeoTrait( geo2, geoTrait2 );
-//
-//                } );
-//            }, 5, TimeUnit.SECONDS );
+                    GeoProjection proj2 = new TangentPlane( LatLonGeo.fromDeg( 30.0, -76.0 ) );
+                    GeoTrait geoTrait2 = new GeoTrait( false, proj2 );
+                    geoTrait2.setProjectedBounds( Length::fromNauticalMiles, -10, +10, -10, +10 );
 
+                    GeoView geo2 = new GeoView( );
+                    gui.addView( geo2 );
+                    GeoTrait.setGeoTrait( geo2, geoTrait2 );
 
-
+                } );
+            }, 5, TimeUnit.SECONDS );
+            */
 
         } );
     }

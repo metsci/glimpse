@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,12 @@
  */
 package com.metsci.glimpse.layers.time;
 
+import static com.jogamp.opengl.GLProfile.GL3;
+import static com.metsci.glimpse.core.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.docking.DockingUtils.requireIcon;
 import static com.metsci.glimpse.layers.time.TimeTrait.requireTimeTrait;
 import static com.metsci.glimpse.layers.time.TimeZoneTrait.requireTimeZoneTrait;
-import static com.metsci.glimpse.painter.info.SimpleTextPainter.HorizontalPosition.Right;
 import static com.metsci.glimpse.util.PredicateUtils.notNull;
-import static javax.media.opengl.GLProfile.GL3;
 
 import java.time.ZoneId;
 import java.util.Collection;
@@ -40,22 +40,22 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
-import javax.media.opengl.GLProfile;
 import javax.swing.Icon;
 
 import com.google.common.collect.ImmutableSet;
-import com.metsci.glimpse.axis.painter.label.AxisUnitConverter;
-import com.metsci.glimpse.axis.painter.label.AxisUnitConverters;
-import com.metsci.glimpse.axis.tagged.TaggedAxisMouseListener1D;
-import com.metsci.glimpse.context.GlimpseContext;
+import com.jogamp.opengl.GLProfile;
+import com.metsci.glimpse.core.axis.painter.label.AxisUnitConverter;
+import com.metsci.glimpse.core.axis.painter.label.AxisUnitConverters;
+import com.metsci.glimpse.core.axis.tagged.TaggedAxisMouseListener1D;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.painter.decoration.GridPainter;
+import com.metsci.glimpse.core.painter.info.SimpleTextPainter;
+import com.metsci.glimpse.core.plot.timeline.CollapsibleTimePlot2D;
+import com.metsci.glimpse.core.plot.timeline.event.EventPlotInfo;
+import com.metsci.glimpse.core.plot.timeline.layout.TimePlotInfo;
+import com.metsci.glimpse.core.support.font.FontUtils;
 import com.metsci.glimpse.layers.GlimpseCanvasView;
 import com.metsci.glimpse.layers.ViewOption;
-import com.metsci.glimpse.painter.decoration.GridPainter;
-import com.metsci.glimpse.painter.info.SimpleTextPainter;
-import com.metsci.glimpse.plot.timeline.CollapsibleTimePlot2D;
-import com.metsci.glimpse.plot.timeline.event.EventPlotInfo;
-import com.metsci.glimpse.plot.timeline.layout.TimePlotInfo;
-import com.metsci.glimpse.support.font.FontUtils;
 import com.metsci.glimpse.util.var.Var;
 
 public class TimelineView extends GlimpseCanvasView
@@ -86,7 +86,7 @@ public class TimelineView extends GlimpseCanvasView
     @Override
     public Icon getIcon( )
     {
-        return requireIcon( "open-icons/time.png" );
+        return requireIcon( TimelineView.class.getResource( "icons/openicon/time.png" ) );
     }
 
     @Override

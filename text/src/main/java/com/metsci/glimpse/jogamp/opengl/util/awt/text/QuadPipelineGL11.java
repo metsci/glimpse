@@ -29,8 +29,8 @@ package com.metsci.glimpse.jogamp.opengl.util.awt.text;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * {@link QuadPipeline} for use with OpenGL 1.1.

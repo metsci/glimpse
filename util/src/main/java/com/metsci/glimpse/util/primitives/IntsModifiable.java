@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,5 +108,8 @@ public interface IntsModifiable extends Ints
     void ensureCapacity( int minCapacity );
 
     void compact( );
+
+    @Override
+    IntsModifiable copy( );
 
 }

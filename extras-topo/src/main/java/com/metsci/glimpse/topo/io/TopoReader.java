@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ public class TopoReader
 {
     private static final Logger logger = getLogger( TopoReader.class );
 
-    public static TopoDataset readTopoDataset( File dir ) throws IOException, TopoParseException
+    public static TopoDataset readTopoDataset( File dir ) throws IOException
     {
         List<TopoDataFile> levels = new ArrayList<>( );
 
@@ -76,7 +76,7 @@ public class TopoReader
         return new TopoDataset( levels );
     }
 
-    public static TopoDataFile readTopoLevel( File dataFile ) throws IOException, TopoParseException
+    public static TopoDataFile readTopoLevel( File dataFile ) throws IOException
     {
         File hdrFile = siblingFile( dataFile, "hdr" );
         if ( hdrFile.isFile( ) )
@@ -129,7 +129,7 @@ public class TopoReader
         return sibling;
     }
 
-    public static TopoDataFile readTopoLevelWithFileHeader( File dataFile, File hdrFile ) throws IOException, TopoParseException
+    public static TopoDataFile readTopoLevelWithFileHeader( File dataFile, File hdrFile ) throws IOException
     {
         Map<String,String> header = readTopoHdrFile( hdrFile );
 
@@ -262,7 +262,7 @@ public class TopoReader
         }
     }
 
-    public static TopoDataFile readTopoLevelWithGuessedHeader( File dataFile ) throws IOException, TopoParseException
+    public static TopoDataFile readTopoLevelWithGuessedHeader( File dataFile ) throws IOException
     {
         if ( !dataFile.isFile( ) )
         {

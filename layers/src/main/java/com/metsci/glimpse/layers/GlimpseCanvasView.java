@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Metron, Inc.
+ * Copyright (c) 2020, Metron, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +28,15 @@ package com.metsci.glimpse.layers;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Objects.equal;
-import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLRendererString;
-import static com.metsci.glimpse.gl.util.GLCapabilityUtils.getGLVersionString;
+import static com.jogamp.opengl.GLContext.CONTEXT_NOT_CURRENT;
+import static com.metsci.glimpse.core.gl.util.GLCapabilityUtils.getGLRendererString;
+import static com.metsci.glimpse.core.gl.util.GLCapabilityUtils.getGLVersionString;
+import static com.metsci.glimpse.core.support.DisposableUtils.onGLDispose;
+import static com.metsci.glimpse.core.support.DisposableUtils.onGLInit;
 import static com.metsci.glimpse.layers.misc.UiUtils.ensureAnimating;
 import static com.metsci.glimpse.layers.misc.UiUtils.requireSwingThread;
-import static com.metsci.glimpse.support.DisposableUtils.onGLDispose;
-import static com.metsci.glimpse.support.DisposableUtils.onGLInit;
 import static com.metsci.glimpse.util.logging.LoggerUtils.getLogger;
 import static com.metsci.glimpse.util.logging.LoggerUtils.logInfo;
-import static javax.media.opengl.GLContext.CONTEXT_NOT_CURRENT;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -46,13 +46,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.media.opengl.GLAnimatorControl;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
 
-import com.metsci.glimpse.context.GlimpseContext;
-import com.metsci.glimpse.support.swing.NewtSwingEDTGlimpseCanvas;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
+import com.metsci.glimpse.core.context.GlimpseContext;
+import com.metsci.glimpse.core.support.swing.NewtSwingEDTGlimpseCanvas;
 
 public abstract class GlimpseCanvasView extends View
 {
@@ -203,10 +203,8 @@ public abstract class GlimpseCanvasView extends View
         if ( this.canvas != null )
         {
             this.animator.remove( this.canvas.getGLDrawable( ) );
-
-            this.canvas.getCanvas( ).setNEWTChild( null );
-            this.canvasParent.remove( this.canvas );
             this.canvas.destroy( );
+            this.canvasParent.remove( this.canvas );
             this.canvas = null;
         }
     }
