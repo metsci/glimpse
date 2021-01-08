@@ -334,9 +334,10 @@ public class ShadedReliefTileCache
     {
         cacheFile.getParentFile( ).mkdirs( );
         RandomAccessFile rf = new RandomAccessFile( cacheFile, "rw" );
+        File lockFile = new File( cacheFile.getParentFile( ), ".lock" );
 
         // Get an exclusive lock while writing
-        lockFile( cacheFile );
+        lockFile( lockFile );
 
         try
         {
@@ -359,7 +360,7 @@ public class ShadedReliefTileCache
         }
         finally
         {
-            unlockFile( cacheFile );
+            unlockFile( lockFile );
             rf.close( );
         }
     }
