@@ -6,6 +6,7 @@
         <groupId>com.metsci.glimpse</groupId>
         <artifactId>glimpse-parent</artifactId>
         <version>4.0.0-rc05</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>glimpse-full-assembly</artifactId>
@@ -47,11 +48,12 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                             <includeScope>compile</includeScope>
                             <classifier>sources</classifier>
                             <outputDirectory>${project.build.directory}/sources</outputDirectory>
                             <includeGroupIds>com.metsci.glimpse</includeGroupIds>
+                            <!-- TODO: Get maven-javadoc-plugin working on multi-module sources -->
+                            <excludes>module-info.java</excludes>
                         </configuration>
                     </execution>
                 </executions>
@@ -66,10 +68,7 @@
                             <goal>javadoc</goal>
                         </goals>
                         <configuration>
-                            <show>public</show>
-                            <maxmemory>2056m</maxmemory>
                             <sourcepath>${project.build.directory}/sources</sourcepath>
-                            <doctitle>Glimpse Data Visualization Library</doctitle>
                         </configuration>
                     </execution>
                 </executions>
