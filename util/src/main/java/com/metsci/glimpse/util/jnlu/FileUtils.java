@@ -96,11 +96,18 @@ public class FileUtils
      * process attempts the deletion repeatedly, until it succeeds, up to numAttempts
      * times.
      */
-    public static void execDeleteRecursively( int numAttempts, int millisBetweenAttempts, File fileOrDir ) throws IOException
+    public static Process execDeleteRecursively( int numAttempts, int millisBetweenAttempts, File fileOrDir ) throws IOException
     {
         String java = System.getProperty( "java.home" ) + File.separator + "bin" + File.separator + "java";
         String classpath = System.getProperty( "java.class.path" );
-        Runtime.getRuntime( ).exec( new String[] { java, "-cp", classpath, DeleteRecursively.class.getName( ), Integer.toString( numAttempts ), Integer.toString( millisBetweenAttempts ), fileOrDir.getCanonicalPath( ) } );
+        // Combine the classpath and modulepath on newer JVMs and use as classpath
+        String modulepath = System.getProperty( "jdk.module.path", "" );
+
+        String[] cmd = { java, DeleteRecursively.class.getName( ), Integer.toString( numAttempts ), Integer.toString( millisBetweenAttempts ), fileOrDir.getCanonicalPath( ) };
+        // This gets around the Windows command line length limit
+        String[] env = { "CLASSPATH=" + classpath + File.pathSeparator + modulepath };
+
+        return Runtime.getRuntime( ).exec( cmd, env );
     }
 
     public static class DeleteRecursively
