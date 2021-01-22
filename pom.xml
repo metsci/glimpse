@@ -126,31 +126,31 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <show>public</show>
+                    <maxmemory>2056m</maxmemory>
+                    <doctitle>Glimpse Data Visualization Library</doctitle>
+                    <doclint>none</doclint>
+                    <additionalDependencies>
+                        <!-- Keep javadoc from choking on xml-bind-api deps; more info in the docking POM -->
+                        <additionalDependency>
+                            <groupId>jakarta.xml.bind</groupId>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                            <version>2.3.2</version>
+                        </additionalDependency>
+                        <additionalDependency>
+                            <groupId>jakarta.activation</groupId>
+                            <artifactId>jakarta.activation-api</artifactId>
+                            <version>1.2.1</version>
+                        </additionalDependency>
+                    </additionalDependencies>
+                </configuration>
                 <executions>
                     <execution>
                         <id>deploy</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                        <configuration>
-                            <show>public</show>
-                            <maxmemory>2056m</maxmemory>
-                            <doctitle>Glimpse Data Visualization Library</doctitle>
-                            <doclint>none</doclint>
-                            <additionalDependencies>
-                                <!-- Keep javadoc from choking on xml-bind-api deps; more info in the docking POM -->
-                                <additionalDependency>
-                                    <groupId>jakarta.xml.bind</groupId>
-                                    <artifactId>jakarta.xml.bind-api</artifactId>
-                                    <version>2.3.2</version>
-                                </additionalDependency>
-                                <additionalDependency>
-                                    <groupId>jakarta.activation</groupId>
-                                    <artifactId>jakarta.activation-api</artifactId>
-                                    <version>1.2.1</version>
-                                </additionalDependency>
-                            </additionalDependencies>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
